@@ -309,7 +309,7 @@
 				$_BR_$:強制改行用		(HEADER、BODY、FOOTER利用可能）
 				$_LOGO_$:店舗ロゴ表示	(HEADER、FOOTER利用可能)
 		-->
-		<!--  -->
+		<!-- 
 		<STAYCARD_8>
 			<PAGESIZE VERTICAL="FALSE">A5</PAGESIZE>
 			<HEADER>
@@ -326,7 +326,7 @@
 				</ROW>
 				<ROW>
 					<COL STYLE="text-align:center;height:50px;" >Address$_BR_$住所</COL>
-					<COL STYLE="" COLSPAN="7">$$_Field15__r.mailingCountry_$$ $$_Field15__r.MailingPostalCode_$$ $_BR_$ $$_Field15__r.MailingAddress_$$
+					<COL STYLE="" COLSPAN="7">$$_Field15__r.MailingPostalCode_$$ $_BR_$ $$_Field15__r.MailingAddress_$$
 					</COL>
 				</ROW>
 				<ROW>
@@ -372,6 +372,6 @@
 				</ROW>
 			</FOOTER>
 		</STAYCARD_8>
-		
+		 -->
 	</SHOP>
 </root>
