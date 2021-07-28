@@ -125,6 +125,11 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 				// if(layoutCode == layoutType3B5) pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(oXmlInfo.bComment,4,20));
 				if(layoutCode == layoutType4A4) pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(oXmlInfo.bComment,9,40));
 				if(layoutCode == layoutType5A4) pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(oXmlInfo.bComment,4,40));
+				// 2021/07/30 #JP10785 by zy BEGIN
+                if(layoutCode == layoutType6) {
+                	pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(paraMap.get(commentKey),4,40));
+                }
+				// 2021/07/30 #JP10785 by zy END
 			}
 		} else {
 			outLeadInf = new Lead__c();
@@ -164,17 +169,65 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 	                    }
 	                }
 	            } catch(Exception e){}
+	            // 見積のカスタム設定の対応
+	            String customizeHtml = oXmlInfo.customizeHtml;
+	            String beforeHtml = customizeHtml.substringBefore(ESTIAMTE_TAB_BEG);
+		        String afterHtml = customizeHtml.substringAfter(ESTIAMTE_TAB_END);
+		        // 見積明細TAGを取得する
+		        String bookingEstHtml = customizeHtml.replace(beforeHtml, '').replace(afterHtml, '');
+		        Dom.Document estDoc = new Dom.Document();
+		        otherAttr = '';
+		        estColGroupStr = '';
+		        // 見積明細設定あり
+		        if (!CommUtils.isBLank(bookingEstHtml)) {
+		            estDoc.load(bookingEstHtml);
+		            Dom.XmlNode estNode = estDoc.getRootElement();
+		            // 見積明細設定情報
+		            integer rowNumInt = null;
+		            if (estNode != null) {
+		            	// 内容列横幅設定
+		            	String prodNameWidth = '';
+		                for (integer i = 0 ; i < estNode.getAttributeCount() ; i++) {
+		                    String key = estNode.getAttributeKeyAt(i);
+		                    if (key == 'rownum') {
+		                        rowNumInt = Commutils.nullToIntZero(CommUtils.nullTOBlank(estNode.getAttribute(key, null)));
+		                        if (rowNumInt != null) {
+		                            oXmlInfo.bMaxRows = rowNumInt;
+		                        }
+		                    } else if (key == 'colsize') {
+		                        String colGroupStr = CommUtils.nullTOBlank(estNode.getAttribute('colsize', null));
+		                        if (!CommUtils.isBlank(colGroupStr)) {
+		                            
+		                            // 設定明細列横幅
+		                            List<String> colSizeArr = colGroupStr.split(',');
+		                            for (String col : colSizeArr){
+		                                estColGroupStr += '<col width="' + col + '" />';
+		                            }
+		                            if (colSizeArr.size() > 2) {
+		                            	prodNameWidth = colSizeArr[2];
+		                            }
+		                        }
+		                    } else {
+		                        String val = estNode.getAttribute(key,null);
+		                        otherAttr += ' '+ key + '="' + val + '"';
+		                    }
+		                }
+		                customMaxLen = oXmlInfo.pageSizeType == ReportXmlParserHelper.PAGETYPE.B5.name() ? 48 : 56;
+		                // 明細例横幅設定の場合
+		                if (!CommUtils.isBlank(prodNameWidth) && prodNameWidth.isNumeric()){
+		                	integer widthSize = COmmUtils.nullToIntZero(prodNameWidth);
+		                	// 12pxの英字、横幅は8pxです
+		                	customMaxLen = integer.valueOf(widthSize/8);
+		                }
+		                
+		            }
+		        }
 	        }
 	        customeStyleStr = oXmlInfo.customeStyleStr;
     	}
 		// 2021/07/30 #JP10785 by zy END
-		try{
-			// 予約情報を取得する
-			queryLeadInfo(leadId);
-		} catch(Exception e){
-
-		}
-		
+		// 予約情報を取得する
+		queryLeadInfo(leadId);
 	}
 	/**
 	* PDF情報を取得を行う
@@ -747,38 +800,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
                         .replace(getHtmlApiStr(systemDate),system.now().format(CONST_DATEFORMAT))
                         .replace(getHtmlApiStr(honorific),Commutils.nullTOBlank(mrStr));
         }
-        String beforeHtml = customizeHtml.substringBefore('<ESTIMATETABLE');
-        String afterHtml = customizeHtml.substringAfter('</ESTIMATETABLE>');
+       	String beforeHtml = customizeHtml.substringBefore(ESTIAMTE_TAB_BEG);
+		String afterHtml = customizeHtml.substringAfter(ESTIAMTE_TAB_END);
         String bookingEstHtml = customizeHtml.replace(beforeHtml, '').replace(afterHtml, '');
-        Dom.Document estDoc = new Dom.Document();
-        String otherAttr = '';
-        if (!CommUtils.isBLank(bookingEstHtml)) {
-             estDoc.load(bookingEstHtml);
-            Dom.XmlNode estNode = estDoc.getRootElement();
-            integer rowNumInt = null;
-            if (estNode != null) {
-                for (integer i = 0 ; i < estNode.getAttributeCount() ; i++) {
-                    String key = estNode.getAttributeKeyAt(i);
-                    if (key == 'rownum') {
-                        rowNumInt = Commutils.nullToIntZero(CommUtils.nullTOBlank(estNode.getAttribute(key, null)));
-                        if (rowNumInt != null) {
-                            oXmlInfo.bMaxRows = rowNumInt;
-                        }
-                    } else if (key == 'colsize') {
-                        String colGroupStr = CommUtils.nullTOBlank(estNode.getAttribute('colsize', null));
-                        if (!CommUtils.isBlank(colGroupStr)) {
-                            estColGroupStr = '';
-                            for (String col : colGroupStr.split(',')){
-                                estColGroupStr += '<col width="' + col + '" />';
-                            }
-                        }
-                    } else {
-                        String val = estNode.getAttribute(key,null);
-                        otherAttr += ' '+ key + '="' + val + '"';
-                    }
-                }
-            }
-        }
 		// 2021/07/30 #JP10785 by zy END
         // 改ページ処理を行う
         for (BookItem detailItem : dsList) {
@@ -810,9 +834,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
         if(layoutCode == layoutType6) {
         	for (integer i = 0 ; i < allPageList.size(); i++) {
 	            OnePageInfo currentPage = allPageList[i];
-	            currentPage.pageColumns.addAll(convertCommentPage(beforeHtml,'COMMENT'));
+	            currentPage.pageColumns.addAll(convertCommentPage(beforeHtml,COMMENT_TAB));
 	            currentPage.pageColumns.add(new pageColumn(createDetailHtml(currentPage,otherAttr)));
-	            currentPage.pageColumns.addAll(convertCommentPage(afterHtml,'COMMENT'));
+	            currentPage.pageColumns.addAll(convertCommentPage(afterHtml,COMMENT_TAB));
 	        }
         }
 		// 2021/07/30 #JP10785 by zy END
@@ -1106,6 +1130,12 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 				// 2019/07/30 軽減税率機能対応 WGCH BEGIN
 				if(isReducedTaxFlg) maxLen -= 4;
 				// 2019/07/30 軽減税率機能対応 WGCH END
+				// 2021/07/30 #JP10785 by zy BEGIN
+				// カスタム設定字段長
+				if (layoutCode == layoutType6) {
+					maxLen = customMaxLen;
+				}
+				// 2021/07/30 #JP10785 by zy END
 				// 会計商品名
 				productNm = (CommUtils.isBlank(s.ProductName__c) ? s.X2_1__c : s.ProductName__c);
 				productNm = CommRepUtils.getPdfMaxShowString(productNm, maxLen);
@@ -1472,6 +1502,7 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 	    	// 2021/07/30 #JP10785 by zy BEGIN
             customizeHtml = '';
             customeStyleStr = '';
+            pageSizeType = 'B5';// ページサイズタイプ
             if(layoutCode == layoutType6) {
 	            String marginLeft = '0';
 	            String marginTop = '0';
@@ -1484,8 +1515,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 	                	if (!CommUtils.isBlank(verticalStr)) {
 	                		cardFlg = boolean.valueOf(verticalStr);
 	                	}
-	                    if (!cardFlg) pageformat = ReportXmlParserHelper.getPdfPagePaperSizeTraverse(CommUtils.nullToBlank(cardSize.getText()),!cardFlg);
-	                    else pageformat = ReportXmlParserHelper.getPdfPagePaperSize(CommUtils.nullToBlank(cardSize.getText()));
+	                	pageSizeType = CommUtils.nullToBlank(cardSize.getText());
+	                    if (!cardFlg) pageformat = ReportXmlParserHelper.getPdfPagePaperSizeTraverse(pageSizeType,!cardFlg);
+	                    else pageformat = ReportXmlParserHelper.getPdfPagePaperSize(pageSizeType);
 	                    String marginLeftStr = cardSize.getAttribute('MARGINVERTICAL',null);
 	                    if (!CommUtils.isBLank(marginLeftStr)) {
 	                        marginLeft = marginLeftStr;
@@ -1546,6 +1578,7 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
         public String customizeHtml; // HTML設定内容
         public String pageformat; // ページサイズ
         public String customeStyleStr; // カスタムSTYLE
+        public String pageSizeType;
 		// 2021/07/30 #JP10785 by zy END
     }
     /*// 2015/11/16 改正[錦水館専用情報] BEGIN
@@ -1938,6 +1971,12 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
     private static final String systemDate = 'SystemDate';
     private static final String CONST_DATEFORMAT = 'yyyy/MM/dd';
     private static final String commentHtml = '<COMMENT></COMMENT>';
+    private static final String ESTIAMTE_TAB_BEG = '<ESTIMATETABLE';
+    private static final String ESTIAMTE_TAB_END = '</ESTIMATETABLE>';
+    private static final String COMMENT_TAB = 'COMMENT';
+    private String otherAttr; // 見積明細の属性
+    // カスタム設定文字長
+    private static integer customMaxLen;
     // 特殊字段名
     private Set<String> excludeSet = new Set<String>{personNumber,adultNumber,childNumber,roomNumber,nightNumber,shopPostNo,shopName,shopAddress,shopPhone,shopFax,shopEmail,shopWebSite,honorific,comment,systemDate};
     // 見積明細HTML中にHEADのHTML
