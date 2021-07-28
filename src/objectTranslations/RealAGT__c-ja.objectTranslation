@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>リアルAGT</value>
+    </caseValues>
+    <fields>
+        <label><!-- AGT --></label>
+        <name>AccountRef__c</name>
+        <relationshipLabel><!-- リアルAGT --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- AGT提供数 --></label>
+        <name>AgtMaxRooms__c</name>
+    </fields>
+    <fields>
+        <label><!-- 終了日付 --></label>
+        <name>EndDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ --></label>
+        <name>RoomTypeRel__c</name>
+        <relationshipLabel><!-- リアルAGT --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 汎用マスタに各種別のデータはキーを作りたい場合、該当項目に格納する --></help>
+        <label><!-- 検索キー --></label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- 開始日付 --></label>
+        <name>StartDate__c</name>
+    </fields>
+</CustomObjectTranslation>

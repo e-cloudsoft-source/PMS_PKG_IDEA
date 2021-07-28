@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>ラックレート取込(ベースプラン別)機能有効場合、該当テンプレートを利用する</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>ベースプラン別_ラックレートテンプレート</name>
+    <public>false</public>
+</Document>

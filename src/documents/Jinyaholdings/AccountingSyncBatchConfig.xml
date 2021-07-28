@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!--
+概要：買掛決済バッチ情報作成の関連定義情報
+	仕入入力画面にも、一部情報定義を参照する
+	<SHOP>	店舗別支払メディア情報定義可能
+		<SHOPCODE></SHOPCODE>			店舗コード
+		<RESULT_MAIL></RESULT_MAIL>		処理通知先メールアドレス,「,」で複数メールアドレス定義可能（５個まで）
+		**** 下記はリクエストバッチ画面関連の定義情報 ****
+		<REQBAT_WAIT_TIME>				リクエストバッチ待ち時間の定義(秒数) 0の場合、待ちなし、１０秒後スケジュールを起動する
+		**** 下記は仕入画面関連の定義情報 ****
+		<FILTERBUTTON>					仕入画面振込データ出力ボタンから抽出する仕入データの科目条件を定義する
+    		<LABEL>							振込出力ボタンのラベル
+        	<FILTER>						振込出力のデータの抽出条件
+
+		<BUTTONS>						仕入画面に「レポート実行」ボタンから起動できるレポートリストを定義する
+        	<BUTTON> 						
+        		<LABEL> 				仕入画面に該当レポート起動リンクの表示ラベル
+        		<REP_NAME>				起動したいレポート名(例：$今月の原価率[飲料])
+
+		**** 下記は銀行振込出力機能関連の定義情報 ****
+		<BANK_TRANS_RATE>				銀行口座へ振込の手数料情報を定義する
+		<BANK_KOZAINFO>					口座情報を定義する
+			<PUR_SETTLEMENT>				支払口座情報（実際の口座情報を変更が必要）
+			<PUR_RECIVEACCOUNT>				振込先口座関連の定義情報（普通は変更不要）
+		**** 銀行振込CSV出力書式、普通場合、変更不要 ****
+		<BANK_TELEGRAM_HEADER>
+		<BANK_TELEGRAM_DETAIL>
+		<BANK_TELEGRAM_TRAILER>
+		<BANK_TELEGRAM_END>
+		**** 販売手数料計算用パラメータの定義情報 ****
+		<AGT_SALESRATE>
+			NOTAXFLG								販売手数料は仕入に反映するタイミング、税対象外する（TRUE）・税対象（FALSE)定義	
+			<I_TYPENAME>販売手数料</I_TYPENAME>		販売手数料計算計算後、仕入に新規追加する場合、仕入の種別の設定情報
+			<O_KAMOKU>買掛（月末振込）</O_KAMOKU>		販売手数料計算計算後、仕入に新規追加する場合、仕入の科目の設定情報
+			<HOLIDAY_INC_SAT>FALSE</HOLIDAY_INC_SAT>土曜日は休日として定義する/しない制御　TRUE:休日、FALSE：休日外(デフォルト値)、該当定義により、金曜日は休前日にする/しない判断する
+			<CHARGERATE_LOGIC>						販売会計の手数料定義情報は複数を定義されている場合、該当タブにより
+													どの手数料定義情報を使うの判別条件を定義する
+				<FILTER TESURYONO="CH-00000060" BEF_HOLIDAY="TRUE">	手数料番号に関連のご予約の抽出条件
+													TESURYONO：手数料の手数料番号値、下記定義の判断ロジック条件と一致の時、該当手数料番号の手数料値を利用して、販売手数料を計算する
+													BEF_HOLIDAY：休前日により、手数料定義値を区別する、しない制御
+														休日前区別なし：該当タグ「BEF_HOLIDAY」定義しない
+														休日前区別あり：該当違う「BEF_HOLIDAY」定義する
+															TRUE：予約の到着日は休前日の場合、該当手数料番号の手数料値を使う
+															FALSE：予約の到着日は休前日以外の場合、該当手数料番号の手数料値を使う
+														該当タグ「BEF_HOLIDAY」は定義なしのとき、休日前区別なし
+					<DESCRIPT>I.JTB/HR(宿泊)</DESCRIPT>	説明、内容任意、例：取引先名と手数料カテゴリ２の設定内容など
+		 			<LOGIC>{0}</LOGIC>					判断ロジックを定義する {0} AND {1} AND ({2} OR {3}) 組み合わせ指定可能、
+		          	<COONDITION>						集計用数式、最大十個数式ロジック定義可能、順番により、{0}から{9}まで自動識別する
+        												注意1：元のAPI項目タイプにより、数式設定方式が違う
+        												項目タイプ：数値、通貨の場合 APIXXXX = 比較の数値
+        			    								項目タイプ：テキストの場合、 APIXXXX = '比較のテキスト'
+        			    								注意2:ご予約の項目は条件として、指定する場合、前方は：Relreserve__r.API項目名方式で定義が必要
+															例：条件：ご予約のセグメント値は「企画旅行」場合、下記ように定義が必要
+        			    									<COONDITION>
+        			    									Relreserve__r.Segment__c = '企画旅行'
+        			    									</COONDITION>
+	          	</FILTER>
+			
+			CANCEL_CODE						キャンセル料の会計商品コード「,」で複数定義可能
+				例：<CANCEL_CODE>800001</CANCEL_CODE>
+			SALES_TARGETOUT					販売手数料の計算対象外キーワード、会計明細の商品明細列に該当キーワードを含めすると、販売手数料の計算対象外になる「,」で複数定義可能
+											"*?!." 使わないください。
+				例：<SALES_TARGETOUT>「現地追加」</SALES_TARGETOUT>
+			PRE_PAYMENT_INFOS					事前決済の場合、該当事前決済金額の手数料計算用定義情報
+				PRE_PAYMENT_INFO				事前決済の会計商品コード、関連の会計商品コードと手数料レートの定義情報、該当タグは複数回目定義可能
+				PRE_PAYMENT_CODE				事前決済会計商品コード
+				REL_PAYMENT_CODE				上記事前決済会計商品コードが会計明細に存在場合　かつ　該当タグに定義の会計商品コードが明細に存在すると、該当明細の金額も事前決済金額になる
+					RATE						使用料レート
+				例：	会計明細に、M90201（一休事前決済）、一休ポイント（M90201）の会計商品コードが存在、該当明細の利用金額を取得して、レート：2.5から資料を計算する
+					明細１：一休事前決済：20000
+					明細２：一休ポイント：2000
+					レート：2.5
+					事前決済手数料：（20000+2000）* 2.5% = 550
+					<PRE_PAYMENT_INFOS>
+						<PRE_PAYMENT_INFO PRE_PAYMENT_CODE="M91201" REL_PAYMENT_CODE="M90201" RATE="2.5"/>
+					</PRE_PAYMENT_INFOS>
+		**** カード手数料計算用パラメータの定義情報 ****
+		<CARD_SALESRATE>
+			NOTAXFLG								カード手数料は仕入に反映するタイミング、税対象外する（TRUE）・税対象（FALSE)定義
+			<I_TYPENAME>支払手数料</I_TYPENAME>		カード手数料計算計算後、仕入に新規追加する場合、仕入の種別の設定情報
+			<O_KAMOKU>買掛（月末振込）</O_KAMOKU>		カード手数料計算計算後、仕入に新規追加する場合、仕入の種別の設定情報
+		</CARD_SALESRATE>
+-->
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE></SHOPCODE>
+        <!-- 処理通知先メールアドレス,「,」で複数メールアドレス定義可能（５個まで） -->
+        <RESULT_MAIL></RESULT_MAIL>
+        <!-- 仕入画面振込データ出力ボタン情報の定義 -->
+        <FILTERBUTTON>
+        	<BUTTON>
+        		<LABEL>都度振込出力</LABEL>
+        		<FILTER>KamokuLst__c in ('事前振込','買掛（都度振込）') </FILTER>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>月末振込出力</LABEL>
+        		<FILTER>KamokuLst__c in ('買掛（月末振込）') </FILTER>
+        	</BUTTON>
+        </FILTERBUTTON>
+        <!-- リクエストバッチ待ち時間の定義(秒数) 0の場合、待ちなし、１０秒後スケジュールを起動する -->
+        <REQBAT_WAIT_TIME>60</REQBAT_WAIT_TIME>
+        <!-- 仕入入力画面に表示するレポート情報の定義 -->
+        <BUTTONS>
+        	<!-- レポートコメントライン定義、注：LABELタグのみ定義される場合、コメントラインとして、識別する -->
+        	<BUTTON>
+        		<LABEL>以下は調理レポート</LABEL>
+        	</BUTTON>
+        	<!-- レポートは画面に表示するラベルとレポート名 -->
+        	<BUTTON>
+        		<LABEL>現在の仕入高[調理]</LABEL>			<!-- 仕入画面に表示するレポートのラベル -->
+        		<REP_NAME>現在の仕入高[料理]</REP_NAME>		<!-- レポート名 -->
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>今月の原価率[調理]</LABEL>			<!-- 仕入画面に表示するレポートのラベル -->
+        		<REP_NAME>今月の原価率[調理]</REP_NAME>	<!-- レポート名 -->
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>以下は売店レポート</LABEL>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>現在の仕入高[売店]</LABEL>
+        		<REP_NAME>現在の仕入高[売店]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>今月の原価率[売店]</LABEL>
+        		<REP_NAME>今月の原価率[売店]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>以下は飲料レポート</LABEL>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>現在の仕入高[飲料]</LABEL>
+        		<REP_NAME>現在の仕入高[飲料]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>今月の原価率[飲料]</LABEL>
+        		<REP_NAME>今月の原価率[飲料]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>以下は室料レポート</LABEL>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>現在の仕入高[室料]</LABEL>
+        		<REP_NAME>現在の仕入高[室料]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>今月の原価率[室料]</LABEL>
+        		<REP_NAME>今月の原価率[室料]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>以下はブライダルレポート</LABEL>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>現在の仕入高[ブライダル]</LABEL>
+        		<REP_NAME>現在の仕入高[ブライダル]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>今月の原価率[ブライダル]</LABEL>
+        		<REP_NAME>今月の原価率[ブライダル]</REP_NAME>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>以下は旅館外注費レポート</LABEL>
+        	</BUTTON>
+        	<BUTTON>
+        		<LABEL>現在の仕入高[旅館外注費]</LABEL>
+        		<REP_NAME>現在の仕入高[旅館外注費]</REP_NAME>
+        	</BUTTON>
+
+        </BUTTONS>
+        <!-- 銀行へ通信電文関連定義情報 -->
+        <BANK_TRANS_RATE>
+			<SAME_BANK>							<!-- 同銀行 -->
+				<SAME_BRANCH>					<!-- 同支店 -->
+					<RANK_LEVEL>				<!-- １万円以下 -->
+						<MIN_VAL>0</MIN_VAL>
+						<MAX_VAL>9999</MAX_VAL>
+						<RATE>0</RATE>
+					</RANK_LEVEL>
+					<RANK_LEVEL>				<!-- １以上〜3万円以下 -->
+						<MIN_VAL>10000</MIN_VAL>
+						<MAX_VAL>29999</MAX_VAL>
+						<RATE>0</RATE>
+					</RANK_LEVEL>
+					<RANK_LEVEL>				<!-- 3万円以上 -->
+						<MIN_VAL>30000</MIN_VAL>
+						<RATE>0</RATE>
+					</RANK_LEVEL>
+				</SAME_BRANCH>
+				<DIFF_BRANCH>					<!-- 別支店 -->
+					<RANK_LEVEL>				<!-- １万円以下 -->
+						<MIN_VAL>0</MIN_VAL>
+						<MAX_VAL>9999</MAX_VAL>
+						<RATE>108</RATE>
+					</RANK_LEVEL>
+					<RANK_LEVEL>				<!-- １以上〜3万円以下 -->
+						<MIN_VAL>10000</MIN_VAL>
+						<MAX_VAL>29999</MAX_VAL>
+						<RATE>108</RATE>
+					</RANK_LEVEL>
+					<RANK_LEVEL>				<!-- 3万円以上 -->
+						<MIN_VAL>30000</MIN_VAL>
+						<RATE>324</RATE>
+					</RANK_LEVEL>
+				</DIFF_BRANCH>
+			</SAME_BANK>
+			<DIFF_BANK>							<!-- 別銀行 -->
+				<RANK_LEVEL>					<!-- １万円以下 -->
+					<MIN_VAL>0</MIN_VAL>
+					<MAX_VAL>9999</MAX_VAL>
+					<RATE>324</RATE>
+				</RANK_LEVEL>
+				<RANK_LEVEL>					<!-- １以上〜3万円以下 -->
+					<MIN_VAL>10000</MIN_VAL>
+					<MAX_VAL>29999</MAX_VAL>
+					<RATE>432</RATE>
+				</RANK_LEVEL>
+				<RANK_LEVEL>					<!-- 3万円以上 -->
+					<MIN_VAL>30000</MIN_VAL>
+					<RATE>648</RATE>
+				</RANK_LEVEL>
+			</DIFF_BANK>
+        </BANK_TRANS_RATE>
+        <!-- 口座情報定義する -->
+        <BANK_KOZAINFO>
+        	<PUR_SETTLEMENT>								<!-- 買掛決済バッチ -->
+        		<KOUZA_SEQ>SA-00000000</KOUZA_SEQ>					<!-- 店舗口座情報番号値(Name) -->
+        		<DESCRIPT>仕入支払口座</DESCRIPT>				<!-- 説明文言 -->
+        		<TRANS_TYPE>21</TRANS_TYPE>					<!-- 業務種別:21:総合 11または71:給与 12または72:賞与 -->
+        	</PUR_SETTLEMENT>
+
+        	<PUR_RECIVEACCOUNT>								<!-- 振り込み先の口座情報の定義 -->
+        		<KOUZA_TYPE>買掛支払</KOUZA_TYPE>
+        		<DESCRIPT>
+        		取引先の振込用口座の種別情報、取引先側に複数口座情報を登録される場合、該当種別で、口座情報の「口座種別」と比較用
+        		一致すると、該当口座情報は買掛決済振り込み先の口座情報で利用する
+        		</DESCRIPT>
+        	</PUR_RECIVEACCOUNT>
+
+        	<!-- 買掛決済処理機能関連の口座情報定義　END -->
+        </BANK_KOZAINFO>
+        <BANK_TELEGRAM_HEADER>
+        	<DATA_KBN>1</DATA_KBN>		<!-- レコード種別:1:ヘッダレコード -->
+        	<MESSAGE_HEADER>
+        	データ区分,種別コード,コード区分,会社コード,会社名,振込指定日,仕向銀行番号,仕向銀行名,仕向支店番号,仕向支店名,預金種目,口座番号,ダミー
+        	</MESSAGE_HEADER>
+			<MESSAGE_LAYOUT>
+			$$_データ区分_$$
+			$$_種別コード_$$
+			$$_コード区分_$$
+			$$_委託者コード_$$
+			$$_委託者名_$$
+			$$_取組日_$$
+			$$_仕向金融機関番号_$$
+			$$_仕向金融機関名_$$
+			$$_仕向支店番号_$$
+			$$_仕向支店名_$$
+			$$_預金種目(依頼人)_$$
+			$$_口座番号(依頼人)_$$
+			$$_ダミー_$$
+			</MESSAGE_LAYOUT>
+		</BANK_TELEGRAM_HEADER>
+		<BANK_TELEGRAM_DETAIL>
+			<DATA_KBN>2</DATA_KBN>		<!-- レコード種別:2:データレコード -->
+			<IS_EDI>FALSE</IS_EDI>			<!-- EDI情報を使う -->
+			<FURIKOMIKBN>7</FURIKOMIKBN>	<!-- 振込指定区分 -->
+			<MESSAGE_HEADER>
+			データ区分,被仕向銀行番号,被仕向銀行名,被仕向支店番号,被仕向支店名,手形交換所番号,預金種目,口座番号,受取人名,振込金額,新規コード,顧客コード1,顧客コード2,振込指定区分,識別表示,ダミー,支払金額,先方負担手数料,振込手数料
+			</MESSAGE_HEADER>
+			<MESSAGE_LAYOUT>
+			$$_データ区分_$$
+			$$_被仕向金融機関番号_$$
+			$$_被仕向金融機関名_$$
+			$$_被仕向支店番号_$$
+			$$_被仕向支店名_$$
+			$$_手形交換所番号_$$
+			$$_預金種目_$$
+			$$_口座番号_$$
+			$$_受取人名_$$
+			$$_振込金額_$$
+			$$_新規コード_$$
+			$$_顧客コード1_$$
+			$$_顧客コード2_$$
+			$$_EDI情報_$$
+			$$_振込区分_$$
+			$$_識別表示_$$
+			$$_ダミー_$$
+			$$_支払金額_$$
+			$$_先方負担手数料_$$
+			$$_振込手数料_$$
+			</MESSAGE_LAYOUT>
+		</BANK_TELEGRAM_DETAIL>
+		<BANK_TELEGRAM_TRAILER>
+			<DATA_KBN>8</DATA_KBN>		<!-- レコード種別:8:トレーラレコード -->
+			<MESSAGE_HEADER>
+			データ区分,合計件数,合計金額,ダミー
+			</MESSAGE_HEADER>
+			<MESSAGE_LAYOUT>
+			$$_データ区分_$$
+			$$_合計件数_$$
+			$$_合計金額_$$
+			$$_ダミー_$$
+			</MESSAGE_LAYOUT>
+		</BANK_TELEGRAM_TRAILER>
+		<BANK_TELEGRAM_END>
+			<DATA_KBN>9</DATA_KBN>		<!-- レコード種別:9:エンドレコード -->
+			<MESSAGE_HEADER>
+			データ区分,ダミー
+			</MESSAGE_HEADER>
+			<MESSAGE_LAYOUT>
+			$$_データ区分_$$
+			$$_ダミー_$$
+			</MESSAGE_LAYOUT>
+		</BANK_TELEGRAM_END>
+		<!-- エージェント販売手数料計算後、仕入に追加する場合、種目と科目の設定情報 -->
+		<AGT_SALESRATE NOTAXFLG="FALSE">
+			<I_TYPENAME>販売手数料</I_TYPENAME>		<!-- 種別 -->
+			<O_KAMOKU>買掛（月末振込）</O_KAMOKU>		<!-- 科目 -->
+			<HOLIDAY_INC_SAT>FALSE</HOLIDAY_INC_SAT><!-- 休日定義に、土曜日は休日として定義する/しない制御　TRUE:休日、FALSE：休日外(デフォルト値) -->
+			<CHARGERATE_LOGIC>
+				<FILTER TESURYONO="CH-00000021">	<!-- 該当手数料番号に関連のご予約の抽出条件 -->
+					<DESCRIPT>I.JTB/HR(宿泊)</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.ReservedType__c in ('泊 ２食','泊 朝半','泊 夕半','泊 素','宿泊')
+						AND
+						Relreserve__r.StayNightCal__c > 0
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000022">	<!-- 該当手数料番号に関連のご予約の抽出条件 -->
+					<DESCRIPT>I.JTB/食事(日帰り)</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.StayNightCal__c = 0
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000023" BEF_HOLIDAY="TRUE">	<!-- 予約タイプ：'宿泊(休前日)' -->
+					<DESCRIPT>JTB/宿泊、休前日</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.ReservedType__c in ('泊 ２食','泊 朝半','泊 夕半','泊 素','宿泊')
+						AND
+						Relreserve__r.Segment__c NOT IN ('学生団体','企画旅行')
+						AND
+						Relreserve__r.StayNightCal__c > 0
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000024" BEF_HOLIDAY="FALSE">	<!-- 予約タイプ：'宿泊(休前日)以外' -->
+					<DESCRIPT>JTB/宿泊、休前日以外</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.ReservedType__c in ('泊 ２食','泊 朝半','泊 夕半','泊 素','宿泊')
+						AND
+						Relreserve__r.Segment__c NOT IN ('学生団体','企画旅行')
+						AND
+						Relreserve__r.StayNightCal__c > 0
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000025">	<!-- $泊 = 0 -->
+					<DESCRIPT>食事(日帰り)</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.StayNightCal__c = 0
+						AND
+						Relreserve__r.Segment__c NOT IN ('学生団体','企画旅行')
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000026" BEF_HOLIDAY="TRUE">	<!-- 予約タイプ:'宿泊(休前日)' AND セグメント:'学生団体' -->
+					<DESCRIPT>学生団体、休前日</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.ReservedType__c in ('泊 ２食','泊 朝半','泊 夕半','泊 素','宿泊')
+						And
+						Relreserve__r.Segment__c = '学生団体'
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000027" BEF_HOLIDAY="FALSE">	<!-- 予約タイプ：'宿泊(休前日)以外' AND セグメント:'学生団体' -->
+					<DESCRIPT>学生団体、休前日以外</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.ReservedType__c in ('泊 ２食','泊 朝半','泊 夕半','泊 素','宿泊')
+						And
+						Relreserve__r.Segment__c = '学生団体'
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000028">	<!-- セグメント:'企画旅行' -->
+					<DESCRIPT>JTB/企画旅行に伴うとき</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.Segment__c = '企画旅行'
+		          	</COONDITION>
+	          	</FILTER>
+	          	
+				<FILTER TESURYONO="CH-00000020">
+					<DESCRIPT>KNT/一般</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.Segment__c NOT IN ('学生団体','海外','海外個人','海外団体')
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000029">
+					<DESCRIPT>KNT/学生団体</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.Segment__c = '学生団体'
+		          	</COONDITION>
+	          	</FILTER>
+				<FILTER TESURYONO="CH-00000030">
+					<DESCRIPT>KNT/訪日旅行</DESCRIPT>
+		 			<LOGIC>{0}</LOGIC>
+		          	<COONDITION>
+						Relreserve__r.Segment__c IN ('海外','海外個人','海外団体')
+		          	</COONDITION>
+	          	</FILTER>
+			</CHARGERATE_LOGIC>
+			<!-- 
+			<CANCEL_CODE>C0001,C0002</CANCEL_CODE>
+			<SALES_TARGETOUT>(現地追加)</SALES_TARGETOUT>
+			<PRE_PAYMENT_INFOS>
+				<PRE_PAYMENT_INFO PRE_PAYMENT_CODE="M91201" REL_PAYMENT_CODE="M90201" RATE="2.5"/>
+			</PRE_PAYMENT_INFOS>
+			 -->
+		</AGT_SALESRATE>
+		<!-- カード手数料計算計算後、仕入に追加する場合、種目と科目の設定情報 -->
+		<CARD_SALESRATE NOTAXFLG="TRUE">
+			<I_TYPENAME>支払手数料</I_TYPENAME>		<!-- 種別 -->
+			<O_KAMOKU>買掛（月末振込）</O_KAMOKU>		<!-- 科目 -->
+		</CARD_SALESRATE>
+    </SHOP>
+</root>

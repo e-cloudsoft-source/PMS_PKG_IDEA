@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>QQNTruncatedDQN</value>
+    </caseValues>
+    <fields>
+        <label><!-- BatchSize --></label>
+        <name>BatchSize__c</name>
+    </fields>
+    <fields>
+        <label><!-- Comment --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- DiscountFactor --></label>
+        <name>DiscountFactor__c</name>
+    </fields>
+    <fields>
+        <label><!-- IsActive --></label>
+        <name>IsActive__c</name>
+    </fields>
+    <fields>
+        <label><!-- MseThreshold --></label>
+        <name>MseThreshold__c</name>
+    </fields>
+    <fields>
+        <label><!-- PendingBatches --></label>
+        <name>PendingBatches__c</name>
+    </fields>
+    <fields>
+        <label><!-- QTableRef --></label>
+        <name>QTableRef__c</name>
+        <relationshipLabel><!-- QQNTruncatedDQN --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

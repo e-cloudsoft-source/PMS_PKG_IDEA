@@ -1,0 +1,1060 @@
+<apex:page standardController="Lead__c" extensions="BookingEstimateItemSetups" showHeader="false"
+	sidebar="false" tabstyle="BookingEstimateItem__c">
+	
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<!-- 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw BEGIN -->
+<c:CommHeaderComp loadJsLib="false"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/cultures/kendo.culture.ja-JP.min.js')}"/>
+<!-- 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw END -->
+<style>
+html,body{
+	height:100%;
+	width:100%;
+}
+/* Salesforce Calendar Link No Show */
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+#gla{margin:0 auto;position:relative;height:500px;overflow:hidden;background-color: whitesmoke;width:100%}
+#gla_box{width:600px;margin:auto;}
+.gla_inbox{
+	position:absolute;
+	white-space:nowrap;
+	height: 350px;
+	border: solid 2px rgb(76, 142, 250);
+    background: beige;
+}
+/* 浮动窗口*/
+#floatScreen{
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	height:30px;
+	background: grey;
+}
+.k-animation-container.km-popup{
+	z-index: 2000!important;
+}
+.k-window-titlebar.k-header{
+	background-color: rgb(76, 142, 250);
+}
+/*角标 */
+.sticky{
+    height: 0px;
+    position: absolute;
+    right: 0px;
+    top: 1px;
+    border-left: 10px solid transparent;
+    border-top: 10px solid red;
+    display: none;
+}
+/*收藏 BEGIN */
+.collect {
+	background-image: url("/img/samples/stars_100.gif");
+	width:15px;
+	height:15px;
+	background-repeat: no-repeat;
+}
+.collected{
+	background-position: 0px 0px;
+}
+.noCollect{
+	background-position: -20px 0px;
+}
+.collectDiv{
+	margin-left: 40%;
+	cursor: pointer;
+}
+/*收藏 END */
+.mainRow{
+	background: aliceblue;
+}
+#helpDiv{
+	overflow: hidden;
+	width: 0;
+	height:0;
+}
+/*ボタン様式 BEGIN*/
+.customBtn{
+	width: 100px;
+	height:18px;
+	border: 0;
+	height: 20px;
+}
+.baseBtn{
+	font-weight: bold;
+    font-size: 15px;
+    color: white;
+    cursor: pointer;
+    position: absolute;
+    background: #3b8dcd;
+    padding:3px;
+    line-height: 22px;
+}
+/*ボタン様式 END*/
+/* 自動保存　BEGIN */
+#htmlInput,#htmlTextrea{
+	position: absolute;
+	font-size: 13px;
+}
+td.changed .sticky{
+	display: block;
+}
+.canEditColumn{
+	position: relative;
+	overflow: hidden;
+}
+#container {
+	position: relative;
+}
+/* 自動保存　END */
+/* spliter */
+#backSceen {
+	width:100%;
+	height:100%;
+	display:none;
+	z-index:11001;
+	position: relative;
+}
+.k-ghost-splitbar{
+	z-index:11002 !important;
+}
+/*
+.innerValue{
+	overflow: hidden;
+	text-overflow:ellipsis;
+	display: block;
+	white-space: nowrap;
+}*/
+td.dataCell span{
+	overflow: hidden;
+	text-overflow:ellipsis;
+	display: block;
+	white-space: nowrap;
+	margin-right: 10px;
+}
+tr.tranDetailRow{
+	line-height: 34px;
+}
+.outSizeClass{
+	border:1px solid red;
+}
+.datePicker{
+	z-index:11111;
+}
+/* 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw BEGIN */
+.k-button-booking{
+	border-radius: 0;
+	float: left;
+	width:auto;
+}
+.k-button-booking span{
+	margin-right: 5px;
+}
+/* 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw END */
+</style>
+<script>
+$=jQuery.noConflict();
+var chgWinFlag = false;// 如果窗口有切换则改成true，因为open动作会影响画面编辑focus
+var floatTop = 30;
+var NEW_SRC_TEMP = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'BookingEstimateItemSetup')}?mitumo&id={!leadId}";
+var QUOTA_STATUS = {
+	TEMP:"{!QUOTA_TEMP}",
+	KARI:"{!QUOTA_KARI}",
+	FORMAL:"{!QUOTA_FORMAL}"
+};
+// 2017/12/11 見積明細金額合計機能追加　by　zy BEGIN
+/* 货币种别 */
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = JINYACONNECT.NumberPointLen;
+currency.symbol = JINYACONNECT.CurrencySybmol;
+// 2017/12/11 見積明細金額合計機能追加　by　zy END
+$(document).ready(function() {
+	// 绑定内置参数
+    bindEvents();
+    // 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw BEGIN
+    // 绑定Quota事件
+    bindQuotaChange();
+    // 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw END
+});
+function bindEvents(){
+	// 常数设定
+	floatTop = $("#floatScreen").height();
+	// 页面分割绑定
+	bindSplit();
+	// 窗口绑定
+	bindKendoWindow();
+	// 打开第一行页面
+	initWindows();
+	// 可编辑行绑定
+	bindCanEditRow();
+	// 窗口自适应
+	bindWindowResize();
+}
+// 窗口自适应
+function bindWindowResize(){
+	$(window).resize(function(){
+		// 宽度高度都变更
+		resizeWindow(true);
+	});
+	$("#detailWrap").scroll(function(){
+		// 屏幕自适应的时候 防止其他模式出现问题
+		onEditCurRow($("tr.tranDetailRow:not(:first).mainRow"));
+	});
+}
+// 页面分割
+function bindSplit(){
+	// 用户设定保留
+	var windowSet = $("#hidWindowSet").val();
+	var panesArr =  [{size: "70%" , min:"150px"},{size: "30%" }];
+	if (windowSet != "" ) {
+		panesArr = JSON.parse(windowSet);
+	}
+	$("#splitter").kendoSplitter({
+	   orientation: "vertical",
+	   panes:panesArr,
+       layoutChange:function(e){
+      	 resizeWindow();
+       },
+       resize:function(e){
+      	 $("#backSceen").hide();
+      	 try{
+      		ajaxSaveWindowSetting(e);
+      	}catch(e) {}
+     }
+   });
+   $(".k-splitbar-draggable-vertical.k-splitbar").on("mousedown", function(e) {
+	   $("#backSceen").show();
+   });
+}
+// 默认打开第一个窗口
+function initWindows(){
+	var firstRow = $("table[id$=leadsTable] tr.tranDetailRow").first();
+	changeTopMsg(firstRow.get(0));
+}
+// 窗口绑定
+function bindKendoWindow(_div){
+	var div_boxs = $("div.gla_inbox");
+	if (_div != undefined ) div_boxs = _div;
+	var midW = $("div#gla").width(),midH = $("div#gla").height();
+	var glaWidth = midW - 15;
+    var glaHeight = midH - floatTop - 30 - 20; // 30 是title宽度，10距离底部10px的距离，顶部距离10px
+	div_boxs.each(function(){
+		var _this = $(this),actionArr = ["Minimize"];
+		makeWindow(_this,glaWidth,glaHeight,actionArr,glaWidth,glaHeight);
+	});
+}
+// 作成kendowindow
+function makeWindow(el,n_res,n_height,actionArr,glaWidth,glaHeight){
+	// window作成
+	el.kendoWindow({
+       	visible: false,
+		iframe: true,
+		width: n_res,
+		height : n_height,
+        actions: actionArr,
+        maxHeight : glaHeight,
+        maxWidth : glaWidth,
+	  	resize: function(e) {
+		    // user has finished resizing the window
+		    if (e.sender.wrapper.hasClass("k-window-maximized")) {
+		    	e.sender.wrapper.css({left:2,top:25});
+		    }
+		    var curHeight = $("#gla").height();
+		    var divTop = $("div.gla_inbox",e.sender.wrapper).offset().top;
+			var maxHeight = curHeight - divTop - 15;
+			e.sender.wrapper.css("max-height",maxHeight);
+		}
+    });
+}
+// 窗口自适应
+function resizeWindow(hadWidth){
+	var curWidth = $("#gla").width();
+	var curHeight = $("#gla").height();
+	var curDivs = $("div.gla_inbox");
+	var curEntDiv = $("div.k-window:visible div.gla_inbox");
+	if (curEntDiv.length > 0) {
+		var divTop = curEntDiv.offset().top;
+		var maxHeight = curHeight - divTop - 15;
+		curDivs.each(function(){
+			var curDiv = $(this);
+			var kendoWin = curDiv.data("kendoWindow");
+			if (kendoWin != undefined) {
+				kendoWin.wrapper.css({height:maxHeight,"max-height":maxHeight});
+				curDiv.css("max-height","");
+				if (hadWidth) {
+					var maxWidth = curWidth - 10;
+					kendoWin.wrapper.css({width:maxWidth,"max-width":maxWidth});
+				}
+			}
+		});
+		// 屏幕自适应的时候 防止其他模式出现问题
+		onEditCurRow($("tr.tranDetailRow:not(:first).mainRow"));
+	}
+}
+	
+// 新作成响应
+function refreshRowInfo(obj){
+	// 刷新行如果【本保存】返回
+	// 需要选中第一行
+	if ( refreshRowByInfo(obj)) {
+		// 2018/11/30 多見積の内容金額不正bug fixed by zy BEGIN
+		if ($.isEmptyObject(obj)) refreshQuotaInfo();
+		// 2018/11/30 多見積の内容金額不正bug fixed by zy END
+		changeTopMsg($("tr.tranDetailRow:first").get(0));
+	} else 
+		refreshRowStatus();
+	
+}
+// 更新行中内容
+function refreshRowByInfo(obj,moveFlag){
+	var curId = obj.id;
+	var canMoveFlag = false;
+	var hasChnagRowFlag = false;
+	if (moveFlag == undefined || moveFlag == false ) canMoveFlag = true;
+	if ( curId != undefined && curId != "" ) {
+		var curElement = $("input[name=quotaId][value='" + curId + "']");
+		var firstRow = $("tr.tranDetailRow").first();
+		var rowClone;
+		var isNewRow = false;
+		// コピー
+		if (curElement.length == 0) {
+			rowClone = firstRow.clone();
+			rowClone.find("[id]").removeAttr("id");
+			rowClone.appendTo($("table[id$=leadsTable]"));
+			changeWindowToQuota($("div.k-window:visible div.gla_inbox"),curId);
+			curElement = rowClone;
+			$(".mainRow").removeClass("mainRow");
+			isNewRow = true;
+		} else rowClone = curElement.closest("tr.tranDetailRow");
+		// bug修正
+		rowClone.removeClass("first");
+		if (canMoveFlag) rowClone.insertAfter(firstRow);
+		// 状态「本保存」切换到top行
+		hasChnagRowFlag = obj.status == QUOTA_STATUS.FORMAL;
+		// 見積名
+		$("td:eq(1) .innerValue",rowClone).text(obj.name);
+		// 見積名
+		$("td[name=quotaName] .innerValue",rowClone).text(obj.quotaName);
+		// 2017/12/11 見積明細金額合計機能追加　by　zy BEGIN
+		// 見積説明
+		$("td[name=quotaDesc] span",rowClone).text(obj.quoDesc);
+		// 見積説明ID設定
+		$("td[name=quotaDesc] span",rowClone).attr("id",kendo.guid() + ':innerValue');
+		// 有効期間設定
+		$("td[name=quotaDate] span",rowClone).text(obj.quoDate);
+		$("td[name=quotaDate] span",rowClone).attr("id",kendo.guid() + ':innerDate');
+		$("td[name=createDate] span",rowClone).text(obj.createDate);
+		$("td[name=createBy] span",rowClone).text(obj.createBy);
+		var totalStr = kendo.toString(Math.abs(obj.quoTotal),"c");
+		if (obj.quoTotal < 0) totalStr = totalStr.replace(JINYACONNECT.CurrencySybmol,JINYACONNECT.CurrencySybmol + '-');
+		// 合計金額
+		$("td[name=quotaTotal]",rowClone).text(totalStr);
+		// 2017/12/11 見積明細金額合計機能追加　by　zy END
+		$("input[name=hidStatus]",rowClone).val(obj.status);
+		$("input[name=quotaId]",rowClone).val(curId);
+	} else {
+		// 窗体解锁
+		$(".windowLocked").removeClass("windowLocked");
+		return true;
+	}
+	return hasChnagRowFlag;
+}
+// 将打开窗口转换成临时的
+function changeWindowToQuota(orgDiv,quotaId){
+	// 窗口解锁
+	orgDiv.removeClass("windowLocked");
+	var cloneDiv = orgDiv.clone();
+	orgDiv.removeAttr("id");
+	var src = orgDiv.attr("src");
+	if ( src != undefined ) { 
+		src = NEW_SRC_TEMP + '&quota=' + quotaId;
+		orgDiv.attr("src",src);
+	} else {
+		src = orgDiv.attr("baseSrc");
+		if (src != undefined ) {
+			src = NEW_SRC_TEMP + '&quota=' + quotaId;
+			orgDiv.attr("baseSrc",src);
+		}
+	}
+	// 删除内部iframe 重新读取
+	if ($("iframe",cloneDiv).length > 0) $("iframe",cloneDiv).remove();
+	$("#gla").append(cloneDiv);
+	// 更换窗体id
+	orgDiv.attr("subid",quotaId);
+	orgDiv.data("kendoWindow").title("");
+	bindKendoWindow(cloneDiv);
+}
+// kendowindow 统一控制
+function ctrlKendoWindow(closeFlag,winArr,openAndRefreshFlag){
+	var funArr;
+	if (winArr != undefined) funArr = winArr;
+	else funArr = $("div.gla_inbox,div.gla_detail");
+	if (funArr != undefined) {
+		// 倒叙 ， 一泊窗口最上方
+		var arrLen = funArr.length;
+		for (var idx = arrLen; idx > 0 ; idx--) {
+			var _this = funArr.eq(idx - 1);
+			var dataWindow = $(_this).data("kendoWindow");
+			// 不存在窗口则不进行处理
+			if (dataWindow == undefined) continue;
+			if (closeFlag) {
+				dataWindow.close();
+				//_this.hide();
+			} else {
+				//_this.show();
+				if (dataWindow.content().trim() == "") { 
+	           		var contentSrc = dataWindow.wrapper.find("div.gla_inbox").attr("src") ;
+	           		dataWindow.refresh(contentSrc);
+	           	} else if (openAndRefreshFlag) {
+					refreshChildWindow(_this);
+				}
+				dataWindow.open();
+				// 拖拽不出窗口
+				dataWindow.dragging._draggable.bind("drag", function (e) {
+					var curWindow = e.sender.element;
+					var targetPos = curWindow.offset();
+					var maxHeight = $("#gla").height();
+					var maxWidth = $("#gla").width();
+					var maxTop = maxHeight - curWindow.height() - 25;
+					var maxLeft = maxWidth - curWindow.width() - 5;
+					if ( targetPos.left < 0 ) {
+						curWindow.offset({left:0});
+					}
+					if ( targetPos.left > maxLeft ) {
+						curWindow.offset({left:maxLeft});
+					}
+					if ( targetPos.top > maxTop) {
+						curWindow.offset({top:maxTop});
+					}
+				});
+				var n_top = 35,n_left = 5;
+				_this.closest(".k-window").css({
+					top: n_top,
+		   			left: n_left,
+				});
+				chgWinFlag = true;
+			}
+		}
+	}
+}
+// 行选中响应
+function changeTopMsg(that){ 
+	if ( $(that).hasClass("mainRow") ) {
+		return ;
+	}
+	// 被锁的窗口进行提示
+	if ( $("div.k-window:visible div.gla_inbox").hasClass("windowLocked") ) {
+		//該当の表示画面に更新中、破棄よろしくですか？
+		if (!confirm('{!$Label.MSG_011_0092}')) {
+			return;
+		}
+		$("div.k-window:visible div.gla_inbox").removeClass("windowLocked");
+	}
+	// 删除当前行并保存行id
+	saveAndRemoveMainRow();
+	$(that).addClass("mainRow");
+	var status = $("input[name=hidStatus]",that).val();
+	var needFreshFlag = status == QUOTA_STATUS.TEMP ? true : false;
+	var quotaId = $("[name=quotaId]",that).val();
+	var c_div = $("div.gla_inbox[subid='" + quotaId + "']");
+	// 显示隐藏，输入显示
+    openMainWindowAndCloseOther(c_div,needFreshFlag);
+    // 在窗口打开后执行
+    refreshRowStatus(true);
+}
+// 刷新功能键盘
+function refreshFunBtn(that){
+	if (that == undefined || that.length == 0) {
+		// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw BEGIN
+		/*
+		$("#floatScreen>span.buttonPanel .customBtn:eq(0)").hide();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(1)").hide();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(2)").hide();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(3)").hide();
+		*/
+		$("#floatScreen>span.buttonPanel .k-button").attr("disabled", true);
+		// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw END
+		return ;
+	}
+	$(".onSelect").removeClass("onSelect");
+	var curStatus = $("input[name=hidStatus]",that).val();
+	/*
+	if ( curStatus == QUOTA_STATUS.FORMAL) {
+		$("#floatScreen>span.buttonPanel .customBtn:eq(0)").show();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(1)").show();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(2)").hide();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(3)").show();
+	} else 
+	*/
+	// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw BEGIN
+	$("#floatScreen>span.buttonPanel .k-button").attr("disabled", false);	
+	// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw END
+	if ( curStatus == QUOTA_STATUS.TEMP ) {
+		// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw BEGIN
+		/*
+		$("#floatScreen>span.buttonPanel .customBtn:eq(0)").show();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(1)").hide();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(2)").hide();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(3)").show();
+		*/
+		$("#floatScreen>span.buttonPanel .k-button:eq(2)").attr("disabled", true); // 消除
+		// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw END
+	} else {
+		// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw BEGIN
+		/*
+		$("#floatScreen>span.buttonPanel .customBtn:eq(0)").show();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(1)").show();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(2)").show();
+		$("#floatScreen>span.buttonPanel .customBtn:eq(3)").hide();
+		*/
+		$("#floatScreen>span.buttonPanel .k-button:eq(2)").attr("disabled", false); // 消除
+		// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw END
+	}
+}
+// 打开一个window 关闭其他的
+function openMainWindowAndCloseOther(c_div,openAndRefreshFlag){
+    ctrlKendoWindow(true,$("div.gla_inbox"));
+    if (c_div.is(":visible")) {
+    	if (c_div.data("kendoWindow") != undefined ) c_div.data("kendoWindow").toFront();
+    }else {
+    	ctrlKendoWindow(false,c_div,openAndRefreshFlag);
+    }
+}
+// 新規ボタン
+function newTemplateBtn(that){
+	if ($(that).hasClass("onSelect")) return;
+	var kendoWin = $("#newBoxWin").data("kendoWindow");
+	kendoWin.title("新規");
+	//console.log(kendoWin);
+	kendoWin.refresh($("#newBoxWin").attr("src"));
+	openMainWindowAndCloseOther($("#newBoxWin"));
+	// 删除并记录选中行
+	saveAndRemoveMainRow();
+	$(".onSelect").removeClass("onSelect");
+	$(that).addClass("onSelect");
+	// 删除选中行
+	refreshRowStatus(true);
+}
+// 複製ボタン
+function copyTempBtn(that){
+	if ($(that).hasClass("onSelect")) return;
+	var curRow = $("tr.tranDetailRow.mainRow");
+	$(that).addClass("onSelect");
+	// 删除并记录选中行
+	saveAndRemoveMainRow();
+	$(".onSelect").removeClass("onSelect");
+	// 集計の場合下　複製
+	var status = $("input[name=hidStatus]",curRow).val();
+	var kendoWin = $("#copyBoxWin").data("kendoWindow");
+	var baseSrc = $("#copyBoxWin").attr("baseSrc");
+	// 2018/10/29 多見積多泊バグ改修　by　zy BEGIN
+	var quotaInput = $("input[name=quotaId]",curRow);
+	var quoatId = quotaInput.val();
+	// 2018/10/29 多見積多泊バグ改修　by　zy END
+	var copySrc = baseSrc + '&quota=' + quoatId;
+	var subid = quotaInput.attr("subid");
+	// 2018/10/29 多見積多泊バグ改修　by　zy BEGIN
+	if (subid != "") copySrc += '&more=' + subid;
+	// 2018/10/29 多見積多泊バグ改修　by　zy END
+	//if ( status == QUOTA_STATUS.TEMP) copySrc = baseSrc;
+	$("#copyBoxWin").attr("src",copySrc);
+	kendoWin.title("複製");
+	kendoWin.refresh(copySrc);
+	openMainWindowAndCloseOther($("#copyBoxWin"));
+	//}
+	// 刷新行、btn 状态
+	refreshRowStatus(true);
+}
+// 收藏功能
+function changeCollectStatus(el){
+	var markFlag = false;
+	// 判断当前收藏状态
+	if ($(el).hasClass("noCollect")) {
+		$(el).removeClass("noCollect");
+		$(el).addClass("collected");
+		markFlag = true;
+	} else {
+		$(el).removeClass("collected");
+		$(el).addClass("noCollect");
+	}
+	var curRow = $(el).closest("tr.tranDetailRow");
+	var quotaId = $("input[name=quotaId]",curRow).val();
+	ajaxSaveBookMark(quotaId,markFlag);
+}
+// 删除quota
+function deleteQuota(){
+	var curRow = $("tr.tranDetailRow.mainRow");
+	var quotaId = $("input[name=quotaId]",curRow).val();
+	var reqObj = { quotaid:quotaId};
+	var ajaxRequest = JSON.stringify(reqObj);
+	curRow.hide();
+	Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.BookingEstimateItemSetups.deleteQuota}", ajaxRequest , function(result, event){
+    });
+    // 打开第一个窗口
+    initWindows();
+}
+// 刷新列表状态
+// refreshFlag ： 是否需要刷新现在行状态
+function refreshRowStatus(refreshFlag){
+	// 刷新列表状态
+	var helpDiv = $("#helpDiv");
+	var editIcon = $("span[name=mainIcon]",helpDiv).clone();
+	//var leadIcon = $("img[name=leadIcon]",helpDiv).clone();
+	//var detailIcon = $("span[name=detailIcon]",helpDiv).clone();
+	if (refreshFlag == undefined) refreshFlag = false;
+	if (!refreshFlag) $(".mainRow").removeClass("mainRow");
+	var showSubId = refreshFlag ? $("tr.tranDetailRow.mainRow input[name=quotaId]").val() : $("div.k-window:visible div.gla_inbox").attr("subid");
+	// 刷新编辑模式
+	$("input[id$=htmlDate],#htmlInput,#htmlTextrea").hide();
+	$("tr.tranDetailRow").each(function(){
+		var subId = $("input[name=quotaId]",this).val();
+		var rowStatus = $("input[name=hidStatus]",this).val();
+		// 状态设定
+		//if ( rowStatus == QUOTA_STATUS.TEMP) $("span.statusClass",this).html(leadIcon);
+		//else 
+		if (subId == showSubId) {
+			$("span.statusClass",this).html(editIcon);
+			$(this).addClass("mainRow");
+			// 可编辑行
+			if ( rowStatus != QUOTA_STATUS.TEMP) onEditCurRow(this);
+		} 
+		//else if ( rowStatus == QUOTA_STATUS.FORMAL) $("span.statusClass",this).html(detailIcon);
+		else $("span.statusClass",this).html("");
+		if ( rowStatus == QUOTA_STATUS.TEMP) $("div.collect",this).hide(); 
+		else $("div.collect",this).show(); 
+	});
+	// 更新状态
+	refreshFunBtn($("tr.tranDetailRow.mainRow"));
+}
+// 页面刷新
+function refreshParentDetail(subId){
+	// 临时页面更改为正式页面
+	$("div.gla_inbox[subid='temp']").attr("subid",subId);
+	refreshDetailFun();
+}
+// 当前行可编辑
+function onEditCurRow(row){
+	if (row == undefined || row.length == 0) return;
+	$(".outSizeClass").removeClass("outSizeClass");
+	var nameEl = $("td[name=quotaName] span",row);
+	var descEl = $("td[name=quotaDesc] span",row);
+	var dateEl = $("td[name=quotaDate] span",row);
+	var input = $("#htmlInput");
+	var textArea = $("#htmlTextrea");
+	var inputDate = $("input[id$=htmlDate]");
+	initPosAndValue(nameEl,input);
+	initPosAndValue(descEl,textArea);
+	initPosAndValue(dateEl,inputDate);
+}
+// 设定编辑栏位置
+// el 目标元素
+// ed 编辑栏
+// noheightFlag 变更高度
+function initPosAndValue(el,ed,obj){
+	var curTd = el.closest("td.canEditColumn");
+	var curPos = $(el).offset();
+	var curLeft = curPos.left - 3,curTop = curTd.offset().top + 1,curWd = curTd.width() - 10,curHt = curTd.height() - 1;
+	var curValue = el.text();
+	ed.val(curValue);
+	if (obj != undefined) {
+		if ("height" in  obj) curHt += obj.height;
+		if (curValue == "" && "top" in  obj) curTop = obj.top;
+	}
+	ed.css({left:curLeft,top:curTop,width:curWd,"z-index":1,height:curHt});
+	ed.show();
+}
+// 双击编辑
+function bindCanEditRow(eachRow){
+	var curRows = $("tr.tranDetailRow");
+	if (eachRow != undefined) curRows = eachRow;
+	$("input[id$=htmlDate],#htmlInput,#htmlTextrea").unbind("blur");
+	$("input[id$=htmlDate],#htmlInput,#htmlTextrea").blur(function(){ 
+		var curTd,orgValue,curElement,curRow = $("tr.tranDetailRow.mainRow");
+		var elementId = $(this).attr("id");
+		if ( elementId == 'htmlInput') {
+   			curTd = $("td[name=quotaName]",curRow);
+   			curElement = $("span.innerValue",curTd);
+   		} else if (elementId == 'htmlTextrea' ) { 
+   			curTd = $("td[name=quotaDesc]",curRow);
+   			curElement = $("span[id$=innerValue]",curTd);
+   		} else { 
+   			curTd = $("td[name=quotaDate]",curRow);
+   			curElement = $("span[id$=innerDate]",curTd);
+   		}
+   		orgValue = curElement.text();
+	   	var curValue = $(this).val();
+	   	$(".outSizeClass").removeClass("outSizeClass");
+	   	if (orgValue != curValue) {
+	   		var curMaxLengt = $(this).attr("maxlength");
+	   		curMaxLengt = parseInt(curMaxLengt)/3;
+	   		var curLenth = curValue.length;
+	   		if (curLenth >= curMaxLengt) {
+	   			$(this).addClass("outSizeClass");
+	   			curValue = curValue.substring(0,curMaxLengt);
+	   			$(this).val(curValue);
+	   		}
+	   		curElement.text(curValue);
+	   		curTd.addClass("changed");
+	   		ajaxSaveRemote();
+	   	}
+	 });
+}
+// 印刷打印请求书
+function leadPdf(leadId){
+	var href = '/apex/LeadPDF?scontrolCaching=1&id=' + leadId;
+	var curRow = $("tr.mainRow");
+	// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw BEGIN
+	// 選択見積の場合
+	if (!curRow.hasClass("first")){
+		// 該当選択見積Id
+		var quotaId = $("input[name=quotaId]",curRow).val();
+		href = '/apex/QuotaPDF?scontrolCaching=1&id=' + quotaId;
+	}
+	// 2018/10/25 常に新規保存になってしまい、見積もりがいくつも作成されてしまいます。 by cxw END
+	window.open(href);
+}
+// bookMark保存不需要回传值 不提示用户
+function ajaxSaveBookMark(quotaId,markFlag){
+	var reqObj = { quotaid:quotaId,mark:markFlag};
+	var ajaxRequest = JSON.stringify(reqObj);
+	Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.BookingEstimateItemSetups.saveBookMark}", ajaxRequest , function(result, event){
+        	//超限提示
+        	if (result != undefined && result != "" ) {
+        		//alert(result);
+        		// 对关注以后的标签进行取消
+        		if (markFlag) {
+        			var curRow = $("input[name=quotaId][value='" + quotaId + "']").closest("tr.tranDetailRow");
+        			if (curRow.length > 0) {
+        				var el = $("div.collect",curRow);
+        				if ($(el).hasClass("collected")) {
+							$(el).removeClass("collected");
+							$(el).addClass("noCollect");
+							var curTop = $("#detailWrap").offset().top;
+							$("#popupNotification .warnMsg").text(result);
+							$.blockUI({ 
+					            message: $('#popupNotification'), 
+					            fadeIn: 500, 
+					            fadeOut: 500, 
+					            timeout: 2000, 
+					            showOverlay: false, 
+					            centerY: false, 
+					            css: { 
+					                width: 'auto', 
+					                top: curTop, 
+					                left: '', 
+					                right: '0px', 
+					                border: 'none', 
+					                padding: '5px', 
+					                backgroundColor: '#000', 
+					                color: '#fff' 
+					            } 
+					        }); 
+						}
+        			}
+        		}
+        	}
+    });
+}
+// 見積更新
+function ajaxSaveRemote(){
+	var reqArr = [];
+	$("div.sticky:visible").each(function(){
+		var curTd = $(this).closest("td.dataCell");
+		var curTr = curTd.closest("tr.tranDetailRow");
+		var fieldName = curTd.attr("name");
+		var quotaId = $("input[name=quotaId]",curTr).val();
+		var fieldValue = "";
+		if ( fieldName == 'quotaName' || fieldName == 'quotaDesc' ) {
+			fieldValue = $("span.innerValue,span[id$=innerValue]",curTd).text();
+		} else if ( fieldName == 'quotaDate' ) {
+			fieldValue = $("span[id$=innerDate]",curTd).text();
+		}
+		reqArr.push({
+			field:fieldName,
+			quotaid:quotaId,
+			value:fieldValue
+		});
+	});
+	if (reqArr.length > 0 ) {
+		kendo.ui.progress($("#container"), true);
+		var ajaxRequest = JSON.stringify(reqArr);
+		Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.BookingEstimateItemSetups.saveQuota}", ajaxRequest , function(result, event){
+        	if (event.type == 'exception') {
+            } else {
+               if ( result != undefined && result != null && result != "null" && typeof result == 'object') {
+               	   try{
+	               	   for (var i = 0 ; i < result.length ; i++) {
+	               	   	   refreshRowByInfo(result[i],true);
+	               	   	   // 提交以后刷新页面
+	               	   	   var curId = result[i].id;
+	               	   	   var c_div = $("div.gla_inbox[subid='" + curId + "']");
+	               	   	   //refreshChildWindow(c_div);
+	               	   }
+               	   } catch (e){}
+               	   refreshRowStatus();
+                   $(".changed").removeClass("changed");
+               } 
+           } // End else
+           kendo.ui.progress($("#container"), false);
+    	});
+	}
+}
+function ajaxSaveWindowSetting(spliter) {
+	var arr = [];
+	var optionArr = spliter.sender.options.panes;
+    for ( var i = 0 ; i < optionArr.length ; i++ ) {
+    	var panel = optionArr[i];
+    	arr.push(panel);
+    }
+    if (arr.length > 0) {
+    	var req = JSON.stringify(arr);
+    	Visualforce.remoting.Manager.invokeAction(
+        	"{!$RemoteAction.BookingEstimateItemSetups.saveResize}", req , function(result, event){
+    	});
+   	}
+}
+// 刷新子窗口
+function refreshChildWindow(_this) {
+	var curIframe = $("iframe",_this).get(0);
+	if ( curIframe != undefined ) {
+		var iframeWindow = curIframe.contentWindow;
+		if ("refreshWindowFun" in iframeWindow) iframeWindow.refreshWindowFun();
+	}
+}
+// 上一次选中行
+var orgQuotaId;
+function saveAndRemoveMainRow(){
+	var orgRow = $("tr.tranDetailRow.mainRow");
+	// 保存上次更新
+	if (orgRow.length > 0) orgQuotaId = $("input[name=quotaId]",orgRow).val();
+	$("tr.tranDetailRow.mainRow").removeClass("mainRow");
+}
+// 子窗口回调父窗口功能 BEGIN
+// 子窗口调用取消收藏功能
+function parChangeCollect(quotaId){
+	// 見積ありの場合
+	var curElement = $("input[name=quotaId][value='" + quotaId + "']");
+	if (curElement.length > 0) {
+		var curRow = curElement.closest("tr.tranDetailRow");
+		$("div.collect",curRow).removeClass("collected");
+		$("div.collect",curRow).addClass("noCollect");
+	}
+	ajaxSaveBookMark(quotaId,false);
+}
+// 锁住窗口
+function parLockWindow(){
+	var curEntDiv = $("div.k-window:visible div.gla_inbox");
+	var kendoWindow = curEntDiv.data("kendoWindow");
+	var orgTitle = kendoWindow.title();
+	if ( kendoWindow != "" ) kendoWindow.title(orgTitle + "{!$Label.MSG_011_0095}");
+	// 添加切换提示
+	curEntDiv.addClass("windowLocked");
+}
+// 恢复上一次选中行
+function parBackTopRow(){
+	if (orgQuotaId != undefined) {
+		var curElement = $("input[name=quotaId][value='" + orgQuotaId + "']");
+		if ( curElement.length > 0 ) {
+			var curRow = curElement.closest("tr.tranDetailRow");
+			changeTopMsg(curRow.get(0));
+		}
+	}
+}
+// 子窗口回调父窗口功能 END
+// 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw BEGIN
+function bindQuotaChange(){
+	var callback = function(mutationList, observer){
+		var len = $($tbody).children("tr.dataRow").filter(function(index, el){
+			return $(el).is(":visible");
+		}).length;
+		// 父窗口見積数変更
+		if ("changeQuotaItemNum" in window.parent) window.parent.changeQuotaItemNum(len);
+	};
+	var observerOptions = {childList: true, attributes:true, subtree: true, attributeFilter: ["style"]};
+	var $tbody = $("table[id$=leadsTable]").find("tbody");
+	if($tbody.length == 0) return;
+	var observer = new MutationObserver(callback);
+	var tbody = $tbody[0];
+	observer.observe(tbody, observerOptions);
+}
+// 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw END
+// 2018/11/30 多見積の内容金額不正bug fixed by zy BEGIN
+function refreshQuotaInfo(){
+	var leadId = $("#hidLeadId").val();
+	if (leadId == undefined) leadId = '';
+	remoteQuery('refreshDetails',leadId,afterRefreshDetail);
+}
+function afterRefreshDetail(result){
+	if (result != null) {
+		for (var i = 0 ; i < result.length ; i++) {
+			var data = result[i];
+			refreshRowByInfo(data,true);
+		}
+	}	
+}
+function remoteQuery(type,req,callback){
+	Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.BookingEstimateItemSetups.remoteQuery}", type , req , function(result, event){
+       	if(event.type == 'exception') {
+            errorToReLoad(type);
+        } else if(result != null){
+        	// html encode
+        	try{
+        	} catch(e){}
+        }
+        if (callback != undefined) callback(result);
+    });
+}
+// 2018/11/30 多見積の内容金額不正bug fixed by zy END
+</script>
+<apex:form >
+	<input type="hidden" id="hidWindowSet" value="{!windowSetting}"/>
+	<!-- 2018/11/30 多見積の内容金額不正bug fixed by zy BEGIN -->
+	<input type="hidden" id="hidLeadId" value="{!leadId}"/>
+	<!-- 2018/11/30 多見積の内容金額不正bug fixed by zy END -->
+	<div id="helpDiv">
+		<span class="k-icon k-i-pencil" name="mainIcon" ></span>
+		<span class="k-icon k-i-clock" name="detailIcon"></span>
+		<img src="/img/func_icons/util/checkmark16.gif" style="cursor: help;" title="これ見積、予約作成済み" name="leadIcon"  border="0"/>
+		<img src="/img/func_icons/util/pencil12.gif" style="position: absolute;" name="pencilIcon"  border="0"/>
+		<input type="text" value="" id="htmlInput" maxLength='{!$ObjectType.Quota__c.Fields.QuotaName__c.byteLength}'/>
+		<textarea id="htmlTextrea"  maxLength='{!$ObjectType.Quota__c.Fields.QuotaDescription__c.byteLength}'></textarea>
+		<apex:inputField value="{!timeTable.Checkinday__c}" id="htmlDate" style="width:80%;position:absolute;font-size: 13px;"/>
+	</div>
+</apex:form>
+<div id="splitter" style="height:100%">
+	<div id="gla">
+		<div id="backSceen"></div>
+		<div id="popupNotification">
+			<img src="/img/msg_icons/warning16.png" alt=""/>
+			<span class="warnMsg"></span>
+		</div>
+		<div id="floatScreen">
+			 <span class="buttonPanel">
+			 	<!-- 新規
+				<input type="button" style="background: #3b8dcd ;font-size: 15px;color: white;border:0;" class="btn customBtn" onclick="newTemplateBtn(this)" value="{!$Label.MSG_011_0084}"/>
+				-->
+				<button type="button" class="k-button k-button-icon k-button-booking" title="{!$Label.MSG_011_0084}" onclick="newTemplateBtn(this)">
+            		<span class="k-icon k-i-file"></span>{!$Label.MSG_011_0084}
+            	</button>
+				<!-- 複製 
+				<input type="button" style="background: #3b8dcd ;font-size: 15px;color: white;border:0;" class="btn customBtn" onclick="copyTempBtn(this)" value="{!$Label.MSG_011_0085}"/>
+				-->
+				<button type="button" class="k-button k-button-icon k-button-booking" title="{!$Label.MSG_011_0085}" onclick="copyTempBtn(this)">
+            		<span class="k-icon k-i-copy"></span>{!$Label.MSG_011_0085}
+            	</button>
+				<!-- 削除
+				<input type="button" style="background: #3b8dcd ;font-size: 15px;color: white;border:0;" class="btn customBtn" onclick="deleteQuota()" value="{!$Label.MSG_011_0086}"/>
+				-->
+				<button type="button" class="k-button k-button-icon k-button-booking" title="{!$Label.MSG_011_0086}" onclick="deleteQuota()">
+            		<span class="k-icon k-i-delete"></span>{!$Label.MSG_011_0086}
+            	</button>
+				<!-- 印刷
+				<input type="button" style="background: #3b8dcd ;font-size: 15px;color: white;border:0;" class="btn customBtn" onclick="leadPdf('{!leasSobj.id}')" value="{!$Label.MSG_011_0087}"/>
+				-->
+				<button type="button" class="k-button k-button-icon k-button-booking" title="{!$Label.MSG_011_0087}" onclick="leadPdf('{!leasSobj.id}')">
+            		<span class="k-icon k-i-print"></span>{!$Label.MSG_011_0087}
+            	</button>
+			 </span>
+			
+			 <div style="top: 0px; right: 0px;" class="{!if(ISBLANK(leasSobj.name),'','baseBtn')}" >
+			 	<a href="/{!leasSobj.id}" style="color:white;" target="_blank" >{!leasSobj.name}</a>
+			 </div>
+		</div>
+		
+	    <apex:repeat value="{!quotaOptionLst}" var="quota">
+	    	<apex:outputPanel rendered="{!quota.autoFlag}">
+	    		<!-- quota -->
+				<div class="gla_inbox" subid="{!quota.sobjId}" src="{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'BookingEstimateItemSetup')}?mitumo&more={!quota.subId}&id={!leadId}">
+				</div>
+	    	</apex:outputPanel>
+	    	<apex:outputPanel rendered="{!!quota.autoFlag}">
+	    		<!-- quota -->
+				<div class="gla_inbox" subid="{!quota.sobjId}" src="{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'BookingEstimateItemSetup')}?mitumo&quota={!quota.quo.id}&id={!leadId}">
+				</div>
+	    	</apex:outputPanel>
+		</apex:repeat>
+		<div class="gla_inbox" id="newBoxWin"  src="{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'BookingEstimateItemSetup')}?mitumo&newTemp&id={!leadId}"></div>
+		<div class="gla_inbox" id="copyBoxWin"  baseSrc="{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'BookingEstimateItemSetup')}?mitumo&newTemp&id={!leadId}"></div>
+	</div>
+	<div id="detailWrap" style="overflow: scroll;height:380px;">
+	    <div id="container">
+    		<div >
+    		<apex:form >
+    			<apex:actionFunction name="refreshDetailFun" action="{!refreshDetail}" reRender="quoteDetail" oncomplete="refreshRowStatus();bindCanEditRow();"/>
+    			<apex:pageBlock id="quoteDetail">
+    				<apex:pageMessages />
+    				<!-- 2017/12/11 見積明細金額合計機能追加　by　zy BEGIN -->
+	    			<apex:pageBlockTable value="{!quotaOptionLst}" var="quota" id="leadsTable" rowClasses="tranDetailRow" onRowClick="changeTopMsg(this)" columnsWidth="15px,100px,10%,16%,80px,70px,100px,65px,55px" style="max-height:300px;table-layout: fixed;">
+				    <!-- 2017/12/11 見積明細金額合計機能追加　by　zy END --> 
+				        <!-- 状態　-->
+				        <apex:column >
+				         	<span class='statusClass' style="margin:0px;"></span>
+				         	<!-- 2018/10/29 多見積多泊バグ改修　by　zy BEGIN -->
+				         	<input type="hidden" value="{!quota.sobjId}" subid="{!quota.subId}" id="quotaId" name="quotaId"/>
+				         	<!-- 2018/10/29 多見積多泊バグ改修　by　zy END -->
+				        	<input type="hidden" value="{!quota.quo.QuotaStatus__c}" name="hidStatus"/>
+				        </apex:column>
+				        <!-- 見積名 --> 
+				        <apex:column headerValue="{!$ObjectType.Quota__c.Fields.Name.Label}">
+				        	<span class="innerValue">{!quota.quo.name}</span>
+				        </apex:column>
+				        <!-- 見積名 --> 
+				        <apex:column headerValue="{!$ObjectType.Quota__c.Fields.QuotaName__c.Label}" styleClass="canEditColumn"  html-name="quotaName">
+				        		<span class="innerValue" title="{!quota.quo.QuotaName__c}">{!quota.quo.QuotaName__c}</span>
+				        	<div class="sticky"></div>
+				        </apex:column>
+				        <!-- 説明 --> 
+				        <apex:column headerValue="{!$ObjectType.Quota__c.Fields.QuotaDescription__c.Label}" styleClass="canEditColumn"  html-name="quotaDesc">
+				        		<apex:outputField id="innerValue" title="{!quota.quo.QuotaDescription__c}" value="{!quota.quo.QuotaDescription__c}"/>
+				        	<div class="sticky"></div>
+				        </apex:column>
+				        <!-- 有効期間 --> 
+				         <apex:column headerValue="{!$ObjectType.Quota__c.Fields.ExpirationDate__c.Label}" styleClass="canEditColumn"  html-name="quotaDate">
+				        	<apex:outputField id="innerDate" value="{!quota.quo.ExpirationDate__c}"/>
+				        	<div class="sticky"></div>
+				        </apex:column>
+				        <!-- 2017/12/11 見積明細金額合計機能追加　by　zy BEGIN -->
+				        <!-- 作成日--> 
+				         <apex:column headerValue="{!$ObjectType.Quota__c.Fields.LastModifiedDate.Label}" html-name="createDate">
+				        	<apex:outputField value="{!quota.quo.LastModifiedDate}"/>
+				        </apex:column>
+				        <!-- 最終更新者--> 
+				         <apex:column headerValue="{!$Label.ps__msg_011_0090}" html-name="createBy">
+				        	<apex:outputField value="{!quota.quo.LastModifiedById}"/>
+				        </apex:column>
+				         <!-- 金額 --> 
+				        <apex:column headerValue="{!$ObjectType.Quota__c.Fields.TotalInc__c.Label}" html-name="quotaTotal">
+				        	<apex:outputPanel style="margin-right: 2px;" id="usedAmount" rendered="{!!ISBLANK(quota.quo.TotalInc__c)}">
+				    				{!CurrencySybmol}
+				    				<apex:outputtext value="{0,number,##,###}" >
+				    				 	<apex:param value="{!quota.quo.TotalInc__c}" />
+				    				 </apex:outputtext>
+		                   	</apex:outputPanel>
+				        </apex:column>
+				       	<!-- 2017/12/11 見積明細金額合計機能追加　by　zy BEGIN -->
+				        <!-- ブックマーク --> 
+				         <apex:column headerValue="{!$Label.ps__msg_011_0091}">
+				        	<div class="collect {!if(quota.bookMarkFlag,'collected','noCollect')} collectDiv" onclick="changeCollectStatus(this)"></div>
+				        </apex:column>
+				    </apex:pageBlockTable>
+			    </apex:pageBlock>
+			    </apex:form>
+    		</div>
+	    </div>
+	</div>
+</div>
+</apex:page>

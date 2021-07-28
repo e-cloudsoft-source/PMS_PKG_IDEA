@@ -1,0 +1,109 @@
+<apex:page controller="BulkProcessBatch" sidebar="false" id="allPage" >
+
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+	<!-- 2016/06/09 共通JS定数を定義追加する -->
+	<c:CommHeaderComp loadJsLib="false"/>
+    <apex:form id="batchProcess">
+		<!-- バッチ一括処理 -->
+		<apex:pageBlock title="{!$Label.ps__msg_036_0001}">
+		<!-- バッチ処理結果： -->
+        <apex:pageMessage summary="{!errMessage}" severity="error"  strength="1"
+            title="{!$Label.ps__msg_036_0002}" escape="false" rendered="{!isShwoErrMessage}" />
+	<!-- バッチ処理結果： -->
+        <apex:pageMessage summary="{!message}" severity="info"  strength="1"
+            title="{!$Label.ps__msg_036_0002}" escape="false" rendered="{!isShowMessage}"/>
+	<!-- 処理日 -->
+            <apex:outputLabel value="{!$Label.ps__msg_036_0003}" styleClass="labelCol"/>
+			<apex:outputPanel styleClass="requiredInput" layout="block">
+			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	<!-- (yyyy/mm/dd) {!$Label.MSG_036_0011}-->
+	<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+			<apex:inputText value="{!checkInDate}" maxlength="10" size="14" style="height: 1em; font-size: 100%;" id="processDate"/>({!DateFormat})
+	<!-- 2016/11/25 TIMEZON fix END by zh -->
+			&nbsp;&nbsp;&nbsp;
+		<!-- 処理 -->
+            <apex:commandButton value="{!$Label.ps__msg_036_0004}" action="{!autoCheckInProcess}" onClick="blockUi(this.form)"/>
+            </apex:outputPanel>
+		</apex:pageBlock>
+    </apex:form>
+    <!-- 
+    <apex:form id="amountProcess">
+        <apex:pageBlock title="売上一括処理 ">
+			<apex:pageMessage severity="error" strength="1" summary="{!calDayAmoutErrMsg}" rendered="{!isShowCalDayAmoutMsg && calDayAmoutErrMsg != null}"/>
+			<apex:pageMessage severity="info" strength="1" summary="{!calDayAmoutInfMsg}" rendered="{!isShowCalDayAmoutMsg && calDayAmoutInfMsg != null}"/>
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <apex:inputText value="{!amoutDate}" maxlength="10" size="14" style="height: 1em; font-size: 100%;"/>(yyyy/mm/dd)
+            &nbsp;&nbsp;&nbsp;
+            <apex:commandButton value="一括処理" action="{!autoCalDayAmount}" onClick="blockUi(this.form)"/>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+     -->
+    <apex:form >
+    <!-- Update sales account -->
+    <apex:pageBlock title="{!$Label.ps__msg_036_0009} "> 
+        <apex:pageMessages />
+	<!-- Update -->
+        <apex:commandButton value="{!$Label.ps__msg_036_0010}" action="{!UpdateforSalesforcast}" id="theButton" onClick="blockUi(this.form)"/>
+    </apex:pageBlock>
+	</apex:form>
+<script>
+$j=jQuery.noConflict();
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+
+$j(document).ready(function($) {
+    bindEvent();
+});
+
+<!-- Juqery Function Begin -->
+function bindEvent() {
+	$j("input[id$='processDate']").blur(function(){
+		// 2016/11/25 TIMEZON fix BEGIN by zh
+		//var inputDt = Date.parse($j(this).val());
+		var inputDt = Date.parseExact($j(this).val(),JINYACONNECT.DateFormat);
+		if (inputDt != null)
+		// 2016/11/25 TIMEZON fix END by zh
+		$j(this).val(dateFormat.format(inputDt));
+	});
+}
+function blockUi(btn) {
+    //$j("#bodyCell").block({
+    $j.blockUI({
+             //Processing...
+	              message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_036_0005}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j.unblockUI({ fadeOut: 200 });
+}
+// 自動チェックイン処理
+function jsToCheckInFun(objId) {
+    blockUi();
+	// 既に定義する売価はプランカラ取得、画面に設定する
+	Visualforce.remoting.Manager.invokeAction(
+	"{!$RemoteAction.BulkProcessBatch.checkInLeadById}", objId, function(result, event){
+		if(event.type == 'exception') {
+			alert(event.message);
+		} else {
+     		if (result != "") {
+				// Memory更新
+				alert(result);
+     		} else {
+     			var spanObj = $j("#" + objId);
+     			spanObj.hide();
+     		}
+		}
+		// 画面解除する
+		unblockUi();
+	});
+}
+
+</script><!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

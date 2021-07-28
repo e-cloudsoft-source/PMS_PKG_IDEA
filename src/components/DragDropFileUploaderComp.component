@@ -1,0 +1,234 @@
+<apex:component controller="DragAndDropRESTAPI">
+	<apex:attribute name="parentId" type="String" description="Parent record where attachment would be attached"/>
+	<apex:attribute name="DragDropHeight" type="String" description="Height in Pixel for Drag and Drop Section"/>
+    <apex:attribute name="isFirstComp" type="boolean" default="true" description="複数回コンポネットをインポートするがどうか" />
+    <apex:attribute name="linenum" type="Integer" default="0" description="行数" />
+    <apex:attribute name="existFileId" type="String" description="既存のAttachmentファイルID"/>
+    <apex:attribute name="existFileNm" type="String" description="既存のAttachmentファイル名"/>
+    <apex:attribute name="existFileUrl" type="String" description="ファイルのダウンロードURL"/>
+    <apex:attribute name="isSF1" type="boolean" default="false" description="Salesforce1対応"/>
+<apex:outputPanel rendered="{!isFirstComp}">  
+<style> 
+	.holderDiv {
+		border: 2px dashed #999;
+		max-height: {!IF(isSF1, '50px','28px')};	
+		min-height: {!IF(isSF1, '50px','26px')};		
+		background-color:#f0f0f0;
+		width: {!IF(isSF1, '100%','80px')};
+		overflow: hidden;
+		display: inline-block;
+		text-overflow:ellipsis;
+	}
+	.holderDiv-over {
+		border-color: #00aef0;
+		/*background-color: :#f0f0ff;*/
+	}
+	.progressbar{
+		width: {!IF(isSF1, '100%','80px')};
+	}
+	.dragDropComponentSize{ height:{!IF(isSF1, '50px','28px')} ; overflow: hidden;}
+	.child-elements {
+  		pointer-events: none;
+  		cursor: default;
+	}
+</style>    
+</apex:outputPanel>
+
+<article class="dragDropComponentSize" id="dndContainer">
+	<div id="holder_{!linenum}" linenum="{!linenum}" class="holderDiv" parentid="{!parentId}" style="display: {!IF(LEN(parentId) ==0, 'none','block')}">
+		<apex:outputText value="{!IF(isSF1,'ここにクリックして、ファイルをアップロードする','ここにファイルをドロップ')}" rendered="{!LEN(existFileId) == 0}"/>
+		<apex:outputPanel rendered="{!LEN(existFileId) > 0}" styleClass='child-elements' >
+		<apex:outputLink value="{!hostName}{!IF(ISNULL(existFileUrl), '/servlet/servlet.FileDownload?file=',existFileUrl)}{!existFileId}" 
+						target="_blank" style="pointer-events:auto" title="{!existFileNm}" rendered="{!!isSF1}">{!existFileNm}</apex:outputLink>
+        <apex:outputLink value="javascript:void(0)" onclick="javascript:_openImgWin('{!existFileId}',this,event)"
+                        target="_blank" style="pointer-events:auto" title="{!existFileNm}" rendered="{!AND(isSF1,!ISNULL(existFileId))}">{!existFileNm}</apex:outputLink>
+		</apex:outputPanel>
+	</div>
+    <div id="uploadprogress_{!linenum}" class="progressbar"></div>
+    <input type="file" name="datafile" id="file-input" style="display: none;" onchange="javascript:_clickFileUpload()"/>
+</article>
+
+<apex:outputPanel rendered="{!isFirstComp}">
+<script> 
+// Salesforce Service Url
+var sfdcHostName = UserContext.salesforceURL;
+// File Download Url
+var fileDownloadUrl = "{!hostName}/servlet/servlet.FileDownload?file=";
+
+function textBeforeDrag(flag,lineNum){
+    var holder_div = document.getElementById('holder_'+lineNum);
+    if(flag)
+    {
+        $j(holder_div).removeClass("holderDiv-over"); 
+    }else{
+    	$j(holder_div).addClass("holderDiv-over");
+    }
+}
+function updateProgress(event, $progress) {
+	if (event.lengthComputable) {
+		var complete = (event.loaded / event.total * 100 | 0);
+		$progress.data("kendoProgressBar").value(complete);
+	}
+}
+
+function readfiles(files,lineNum) { 
+
+	//var formData = new FormData();
+	//Not sure why multiple files dropping, so for time being disable multi file functionality
+	if(files.length > 1) {
+		alert('Multi Upload is not supported, please try to upload single file');
+		return;
+	}
+	if(files.length > 0 && files[0].size/ 1024>5130){			 
+		alert("That would allow up to 5MB approx.");
+ 		return;	 		      
+	}
+	//console.debug(lineNum);
+    var holder = document.getElementById('holder_'+lineNum);
+    var $holder = $j(holder);
+
+	for (var i = 0; i < files.length; i++) {
+       	var parentId = holder.getAttribute("parentid");
+       	var namespace = "{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+       	namespace = (namespace.length == 0 ? '' : namespace.slice(0, -2)+'/');
+		var sfdcurl = sfdcHostName+'/services/apexrest/'+namespace+'DragAndDrop/v1?FileName='+encodeURIComponent(files[i].name)+'&parId='+parentId+'&lineNum='+lineNum;
+
+      	var xhr;
+      	if (window.ActiveXObject) {
+      		xhr = new ActiveXObject('Microsoft.XMLHTTP')
+      	} else {
+      		if(window.Sarissa && Sarissa.originalXMLHttpRequest) {
+      			xhr = new Sarissa.originalXMLHttpRequest();
+      		} else {
+      			xhr = new XMLHttpRequest();
+      		}
+      	}
+		//xhr.setTimeout(120000);
+		//xhr = $j.ajaxSettings.xhr();
+		
+		if (xhr.upload) {
+			if({!!isSF1}){
+			// 情報を隠す
+			$holder.hide();
+			// 処理ステータスBARを表示する
+			var $progress = $j("#uploadprogress_"+lineNum);
+			if (!$progress.data("kendoProgressBar")) {
+				$progress.kendoProgressBar({
+					min: 0,
+	                max: 100,
+	                type: "percent",
+					animation: false,
+				});
+			}
+			$progress.data("kendoProgressBar").value(0);
+			$progress.show();
+			
+			xhr.upload.onprogress = function (event) {
+				if (event.lengthComputable) {
+	               	var complete = (event.loaded / event.total * 100 | 0);
+	               	$progress.data("kendoProgressBar").value(complete);
+					}
+				}
+			} else{
+				document.getElementById('holder_0').innerHTML="<img style='margin-left:10px;' src='../img/loading32.gif' alt='Loading...' />";
+			}
+    	}
+		xhr.onreadystatechange=function() {
+			if (xhr.readyState === 4) {
+				$j("#file-input").attr("disabled", null);
+				// SUCCESS
+				if (xhr.status === 200) {
+					//console.log(xhr.responseText);
+					var rs = JSON.parse(xhr.responseText);
+ 					//指定のDIVにファイル名とDownloadのURLを設定する
+ 					var downUrl = fileDownloadUrl + rs[1];
+ 					var innerHTML = "<span class='child-elements' ><a href='"+downUrl+"' target='_blank' style='pointer-events:auto' title='"+rs[2]+"'>" + rs[2] + "</a></span>";
+ 				    if ({!isSF1}) innerHTML = "<span class='child-elements' ><a href='javascript:void(0)' onclick='javascript:_openImgWin(\""+rs[1]+"\",this,event)' target='_blank' style='pointer-events:auto' title='"+rs[2]+"'>" + rs[2] + "</a></span>";
+ 					//document.getElementById('holder_'+rs[0]).innerHTML="<span class='child-elements' ><a href='"+downUrl+"' target='_blank' style='pointer-events:auto' title='"+rs[2]+"'>" + rs[2] + "</a></span>";
+					document.getElementById('holder_'+rs[0]).innerHTML=innerHTML;
+					if({!!isSF1}){ $progress.data("kendoProgressBar").value(100);}
+				} 
+				// ERROR
+				else {
+					alert(xhr.responseText);
+				}
+	          	if({!!isSF1}){ $progress.hide();}
+	          	$holder.show();
+			}
+		}
+		xhr.open('POST','/services/proxy' );
+		xhr.setRequestHeader("Authorization","OAuth {!GETSESSIONID()}");
+		xhr.setRequestHeader('SalesforceProxy-Endpoint', sfdcurl);
+		xhr.setRequestHeader('X-User-Agent', 'DragAndDropAPI v1.0');
+		xhr.send(files[i]);
+    } // for (var i = 0; i < files.length; i++) {
+}
+function _clickFileUpload() {
+	$j("#file-input").attr("disabled", "disabled");
+    readfiles(document.getElementById("file-input").files,0)
+}
+function _openImgWin(fileId,obj,evt) {
+    if (typeof sforce !== 'undefined' && sforce.one) {
+        sforce.one.navigateToURL("/"+fileId);
+    } else {
+        window.open(fileDownloadUrl+fileId);
+    }
+    var e=(evt)?evt:window.event;
+    if(window.event) e.cancelBubble=true;// ie下阻止冒泡
+    else e.stopPropagation();// 其它浏览器下阻止冒泡
+}
+$j(document).ready(function() {
+    // 2017/06/27 Salesforce1で仕入情報入力機能改善対応　BEGIN
+    if ({!isSF1}) {
+        // Onlickの場合、ファイル選択機能起動
+        $j(".holderDiv").on("click",function(){
+            return $j("#file-input").click();
+        });
+        return;
+    }
+    // 2017/06/27 Salesforce1で仕入情報入力機能改善対応　END
+	$j(document).on("dragenter",function(e){
+        e.stopPropagation();
+        e.preventDefault();
+       }).on("dragover",function(e){
+        e.stopPropagation();
+        e.preventDefault();
+	}).on("drop",function(e){
+        e.stopPropagation();
+        e.preventDefault();
+	});
+	
+	//$j(".holderDiv").on("dragenter",function(e){
+    $j(".holderDiv").on("dragover",function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        var lineNum = this.getAttribute("linenum");
+        textBeforeDrag(false,lineNum);
+        return false;
+	}).on("dragleave",function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        //console.debug("dragleave");
+        var lineNum = this.getAttribute("linenum");
+        textBeforeDrag(true,lineNum);
+        return false;
+	}).on("drop",function(_e){
+        var e = _e;
+        if( _e.originalEvent ){
+            e = _e.originalEvent;
+        }
+        e.stopPropagation();
+        e.preventDefault();
+
+		var lineNum = this.getAttribute("linenum");
+		textBeforeDrag(true,lineNum);
+        var dt = e.dataTransfer;
+        var files = dt.files;
+        readfiles(files,lineNum);
+	});
+});
+
+</script>
+</apex:outputPanel>
+
+</apex:component>

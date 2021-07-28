@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>TL2WAY機能の関連パラメータの設定</description>
+    <internalUseOnly>false</internalUseOnly>
+    <keywords>2WAY 連携 リンカーン</keywords>
+    <name>TL2WAY機能定義情報</name>
+    <public>false</public>
+</Document>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>お料理</value>
+    </caseValues>
+    <fields>
+        <help><!-- コース料理、会席料理、単品料理 --></help>
+        <label><!-- カテゴリ１ --></label>
+        <name>Category1__c</name>
+        <picklistValues>
+            <masterLabel>アラカルト</masterLabel>
+            <translation><!-- アラカルト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>コース</masterLabel>
+            <translation><!-- コース --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- カテゴリ２ --></label>
+        <name>Category2__c</name>
+        <picklistValues>
+            <masterLabel>お子様限定</masterLabel>
+            <translation><!-- お子様限定 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>アラカルト</masterLabel>
+            <translation><!-- アラカルト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>冬期限定</masterLabel>
+            <translation><!-- 冬期限定 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>夏期限定</masterLabel>
+            <translation><!-- 夏期限定 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>朝食</masterLabel>
+            <translation><!-- 朝食 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>特別</masterLabel>
+            <translation><!-- 特別 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>秋期限定</masterLabel>
+            <translation><!-- 秋期限定 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金額 --></label>
+        <name>Currency__c</name>
+    </fields>
+    <fields>
+        <label><!-- Image --></label>
+        <name>Image123__c</name>
+    </fields>
+    <fields>
+        <label><!-- 朝食 7:30〜または8:30〜 --></label>
+        <name>Morning__c</name>
+    </fields>
+    <fields>
+        <label><!-- Name --></label>
+        <name>Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親 --></label>
+        <name>Parent__c</name>
+        <relationshipLabel><!-- お料理 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Seq# --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理を出せる時間帯 --></help>
+        <label><!-- 昼食 11：30〜14：00(LO) --></label>
+        <name>X11_30_14_00_LO__c</name>
+    </fields>
+    <fields>
+        <help><!-- 軽食を出せる時間帯 --></help>
+        <label><!-- 軽食 14：00〜17：00 --></label>
+        <name>X14_00_17_00__c</name>
+    </fields>
+    <fields>
+        <help><!-- お料理を出せる時間帯 --></help>
+        <label><!-- 夕食 17：00〜20：00(LO) --></label>
+        <name>X17_00_20_00_LO__c</name>
+    </fields>
+</CustomObjectTranslation>

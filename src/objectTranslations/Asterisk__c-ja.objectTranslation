@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Asterisk</value>
+    </caseValues>
+    <fields>
+        <label><!-- Active --></label>
+        <name>Active__c</name>
+    </fields>
+    <fields>
+        <label><!-- Realm --></label>
+        <name>Realm__c</name>
+    </fields>
+    <fields>
+        <label><!-- WebSocket Server URL --></label>
+        <name>WebSocket_Server_URL__c</name>
+    </fields>
+    <validationRules>
+        <errorMessage><!-- please enter a valid realm --></errorMessage>
+        <name>RealmValidation</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- please enter a valid ip and port --></errorMessage>
+        <name>ValidationForSErverIP_Port</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- please enter a valid WebSocket_Server_URL__c --></errorMessage>
+        <name>WebSocketValidation</name>
+    </validationRules>
+</CustomObjectTranslation>

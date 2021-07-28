@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value><!-- MX900IP --></value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value><!-- MX900IP --></value>
+    </caseValues>
+    <fields>
+        <label>Transmission busy line</label>
+        <name>BUSY__c</name>
+    </fields>
+    <fields>
+        <help>Telephone outbound date</help>
+        <label><!-- DAY --></label>
+        <name>DAY__c</name>
+    </fields>
+    <fields>
+        <label>Transmission call volume</label>
+        <name>DIALCALLS__c</name>
+    </fields>
+    <fields>
+        <label>Transmission average hold time</label>
+        <name>DIALTIMEAVG__c</name>
+    </fields>
+    <fields>
+        <label>Transmission incoming call hold time</label>
+        <name>DIALTIME__c</name>
+    </fields>
+    <fields>
+        <help>Outside inbound calls include the inbound lines also ?</help>
+        <label>Number of transmission calls</label>
+        <name>DIAL__c</name>
+    </fields>
+    <fields>
+        <label>Number of incoming call numbers</label>
+        <name>EXT__c</name>
+    </fields>
+    <fields>
+        <label>Suspend in the middle &lt; 15 seconds</label>
+        <name>INCMP15__c</name>
+    </fields>
+    <fields>
+        <label>Suspend in the middle &lt; 30 seconds</label>
+        <name>INCMP30__c</name>
+    </fields>
+    <fields>
+        <help>As the caller has been in waiting for some time , the call has been cut off[Number of calls suspend in the middle]</help>
+        <label>Suspend in the middle &lt; 5 seconds</label>
+        <name>INCMP5__c</name>
+    </fields>
+    <fields>
+        <label>Suspend in the middle &gt;= 60 seconds</label>
+        <name>INCMP60O__c</name>
+    </fields>
+    <fields>
+        <label>Suspend in the middle &lt; 60 seconds</label>
+        <name>INCMP60__c</name>
+    </fields>
+    <fields>
+        <help>In a outbound call, how many miss calls ?</help>
+        <label>Transmission overflow</label>
+        <name>OVERFLOW__c</name>
+    </fields>
+    <fields>
+        <help>Outside line incoming include the incoming lines also ?</help>
+        <label>Incoming</label>
+        <name>RECEIVING__c</name>
+    </fields>
+    <fields>
+        <help>Items such as Capacity utilization, Average with holding time is below 1000sec ?</help>
+        <label>Incoming call volume</label>
+        <name>RECIVINGCALLS__c</name>
+    </fields>
+    <fields>
+        <help>After the outside line response, Average with holding time in seconds</help>
+        <label>Incoming average hold time</label>
+        <name>RECIVINGTIMEAVG__c</name>
+    </fields>
+    <fields>
+        <help>After the outside line response, Average with holding time in seconds</help>
+        <label>Incoming call hold time</label>
+        <name>RECIVINGTIME__c</name>
+    </fields>
+    <fields>
+        <label>Response &lt; 15 seconds</label>
+        <name>REV15__c</name>
+    </fields>
+    <fields>
+        <label>Response &lt; 30 seconds</label>
+        <name>REV30__c</name>
+    </fields>
+    <fields>
+        <help>The call was taken within how many seconds ? [Calling average time</help>
+        <label>Response &lt; 5 seconds</label>
+        <name>REV5__c</name>
+    </fields>
+    <fields>
+        <label>Response &gt;= 60 seconds</label>
+        <name>REV60O__c</name>
+    </fields>
+    <fields>
+        <label>Response &lt; 60 seconds</label>
+        <name>REV60__c</name>
+    </fields>
+    <fields>
+        <help>Telephone outbound call time in one hour time ?</help>
+        <label><!-- TIME --></label>
+        <name>TIME__c</name>
+    </fields>
+    <fields>
+        <label><!-- WEEK --></label>
+        <name>Week__c</name>
+    </fields>
+    <nameFieldLabel><!-- MX900IP# --></nameFieldLabel>
+    <startsWith><!-- Consonant --></startsWith>
+</CustomObjectTranslation>

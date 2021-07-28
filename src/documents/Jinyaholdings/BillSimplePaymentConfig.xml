@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：新会計メニュー画面の支払メディア情報の定義
+Ver6.4 更新履歴
+　　　新会計について、カード種別、金券種別が反映されない不具合改修に従って、
+     画面の明細セクションに入れた会計商品目で会計支払の「カード種別」と「金券種別」に反映する
+書式：
+	<SHOP>	店舗別支払メディア情報定義可能
+		<SHOPCODE></SHOPCODE>			店舗コード
+		<LAYOUT>								支払メニューの表示スタイル情報
+			<MAXCOLS>3</MAXCOLS>				一行に、最大表示できるの列数（Default：３列）
+			<BTNSTYLE>width:124px;</BTNSTYLE>	支払ボタンのWidth/Heightのスタイル定義情報
+			<TABLEWIDTH>420</TABLEWIDTH>		支払メニューの最大横幅(PX単位)
+			<TABLEHEIGHT>260</TABLEHEIGHT>		支払メニューの最大縦幅(PX単位)
+		</LAYOUT>
+		<BUTTONTAB>								１グループの支払ボタン定義情報(複数タブ定義可能)
+			<TABLABEL>メディア</TABLABEL>			該当タブの表示ラベル
+			<BUTTON ISBLANK="FALSE">			支払ボタン表示用情報を定義する 
+													属性 ISBLANK: 該当ボタンは画面に表示・非表示制御 
+																TRUE:画面は該当場所は空白を表示する
+																FALSE:ボタンはそのまま画面に表示（Default値)
+				<LABEL>現金</LABEL>				該当支払ボタン表示ラベル
+				<PRODCODE>M99000</PRODCODE>		該当支払ボタン関連の会計商品コード、該当商品コードは必ず会計商品に存在が必要
+				<ICONURL>/resource/ps__AppImages/payicon/Cash.png</ICONURL>		
+												ボタンにアイコンを表示したい場合、該当タグで参照する画像のURLを定義する
+												アイコン表示不要の場合、該当タグを定義しないてください
+						注：新会計支払商品を追加に従って、自分作成したアイコンを表示するの設定手順：
+						1:拡張子はjpeg/png/icon のアイコン表示用画像ファイルを準備する(例：pay001.png)
+						2:作成したアイコン画像を同じフォルダに置いて、画像をファイルを全て選択して、圧縮して、ZIPファイル作成する
+						  注意！！！圧縮の場合、必ず全てアイコンを直接選択して、圧縮する、そしないと、画像参照を見えない可能性あり
+						3:作成したZIPファイルはSalesforceにアップロードする
+						パス：設定→開発→静的リソース→新規/編集
+							下記情報を画面に入力する
+								名前：payicon					←固定
+								ファイル:上記作成のZIPファイル	←今回作成のZIPファイルを選べる
+								キャッシュコントロール:非公開		←固定
+						4:アップロードしたアイコンは支払メデイアメニューに反映する
+						　　変更したいボタンの「ICONURL」タグの情報は下記様に設定する 
+							<ICONURL>/resource/payicon/xxxxxx</ICONURL>
+						    補足：「xxxxxx」 は個別作成のアイコンファイル名(上記の例の場合、pay001.pngで設定する)
+			</BUTTON>		
+		
+	</SHOP>
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>		<!-- 店舗コード -->
+		<LAYOUT>
+			<MAXCOLS>3</MAXCOLS>	<!-- 最大列数 -->
+			<BTNSTYLE>width:124px;height:30px;</BTNSTYLE>
+			<TABLEWIDTH>420</TABLEWIDTH>
+			<TABLEHEIGHT>280</TABLEHEIGHT>
+		</LAYOUT>
+
+		<BUTTONTAB>
+			<TABLABEL>メディア</TABLABEL>
+			<!-- 1行目 -->
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>現金</LABEL>
+				<PRODCODE>M99000</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/Cash.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="TRUE"/>	<!-- 空白ボタン -->
+			<BUTTON ISBLANK="TRUE"/>	<!-- 空白ボタン -->
+			
+			<!-- 2行目 CARD -->
+		    <BUTTON ISBLANK="FALSE">
+					<LABEL>VISA</LABEL>
+					<PRODCODE>M90001</PRODCODE>
+					<ICONURL>/resource/ps__AppImages/payicon/card/visa.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+					<LABEL>Master</LABEL>
+					<PRODCODE>M90002</PRODCODE>
+					<ICONURL>/resource/ps__AppImages/payicon/card/mc.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+					<LABEL>JCB</LABEL>
+					<PRODCODE>M90003</PRODCODE>
+					<ICONURL>/resource/ps__AppImages/payicon/card/jcb.jpg</ICONURL>
+			</BUTTON>
+			<!-- 3行目 -->
+			<BUTTON ISBLANK="FALSE">
+					<LABEL>AMEX</LABEL>
+					<PRODCODE>M90004</PRODCODE>
+					<ICONURL>/resource/ps__AppImages/payicon/card/ae.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+					<LABEL>Diners</LABEL>
+					<PRODCODE>M90005</PRODCODE>
+					<ICONURL>/resource/ps__AppImages/payicon/card/dis.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="TRUE"/>	<!-- 空白ボタン -->
+			<!-- 4行目 -->
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>売掛</LABEL>
+				<PRODCODE>M90050</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/aricon.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="TRUE"/>	<!-- 空白ボタン -->
+			<BUTTON ISBLANK="TRUE"/>	<!-- 空白ボタン -->
+			
+	
+			<!-- 5行目 -->
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>前受金[現金]</LABEL>
+				<PRODCODE>M90100</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/Cash.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>前受金[ｶｰﾄﾞ]</LABEL>
+				<PRODCODE>M90101</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>予約金</LABEL>
+				<PRODCODE>M99005</PRODCODE>
+			</BUTTON>
+			
+			
+			<!-- 7行目 -->
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>値引</LABEL>
+				<PRODCODE>M90150</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/off.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<!-- 割引 -->
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>割引(5%)</LABEL>
+				<PRODCODE>M90160</PRODCODE>
+				<ICONURL>/resource/AppImages/payicon/rateoff.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>割引(10%)</LABEL>
+				<PRODCODE>M90161</PRODCODE>
+				<ICONURL>/resource/AppImages/payicon/rateoff.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>割引(15%)</LABEL>
+				<PRODCODE>M90162</PRODCODE>
+				<ICONURL>/resource/AppImages/payicon/rateoff.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>割引(20%)</LABEL>
+				<PRODCODE>M90163</PRODCODE>
+				<ICONURL>/resource/AppImages/payicon/rateoff.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="TRUE"/>	<!-- 空白ボタン -->
+
+			<!-- 返金 -->
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>返金[現金]</LABEL>
+				<PRODCODE>M98000</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/back_cash.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>返金[ｶｰﾄﾞ]</LABEL>
+				<PRODCODE>M98001</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/back_card.png</ICONURL>	<!-- ボタン関連の画像 -->
+			</BUTTON>
+		</BUTTONTAB>
+	<BUTTONTAB>
+		<TABLABEL>カード</TABLABEL>
+	    <BUTTON ISBLANK="FALSE">
+				<LABEL>VISA</LABEL>
+				<PRODCODE>M90001</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/visa.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>MASTER</LABEL>
+				<PRODCODE>M90002</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/mc.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>JCB</LABEL>
+				<PRODCODE>M90003</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/jcb.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>AMEX</LABEL>
+				<PRODCODE>M90004</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/ae.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>DIS</LABEL>
+				<PRODCODE>M90005</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/dis.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>SAISON</LABEL>
+				<PRODCODE>M90006</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/saison.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>MUFG</LABEL>
+				<PRODCODE>M90007</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/mufg.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>DC</LABEL>
+				<PRODCODE>M90008</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/dc.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>UC</LABEL>
+				<PRODCODE>M90009</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/uc.jpg</ICONURL>
+		</BUTTON>
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>AEON</LABEL>
+				<PRODCODE>M90010</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/aeon.jpg</ICONURL>
+		</BUTTON>	
+		<BUTTON ISBLANK="FALSE">
+				<LABEL>セディナ</LABEL>
+				<PRODCODE>M90011</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/card/ced.jpg</ICONURL>
+		</BUTTON>	
+			
+	</BUTTONTAB>
+	<BUTTONTAB>
+		<TABLABEL>クーポン</TABLABEL>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>楽天ポイント</LABEL>
+				<PRODCODE>M90200</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/rt.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+			<LABEL>一休ポイント</LABEL>
+				<PRODCODE>M90201</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/1x.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+			<LABEL>じゃらんポイント</LABEL>
+				<PRODCODE>M90202</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/jal.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>らくだポイント</LABEL>
+				<PRODCODE>M90203</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/rak.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>全国百貨店</LABEL>
+				<PRODCODE>M90204</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/bh.gif</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>JTBクーポン</LABEL>
+				<PRODCODE>M90205</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/jtbc.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>KNTクーポン</LABEL>
+				<PRODCODE>M90206</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/kntc.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+			<LABEL>JTBドコモ</LABEL>
+				<PRODCODE>M90207</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/jtbd.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>KNTドコモ</LABEL>
+				<PRODCODE>M90208</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/kntd.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>陣屋商品券</LABEL>
+				<PRODCODE>M90209</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/jy.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>東海大ギフト</LABEL>
+				<PRODCODE>M90210</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/dh.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>日本旅行</LABEL>
+				<PRODCODE>M90211</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/rbl.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>ＶＩＳＡ</LABEL>
+				<PRODCODE>M90212</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/visa.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>農協観光</LABEL>
+				<PRODCODE>M90213</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/ntour.jpg</ICONURL>
+			</BUTTON>
+			<BUTTON ISBLANK="FALSE">
+				<LABEL>社長売掛</LABEL>
+				<PRODCODE>M90214</PRODCODE>
+				<ICONURL>/resource/ps__AppImages/payicon/coupon/mg.png.jpg</ICONURL>
+			</BUTTON>
+		</BUTTONTAB>
+		<BUTTONTAB>
+			<TABLABEL>その他</TABLABEL>
+			<BUTTON>
+				<LABEL>その他</LABEL>
+				<PRODCODE>M99999</PRODCODE>
+			</BUTTON>
+		</BUTTONTAB>
+	</SHOP>
+</root>

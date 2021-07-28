@@ -1,0 +1,288 @@
+<apex:page standardController="Contact" extensions="CustomerMerge" Id="contactMerge"
+sidebar="false" showheader="true" action="{!initAction}">
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+
+<script>$=jQuery.noConflict();</script>
+<!-- Contact Info Merge -->    <!-- お客様情報マージ -->
+<apex:sectionHeader title="{!$Label.ps__msg_012_0299}" subtitle="{!$Label.ps__msg_012_0280}"/>
+
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock" />
+<apex:form Id="conditionForm">
+<apex:pageMessages id="conditionMsg"/>
+<apex:outputPanel id="wordSection">
+<!-- キーワード入力検索 -->
+    <apex:pageBlock title="{!$Label.ps__msg_012_0281}"  rendered="{!!initHaveErrFlg}">
+        <apex:pageBlockSection columns="1" >
+	 		<apex:outputPanel styleClass="requiredInput" layout="block">
+	        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	        <!-- お客様名、電話番号(単語)を入力して下さい。 -->
+            <apex:inputText value="{!findKey}" style="width:500px;font-size:1.3em" 
+                html-placeholder="{!$Label.ps__msg_012_0282}"/>
+                <!-- ※旅行太郎　0312011211　りょこうたろ -->
+            <apex:outputLabel style="margin-left: 10px" value="{!$Label.ps__msg_012_0283}" />
+            </apex:outputPanel>
+        </apex:pageBlockSection>
+		<!-- 検索ボタン -->
+		<apex:pageBlockButtons location="bottom">
+			<!-- 検索 -->
+			<apex:commandButton style="width:120px;height:20px" value="{!$Label.ps__msg_012_0284}" action="{!queryConcatInfo}"/>
+			<!-- 戻る -->
+			<apex:commandButton style="width:120px;height:20px" value="{!$Label.ps__msg_012_0285}" action="{!gotoBack}" immediate="true"/>
+		</apex:pageBlockButtons>
+    </apex:pageBlock>
+    <!-- 処理エラーの場合、戻るボタンを指定する -->
+    <apex:pageBlock rendered="{!initHaveErrFlg}">
+    	<apex:pageBlockButtons location="bottom">
+    	<!-- 戻る -->
+		<apex:commandButton style="width:120px;height:20px" value="{!$Label.ps__msg_012_0285}" action="{!gotoBack}" immediate="true"/>
+		</apex:pageBlockButtons>
+	</apex:pageBlock>
+</apex:outputPanel>
+<apex:actionFunction name="refreshPageFun" action="{!queryConcatInfo}" reRender="conditionMsg,resultForm" oncomplete="unblockUi();" />
+</apex:form>
+
+<apex:form Id="resultForm" rendered="{!!initHaveErrFlg}">
+<script>
+$(document).ready(function() { bindEvent(); });
+</script>
+<!-- 2017/10/31 検索結果一覧画面に表示する項目はカスタマイズ by WGCH BEGIN -->
+<style>
+	td span table tbody td {
+	    border-width: 0 0 0 0 !important;
+	}
+</style>
+ <!-- 2017/10/31 検索結果一覧画面に表示する項目はカスタマイズ by WGCH END -->
+<apex:inputHidden value="{!oldContactId}" id="hidOldContactId"/>
+<apex:inputHidden value="{!newContactId}" id="hidNewContactId"/>
+<!-- マージ元お客様情報 -->
+<apex:pageBlock title="{!$Label.ps__msg_012_0286}">
+    <apex:pageBlockButtons >
+      <!-- お客様と関連リスト -->
+      <input type="button" value="{!$Label.MSG_012_0287}" style="min-width: 120px" class="btn" onclick="merageMultiCustomer()"/>
+      <!-- お客様のみマージ -->
+      <input type="button" value="{!$Label.MSG_012_0288}" id="cleanRoomBtn" style="min-width: 120px" class="btn" onclick="showMergerFieldPage()"/>
+    </apex:pageBlockButtons>
+
+	<apex:pageBlockTable value="{!contacts}" var="item" >
+          <apex:column style="width:40px;">
+              <apex:facet name="header"><input type="checkbox" name="groupAll"  onclick="selectAllItem(this);"/></apex:facet>
+              <!-- <input type="radio" name="group1" locAttr="{!item.id}" onclick="syncIdToHidItem('{!JSENCODE(item.id)}');"/>-->
+              <input type="checkbox" name="group1" value="{!item.id}" onclick="syncIdToHidItem('{!JSENCODE(item.id)}');"/>
+              <img id="imgok_{!item.id}" class="icon-status" src="../img/msg_icons/confirm16.png" alt="マージ済み" style="display: none;vertical-align:middle;"/>
+              <img id="imgng_{!item.id}" class="icon-status" src="../img/msg_icons/error16.png" alt="" style="display: none"/>
+          </apex:column>
+          <!-- 2017/10/31  検索結果一覧画面に表示する項目はカスタマイズ by WGCH BEGIN -->
+          <apex:repeat value="{!vFieldsApiLst}" var="field" rendered="{!vFieldsApiLst.size > 0}">
+          <apex:column headervalue="{!customLabelMap[field]}" >
+             <apex:outputField value="{!item[field]}" rendered="{!field != 'name' && field != 'mailingaddress' && field != 'otheraddress'}"/>
+             <!-- Name-Link -->
+             <apex:outputLink value="/{!item.Id}" target="_blank" rendered="{!field == 'name'}">
+                     <apex:outputText value="{!item.Name}" />
+             </apex:outputLink>
+             <!-- 住所(郵送先) -->
+             <apex:outputPanel rendered="{!field == 'mailingaddress'}">
+	             <apex:variable var="mailingaddress" value="{!TRIM(item.MailingCountry + IF(item.MailingState != '', ' ' + item.MailingState, '') + IF(item.MailingCity != '', ' ' + item.MailingCity, '') + IF(item.MailingStreet != '', ' ' + item.MailingStreet, ''))}"/>
+	             <apex:outputText value="{!mailingaddress}"/>
+             </apex:outputPanel>
+             <!-- 住所(その他) -->
+             <apex:outputPanel rendered="{!field == 'otheraddress'}">
+	             <apex:variable var="otheraddress" value="{!TRIM(item.OtherCountry + IF(item.OtherState != '', ' ' + item.OtherState, '') + IF(item.OtherCity != '', ' ' + item.OtherCity, '') + IF(item.OtherStreet != '', ' ' + item.OtherStreet, ''))}"/>
+	             <apex:outputText value="{!otheraddress}"/>
+             </apex:outputPanel>
+          </apex:column>
+          </apex:repeat>
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.Name.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputLink value="/{!item.Id}" target="_blank" >
+                     <apex:outputText value="{!item.Name}" />
+              </apex:outputLink>
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.Name1__c.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.Name1__c}" />
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.KanaName1__c.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.KanaName1__c}" />
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.Katakana__c.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.Katakana__c}" />
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.phone.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.phone}" />
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.email.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.email}" />
+          </apex:column>
+          <!-- 住所 -->
+          <apex:column headervalue="{!$Label.ps__msg_012_0289}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.MailingCountry}" />
+              <apex:outputField value="{!item.MailingState}" />
+              <apex:outputField value="{!item.MailingCity}" />
+              <apex:outputField value="{!item.MailingStreet}" />
+          </apex:column>     
+          <apex:column headervalue="{!$ObjectType.Contact.Fields.AccountId.Label}" rendered="{!vFieldsApiLst.size == 0}">
+              <apex:outputField value="{!item.AccountId}" />
+          </apex:column>
+          <!-- 2017/10/31  検索結果一覧画面に表示する項目はカスタマイズ by WGCH END -->
+          
+	</apex:pageBlockTable>
+
+</apex:pageBlock>
+
+<div id="mergeFieldDiv"></div>
+
+</apex:form>
+<script>
+
+function bindEvent() {
+	var mergeFieldWin = $("#mergeFieldDiv");
+	if (!mergeFieldWin.data("kendoWindow")) {
+		mergeFieldWin.kendoWindow({
+        	width: "1000px",
+        	height: "580px", 
+        	//お客様項目情報マージ   
+            title: "{!$Label.MSG_012_0290}",
+            visible: false,
+            iframe: true,
+            type: "GET"
+        });  
+	}
+}
+function syncIdToHidItem(itemId) {
+	$("input:hidden[id$=':hidOldContactId']").val(itemId);
+	// 2019/06/15 お客様と関連リスト、複数マージできるように改善 BEGIN
+	//すべて明細サイズ
+	var arrsLen = $("input[name='group1']:checked").length;
+	var allItemLen = $("input[name='group1']").length;
+	$("input[name='groupAll']").prop("checked",(allItemLen == arrsLen));
+	// 2019/06/15 お客様と関連リスト、複数マージできるように改善 END
+}
+// 2019/06/15 お客様と関連リスト、複数マージできるように改善 BEGIN
+function selectAllItem(that) {
+	var arrs = $("input[name='group1']");
+	var arrsLen = arrs.length;
+	var allProp = that.checked;
+	for (i=0; i<arrsLen; i++) {
+		arrs[i].checked = allProp;
+	}
+}
+function merageMultiCustomer() {
+	//　すべて選択した明細を取得する
+	var arrs = $("input[name='group1']:checked");
+	var arrsLen = arrs.length;
+	if (arrsLen == 0) {
+    	alert("{!$Label.MSG_012_0291}");
+    	return false;
+	}
+	// object
+	var odids = new Array();
+	for (i=0; i<arrsLen; i++) {
+		odids.push(arrs[i].value);
+	}
+	blockUi();
+	merageMultiCustomerProc(odids);
+	return false;
+}
+function merageMultiCustomerProc(odids) {
+
+	// 選択した明細IDを項目に確認する
+	var nwid = $("input[id$=':hidNewContactId']").val();
+	var odId = odids.length > 0 ? odids[0] : '';
+	
+	// １件つづ情報マージ処理を行う
+	// 事前チェックを行う
+	Visualforce.remoting.Manager.invokeAction(
+	   "{!$RemoteAction.CustomerMerge.mergerRelList}", nwid,odids,
+        // 異常
+		function(result, event){
+        // 異常
+     	if(event.type == 'exception') {
+            alert(event.message);
+            unblockUi();
+     	} else {
+//console.debug('result.nextLeadIds:'+result.nextLeadIds);
+     		if (result.nextIds.length == 0) {
+    			// 処理対象行目のIDを取得、処理成功のアイコンを表示する
+    			$("#imgok_"+odId).show();
+				// 処理完了
+				refreshPageFun();
+				//unblockUi();
+     		} else {
+     			// 警告情報を表示する[該当予約データは再割当てする]
+     			if (result.message != "") {
+     				// 未清掃の部屋でも、該当部屋も割り当てする
+					$("#imgng_"+odId).show();
+     			} else {
+     				// 処理対象行目のIDを取得、処理成功のアイコンを表示する
+     				$("#imgok_"+odId).show();
+	     			// 次の処理を行う
+console.info(result.nextIds)
+	     			merageMultiCustomerProc(result.nextIds);
+     			}
+     		}
+			
+		}
+    });
+	
+	return true;
+}
+// 2019/06/15 お客様と関連リスト、複数マージできるように改善 END
+function preSelectCheck() {
+	// 2019/06/15 お客様と関連リスト、複数マージできるように改善 BEGIN
+	//var groupvalue=$("input:radio[name='group1']:checked").val();
+	//if ($("input:radio[name='group1']:checked").length == 0) {
+	var checkedLen = $("input[name='group1']:checked").length;
+	if (checkedLen > 1) {
+    	alert("{!$Label.MSG_012_0291_1}");
+    	return false;
+	} else if (checkedLen == 0) {
+	// 2019/06/15 お客様と関連リスト、複数マージできるように改善 END
+		//マージ元お客様情報を選択してください。
+    	alert("{!$Label.MSG_012_0291}");
+    	return false;
+  	}
+  	return true;
+}
+
+function showMergerFieldPage() {
+
+	if (!preSelectCheck()) return false;
+
+	var nwid = $("input[id$=':hidNewContactId']").val();
+	var odid = $("input[id$=':hidOldContactId']").val();
+	// 2020/07/30 マージのエラー修正 BY zyz BEGIN
+	var arrs = $("input[name='group1']:checked");
+	if (arrs.length >0) odid = arrs[0].value;
+	// 2020/07/30 マージのエラー修正 BY zyz END
+	var win = $("#mergeFieldDiv").data("kendoWindow");
+	win.refresh({
+    	url: "/apex/CustomerMergeField?nwid="+nwid+"&odid="+odid    
+	});
+	win.center().open();
+}
+function closeKendoWin(){
+	var win = $("#mergeFieldDiv").data("kendoWindow");
+	if ( win != undefined ) {
+		win.close();
+	}
+}
+// 画面Lockする
+function blockUi() {
+    $.blockUI({
+        baseZ: 60000,
+        //Processing...
+        message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0292}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+</script>
+</apex:page>

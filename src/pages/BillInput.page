@@ -1,0 +1,1262 @@
+<!-- 会計 -->
+<apex:page standardController="AccountAcount__c" extensions="BillInput_Ctrl" title="{!$Label.ps__msg_006_0115}" sidebar="false" action="{!initAction}" tabstyle="AccountAcount__c">
+<!-- 
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.editable-select.js')}"/>
+-->
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}" />
+    
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+
+<style>
+.totalRowNumCell {
+	text-align: right;
+}
+.totalRowCenCell {
+	text-algin: center;
+}
+.amountPriceCss {
+	font-size: 24px;
+	font-style: inherit;
+}
+.ui-autocomplete { 
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+ */
+* html .ui-autocomplete {
+	height: 200px;
+}
+.ui-autocomplete-loading { background: white url({!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}) right center no-repeat; }
+.ui-autocomplete { position: absolute; cursor: default;z-index:30 !important;}
+.pointImg{
+	cursor: move;
+}
+</style>
+<script>
+$=jQuery.noConflict();
+//var currRowIndex = 0;
+beenFocused = true;
+/*
+$(document).ready(function() {
+    bindEvents();
+});*/
+function bindEvents() {
+    // clear the one row info
+    var clearItemIdArr=new Array(':hidProductId',':hidProductNm',
+    	':productName',':price',':orderNums',':hidNoShowReqFlg',
+    	':amoutPriceExcTax',':discountNum',':amoutPriceIncTax',
+    	':InvoiceNoShowFlg',':hidTranId', ':hidAccId',':hidSyncInfo',
+    	':taxRateType', ':hidTaxRateType', ':serviceRate', ':hidServiceRate', ':specialTax', ':hidSpecialTax', ':hidActionType');
+    // Clear Button
+    $("input[id$=':clearProduct']").click(function() {
+        currRowIndex = $(this).attr("rowindex");
+        dispExtendImg("hidden"); // 展開imgを非表示にする
+        for (var i = 0; i < clearItemIdArr.length; i++){
+            clearObj = $("[id$=':tran1Table:" + currRowIndex + clearItemIdArr[i] + "']");
+            if (clearObj.size() == 0) continue;
+            if (clearObj.is(":checkbox")) {
+                clearObj.removeAttr('checked');
+            } else if (clearObj.is("select")) {
+                clearObj.get(0).selectedIndex = 0;
+            } else if (clearObj.is("span")) {
+                clearObj.text("");
+            } else {
+                clearObj.val("");
+            }
+        }
+    });
+
+    $("img[name='productPopup']").click(function() {
+        currRowIndex = $(this).attr("rowindex");
+        var dumyField = $("#dumyfieldId").get(0);
+        // 引き渡し値を設定して、選択画面を開く
+        ctrlNm = $("input:text[id$=':" + currRowIndex + ":productName']").get(0);
+        ctrlId = $("input:hidden[id$=':" + currRowIndex + ":hidProductId']").get(0);
+        ctrlHidNm = $("input:hidden[id$=':" + currRowIndex + ":hidProductNm']").get(0);
+        ctrlPriceId = $("input:text[id$=':" + currRowIndex + ":price']").get(0);
+        ctrlOrderNumId = $("input:text[id$=':" + currRowIndex + ":orderNums']").get(0);
+        ctrlTaxRate = $("span[id$=':" + currRowIndex + ":taxRateType']").get(0);
+        ctrlHidTaxRate = $("input:hidden[id$=':" + currRowIndex + ":hidTaxRateType']").get(0);
+        ctrlServiceTaxRate = $("span[id$=':" + currRowIndex + ":serviceRate']").get(0);
+        ctrlHidServiceTaxRate = $("input:hidden[id$=':" + currRowIndex + ":hidServiceRate']").get(0);
+        //ctrlSpecialTax = $("span[id$=':" + currRowIndex + ":specialTax']").get(0);
+        //ctrlHidSpecialTax = $("input:hidden[id$=':" + currRowIndex + ":hidSpecialTax']").get(0);
+        ctrlSpecialTax = $("input:text[id$=':" + currRowIndex + ":specialTax']").get(0);
+        ctrlHidSpecialTax = dumyField;
+        ctrlHidActionType = $("input:hidden[id$=':" + currRowIndex + ":hidActionType']").get(0);
+        var openUrl = "/apex/ProductSearch";
+        // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+		objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+			ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType);
+		commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupCallback);
+    });
+    // プランの単価入力制御
+    switchPriceStatus();
+    
+    // 会計商品AutoComplete[1桁以上]
+    $("input[id$=':productName']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.BillInput_Ctrl.getArrayProductItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($.map(result, function (item) {
+                    	item.id = item.productId;
+                    	item.value = item.prodcutName + "("+item.prodcutCode+")";
+                    	return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+	    	var nameArray = $(this).attr("id").split(":");
+	    	currRowIndex = nameArray[nameArray.length - 2];
+    		ui.item.rowIndex = currRowIndex;
+			autoGetProductInfo(ui.item);
+            return false;
+        },
+        select: function (event, ui) {
+	    	var nameArray = $(this).attr("id").split(":");
+	    	currRowIndex = nameArray[nameArray.length - 2];
+            ui.item.rowIndex = currRowIndex;
+            autoGetProductInfo(ui.item);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+            return false;
+        },
+    });
+    
+    // すべて入力の全角数字は半額に変更を行う
+    $('input').change(function(){
+        var txt  = $(this).val();
+        var han = txt.replace(/[Ａ-Ｚａ-ｚ０-９]/g,function(s){return String.fromCharCode(s.charCodeAt(0)-0xFEE0)});
+        $(this).val(han);
+    });
+	
+	// 商品金額関連項目監視設定
+	$("input[id$=':orderNums'], input[id$=':price'], input[id$=':specialTax']").on('blur', function(e){
+		var rowIndex = $(this).closest('tr').children().first().children().first().attr("rowindex");
+		setupInvoiceNoShowFlg(rowIndex);	
+	});
+	// 2014/06/05 Select ADD
+    // 2018/11/2 文字列の途中からマウスを置いて、文字列を変更できるように希望します。 by cxw BEGIN
+    /*
+    $('input').on('focus', function(e) {
+		// 2014/06/05
+		$(this).select();
+	}).on('click', function(e) {
+		// 2014/06/05
+		$(this).select();
+	}).on('mouseup', function(e){
+		// 2014/06/05
+		e.preventDefault();
+	});
+    */
+    // 2018/11/2 文字列の途中からマウスを置いて、文字列を変更できるように希望します。 by cxw END
+	
+	$("input[id$=':InvoiceNoShowFlg']").on('click', function(e) {
+		var rowIndex = $(this).closest('tr').children().first().children().first().attr("rowindex");
+		//console.log("rowIndex:" + rowIndex);
+		$("input[id$=':" + rowIndex + ":hidNoShowReqFlg']").val("1");
+	});
+	
+	//$('#tran1Table table tbody').sortable();
+	// Drop Acton
+	$("[id$=tran1Table]").kendoDraggable({
+		filter:'.pointIndex',
+		hint: function(e) {
+			dragLeadElement = $(e).parent().parent();
+			return dragLeadElement.clone();
+		},
+		dragstart: draggableOnDragStart,
+		dragend: draggableOnDragEnd
+	});
+	$("[id$=tran1Table] tbody tr").kendoDropTarget({
+		dragenter: droptargetOnDragEnter,
+		dragleave: droptargetOnDragLeave,
+		drop: droptargetOnDrop
+	});
+}
+// 会計明細の単価入力制御
+function switchPriceStatus() {
+	$("[id^='showDetailEvent']").each(function(idx) {
+		var rowIndex = $(this).attr("rowIndex");
+		if ($(this).css("visibility") == "hidden") {
+			$("input[id$=':" + rowIndex + ":price']").attr('readonly', false);
+			$("input[id$=':" + rowIndex + ":price']").css('background-color', '');
+		} else {
+			$("input[id$=':" + rowIndex + ":price']").attr('readonly', true);
+			$("input[id$=':" + rowIndex + ":price']").css('background-color', '#DCDCDC');
+		}
+	});
+}
+// ポップ商品選択後の自動処理
+function popupCallback() {
+	// プラン設定の切り替え
+	var actType = $("input:hidden[id$=':" + currRowIndex + ":hidActionType']").val();
+   	if(actType == "{!ACTTYPE_PLAN}"){
+       	dispExtendImg("visible");
+	} else{
+       	dispExtendImg("hidden");
+   	}
+    // 項目自動クリア
+    $("input:hidden[id$=':" + currRowIndex + ":hidTranId']").val("");
+    $("input:hidden[id$=':" + currRowIndex + ":hidAccId']").val("");
+    // 宿泊税は０の場合、空白に設定を行う
+    var specialTax = $("input:text[id$=':" + currRowIndex + ":specialTax']").val();
+    if (1 * specialTax == 0) $("input:text[id$=':" + currRowIndex + ":specialTax']").val("");
+    // ステータス切替
+    switchPriceStatus();
+    // 請求書非表示フラグ制御
+    setupInvoiceNoShowFlg(currRowIndex);
+    
+}
+function blockUi() {
+    $("form[id$=':billInputForm']").block({
+//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_006_0118}</h1>'
+
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $("form[id$=':billInputForm']").unblock();
+}
+function showDetailFun(obj) {
+    if ($(obj).attr("openStatus") == "false") {
+		$(obj).attr("openStatus","true");
+	//折りたたむ
+		$(obj).attr("title","{!$Label.MSG_006_0119}");
+		$(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}");
+		// Javasceipr Remotingでデータを取得する
+		currRowIndex = $(obj).attr("rowIndex");
+		var ctrlId = $("input:hidden[id$=':" + currRowIndex + ":hidProductId']").get(0);
+		var tranId = $("input:hidden[id$=':" + currRowIndex + ":hidTranId']").get(0);
+		var accId = $("input:hidden[id$=':" + currRowIndex + ":hidAccId']").get(0);
+		var childcls = ($(obj).attr("id")) + "_child";
+		// 該当商品はMEMORYに格納していない場合
+
+		hashMap.Clear();
+		var syncInfo = $("input[id$=':" + currRowIndex + ":hidSyncInfo']").val();
+		if (syncInfo != "") {
+			syncInfo = syncInfo.substring(0, syncInfo.length-1);
+			var synInfoArr = syncInfo.split(";");
+			for (i = 0; i < synInfoArr.length; i++){
+				hashMap.Put(synInfoArr[i].split(":")[0], synInfoArr[i].split(":")[1]);
+			}
+		}
+
+blockUi();
+		Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.BillInput_Ctrl.getAccountMstLstByPlan}',
+            tranId.value, accId.value, ctrlId.value,
+            function(result, event){
+unblockUi();
+                if (event.status) {
+                    if(result== null || result.length == 0){
+//データ詳細がありません。
+                        $(obj).parent().parent().parent().after("<tr><td colspan='10' style='margin-right: 200px;' >{!$Label.MSG_006_0120}</td></tr>");
+
+                    }else{
+                    	// プラン明細設定情報を格納用
+                    	var planSyncInf = '';
+                    	var tabStrHead = "<tr><td colspan='10'>" +
+	                	          "<table style='width:50%' class='list' border='0' cellpadding='0' cellspacing='0'>" +
+	                	          "<thead class='rich-table-thead'>" +
+	                	          "<tr class='headerRow' nowrap='nowrap'>" +
+									//商品名
+	                	              "<th class='headerRow' nowrap='nowrap' style='width:70%'>{!$Label.MSG_006_0121}</th>" +
+	                	          //単価
+	                	              "<th class='headerRow' nowrap='nowrap' style='width:30%'>{!$Label.MSG_006_0122}</th></tr></thead>" +
+
+	                	          "<tBody>";
+	                	var tabStrFoot = "</tBody></table></td></tr>";
+	                	var tabStrBody = "";
+
+	                	for (var i=0; i<result.length; i++) {
+	                		// メモーに既存場合、メモーの設定情報から、単価を設定する
+	                		var memoryPrice = hashMap.Contains(result[i].sobjId) ? hashMap.Get(result[i].sobjId) : result[i].prodPrice;
+	                		tabStrBody += "<tr><td style='background-color: #FFEBCD;'>" + result[i].prodName;
+	                		tabStrBody += "<input type='hidden' value='" + result[i].sobjId + "' id='" + currRowIndex + "_" + i + "' /></td>";
+	                		tabStrBody += "<td style='background-color: #FFEBCD;text-align: right;'>";
+	                		tabStrBody += "<input type='text' style='text-align:right;' parentIndex='"+currRowIndex+"' rowIndex='" + i + "' class='" + childcls + "' value='" + memoryPrice + "' /></td></tr>";
+
+	                		planSyncInf += result[i].sobjId + ':' + memoryPrice.replaceAll(",","") + ';';
+	                	}
+	                	$(obj).parent().parent().parent().after(tabStrHead + tabStrBody + tabStrFoot);
+
+	                	// 連携用情報、HIDDEN項目に格納する
+	                	$("input[id$=':" + currRowIndex + ":hidSyncInfo']").val(planSyncInf);
+
+	                	// 単価合計値計算して、プランの単価へ反映する
+	                	// Event Binding
+	                	$("[class='"+ childcls +"']").on('blur', function(e){
+	                		var price = $(this).val().replaceAll(",","");
+	                		if (!$.isNumeric(price)) price = "0";
+	                		$(this).val(commUtils.numFormat(price));
+
+	                		var sumVal = 0;
+	                		var parentRowIndex = $(this).attr("parentIndex");
+	                		var planSyncInf = '';
+	                		// 合計値計算を行う
+	                		$("[class='"+ childcls +"']").each(function(idx){
+	                			var hidFieldId = parentRowIndex + "_" + $(this).attr("rowIndex");
+	                			var unitPrice = $(this).val().replaceAll(",","");
+	                			//sumVal += 1 * unitPrice;
+	                			sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+	                			planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ';';
+	                		});
+	                		// 合計値でプランの単価に反映する
+	                		$("input[id$=':"+ parentRowIndex + ":price']").val(sumVal);
+	                		$("input[id$=':" + parentRowIndex + ":hidSyncInfo']").val(planSyncInf);
+	                		// 2013/11/08 単価計算後、総金額計算を行う
+							var rowIndex = $("input[id$=':"+ parentRowIndex + ":clearProduct']").attr("rowIndex");
+	                		setupInvoiceNoShowFlg(rowIndex);
+	                	});
+
+                    }
+
+                } else if (event.type === 'exception') {
+ 		//データ詳細がありません。
+                    $(obj).parent().parent().parent().after("<tr><td colspan='10' style='margin-left: 200px;' >{!$Label.MSG_006_0120}</td></tr>");
+                } else {
+                //データ詳細がありません。
+                    $(obj).parent().parent().parent().after("<tr><td colspan='10' style='margin-left: 200px;' >{!$Label.MSG_006_0120}</td></tr>");
+                }
+
+            },
+            {escape: true}
+        );
+		//$(obj).parent().parent().parent().after("<tr><td colspan='10' style='margin-left: 200px;' ><table><tr><td>444</td><td>555</td><td>666</td></tr></table> </td></tr> ");
+    } else {
+        $(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}");
+        $(obj).attr("openStatus","false");
+	//展開
+        $(obj).attr("title","{!$Label.MSG_006_0123}");
+        $(obj).parent().parent().parent().next().remove();
+    }
+}
+var currRowIndex = 0;
+// 展開imgの表示・非表示を制御する
+function dispExtendImg(flg){ // flg : visible | hidden
+	var idx = currRowIndex;
+    $("#showDetailEvent" + idx).attr("style", "cursor: pointer;display: true; width: 18px; height: 18px; visibility:" + flg);
+    if($("#showDetailEvent" + idx).attr("openStatus") == "true"){
+        $("#showDetailEvent" + idx).attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}");
+        $("#showDetailEvent" + idx).attr("openStatus","false");
+	//展開
+        $("#showDetailEvent" + idx).attr("title","{!$Label.MSG_006_0123}");
+        $("#showDetailEvent" + idx).parent().parent().parent().next().remove();
+    }
+    switchPriceStatus();
+}
+
+// 最新商品情報を取得する
+function autoGetProductInfo(result) {
+	// 存在の商品情報は画面へ反映する
+	var currRowIndex = result.rowIndex;
+    var taxValLabel = (　result.tax == "" ? "0%" : result.tax + "%");
+    var serviceLabel = (　result.serviceRate == "" ? "0%" : result.serviceRate + "%");
+       
+    $("input:text[id$=':" + currRowIndex + ":productName']").val(result.prodcutName);
+    $("input:hidden[id$=':" + currRowIndex + ":hidProductId']").val(result.productId);
+    $("input:hidden[id$=':" + currRowIndex + ":hidProductNm']").val(result.prodcutName);
+    $("input:text[id$=':" + currRowIndex + ":price']").val(result.unitPrice);
+    $("input:text[id$=':" + currRowIndex + ":orderNums']").val(1);
+    $("span[id$=':" + currRowIndex + ":taxRateType']").text(taxValLabel);
+    $("input:hidden[id$=':" + currRowIndex + ":hidTaxRateType']").val(result.tax);
+    $("span[id$=':" + currRowIndex + ":serviceRate']").text(serviceLabel);
+    $("input:hidden[id$=':" + currRowIndex + ":hidServiceRate']").val(result.serviceRate);
+    $("input:text[id$=':" + currRowIndex + ":specialTax']").val(result.specialTax);
+    $("input:hidden[id$=':" + currRowIndex + ":hidActionType']").val(result.actionType);
+
+	popupCallback();
+}
+// 会計書情報はHIDDEN項目に設定する
+function copySelectValToHidden() {
+	$("input:hidden[id$=':hidAccountId']").val($("[id$=':accountNameSel']").val());
+	$("input:hidden[id$=':hidReceiptId']").val($("[id$=':accountReciptSel']").val());
+	$("input:hidden[id$=':hidProvisoId']").val($("[id$=':accountProvisoSel']").val());
+}
+
+// Disable Button
+function buttonsEnabled(enabled) {
+    // retrieve all of the buttons or links on the page
+    // with the css class of btn
+    var $buttons = $('.btn');
+    if (enabled === false) {
+        // add the btnDisabled class to give it the look of being disabled
+        // add the disabled attribute to actually disable interactability
+        $buttons.toggleClass('btnDisabled', true).attr('disabled', 'disabled');
+    } else {
+        // remove the css class and the disabled attribute
+        $buttons.toggleClass('btnDisabled', false).attr('disabled', null);
+        // Remove BlockUI
+        unblockUi();
+    } 
+}
+// 会計書非表示制御
+function setupInvoiceNoShowFlg(rowIndex) {
+	
+	var autoCheckFlg = $("#hidCommNoShowRequestFlg").val();
+	if (autoCheckFlg == "false") return;
+	// 自動設定するがどうかチェックする
+	if ($("input[id$=':" + rowIndex + ":hidNoShowReqFlg']").val() == "1") return;
+	
+     var productName = $("input:text[id$=':" + rowIndex + ":productName']").val();
+     if (productName == "") return;
+     var price = $("input:text[id$=':" + rowIndex + ":price']").val();
+     var orderNum = $("input:text[id$=':" + rowIndex + ":orderNums']").val();
+     var special = $("input:text[id$=':" + rowIndex + ":specialTax']").val();
+     price = (price == "" ? 0 : 1*price);
+     orderNum = (orderNum == "" ? 0 : 1*orderNum);
+     special= (special == "" ? 0 : 1*special);
+     if ((price * orderNum + special) == 0) {
+     	$("input:checkbox[id$=':" + rowIndex + ":InvoiceNoShowFlg']").prop({'checked':'checked'});
+     } else {
+     	$("input:checkbox[id$=':" + rowIndex + ":InvoiceNoShowFlg']").prop({'checked':false});
+     }
+}
+// 会計書順位調整JS
+function draggableOnDragStart(e) {
+	$(dragLeadElement).hide();
+	var imgFun = $(dragLeadElement).find('img[id^=showDetailEvent]');        
+	if(imgFun.attr("openStatus")=="true"){
+	    showDetailFun(imgFun);
+	}
+}
+function draggableOnDragEnd(e) {
+	var draggable = $('table').data("kendoDraggable");
+	$(dragLeadElement).show();
+    refreshOrder();
+}
+function droptargetOnDragEnter(e) {}
+function droptargetOnDragLeave(e) {}
+function droptargetOnDrop(e) {
+	$(e.dropTarget).before($(dragLeadElement));
+}
+function refreshOrder(){
+	var rowIndex = 1;
+	var orgRomIndex = 1;
+	$("[id$=tran1Table] tbody tr").each(function(){
+		$(this).find('[id$=hidRowNo]').val(orgRomIndex);
+		if($(this).find('[id$=productName]').val() !=''){
+			$(this).find('[id$=hidRowNo]').val(rowIndex);
+			rowIndex++;
+		}
+		$(this).find('[id$=pointIndex]').text(orgRomIndex);
+         orgRomIndex++;
+	});
+}
+</script>
+
+<apex:outputPanel id="eventBindPanel">
+<script>
+$(document).ready(function() {
+    bindEvents();
+});
+</script>
+</apex:outputPanel>
+<apex:form id="billInputForm" > 
+<apex:outputPanel id="errPanel">
+<apex:pageMessages />
+</apex:outputPanel>
+<input type="hidden" id="dumyfieldId" />
+<input type="hidden" id="hidCommNoShowRequestFlg" value="{!$Setup.CommDefine__c.ps__NoShowRequestFlg__c}"/>
+<apex:actionFunction name="insertDataFunction" 
+        action="{!insertData}" 
+        oncomplete="bindEvents();buttonsEnabled(true);"
+        rerender="billInputForm,errPanel" />
+<apex:actionFunction name="upsertDataFunction" 
+        action="{!upsertData}" 
+        oncomplete="bindEvents();buttonsEnabled(true);"
+        rerender="billInputForm,errPanel" />
+<apex:actionFunction name="gotoCancelFunction" action="{!gotoCancel}" immediate="true" />
+
+<script>
+$(document).ready(function() {
+	var accountNamesDs = $.parseJSON("{!JSENCODE(accountNames)}");
+	var accountProvisosDs = $.parseJSON("{!JSENCODE(accountProvisos)}");
+	// 2015/10/29 但しデイフォル値設定機能対応 BEGIN
+	var accountProvisosDsDefVal = "";
+	for (i=0; i < accountProvisosDs.length; i++) {
+		var defaultPos = accountProvisosDs[i].value.indexOf(':1');
+		if (defaultPos > 0) {
+			var orgVal = accountProvisosDs[i].value.substr(0,defaultPos);
+			accountProvisosDs[i].label = orgVal;
+			accountProvisosDs[i].value = orgVal;
+			if (accountProvisosDsDefVal.length == 0) accountProvisosDsDefVal = orgVal;
+		}
+	}
+	// 2015/10/29 但しデイフォル値設定機能対応 END
+	// 2013/10/21 会計書宛名情報設定用
+	$("[id$=':accountNameSel'],[id$=':accountReciptSel']").kendoComboBox(
+	{
+       dataTextField: "label",
+       dataValueField: "value",
+       dataSource: accountNamesDs,
+       //filter: "contains",
+       //suggest: true,
+       //index: 3
+    });
+    $("[id$=':accountProvisoSel']").kendoComboBox(
+	{
+       dataTextField: "label",
+       dataValueField: "value",
+       dataSource: accountProvisosDs,
+       //filter: "contains",
+       //suggest: true,
+       //index: 3
+    });
+    // 2015/10/29 但しデイフォル値設定機能対応 BEGIN
+    if (accountProvisosDsDefVal.length > 0) { 
+		var accountProvisoSelCombobox = $("[id$=':accountProvisoSel']").data("kendoComboBox");
+		if (accountProvisoSelCombobox.value().length == 0) {
+			accountProvisoSelCombobox.value(accountProvisosDsDefVal);
+		}
+	}
+	// 2015/10/29 但しデイフォル値設定機能対応 END
+});
+</script>
+<!-- 会計 -->
+<apex:pageblock title="{!$Label.ps__msg_006_0115}" >
+
+    <apex:pageBlockButtons location="top">
+		<!-- 
+        <apex:commandButton value="会計確定" onclick="upsertDataFunction();buttonsEnabled(false);blockUi();" rendered="{!oPage.isUpd}"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 100px"/>
+        <apex:commandButton value="会計作成" onclick="insertDataFunction();buttonsEnabled(false);blockUi();" rendered="{!oPage.isIns}"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 100px"/>
+		<apex:commandButton action="{!gotoCancel}" value="キャンセル" immediate="true" style="width:100px" />
+		-->
+        <apex:outputPanel rendered="{!oPage.isUpd}">
+<!-- 会計確定 -->
+        <input type="button" value="{!$Label.MSG_006_0124}" onclick="copySelectValToHidden();refreshOrder();upsertDataFunction();buttonsEnabled(false);blockUi();" class="btn"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); min-width:100px"/>
+        </apex:outputPanel>
+		<apex:outputPanel rendered="{!oPage.isIns}">
+		<!-- 会計確定 -->
+        <input type="button" value="{!$Label.MSG_006_0124}" onclick="copySelectValToHidden();refreshOrder();insertDataFunction();buttonsEnabled(false);blockUi();" class="btn"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); min-width: 100px"/>
+		</apex:outputPanel>
+		<!-- キャンセル -->
+        <input type="button" value="{!$Label.MSG_006_0125}" onclick="gotoCancelFunction();buttonsEnabled(false);blockUi();" class="btn" style="width: 100px"/>
+    </apex:pageBlockButtons>
+    
+	<apex:variable var="varCommentMaxStrLen" value="{!commentMaxStrSize}" />
+	<!-- 会計 - Receipt# -->    <!-- YYMMDD -->
+	<apex:pageBlockSection columns="2" title="{!$Label.ps__msg_006_0165} & {!$Label.ps__msg_006_0166}" >
+
+		<apex:outputField value="{!oAcountSobj.Name}"/>
+		<!-- 入金確認済みのチェックボックス -->
+		<apex:inputField value="{!oAcountSobj.PaymentFlg__c}" />
+		<apex:inputField value="{!oAcountSobj.Field146__c}" rendered="false"/>
+		<apex:inputField value="{!oAcountSobj.Field39__c}" rendered="false"/>
+		<!-- レシートＮｏ． -->
+		<apex:inputField value="{!oAcountSobj.Field145__c}" rendered="false" />
+		<!-- ＶＯＩＤレシートＮｏ． -->
+		<apex:inputField value="{!oAcountSobj.Field40__c}" rendered="false"/>
+		<!-- 最新更新者 -->
+		<apex:outputField value="{!oAcountSobj.LastModifiedById}" />
+		<!-- 会計済み -->
+		<apex:outputField value="{!oAcountSobj.AccountedFlgCal__c}" />
+		<!-- 最新更新日 -->
+		<apex:outputField value="{!oAcountSobj.LastModifiedDate}" />
+		
+		<!-- 予約会計． -->
+		<apex:pageBlockSectionItem >
+		<apex:outputLabel >
+			<apex:outputLink value="javascript:void(0)" onclick="window.open('/{!oAcountSobj.frs__c}' , '_blank')" rendered="{!oPage.isUpd}">
+			<!-- 売上計上日 -->{!$Label.ps__msg_006_0126}
+			</apex:outputLink>
+			<!-- 売上計上日 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0126}" rendered="{!oPage.isIns}"/>
+		</apex:outputLabel>
+		<apex:inputField value="{!oAcountSobj.SalesDate__c}" required="true"/>
+		</apex:pageBlockSectionItem>
+		
+		<apex:pageBlockSectionItem >
+				<!-- 会計書言語 -->
+				<apex:outputLabel value="{!$Label.ps__msg_006_0127}" />
+				<apex:selectList value="{!oAcountSobj.AccountLanguage__c}" multiselect="false" size="1">
+				<!-- 日本語 -->
+					<apex:selectOption itemValue="jp" itemLabel="{!$Label.ps__msg_006_0128}" />
+				<!-- 英語 -->
+					<apex:selectOption itemValue="en" itemLabel="{!$Label.ps__msg_006_0129}" />
+				</apex:selectList>
+		</apex:pageBlockSectionItem>
+
+	</apex:pageBlockSection>
+<!-- 予約 -->
+	<apex:pageBlockSection columns="2" title="{!$Label.ps__msg_006_0130}" >
+
+		<!-- ご予約 -->
+		<apex:outputField value="{!oAcountSobj.Relreserve__c}" rendered="{!oPage.isUpd}"/>
+		<apex:inputField value="{!oAcountSobj.Relreserve__c}" rendered="{!oPage.isIns}"/>
+		<!-- お客様 -->
+		<apex:pageBlockSectionItem labelStyle="height:28px">
+			<apex:outputLabel value="{!$Label.ps__msg_006_0131}" />
+			<apex:outputPanel >
+			<!-- 
+			<apex:outputField value="{!oAcountSobj.relaccount__c}" rendered="{!oPage.isUpd}" />
+			<apex:inputField value="{!oAcountSobj.relaccount__c}" rendered="{!oPage.isIns}" />
+			 -->
+			<apex:inputField value="{!oAcountSobj.relaccount__c}" />
+			</apex:outputPanel>
+		</apex:pageBlockSectionItem>
+		<!-- お部屋 -->
+		<!-- 
+		<apex:outputField value="{!oAcountSobj.Relreserve__r.Rroom__c}" />
+		 -->
+		<apex:pageBlockSectionItem labelStyle="height:28px">
+					<!-- お部屋 -->
+								<apex:outputLabel value="{!$Label.ps__msg_006_0132}" />
+			<apex:outputPanel >
+			<apex:outputField value="{!oAcountSobj.Relreserve__r.Rroom__c}" rendered="{!oPage.isIns}" />
+			<apex:inputField value="{!oAcountSobj.Field150__c}" rendered="{!AND(oPage.isUpd, oAcountSobj.Relreserve__c == null)}" />
+			<apex:outputField value="{!oAcountSobj.Relreserve__r.Rroom__c}" rendered="{!AND(oPage.isUpd, oAcountSobj.Relreserve__c != null)}" />
+			</apex:outputPanel>
+		</apex:pageBlockSectionItem>
+		<!-- 顧客様の取引先 -->
+		<apex:pageBlockSectionItem labelStyle="height:28px">
+<!-- ご請求先 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0133}" />
+
+			<apex:outputField value="{!oAcountSobj.relaccount__r.AccountId}" />
+ 		</apex:pageBlockSectionItem>
+
+		<!-- 部屋タイプ -->
+		<apex:pageBlockSectionItem >
+			<apex:outputLabel value="{!$Label.ps__msg_006_0134}" />
+			<apex:outputField value="{!oAcountSobj.Relreserve__r.refTypeOfRooms__c}" />
+		</apex:pageBlockSectionItem>
+		
+		<!-- 会計宛名 -->
+		<apex:pageBlockSectionItem >
+		<apex:outputLabel value="{!$Label.ps__msg_006_0135}" />
+		<apex:inputText id="accountNameSel" value="{!oAcountSobj.AccountName__c}" maxlength="255" style="width:240px" />
+		</apex:pageBlockSectionItem>
+
+		<!-- 予約人数 -->
+		<apex:outputField value="{!oAcountSobj.Relreserve__r.StayPersons__c}" />
+		
+		<apex:pageBlockSectionItem >
+		<!-- 領収証宛名 -->
+		<apex:outputLabel value="{!$Label.ps__msg_006_0136}" />
+		<apex:inputText id="accountReciptSel" value="{!oAcountSobj.AccountReceiptName__c}" maxlength="255" style="width:240px" />
+		</apex:pageBlockSectionItem>
+		
+		<!-- 領収書日付 -->
+		<apex:outputLabel />
+		<apex:inputField value="{!oAcountSobj.AccountReceiptDate__c}"/>
+		<!-- 
+		<apex:inputField value="{!oAcountSobj.comment__c}" style="width:320px" html-placeholder="B5 会計書: 12桁 / A4 会計書: 16桁 ごとにリターンキーを入力してください。"/>
+		-->
+		
+		<apex:pageBlockSectionItem >
+		
+		<apex:outputLabel >
+			<span class="helpButton" id="commentHelpLabel-_help">
+			<apex:outputLabel value="{!$ObjectType.AccountAcount__c.Fields.comment__c.label}" />
+			<img src="/s.gif" alt="" class="helpOrb" title="" style="vertical-align: middle;"/>
+<!-- 最大入力桁数は -->       <!-- 桁です -->  
+			<script>sfdcPage.setHelp('commentHelpLabel', '{!$Label.MSG_006_0137}{!varCommentMaxStrLen}{!$Label.MSG_006_0138}');</script>
+
+			</span>
+		</apex:outputLabel>
+		<apex:inputField value="{!oAcountSobj.comment__c}" label="" html-maxlength="{!varCommentMaxStrLen}" style="width:320px" id="accountComment"/>
+		</apex:pageBlockSectionItem>
+		
+		<apex:pageBlockSectionItem >
+		<!-- 領収証但し -->
+		<apex:outputLabel value="{!$Label.ps__msg_006_0139}" />
+		<apex:outputLabel >
+		<apex:inputText id="accountProvisoSel" value="{!oAcountSobj.AccountProviso__c}" maxlength="255" style="width:240px" />
+		<apex:inputHidden value="{!oAcountSobj.AccountName__c}" id="hidAccountId"/>
+		<apex:inputHidden value="{!oAcountSobj.AccountReceiptName__c}" id="hidReceiptId"/>
+		<apex:inputHidden value="{!oAcountSobj.AccountProviso__c}" id="hidProvisoId"/>
+		</apex:outputLabel>
+		</apex:pageBlockSectionItem>
+
+	</apex:pageBlockSection>
+<!-- 会計[Ttotal] -->
+	<apex:pageBlockSection columns="2" title="{!$Label.ps__msg_006_0158}" rendered="true">
+		<apex:inputField value="{!oAcountSobj.Field42__c}" rendered="false"/>	<!-- 担当者Ｎｏ．-->
+		<apex:inputField value="{!oAcountSobj.Field43__c}" rendered="false"/>	<!-- 元扱者Ｎｏ．-->
+		<apex:inputField value="{!oAcountSobj.Field44__c}" rendered="false"/>	<!-- 元担当者Ｎｏ．-->
+		<apex:inputField value="{!oAcountSobj.Field45__c}" rendered="false"/>	<!-- 会計種別-->
+		<apex:inputField value="{!oAcountSobj.Field7__c}" rendered="false"/>	<!-- 伝票Ｎｏ．-->
+		<apex:inputField value="{!oAcountSobj.Field48__c}" rendered="false"/>	<!-- 伝票枝番-->
+		<apex:inputField value="{!oAcountSobj.Field49__c}" rendered="false"/>	<!-- 伝票一連Ｎｏ．-->
+		<apex:inputField value="{!oAcountSobj.Field50__c}" rendered="false"/>	<!-- 新規オーダー時刻-->
+		<apex:inputField value="{!oAcountSobj.Field51__c}" rendered="false"/>	<!-- 追加オーダー時刻-->
+		<apex:inputField value="{!oAcountSobj.Field52__c}" rendered="false"/>	<!-- 料理提供時刻-->
+		<apex:inputField value="{!oAcountSobj.Field54__c}" rendered="false"/>	<!-- 組数-->
+		<apex:inputField value="{!oAcountSobj.Field55__c}" rendered="false"/>	<!-- ＰＯＳ入力人数-->
+		<apex:inputField value="{!oAcountSobj.Field56__c}" rendered="false"/>	<!-- オーダー人数-->
+		<apex:inputField value="{!oAcountSobj.Field53__c}" rendered="false"/>	<!-- 会計日時-->
+		<apex:inputField value="{!oAcountSobj.Field58__c}" rendered="false"/>	<!-- フリー１集計コード-->
+		<apex:inputField value="{!oAcountSobj.Field59__c}" rendered="false"/>	<!-- フリー１集計名称-->
+		<apex:inputField value="{!oAcountSobj.Field60__c}" rendered="false"/>	<!-- レストラン売上客数-->
+		<apex:inputField value="{!oAcountSobj.Field61__c}" rendered="false"/>	<!-- 店頭売上客数-->
+		<apex:inputField value="{!oAcountSobj.Field62__c}" rendered="false"/>	<!-- 売上高客数-->
+		<apex:inputField value="{!oAcountSobj.Field63__c}" rendered="false"/>	<!-- 収入計客数-->
+		<apex:inputField value="{!oAcountSobj.Field64__c}" rendered="false"/>	<!-- お通し人数-->
+		<apex:inputField value="{!oAcountSobj.Field65__c}" rendered="false"/>	<!-- 控え番号（任意情報１）-->
+
+ 		<apex:pageBlockSectionItem helpText="{!$ObjectType.AccountAcount__c.Fields.Field57__c.inlineHelpText}" >
+			<apex:outputLabel value="{!$ObjectType.AccountAcount__c.Fields.Field57__c.Label}" for="peoples" />
+			<apex:outputField value="{!oAcountSobj.Field57__c}" id="peoples"/>
+		</apex:pageBlockSectionItem><!-- 会計人数-->
+		
+		
+ 		<apex:pageBlockSectionItem helpText="{!$ObjectType.AccountAcount__c.Fields.Field66__c.inlineHelpText}" >
+<!-- 男性 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0140}" for="maleNums" />
+			<apex:inputField value="{!oAcountSobj.Field66__c}" id="maleNums"/>
+		</apex:pageBlockSectionItem><!-- 客層１-->
+		&nbsp;
+ 		<apex:pageBlockSectionItem helpText="{!$ObjectType.AccountAcount__c.Fields.Field67__c.inlineHelpText}" >
+			<!-- 女性 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0141}" for="femaleNums" />
+			<apex:inputField value="{!oAcountSobj.Field67__c}" id="femaleNums"/>
+		</apex:pageBlockSectionItem><!-- 客層2-->
+		&nbsp;
+ 		<apex:pageBlockSectionItem helpText="{!$ObjectType.AccountAcount__c.Fields.Field68__c.inlineHelpText}" >
+			<!-- 子供 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0142}" for="childrenNums" />
+
+			<apex:inputField value="{!oAcountSobj.Field68__c}" id="childrenNums"/>
+		</apex:pageBlockSectionItem><!-- 客層3-->
+		<apex:inputField value="{!oAcountSobj.Field66__c}" rendered="false"/>	<!-- 客層１-->
+		<apex:inputField value="{!oAcountSobj.Field67__c}" rendered="false"/>	<!-- 客層２-->
+		<apex:inputField value="{!oAcountSobj.Field68__c}" rendered="false"/>	<!-- 客層３-->
+		<apex:inputField value="{!oAcountSobj.Field69__c}" rendered="false"/>	<!-- 客層４-->
+		<apex:inputField value="{!oAcountSobj.Field70__c}" rendered="false"/>	<!-- 客層５-->
+		<apex:inputField value="{!oAcountSobj.Field71__c}" rendered="false"/>	<!-- ディッシュアップ時間帯開始時間-->
+		<apex:inputField value="{!oAcountSobj.Field72__c}" rendered="false"/>	<!-- ディッシュアップ時間帯終了時間-->
+		<apex:inputField value="{!oAcountSobj.Field73__c}" rendered="false"/>	<!-- アイテム総点数-->
+		<apex:inputField value="{!oAcountSobj.Field74__c}" rendered="false"/>	<!-- 店内飲食合計1（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field75__c}" rendered="false"/>	<!-- 店内飲食合計1（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field76__c}" rendered="false"/>	<!-- 店内飲食合計2（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field77__c}" rendered="false"/>	<!-- 店内飲食合計2（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field78__c}" rendered="false"/>	<!-- 店内飲食外税対象金額-->
+		<apex:inputField value="{!oAcountSobj.Field79__c}" rendered="false"/>	<!-- 店内飲食外税対象点数-->
+		<apex:inputField value="{!oAcountSobj.Field80__c}" rendered="false"/>	<!-- 店内飲食内税対象（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field81__c}" rendered="false"/>	<!-- 店内飲食内税対象（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field82__c}" rendered="false"/>	<!-- 店内飲食内税対象（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field83__c}" rendered="false"/>	<!-- 店内飲食内税対象（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field84__c}" rendered="false"/>	<!-- 店内飲食非課税対象金額-->
+		<apex:inputField value="{!oAcountSobj.Field85__c}" rendered="false"/>	<!-- 店内飲食非課税対象点数-->
+		<apex:inputField value="{!oAcountSobj.Field86__c}" rendered="false"/>	<!-- テイクアウト合計1（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field87__c}" rendered="false"/>	<!-- テイクアウト合計1（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field88__c}" rendered="false"/>	<!-- テイクアウト合計2（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field89__c}" rendered="false"/>	<!-- テイクアウト合計2（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field90__c}" rendered="false"/>	<!-- テイクアウト外税対象金額-->
+		<apex:inputField value="{!oAcountSobj.Field91__c}" rendered="false"/>	<!-- テイクアウト外税対象点数-->
+		<apex:inputField value="{!oAcountSobj.Field92__c}" rendered="false"/>	<!-- テイクアウト内税対象（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field93__c}" rendered="false"/>	<!-- テイクアウト内税対象（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field94__c}" rendered="false"/>	<!-- テイクアウト内税対象（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field95__c}" rendered="false"/>	<!-- テイクアウト内税対象（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field96__c}" rendered="false"/>	<!-- テイクアウト非課税対象金額-->
+		<apex:inputField value="{!oAcountSobj.Field97__c}" rendered="false"/>	<!-- テイクアウト非課税対象点数-->
+		<apex:inputField value="{!oAcountSobj.Field98__c}" rendered="false"/>	<!-- レストラン売上合計1（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field99__c}" rendered="false"/>	<!-- レストラン売上合計1（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field100__c}" rendered="false"/>	<!-- レストラン売上合計2（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field101__c}" rendered="false"/>	<!-- レストラン売上合計2（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field102__c}" rendered="false"/>	<!-- レストラン売上外税対象金額-->
+		<apex:inputField value="{!oAcountSobj.Field103__c}" rendered="false"/>	<!-- レストラン売上外税対象点数-->
+		<apex:inputField value="{!oAcountSobj.Field104__c}" rendered="false"/>	<!-- レストラン売上内税対象（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field105__c}" rendered="false"/>	<!-- レストラン売上内税対象（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field106__c}" rendered="false"/>	<!-- レストラン売上内税対象（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field107__c}" rendered="false"/>	<!-- レストラン売上内税対象（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field108__c}" rendered="false"/>	<!-- レストラン売上非課税対象金額-->
+		<apex:inputField value="{!oAcountSobj.Field109__c}" rendered="false"/>	<!-- レストラン売上非課税対象点数-->
+		<apex:inputField value="{!oAcountSobj.Field110__c}" rendered="false"/>	<!-- 売上計1（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field111__c}" rendered="false"/>	<!-- 売上計1（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field112__c}" rendered="false"/>	<!-- 売上計2（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field113__c}" rendered="false"/>	<!-- 売上計2（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field114__c}" rendered="false"/>	<!-- 売上計3（内税抜き）金額-->
+		<apex:inputField value="{!oAcountSobj.Field115__c}" rendered="false"/>	<!-- 売上計3（内税抜き）点数-->
+		<apex:inputField value="{!oAcountSobj.Field116__c}" rendered="false"/>	<!-- 売上計4（内税込み）金額-->
+		<apex:inputField value="{!oAcountSobj.Field117__c}" rendered="false"/>	<!-- 売上計4（内税込み）点数-->
+		<apex:inputField value="{!oAcountSobj.Field118__c}" rendered="false"/>	<!-- 金券販売合計　金額-->
+		<apex:inputField value="{!oAcountSobj.Field119__c}" rendered="false"/>	<!-- 金券販売合計　回数-->
+		<apex:inputField value="{!oAcountSobj.Field120__c}" rendered="false"/>	<!-- 金券販売合計　枚数-->
+		<apex:inputField value="{!oAcountSobj.Field121__c}" rendered="false"/>	<!-- 消費税（外）-->
+		<apex:inputField value="{!oAcountSobj.Field122__c}" rendered="false"/>	<!-- 消費税（内）-->
+		<apex:inputField value="{!oAcountSobj.Field123__c}" rendered="false"/>	<!-- 消費税（外）対象額-->
+		<apex:inputField value="{!oAcountSobj.Field124__c}" rendered="false"/>	<!-- 消費税（内）対象額-->
+		<apex:inputField value="{!oAcountSobj.Field125__c}" rendered="false"/>	<!-- 消費税非課税対象額-->
+		<apex:inputField value="{!oAcountSobj.Field126__c}" rendered="false"/>	<!-- 請求金額-->
+		<apex:inputField value="{!oAcountSobj.Field127__c}" rendered="false"/>	<!-- 課税１　種別-->
+		<apex:inputField value="{!oAcountSobj.Field128__c}" rendered="false"/>	<!-- 課税１　税率-->
+		<apex:inputField value="{!oAcountSobj.Field129__c}" rendered="false"/>	<!-- 課税２　種別-->
+		<apex:inputField value="{!oAcountSobj.Field130__c}" rendered="false"/>	<!-- 課税２　税率-->
+		<apex:inputField value="{!oAcountSobj.Field131__c}" rendered="false"/>	<!-- 課税３　種別-->
+		<apex:inputField value="{!oAcountSobj.Field132__c}" rendered="false"/>	<!-- 課税３　税率-->
+		<apex:inputField value="{!oAcountSobj.Field133__c}" rendered="false"/>	<!-- レシートＮｏ．（ＦＲＯＭ）-->
+		<apex:inputField value="{!oAcountSobj.Field134__c}" rendered="false"/>	<!-- レシートＮｏ．（ＴＯ）-->
+		<apex:inputField value="{!oAcountSobj.Field135__c}" rendered="false"/>	<!-- 今回未精算　組数-->
+		<apex:inputField value="{!oAcountSobj.Field136__c}" rendered="false"/>	<!-- 今回未精算　金額-->
+		<apex:inputField value="{!oAcountSobj.Field137__c}" rendered="false"/>	<!-- 釣銭準備金-->
+		<apex:inputField value="{!oAcountSobj.Field138__c}" rendered="false"/>	<!-- シフト精算／日計精算回数-->
+		<apex:inputField value="{!oAcountSobj.Field139__c}" rendered="false"/>	<!-- 今回精算日時-->
+		<apex:inputField value="{!oAcountSobj.Field140__c}" rendered="false"/>	<!-- 売上計5(外税込み)金額-->
+		<apex:inputField value="{!oAcountSobj.Field141__c}" rendered="false"/>	<!-- 営業日付-->
+		<apex:inputField value="{!oAcountSobj.Field142__c}" rendered="false"/>	<!-- 明細数（商品／監査）-->
+		<apex:inputField value="{!oAcountSobj.Field143__c}" rendered="false"/>	<!-- 明細数（支払）-->
+	</apex:pageBlockSection>
+<!-- 金額情報 -->
+	<apex:pageBlockSection columns="2" title="{!$Label.ps__msg_006_0143}" id="basePaymentInfo">
+		<apex:pageBlockSectionItem >
+		<!-- ご利用金額(税込) -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0144}" />
+
+			<apex:outputText value="{0,number,{!NumberFormat}}" >
+			<apex:param value="{!(oTttendFooter.amoutSalesPrice)}" />
+			</apex:outputText>
+ 		</apex:pageBlockSectionItem>
+		<!-- ご請求金額 -->
+		<apex:pageBlockSectionItem dataStyleClass="amountPriceCss" >
+			<apex:outputLabel value="{!$Label.ps__msg_006_0145}" />
+			<apex:outputText value="{0,number,{!NumberFormat}}">
+			<apex:param value="{!NULLVALUE(oTttendFooter.amoutSalesPrice,0) 
+				- NULLVALUE(oTttendFooter.amoutDiscountPrice,0) 
+				- NULLVALUE(oTttendFooter.amoutSubscriptionPrice,0) 
+				- NULLVALUE(IF(oAcountSobj.CouponReturnFlg__c , oTttendFooter.amoutCouponPrice, oTttendFooter.amoutCouponPayPrice), 0)
+				- NULLVALUE(oTranFooter.amoutAdvancesReceived,0)}" />
+			</apex:outputText>
+ 		</apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+<!-- 割引額 -->
+            <apex:outputLabel value="{!$Label.ps__msg_006_0146}" />
+
+            <apex:outputText value="{0,number,{!NumberFormat}}">
+            <apex:param value="{!oTttendFooter.amoutDiscountPrice}" />
+            </apex:outputText>
+        </apex:pageBlockSectionItem>
+        
+        <apex:pageBlockSectionItem >
+            <!-- クーポン利用の返金 -->
+            <apex:outputLabel value="{!$Label.ps__msg_006_0147}" />
+            <!-- <apex:inputCheckbox /> -->
+            <apex:inputField value="{!oAcountSobj.CouponReturnFlg__c}" />
+        </apex:pageBlockSectionItem>
+		<apex:pageBlockSectionItem >
+<!-- 前受金 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0148}" />
+
+			<apex:outputText value="{0,number,{!NumberFormat}}">
+			<apex:param value="{!NULLVALUE(oTranFooter.amoutAdvancesReceived,0) + NULLVALUE(oTttendFooter.amoutSubscriptionPrice,0)}" />
+			</apex:outputText>
+ 		</apex:pageBlockSectionItem>
+ 		<apex:outputPanel />
+		<apex:pageBlockSectionItem helpText="{!$ObjectType.AccountAcount__c.Fields.AmoutSpecialPrice__c.InlineHelpText}">
+<!-- 特別税 -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0149}" />
+
+			<apex:outputText value="{0,number,{!NumberFormat}}">
+			<apex:param value="{!oTranFooter.amoutSpecialTax}" />
+			</apex:outputText>
+ 		</apex:pageBlockSectionItem>
+		<!-- 
+		<apex:outputPanel >
+				<table>
+				<tr><td>ご請求金額</td><td><span></span></td></tr>
+				<tr><td>ご利用金額(税込)</td><td><span>{!oAcountSobj.Field116__c}</span></td></tr>
+				<tr><td>割引額</td><td><span>{!oTttendFooter.amoutDiscountPrice}</span></td></tr>
+				<tr><td>前受金</td><td><span>{!oTranFooter.amoutAdvancesReceived}</span></td></tr>
+			</table>
+		</apex:outputPanel>
+		<apex:outputPanel >
+			<table>
+				<tr><td>ご請求金額</td><td><span><apex:outputField value="{!oAcountSobj.AmoutSpecialPrice__c}" /></span></td></tr>
+				<tr><td>ご利用金額(税込)</td><td><span>{!oAcountSobj.Field116__c}</span></td></tr>
+				<tr><td>割引額</td><td><span>{!oTttendFooter.amoutDiscountPrice}</span></td></tr>
+				<tr><td>前受金</td><td><span>{!oTranFooter.amoutAdvancesReceived}</span></td></tr>
+			</table>
+
+		</apex:outputPanel>
+		 -->
+	</apex:pageBlockSection>
+	
+	<apex:pageBlockSection columns="2" title="Information" rendered="false">
+		<apex:outputField value="{!oAcountSobj.POSNo__c}"  rendered="false"/>	<!-- POSNo.-->
+		<apex:outputField value="{!oAcountSobj.PlanNo__c}"  rendered="false"/>	<!-- Plan#-->
+    </apex:pageBlockSection>
+	<apex:pageBlockSection columns="1" rendered="false">
+	   <apex:inputField value="{!oAcountSobj.comment__c}" style="width:400px"/>   <!-- コメント-->
+	</apex:pageBlockSection>
+
+</apex:pageblock>
+
+
+<!-- 会計支払 -->
+<apex:pageblock title="{!$Label.ps__msg_006_0150}" id="ttendBlock" rendered="{!oPage.isUpd}">
+    <apex:actionFunction name="addTtendItemFun" action="{!addTtendItem}" status="refStatusBlock" oncomplete="bindEvents()" reRender="ttendPanel"/>
+    <apex:pageBlockButtons location="top">
+    <!-- 会計支払 -->
+        <input class="btn" value="{!$Label.ps__msg_006_0150}" type="button" onclick="javascript:amoutMoney();"
+        style="color: #ffffff; background-color: #00FF00; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 100px" />
+ 		<!-- 行追加 -->
+ 		<input class="btn" value="{!$Label.MSG_006_0151}" type="button" onclick="javascript:addTtendItemFun();" style="width: 100px" />
+
+    </apex:pageBlockButtons>
+
+<apex:outputPanel layout="block" style="overflow:auto; " id="ttendPanel">
+
+    <apex:pageBlockTable value="{!oTTendSobjLst}" var="o" id="ttendTable">
+	<!--
+    <apex:column headerValue="{!$ObjectType.TTend__c.Fields.paymentType__c.label}" >
+    	<apex:inputField value="{!o.sobj.paymentType__c}" required="{!if(o.index == 0, true, false)}"/>
+	</apex:column>
+	 -->
+	  <!-- メディア種別-->
+    <apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field2__c.label}" >
+		<apex:selectList value="{!o.sobj.Field2__c}" multiselect="false" size="1"
+			required="{!(o.index == 0)}">
+<!-- --なし-- -->
+			<apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_006_0152}" />
+			<apex:selectOptions value="{!mediaTypeOptionLst}"/>
+		</apex:selectList>
+	</apex:column>
+    <apex:column headerValue="{!$ObjectType.TTend__c.Fields.CardTypeLst__c.label}" >
+    	<apex:inputField value="{!o.sobj.CardTypeLst__c}" />
+	</apex:column>  <!-- カード種別 -->
+    <apex:column headerValue="{!$ObjectType.TTend__c.Fields.CouponTypeLst__c.label}" >
+    	<apex:inputField value="{!o.sobj.CouponTypeLst__c}" />
+	</apex:column>  <!-- 金券種別-->
+<!--
+<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field2__c.label}" >		<apex:inputField value="{!o.sobj.Field2__c}"/>	</apex:column>	 --><!-- メディア種別-->
+
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field3__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.Field3__c}"/>	</apex:column>	<!-- メディア名称-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field4__c.label}" rendered="false" >	<apex:inputField value="{!o.sobj.Field4__c}"/>	</apex:column>	<!-- 処理　種別１-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field5__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.Field5__c}"/>	</apex:column>	<!-- 処理　種別２-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field6__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.Field6__c}"/>	</apex:column>	<!-- 明細　種別-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field7__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.Field7__c}"/>	</apex:column>	<!-- 券種コード-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field8__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.Field8__c}"/>	</apex:column>	<!-- 券名称-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field9__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.Field9__c}"/>	</apex:column>	<!-- 発行店番-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field10__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field10__c}"/>	</apex:column>	<!-- 値引／割引種別-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field13__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field13__c}"/>	</apex:column>	<!-- 対象ＰＬＵコード-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field14__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field14__c}"/>	</apex:column>	<!-- 値引／割引ステータス-->
+
+<!-- 金券-->
+	<apex:column headerValue="{!$Label.ps__msg_006_0153}{!$ObjectType.TTend__c.Fields.Field16__c.label}" >
+	   <apex:inputField value="{!o.sobj.Field16__c}"/>
+	</apex:column>	<!-- 単価-->
+	<!-- 金券-->
+	<apex:column headerValue="{!$Label.ps__msg_006_0153}{!$ObjectType.TTend__c.Fields.Field17__c.label}" >
+
+	   <apex:inputField value="{!o.sobj.Field17__c}"/>
+	</apex:column>	<!-- 枚数-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field18__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field18__c}"/>	</apex:column>	<!-- 残枚数-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field19__c.label}" >
+	   <apex:inputField value="{!o.sobj.Field19__c}"/>
+	</apex:column>	<!-- 預かり　金額-->
+    <apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field15__c.label}" rendered="false">
+        <apex:inputField value="{!o.sobj.Field15__c}"/>
+    </apex:column>  <!-- 値割引対象額-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field20__c.label}" >
+        <apex:outputField value="{!o.sobj.Field20__c}"/>
+    </apex:column>	<!-- 支払　金額-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field21__c.label}" >
+	   <apex:outputField value="{!o.sobj.Field21__c}"/>
+	</apex:column>	<!-- 釣銭（差額）金額-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field22__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field22__c}"/>	</apex:column>	<!-- 釣銭（差額）種別-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field23__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field23__c}"/>	</apex:column>	<!-- 企業コード-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field24__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field24__c}"/>	</apex:column>	<!-- 有効期限-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field25__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field25__c}"/>	</apex:column>	<!-- メディア毎消費税額-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field26__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field26__c}"/>	</apex:column>	<!-- 対象メニューコード-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field27__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field27__c}"/>	</apex:column>	<!-- 対象ＤＰコード-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.POSNo__c.label}" rendered="false">		<apex:inputField value="{!o.sobj.POSNo__c}"/>	</apex:column>	<!-- POSNo.-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field31__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field31__c}"/>	</apex:column>	<!-- 日計精算時刻-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field32__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field32__c}"/>	</apex:column>	<!-- 日計精算回数-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.Field34__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.Field34__c}"/>	</apex:column>	<!-- 営業日付-->
+	<apex:column headerValue="{!$ObjectType.TTend__c.Fields.noneaccount__c.label}" rendered="false">	<apex:inputField value="{!o.sobj.noneaccount__c}"/>	</apex:column>	<!-- 集計対象外-->
+
+	</apex:pageBlockTable>
+
+</apex:outputPanel>
+</apex:pageblock>
+
+
+
+<!-- 会計明細 -->
+<apex:pageblock title="{!$Label.ps__msg_006_0154}" id="tran1Block" rendered="{!oPage.isUpd}">
+
+    <apex:actionFunction name="amoutMoney" action="{!calPaymentInfo}" status="refStatusBlock"
+        oncomplete="bindEvents()" reRender="ttendBlock,tran1Block, basePaymentInfo, errPanel"/>
+    <apex:actionFunction name="addTranItemFun" action="{!addTran1Item}" status="refStatusBlock" 
+    	oncomplete="bindEvents()" reRender="tran1Block"/>
+    
+    <apex:pageBlockButtons location="top">
+<!-- 行追加 -->
+    	<input class="btn" value="{!$Label.MSG_006_0151}" type="button" onclick="javascript:addTranItemFun();" style="width: 100px" />
+
+    </apex:pageBlockButtons>
+    <apex:pageBlockButtons location="bottom">
+    	<!-- 一時停止
+        <apex:commandButton action="{!addTran1Item}" value="AddItem" rendered="{!isShowAddItemBtnFlg}" style="width:100px"/> -->
+        <!-- 
+        <apex:commandButton value="会計確定" onclick="upsertDataFunction();buttonsEnabled(false);blockUi();" rendered="{!oPage.isUpd}"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 100px"/>
+        <apex:commandButton value="会計作成" onclick="insertDataFunction();buttonsEnabled(false);blockUi();" rendered="{!oPage.isIns}"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 100px"/>
+		<apex:commandButton action="{!gotoCancel}" value="キャンセル" immediate="true" style="width:100px" />
+		-->
+        <apex:outputPanel rendered="{!oPage.isUpd}">
+<!-- 会計確定 -->
+        <input type="button" value="{!$Label.MSG_006_0124}" onclick="copySelectValToHidden();upsertDataFunction();buttonsEnabled(false);blockUi();" class="btn"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); min-width:100px"/>
+        </apex:outputPanel>
+		<apex:outputPanel rendered="{!oPage.isIns}">
+		<!-- 会計確定 -->
+        <input type="button" value="{!$Label.MSG_006_0124}" onclick="copySelectValToHidden();insertDataFunction();buttonsEnabled(false);blockUi();" class="btn"
+            style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); min-width: 100px"/>
+		</apex:outputPanel>
+		<!-- キャンセル -->
+        <input type="button" value="{!$Label.MSG_006_0125}" onclick="gotoCancelFunction();buttonsEnabled(false);blockUi();" class="btn" style="width: 100px"/>
+
+    </apex:pageBlockButtons>
+
+<apex:outputPanel layout="block" style="overflow:auto; " id="tran1Panel" >
+<!-- 並べ順替え -->
+<apex:outputPanel >
+<!-- 並び替え -->
+	<apex:outputLabel value="{!$Label.ps__msg_006_0155}　"/>
+
+	<apex:outputPanel >
+	    <apex:selectList size="1" value="{!sortField}">
+	        <apex:selectOption itemValue="" itemLabel=""/>
+	        <apex:selectOptions value="{!sortFieldOpts}"/>
+	        <apex:actionSupport event="onchange" action="{!sortTranRsList}" rerender="tran1Block" status="refStatusBlock" oncomplete="bindEvents()" />
+	    </apex:selectList>&nbsp;&nbsp;
+	    <apex:selectList size="1" value="{!sortOrder}">
+<!-- 昇順 -->
+	        <apex:selectOption itemValue="asc NULLS FIRST" itemLabel="{!$Label.ps__msg_006_0156}"/> 
+	    <!-- 降順 -->
+	        <apex:selectOption itemValue="desc NULLS LAST" itemLabel="{!$Label.ps__msg_006_0157}"/>
+
+	        <apex:actionSupport event="onchange" action="{!sortTranRsList}" rerender="tran1Block" status="refStatusBlock" oncomplete="bindEvents()" />
+	    </apex:selectList>
+    </apex:outputPanel>
+</apex:outputPanel>
+
+	 <apex:pageBlockTable value="{!oTranSobjLst}" var="t" id="tran1Table">
+		
+		<apex:column >
+<!-- 移動 -->
+			 <div title="{!$Label.MSG_006_0114}"  class="pointIndex" rowIndex = "{!t.index}">
+			 	  <img title="" class="pointImg" alt="" src="{!URLFOR($Resource.AppImages, 'extend/blur.png')}" />  
+                  <apex:outputText value="{!t.rowNo}" id="pointIndex" rendered="false"/>
+		          <apex:inputHidden value="{!t.sobj.RowNo__c}" id="hidRowNo" />
+			</div>
+		</apex:column>	
+			
+	 	<!-- アクション -->
+	 	<apex:column headerValue="{!$Label.ps__msg_006_0159}" footerClass="totalRowCenCell">
+	 	<!-- クリア -->
+			<input type="button" title="{!$Label.MSG_006_0160}" value="{!$Label.MSG_006_0160}" id=":{!t.index}:clearProduct" rowIndex = "{!t.index}" />
+		
+			<apex:facet name="footer"><!-- 合計 -->{!$Label.ps__msg_006_0161}</apex:facet>
+		</apex:column>
+
+		<apex:column headerValue="{!$ObjectType.Tran1__c.Fields.InvoiceNoShowFlg__c.label}" style="text-align: center; ">
+		    <apex:outputPanel >
+		    <apex:inputField value="{!t.sobj.InvoiceNoShowFlg__c}" id="InvoiceNoShowFlg"/>
+		    <apex:inputHidden value="{!t.sobj.NoShowRequestFlg__c}" id="hidNoShowReqFlg" />
+		    </apex:outputPanel>
+		</apex:column>  <!-- 請求書非表示-->
+
+	 	<!-- 商品コード -->
+	<!-- 商品 -->
+        <apex:column headerValue="{!$Label.ps__msg_006_0162}">
+        		<span class="lookupInput">
+				<!--
+                <input type="text" value="{!t.productNm}" id=":tran1Table:{!t.index}:productName"
+                    readonly="readonly" style="background-color:#f1f1f1; url({!URLFOR($Resource.reportFiles, 'img/blank')});" />
+                     -->
+                <apex:inputText value="{!t.productNm}" id="productName" maxlength="80" size="40" html-rowIndex="{!t.index}"/>
+                <!--
+                <apex:inputText value="{!t.sobj.Field7__r.Name}" id="productName" disabled="true" /> -->
+                <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+	              onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+	              onfocus="this.className = 'lookupIconOn';"
+	              onblur="this.className = 'lookupIcon';"
+	              class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+	              name="productPopup"
+	              rowIndex = "{!t.index}" />
+
+	            <!-- 単価用ボタン -->
+<!-- 展開 -->
+                <img title="{!$Label.MSG_006_0123}" src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}"
+                    style="cursor: pointer;display: true; width: 18px; height: 18px; visibility:{!IF(t.isPlanProduct,'visible','hidden')}"
+                    id="showDetailEvent{!t.index}" onclick="showDetailFun(this)" openStatus="false"
+                    rowIndex = "{!t.index}" />
+
+	          	</span>
+			  <apex:inputHidden value="{!t.sobj.PlanDetailSyncInfo__c}" id="hidSyncInfo" />
+              <apex:inputHidden value="{!t.sobj.Field7__c}" id="hidProductId" />
+              <apex:inputHidden value="{!t.orgProductNm}" id="hidProductNm" />
+              <!-- 関連情報を一時保持するため、別の変数を定義する -->
+              <apex:inputHidden value="{!t.tranId}" id="hidTranId" />
+              <apex:inputHidden value="{!t.accRefId}" id="hidAccId" />
+        </apex:column>
+
+
+
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field2__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field2__c}"/>  </apex:column>  <!-- 商品種別-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field3__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field3__c}"/>  </apex:column>  <!-- 処理種別１-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field4__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field4__c}"/>  </apex:column>  <!-- 処理種別２-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field5__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field5__c}"/>  </apex:column>  <!-- 商品名称（または券名称）-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field6__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field6__c}"/>  </apex:column>  <!-- テーブルＮｏ．-->
+        <!--
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field7__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field7__c}"/>  </apex:column>   --><!-- 商品コード-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field8__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field8__c}"/>  </apex:column>  <!-- 伝票Ｎｏ．-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field9__c.label}" rendered="false">     <apex:inputField value="{!t.sobj.Field9__c}"/>  </apex:column>  <!-- オーダー時刻-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field10__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field10__c}"/> </apex:column>  <!-- 親メニューコード-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field11__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field11__c}"/> </apex:column>  <!-- 親メニュー名称-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field12__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field12__c}"/> </apex:column>  <!-- 自社コード-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field13__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field13__c}"/> </apex:column>  <!-- 売上集計リンクコード-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field14__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field14__c}"/> </apex:column>  <!-- テイクアウトフラグ-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field15__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field15__c}"/> </apex:column>  <!-- 奉仕料２（深夜料）フラグ-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field16__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field16__c}"/> </apex:column>  <!-- ＳＴ１-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field17__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field17__c}"/> </apex:column>  <!-- ＳＴ２-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field18__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field18__c}"/> </apex:column>  <!-- ＳＴ３-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field19__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field19__c}"/> </apex:column>  <!-- ＳＴ４-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field20__c.label}" >
+            <apex:inputField value="{!t.sobj.Field20__c}" id="price" />
+        </apex:column>  <!-- 単価-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field21__c.label}" >
+
+            <apex:inputField value="{!t.sobj.Field21__c}" id="orderNums"/>
+
+
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,{!NumberFormat}}">
+            <apex:param value="{!oTranFooter.amoutAdvancesReceived}" />
+            </apex:outputText></apex:facet>
+
+        </apex:column>  <!-- 数量-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field22__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field22__c}"/> </apex:column>  <!-- 残数量-->
+<!-- (税抜)-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field23__c.label}{!$Label.ps__msg_006_0163}" style="text-align: right; background-color: #FFEBCD;"
+
+        	footerClass="totalRowNumCell">
+			<apex:outputText value="{0,number,{!NumberFormat}}" id="amoutPriceExcTax" rendered="{!t.isValidata}">
+			<apex:param value="{!t.amoutExcTax}" />
+			</apex:outputText>
+
+            <apex:facet name="footer" >
+            <apex:outputText value="{0,number,{!NumberFormat}}">
+            <apex:param value="{!oTranFooter.amoutPriceExcTax}" />
+            </apex:outputText></apex:facet>
+        </apex:column>  <!-- 合計金額(税抜)-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field25__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field25__c}"/> </apex:column> -->  <!-- リンクＤＰコード-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field26__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field26__c}"/> </apex:column> -->  <!-- リンクＧＰコード-->
+		<!-- 消費税　種別-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.TaxRate__c.label}" style="text-align: right; ">
+			<!-- <apex:outputField value="{!t.sobj.TaxRate__c}" id="taxRateType"/>-->
+			<apex:outputText value="{0,number, {!TaxNumberFormat}}" id="taxRateType">
+            <apex:param value="{!t.sobj.TaxRate__c/100}" />
+            </apex:outputText>
+			<apex:inputHidden value="{!t.sobj.TaxRate__c}" id="hidTaxRateType" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.ServiceRate__c.label}" style="text-align: right; ">
+			<apex:outputField value="{!t.sobj.ServiceRate__c}" id="serviceRate"/>
+			<apex:inputHidden value="{!t.sobj.ServiceRate__c}" id="hidServiceRate" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.SpecialTax__c.label}" style="text-align: right; "
+        	footerClass="totalRowNumCell">
+			<!--
+			<apex:outputField value="{!t.sobj.SpecialTax__c}" id="specialTax"/>
+			<apex:inputHidden value="{!t.sobj.SpecialTax__c}" id="hidSpecialTax" />
+			 -->
+			 <!-- 
+			<apex:inputField value="{!t.sobj.SpecialTax__c}" id="specialTax" style="text-align:right;width:50px"/>
+			 -->
+			<apex:inputText value="{!t.strSpecialTax}" id="specialTax" style="text-align:right;width:50px"/>
+			<apex:inputHidden value="{!t.sobj.ActionType__c}" id="hidActionType" />
+
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,{!NumberFormat}}" >
+            <apex:param value="{!oTranFooter.amoutSpecialTax}" />
+            </apex:outputText></apex:facet>
+        </apex:column>
+<!-- 合計金額(税込)-->
+        <apex:column headerValue="{!$Label.ps__msg_006_0164}" style="text-align: right; background-color: #FFEBCD;"
+
+        	footerClass="totalRowNumCell">
+			<apex:outputText value="{0,number,{!NumberFormat}}" id="amoutPriceIncTax" rendered="{!t.isValidata}">
+			<apex:param value="{!t.amoutIncTax}" />
+			</apex:outputText>
+
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,{!NumberFormat}}" id="totalPriceIncTax">
+            <apex:param value="{!oTranFooter.amoutPriceIncTax}" />
+            </apex:outputText></apex:facet>
+
+
+        </apex:column>  <!-- 合計金額(税込)-->
+
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field27__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field27__c}"/> </apex:column>  <!-- 消費税　種別-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field28__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field28__c}"/> </apex:column>  <!-- 正負フラグ-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field29__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field29__c}"/> </apex:column>  <!-- 発行店番-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field30__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field30__c}"/> </apex:column>  <!-- 階層／指示ステータス位置-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field31__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field31__c}"/> </apex:column>  <!-- 指示ステータスＮｏ．-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field32__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field32__c}"/> </apex:column>  <!-- コメントＮｏ．-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field33__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field33__c}"/> </apex:column>  <!-- 値割引点数-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field34__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field34__c}" id="discountNum"/> </apex:column>  <!-- 値割引金額-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field35__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field35__c}"/> </apex:column>  <!-- プロモ出数-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field36__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field36__c}"/> </apex:column>  <!-- キャンセルリンクシリアルＮｏ．-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field37__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field37__c}"/> </apex:column>  <!-- リンク値割引明細支払番号-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field38__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field38__c}"/> </apex:column>  <!-- 奉仕料１フラグ-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.POSNo__c.label}" rendered="false">      <apex:inputField value="{!t.sobj.POSNo__c}"/>   </apex:column>  <!-- POSNo.-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field42__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field42__c}"/> </apex:column>  <!-- 日計精算時刻-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field43__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field43__c}"/> </apex:column>  <!-- 日計精算回数-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field45__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.Field45__c}"/> </apex:column>  <!-- 営業日付-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.TableNo__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.TableNo__c}"/> </apex:column>  <!-- TableNo-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.noneaccount__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.noneaccount__c}"/> </apex:column>  <!-- 集計対象外-->
+
+
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.TankawithoutTax__c.label}" rendered="false">    <apex:inputField value="{!t.sobj.TankawithoutTax__c}"/> </apex:column>  <!-- $$単価(税抜)-->
+        <apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Subprice__c.label}" rendered="false">   <apex:inputField value="{!t.sobj.Subprice__c}"/>    </apex:column>  <!-- f単価(税込)-->
+
+
+	</apex:pageBlockTable>
+
+</apex:outputPanel>
+
+</apex:pageblock>
+
+
+
+</apex:form>
+
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+
+</apex:page>

@@ -1,0 +1,171 @@
+<apex:page title="{!sObjectTitle}" controller="ExpoLookupCtrl" action="{!init}" sidebar="false" showHeader="false" tabStyle="Account">
+
+
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.ExpoNew, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.ExpoNew, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.ExpoNew, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery-ui-1.10.2.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.ExpoNew, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/CommJs.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/CommLog.js')}"/>	
+
+<script type="text/javascript">
+$ = jQuery.noConflict();
+$(document).ready(function($) {
+	bindEvent();
+});
+</script>
+<style>
+.queryFormCls .bPageBlock{
+	background: #fff url(/img/alohaSkin/lookup_bg.png) repeat-x;
+	padding: 0;
+}
+</style>
+<apex:form styleClass="queryFormCls" onkeydown="on_return()">
+	<apex:pageblock >
+		<div class="bPageTitle" style="padding: 0;">
+			<div class="ptBody">
+				<div class="content">
+					<img src="/img/s.gif" alt="" class="pageTitleIcon" title="" style="background-position: 0 -1202px;"/>
+					<h1 style="font-size: 1.8em;color: #333435;margin: 8px 0 4px;">検索</h1>
+				</div>
+			</div>
+		</div>
+		<apex:pageMessages id="pageMessagesId" />
+		<div class="pBody">
+			<apex:inputText value="{!queryName}" id="queryNameTxtId" style="width:160px"/>
+			<!-- 検索 -->
+			<apex:commandButton action="{!queryInfo}" status="refStatusBlock" rerender="resultForm,pageMessagesId" value="go!" id="queryInfoBtnId" style="width:40px" oncomplete="bindEvent();"/>
+			<div>
+				<label>検索</label>
+				<apex:inputHidden value="{!searchMode}" id="searchModeHid" />
+				<input type="radio" id="searchAllId" name="searchmd" onclick="searchTerm('NAME')" checked="checked" />
+				<label for="searchAllId">名前</label>
+				<input type="radio" id="searchNameId" name="searchmd" onclick="searchTerm('ALL')"/>
+				<label for="searchNameId">すべての項目</label>
+			</div>
+		</div>
+		<div class="clearResults" style="padding-top: 20px;">
+			<script>
+				function clearSearch() {
+					$("[id$=':queryNameTxtId']").val('');
+					$("[id$=':queryInfoBtnId']").click();
+				}
+			</script>
+			&lt;&nbsp;
+			<a href="javascript:clearSearch()">検索結果をクリア</a>
+		</div>
+	</apex:pageblock>
+</apex:form>
+<apex:form id="resultForm" >
+<apex:pageblock title="{!sObjectTitle}">
+	<apex:pageBlockButtons >
+		<apex:outputpanel style="float: right;" id="changePanel">
+			<!-- of -->	<!-- items -->
+			<apex:outputLabel value="{!pageCtrl.StartRsNo} - {!pageCtrl.EndRsNo} {!$Label.ps__msg_009_0029} {!pageCtrl.TotalRs} {!$Label.ps__msg_009_0030}"/>
+			<apex:commandLink action="{!firstPage}" status="refStatusBlock" 
+				reRender="resultForm" styleclass="k-button" style="margin-left: 10px" oncomplete="bindEvent();" >
+					<span class="k-icon k-i-seek-w"></span>
+			</apex:commandLink>
+			<apex:commandLink action="{!previousPage}" status="refStatusBlock" 
+				reRender="resultForm" styleclass="k-button" style="margin-left: 2px" oncomplete="bindEvent();" >
+					<span class="k-icon k-i-arrow-w"></span>
+			</apex:commandLink> 
+			<apex:commandLink action="{!nextPage}" status="refStatusBlock" 
+				reRender="resultForm" styleclass="k-button" style="margin-left: 2px" oncomplete="bindEvent();" >
+					<span class="k-icon k-i-arrow-e"></span>
+			</apex:commandLink> 
+			<apex:commandLink action="{!lastPage}" status="refStatusBlock" 
+				reRender="resultForm" styleclass="k-button" style="margin-left: 2px" oncomplete="bindEvent();" >
+					<span class="k-icon k-i-seek-e"></span>
+			</apex:commandLink> 
+		</apex:outputpanel>
+	</apex:pageBlockButtons>
+	<table class="list" id="rstable" border="0" cellpadding="0" cellspacing="0" width="100%">
+		<thead class="">
+			<tr class="headerRow">
+				<apex:repeat value="{!fieldInfoLst}" var="item">
+					<th class="headerRow">{!item.fieldLab}</th>
+				</apex:repeat>
+			</tr>
+		</thead>
+		<tbody>
+			<apex:repeat value="{!sObjectInfoLst}" var="sObjectItem">
+				<tr class="dataRow">
+					<td class="dataCell">
+						<apex:outputLink value="#" id="selectLink">{!sObjectItem.sNm}</apex:outputLink>
+						<input type="hidden" value="{!sObjectItem.sId}" id="sId"/>
+						<input type="hidden" value="{!sObjectItem.sNm}" id="sNm"/>
+					</td>
+					<apex:repeat value="{!sObjectItem.fieldInfoLst}" var="item" first="1" >
+						<td class="dataCell">
+							<apex:outputText value="{!item.fieldVal}"/>
+						</td>
+					</apex:repeat>
+				</tr>
+			</apex:repeat>
+		</tbody>
+	</table>
+</apex:pageblock>
+<!-- ステータス設定 -->
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+</apex:form>
+<script>
+function bindEvent() {
+	$("div.clearResults")[$("[id$=':queryNameTxtId']").val() != "" ? 'show' : 'hide']();
+	if($("[id$=':searchModeHid']").val() == 'ALL'){
+		$("[id$=':searchAllId']").prop("checked",true);
+	} else{
+		$("[id$=':searchNameId']").prop("checked",true);
+	}
+	// Insert And UPDの場合、最新情報から親画面へ設定を行う
+	$("a[id$=':selectLink']").click(function() {
+		var rooter = $(this).parent();		
+		var sId = rooter.find("[id='sId']").val();
+		var sNm = rooter.find("[id='sNm']").val();
+		selectItem($, sId, sNm);
+	});
+}
+function selectItem($, idVal, nameVal) {
+	if(opener){
+		if(typeof(window.opener.document)=='unknown' || typeof(window.opener.document) == 'undefined' ){ 
+			// Opener Window Is Closed
+			top.window.close();
+		}else{
+			objs = new Array(idVal, nameVal);
+			commUtils.popupSetter(objs);
+			window.opener.focus();
+			top.window.close();
+		} 
+	}else{ 
+		// Opener Window Is Closed
+		top.window.close();
+	}
+}
+function searchTerm(mode){
+	$("[id$=':searchModeHid']").val(mode);
+}
+// 检索框输入值回车响应检索按钮事件
+function on_return(){
+	if (event.keyCode == 13){
+		$("[id$='queryInfoBtnId']").focus();
+		$("[id$='queryInfoBtnId']").trigger("click");
+	}
+}
+// Block Action Window
+function blockUi(){
+	$("form[id$=':resultForm']").block({
+	//Processing...
+		message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0021}</h1>'
+	}); 
+	return true;
+}
+// Lock解除
+function unblockUi(){
+	$("form[id$=':resultForm']").unblock(); 
+}
+</script> 
+</apex:page>

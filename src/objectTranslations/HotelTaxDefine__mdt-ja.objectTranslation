@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>宿泊税</value>
+    </caseValues>
+    <fields>
+        <help><!-- 会計書（33、34のみ）、明細書内に宿泊税と宿泊代が別れて記載する・しないフラグ
+注：パラメータ「単価に宿泊税含む」はONのみ有効
+
+TRUE:明細書内に宿泊税と宿泊代が別れて記載する
+FALSE：明細書内に宿泊税と宿泊代が明細に含める表示（個別行目に表示しない） --></help>
+        <label><!-- RFU --></label>
+        <name>AccountHotelTaxIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 商品の単価に宿泊税を含めている、含めてない定義フラグ
+TRUE：単価に宿泊税は含める
+FALSE:単価に宿泊税は含めない
+注：TRUEの場合、ランク金額は設定の際に、宿泊税金額＋ランク金額で設定が必要
+例：10000-15000円、宿泊税は100の場合、ランク値最小値は10100に設定、ランク値最大値は150100に設定が必要 --></help>
+        <label><!-- 単価に宿泊税含む --></label>
+        <name>IsIncHotelTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク1最大値 --></label>
+        <name>MaxPriceR1__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク2最大値 --></label>
+        <name>MaxPriceR2__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク3最大値 --></label>
+        <name>MaxPriceR3__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク4最大値 --></label>
+        <name>MaxPriceR4__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク5最大値 --></label>
+        <name>MaxPriceR5__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク1最小値 --></label>
+        <name>MinPriceR1__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク2最小値 --></label>
+        <name>MinPriceR2__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク3最小値 --></label>
+        <name>MinPriceR3__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク4最小値 --></label>
+        <name>MinPriceR4__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク5最小値 --></label>
+        <name>MinPriceR5__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当ルールを適応する店舗コードを複数設定可能
+例：店舗コード01,02,03は該当ルールを適応の場合、該当項目は「01,02,03」に設定する --></help>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク1宿泊税 --></label>
+        <name>TaxPriceR1__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク2宿泊税 --></label>
+        <name>TaxPriceR2__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク3宿泊税 --></label>
+        <name>TaxPriceR3__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク4宿泊税 --></label>
+        <name>TaxPriceR4__c</name>
+    </fields>
+    <fields>
+        <label><!-- ランク5宿泊税 --></label>
+        <name>TaxPriceR5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 無効 --></label>
+        <name>isInvalidFlg__c</name>
+    </fields>
+</CustomObjectTranslation>

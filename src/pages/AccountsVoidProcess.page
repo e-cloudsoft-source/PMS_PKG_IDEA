@@ -1,0 +1,17 @@
+<apex:page standardController="AccountAcount__c" extensions="BillInput_Ctrl" 
+	sidebar="false" tabstyle="AccountAcount__c">
+<apex:form id="billInputForm" >
+<!-- VOID処理 -->
+<apex:pageBlock title="{!$Label.ps__msg_006_0306}" >
+	<apex:pageMessages />
+	<!-- 会計情報: -->         <!-- をVOID処理を行いますので、ご注意ください. -->
+	<apex:pageMessage summary="{!$Label.ps__msg_006_0307}{!oAcountSobj.Name}{!$Label.ps__msg_006_0308}" severity="Warning" strength="1" />
+	<apex:pageBlockButtons location="bottom">
+	<!-- キャンセル -->
+	<apex:commandButton action="{!gotoAccountsDetailPg}" value="{!$Label.ps__msg_006_0309}" immediate="true" style="width:100px" />
+	<!-- 確定 -->
+	<apex:commandButton action="{!voidProcess}" value="{!$Label.ps__msg_006_0310}" immediate="true" style="width:100px" />
+	</apex:pageBlockButtons>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

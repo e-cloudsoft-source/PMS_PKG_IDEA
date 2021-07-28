@@ -1,0 +1,883 @@
+<apex:page sidebar="false" showHeader="true" Controller="SyncStatusManagerCtrl" action="{!init}">
+
+<c:CommHeaderComp loadJsLib="true"/>
+<!-- Load jQuery Plugin -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/PrintJs.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/process.js')}"/>
+<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END -->
+<style>
+.tableCss{
+	width:100%;
+	text-align:left;
+}
+.theadCss{
+	text-align:left;
+	background: #B8D7F1;
+}
+.dataTdwidth{
+	width: 110px;
+}
+.lineOverflow{         
+	text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;  
+    text-align: left;
+}
+.gifNoneCss{
+    display: none;
+}
+
+#tabstrip{
+    /*font-weight: lighter;*/
+    font-size: 1em;
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+}
+
+span.dateFormat{
+   display:none;
+}
+.isNoneCss{
+	display: none;
+}
+.inputbtnCss{
+	background: darkgray !important;
+}
+/* 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN */
+.re-status{
+	display: none;
+}
+/* 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END */
+</style>
+<!-- JS INIT LOADING -->
+<script>
+var $j = jQuery.noConflict();
+<apex:repeat value="{!batChkAndRestore.batchStatusLst}" var="batch" >
+	hashMap.Put("{!JSENCODE(batch.jobTypeStr)}_batchDef","{!JSENCODE(batch.jsonStr)}");
+</apex:repeat>
+</script>
+<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN -->
+<apex:actionStatus onstart="javascript:JINYACONNECT.blockUi();" onstop="JINYACONNECT.unblockUi();" id="refStatusBlock"/>
+<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END -->
+<!-- TAB化処理 -->
+<div id="tabstrip">
+	<ul>
+	    <li id="tab_watchAndRestore" class="k-state-active">監視と復旧</li>
+	    <li id="tab_changeRestore" style="display:{!if(branchShopLst.size > 0 ,'',if(PrintStatusLst.size>0,'','none'))}">釣銭機復旧</li>
+	    <li id="tab_leadXmlUpload" style="display:none;">予約再取込</li>
+	    <!-- <li id="li3">在庫同期</li> -->
+	</ul>
+
+	<!-- 監視と復旧 -->
+	<div class="workspace" id="div_watchAndRestore">
+		<apex:Form id="formIdOne" >
+			
+			<!-- バッチ再起動機能の復旧処理 -->
+			<apex:pageBlock Title="バッチ監視と復旧" id="batchStatusPg">
+			<table style="width:100%; min-width:510px;" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="width:50%; min-width:510px;vertical-align: top;">
+						<table class="list" style="width:50%; min-width:510px; text-align:left;" border="0" cellpadding="0" cellspacing="0">
+							<thead>
+								<tr class="headRow theadCss">
+									<td class="dataTdwidth">バッチ名</td>
+									<td>状態</td>
+									<td>アクション</td>
+								</tr>
+							</thead>
+							<tbody>
+								<apex:repeat value="{!batChkAndRestore.batchStatusLst}" var="batch" >
+								<tr style="height: 33px">
+									<td>
+										<apex:outputText value="{!batch.label}"/>
+									</td>
+									<td class="dataTdwidth" id="{!batch.jobTypeStr}_status">
+										<apex:outputText value="{!batch.statusMsg}" id="batchInfoPanel"/>
+									</td>
+									<td>
+										<apex:outputPanel rendered="{!batch.statusOn}">
+											<input type="button" value="停止" style="width: 100px" class="btn" id="{!batch.jobTypeStr}_stop" data-jobtype="{!batch.jobTypeStr}"  onclick="_jsRestartBatchFun('{!JSENCODE(batch.jobTypeStr)}',false)"/>
+											<input type="button" value="復旧" style="width: 100px" class="btn" id="{!batch.jobTypeStr}_reset" onclick="_jsRestartBatchFun('{!JSENCODE(batch.jobTypeStr)}',true)"/>	
+											<img id="{!batch.jobTypeStr}_loading-image" class="icon-status" src="{!URLFOR('/img/loading24.gif')}" alt="Loading..." style="width: 16px;height: 16px;display: none;vertical-align:middle"/>
+										</apex:outputPanel>
+									</td>
+								</tr>
+								</apex:repeat>
+							</tbody>
+						</table>
+					</td>
+					<td style="width:50%; min-width:510px;vertical-align: top;">
+						<table style="width:100%;text-align: center;" class="list isNoneCss" id="messageQueueTable">
+							<thead>
+								<tr class="headRow" style="background: #B8D7F1;">
+									<td>バッチ監視と復旧処理ログ</td>
+								</tr>
+							</thead>
+							<tbody style="max-height: 300px;overflow-y: auto;display: block;">
+								
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+			</apex:pageBlock>
+		</apex:Form>
+	</div>
+	<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN -->
+	<div style=" overflow: scroll;">
+	<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END -->	
+		<apex:form >
+			<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN -->
+			<input type="hidden" id="hidLocalIp" value=""/>
+			<apex:pageBlock Title="IP:" id="changeRestart">
+				<!-- 支店機能 -->
+				<apex:selectList size="1" style="margin:3px;" value="{!branchShopNm}" rendered="{!branchShopLst.size > 1}" id="branchShopCd">
+			        <apex:selectOptions value="{!branchShopLst}" />
+			        <apex:actionSupport event="onchange" action="{!refreshBranchShopInfo}" status="refStatusBlock" rerender="changeRestart" oncomplete="linkAllMachine()"/>
+			    </apex:selectList>
+			    <apex:outputPanel rendered="{!PrintStatusLst.size>0}" id="printPanel">
+					<input type="hidden" id="hidBachMsg" value="{!ipMapJson}"/>
+					<table style="width:100%; min-width:510px;" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td style="width:50%; min-width:510px;vertical-align: top;">
+								<table class="list" style=" min-width:510px; text-align:left;" border="0" cellpadding="0" cellspacing="0" >
+									<thead>
+										<tr class="headRow theadCss">
+											<td class="dataTdwidth">設備名</td>
+											<td class="dataTdwidth">IP</td>
+											<td style="width:50px">状態</td>
+											<td>アクション</td>
+										</tr>
+									</thead>
+									<tbody>
+										<apex:repeat value="{!PrintStatusLst}" var="print" >
+										<tr style="height: 33px" pos="{!print.printConflgName}">
+											<!-- バッチ名 -->
+											<td>
+												<apex:outputText value="{!print.printConflgName}"/>
+											</td>
+											<!-- IP -->
+											<td>
+												<apex:outputText value="{!print.printConflgIp}"/>
+												<input type="hidden" name="hidLcalIp" value="{!print.printConflgIp}"/>
+											</td>
+											<!-- 状態 -->
+											<td class="dataTdwidth" id="_status">
+												<apex:outputText value="未接続" html-name="dataStatus"/>
+											</td>
+											<!-- アクション -->
+											<td style="white-space: nowrap;">
+												<input type="button" value="メカリセット" style="width: 100px" class="btn" name="stopBtn" onclick="_restPrintFun('{!print.printConflgName}',this)"/>
+												<input type="button" value="計数停止" style="width: 100px" class="btn commandBtn" name="checkBtn" onclick="_restartPrintFun('{!print.printConflgName}',this)"/>
+												<!-- 
+												<input type="button" value="復旧" style="width: 100px" class="btn" name="restartBtn" onclick=""/>	
+												<img id="{!print.printConflgName}_re-image" title="再接続" class="re-status" src="../img/func_icons/util/ileUndo16.gif" alt="Loading..." onclick="reCheckMsg(this)" />
+												 -->
+												<img id="{!print.printConflgName}_loading-image" class="icon-status" src="{!URLFOR('/img/loading24.gif')}" alt="Loading..." style="width: 16px;height: 16px;visibility:hidden;vertical-align:middle"/>
+											</td>
+										</tr>
+										</apex:repeat>
+									</tbody>
+								</table>
+							</td>
+							<!-- 为了与ッチ監視と復旧显示一致，添加的TD -->
+							<td style="width:50%; min-width:410px;vertical-align: top;">
+								<table style="width:100%;text-align: left;" class="list isNoneCss" id="printQueueTable">
+									<thead>
+										<tr class="headRow" style="background: #B8D7F1;">
+											<td>釣銭機復旧処理ログ</td>
+										</tr>
+									</thead>
+									<tbody style="max-height: 300px;overflow-y: auto;display: block;">
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</apex:outputPanel>
+			</apex:pageBlock>
+			<!-- 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END -->
+		</apex:form>
+	</div>
+	
+	<!-- 予約取り込み -->	
+	<div class="workspace" id="div_leadXmlUpload">
+		<iframe id="leadXmlUploadBlock" height="100%" width="100%" style="border:0;" frameborder="no" scrolling="no" name="theIframe" src="{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'SyncStatusManagerUpload')}" ></iframe>
+	</div>
+	
+	<!-- 在庫同期 -->	
+	<!-- 
+	<div class="workspace" style="visibility: hidden;">
+
+	</div>
+	 -->
+</div>
+<script>
+// バッチ処理開始の前
+function _jsBatchProcessBefore(jobType, _uuid) {
+	_jsBatchProcessBtnCtrl(jobType, true);
+	
+}
+// バッチ処理開始の後
+function _jsBatchProcessFinish(jobType, _uuid) {
+	//
+	console.debug('FINISH='+_uuid);
+	$j("#"+_uuid).css("background-color","#f0fff0");
+	_jsBatchProcessBtnCtrl(jobType, false);
+}
+// バッチ定義情報(JSON)を取得する
+function _jsBatchProcessGetBatchDefJson(jobType) {
+	return hashMap.Get(jobType+"_batchDef");
+}
+// バッチの各制御ボタンを制御する
+function _jsBatchProcessBtnCtrl(jobType, disableFlg) {
+	var $stopBtn = $j("#"+jobType+"_stop");
+	var $restBtn = $j("#"+jobType+"_reset");
+	var $imgStatus = $j("#"+jobType+"_loading-image");
+	if (disableFlg) {
+		$imgStatus.show();
+		// button 只读
+		$stopBtn.attr("disabled", true);
+		$restBtn.attr("disabled", true);
+		// button 背景变灰
+		$stopBtn.addClass("inputbtnCss");
+		$restBtn.addClass("inputbtnCss");
+	} else {
+		$imgStatus.hide();
+		// button 只读
+		$stopBtn.removeAttr("disabled");
+		$restBtn.removeAttr("disabled");
+		// button 背景变灰
+		$stopBtn.removeClass("inputbtnCss");
+		$restBtn.removeClass("inputbtnCss");
+	}
+}
+// Log output Panel
+function _jsBatchProcessLog(jobType,_uuid, _result) {
+	
+	$logTable = $j("#messageQueueTable");
+	$logTable.removeClass("isNoneCss");
+	var callDiv = '<tr id="'+_uuid+'">';
+		callDiv += '<td style="width:10%;" class="lineOverflow">' + _result[2] + '</td>';
+		callDiv += '</tr>';
+	$logTable.find('tbody').prepend(callDiv);
+	//jinyaConsole.log(_result[2]);
+	// バッチの最新状態を表示する
+	_jsSetUiBatchStatus(jobType,_result[3]);
+}
+// バッチの最新状態を表示する
+function _jsSetUiBatchStatus(jobType,status) {
+	$j("#"+jobType+"_status").text(status);
+}
+
+// 復旧処理を呼出する
+function _jsRestartBatchFun(jobType, startFlg) {
+	// 処理
+	var _uuid = kendo.guid();
+	_jsBatchProcessBefore(jobType, _uuid);
+	var batchJson = _jsBatchProcessGetBatchDefJson(jobType);
+	Visualforce.remoting.Manager.invokeAction(
+	'{!$RemoteAction.SyncStatusManagerCtrl.stopBatchProcess}',jobType,_uuid,batchJson,function(result, event){
+        // 異常
+     	if(event.type == 'exception') {
+            alert(event.message);
+            _jsBatchProcessBtnCtrl(jobType, false);
+     	} else {
+     		if (result[0] != "") {
+     			alert(result[0]);
+     		} else {
+     			_jsBatchProcessLog(jobType, _uuid,result);
+     			// 最新状態をチェックする
+     			_jsRefreshBatchStatus(jobType, _uuid, startFlg);
+     		}
+     	}
+	});
+}
+// バッチ開始処理関数
+function _jsStartBatchFun(jobType, _uuid) {
+	var batchJson = _jsBatchProcessGetBatchDefJson(jobType);
+	Visualforce.remoting.Manager.invokeAction(
+	'{!$RemoteAction.SyncStatusManagerCtrl.restBatchProcess}',jobType,_uuid,batchJson,function(result, event){
+        // 異常
+     	if(event.type == 'exception') {
+            alert(event.message);
+             _jsBatchProcessBtnCtrl(jobType, false);
+     	} else {
+	     	if (result[0] != "") {
+     			alert(result[0]);
+    		}
+    		_jsBatchProcessLog(jobType, _uuid,result);
+     		// 完了処理
+    		_jsBatchProcessFinish(jobType, _uuid);
+     	}
+	});
+}
+// 指定バッチの状態をチェックする
+function _jsRefreshBatchStatus(jobType, _uuid, startFlg, onlyWatch) {
+	// BatchDefのJSON情報を取得する
+	var batchJson = _jsBatchProcessGetBatchDefJson(jobType);
+	if (onlyWatch == undefined) onlyWatch = false;
+	// 最新バッチ状態を確認する
+	Visualforce.remoting.Manager.invokeAction(
+	'{!$RemoteAction.SyncStatusManagerCtrl.refreshBatchStatus}',jobType,_uuid,batchJson,onlyWatch,function(result, event){
+        // 異常
+     	if(event.type == 'exception') {
+            alert(event.message);
+             _jsBatchProcessBtnCtrl(jobType, false);
+     	} else {
+     		var isRunning = (result[0] == '1');
+     		var isStop = (result[0] == '0');
+     		var isWatch = (result[0] == '2');
+     		if (isWatch) {
+     			// バッチの最新状態を表示する
+				_jsSetUiBatchStatus(jobType,result[3]);
+     			return;
+     		}
+     		// バッチは停止の場合
+     		if (!isRunning) {
+     			// 停止済みの場合、スケジールは再度起動が必要場合
+     			if (startFlg) _jsStartBatchFun(jobType,_uuid,true);
+     			else {
+     				_jsBatchProcessLog(jobType,_uuid,result);
+     				_jsBatchProcessFinish(jobType, _uuid);
+     			}
+     		}
+     		// バッチ処理中、実際の時間に再度処理を行う
+     		else {
+     			_jsBatchProcessLog(jobType,_uuid,result);
+     			// 10秒後、再度該当関数を呼びし、自動最新情報を取得する
+     			var timeKey = '_timerkey_'+jobType;
+     			var timerId = hashMap.Get(timeKey);
+     			if (timerId != undefined && timerId != null) {
+     				// 該当TIMERはクリアして、再度定義を行う
+     				clearTimeout(timerId);
+     			}
+     			// 5秒
+				var timerInterval = 5*1000;
+				timerId = setTimeout(function() {
+					_jsRefreshBatchStatus(jobType, _uuid, startFlg);
+				}, timerInterval);
+				hashMap.Put(timeKey, timerId);
+     		}
+     	}
+	});
+}
+function _jsRefreshAllBatchStatus() {
+	var jobs = new Array();
+	$j("input[id$='_stop']").each(function(i,val) {
+		jobs.push($j(val).data("jobtype"));
+	});
+	jobs.forEach(function(val,index,ar){
+		var _uuid = kendo.guid();
+		_jsRefreshBatchStatus(val, _uuid, false, true);
+	});
+}
+
+// 元のJOB定義情報はJSONに格納する
+$j(document).ready(function() {
+    var $tabStripElement = $j("#tabstrip").kendoTabStrip({
+        animation:  {
+            open: {
+                effects: "fadeIn"
+            }
+        },
+		select:function(e,options){
+        	var tabId = e.item["id"];
+        	// 予約アップロード
+        	if(tabId == "tab_leadXmlUpload"){
+				JINYACONNECT.blockUi();
+        	} else if (tabId == "tab_watchAndRestore") {
+        		JINYACONNECT.blockUi();
+        		// 最新バッチ状態をチェックする
+        		_jsRefreshAllBatchStatus();
+        	// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN
+        	} else {
+        		JINYACONNECT.blockUi();
+        	}
+        	// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END
+        },
+        contentLoad:function(){
+        	JINYACONNECT.unblockUi();
+        },
+        show:function(){
+        	JINYACONNECT.unblockUi();
+        },
+        activate:function(e){
+        	//var iframeHeightvalue = $j("#tab_leadXmlUpload").contents().height();
+        	//$j("#tab_leadXmlUpload").height(iframeHeightvalue);
+        	var tabId = e.item["id"];
+        	if (tabId == "tab_leadXmlUpload") {
+				var fam = document.getElementById("leadXmlUploadBlock");
+				if(!$j(fam).hasClass("resizeHeight")){
+					var wrapDiv = $j("div#grid",fam.contentDocument);
+					var difHeight = wrapDiv.position().top - $j("div.k-state-active").position().top;
+					var tempHeight = $j("div.k-state-active").innerHeight() - difHeight - 70;
+					wrapDiv.height(tempHeight);
+					$j(".k-grid-content",wrapDiv).height(tempHeight - 50);
+					$j(fam).addClass("resizeHeight");
+				}
+			// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN
+			} else if (tabId == "tab_changeRestore") {
+				// 测试全部链接
+				linkAllMachine();
+			}
+			// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END
+        	JINYACONNECT.unblockUi();
+        }
+    });
+
+	var wH = $j(window).height();
+	var expandContentDivs = function(divs) {
+        var visibleDiv = divs.filter(":visible");
+        divs.height(wH - parseFloat(visibleDiv.offset().top) - 18
+                    - parseFloat(visibleDiv.css("padding-top"))
+                    - parseFloat(visibleDiv.css("padding-bottom"))
+                    - parseFloat(visibleDiv.css("border-top-width"))
+                    - parseFloat(visibleDiv.css("border-bottom-width"))
+                    - parseFloat(visibleDiv.css("margin-bottom")));
+	}
+	expandContentDivs($tabStripElement.children(".k-content"));
+	// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN
+	initLocalIp();
+	// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END
+});
+// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy BEGIN
+var printingDevice = {};
+var STATUS_KEY = {
+	MACHINE:'装置状態',
+	KEISUU : '計数停止'
+};
+var STATUS = {
+	OTHER:"0:その他",
+	SOH: "1:計数動作中（SOHと同等）", 
+	EM:"2:計数停止中（EMと同等）",
+	NO:'0:計数停止コマンド未受信',
+	YES:'1:受信済み',
+	SUC:'SUCCESS',
+	FAIL:'FAIL',
+	LOAD:'LOAD',
+	UNCONNECT:'接続失敗、URL接続試作:_URL_'
+};
+var CHARGE = {
+	INPUT:'入金',
+	INPUTOVER:'入金完了',
+	INPUTBEFORE:'入金準備',
+	CHARGEOUT:'釣銭放出',
+	CONNECTING:'接続中',
+	UNCONNECT:'接続不可',
+	//2017/06/02 釣銭機の改修　by　zy BEGIN
+	//状态check
+	STOP:'中止...',
+	CHECK:'チェック',
+	REST:'リセット',
+	REOPEN:'計数再開',
+	//2017/06/02 釣銭機の改修　by　zy END
+	// 2017/08/01 计数停止分段命令 by zy BEIGN
+	INPUTSTOP :  '入金停止',
+	INPUTEND : '入金終了'
+	// 2017/08/01 计数停止分段命令 by zy END
+	,CHECKMACHINE : '精査'
+	,NOCHARGEOUT:'釣銭機の釣銭不足、補充後再開ボタン押すください。'
+	,INPUTING:'計数中'
+	,OK:'正常'
+	,BUSSING:'使用中'
+	,NG:'異常'
+	,PROCESS:'処理中...'
+	,BEGIN:'処理開始...'
+	,END:'処理済み'
+};
+function initLocalIp(){
+	var localIp;
+	try{
+		var hadProcessedFlag = true;
+		getIPs(function(ip){
+			if (localIp == undefined) {
+				localIp = ip;
+				$j("#hidLocalIp").val(localIp);
+			}
+		});
+	} catch(err){
+		console.log(err);
+	}
+}
+// 根据ip地址链接各个店铺
+function linkAllMachine(){
+	var bachMsg = $j("input[id$=hidBachMsg]").val();
+	if (bachMsg != undefined && bachMsg != "") {
+		var ipMap = JSON.parse(bachMsg);
+		$j("input[name=hidLcalIp]").each(function(){
+			var ip = $j(this).val();
+			if (ip in ipMap) {
+				var result =  ipMap[ip];
+				console.log(result);
+				var curRow = $j(this).closest("tr");
+				testPrintStatus(result,curRow);
+			}
+		});
+	}
+	// title设定
+	var title = $j("div[id$=changeRestart]").find(".mainTitle");
+	var titleStr = 'IP:' + getCurIp();
+	title.text(titleStr);
+}
+// 测试是否连接正常
+function testPrintStatus(result,curRow){
+	if (result != undefined && result != null) {
+		var print = getPrintConnect(result.name,result.connect,'');
+		print.isTest = true;
+		print.onClose = errorClose;
+		print.curRow = curRow;
+	} else {
+		changeBtnStatus(curRow,false);
+	}
+	console.log(result);
+}
+// 計数停止
+function _restartPrintFun(nameStr,el){
+	var print = getPrintConnect(nameStr);
+	print.callBackSeqArr = [CHARGE.INPUT];
+	print.curRow = $j(el).closest("tr[pos]");
+	print.nextStep();
+	// 按钮封印
+	changeBtnStatus(print.curRow,true);
+	// 更改状态
+	$j("[name=dataStatus]",print.curRow).text(CHARGE.PROCESS);
+	print.action = '計数停止';
+	addLogRow(print);
+}
+function _restPrintFun(nameStr,el){
+	var print = getPrintConnect(nameStr);
+	print.callBackSeqArr = [CHARGE.REST];
+	print.curRow = $j(el).closest("tr[pos]");
+	// 按钮封印
+	changeBtnStatus(print.curRow,true);
+	// 更改状态
+	$j("[name=dataStatus]",print.curRow).text(CHARGE.PROCESS);
+	print.action = 'メカリセット';
+	addLogRow(print);
+	print.nextStep();
+}
+// button状态变更
+function changeBtnStatus(curRow,isDisabled){
+	// 是否disable
+	if (isDisabled != undefined) {
+		var showBtn = $j("input:visible",curRow);
+		if (isDisabled) {
+			showBtn.attr("disabled",true);
+			showBtn.addClass("inputbtnCss");
+		} else {
+			showBtn.removeAttr("disabled");
+			showBtn.removeClass("inputbtnCss");
+		}
+	}
+}
+// 解除disable
+function unDisabledBtn(els){
+	els.removeAttr("disabled");
+	els.removeClass("inputbtnCss");
+}
+// 出错处理
+function errorClose(event){
+	if (event.code == 1006) {
+		$j("[name=dataStatus]",this.curRow).text(CHARGE.UNCONNECT);
+		changeBtnStatus(this.curRow,false);
+		addLogRow(this,true);
+		this.curRow.find(".icon-status").css("visibility","hidden");
+	}
+}
+// 添加log
+function addLogRow(print,isEndFlag){
+	var printTable = $j("#printQueueTable");
+	var title = isEndFlag ? CHARGE.END : CHARGE.BEGIN;
+	var curRow = print.curRow;
+	var action = print.action;
+	if (action != undefined) {
+		var rowTemplate = '<tr><td style="width:10%;" class="lineOverflow">'+ createLogTemplate(curRow.attr("pos"),action,title) +' </td></tr>';
+		var bodyRow = $j("tbody tr",printTable);
+		if (bodyRow.length == 0) $j("tbody",printTable).append($j(rowTemplate));
+		else bodyRow.get(0).insertAdjacentHTML("beforeBegin", rowTemplate);
+		printTable.removeClass("isNoneCss");
+	}
+	if (isEndFlag) curRow.find(".icon-status").css("visibility","hidden");
+	else curRow.find(".icon-status").css("visibility","visible");
+}
+// 获取POS设定打印机
+function getPrintConnect(curPos,url,seq){
+	var print;
+	if (curPos in printingDevice) print = printingDevice[curPos].print;
+	else {
+		printingDevice[curPos] = {};
+		print = $j.WebPrint({
+			webComm:url,
+			isDebug:true,
+			callBackSeqArr:[seq],
+			curPos:curPos,
+			baseInfo:'****復旧機能使用：' + curPos + '[ip：' + getCurIp() + ']****',
+			remoteSaveLog : "{!$RemoteAction.SyncStatusManagerCtrl.savePrintLodToDb}",
+			sendMesssage:function(e){
+				try{
+					if ("data" in e) {
+						if (e.data.indexOf('lastResponse')>=0 || this.isTest) analyResponse(this,e.data);
+					}
+				}catch(err){
+					console.log(err);
+				}
+			},
+			getMsgInfo:getMsgInfo
+			
+		});
+		printingDevice[curPos].print = print;
+	}
+	return print;
+}
+function analyResponse(crgPnt,res) {
+	//没有返回值 不进行处理
+	if(res == "" && res == undefined ) return closePrint(crgPnt);
+	if(res.indexOf("welcome") >= 0 ) return;
+	var connMst = JSON.parse(decodeURIComponent(res));
+	var lastReq = connMst.lastResponse;
+	if( connMst.result == 'wait' || lastReq.result == 'wait' ) {
+		// 变更按钮状态
+		$j("[name=dataStatus]",crgPnt.curRow).text(CHARGE.BUSSING);
+		closePrint(crgPnt);
+    	return ;
+	}
+	 //入金
+    if (crgPnt.curSeq == CHARGE.INPUT) {
+    	var machineInfo = lastReq[STATUS_KEY.MACHINE];
+    	var needChkFlag = true;
+    	// 自动復旧
+    	if( machineInfo == STATUS.SOH || machineInfo == STATUS.EM) {
+    		crgPnt.callBackSeqArr = [CHARGE.STOP];
+			crgPnt.command = CHARGE.INPUTSTOP;
+			crgPnt.nextStep();
+			return;
+    	}
+    	return closePrint(crgPnt);
+   	} else if (crgPnt.curSeq == CHARGE.STOP) {
+		// 計数停止のコマンド場合
+		if (crgPnt.command == CHARGE.INPUTSTOP) {
+			if ( "cmd" in lastReq && lastReq.cmd=='0x47') {
+				// 直接转为下一个命令
+				crgPnt.command = CHARGE.INPUT;
+			} else if ("result" in lastReq && lastReq.result=='stop') {
+				// 直接转为下一个命令
+				crgPnt.command = CHARGE.INPUTSTOP;
+			}
+			crgPnt.callBackSeqArr = [crgPnt.curSeq];
+			// 等待300毫秒以后进行下一步操作，缓冲停止
+    		setTimeout(function(){
+				crgPnt.nextStep();
+			},300);
+		// 計数停止後は状態チェックコマンド
+		} else if (crgPnt.command == CHARGE.INPUT && lastReq.cmd=='0x41') {
+			// シミュレーションのモード場合
+			if(crgPnt.isSimulaterFlag){
+	    		//判断装置计数停止ok，可以进行计数终止命令
+    			crgPnt.command = CHARGE.INPUTEND;
+				crgPnt.callBackSeqArr = [crgPnt.curSeq];
+				crgPnt.nextStep();
+	   			return;
+	  		} 
+			var keisuuInfo = lastReq[STATUS_KEY.KEISUU];
+	    	if( keisuuInfo == STATUS.NO){
+	    		crgPnt.errorCnt++;
+	    		crgPnt.errorContent = STATUS_KEY.KEISUU + ':' + keisuuInfo ;
+	   			// 装置未收到停止命令
+				crgPnt.command = CHARGE.INPUTSTOP;
+				crgPnt.callBackSeqArr = [crgPnt.curSeq];
+				// 等待300毫秒以后进行check 因为未受信不需要延迟送
+    			crgPnt.nextStep();
+			//收到停止命令
+	    	} else if ( keisuuInfo == STATUS.YES ) {
+	    		// 判断机器状态
+	    		var machineInfo = lastReq[STATUS_KEY.MACHINE];
+	    		// 装置状态为「1:計数動作中(SOH と同等)」check命令重新发送
+	    		if ( machineInfo == STATUS.SOH) {
+	    			crgPnt.errorCnt++;
+	    			crgPnt.errorContent = STATUS_KEY.MACHINE + ':' + STATUS.SOH;
+	    			// 等待300毫秒以后进行check
+	    			setTimeout(function(){
+	    				crgPnt.reConnectLast();
+	    			},300);
+	    		// 装置状态为「0:その他」、「2:計数停止中(EM と同等)」
+	    		} else {
+	    			//判断装置计数停止ok，可以进行计数终止命令
+	    			crgPnt.command = CHARGE.INPUTEND;
+					crgPnt.callBackSeqArr = [crgPnt.curSeq];
+					crgPnt.nextStep();
+	    		}
+	    	}
+		} else if (crgPnt.command == CHARGE.INPUTEND && lastReq.cmd=='0x46') {
+			crgPnt.errorContent = "";
+			for (var i = 0 ; i < connMst.responses.length ; i++) {
+				var res = connMst.responses[i];
+				if ("code" in res && res.code != "ACK" && res.code != "ETB") {
+					crgPnt.errorContent = res.memo;
+				}
+				if ( res.cmd == "0x41") meisuuRequest(res,crgPnt);
+			}
+			if (crgPnt.errorContent != "" ) {
+				crgPnt.errorCnt++;
+				// 等待300毫秒以后进行check
+    			setTimeout(function(){
+    				crgPnt.reConnectLast();
+    			},300);
+    			return;
+			}
+			crgPnt.callBackSeqArr = [CHARGE.CHARGEOUT];
+			//按照队列发送下一个操作
+			crgPnt.nextStep();
+		}
+	} else if (crgPnt.curSeq == CHARGE.CHARGEOUT || crgPnt.curSeq == CHARGE.REST){
+		// 断开连接
+		closePrint(crgPnt);
+		// 更改状态
+		$j("[name=dataStatus]",crgPnt.curRow).text(CHARGE.OK);
+	}
+}
+// 断开连接
+function closePrint(crgPnt){
+	// 写入log
+    addLogRow(crgPnt,true);
+	crgPnt.disconnect();
+	// 解除封印
+	changeBtnStatus(crgPnt.curRow,false);
+}
+function getMsgInfo(seq){
+	switch(seq){
+		//入金完了
+		case CHARGE.INPUTOVER:
+			var objParas = [{key:'real', val:'false'}, {key: 'timeout', val: '-1'}, {key: 'amount', val: 0} ];
+			// 2017/08/01 指令分步执行更改 by zy BEGIN
+			var nextCommand = seq;
+			// 如果对象存在command指令
+			if ('command' in this) nextCommand = this.command;
+			return '{"sequence": "' + encodeURIComponent(nextCommand) + '", ' + 
+			// 2017/08/01 指令分步执行更改 by zy END
+							buildWSRequestParameter(objParas) + ', ' +
+							'"token": ""}';
+		//釣銭放出
+		case CHARGE.CHARGEOUT:
+			//枚数指定放出
+			var retAmount = this.returnAmount;
+			var objParas = [
+				{key: 'real'    , obj: 'false'   },
+				{key: 'timeout' , obj: '-1'},
+				{key: 'amount'  , obj: '0' },
+				{key: 'contact' , obj: '0'},
+				{key: 'amt_10k' , obj: retAmount.return_amt_10k },
+				{key: 'amt__5k' , obj: retAmount.return_amt_5k },
+				{key: 'amt__2k' , obj: retAmount.return_amt_2k },
+				{key: 'amt__1k' , obj: retAmount.return_amt_1k },
+				{key: 'amt_500' , obj: retAmount.return_amt_500 },
+				{key: 'amt_100' , obj: retAmount.return_amt_100 },
+				{key: 'amt__50' , obj: retAmount.return_amt_50 },
+				{key: 'amt__10' , obj: retAmount.return_amt_10 },
+				{key: 'amt___5' , obj: retAmount.return_amt_5 },
+				{key: 'amt___1' , obj: retAmount.return_amt_1},
+			];
+			var json = "";
+			for (var i = 0; i < objParas.length; i ++) {
+				if (json.length > 0) json = json + ", ";
+				json = json + jsonParameter(objParas[i].key, objParas[i].obj);
+			}
+			//crgPnt.consoleLog('釣銭枚数指定放出:::' + price_format);
+			// 2017/07/26 中止ボタンコマンド変更　by　zy BEGIN
+			return '{"sequence": "' + encodeURIComponent('中止放出') + '", ' + 
+			// 2017/07/26 中止ボタンコマンド変更　by　zy END
+							'"parameter": \"{' + json + '}\"' + ', ' +
+							'"token": ""}';
+			//最小指定金额放出
+		//2017/06/07 釣銭機の状態の事前チェック　by　zy BEGIN
+		//
+		case CHARGE.STOP:
+			var objParas = [{key:'real', val:'false'}, {key: 'timeout', val: '-1'}, {key: 'amount', val: 0} ];
+			// 2017/08/01 指令分步执行更改 by zy BEGIN
+			var nextCommand = CHARGE.INPUTOVER;
+			// 如果对象存在command指令
+			if ('command' in  this && this.command != undefined) {
+				nextCommand = this.command;
+			}
+			//return '{"sequence": "' + encodeURIComponent(CHARGE.INPUTOVER) + '", ' + 
+			return '{"sequence": "' + encodeURIComponent(nextCommand) + '", ' + 
+			// 2017/08/01 指令分步执行更改 by zy END
+							buildWSRequestParameter(objParas) + ', ' +
+							'"token": ""}';
+		//リセット命令
+		case CHARGE.REST:
+			//超时时间,设置后10秒内一直返回response
+			var objParas = [{key:'real', val:"false" }, {key: 'timeout', val: '-1'},];
+			return '{"sequence": "' + encodeURIComponent(CHARGE.REST) + '", ' + 
+							buildWSRequestParameter(objParas) + ', ' +
+							'"token": ""}';
+		default:
+			//超时时间,设置后10秒内一直返回response
+			var objParas = [{key:'real', val:"false" }, {key: 'timeout', val: '-1'},];
+			return '{"sequence": "' + encodeURIComponent(seq) + '", ' + 
+							buildWSRequestParameter(objParas) + ', ' +
+							'"token": ""}';
+		//2017/06/07 釣銭機の状態の事前チェック　by　zy END
+	}
+}
+// 关闭当前POS下的设备
+function closePrintDevice(pos) {
+	if (pos in printingDevice) {
+		printingDevice[pos].print.disconnect();
+		printingDevice[pos].status.disconnect();
+	}
+	if (pos == undefined) {
+		for (curPos in printingDevice) {
+			if (typeof curPos === "string") {
+				if (curPos in printingDevice) {
+					printingDevice[curPos].print.disconnect();
+					printingDevice[curPos].status.disconnect();
+				}
+			}
+		}
+	}
+}
+function getCurIp(){
+	return $j("#hidLocalIp").val();
+}
+function meisuuRequest(res,crgPnt){
+	crgPnt.returnAmount = {
+		return_amt_10k : res['1万円処理枚数'],
+		return_amt_5k :  res['5千円処理枚数'],
+		return_amt_2k :  res['2千円処理枚数'],
+		return_amt_1k :  res['1千円処理枚数'],
+		return_amt_500 : res['500円処理枚数'],
+		return_amt_100 : res['100円処理枚数'],
+		return_amt_50 :  res['50円処理枚数'],
+		return_amt_10 :  res['10円処理枚数'],
+		return_amt_5 :   res['5円処理枚数'],
+		return_amt_1 :   res['1円処理枚数'],
+	};
+}
+function jsonParameter(jsonKeyName, objectName) {
+	var value = safeValue(objectName);
+	var json = '\\"' + jsonKeyName + '\\": '  + encodeURIComponent(value);
+	return json;
+}
+function safeValue(obj) {
+	if (!obj) return "0";
+	var value = obj;
+	if (!value || value == "") value = '"0"';
+	return value;
+}
+// log作成
+function createLogTemplate(pos,action,res){
+	var logTemp = '_logTm_　釣銭機「_posNm_」_action_:_result_';
+	var curDt = new Date();
+	var dt = kendo.toString(curDt,'yyyyMMddHHmm');
+	dt += curDt.getMilliseconds();
+	if (res == undefined) res = "";
+	return logTemp.replace('_logTm_',dt).replace('_posNm_',pos).replace('_action_',action).replace('_result_',res);
+}
+// 2018/05/22 連携監視/復旧機能(2wayバッチ状態チェック、バッチ復旧、釣銭機復旧) by zy END
+</script>
+</apex:page>

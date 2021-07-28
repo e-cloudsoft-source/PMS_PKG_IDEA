@@ -1,0 +1,277 @@
+<apex:page showHeader="false"  sidebar="false" renderAs="pdf" 
+	readonly="true" applyHtmlTag="false" action="{!initPdf}"
+	standardcontroller="Lead__c" extensions="ApplicationFormPDF">
+<head>
+<style>
+    @page {
+        size: 6.93in 9.84in;        /* B5 portlate size */
+        margin: 0.4cm;
+    }
+    body {
+        font-family: Arial Unicode MS;
+        font-size:0.4cm;
+        top: 0.2cm;
+        left: 0.2cm;
+    }
+    .titleHeader {
+    	text-align: center;
+        font-size: 0.4cm;
+        background-color: #CCCCCC;
+    }
+    .header {
+		height:30px;
+        font-size: 90%;
+        background-color: #CCCCCC;
+    }
+    .odd {
+    	height:20px;
+        /*border-bottom: 1px black solid;*/
+        border-left: 0.5px black solid;
+        padding: 1px 1px 1px 1px;
+        font-size: 95%;
+    }
+	.underline {
+	    	list-style:none; 
+	    	border-bottom:0.5px black solid; 
+	    	padding-top: 1px;
+	}
+ </style>
+</head>
+<body>
+<apex:pageMessages />
+	<table style="width: 100%" cellpadding="0" cellspacing="0" border="0" >
+		<tr><td colspan="3"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:5px;" /> </td></tr>
+		<tr>
+			<td colspan="3" class="titleHeader">Application Form</td>
+		</tr>
+		<tr>
+			<td colspan="3" class="titleHeader"> 御芳名伺</td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<span style="font-size: 60%;">Room Number</span><br/>
+				<div>
+					<table style="width:50%;">
+					<tr><td class="underline">
+					<span style="">室番&nbsp;&nbsp;&nbsp;&nbsp;{!oLeadInf.leadInf.Rroom__r.Name}</span>
+					</td></tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<span style="font-size: 60%;">Arrival Date</span><br/>
+				<span style="font-size: 80%;">宿泊日</span>
+				<span style="margin-left: 8px;font-size: 80%;">
+					<!-- 2019/03/31 日帰り時刻を表記 BY zyz BEGIN -->
+					{!oLeadInf.entryDate}<apex:outputPanel rendered="{!oLeadInf.stayDays==0 && !isApplicationFormTimeFlg}"> {!oLeadInf.arrivalTime}</apex:outputPanel>
+					<!-- 2019/03/31 日帰り時刻を表記 BY zyz END -->
+				</span>
+			</td>
+			<td></td>
+			<td>
+				<span style="font-size: 60%;">Depature Date</span><br/>
+				<span style="font-size: 80%;">出発日</span>
+				<span style="margin-left: 8px;font-size: 80%;">
+					<!-- 2019/03/31 日帰り時刻を表記 BY zyz BEGIN -->
+					{!oLeadInf.departureDate}<apex:outputPanel rendered="{!oLeadInf.stayDays==0 && !isApplicationFormTimeFlg}"> {!oLeadInf.departureTime}</apex:outputPanel>
+					<!-- 2019/03/31 日帰り時刻を表記 BY zyz END -->
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="underline" style="line-height: 90%" colspan="3">
+				<span style="font-size: 60%;">Name under reservation<br/></span>
+				ご予約名
+				<span style="margin-left: 8px;font-size: 0.4cm;">
+					{!oLeadInf.leadInf.Relcontact__r.Name}
+				</span>
+				<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+				<!--<span style="margin-right: 10px;float: right;">様</span>-->
+				<span style="margin-right: 10px;float: right;">{!oLeadInf.mrStr}</span>
+				<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" class="underline" style="line-height: 80%">
+				<div><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:10px;height: 4px" /></div>
+				〒<span style="font-size: 60%;">(Zip Code)</span>
+				<span style="padding-left: 15px">{!oLeadInf.leadInf.Relcontact__r.MailingPostalCode}</span><br/>
+				 <span style="font-size: 60%;">Address</span><br/>
+				住所<span style="padding-left: 10px">{!oLeadInf.address}</span>
+				<br/><div><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:10px;height: 10px" /></div>
+			</td>
+		</tr>
+		<tr>
+			<td  class="underline" >
+				<span style="font-size: 60%;">House Phone<br/></span>
+				電話番号
+				<span>{!oLeadInf.phone}</span>
+			</td>
+			<td>&nbsp;</td>
+			<td  class="underline" >
+				<span style="font-size: 60%;">E-mail Account<br/></span>
+				E-mailｱﾄﾞﾚｽ&nbsp;&nbsp;
+				<span>{!oLeadInf.leadInf.Relcontact__r.Email}</span>
+			</td>
+			
+		</tr>
+		<tr>
+			<td colspan="3">
+				<table style="margin-top: 20px;width:100%" cellpadding="0" cellspacing="0" border="0" >
+					<tr>
+						<td colspan="5" style="text-align:center;margin-top: 8px;font-size: 90%">ご予約内容</td>
+					</tr>
+					<tr height="10px" style="font-size: 60%;">
+						<td></td>
+						<td colspan="4"><span style="text-align: left;">Please confirm the number of guests under your reservation will stay at {!orgName}</span></td>
+					</tr>
+					<tr >
+						<td></td>
+						<td><span style="font-size: 60%;margin-top: 8px">Male</span></td>
+						<td style="font-size: 60%;">Female</td>
+						<td style="font-size: 60%;">Children</td>
+						<td></td>
+					</tr>
+					<tr style="font-size: 80%;">
+						<td>ご人数</td>
+						<td >
+							男性
+							<span style="margin-left: 8px;">
+								{!oLeadInf.leadInf.Mans__c}名
+							</span>
+						</td>
+						<td>
+							女性
+							<span style="margin-left: 8px;">
+								{!oLeadInf.leadInf.Femails__c}名 
+							</span>
+						</td>
+						<td>
+							お子様
+						</td>
+						<td>
+							<span style="margin-left: 8px;">
+								 {!oLeadInf.childCount}名
+							</span>
+						</td>
+					</tr>
+					<tr><td colspan="3"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:80px;height: 10px" /> </td></tr>
+					<tr style="vertical-align:top;">
+						<td colspan="3" style="font-size: 80%;">
+							{!LEFT(oLeadInf.leadInf.Field310__r.name,30)}
+						</td>
+						<td></td>
+						<td >
+							<span style="font-size: 70%;float: right;">
+								※ご記入いただいたお客様の情報の利用は<br/>
+								次のとおりとさせていただきます。<br/>
+								1.法律に基づく宿泊者の名簿
+							</span>
+						</td>
+					</tr>
+				</table> 
+				
+			</td>
+		</tr>
+		<tr><td colspan="3"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:80px;height: 45px" /> </td></tr>
+		
+		<tr>
+			<td ><span style="font-size: 90%">食事処</span></td>
+			<td></td>
+			<td ><span style="font-size: 90%">アレルギー他</span> </td>
+		</tr>
+		<tr>
+			<td class="underline" ><span style="font-size: 90%">{!oLeadInf.leadInf.Field292__c}</span></td>
+			<td><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:10px;height: 25px" /></td>
+			<td class="underline" ></td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<table style="margin-top: 15px;font-size: 90%;width: 100%" cellpadding="0" cellspacing="0" border="0" >
+					<colgroup style="width:190px"/>
+			        <colgroup style="width:30px"/>
+			        <colgroup style="width:90px"/>
+					<tr>
+						<td colspan="4"><span >・当館からの季節のお便りなどをお送りしてもよろしいですか？</span></td>
+					</tr>
+					<tr>
+						<td style="text-align:right;">
+			                <apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle"/>希望する   
+			            </td>
+			            <td></td>
+						<td style="text-align:left;" colspan="2">
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle"/>希望しない
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4"><span >（上記記載の場所以外への送付をご希望の方は以下にご住所をご記入下さいませ）</span></td>
+					</tr>
+					<tr><td colspan="4"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:10px;height: 26px" /> </td></tr>
+					<tr>
+						<td colspan="4"><span >・お夜食（味噌燒おにぎり）をご希望いたしますか？</span></td>
+					</tr>
+					<tr>
+						<td style="text-align:right;">
+			                <apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle"/>希望する   
+			            </td>
+			            <td></td>
+						<td style="text-align:left;" colspan="2">
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle"/>希望しない
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4">
+							<span >・もしよろしければお誕生日をご記入下さい。</span>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: right;">
+						<span style="margin-right: 25px">（	Ｍ　Ｔ　Ｓ　Ｈ　）</span></td>
+						<td colspan="3">
+							<span style="margin-left: 40px">年</span>	
+							<span style="margin-left: 50px">月</span>					
+							<span style="margin-left: 50px">日</span>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4"><span>・お車でお越しのお客様へ。暖気運転・雪下しをさせて頂いてもよろしいですか？</span></td>
+					</tr> 
+					<tr>
+						<td style="text-align:right;">
+			                <apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle"/>希望する   
+			            </td>
+			            <td></td>
+						<td style="text-align:left;" colspan="2">
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle"/>希望しない
+						</td>
+					</tr>
+					<tr><td colspan="4"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:10px;height: 6px" /> </td></tr>
+					
+					<tr >
+						<td class="underline" colspan="3">
+							<div style="line-height:90%;">
+								ご署名<br/>
+								<span style="font-size: 80%">Signature</span>
+							</div>
+						</td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td colspan="3" >
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle;padding-left: 15px"/>
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle;padding-left: 5px"/>
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle;padding-left: 5px"/>
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle;padding-left: 5px"/>
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle;padding-left: 5px"/>
+							<apex:image value="/img/checkbox_unchecked.gif" style="vertical-align: middle;padding-left: 5px"/>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+</body>
+</apex:page>

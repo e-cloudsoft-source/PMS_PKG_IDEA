@@ -1,0 +1,2152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>共通定義</value>
+    </caseValues>
+    <fields>
+        <label><!-- レポート_A1_料理関連[今月] --></label>
+        <name>A1CookingReport__c</name>
+    </fields>
+    <fields>
+        <help><!-- ネットからのリアルAGTの予約かどうかの識別用フラグ
+TRUE：ご予約に紐付く旅行会社情報の親取引先　かつ　該当親取引先分類がリアルの場合、リアルAGTを判定する
+FALSE：ご予約に紐付く旅行会社情報を判断する（デフォルト値）
+注：共通定義「予約ポップのリアルＡＧＴ残室数連動フラグ」項目が０を設定前提 --></help>
+        <label><!-- リアルAGTの予約識別フラグ --></label>
+        <name>AGTReferToParentFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書にハンコ表示・非表示
+TRUE:ハンコ表示
+FALSE:ハンコ非表示(デフォルト値） --></help>
+        <label><!-- 会計書ハンコ表示・非表示 --></label>
+        <name>AccReportStampIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面の予約人數は０人のとき、自動男性、女性、子供人數から集計値を自動設定する、しない制御
+TRUE:自動集計設定する
+FALSE：自動集計設定しない（デフォルト値） --></help>
+        <label><!-- 会計人數自動集計機能制御フラグ --></label>
+        <name>AccounntStayPersonsAutoSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計機能、日付が変わった後、会計データにロックがかかり変更出来ない機能パラメータ値の設定
+書式：X:Y;Z
+X:Y→該当会計の売上日からX月後のY日以後、該当会計をロックされる
+Z:会計ロック後、会計書、請求書発行可否のフラグ( 0/空欄、1、2)
+　0/空欄：　会計ロック後、会計書、請求書発行不可
+　1:カスタムメタデータ型→会計ロック除外者設定に指定ユーザは発行可能
+　2:誰でも発行可能
+設定例：1月後の20日以後会計ロックする、会計ロック除外者のみ会計書発行可能
+1:20;1 --></help>
+        <label><!-- 会計ロック機能パラメータ設定 --></label>
+        <name>AccountAcountCutoffDay__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入湯税自動作成方法切り替え用フラグ
+1/空欄：共有定義「入湯税自動入力フラグ」設定により、入湯税自動入力（デフォルト値）
+2：プランに紐付く入湯税設定により、見積明細、会計明細にプラン登録に従って、入湯税明細を自動入力する --></help>
+        <label><!-- 入湯税自動入力フラグ2 --></label>
+        <name>AccountBathTaxAutoSetupFlg2__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計開く際に、人数と泊数により明細に入湯税明細を自動入力する・しないフラグ
+注１：会計明細に入湯税明細ある場合、自動設定しない
+注２：共通定義：「入湯税商品コード」を事前設定済み　かつ　該当会計商品が存在
+TRUE：会計開く際に、人数と泊数により明細に入湯税明細を自動入力する
+FALSE：自動入力しない（デフォルト値） --></help>
+        <label><!-- 入湯税自動入力フラグ --></label>
+        <name>AccountBathTaxAutoSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計商品「入湯税」の商品コード（共通定義：入湯税自動入力フラグ機能有効の前提）
+書式１：全施設の入湯税商品コードが同じにする
+          入湯税商品コード
+書式２：店舗別入湯税商品コードを定義する
+          店舗コード1：入湯税商品コード1;店舗コード2：入湯税商品コード2
+例：01:9001;02:9002 --></help>
+        <label><!-- 入湯税商品コード --></label>
+        <name>AccountBathTaxCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計明細プラン商品を明細のトップかまたは入力順表示かの制御区分
+会計明細プラン商品を明細の入力順に表示を行う（デフォルト値）
+会計明細プラン商品を明細のトップに表示を行う --></help>
+        <label><!-- 会計明細の並び替え機能コード --></label>
+        <name>AccountDetailSortCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書会計明細表示順設定機能制御区分
+1: 会計編集画面、「並び替え」項目で、表示明細制御（Defautl値）
+2: 会計編集画面、ドロップで会計明細の順番を調整する --></help>
+        <label><!-- 未使用 --></label>
+        <name>AccountDetailSortDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- 別店舗の予約や会計しか変更できないように権限管理
+TRUE:別店舗の予約や会計しか変更できない
+FALSE:別店舗の予約や会計しか変更できる(デフォルト) --></help>
+        <label><!-- 店舗ごとの予約・会計権限 --></label>
+        <name>AccountEditAuthCheckFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 明細の反転をする／しないの設定ができる --></help>
+        <label><!-- 会計書反転明細 --></label>
+        <name>AccountInversionLine__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面でプランの内訳を編集出来可否切り替えフラグ
+TRUE:編集可能
+FALSE:編集不可(デフォルト値) --></help>
+        <label><!-- 会計画面でプランの内訳を編集可否フラグ --></label>
+        <name>AccountIsPlanEditFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書PDFの(控)を出力する制御
+True:会計書PDFの(控)のページを表示 （Default値)
+False:会計書PDFの(控)のページを非表示 --></help>
+        <label><!-- 会計書(控)表示・非表示 --></label>
+        <name>AccountIsShowCopy__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面、社内連絡用コメント項目表示する・しない切替フラグ
+TRUE:項目表示
+FALSE:項目非表示（デフォルト） --></help>
+        <label><!-- 会計画面の社内用コメント表示フラグ --></label>
+        <name>AccountIsShowInCommentFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書明細にメディア情報表示／非表示制御フラグ
+True:  明細にメディア情報表示する
+False: 明細にメディア情報非表示する （Default値） --></help>
+        <label><!-- 会計書の支払メディア明細表示・非表示制御 --></label>
+        <name>AccountMediaIsShow__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売り掛け分の金額を領収書金額からマイナス計算フラグ --></label>
+        <name>AccountMoneyManasFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面の明細が「非表示」を設定するとき、明細の合計金額(税込)の設定区分
+・空白、1の場合、共通定義「会計の非表示の合計金額設定不要」設定値有効
+・2の場合、該当会計明細金額が変更なし、該当明細の合計金額は「ご利用金額(税込)、ご請求金額(税込)」に反映しない --></help>
+        <label><!-- 会計の非表示の合計金額設定不要２ --></label>
+        <name>AccountNoSetAmountWhenNoShowMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面の明細が「非表示」を設定するとき、明細の合計金額(税込)の設定区分
+TRUE:明細が非表示を設定するとき、「合計金額(税込)」の金額は「0」円に保存する
+FALSE:明細が非表示を設定するとき、「合計金額(税込)」の金額はそのまま保存する（デフォルト値） --></help>
+        <label><!-- 会計の非表示の合計金額設定不要 --></label>
+        <name>AccountNoSetAmountWhenNoShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- FALSE：金額差異あり
+TRUE：金額差異なし（デフォルト値） --></help>
+        <label><!-- 会計の金額差異制御 --></label>
+        <name>AccountNoTaxCalFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当フラグはTRUEの場合、会計書PDF項目：お名前(GuestName)/ご請求金額/領収書の金額項目は普通により、大きくび表示を行う --></help>
+        <label><!-- 会計書文字サイズ大 --></label>
+        <name>AccountOldManModeFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 新会計画面の「入金確認/入金日」項目は請求金額は０円の場合、自動チェック/設定するがどうか制御フラグ
+TRUE:自動チェック/設定を行う
+FALSE:自動チェック/設定なし（デフォルト値） --></help>
+        <label><!-- 会計の入金確認/入金日の自動チェック/設定制御 --></label>
+        <name>AccountPaidFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約情報からチェックインから会計情報自動作成の場合、会計支払自動作成するがどうか制御を行う
+TRUE： 会計支払情報を自動作成
+FALSE：会計支払情報を自動作成しない（デフォルト値） --></help>
+        <label><!-- 会計の支払情報の自動作成制御 --></label>
+        <name>AccountPaymentIsAutoGenFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 複数インデックスの会計を指定して、一括印刷可能機能有効・無効切替フラグ
+
+TRUE:会計編集画面の印刷（会計書、請求先）ボタンを押下、該当機能画面へ遷移、複数インデックス会計を指定して、複数会計を一括印刷可能になる
+FALSE:インデックス内のみ会計を表示、印刷可能（デフォルト値） --></help>
+        <label><!-- 会計書、請求書マージ機能フラグ --></label>
+        <name>AccountPdfBulkMergeFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書、一括会計起動する場合、ポップアップウィンドウ表示・非表示制御
+TRUE場合：ポップアップウィンドウ表示　(Default値)
+FALSE場合：ポップアップウィンドウ非表示 --></help>
+        <label><!-- 会計書ポップ表示・非表示制御 --></label>
+        <name>AccountPopupIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 書式：印刷総枚数,枚目:タイトル文言;枚目:タイトル文言
+例：会計書は3枚印刷、1枚目のタイトル：会計書、2枚目のタイトル：会計書(ホテル控)、3枚目のタイトル：会計書(本社控え)
+3,1:会計書;2:会計書(ホテル控);3:会計書(本社控え)
+注：コード33／34／35／36のみ機能有効 --></help>
+        <label><!-- 会計書の印刷枚数とタイトル定義 --></label>
+        <name>AccountPrintNumsAndTitleDef__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU --></label>
+        <name>AccountPrintRecipientTitleRule__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗を切り替えて会計書・請求書を出した際に、次の会計書・請求書を出す時に前回選択した店舗を表示・非表示フラグ
+TRUE:前回選択した店舗を表示する
+FALSE：デフォルト店舗を表示する(デフォルト値） --></help>
+        <label><!-- 店舗切替の保存フラグ --></label>
+        <name>AccountPrintSpCdSaveFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書印刷Popup画面の「一括印刷」表示・非表示制御フラグ(Default: FALSE)
+TRUE:「一括印刷」印刷パラメータ設定項目表示
+FALSE:「一括印刷」印刷パラメータ設定項目非表示 --></help>
+        <label><!-- 会計書統合印刷表示フラグ --></label>
+        <name>AccountPrintType__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書で印刷した際に、長い商品名は折り返し表示切替フラグ
+TRUE:商品名は折り返し表示
+FALSE:商品名は固定長表示（デフォルト値）
+2019/10/24から、該当機能は請求書、見積書も適応する --></help>
+        <label><!-- 会計書/請求書/見積書の商品名を折り返し表示 --></label>
+        <name>AccountProdNmReturnFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書の領収書の「但し」選択リスト値
+デフォルト但し内容を指定したい場合、後ろに、「:1」を指定すると、デフォルト但しを指定可能 
+例：宿泊代,飲食代,駐車場代に対して、宿泊代はデフォルト値を指定したい場合、下記様に定義可能 
+-&gt;宿泊代:1,飲食代,駐車場代 --></help>
+        <label><!-- 領収書但し書き --></label>
+        <name>AccountProviso__c</name>
+    </fields>
+    <fields>
+        <help><!-- 新会計画面の「領収証日付」項目値は空白の場合、デフォルト値設定制御フラグ
+TRUE:会計日時の日付で設定する（デフォルト値）
+FALSE：売上日の日付で設定する --></help>
+        <label><!-- 会計の領収証日付値の自動設定制御 --></label>
+        <name>AccountReceiptDateDefValSetFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 新会計画面の「領収証日付」項目値は空白の場合、デフォルト値設定制御フラグモード
+新会計画面の「領収証日付」項目値は空白の場合、デフォルト値設定制御フラグ
+0：共通定義「会計の領収証日付値の自動設定制御」設定により、日付初期値を設定する（デフォルト値）
+1：到着日の日付で設定する
+2：出発日の日付で設定する --></help>
+        <label><!-- 会計の領収証日付値の自動設定制御モード --></label>
+        <name>AccountReceiptDateDefValSetMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面に新規商品を追加する際、「利用日」をその会計の売上計上日が自動入力する・しない切り替え機能コード
+1：本日の日付で設定する（デフォルト値）
+2：会計の売上計上日で設定する --></help>
+        <label><!-- 会計利用日設定機能コード --></label>
+        <name>AccountReceiptDtAutoSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計ポップアップウィンドウに、会計書(施設コード３３，３４のみ)の領収書表示・非表示切替選択項目表示・非表示制御フラグ
+TRUE：該当切替選択機能は会計ポップアップウィンドウに表示
+FALSE該当切替選択機能は会計ポップアップウィンドウに非表示(デフォルト値） --></help>
+        <label><!-- 会計書の領収書表示・非表示切替選択機能 --></label>
+        <name>AccountRecipteIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入湯税自動入力の場合、自動入力した入湯税の作成方式フラグ
+注１：共通定義：入湯税自動入力フラグ　がＯＮ または　入湯税自動入力フラグ2　が [2] 前提
+注２：共通定義：「入湯税商品コード」を事前設定済み　かつ　該当会計商品が存在 
+TRUE：自動入力の入湯税は日ごとに振り分ける
+FALSE：自動入力の入湯税は1泊目に集める（デフォルト値） --></help>
+        <label><!-- 入湯税自動入力モード --></label>
+        <name>AccountRenpakuBathTaxAutoSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ビル一括印刷のとき、該当数字により、一つPDFファイルに含める部屋数を決める --></help>
+        <label><!-- 会計書ビル一括分割部屋数 --></label>
+        <name>AccountReportBulkPrintMaxRooms__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書23、24は該当コメント文を使う --></help>
+        <label><!-- 会計書コメント文 --></label>
+        <name>AccountReportComment__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書文字色制御設定用、設定内容はHTMLの色設定コード
+例：黒色:black 赤色：red、青：blue、黄色:yellow、緑色:green
+上記以外の色を設定したい場合、下記URLで参照してください
+http://www.hi-ho.ne.jp/douton/htmlcolor.html
+カスタム設定の「施設コード：８，９，１０，１１」設定する場合、会計書文字色設定は会計書に反映する --></help>
+        <label><!-- 会計書文字色 --></label>
+        <name>AccountReportFontColor__c</name>
+    </fields>
+    <fields>
+        <help><!-- 一括会計書（33/34/35/36）、一括請求書明細表示順定義
+1:会計画面明細入力順
+2:利用日順明細出力 --></help>
+        <label><!-- 一括会計書、請求書明細表示順 --></label>
+        <name>AccountReportSortKbn__c</name>
+    </fields>
+    <fields>
+        <help><!-- パラメータによりチェックイン日付またはチェックアウト日付で売上を自動作成
+1:予約のチエックイン日（到着日）で売上計上する（Default値）
+2:予約のチエックアウト日（出発日）で売上計上する --></help>
+        <label><!-- 会計の売上計上日設定区分 --></label>
+        <name>AccountSaleDateSetupDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書(施設コード33/34) 、請求書、見積書にサービス料合計金額は利用明細に表示する・しない制御 
+0/空欄：サービス料合計金額は明細行に追加表示しない（デフォルト値） 
+1：サービス料合計金額は明細行に追加表示
+2：サービス料合計金額は内税消費税行の下に表示 --></help>
+        <label><!-- サービス料別表示制御 --></label>
+        <name>AccountServiceChargeIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「サービス料別表示制御」は「2」で定義されている場合、該当フラグ定義により、サビース料税込み・税抜き切替できる
+TRUE：サービス料は税抜き金額を出力する
+FALSE:サービス料は税込みき金額を出力する(デフォルト値) --></help>
+        <label><!-- サービス料税抜表示フラグ --></label>
+        <name>AccountServiceChargeNoTaxFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書の合計金額と領収書表示箇所の制御コード
+1:各枚目に表示（デフォルト値）
+2:最終枚目のみ表示
+3:1枚目のみ表示 --></help>
+        <label><!-- 会計書合計と領収書表示箇所コード --></label>
+        <name>AccountSetTotalPosition__c</name>
+    </fields>
+    <fields>
+        <help><!-- 複数部屋の一括会計の際に、会計書の明細にそれぞれの部屋名が表記する・しないフラグ（会計書33、34のみ）
+TRUE:表記する
+FALSE:表記しない（デフォルト値） --></help>
+        <label><!-- 会計書明細に部屋名を表示フラグ --></label>
+        <name>AccountShowRoomColFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書（施設コード３３，３４のみ）の署名項目表示・非表示制御フラグ
+TRUE場合： 署名項目を表示する　(デフォルト値)
+FALSE場合：署名項目を表示する非表示 --></help>
+        <label><!-- 会計書の署名表示・非表示制御 --></label>
+        <name>AccountSignatureFieldIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計連携用CSV出力種別：
+PCA：1(デフォルト値)
+Freee:2 --></help>
+        <label><!-- 会計連携用CSV出力種別 --></label>
+        <name>AccountSoftSyncCsvType__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計明細分割画面のプランのBreakdown明細表示・非表示制御
+TRUE：プラン明細は画面に表示する
+FALSE:プラン明細は画面に非表示する (Default値） --></help>
+        <label><!-- 会計分割明細のBreakDown明細表示・非表示フラグ --></label>
+        <name>AccountSplitFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書（33/34)の領収書の点線の位置が常に固定箇所を出力する・しない切り替えフラグ
+TRUE:常に固定位置を出力する
+FALSE:明細により、位置を自動調整を行う(デフォルト値） --></help>
+        <label><!-- 会計書の領収書点線の位置固定フラグ --></label>
+        <name>AccountSplitLineFixFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 明細分割内容出力モードフラグ(会計と見積に対応)
+TRUE:分割内容は１ファイルに複数ページで出力する
+FALSE:分割内容は別々ファイルに出力する（デフォルト値） --></help>
+        <label><!-- 会計/見積明細分割内容出力フラグ --></label>
+        <name>AccountSplitOutputFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- スタンプなし：アイコンと施設情報は表示あり
+スタンプあり：アイコンと施設情報は表示しない --></help>
+        <label><!-- 会計書スタンプ --></label>
+        <name>AccountStampIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連泊の会計に対して、別泊に入力したコメント情報は共有参照可、不可フラグ
+TRUE:共有する
+FALSE:共有しない --></help>
+        <label><!-- 会計コメントの共有フラグ --></label>
+        <name>AccountSyncCommentFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 利用日のモード: 
+1:利用日は到着日と紐付く (デフォルト値)
+2:利用日は到着日と紐付くない
+3:利用日中間モード（会計明細は到着日と紐付く、会計支払は到着日と紐付くない） --></help>
+        <label><!-- 利用日モード --></label>
+        <name>AccountUseDateMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面の「印刷」→「会計書作成」ボタンをクリック後、会計書PDF/レシート印刷 切替選択できるフラグ 
+TRUE:会計書PDF/レシート印刷 切替選択できる 
+FALSE:会計書PDFウインドウを開く（デフォル値） --></help>
+        <label><!-- 会計の印刷 --></label>
+        <name>AccountsPrintFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 活動から複数取込先を選択するとき、選択した取込先参照用レポートのID値を格納する --></help>
+        <label><!-- 活動関連取引先レポートID --></label>
+        <name>ActivityRefAccountReportId__c</name>
+    </fields>
+    <fields>
+        <help><!-- ネットから自動取込機能（ねっぱん）の部屋自動アサイン制御フラグ：「Ver4.52から」
+ネットから自動取込機能（手間いらず、リンカーン、らく通)該当制御フラグも有効「Ver15.53から」
+パラメータ値が
+　TRUEにのときは、部屋タイプに対して、１部屋のみ含め場合、
+　　　　　該当部屋は予約に自動アサインする　（デフォルト値は、TRUEとする）
+　FALSEのときは、実行しない、 --></help>
+        <label><!-- 部屋自動割当フラグ --></label>
+        <name>AdvancesReceivedChk__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「売上更新」→「経理」→「入湯税の人数」「入湯税の金額」関連統計処理使用、会計明細の「リンクＤＰコード」名と定義したキーワードに含めする場合、該当会計明細は統計対象になる 
+定義書式：「キーワード１,キーワード２,キーワード３ etc.」 
+定義例：入湯1,入湯2,入湯3 --></help>
+        <label><!-- 売上_入湯(RollUP) --></label>
+        <name>AmountSumKeyBath1__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「売上更新」→「経理」→「入浴人数」「入浴料」「入浴料(税込)」関連統計処理使用、会計明細の「リンクＤＰコード」名と定義したキーワードに含めする場合、該当会計明細は統計対象になる 
+定義書式：「キーワード１,キーワード２,キーワード３ etc.」 
+定義例：入浴1,入浴2,入浴3 --></help>
+        <label><!-- 売上_入浴(RollUP) --></label>
+        <name>AmountSumKeyBath2__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「売上更新」→「客室稼働率と平均単価」→「客室-[夕]稼働率」関連統計処理使用、会計明細の「リンクＤＰコード」名と定義したキーワードに含めする場合、該当会計明細は統計対象になる
+定義書式：「キーワード１,キーワード２,キーワード３ etc.」
+定義例：夕客室1,夕客室2,夕客室3 --></help>
+        <label><!-- 売上_夕客室(RollUP) --></label>
+        <name>AmountSumKeyNightStay__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「売上更新」→「客室稼働率と平均単価」→「客室-[昼]稼働率」関連統計処理使用、会計明細の「リンクＤＰコード」名と定義したキーワードに含めする場合、該当会計明細は統計対象になる 
+定義書式：「キーワード１,キーワード２,キーワード３ etc.」 
+定義例：昼客室1,昼客室2,昼客室3 --></help>
+        <label><!-- 売上_昼客室(RollUP) --></label>
+        <name>AmountSumKeyNoonStay__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「売上更新」→「客室稼働率と平均単価」→「客室-稼働率」関連統計処理使用、会計明細の「リンクＤＰコード」名と定義したキーワードに含めする場合、該当会計明細は統計対象になる
+定義書式：「キーワード１,キーワード２,キーワード３ etc.」
+定義例：宿泊1,宿泊2,宿泊3 --></help>
+        <label><!-- 売上_宿泊(RollUP) --></label>
+        <name>AmountSumKeyStay__c</name>
+    </fields>
+    <fields>
+        <help><!-- NameSpace(名前空間名) --></help>
+        <label><!-- AppNS --></label>
+        <name>AppNS__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約確認書表示レイアウト制御
+1: 予約確認書（旧)（B５）
+2: 予約確認書（新)（A４）(デフォルト)
+4: 入寮確認書 (A4)
+5: 錦水館専用 (A4)
+6: カスタム用 --></help>
+        <label><!-- 予約確認書コード --></label>
+        <name>ApplicationFormPDFSwitchCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約、宿帳詳細画面から起動する場合、ポップアップウィンドウ表示・非表示制御
+TRUE場合：ポップアップウィンドウ表示　(Default値)
+FALSE場合：ポップアップウィンドウ非表示 --></help>
+        <label><!-- 予約確認書ポップ表示・非表示制御 --></label>
+        <name>ApplicationFormReportPopupIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約確認書のロゴ取得元を切り替え用フラグ
+TRUE:予約の部屋タイプに紐づいた店舗ロゴを表示する
+FALSE:ログイン中のユーザの店舗のロゴを表示する（デフォルト値） --></help>
+        <label><!-- 予約確認書のロゴ取得元 --></label>
+        <name>ApplicationFormShopLogoFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約が日帰り場合、予約確認書に到着時刻、出発時刻を出力する・しないフラグ 
+TRUE:到着時刻、出発時刻を出力しない 
+FALSE:到着時刻、出発時刻を出力する（デフォルト値） --></help>
+        <label><!-- 予約確認書の日帰り到着出発時刻非表示フラグ --></label>
+        <name>ApplicationFormTimeFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 項目値変更により、変更内容を自動的にChatterへポストする・しないフラグ（設定ファイル「オブジェクト変更チェツク用設定情報」設定済み前提）
+TRUE:該当機能有効
+FALSE:該当機能無効（デフォルト値） --></help>
+        <label><!-- 項目変更自動ポストフラグ --></label>
+        <name>AutoAlarmFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 故障部屋自動解除機能、どの部屋タイプは故障開始日の何日前から自動解除パラメータを設定する
+    書式：部屋タイプ「Seq#」:X日前から解除日数,部屋タイプ「Seq#」:X日前から解除日数
+　　例：部屋タイプ（SEQが346，347）の部屋の故障開始日が1日前から自動解除
+　　　　 部屋タイプ（SEQが345）の部屋の故障開始日が2日前から自動解除
+     設定例：346:1,347:1,345:2 --></help>
+        <label><!-- RFU --></label>
+        <name>AutoCancelBadRoom__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約内にある「プラン」という項目を入力する、このプランが予約見積明細に登録する、しない切り替えフラグ
+TRUE:プランが見積明細へ反映されない
+FALSE：プランが見積明細へ反映する（デフォルト値） --></help>
+        <label><!-- ご予約のプランが見積明細に反映する・しないフラグ --></label>
+        <name>AutoCreateBookingEstFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 未使用 --></label>
+        <name>BE_NoShowRequestFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- バッチ処理（予約の自動チェックイン）機能：
+TRUEの場合、１泊数N部屋の予約データも自動チェックイン更新対象
+FALSEの場合、N泊数の予約データのみ自動チェックイン更新対象 --></help>
+        <label><!-- 自動チェックイン対象区分 --></label>
+        <name>BatchNroomsCheckInFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入金消込画面、データフィルターモード切替フラグ
+TRUE：チェックボックス方式で複数条件を指定可能
+FALSE：条件内容を自由入力、２条件まで指定可能 --></help>
+        <label><!-- 入金消込のフィルター切替フラグ --></label>
+        <name>BillEraseFilterFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入金消込機能、消込できる支払メデイア種別コードを定義する、カンマで複数定義可能
+02：カード
+03：売掛
+11：クーポン --></help>
+        <label><!-- 入金消込対象支払種別コード --></label>
+        <name>BillEraseMediaTypeCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計編集画面レイアウト切替制御パラメータ
+1: 元会計編集画面（デフォルト値） 
+2: 新会計メニュー --></help>
+        <label><!-- 会計編集のレイアウト制御コード --></label>
+        <name>BillInputSwitchCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書PDFの(控)を出力する制御
+True:請求書PDFの(控)のページを表示
+False:請求書PDFの(控)のページを非表示 （デフォルト値) --></help>
+        <label><!-- 請求書(控)表示・非表示 --></label>
+        <name>BillIsShowCopy__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書の送付状出力・出力しない切替選択機能フラグ 
+TRUE：該当切替選択機能は請求書出力ポップアップロードウインドウに表示
+FALSE該当切替選択機能は請求書出力ポップアップロードウインドウに非表示(デフォルト値） --></help>
+        <label><!-- 請求書の送付状出力・出力しない切替選択機能フラグ --></label>
+        <name>BillLetterIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 見積から請求書を出力場合、N部屋、N泊目の請求書を１枚に印刷されるフラグ
+TRUE:N部屋、N泊目の請求書を１枚に印刷される
+FALSE:1部屋、N泊目の請求書を１枚に印刷される(デフォルト値) --></help>
+        <label><!-- 請求書一括印刷フラグ --></label>
+        <name>BillPdfFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書、見積書、予約確認書コメント文字列の自動改行制御フラグ
+TRUE:画面入力の改行を無視して、入力行の文字数により、自動改行を行う
+FALSE:画面入力の改行により、その文字はそのまま請求書、見積書、予約確認書に表示する（デフォルト値） --></help>
+        <label><!-- 請求書、見積書、予約確認書コメント自動改行制御 --></label>
+        <name>BillReportCommentAutoBreakFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書&amp;領収書レイアウト有効フラグ
+TRUE:請求書レイアウトに領収書情報は下部に表示を行う
+FALSE：領収書情報を非表示、請求書情報のみ表示しております（デフォルト値） --></help>
+        <label><!-- 請求書＆領収書レイアウト有効フラグ --></label>
+        <name>BillReportReceiptIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書にハンコ表示・非表示
+TRUE：ハンコ表示(Default値）
+FALSE:ハンコ非表示 --></help>
+        <label><!-- 請求書ハンコ表示・非表示 --></label>
+        <name>BillReportStampIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 共通定義：「会計の売上計上日設定区分」が「2」場合でも、利用日が常に到着日で表示のフラグ
+TRUE: 機能有効
+FALSE: 機能無効（デフォルト値） --></help>
+        <label><!-- 利用日が常に到着日で設定フラグ --></label>
+        <name>BookEstUseDateSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- プラン編集画面英語項目表示する・しないフラグ
+TRUE:プラン編集画面、英語項目「Plan（英）、食事内容（英）」を表示する
+FALSE:プラン編集画面、英語項目「Plan（英）、食事内容（英）」を表示しない（デフォルト値） --></help>
+        <label><!-- プラン編集に英語項目表示・非表示フラグ --></label>
+        <name>BookingApiFieldsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 一括予約画面の基本情報に「特記事項」項目表示・非表示制御する
+TRUE：　一括予約画面に「特記事項」項目表示
+FALSE： 一括予約画面に「特記事項」項目非表示(Default値) --></help>
+        <label><!-- 一括予約の特記事項表示・非表示 --></label>
+        <name>BookingAppIsShowComment__c</name>
+    </fields>
+    <fields>
+        <help><!-- 1: 会社名（団体名）、申込者、客室情報入力項目あり画面
+2: 予約ポップ画面と統一する、項目：ひらがな、カナ１、注意事項入力項目あり画面
+3: 一画面レイアウト
+4. 一画面レイアウト、明細行を1行1部屋形式
+初期値：１ --></help>
+        <label><!-- 一括予約基本情報のレイアウトNo. --></label>
+        <name>BookingAppSwitchCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約標準画面：項目（小人A）デフォルト値 --></help>
+        <label><!-- 予約人数(子供) --></label>
+        <name>BookingChildrenDef__c</name>
+    </fields>
+    <fields>
+        <help><!-- Google Chart API Argument --></help>
+        <label><!-- BookingCurves引数 --></label>
+        <name>BookingCurves__c</name>
+    </fields>
+    <fields>
+        <help><!-- 標準ご予約画面の項目（女性）デフォルト値 --></help>
+        <label><!-- 予約人数(女性) --></label>
+        <name>BookingFemailsDef__c</name>
+    </fields>
+    <fields>
+        <help><!-- 一括予約、画面上で部屋タイプを選ぶ際、ユーザは複数店舗に所属している場合、所属店舗全ての部屋タイプが表示フラグ
+TRUE：所属店舗全ての部屋タイプが表示される
+FALSE：デフォルト所属店舗の部屋タイプのみ表示される（デフォルト値） --></help>
+        <label><!-- 一括予約の複数店舗の部屋タイプ表示フラグ --></label>
+        <name>BookingFlexShopsFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- 標準ご予約画面の項目（男性）デフォルト値 --></help>
+        <label><!-- 予約人数(男性) --></label>
+        <name>BookingMansDef__c</name>
+    </fields>
+    <fields>
+        <help><!-- 見積書の印刷ボタンを押したタイミング、発行日付が常に今日日付でデフォルト値として見積書を発行する機能有効フラグ
+TRUE:該当機能有効
+FALSE:該当機能無効（デフォルト値） --></help>
+        <label><!-- 見積の発行日付のデフォルト値を制御フラグ --></label>
+        <name>BookingReceiptDateDefaultInfo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 0/空欄:金額合計は右下に表示する（デフォルト値）　
+1:金額合計は左上に表示する（請求書と同じフォーマット） --></help>
+        <label><!-- 見積書レイアウト表示コード --></label>
+        <name>BookingReportLayoutCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 見積書にハンコ表示・非表示
+TRUE:ハンコ表示(Default値）
+FALSE:ハンコ非表示 --></help>
+        <label><!-- 見積書ハンコ表示・非表示 --></label>
+        <name>BookingReportStampIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当API定義により、CTIから引き渡すの車ナンバー情報は自動的にお客様新規画面に設定する --></help>
+        <label><!-- CTI車ナンバー --></label>
+        <name>CTICarAPIName__c</name>
+    </fields>
+    <fields>
+        <label><!-- CTI Call Columns xml Name --></label>
+        <name>CTI_Call_Columns_xml_Name__c</name>
+    </fields>
+    <fields>
+        <help><!-- 車ナンバーからお客様情報をヒントの場合、「XX様到着致しました」メッセージを放送する機能
+TRUE:該当機能利用
+FALSE：該当機能利用しない（デフォルト値） --></help>
+        <label><!-- CTI_CarNo_Speech --></label>
+        <name>CTI_CarNo_Speech__c</name>
+    </fields>
+    <fields>
+        <label><!-- CTI_type_window --></label>
+        <name>CTI_type_window__c</name>
+    </fields>
+    <fields>
+        <help><!-- こよみ画面、宴会場情報を画面に表示・非表示制御フラグ
+TRUE: 画面に宴会場集計情報を表示する
+FALSE:画面に宴会場集計情報を非表示する (Default値) --></help>
+        <label><!-- こよみの宴会場情報表示 --></label>
+        <name>CalendarIsShowEnaki__c</name>
+    </fields>
+    <fields>
+        <help><!-- 現金合せ画面に「現金合せ履歴」ボタンから起動先のレポート名 --></help>
+        <label><!-- レポート_現金合せ履歴レポート名 --></label>
+        <name>CaseRollupBookRepNm__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿帳登録画面、ご予約の合計人数により入力明細欄を自動作成する・しないフラグ
+TRUE:入力欄作成不要
+FALSE：入力欄作成する（デフォルト値） --></help>
+        <label><!-- 宿帳明細入力欄自動作成不要 --></label>
+        <name>CashRegNoCreateBlankRowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿帳登録画面、お客様名が空欄でも宿帳が自動作成する、しない切り替えフラグ
+TRUE:登録を行う
+FALSE：登録しない（デフォルト値） --></help>
+        <label><!-- 宿帳空欄でも明細作成フラグ --></label>
+        <name>CashRegNullContactCanInsFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿帳サイン後の「保存」押下すると、該当予約をチェックインにする機能
+注：レジカードコード：4、5、7対応済
+TRUE：該当予約をチェックインにする
+FALSE：連動処理なし（デフォルト値） --></help>
+        <label><!-- 宿帳保存後自動チェックインフラグ --></label>
+        <name>CashRegSaveLeadCheckInFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿帳自動作成フラグ
+TRUE:宿帳自動作成する（デフォルト値）
+FALSE:宿帳自動作成しない --></help>
+        <label><!-- 宿帳自動作成フラグ --></label>
+        <name>CashRegisterAutoCreateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿帳一括印刷の際に、１ページに２室宿帳情報を印刷する・しない切替フラグ
+TRUE:１ページ２室宿帳情報を印刷する
+FALSE:１ページ１室宿帳情報を印刷する（デフォルト値）
+前提条件：サイン機能が無効　かつ　レジカードコードが７のみ該当機能を利用ください --></help>
+        <label><!-- ページ毎に２室レジカード出力フラグ --></label>
+        <name>CashRegisterBulkFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- レジカードPDF出力の際に、店舗情報を選択可否フラグ
+TRUE：店舗選択可能、選択店舗により、該当店舗のロゴをPDFに出力する
+FALSE:　店舗選択不要、ユーザ所属店舗のログをPDFに出力する（デフォルト値） --></help>
+        <label><!-- レジカードのロゴフラグ --></label>
+        <name>CashRegisterLogo__c</name>
+    </fields>
+    <fields>
+        <help><!-- サイン機能の利用タイプを定義する
+1：別ウインドウにサインする（デフォルト値）
+2：レジカード画面の署名欄に直接サインする
+3：レジカード画面に直接サインできる --></help>
+        <label><!-- レジカードサインタイプ --></label>
+        <name>CashRegisterSignType__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面（詳細情報ウインドウのレジカードボタン）、宿帳画面（署名リンク）から、レジカード（レジカードコード：４のみ）画面を起動する場合、サイン用画面を起動するがどうか判断用フラグ
+TRUE：署名用レジカードを起動する
+FALSE:署名用レジカードを起動しない、直接レジカードPDFを表示する（デフォルト値） --></help>
+        <label><!-- レジカードサインフラグ --></label>
+        <name>CashRegisterSign__c</name>
+    </fields>
+    <fields>
+        <help><!-- レジカード画面遷移制御コード
+コード：1 B5サイズ、アンケート質問あり
+コード：2 B5サイズ、アンケート質問なし
+コード：3 B5サイズ、アンケート質問なし、プレ印刷用紙文字列のみ
+コード：4 B5サイズ、客室係記入ページあり
+コード：5 B5サイズ、代表者のみ、勤務先情報あり
+コード：6 A5サイズ、代表者のみ、国籍情報あり
+コード：7 A5サイズ（横）、代表者のみ、国籍情報あり --></help>
+        <label><!-- レジカードコード --></label>
+        <name>CashRegisterSwitchCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 機能の処理結果を通知用チャターグループ名を定義する
+書式：1:グループ名A,グループ名B;2:グループ名C.グループ名D
+1→2way連携結果通知
+2→車ナンバー通知
+3→勤怠修正申請
+4→PCA/FREEE/勘定奉行連携出力グループ名
+5→POS取込通知
+6→IOT通知
+7→予定表PDF通知
+8→予約チェックアウト通知
+9→ラックレートTier変更通知
+10→勤怠チェック結果通知
+11→入金消込チェック通知
+12→予約チェックイン通知 --></help>
+        <label><!-- チャターグループ名 --></label>
+        <name>ChatterGroupName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「車ナンバー通知」「IOT通知」メッセージは簡易方式でチャターグループへポストするフラグ
+TRUE：簡易メッセージ
+FALSE:通常メッセージ（デフォルト値) --></help>
+        <label><!-- チャターポスト簡易メッセージフラグ --></label>
+        <name>ChatterGroupSimpleMsgFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 画面の指定日を指定した後、ルームインジケータや予定表、タイムテーブルを横断的に見る時にその都度同じ指定日を設定、データを表示される
+TRUE: 機能有効
+FALSE: 機能無効（デフォルト値） --></help>
+        <label><!-- 指定日横断有効フラグ --></label>
+        <name>CheckInDayUserConfigFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- チェックインの通知メッセージをチャターへポストする、しないフラグ
+TRUE:ポストする
+FALSE:ポストしない（デフォルト値） --></help>
+        <label><!-- チェックイン通知チャターへポストフラグ --></label>
+        <name>CiMessageToChatterFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- チェックイン音声通知機能有効するがどうか制御フラグ
+TRUE:音声通知する
+FALSE:音声通知しない（デフォルト値） --></help>
+        <label><!-- チェックイン音声通知機能 --></label>
+        <name>CiSpeechAlertFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 清掃指示データの作成対象日付の制御フラグ
+TRUE:チェックアウトタイミングの日付の清掃指示データを作成する
+FALSE:チェックアウトすると、チェックアウト日の清掃指示データを作成する（デフォルト値） --></help>
+        <label><!-- 清掃指示データの対象日付制御区分 --></label>
+        <name>ClearDataCreateOnCheckoutDay__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計画面のチェックアウトボタンをクリック後、会計書出力ページを自動起動する・しないフラグ
+TRUE:チェックアウトボタンをクリック後、該当予約情報をチェックアウトして、会計書出力ページを起動する
+FALSE:チェックアウトボタンをクリック後、該当予約情報をチェックアウトのみ、会計書出力ページを起動しない --></help>
+        <label><!-- チェックアウト+会計書作成フラグ --></label>
+        <name>CoAndShowAccountWin__c</name>
+    </fields>
+    <fields>
+        <help><!-- チェックアウトの通知メッセージをチャターへポストする、しないフラグ
+TRUE:ポストする
+FALSE:ポストしない（デフォルト値） --></help>
+        <label><!-- チェックアウト通知チャターへポストフラグ --></label>
+        <name>CoMessageToChatterFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- チェックアウト音声通知機能有効するがどうか制御フラグ
+TRUE:音声通知する
+FALSE:音声通知しない（デフォルト値） --></help>
+        <label><!-- チェックアウト音声通知機能 --></label>
+        <name>CoSpeechAlertFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「割当済」の色設定用、デフォルト値：#00ccff 
+設定例：royalblue
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_割当済」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_割当済 --></label>
+        <name>ColorRSRoomAssigned__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「故障」の色設定用、デフォルト値：#2554C7 
+設定例：gray
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_故障」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_故障 --></label>
+        <name>ColorRSRoomBad__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「出発予定」の色設定用、デフォルト値：#FDD017 
+設定例：gold
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_出発予定」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_出発予定 --></label>
+        <name>ColorRSRoomChkOutDay__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「出発」の色設定用、デフォルト値：#F75D59 
+設定例：coral
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_出発」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_出発 --></label>
+        <name>ColorRSRoomChkOut__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「未清掃」の色設定用、デフォルト値：#B0C4DE 
+設定例：lightsteelblue
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_未清掃」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_未清掃 --></label>
+        <name>ColorRSRoomNoClean__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「外出」の色設定用、デフォルト値：#CCCCCC 
+設定例：Silver
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_外出」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_外出 --></label>
+        <name>ColorRSRoomOut__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面のステータス「滞在」の色設定用、デフォルト値：#90EE90 
+設定例：limegreen
+店舗情報なしまたは店舗情報項目「色_ルームインジケータ_滞在」を登録されない場合、該当項目の設定値で画面に表示する --></help>
+        <label><!-- 色_ルームインジケータ_滞在 --></label>
+        <name>ColorRSRoomStay__c</name>
+    </fields>
+    <fields>
+        <help><!-- 新規予約画面上でお客様検索をした後に表示される候補項目の定義
+お客様の項目のみ定義可能（カンマ「,」で複数API項目を定義可能）
+例：API1,API2,API3
+注：データ型が「日付、日付/時間、テキストエリア、ロングテキスト」の項目を定義不可 --></help>
+        <label><!-- 客様検索機能のカスタマイズ表示項目 --></label>
+        <name>ContactSearchFields__c</name>
+    </fields>
+    <fields>
+        <help><!-- お客様利用回数集計方式区分
+1：予約データ件数で集計（Defautl値）
+2：実際の来店回数で集計（N部屋N泊連泊でも、１回で集計する） --></help>
+        <label><!-- お客様利用回数集計区分 --></label>
+        <name>ContactUsageCountDiv__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_カスタム時間割 --></label>
+        <name>CustomTimeReport__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_RFMランク別集計レポート名 --></label>
+        <name>CustomerRankKey__c</name>
+    </fields>
+    <fields>
+        <help><!-- 日帰お客様はデフォルト滞在時間数を定義する、時間単位 --></help>
+        <label><!-- 到着日と出発日同一日デフォルト滞在時間数 --></label>
+        <name>DayUseDefaultStayHours__c</name>
+    </fields>
+    <fields>
+        <help><!-- 書式：[HH:MM]
+中継アプリから日帰り予約を取込する場合、到着時刻と出発時刻を未設定する場合
+到着時刻は　該当設定値で設定する、
+出発時刻は　到着時刻 + 2時間で設定する --></help>
+        <label><!-- 到着日と出発日同一日予約到着時刻 --></label>
+        <name>DayUseEntryTime__c</name>
+    </fields>
+    <fields>
+        <help><!-- 見積明細、会計明細のデフォルト行数
+&quot;5&quot;（デフォルト値） --></help>
+        <label><!-- 明細デフォルト行数 --></label>
+        <name>DetailsInputDefaultLines__c</name>
+    </fields>
+    <fields>
+        <help><!-- 見積書、会計書、請求書の内消費税の英語表示文字 --></help>
+        <label><!-- 内消費税英語表示文言 --></label>
+        <name>EnglishTaxLabel__c</name>
+    </fields>
+    <fields>
+        <help><!-- 複数見積機能、既存見積を修正後、修正した内容は既存見積明細に反映する・しないフラグ
+TRUE：反映しない
+FALSE:反映する（デフォルト値） --></help>
+        <label><!-- 複数見積の既存見積へ反映制御フラグ --></label>
+        <name>EstIsCanEditFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 為替レート取得APIのレート価額設定区分：
+1:買いレート
+2:中点 (Default値）
+3:売りレート --></help>
+        <label><!-- 為替レート取得バッチレート設定区分 --></label>
+        <name>ExchangeRateApiRateKbn__c</name>
+    </fields>
+    <fields>
+        <help><!-- JPY通貨以外からJPY通貨の請求書を作成する場合、為替レート取得区分を設定する
+&quot;1&quot;: 請求書ボタンクリックの会計の「売上計上日」にて、該日の為替レートで外貨から日本円の請求額を計算する（Default値）
+&quot;2&quot;：各会計の「売上計上日」にて、為替レートを別々取得して、各売上計上日の請求額を計算する --></help>
+        <label><!-- 為替レート取得区分 --></label>
+        <name>ExchangeRateQueryDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- 為替レート取得のスケジュール起動時間（HH）を設定する
+設定範囲（０〜２３）
+例：朝９時の為替レートを取得したい場合、該当数値は９に設定する --></help>
+        <label><!-- 為替レート取得バッチ起動時間（HH） --></label>
+        <name>ExchangeRateStartHours__c</name>
+    </fields>
+    <fields>
+        <help><!-- 日本円以外の通貨から日本円に金額変更する場合、該当消費税率で消費税を計算する --></help>
+        <label><!-- 日本消費税率 --></label>
+        <name>ExchangeTaxRate__c</name>
+    </fields>
+    <fields>
+        <help><!-- 施設の会計書出力レイアウト種類を判別用区分コード
+コード詳細意味は項目説明内容を参照ください --></help>
+        <label><!-- 施設コード --></label>
+        <name>FacilityCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書に、施設組織情報表示内容（Email)設定用 --></help>
+        <label><!-- 施設EMAIL --></label>
+        <name>FacilityEmail__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「未使用」 --></help>
+        <label><!-- 施設名 --></label>
+        <name>FacilityName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書の「お振込先」の振込１番目の表示情報を設定する、最大３行目のお振込先情報を定義可能 
+設定例：○○銀行△△支店　普通 1234567 --></help>
+        <label><!-- 施設振込先１ --></label>
+        <name>FacilityPayee1__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書の「お振込先」の振込２番目の表示情報を設定する、最大３行目のお振込先情報を定義可能 
+設定例：○○銀行△△支店　普通 1234567 --></help>
+        <label><!-- 施設振込先２ --></label>
+        <name>FacilityPayee2__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書の「お振込先」の振込３番目の表示情報を設定する、最大３行目のお振込先情報を定義可能
+設定例：○○銀行△△支店　普通 1234567 --></help>
+        <label><!-- 施設振込先３ --></label>
+        <name>FacilityPayee3__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書の「口座名義人」の表示情報を設定する --></help>
+        <label><!-- 施設振込先口座 --></label>
+        <name>FacilityPayeeAcount__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書に、施設組織情報表示内容（URL)設定用 --></help>
+        <label><!-- 施設URL --></label>
+        <name>FacilityWebsite__c</name>
+    </fields>
+    <fields>
+        <help><!-- 施設最大客室数定義する --></help>
+        <label><!-- 施設客室数 --></label>
+        <name>GuestRooms__c</name>
+    </fields>
+    <fields>
+        <help><!-- 理論在庫と実際在庫との連動処理要／不要切り替えフラグ
+TRUE:  連動が不要（棚卸画面、在庫数を入力すると、実際在庫へ設定する、リクエストバッチ実施不要）
+FALSE: 連動が必要（棚卸画面、在庫数を入力すると、実際在庫へ設定する、リクエストバッチ実施要）(デフォルト値) --></help>
+        <label><!-- 棚卸し機能を使用する・使用しないフラグ --></label>
+        <name>InventorySaveFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- Iotのワーニングメッセージの文言定義
+書式：メッセージ種別:X@locationX@valueX
+説明：
+メッセージ種別:水量[WaterQuqntity]、水温[WaterTemperature]、人数[Persons]
+X:カスタマイズ文言
+@location:検知の場所(省略可)
+@value:検知値(省略可) --></help>
+        <label><!-- IOT機能通知文言定義 --></label>
+        <name>IotMessageCustomDef__c</name>
+    </fields>
+    <fields>
+        <help><!-- IOT機能通知文言ジョイン機能文言有効がどうか制御フラグ
+TRUE:通知文言ジョインする（デフォルト値）
+FALSE：通知文言ジョインしない --></help>
+        <label><!-- IOT機能通知文言ジョイン機能 --></label>
+        <name>IotMessageJoinFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- IOTの通知メッセージをチャターへポストする、しない制御フラグ
+TRUE:ポストする（デフォルト値）
+FALSE:ポストしない --></help>
+        <label><!-- IOT機能通知チャターへポスト制御 --></label>
+        <name>IotMessageToChatterFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- IOT機能正常状態（Normal）を受信のとき、音通知、チャターへポストをする・しない制御フラグ
+TRUE：音通知、チャターへポストをする
+FALSE：音通知、チャターへポストをしない（デフォルト値） --></help>
+        <label><!-- IOT機能正常値の通知機能制御 --></label>
+        <name>IotNormalStatusAlertFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- IOT音声通知機能有効するがどうか制御フラグ
+TRUE:音声通知する（デフォルト値）
+FALSE:音声通知しない --></help>
+        <label><!-- IOT音声通知機能 --></label>
+        <name>IotSpeechAlertFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- IOTの状態管理機能が有効、無効を制御（IOTクライアント側はVer.インターフェイス4対応済後、該当パラメータを「ON」する可能）
+TRUE：マップ画面を初期表示のとき、IOT既存の最新状態情報を画面に表示する
+FALSE:マップ画面を初期表示のとき、IOT既存の最新状態情報を画面に表示しない --></help>
+        <label><!-- IOT機能状態管理機能 --></label>
+        <name>IotStatusManagerFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 未清掃状態は清掃終了の操作をかけるまで表示する・しないフラグ
+TRUE:清掃終了まで未清掃状態を表示する
+FALSE:日毎に清掃状態を切り替えする（デフォルト値） --></help>
+        <label><!-- 未清掃保持フラグ --></label>
+        <name>IsNoCleanKeepFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- 項目変更履歴情報（現金合わせ変更履歴、会計編集情報変更履歴）自動作成する・しない切替フラグ
+TRUE：自動作成する（デフォルト値）
+FALSE:自動作成しない --></help>
+        <label><!-- 項目変更履歴自動作成フラグ --></label>
+        <name>ItemChangeHistoryAutoCreateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約の請求書ボタンを押下して、会計編集画面の請求書ボタンで起動されたウインドウUIと同じする・しない切り替えフラグ
+TRUE：ご予約の請求書ボタンを押下して、会計編集画面の請求書ボタンで起動されたウインドウUIと同じ
+FALSE：ウインドウを表示されない（カスタムメタデータ型の定型文を設定される場合、起動ウインドウあり） --></help>
+        <label><!-- 請求書作成指示UI統一フラグ --></label>
+        <name>LeadBillStartWindowUIFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約昼の太陽マークが表示する時刻リストを定義する、ご予約の到着時刻は該当リストに含まれるの日帰りのご予約に昼の太陽マークが表示する 
+書式：「&quot;時:分&quot;」複数時刻をカマで連結を複数定義できる 
+例：「&quot;11:00&quot;,&quot;12:00&quot;,&quot;13:00&quot;,&quot;14:00&quot;,&quot;15:00&quot;」 --></help>
+        <label><!-- ご予約昼の太陽マークが表示する時刻定義1 --></label>
+        <name>LeadIsHiruKey1__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約昼の太陽マークが表示する時刻リストを定義する、ご予約の到着時刻は該当リストに含まれるの日帰りのご予約に昼の太陽マークが表示する
+書式：「&quot;時:分&quot;」複数時刻をカマで連結を複数定義できる
+例：「&quot;11:00&quot;,&quot;12:00&quot;,&quot;13:00&quot;,&quot;14:00&quot;,&quot;15:00&quot;」 --></help>
+        <label><!-- ご予約昼の太陽マークが表示する時刻定義 --></label>
+        <name>LeadIsHiruKey__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約の「請求先」項目値をお客様の取引先で自動設定する・しないフラグ
+TRUE:ご予約の「請求先」項目値をお客様の取引先で自動設定する
+FALSE:自動設定しない(デフォルト値） --></help>
+        <label><!-- ご予約の請求先自動設定フラグ --></label>
+        <name>LeadRefAccountAutoSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- N roomsのとき、親部屋にあつめるかまたは、分割するかパラメータにて、切り替えられるように対応
+1:予約情報は親部屋にあつめる
+2:予約情報は分割設定 (Default値） --></help>
+        <label><!-- 親部屋集める/分割するフラグ --></label>
+        <name>LeadSplitDivCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約人数を変更したら予約見積明細の数量を変更する／しない
+TRUE:　予約人数を変更したら予約見積明細の数量を変更する
+FALSE: 予約人数を変更したら予約見積明細の数量を変更しない（デフォルト値） --></help>
+        <label><!-- 予約人数と予約見積明細の数量連動制御フラグ --></label>
+        <name>LeadStayPersonsIsSyncToEstitemFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計編集画面の会計支払の予約金表示・非表示に切り替え制御　Default：False
+TRUE:会計支払のメディア種別に、「予約金」表示
+FALSE:会計支払のメディア種別に、「予約金」非表示 --></help>
+        <label><!-- 会計支払メディア種別（予約金）表示・非表示フラグ --></label>
+        <name>MediaTypeSubscriptionIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連絡事項は一つ入力項目に変更し、フォントサイズ、色を変更できる機能切替フラグ
+TRUE:機能有効
+FALSE:機能無効（デフォルト値） --></help>
+        <label><!-- ルームインジケータ連絡事項がリッチ表示フラグ --></label>
+        <name>MessageIsRichTextFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面に、「連絡事項」セクション表示・非表示制御フラグ
+TRUE:表示
+FALSE:非表示 --></help>
+        <label><!-- ルームインジケータ連絡事項表示・非表示フラグ --></label>
+        <name>MessageIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連絡事項内容は自動的に去年度の同じ年月（日）の連絡事項を表示制御
+TRUE:最新連絡事項が無いと、去年度の連絡事項を表示する 
+FALSE:最新連絡事項のみ表示する（デフォルト値） --></help>
+        <label><!-- 連絡事項過去データ表示 --></label>
+        <name>MessageOldDataIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連絡事項表示行数設定（1〜6）［Default値：3］ --></help>
+        <label><!-- 連絡事項表示行 --></label>
+        <name>MessageRows__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗ごとの連絡事項を区別する・しない
+TRUE:店舗ごとの連絡事項を区分する
+FALSE:全店舗の連絡事項を共有する（デフォルト値） --></help>
+        <label><!-- 店舗ごとの連絡事項 --></label>
+        <name>MessageShopCodeDivFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 共通定義：「未清掃保持フラグ」がTRUE前提
+未清掃状態チェックを実施際に、過去X日間清掃データをチェックの日数を定義する --></help>
+        <label><!-- 未清掃保持チェック日数 --></label>
+        <name>NoCleanKeepDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計編集画面に、会計明細の合計金額は０円の場合、請求書非表示を自動チェックされるがどうか切替フラグ
+TRUE：自動設定
+FALSE:自動設定なし（Default値） --></help>
+        <label><!-- ０円自動非表示設定機能 --></label>
+        <name>NoShowRequestFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- プラン設定機能、オプション商品設定可否切替フラグ
+注：軽減税率機能有効フラグがTRUE設定前提
+
+0:プラン設定画面、オプション商品明細設定機能なし（デフォルト値）
+1:プラン設定画面、オプション商品明細設定機能あり --></help>
+        <label><!-- プランオプション商品フラグ --></label>
+        <name>OptionPlanSetMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ/タイムテーブル機能、
+お部屋をクリックした際の部屋詳細情報に「外出」「戻る」ボタンを表示し、押すと「外出」「滞在」状態になり部屋の色が変わる
+TRUE:該当機能が有効
+FALSE:該当機能が無効（デフォルト値） --></help>
+        <label><!-- 外出管理フラグ --></label>
+        <name>OutButtonShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- プラン設定画面の明細のデフォルト行数 10（デフォルト値） --></help>
+        <label><!-- プラン明細デフォルト行数 --></label>
+        <name>PDDetailsInputDefaultLines__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当パラメータON設定不可!!!
+軽減税率機能有効前提
+見積書、会計書、請求書の明細を表示する場合、プラン明細も出力する・しない切替フラグ
+TRUE：プラン明細出力表示する
+FALSE：プラン明細出力表示しない（デフォルト値） --></help>
+        <label><!-- RFU --></label>
+        <name>PDFPlanBrkIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計オブジェクトのレシートNo.設定方式判別区分
+レシートNoは「0000」の場合：自動採番機能にて、レシートNoに反映する
+レシートNoは「0000」以外の場合、該当レシートNoがそのまま利用する
+レシートNoは「0010」はPOS取込機能で利用済 --></help>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書印刷するとき、該当PDFファイルが複数保持する・上書き切り替えフラグ
+TRUE:該当PDFファイルが複数保持する
+FALSE:該当PDFファイルが上書き（デフォルト値） --></help>
+        <label><!-- 会計書PDF複数保持フラグ --></label>
+        <name>PdfGeneralFlgForAccountDupVer__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書印刷するとき、該当PDFファイルを会計の添付ファイルとして、保存する（最終印刷したPDFのみ保存する）
+分割印刷する場合、分割NO単位でPDFファイルを保存する
+TRUE：PDFファイルを自動保存する
+FALSE：PDFファイルをを自動保存しない（デフォル値） --></help>
+        <label><!-- 会計書PDF --></label>
+        <name>PdfGeneralFlgForAccount__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書印刷するとき、該当PDFファイルが複数保持する・上書き切り替えフラグ
+TRUE:該当PDFファイルが複数保持する
+FALSE:該当PDFファイルが上書き（デフォルト値） --></help>
+        <label><!-- 請求書PDF複数保持フラグ --></label>
+        <name>PdfGeneralFlgForBillDupVer__c</name>
+    </fields>
+    <fields>
+        <help><!-- 請求書印刷するとき、該当PDFファイルを会計の添付ファイルとして、保存する（最終印刷したPDFのみ保存する） 
+分割印刷する場合、分割NO単位でPDFファイルを保存する 
+TRUE：PDFファイルを自動保存する 
+FALSE：PDFファイルをを自動保存しない（デフォル値） --></help>
+        <label><!-- 請求書PDF --></label>
+        <name>PdfGeneralFlgForBill__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_当月の個人勤怠情報 --></label>
+        <name>PersonTMInfoReport__c</name>
+    </fields>
+    <fields>
+        <help><!-- プラン詳細マイナス金額入力可否切り替えフラグ
+TRUE：入力可能
+FALSE:入力不可(デフォルト） --></help>
+        <label><!-- プラン詳細マイナス金額入力可否フラグ --></label>
+        <name>PlanBreakdownMinusFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 「未使用」 --></help>
+        <label><!-- プラン商品コード頭数字 --></label>
+        <name>PlanProdCdPrefixNum__c</name>
+    </fields>
+    <fields>
+        <help><!-- POS取込で作成された会計データに対して、会計人數は関連のご予約と会計へ連携する、しないフラグ
+TRUE：該当会計データの会計人數は関連のご予約、会計の人數は連携する（いずれ変更すると、関連データの人數を一緒に同じ人數で更新する）
+FALSE：連携なし（デフォルト値） --></help>
+        <label><!-- POS人數はご予約人數へ連動フラグ --></label>
+        <name>PosDataStayPersonsSyncLeadFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- POS取込の対象ファイル(TTOTAL.csv,TTEND.csv,TITEM.csv)はドキュメントにアップロードとき、
+ドキュメントの一意の名前情報を設定する(定義の順番は固定ので、注意ください)
+書式：TTOTALの一意の名前,TTENDの一意の名前,TITEMの一意の名前
+例：ttotal,ttend,titem --></help>
+        <label><!-- POS取込の対象ファイルの一意の名前 --></label>
+        <name>PosFileKeyDef__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上取込処理判別区分：0: NOP, 1:Jinya, 2:HC --></help>
+        <label><!-- POSレジ --></label>
+        <name>Posreg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ等で表示される新規予約画面と予約詳細画面上の見積明細の部分において、
+虫眼鏡マークを押すと出てくる検索画面レイアウトを定義する
+0:商品検索結果一覧を表示、商品選択形式（デフォルト値）
+1:会計画面で仕様しているボタン形式 --></help>
+        <label><!-- 会計商品検索レイアウト --></label>
+        <name>ProductSearchLayoutKbn__c</name>
+    </fields>
+    <fields>
+        <help><!-- TRUE：商品検索方式は前方一致
+FALSE:商品検索方式は部分一致（デフォルト値） --></help>
+        <label><!-- 会計商品の検索方式 --></label>
+        <name>ProductSearchTypeFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 商品入力の際に表示の商品一覧の並び順会計商品項目API値
+例：商品コードで昇順表示したい場合: Field3__c asc --></help>
+        <label><!-- 商品表示並び順定義 --></label>
+        <name>ProductSortKey__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入入力画面、仕入明細レイアウトを表示する・しない切替フラグ
+仕入明細入力レイアウトを表示：TRUE:
+仕入明細入力レイアウトを非表示：FALSE:（デフォルト値） --></help>
+        <label><!-- 仕入明細表示・非表示制御 --></label>
+        <name>PurchaseDetailIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_仕入高[調理] --></label>
+        <name>PurchaseReport__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約新規の場合、過去予約の部屋割り当てる実績により、部屋を自動割り当てする・しない切替フラグ
+TRUE:部屋を自動割り当てする
+FALES:部屋を自動割り当てしない（デフォルト値）
+注：リクエストバッチでデータ学習後、該当機能が有効の前提 --></help>
+        <label><!-- 部屋自動割当機能切替フラグ --></label>
+        <name>QQNRoomAssignFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- アンケート出力のタイミング、指定言語のアンケートを選択出力できる機能の制御フラグ
+TRUE：出力したい言語を切替選択できる機能あり
+FALSE:出力したい言語を切替選択できる機能なし、ユーザの言語により、対応言語のアンケートを自動出力する（デフォルト値） --></help>
+        <label><!-- アンケートの出力言語を切替選択できる機能制御 --></label>
+        <name>QuestionnaireMulitiLangFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ラックレート取込機能、ベースプラン別取り込み機能有効・無効切替フラグ
+TRUE：ベースプラン別取り込みできること
+FALSE：既存ラックレート取込機能（デフォルト値） --></help>
+        <label><!-- ラックレート取込(ベースプラン別)機能有効 --></label>
+        <name>RaceRateImportByBasePlanFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート__ラックレート設定情報レポート名 --></label>
+        <name>RaceRateReport__c</name>
+    </fields>
+    <fields>
+        <help><!-- CSVファイルをアップロードにより、ラックレート別、ベースプラン別部屋タイプ販売状態を一括設定機能有効・無効切替フラグ
+TRUE:ラックレート取込画面からラックレート別、ベースプラン別部屋タイプの販売状態を一括設定機能有効する
+FALSE:一括設定機能無効(デフォルト値） --></help>
+        <label><!-- RFU --></label>
+        <name>RackRatePlanConfigFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ラックレートの「人数」デフォルト値(1〜10) 
+店舗情報側に設定される場合、店舗情報側の設定が優先 
+店舗なし　又は　店舗側に未設定場合、該当設定値で使う --></help>
+        <label><!-- ラックレート人数デフォルト値 --></label>
+        <name>RackRateTablePeopleDefault__c</name>
+    </fields>
+    <fields>
+        <help><!-- ラックレートの「Tier」デフォルト値(Tier1〜Tier8)
+店舗情報側に設定される場合、店舗情報側の設定が優先
+店舗なし　又は　店舗側に未設定場合、該当設定値で使う --></help>
+        <label><!-- ラックレートTierデフォルト値 --></label>
+        <name>RackRateTableTierDefault__c</name>
+    </fields>
+    <fields>
+        <help><!-- リカイアス機能有効・無効フラグ
+TRUE:リカイアス機能有効
+FALSE:リカイアス機能無効（デフォルト値） --></help>
+        <label><!-- リカイアスフラグ --></label>
+        <name>RecaiusFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入金の場合、該当会計画面に入金方式定義できる
+1: 入金日登録する
+2: 入金確認のチェックボックス(デフォルト値) --></help>
+        <label><!-- 会計の入金確認登録方式 --></label>
+        <name>ReceiptDtIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 軽減税率有効の場合、プラン金額計算方法切り替えフラグ
+TRUE:プラン明細の単価、消費税、サビース料で金額計算し、明細金額を合計して、プラン金額に設定する
+FALSE:プラン明細の単価とプランの消費税とサビース料設定値で計算して、プラン金額に設定する（デフォルト値） --></help>
+        <label><!-- 軽減税率、プラン金額が明細別計算フラグ --></label>
+        <name>ReducedTaxPlanDetailCalFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 軽減税率機能有効、値引きが存在場合、値引き計算モードを定義する
+0:合計金額からの8%10%商品の割合からの値引き(デフォルト値）
+1:8%対象商品からの値引き
+2:10%対象商品からの値引き --></help>
+        <label><!-- 軽減税率、値引き割合モード --></label>
+        <name>ReducedTaxProportionMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当機能有効により、多税率混在定義可能になる
+TRUE：軽減税率機能有効
+FALSE：軽減税率機能無効（デフォルト値） --></help>
+        <label><!-- 軽減税率機能有効フラグ --></label>
+        <name>ReducedTaxRateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 軽減税率機能有効の場合、合計金額に消費税が０％明細行、値引き関連の明細行及び合計明細行を表示・非表示切り替えフラグ
+書式：0(1),0(1),0(1)   →　0：該当明細行目を非表示、1：該当明細行目を表示
+1桁目：消費税が０％明細行目表示・非表示制御
+2桁目：値引き明細行目表示・非表示制御
+3桁名：合計金額行目表示・非表示制御
+例：消費税が０％非表示、値引き非表示、合計金額を表示したい場合-&gt; 0,0,1 設定する --></help>
+        <label><!-- 軽減税率、合計明細内容非表示設定フラグ --></label>
+        <name>ReducedTaxRowIsHideMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連泊の予約情報の予約ステータスは「NO SHOW、キャンセルまたは、削除への変更」されると、この予約以後の泊目の予約情報を自動的に同じステータスを設定されるがどうか制御フラグ
+TRUE： 一括設定する
+FALSE：一括設定しない（デフォルト値） --></help>
+        <label><!-- 連泊予約一括キャンセル機能制御フラグ --></label>
+        <name>RenpakuBatchCancelIsCanFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連泊の予約情報をチェックアウトされる場合、前日分全てのご予約分をチェックアウト処理を実施する・しないフラグ
+TRUE： 自動でチェックアウトを行う 
+FALSE：自動でチェックアウトを行わない（デフォルト値） --></help>
+        <label><!-- 連泊予約一括チェックアウト機能制御フラグ --></label>
+        <name>RenpakuBatchCheckOutIsCanFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連泊の予約情報はチェックインされると、この予約以後の泊目の予約情報を自動的にチェックインされるがどうか制御フラグ
+TRUE： 自動でチェックインを行う（デフォルト値）
+FALSE：自動でチェックインを行わない --></help>
+        <label><!-- 連泊予約一括チェックイン機能制御フラグ --></label>
+        <name>RenpakuBatchCheckinIsCanFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連泊の予約情報は外出されると、この予約以後の泊目の予約情報を自動的に外出されるがどうか制御フラグ
+TRUE： 同時に外出になる
+FALSE：該当泊目のみ外出状態になる（デフォルト値） --></help>
+        <label><!-- 連泊予約一括外出機能制御フラグ --></label>
+        <name>RenpakuBatchGoingoutIsCanFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理項目の商品明細並べ順表示方式制御
+1:商品名順で明細を表示する　（Default値)
+2:商品コード順で明細を表示する --></help>
+        <label><!-- 予定表料理項目商品並べ順表示方式 --></label>
+        <name>ReportKScheduleCookFieldSortDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予定表の料理集計ウインドウに、料理集計種別定義する
+コード１：項目　「昼」別で料理集計を行う　　　（Default値）
+コード２：項目　「昼と夜」別で料理集計を行う --></help>
+        <label><!-- 予定表料理集計コード --></label>
+        <name>ReportKScheduleCookInfoCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理集計結果表示方式制御
+TRUE:未チェックインの予約の料理とチェックイン済の料理は別々に表示する
+FALSE:一箇所に纏めて集計結果を表示する --></help>
+        <label><!-- 予定表料理集計表示方式 --></label>
+        <name>ReportKScheduleCookInfoDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予定表のExcel出力機能に、予約の料理情報は出力書式制御
+１：ご予約の料理情報は纏めて１セールに出力する（デフォルト値)
+２：ご予約の料理情報は一番側に、商品名1,数量1,商品名2,数量2 ... 商品名N,数量N,書式で出力する --></help>
+        <label><!-- 予定表Excel出力の料理情報出力モード --></label>
+        <name>ReportKScheduleExcelFoodMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予定表のExcel出力機能の場合、文字列の折り返し文字数定義
+該当文字数を超えると、改行を行う
+数字０を入れると、制御なしで処理を行う --></help>
+        <label><!-- 予定表Excel出力の折り返し文字数 --></label>
+        <name>ReportKScheduleExcelLineSize__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連絡事項は一つ入力項目に変更し、フォントサイズ、色を変更できる機能切替フラグ 
+TRUE:機能有効
+FALSE:機能無効（デフォルト値） --></help>
+        <label><!-- 予定表連絡事項がリッチ表示フラグ --></label>
+        <name>ReportKScheduleMessageIsRichTextFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予定表画面に、「連絡事項」セクション表示・非表示制御フラグ
+TRUE:表示
+FALSE:非表示（Default) --></help>
+        <label><!-- 予定表連絡事項表示・非表示フラグ --></label>
+        <name>ReportKScheduleMessageIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計ＯＰに定義する料理範囲データの抽出Ｗｈｅｒｅ条件（会計ＯＰのＮａｍｅに定義の文言を含め場合、料理として、抽出される）
+データ構造：（朝食集計情報は個別に表示したい場合、OPTION値は１に設定すると、集計の最後行目に、朝食を表示する）
+文言キー:朝食フラグ(OPTION),
+文言キー:朝食フラグ(OPTION)
+例：会席,お膳,単品,仕出し,朝食:1
+例の説明：見積もり明細から料理抽出の条件は 会計ＯＰの名は [会席][お膳][単品][仕出し][朝食]いずれが --></help>
+        <label><!-- レポート_予定表抽出条件1 --></label>
+        <name>ReportKScheduleWhere__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書(施設コード33、34)、見積書、発注書、注文請書、納品書、検収書宛名が一定文字数を超えた場合に自動改行がどうか切り替えフラグ
+TRUE：自動改行しない
+FALSE：自動改行する（デフォルト値） --></help>
+        <label><!-- 宛名自動改行フラグ --></label>
+        <name>ReportPdfTitleAutoBreakFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Reservation Account Reference --></label>
+        <name>ResAccRef__c</name>
+    </fields>
+    <fields>
+        <help><!-- 車ナンバーのHTMLのIDの情報を格納する、自動設定するため、手動設定が不要 --></help>
+        <label><!-- Reservation Car Number Reference --></label>
+        <name>ResCarNoRef__c</name>
+    </fields>
+    <fields>
+        <label><!-- Reservation Contact Reference --></label>
+        <name>ResContRef__c</name>
+    </fields>
+    <fields>
+        <label><!-- Reservation Phone Number Reference --></label>
+        <name>ResPhoneRef__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書、請求書、見積書、予約確認書、レジカードなど出力際に、敬称を選択できるがどうか切り替えフラグ
+TRUE：敬称選択できる
+FALSE:敬称選択できず、様でデフォルトを出力する（デフォルト値）
+注：設定→作成→選択リスト値セット→敬称（リスト値設定変更可能） --></help>
+        <label><!-- 敬称選択機能有効フラグ --></label>
+        <name>RespectIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 六輝情報はルームインジケータ、予約ポップ、タイムテーブルに表示、非表示制御
+TRUE:六輝情報非表示
+FALSE:六輝情報表示（デフォルト値） --></help>
+        <label><!-- 六輝情報非表示 --></label>
+        <name>RokuyoIsNoShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- ネットからの予約自動取込の親部屋マークとして、記号で一文字定義、この定義されたマークを予約名の文字列先頭に付加する（前提条件：N部屋一括予約場合のみ、該当標識を親部屋に付加する） --></help>
+        <label><!-- 親部屋マーク --></label>
+        <name>RoomDelegatePrefix__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータの予約情報詳細ウインドウの「会計書」ボタンをクリックする場合
+出力された会計書の到着日、出発日、泊数情報の取得元切替フラグ
+0/空欄：予約インデックスの到着日、出発日、泊数で会計書を出力する
+1：明細別単位で会計書を出力する（該当部屋に対して、連泊期間により、会計書にを出力する） --></help>
+        <label><!-- ルームインジケータの印刷ボタンから会計書出力内容フラグ --></label>
+        <name>RoomIndicatorAccountPrintCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 書式:HHMM  ４桁に定義ください
+0〜２３間に設定する、設定時間により、当日の営業日切替判断する
+例：　「13」を設定すると、
+　　　　13時前に、前日の予約データをルームインジケータ画面に表示する
+　　　　13時以後、当日の予約データをルームインジケータ画面に表示する --></help>
+        <label><!-- ルームインジケータ営業日切替時間 --></label>
+        <name>RoomIndicatorBusinessHourMM__c</name>
+    </fields>
+    <fields>
+        <help><!-- 未使用 --></help>
+        <label><!-- 未使用 --></label>
+        <name>RoomIndicatorBusinessHour__c</name>
+    </fields>
+    <fields>
+        <help><!-- IN/OUT切り替え時間までは前日の予約情報を表示する、しない制御
+TRUE:IN/OUT切り替え時間までは前日の予約情報を表示する
+FALSE:IN/OUT切り替え時間までは前日の予約情報を表示しない(デフォルト値) --></help>
+        <label><!-- ルームインジケータ営業日切替表示 --></label>
+        <name>RoomIndicatorBusinessSwitch__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面、レジカード一括印刷ボタンを押下したあと、印刷したい部屋を選べる画面を表示する・しない切替フラグ
+1：表示しない（デフォルト）
+2：表示する --></help>
+        <label><!-- ルームインジケータレジカード一括印刷制御コード --></label>
+        <name>RoomIndicatorCashRegisterCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- TRUE:ウィンドウがそのまま 
+FALSE:自動閉じる（デフォルト値） --></help>
+        <label><!-- ルームインジケータの部屋詳細ウィンドウ自動閉じるフラグ --></label>
+        <name>RoomIndicatorDetailWindowAutoCloseFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータから延泊処理を行った際、新規作成された予約の見積明細が自動入力ように改善対応（延泊前の最終日の見積明細からコピーする）
+TRUE:自動入力する
+FALSE:自動入力しない --></help>
+        <label><!-- 延泊の見積明細自動入力 --></label>
+        <name>RoomIndicatorEstIsCloneFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- ルームインジケータ新規後一括予約画面へ遷移する・しない切替選択機能制御 --></label>
+        <name>RoomIndicatorGoBookingFlexAppConfirmFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- ルームインジケータ新規後一括予約画面へ自動遷移制御 --></label>
+        <name>RoomIndicatorGoBookingFlexAppFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面に一括チェックイン機能利用可・不可制御フラグ
+True:一括チェックイン機能利用可
+False:一括チェックイン機能利用不可 （デフォルト値) --></help>
+        <label><!-- ルームインジケータ一括チェックイン機能起動制御フラグ --></label>
+        <name>RoomIndicatorGpCIMsgIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面にアサイン一括取消機能利用可・不可制御フラグ
+True:一括取消機能利用可
+False:一括取消機能利用不可 （デフォルト値) --></help>
+        <label><!-- ルームインジケータアサイン一括取消機能起動制御フラグ --></label>
+        <name>RoomIndicatorGpCancelMsgIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面にキャンセル機能利用する場合、同グループの予約情報を一括キャンセルする・しない機能利用可・不可制御フラグ
+True:一括キャンセル機能利用可
+False:一括キャンセル機能利用不可 （デフォルト値) --></help>
+        <label><!-- ルームインジケータ一括キャンセル機能起動制御フラグ --></label>
+        <name>RoomIndicatorGpClMsgIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面にN部屋の場合、一括外出、入室機能利用可・不可制御フラグ
+True:一括外出、入室機能利用可
+False:一括外出、入室機能利用不可 （デフォルト値) --></help>
+        <label><!-- ルームインジケータ一括外出/入室機能起動制御フラグ --></label>
+        <name>RoomIndicatorGpOIMsgIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面に、部屋名最大表示文字数設定（４文字から９文字まで入力してください） --></help>
+        <label><!-- ルームインジケータ表示最大文字数 --></label>
+        <name>RoomIndicatorInfoMaxLength__c</name>
+    </fields>
+    <fields>
+        <help><!-- 1：顧客様名
+2：予約名 --></help>
+        <label><!-- ルームインジケータ表示名 --></label>
+        <name>RoomIndicatorInfoNameType__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータの詳細画面に「予約のキャンセル」ボタンを表示・非表示フラグ
+TRUE：該当ボタンを非表示
+FALSE：該当ボタンを表示する（デフォルト値） --></help>
+        <label><!-- ルームインジケータ予約のキャンセルボタンの非表示フラグ --></label>
+        <name>RoomIndicatorIsShowLeadCancelBtn__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面に、予約人数画面に表示制限
+TRUE： 予約人数表示する
+FALSE：予約人数非表示する（Defautl値） --></help>
+        <label><!-- ルームインジケータ予約人数表示・非表示制御 --></label>
+        <name>RoomIndicatorIsShowStayPersons__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面に、タイムテーブル情報を表示・非表示制御する
+TRUE：タイムテーブル情報を表示する
+FALSE:タイムテーブル情報を非表示する (Default値） --></help>
+        <label><!-- ルームインジケータのタイムテーブル表示・非表示 --></label>
+        <name>RoomIndicatorIsShowTimeInfo__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面の予約詳細情報表示用ミニページ表示・非表示制御
+TRUE: 予約詳細情報表示用ミニページ表示
+FALSE：予約詳細情報表示用ミニページ非表示(デフォルト値） --></help>
+        <label><!-- ルームインジケータミニページ表示・非表示制御 --></label>
+        <name>RoomIndicatorLookupHoverIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面、複数店舗選択照会フラグ
+TRUE:複数店舗選択、照会可能
+FALSE:ひとつ店舗選択、照会可（デフォルト値） --></help>
+        <label><!-- ルームインジケータ複数店舗選択照会フラグ --></label>
+        <name>RoomIndicatorMultiSelectFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 過去日の連泊予約の部屋ステータスはCO(チェックアウト)色に表示する・しない制御フラグ
+TRUE:過去日の連泊予約の部屋ステータスはチェックアウト処理しないでも、CO色に表示
+FALSE:過去日の連泊予約の部屋ステータスはチェックアウト処理しない場合、「滞在」色を表示する（デフォルト値) --></help>
+        <label><!-- 過去日の部屋ステータスのCO色設定 --></label>
+        <name>RoomIndicatorPastLeadToCoColorFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面、予約検索対象条件にレコードタイプ制限あり、なし切替用
+FALSE：レコードタイプ範囲制限あり(デフォルト値)
+TRUE：レコードタイプ範囲制限なし --></help>
+        <label><!-- forSFDBBUGルームインジケータ検索制限フラグ --></label>
+        <name>RoomIndicatorQueryLimitFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面、タイムテーブル画面の部屋タイプを選択すると、未割り当てウインドウの予約も該当部屋タイプのみ情報を表示する・しない制御
+0:該当店舗のすべて未割り当て予約を未割り当てウインドウに表示（デフォルト値）
+1:画面の部屋タイプを掛けときに、掛けた部屋タイプの予約のみを未割り当てウインドウに表示 --></help>
+        <label><!-- タイムテーブルの未割り当て予約ウインドウの表示コード --></label>
+        <name>RoomIndicatorRoomTypeSelectFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータ画面に、前日、当日、翌日、指定日など検索条件表示制御フラグ
+TRUE：上記検索条件を表示する
+FALSE：上記検索条件を表示なし、当日分だけデータを表示する --></help>
+        <label><!-- ルームインジケータ履歴表示 --></label>
+        <name>RoomIndicatorShowHisFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- TRUE：確認メッセージを表示する
+FALSE；確認メッセージを表示しない（デフォルト値） --></help>
+        <label><!-- ルームチェンジする際、確認アラートを出す・出ないフラグ --></label>
+        <name>RoomIndicatorSmTypeMsgIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面からプランなし予約データを登録する場合、該当会計商品名で見積もり明細を登録する、該当商品単価は料金表設定によて、自動設定を行う --></help>
+        <label><!-- 室料の会計商品名 --></label>
+        <name>RoomPriceProdName__c</name>
+    </fields>
+    <fields>
+        <label><!-- タイムテーブル新規後一括予約画面へ遷移する・しない切替選択機能制御 --></label>
+        <name>RoomScheduleGoBookingFlexAppConfirmFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- タイムテーブル新規後一括予約画面へ自動遷移制御 --></label>
+        <name>RoomScheduleGoBookingFlexAppFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- タイムテーブル画面情報を自動更新間隔分数 
+インターバルタイマの設定値は1以上を設定ください
+インターバルタイマの設定値は0 又は 空白に設定する場合、自動更新を行わない --></help>
+        <label><!-- タイムテーブルページ更新のインターバルタイマ --></label>
+        <name>RoomScheduleTimerMinute__c</name>
+    </fields>
+    <fields>
+        <help><!-- ルームインジケータの部屋表示順制御：
+　1 : お部屋名昇順
+　2 : お部屋項目（DisplayNo）設定値昇順 --></help>
+        <label><!-- ルームインジケータお部屋表示順 --></label>
+        <name>RoomSortDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面からベースプラン、種類別Tier、販売状態を指定可否フラグ
+TRUE:予約ポップ画面からベースプラン、種類別Tier、販売状態を直接変更可能になる
+FALSE：該当機能が無効（デフォルト値） --></help>
+        <label><!-- 予約ポップラックレート設定[プラン]有効フラグ --></label>
+        <name>RoomTypeBasePlanTierFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- 年、月をかえる場合、画面イベント制限フラグ
+FALSE: 年、月を変えると、画面データを更新する(デフォルト値）
+TRUE: 年、月を変えた後に送信ボタンで画面データを更新する --></help>
+        <label><!-- 予約ポップの年月イベント制限フラグ --></label>
+        <name>RoomTypeDateEventFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップの日付からクリックすると、遷移先の制御フラグ 
+1.該当日付のルームインジケータへ遷移する（デフォルト値） 
+2.予約レポートへ遷移する --></help>
+        <label><!-- 予約ポップの日付から遷移先の制御フラグ --></label>
+        <name>RoomTypeDateLinkFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップの「年月」項目の表示箇所の制御コード
+1:画面の右に表示する（デフォルト値）
+2:画面の左に表示する --></help>
+        <label><!-- 予約ポップの年月表示箇所コード --></label>
+        <name>RoomTypeDatePosition__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約ポップ新規後一括予約画面へ遷移する・しない切替選択機能制御 --></label>
+        <name>RoomTypeGoBookingFlexAppConfirmFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約ポップ新規後一括予約画面へ自動遷移制御 --></label>
+        <name>RoomTypeGoBookingFlexAppFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ過去日付で予約登録可否判断フラグ（TRUE：過去日付で予約登録可　FALSE：不可） --></help>
+        <label><!-- 予約ポップの過去予約可フラグ --></label>
+        <name>RoomTypeInputPastData__c</name>
+    </fields>
+    <fields>
+        <help><!-- 連絡事項は一つ入力項目に変更し、フォントサイズ、色を変更できる機能切替フラグ 
+TRUE:機能有効
+FALSE:機能無効（デフォルト値） --></help>
+        <label><!-- 予約ポップ連絡事項がリッチ表示フラグ --></label>
+        <name>RoomTypeMessageIsRichTextFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面に、「連絡事項」セクション表示・非表示制御フラグ
+TRUE:表示
+FALSE:非表示（Default) --></help>
+        <label><!-- 予約ポップ連絡事項表示・非表示フラグ --></label>
+        <name>RoomTypeMessageIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 新規予約ウィンドウバージョン
+1. XML（予約ポップ画面の予約入力項目カスタマイズ）で入力項目を拡張できる、項目必須、非必須設定できる
+2. XML(予約ポップ画面の予約入力項目カスタマイズ V2.0)で、入力項目を拡張できる、表示の列、表示の箇所、デフォルト項目の一部はず対応できる --></help>
+        <label><!-- 予約ポップの新規予約ウィンドウのバージョン値 --></label>
+        <name>RoomTypeNewBookingWinVersion__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップのリアルAGTエリアレイアウト表示コード
+1/空欄：ヘッダーに提供数を表示する（デフォルト値）
+2：ヘッダーに販売数を表示し、リアルAGT残室を下表の和にする --></help>
+        <label><!-- 予約ポップのリアルAGTエリアレイアウト表示コード --></label>
+        <name>RoomTypeRealAgtPageMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面：「部屋タイプ」タイトルの上のリンク遷移先のレポート名 --></help>
+        <label><!-- レポート_予約ポップレポート名 --></label>
+        <name>RoomTypeReport__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップの予約入力画面に、部屋入力項目表示・非表示制御フラグ
+TRUE:部屋入力項目が表示
+FALSE:部屋入力項目が非表示
+Default：非表示 --></help>
+        <label><!-- 予約ポップの部屋項目表示・非表示フラグ --></label>
+        <name>RoomTypeRoomIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面に営業の設定値リストを定義する
+データ構造：営業ステータス[:][1][;][文字色定義値]
+例：通常:1;BLACK,休館,貸切;ORANGE
+例の説明：営業ステータス設定は【通常,休館,貸切】３つ設定値を表示する
+[:1]を付けているの「通常」ステータスは営業のデフォルトステータスとして、画面に表示する   
+注：(OPTION)はいずれのステータスに一つ定義が必要
+[;BLACK][;ORANGE]を付けているのスタータスの文字色定義値で画面に表示する --></help>
+        <label><!-- 予約ポップ営業ステータス --></label>
+        <name>RoomTypeSaleStatus__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップの予約データ登録項目「セミナー」は画面に表示、非表示制御フラグ
+TRUE：表示
+FALSE：非表示 --></help>
+        <label><!-- 予約ポップのセミナー入力可・不可フラグ --></label>
+        <name>RoomTypeSeminarIsShow__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップの残室数レイアウト表示コード
+1：予約ポップの残室数とラックレート情報同時に表示する
+0/空欄：予約ポップの残室情報のみ表示する（デフォルト値） --></help>
+        <label><!-- 予約ポップの残室数レイアウト表示コード --></label>
+        <name>RoomTypeShowPageMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ開始日モード制御
+&quot;1&quot;:毎月の１日から一月間データを表示する（Default値）
+&quot;2&quot;:当日から一月間データを表示する --></help>
+        <label><!-- 予約ポップ開始日モード --></label>
+        <name>RoomTypeStartDateMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面から在庫値、販売状態を指定可否フラグ
+TRUE:予約ポップ画面から在庫値を直接変更可能になる（選択リスト：「在庫設定」選択肢追加）
+FALSE：該当機能が無効（デフォルト値） --></help>
+        <label><!-- 予約ポップ在庫設定有効フラグ --></label>
+        <name>RoomTypeStockSettingFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- True場合、予約ポップ/予約一括　画面に、E/B機能を起動する --></help>
+        <label><!-- E/B機能フラグ --></label>
+        <name>RoomUseEbFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 複数部屋の場合、部屋別に宿帳を作成する・しない切り替えフラグ 
+TRUE:複数部屋の部屋別に宿帳自動作成する 
+FALSE:複数部屋の部屋別に宿帳自動作成しない（デフォルト値） --></help>
+        <label><!-- 複数部屋の宿帳自動作成フラグ --></label>
+        <name>RoomsCashRegAutoCreateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 0:切り捨て 
+1:四捨五入 
+2:切り上げ
+税金計算の端数処理の項目 --></help>
+        <label><!-- 会計税の端数処理 --></label>
+        <name>RoundType__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上日別ロック際に、会計ロック機能コードを定義する
+0：会計ロック機能無効（デフォルト値）
+１：連泊の最終泊ロック
+　　最終泊ロック場合、全泊の会計をロックする
+２：連泊中の日々のロックする
+　　日別の会計をロックする --></help>
+        <label><!-- 売上日別会計ロック機能コード --></label>
+        <name>RsvLockType__c</name>
+    </fields>
+    <fields>
+        <help><!-- スケジュール起動日により、実際の業務処理日の日数差値を定義する
+例：
+起動日： 2013/10/15  →　起動日：-1 に設定すると、実際の処理指定日は　2013/10/14
+起動日： 2013/10/15  →　起動日：1 に設定すると、実際の処理指定日は　2013/10/16
+該当パラメータ利用対象：
+自動チェックイン処理と会計データ自動計算処理バッチ（BulkProcessSchedule_1）
+売上バッチ（BulkProcessSchedule_2） --></help>
+        <label><!-- バッチスケジュール１処理日 --></label>
+        <name>Schedule1DeviationDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- スケジュール起動日により、実際の業務処理日の日数差値を定義する
+例：
+起動日： 2013/10/15  →　起動日：-1 に設定すると、実際の処理指定日は　2013/10/14
+起動日： 2013/10/15  →　起動日：1 に設定すると、実際の処理指定日は　2013/10/16 --></help>
+        <label><!-- バッチスケジュール２処理日 --></label>
+        <name>Schedule2DeviationDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- 支払いメディアの一括自動入力バッチ起動スケジュール
+スケジュール起動日により、実際の業務処理日の日数差値を定義する
+例：
+起動日： 2013/10/15 →　起動日：-1 に設定すると、実際の処理指定日は　2013/10/14
+起動日： 2013/10/15 →　起動日：1 に設定すると、実際の処理指定日は　2013/10/16 --></help>
+        <label><!-- バッチスケジュール(支払いメディア一括登録)処理日 --></label>
+        <name>ScheduleBulkAccountPaymentDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入金チェックバッチ起動スケジュール
+スケジュール起動日により、実際の売上日の日数差値を定義する 
+例： 
+起動日： 2013/10/15 →　起動日：-1 に設定すると、実際の処理売上日は　2013/10/14 
+起動日： 2013/10/15 →　起動日：1 に設定すると、実際の処理売上日は　2013/10/16 --></help>
+        <label><!-- バッチスケジュール(入金チェック)処理日 --></label>
+        <name>SchedulePayCheckDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- PCA連携のCSV出力ファイルにヘッダー付加する・しない制御フラグ
+TRUE：ヘッダー付加する（デフォルト値）
+FALSE：ヘッダー付加しない --></help>
+        <label><!-- バッチスケジュール(PCA連携)CSVヘッダー付加する・しないフラグ --></label>
+        <name>SchedulePcaCsvHeaderIsShowFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- PCA連携のCSV抽出処理バッチ起動スケジュール
+スケジュール起動日により、実際の業務処理日の日数差値を定義する
+例：
+起動日： 2013/10/15 →　起動日：-1 に設定すると、実際の処理指定日は　2013/10/14
+起動日： 2013/10/15 →　起動日：1 に設定すると、実際の処理指定日は　2013/10/16 --></help>
+        <label><!-- バッチスケジュール(PCA連携)処理日 --></label>
+        <name>SchedulePcaDeviationDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- PCA連携後の結果通知方式制御を行う
+0:連携結果を通知しない
+1:メールで結果を通知（デフォルト値)
+2:ドキュメントの連携ファイルのフォルダに追加
+3:メール通知とドキュメントの連携ファイルのフォルダに追加 --></help>
+        <label><!-- PCA連携結果通知制御コード --></label>
+        <name>SchedulePcaResultSendType__c</name>
+    </fields>
+    <fields>
+        <help><!-- バッチ処理異常の場合、メール宛を格納する、複数メールアドレスが存在する場合、「,」で分ける設定する --></help>
+        <label><!-- バッチスケジュール結果送信宛 --></label>
+        <name>ScheduleResultMailAddress__c</name>
+    </fields>
+    <fields>
+        <help><!-- 勤怠時間チェック処理バッチ起動スケジュール
+スケジュール起動日により、実際の勤怠日の日数差値を定義する 
+例： 
+起動日： 2013/10/15 →　起動日：-1 に設定すると、実際の処理勤怠日は　2013/10/14 
+起動日： 2013/10/15 →　起動日：1 に設定すると、実際の処理勤怠日は　2013/10/16 --></help>
+        <label><!-- バッチスケジュール(勤怠時間チェック)処理日 --></label>
+        <name>ScheduleWorkTimeDays__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別で会計商品を検索区分(空白、1、2、3)
+空白: 全て商品を検索する、店舗別区別なし
+1:　全て会計商品が店舗別検索する
+2:　商品処理種別が「通常、プラン、室料、朝食、夕食、サービス料」のみ店舗別検索する
+3:　商品処理種別が「前受付金、支払」のみ店舗別検索する --></help>
+        <label><!-- 店舗別会計商品検索区分 --></label>
+        <name>ShopAccountSearchDiv__c</name>
+    </fields>
+    <fields>
+        <help><!-- パラメータ：店舗別プランがONの場合、該当パラメータで予約ポップのベースプランは店舗別表示する・しない制御可能
+TRUE:ベースプランは店舗別表示する
+FALSE:各店舗に全てベースプランを表示する --></help>
+        <label><!-- 店舗別ベースプラン --></label>
+        <name>ShopBasePlanFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書、請求書、見積書のロゴ取得元を切り替え用フラグ
+0/空欄:機能無効（デフォルト値）
+1:予約の部屋タイプに紐づいた店舗ロゴを表示する
+2:ログイン中のユーザの店舗のロゴを表示する --></help>
+        <label><!-- 会計書、請求書、見積書のロゴ取得元 --></label>
+        <name>ShopDefaultCodeSetMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別予約の泊数、到着時刻、出発時刻を設定する
+該当定義に含めない店舗コードは泊数が1、到着時刻と出発時刻は予約のデフォルト設定値で返却する
+書式：店舗コード1,店舗コード2&amp;泊数,到着時刻,出発時刻;店舗コード3&amp;泊数,到着時刻,出発時刻
+例1   =&gt; 01,02&amp;1,16:30,09:00;03&amp;0,12:00,14:00
+例2(店舗情報定義なし)  =&gt; &amp;0,12:00,14:00 --></help>
+        <label><!-- 店舗別予約デフォルト値 --></label>
+        <name>ShopLeadDefaultInfo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別単位でプラン情報を定義する場合、該当フラグがTRUEに設定する
+TRUE:プラン設定する場合、プランに店舗別で分ける設定する
+FALSE:プラン設定する場合、店舗と関係なし設定する --></help>
+        <label><!-- 店舗別プラン --></label>
+        <name>ShopPlanSetupFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 簡易会計画面の[会計確定」ボタンをクリック後、会計書PDFのウインドウを開く、または　レシートプリンタへ送信、直接印刷するフラグ
+TRUE:レシートプリンタへ送信、明細印刷する
+FALSE:会計書PDFウインドウを開く（デフォル値） --></help>
+        <label><!-- 簡易会計の印刷 --></label>
+        <name>SimpleAccountsPrintFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 設定→開発→サイトに指定のサイトドメイン名と一致が必要
+例：https://expo.yourcompany.com --></help>
+        <label><!-- サイトURL --></label>
+        <name>SiteRootUrl__c</name>
+    </fields>
+    <fields>
+        <help><!-- スタッフ画面のレクタングルコピー機能有効・無効制御フラグ
+レクタングルコピー機能有効：TRUE
+レクタングルコピー機能無効：FALSE（デフォルト値） --></help>
+        <label><!-- スタッフのレクタングルコピー制御 --></label>
+        <name>StaffNoCopyFlag__c</name>
+    </fields>
+    <fields>
+        <help><!-- 1 : 連泊の初日のキャンセルレートで全泊の料金を計算する
+2:  各泊目から別々のキャンセルレートで各泊目の料金を計算する --></help>
+        <label><!-- 連泊キャンセル料計算区分 --></label>
+        <name>StayCancelRuleKbn__c</name>
+    </fields>
+    <fields>
+        <help><!-- 在庫通知データ作成フラグ（在庫通知機能利用）
+TRUE:在庫通知データを作成する（デフォルト値）
+FALSE:在庫通知データを作成しない --></help>
+        <label><!-- 在庫通知データ作成フラグ --></label>
+        <name>StockDataCreateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入明細、会計明細、注文（受注）に従って、商品単位に在庫管理する・しないフラグ
+TRUE：該当機能が有効
+FALSE:該当機能が無効（デフォルト） --></help>
+        <label><!-- 在庫連動有効フラグ --></label>
+        <name>StockSyncIsActiveFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約ポップ画面の最大残室数はリアルＡＧＴ残室数減算後表示する・しない切替フラグ
+0: 予約ポップ画面の最大残室数 = 部屋タイプの「$数」 - リアルＡＧＴ残室数
+1: 予約ポップ画面の最大残室数 = 部屋タイプの「$数」 (デフォルト値） --></help>
+        <label><!-- 予約ポップのリアルＡＧＴ残室数連動フラグ --></label>
+        <name>StockSyncIsMode__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_客室割当状況 - 昼と夕 [Tier4] --></label>
+        <name>Tier4Report__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_客室割当状況 - 昼と夕 [Tier6] --></label>
+        <name>Tier6Report__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_客室割当状況 - 昼と夕 [Tier7] --></label>
+        <name>Tier7Report__c</name>
+    </fields>
+    <fields>
+        <help><!-- タイムテーブル画面から予約情報を移動される場合、確認メッセージを表示、非表示フラグ 
+	TRUE:確認メッセージ表示
+	FALSE:確認メッセージ非表示（デフォルト値） --></help>
+        <label><!-- タイムテーブル予約移動確認フラグ --></label>
+        <name>TimeTableConfirmFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- タイムテーブル画面の期間表示の初期値を設定する 
+入力可能値リスト: 
+90日 
+31日(デフォルト値)
+7日 
+30分 
+15分 
+10分 
+5分 --></help>
+        <label><!-- タイムテーブル期間表示初期値 --></label>
+        <name>TimeTableDefaultMode__c</name>
+    </fields>
+    <fields>
+        <help><!-- タイムテーブル画面に初期表示の部屋数 --></help>
+        <label><!-- タイムテーブルの表示部屋数 --></label>
+        <name>TimeTableProcessLimit__c</name>
+    </fields>
+    <fields>
+        <help><!-- 画面情報を自動更新間隔秒数（対象画面：予約ポップ、予定表、ルームインジケータ）　「デフォルト値：60秒」
+自動的に設定秒数で、サーバーから最新情報を取得して、表示画面に反映する --></help>
+        <label><!-- ページ更新のインターバルタイマ --></label>
+        <name>TimerSecond__c</name>
+    </fields>
+    <fields>
+        <help><!-- タイムテーブル画面から新規予約登録可、不可制御
+TRUE:新規予約登録不可
+FALSE:新規予約登録可（デフォルト値） --></help>
+        <label><!-- タイムテーブルの新規予約不可 --></label>
+        <name>TimetableIsNew__c</name>
+    </fields>
+    <fields>
+        <help><!-- 1:税込、サービス料抜き
+2:税込、サービス料込
+3:税抜、サービス料抜き
+4:税抜、サビース料込 --></help>
+        <label><!-- 会計商品単価定義区分 --></label>
+        <name>UnitPriceDefKb__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_出勤時間端数処理 --></label>
+        <name>UserBeginTimeCalMethodType__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_出勤時間単位 --></label>
+        <name>UserBeginTimeUnit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_退勤端数処理 --></label>
+        <name>UserCalMethodType__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_外出時間端数処理 --></label>
+        <name>UserOutRestCalMethodType__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_外出時間単位 --></label>
+        <name>UserOutRestTimeUnit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_入室時間端数処理 --></label>
+        <name>UserRestCalMethodType__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_入室時間単位 --></label>
+        <name>UserRestTimeUnit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勤怠_退勤時間単位 --></label>
+        <name>UserTimeUnit__c</name>
+    </fields>
+    <fields>
+        <help><!-- すかし度制御：Default:FALSE
+TRUE:  透明
+FALSE: 不透明 --></help>
+        <label><!-- すかし度 --></label>
+        <name>WatermarkRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- レポート_WhiteBoard予定表 --></label>
+        <name>WhiteBoardReport__c</name>
+    </fields>
+    <fields>
+        <help><!-- プランブレイクの室料が０円のとき、ラックレートの料金で自動設定する、しないフラグ
+TRUE:自動設定しない
+FALSE: 自動設定する（デフォルト値） --></help>
+        <label><!-- ０円室料の自動設定フラグ --></label>
+        <name>ZeroRoomPriceAutoSetupFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- maxrecords_DB --></label>
+        <name>maxrecords_DB__c</name>
+    </fields>
+    <fields>
+        <label><!-- maxrecords_DSP --></label>
+        <name>maxrecords_DSP__c</name>
+    </fields>
+</CustomObjectTranslation>

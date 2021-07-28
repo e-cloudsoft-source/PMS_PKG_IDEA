@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+2013/11/15 Ver1.0 項目属性設定機能追加
+2013/12/23 Ver1.1 FIELDSの属性　SHOWFOODPOS　を追加する、料理項目表示列制御設定可能
+　　　　　　　       項目COLNUMTYPEに、booleanタイプを追加する、設定すると、TRUEの場合、画面に「チェックマークアイコン表示」できる
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		OPTIONS:	予定表全体属性定義	
+					属性：ASSIGNONLYROOM　予約に割り当て部屋のみ予定表に表示・非表示制御 
+						TRUE:割り当て部屋のみ表示
+						FALSE OR 空白　OR　該当タブなし：全部屋表示する
+					属性：POLLERTIMER インターバルタイマ（秒単位）定義する、最小３０秒まで定義できる（定義省略可能、デフォルト値：60）
+		FIELDS：		店舗単位に、予定表に表示したい項目定義情報	
+								書式：項目ＡＰＩ名:画面に表示ラベル
+								属性：SHOWFOOD
+									　予約情報行の最後に「料理」情報追記するがどうか TRUE:表示/ FALSE:非表示
+									 SHOWFOODPOS
+									  料理項目は表示列指定、設定なし場合、最後列に表示する
+									  例：最前列の場合、SHOWFOODPOS = "1"設定する
+									  　　２列の場合、　SHOWFOODPOS = "2"設定する
+									     最後の列を設定したい場合、SHOWFOODPOS属性なし OR　SHOWFOODPOS=""
+									     指定の列数は総表示列数を超える場合、最後の列に料理情報を表示する
+									  注意：「HIDDENFIELD」設定項目は列数計算対象外
+									  例：FIELDSタグに、FIELD1, FIELD2, FIELD3　設定　SHOWFOODPOS="2"の場合
+									     HIDDENFIELDタグに、FIELD1は設定する
+									     画面項目表示する場合、FIELD2，料理、FIELD3順で表示する
+									 SHOWFOODSTYLE
+									  料理項目のSTYLE指定用タグ
+									  例：文字サイズ：16px, 色：緑, フォント：sans-serif
+									  　　SHOWFOODSTYLE="font-size: 16px; color: green;font-family: sans-serif;"
+									     補足：該当属性設定非必須
+									 SHOWFOODWIDTH
+									  料理項目の横幅サイズ指定タグ（例：100px or 10%)
+									  例：SHOWFOODWIDTH="200px"
+									  　　補足：該当属性設定非必須
+									 SHOWFOODSIMPLE
+									  各ご予約ごとに「料理　数量」の文字を表示・非表示フラグ
+									  	TRUE：各ご予約ごとに「料理　数量」の文字を非表示する
+									  	FALSE：各ご予約ごとに「料理　数量」の文字を表示する
+									  	
+								属性：SHOWGUEST
+									予約情報行の最後に「顧客情報」情報追記するがどうか TRUE:表示/ FALSE:非表示(デフォルト)、定義省略可
+		LINKFIELD：	画面表示の項目はリンク追加の定義情報：　
+								書式：項目ＡＰＩ名(LINKされる対象ＡＰＩ):リンクのSalesforceID
+								注意：LINKFIELDに定義した「項目ＡＰＩ名」は必ずFIELDSに定義ください
+		AGGREGATE:	自動合計項目
+								注意：AGGREGATEに定義した「項目ＡＰＩ名」は必ずFIELDSに定義ください
+	    HIDDENFIELD:定義されている項目は画面初期表示する場合、該当項目は非表示する
+	    						書式：項目ＡＰＩ名
+	    						注意：HIDDENFIELDに定義した「項目ＡＰＩ名」は必ずFIELDSに定義ください
+	    COLNUMSIZE: 項目の横幅サイズ定義する
+	                            書式：項目ＡＰＩ名:サイズ（例：100px or 10%)
+	    						注意：HIDDENFIELDに定義した「項目ＡＰＩ名」は必ずFIELDSに定義ください
+	    COLNUMSTYLE:項目列のSTYLE定義SCRIPT
+	    						書式：項目API名：STYLE文字列(例：font-size: 14px; color: red;)
+	    						注意：料理項目のSTYLEを設定したい場合、タグ：SHOWFOODSTYLE設定ヘルプを参照ください
+	    COLNUMTYPE:項目のデータタイプ定義する(文字列以外のデータタイプ定義する、設定しない項目は自動:文字列
+	    						書式：項目ＡＰＩ名:データタイプ
+	    							データタイプのキー：　数値：number / 日付：date / チェックボックス：boolean /選択リスト：list
+	    				　　  	注意：日付の場合、書式は自動 yyyy/mm/ddに変換する
+	    				　　　　　　　　チェックボックスの場合、チェックマークアイコン表示に変更する
+	    				            画面に、数値、日付の項目を表示したい場合、必ず明示的にデータタイプを定義してください。
+	  	COLNUMEDIT:編集できる項目定義する
+	  							書式：項目ＡＰＩ名
+	  							注意：料理項目、参照項目、数式項目な定義できません、ご予約オブジェクト以外の項目が定義できません
+	  	FOODSUMMARY:料理集計ウィンドウ設定情報
+	  			COLNUMSIZE:表示列幅情報定義する(px)
+	  				MIDDAYICON:（昼）列幅定義
+	  				PRODCUTNMAEM:（料理）列幅定義
+	  				PRODUCTSUMMY:（数量）列幅定義
+	  			COLNUMSTYLE:項目列のSTYLE定義SCRIPT
+	  				書式：項目API名：STYLE文字列(例：font-size: 14px; color: red;)
+	  				MIDDAYICON:（昼）列のSTYLE定義
+	  				PRODCUTNMAEM:（料理）列のSTYLE定義
+	  				PRODUCTSUMMY:（数量）列のSTYLE定義
+	  	HISTORY:			予定表の変更履歴が色を定義タグ(2017/03/15 新規追加）
+	  		BGCOLOR:			予定表に変更履歴あるセルの背景を色付けるがどう定義フラグ（TRUE/FALSE)
+	  								TRUE：該当変更履歴ありのセルの背景に色を付ける（デフォル値）
+	  								FALSE:該当変更履歴ありのセルの文字列に色を付ける
+	  		COLOR:			色のルール定義タグ
+	  			VALUE:		色の定義値
+	  				FROM:		項目変更回数FROM値を定義する
+	  				TO:			項目変更回数TO値を定義する		（該当項目の変更回数はFROM/TO範囲の場合、該当項目はVALUEタグに指定色に表示する）
+	  							チェック単位：回数
+	  				TMFROM:		項目最終変更時間FROM値を定義する
+	  				TMTO:		項目最終変更時間TO値を定義する	（該当項目の最終変更時間からTMFROM/TMTO範囲の場合、該当項目はVALUEタグに指定色に表示する）
+	  							チェック単位：分
+	  				!!!!!!注意１：同じAPIに対して、変更回数/時間変更複数定義できますが、XMLのタグVALUEのロジック定義順により、先に条件を満足の色を設定する
+	  				!!!!!!（例：<VALUE FROM="1", TO="2", TMFROM="1", TMTO="2"> -> ☓ !!!!!!
+	  						
+	  			FIELDS:		該当色定義を対応の項目ＡＰＩ名、複数API名をカンマ「,」で連結定義可能
+	  		FOODSUMMARYCOLOR:料理集計ウインドウの料理数変更すると、数量項目色付ける機能有効(未定義の場合、料理変更色付ける機能無効）
+	  			DETAILISSHOW:	予定表の「料理」列の料理数量を変更すると、該当料理の数量項目を色付ける機能有効（TRUE)/無効（FALSE)
+	  			VALUE:			色の定義値
+	  	EXPORTPDF:	予定表内容はPDFファイルとして自動Chatterポスト出力機能関連の出力内容定義(2017/04/30新規追加）
+	  		FIELDS:			予定表PDFに表示したい項目定義情報	
+	  						該当タグを未定義、または　タグ内の内容は空欄の場合、SHOP→FIELDSに定義した項目をPDFに自動出力する
+	  			SHOWFOOD:		料理項目は出力する、しないフラグ：TRUE:	出力/FALSE:出力しない（デフォルト）
+	  		MAXWIDTH:		ページの最大横幅サイズ、出力項目は多い場合、数字調整が必要
+	  		COLOR:			投稿した予定表の変更箇所の背景色を指定する、定義省略可能（2017/06/15新規追加）
+	  						注意：PDF化の場合、使えない色がありますので、右側URLページに記載色を推奨する（http://www.colordic.org/s/)
+        EXPORTPDF_BATCHCONFIG:(2017/04/30新規追加）
+	  					PDFファイルChatterGroupへ自動ポストバッチスケジール定義関連
+	  		INTERVAL:		予定表出力のインターバルタイマ（分単位）定義する、最小起動時間単位は５分単位、デフォルト：120分
+	  		POSTDEFINE:		店舗毎に予定表PDF投稿用Chatterグループ名を定義する、該当タグ定義省略可、省略の場合、共通定義の「チャターグループ名」により、PDF投稿する(2017/06/15新規追加)
+	  			GROUPNAME:	チャターグループ名、カマンで複数定義可能（グループ1,グループ2,グループ3...)
+	  			SHOPCODE:	店舗コード
+        GROUPABLE:          (2017/09/15新規追加)
+                            該当タグが存在すると、複数予約時(予約インデックスが同じ)にはまとまって表示機能が有効になる
+            AUTOEXPAND:     予定表を開くとき、予約インデックスごとの予約明細情報セクションを展開/折りたたみ切替フラグ(省略可)
+                            TRUE:展開
+                            FALSE:折りたたみ(デフォルト値)
+            GROUPTITLE:     タイトルに個別表示したい項目APIを定義する、該当タグに指定の項目APIは必ず「FIELDS」タグに定義済み
+                            書式：API:集計フラグ　(集計フラグは定義省略可、該当項目を集計したい場合、該当APIの後ろに「:1」(集計フラグ)定義する）
+                            注意：①集計フラグを定義されている場合、該当APIはタグ「COLNUMTYPE」に定義　かつ　タイプは「number」が必要
+                                 ②画像表示項目APIは定義対象外
+        SORTFIELD:          予定表の表示順のカスタマイズ用(デフォルト値：部屋Seq#順) (2017/09/30新規追加)
+                            注意：部屋項目のみ指定可能、
+                            例1：部屋SEQ#順:     <SORTFIELD>Rroom__r.Seq__c</SORTFIELD>
+                            例2：部屋R#順:       <SORTFIELD>Rroom__r.Rnumber__c</SORTFIELD>
+                            例3：部屋DisplayNo順:<SORTFIELD>Rroom__r.DisplayNo__c</SORTFIELD>
+        NOSHOWROOM:         予定表に表示したく無い部屋を表示除外定義用（部屋のSeq#、カンマで複数定義可能    (2017/09/30新規追加)
+                            例：Seq#が10,20,30の部屋は予定表に非表示したい場合、<NOSHOWROOM>10,20,30</NOSHOWROOM>)      
+2017.03.15 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応できるように改善対応
+			例1:	①変更履歴項目の背景を色を付ける、
+				②項目【ご予約の到着時刻、特記事項】の変更回数は２以下回の場合、色は緑色を表示したい
+				③項目【ご予約の到着時刻、特記事項】の変更回数は３〜４回の場合、色は赤色を表示したい	
+				④項目【ご予約の到着時刻、特記事項】の変更回数は５回以上の場合、色は青色を表示したい	
+				⑤項目【ご予約の予約人数】は変更されると、常に黄色を表示したい
+					<HISTORY>
+						<COLOR>
+							<VALUE TO="2">GREEN</VALUE>
+							<VALUE FROM="3" TO="4">RED</VALUE>
+							<VALUE FROM="5">BLUE</VALUE>
+							<FIELDS>Field4__c,Comment3__c</FIELDS>
+						</COLOR>
+						<COLOR>
+							<VALUE>YELLOW</VALUE>
+							<FIELDS>StayPersons__c</FIELDS>
+						</COLOR>
+					</HISTORY>
+			例2:	①変更履歴項目の文字色を付ける、
+				②項目【ご予約の到着時刻、特記事項】の変更回数は２以下回の場合、色は緑色を表示したい
+				③項目【ご予約の到着時刻、特記事項】の変更回数は３〜４回の場合、色は赤色を表示したい	
+				④項目【ご予約の到着時刻、特記事項】の変更回数は５回以上の場合、色は青色を表示したい	
+				⑤項目【ご予約の予約人数】は変更されると、常に黄色を表示したい
+					<HISTORY>
+						<BGCOLOR>FALSE</BGCOLOR>
+						<COLOR>
+							<VALUE TO="2">GREEN</VALUE>
+							<VALUE FROM="3" TO="4">RED</VALUE>
+							<VALUE FROM="5">BLUE</VALUE>
+							<FIELDS>Field4__c,Comment3__c</FIELDS>
+						</COLOR>
+						<COLOR>
+							<VALUE>YELLOW</VALUE>
+							<FIELDS>StayPersons__c</FIELDS>
+						</COLOR>
+					</HISTORY>
+			例３：変更時間単位で変更履歴項目の文字色を付ける
+					API項目：Mans__c,Femails__cは最初変更時間から下記定義ルールにより、文字列色を設定する
+					最終変更時間から２分以内、GREENを表示する
+					最終変更時間から２分〜１０分以内、chartreuseを表示する
+					最終変更時間から１０分以上、REDを表示する
+					<COLOR>
+						<VALUE TMTO="2">GREEN</VALUE>
+						<VALUE TMFROM="2" TMTO="10">chartreuse</VALUE>
+						<VALUE TMFROM="10">RED</VALUE>
+						<FIELDS>Mans__c,Femails__c</FIELDS>
+					</COLOR>
+2017.04.30 予定表PDF自動出力機能の定義手順：(2017/04/30新規追加）
+			1.予定表PDF自動ポスト用チャターグループを登録する
+			2.上記１で作成のチャターグループは「共通定義→チャターグループ名」に定義する（例：7:XXXXXXXX(チャターグループ名))
+			3.「ドキュメント→Jinyaholdings→予定表カスタマイズ」の「EXPORTPDF_BATCHCONFIG」、「EXPORTPDF」タグを定義する
+			4.「設定→アプリケーションの設定→開発→Apex クラス→Apexをスケジール」ボタンをクリックして、PDF自動ポストスケジールを登録する
+			設定例：	ジョブ名:		予定表PDF自動ポスト
+					Apex クラス:	K_ScheduleReportPdfSchedule
+					開始:		開始したい未来日付
+					終了:		上記「開始」と同じ日付
+					希望始時刻:	未来時刻
+2017.06.15	EXPORTPDF→タグ(COLOR) 新規追加
+			EXPORTPDF_BATCHCONFIG→タグ(POSTDEFINE) 新規追加
+2017.09.15  GROUPABLEタグ新規追加
+2017.09.30  SORTFIELD、NOSHOWROOMタグ新規追加
+2018.02.15  HANDWRITEタグ新規追加
+2018.03.15  FOODGROUPABLEタグ新規追加
+2018.07.17  SHOP→GUESTYADOINFOタグ新規追加
+			SHOP→FIELDSタグに「SHOWGUEST」属性新規追加
+2018.09.10  SHOP→NIGHTSGROUPABLEタグ新規追加
+            SHOP→FOODSUMMARY->CONSECUTIVENIGHTSタグ新規追加
+2018.10.31  SHOP→FOODSUMISSHOWPRODタグ新規追加
+			SHOP→FOODSUMISNOSHOWタグ新規追加
+2019.02.28  SHOP→FOODSUMMARY->COLNUMSIZE->UNITPRICEタグ新規追加
+			SHOP→FOODSUMMARY->COLNUMSTYLE->UNITPRICEタグ新規追加
+			SHOP→FOODSUMMARY->UNITPRICECOLSHOWタグ新規追加
+			SHOP→OPTIONS→DAYBUTTONSHOWタグ新規追加
+2019.04.30  SHOP→FIELDSタグに「SHOWFOODSIMPLE」属性新規追加
+2019.05.15  SHOP→FOODSUMMARY->UNITPRICECOLSHOWタグに「MODE」属性新規追加
+				料理単価モード：0(会計商品単価)、1(見積明細・会計明細の単価[税抜き])、2(見積明細・会計明細の単価[税込])
+			SHOP→FOODSUMMARY->ONENIGHTSUMFLGタグ新規追加（タグ：TRUEに設定される前提）
+2019.06.15  SHOP→FOODSUMMARY→SUMMARYFILTERCONFIGタグ新規追加
+				予定表のフィルターをユーザ毎に保持できる機能切り替えフラグ
+					TRUE : 予定表のフィルターをユーザ毎に保持する
+					FALSE: 予定表のフィルター値を保持しない（デフォルト）
+2019.06.15  SHOP→OPTIONS→TERMDATESIZEタグ新規追加
+				予定表の表示期間定義可能、例：期間が5日を指定場合<TERMDATESIZE>5</TERMDATESIZE>
+2019.06.15  SHOP→OPTIONS→SHOWFOODISSHOWOPタグ新規追加
+				料理列に会計OP列を表示する・しない切り替え機能
+					TRUE:料理列に会計OP列を表示する
+					FALSE:料理列に会計OP列を表示しない（デフォルト）　
+			SHOP→OPTIONS→SHOWFOODISSHOWOP→LABEL属性で、会計OP列のタイトルをカスタマイズ可能
+			列：料理列にタイトルが「会計OP」列を表示したい場合
+					<SHOWFOODISSHOWOP LABEL="会計OP">TRUE</SHOWFOODISSHOWOP>
+2019.07.19  SHOP→FOODSUMMARY->UNITPRICECOLSHOWタグに「MODE」属性新規追加
+				3: 見積明細・会計明細の単価[税抜、サービス料込]
+				4: 見積明細・会計明細の単価[税込、サービス料抜き]
+2020.02.28  SHOP→FIELDSタグに「SHOWGUESTPOS」属性新規追加
+			「SHOWGUEST」TRUE場合: 顧客情報項目は表示列指定、設定なし場合、最後列に表示する
+			  例：最前列の場合、SHOWGUESTPOS = "1"設定する
+			  　　２列の場合、　SHOWGUESTPOS = "2"設定する
+			     最後の列を設定したい場合、SHOWGUESTPOS属性なし OR　SHOWGUESTPOS=""
+			     指定の列数は総表示列数を超える場合、最後の列に顧客情報を表示する
+			  注意：「HIDDENFIELD」設定項目は列数計算対象外
+			  例：FIELDSタグに、FIELD1, FIELD2, FIELD3　設定　SHOWGUESTPOS="2"の場合
+			     HIDDENFIELDタグに、FIELD1は設定する
+			     画面項目表示する場合、FIELD2，顧客情報、FIELD3順で表示する
+2021.05.31 SHOP→OPTIONS→MULTIROOMFLGタグ新規追加 
+				部屋で絞り込める機能フラグ（部屋複数選択リストを画面に追加する）
+　				TRUE：部屋で絞り込みできる（デフォルト値）
+　				FALSE: 部屋選択リストが画面に非表示
+2021.05.31 SHOP->LAYOUT　予定表のレイアウトを複数パターンを定義できる機能
+				LAYOUT	 一つレイアウト情報定義用タグ、該当タグのは配下に既存SHOPタグに含めているタグも同じように定義可能
+					注：SHOPタグ配下に設定のレイアウト定義がデフォルト値として、初期表示する、レイアウト選択により、レイアウトを切替する
+				LAYOUTLABEL:	レイアウト表示レベル名、同じ店舗に名を重複しないください。（定義必須）
+
+	-->
+	<SHOP><!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+		<SHOPCODE></SHOPCODE>
+		<OPTIONS>
+			<POLLERTIMER>60</POLLERTIMER><!-- 秒数単位 -->
+			<DAYBUTTONSHOW>FALSE</DAYBUTTONSHOW><!-- 予定表ページに「前日、今日、翌日」 -->
+			<TERMDATESIZE>5</TERMDATESIZE><!-- 予定表の表示期間 -->
+			<SHOWFOODISSHOWOP LABEL="会計OP">FALSE</SHOWFOODISSHOWOP>
+		</OPTIONS>
+		<FIELDS SHOWFOOD="true" SHOWFOODSIMPLE="FALSE">
+		 refTypeOfRooms__r.ShopInfoRef__r.Name:支店
+		,Rroom__r.Seq__c:SEQ
+		,Rroom__r.Rnumber__c:R#
+		,Field353__c:確
+		,Rroom__r.Name:部屋
+		,refTypeOfRooms__r.Name:部屋タイプ名
+		,Field291__c:当日
+		,Field4__c:到着時刻
+		,Field278__c:昼
+		,Check369__c:Check
+		,Morningtime__c:朝食時間
+		,Field300__c:布団戸締
+		,Field281__c:補足$
+		,Field302__c:補足
+		,StayPersons__c:予約人数
+		,Mans__c:男性
+		,Femails__c:女性
+		,ChildFA__c:小人A
+		,Childs__c:小人B
+		,Name:予約名
+		,ReservedType__c:予約タイプ
+		,Field293__c:夕食時間
+		,Field303__c:処
+		,Field306__c:[料]要注意
+		,Field354__c:料理補足
+		,Field301__c:食事開始
+		,Comment3__c:特記事項
+		</FIELDS>
+		<LINKFIELD>
+		Name:Id
+		</LINKFIELD>
+		<AGGREGATE><!-- 合計項目定義する -->
+		StayPersons__c
+		</AGGREGATE>
+		<HIDDENFIELD><!-- 初期非表示項目 -->
+		refTypeOfRooms__r.ShopInfoRef__r.Name
+		</HIDDENFIELD>
+		<COLNUMSIZE><!-- 項目の横幅サイズを設定する（例：100px, 10%) -->
+		 Rroom__r.Seq__c:46px
+		,Field353__c:36px
+		,Comment3__c:20%
+		</COLNUMSIZE>
+		<COLNUMSTYLE>
+		</COLNUMSTYLE>
+		<COLNUMTYPE>
+		 Rroom__r.Seq__c:number
+		,Rroom__r.Rnumber__c:number
+		,StayPersons__c:number
+		,Mans__c:number
+		,Femails__c:number
+		,ChildFA__c:number
+		,Childs__c:number
+		</COLNUMTYPE>
+		<COLNUMEDIT>
+		 Field4__c
+		,StayPersons__c
+		,Mans__c
+		,Femails__c
+		</COLNUMEDIT>
+		<FOODSUMMARY><!-- 料理集計定義情報 -->
+			<COLNUMSIZE>	<!-- 列の横幅サイズ(px) -->
+				<MIDDAYICON>60</MIDDAYICON>
+				<PRODCUTNMAEM>240</PRODCUTNMAEM>
+				<PRODUCTSUMMY>60</PRODUCTSUMMY>
+				<!-- 2019/02/28 新規追加　単価列の横幅サイズ(px)  -->
+				<UNITPRICE>100</UNITPRICE>
+			</COLNUMSIZE>
+			<COLNUMSTYLE>	<!-- 項目列のSTYLE定義SCRIPT -->
+				<MIDDAYICON>font-size: 14px;</MIDDAYICON>
+				<PRODCUTNMAEM>font-size: 14px;</PRODCUTNMAEM>
+				<PRODUCTSUMMY>text-align: right; font-size: 14px</PRODUCTSUMMY>
+				<!-- 2019/02/28 新規追加　単価列のSTYLE定義SCRIPT  -->
+				<UNITPRICE>text-align: right; font-size: 14px;</UNITPRICE>
+			</COLNUMSTYLE>
+			<!-- 2018/09/10 新規追加
+				CONSECUTIVENIGHTS: 	泊数単位料理集計場合、泊数により、背景色定義用タグ、定義省略可能、省略の場合、背景は白色で設定する
+									注：タグ「NIGHTSGROUPABLE」値がTRUEの場合、該当設定が有効になる
+					BACKGROUNDCOLOR:背景色設定用タグ
+						FROMNIGHT:	開始泊数
+						TONIGHT:	終了泊数
+				下記例は１泊、２泊、３泊、４泊以後の色を設定する
+			 -->
+			<!-- 
+			<CONSECUTIVENIGHTS>
+				<BACKGROUNDCOLOR FROMNIGHT="1" TONIGHT="1">#ffcc33</BACKGROUNDCOLOR>
+				<BACKGROUNDCOLOR FROMNIGHT="2" TONIGHT="2">#33ff66</BACKGROUNDCOLOR>
+				<BACKGROUNDCOLOR FROMNIGHT="3" TONIGHT="3">yellow</BACKGROUNDCOLOR>
+				<BACKGROUNDCOLOR FROMNIGHT="4" >orange</BACKGROUNDCOLOR>
+			</CONSECUTIVENIGHTS>
+			 -->
+			<!-- 2019/02/28 新規追加
+				UNITPRICECOLSHOW：料理集計ウインドウに単価列を表示する・しない切替フラグ
+						TRUE:単価列を表示する
+						FALSE:単価列を非表示する（デフォルト値）
+			-->
+			<!-- 2019/05/15 MODE 属性新規追加
+				0: 会計商品単価(デフォルト値)
+				1: 見積明細・会計明細の単価[税抜き]
+				2: 見積明細・会計明細の単価[税込]
+				3: 見積明細・会計明細の単価[税抜、サービス料込]
+				4: 見積明細・会計明細の単価[税込、サービス料抜き]
+			-->
+			<UNITPRICECOLSHOW MODE="0" >FALSE</UNITPRICECOLSHOW>
+			<!-- 2019/05/15 新規追加(タグ：NIGHTSGROUPABLEがTRUEに設定前提)
+				料理集計：単泊または日帰りの料理数は「連泊の１泊目」に集めて合計する
+				FALSE: 単泊または日帰りの料理数は個別集計（デフォルト）
+				TRUE: 単泊または日帰りの料理数は「連泊の１泊目」に集めて合計する
+			-->
+			<ONENIGHTSUMFLG>FALSE</ONENIGHTSUMFLG>
+			
+			<!-- 
+			2019.06.15  SHOP→FOODSUMMARY→SUMMARYFILTERCONFIGタグ新規追加
+					予定表のフィルターをユーザ毎に保持できる機能切り替えフラグ
+					TRUE : 予定表のフィルターをユーザ毎に保持する
+					FALSE: 予定表のフィルター値を保持しない（デフォルト
+			 -->
+			<SUMMARYFILTERCONFIG>FALSE</SUMMARYFILTERCONFIG>
+		</FOODSUMMARY>
+		<!--
+		<EXPORTPDF >
+			<FIELDS SHOWFOOD="TRUE">
+			</FIELDS>
+			<MAXWIDTH>3000</MAXWIDTH>
+		</EXPORTPDF>
+		-->
+		<!-- 2017.09.05 複数予約時(予約インデックスが同じ)にはまとまって表示の定義 
+		  ①複数予約時(予約インデックスが同じ)にはまとまって表示機能有効
+		  ②タイトルに、「予約タイプ」「予約チャネル」「予約人数」情報を表示
+		  ③「予約人数」は集計指定する
+		-->
+        <!-- 
+        <GROUPABLE>
+            <AUTOEXPAND>FALSE</AUTOEXPAND>
+            <GROUPTITLE>  
+            StayPersons__c:1
+            ,Field4__c   
+            ,ReservedType__c 
+            ,Comment3__c
+            </GROUPTITLE>
+        </GROUPABLE>
+        -->
+        <!-- 部屋R#順表示したい場合 -->
+        <!-- 
+        <SORTFIELD>Rroom__r.Rnumber__c</SORTFIELD>
+        -->
+        <!-- Seq#が10,20,30の部屋は予定表に非表示したい場合 -->
+        <!-- 
+        <NOSHOWROOM>10,20,30</NOSHOWROOM>
+        -->
+        <!-- 2018/02/15 新規追加  
+        HANDWRITE:     該当タグを定義する場合、手書き入力機能有効の場合、該当タグを定義しなければ、手書き入力機能無効
+            REAPPEAR:  TRUE:手書き入力内容履歴を残る、前回入力内容ベースで再度入力可能
+                       FALSE:手書き入力内容履歴を残らない、毎回最新ベースで入力する（デフォルト値）
+            SHAREFLG:  入力内容は全員見えるがどうかフラグ（前提:REAPPEARタグ値はTRUEの場合のみ有効）
+                  TRUE:入力内容はだれでも見える、続いて入力可能（デフォルト値)
+                  FALSE: 入力内容は自分のみ見える、続いて入力可能（デフォルト値）
+        -->
+        <!-- 
+        <HANDWRITE>
+            <REAPPEAR>FALSE</REAPPEAR>
+            <SHAREFLG>TRUE</SHAREFLG>
+        </HANDWRITE>
+         -->
+        <!-- 2018/03/15 新規追加
+        FOODGROUPABLE:  予定表の料理明細は会計OPにより分割表示する・しないフラグ
+            TRUE:会計商品の会計OPにより分割表示する
+            FALSE:会計商品の会計OPにより分割表示しない(デフォルト値)
+         -->
+ 		<!--
+        <FOODGROUPABLE>TRUE</FOODGROUPABLE>
+		-->
+		<!-- 2018/07/17 新規追加 
+		GUESTYADOINFO:	予定表出力の際に、各部屋の宿泊者情報列に出力のお客様項目を指定する
+						該当タグに出力したい項目APIとラベル名を指定する（お客様の項目APIのみ指定可能)
+			TITLE:		タグ属性、該当宿泊者情報出力列のタイトル名を指定可能（指定省略可、デフォルト：顧客情報)
+		-->
+		<!-- 
+		<GUESTYADOINFO TITLE="お客様特記事項">
+			Relcontact__r.Name:名前,
+			Relcontact__r.Katakana__c:カナ名,
+			Relcontact__r.gender__c:性別
+		</GUESTYADOINFO>
+		-->
+		<!-- 2018/09/10 新規
+			NIGHTSGROUPABLE：	泊数単位料理集計する、しないフラグ、デフォルト：FALSE
+		 -->
+		 <!-- 
+		 <NIGHTSGROUPABLE>TRUE</NIGHTSGROUPABLE>
+		  -->
+		  <!-- 2018/10/31 新規
+		  FOODSUMISNOSHOW:料理集計ウインドウ、料理集計総数を表示する・しないフラグ
+		  	TRUE:非表示
+		  	FALSE:表示（デフォルト）
+		  FOODSUMISSHOWPROD: 料理集計ウインドウ、料理ごとの総数を集計する・しないフラグ
+		  	TRUE:料理ごとの総数を集計する
+		  	FALSE:すべて料理の総数を集計する（デフォルト）
+		  	注：FOODSUMISNOSHOWフラグはFALSE場合のみ、FOODSUMISSHOWPRODの設定が有効
+		  -->
+		 <FOODSUMISNOSHOW>FALSE</FOODSUMISNOSHOW>
+		 <FOODSUMISSHOWPROD>FALSE</FOODSUMISSHOWPROD>
+	</SHOP>
+	<SHOP><!-- 支店「東京都千代田区1号店」表示項目を定義する -->	
+		<SHOPCODE>01</SHOPCODE>
+		<OPTIONS>
+			<ASSIGNONLYROOM>TRUE</ASSIGNONLYROOM>
+		</OPTIONS>
+		<FIELDS SHOWFOOD="TRUE" SHOWFOODPOS="1" SHOWFOODWIDTH="200px"
+				SHOWFOODSTYLE="font-size: 16px; color: green;font-family: sans-serif;">
+		 refTypeOfRooms__r.ShopInfoRef__r.Name:支店
+		,Rroom__r.Name:部屋
+		,refTypeOfRooms__r.Name:部屋タイプ名
+		,StayPersons__c:予約人数
+		,Name:予約名
+		,Relcontact__r.Name:お客様名
+		,Field298__c:お客様ステータス
+		,Field276__c:ズ
+		,EntryTime__c:到着日
+		,Field352__c:利用目的
+		,Comment3__c:特記事項
+		</FIELDS>
+		<LINKFIELD>
+		Name:Id
+		</LINKFIELD>
+		<AGGREGATE><!-- 合計項目定義する -->
+		StayPersons__c
+		</AGGREGATE>
+		<HIDDENFIELD><!-- 初期非表示項目 -->
+		refTypeOfRooms__r.ShopInfoRef__r.Name
+		</HIDDENFIELD>
+		<COLNUMSIZE><!-- 項目の横幅サイズを設定する（例：100px, 10%) -->
+		 Rroom__r.Seq__c:46px
+		,Field353__c:36px
+		,Comment3__c:20%
+		,Field276__c:40px
+		</COLNUMSIZE>
+		<COLNUMSTYLE>
+		Comment3__c:font-size: 16px; color: green;font-family: sans-serif;
+		,EntryTime__c:font-size: 16px; color: green;
+		,Field298__c:font-size:10px;
+		</COLNUMSTYLE>
+		<COLNUMTYPE>
+		EntryTime__c:date
+		,StayPersons__c:number
+		,Field276__c:boolean
+		,Field298__c:list
+		</COLNUMTYPE>
+		<COLNUMEDIT>
+		EntryTime__c
+		,Field352__c
+		,Field298__c
+		,Field276__c
+		,StayPersons__c
+		</COLNUMEDIT>
+	</SHOP>	
+	<SHOP><!-- 支店「東京都千代田区2号店」表示項目を定義する -->	
+		<SHOPCODE>02</SHOPCODE>
+		<FIELDS SHOWFOOD="true" SHOWFOODPOS="6">
+		 refTypeOfRooms__r.ShopInfoRef__r.Name:支店
+		,Rroom__r.Name:部屋
+		,refTypeOfRooms__r.Name:部屋タイプ名
+		,StayPersons__c:予約人数
+		,Mans__c:男性
+		,Femails__c:女性
+		,Name:予約名
+		,Relcontact__r.Name:お客様名
+		,EntryTime__c:到着日
+		,Field2__c:予約チャネル
+		,Field276__c:ズ
+		,Comment3__c:特記事項
+		</FIELDS>
+		<LINKFIELD>
+		Name:Id
+		,Relcontact__r.Name:Relcontact__c
+		</LINKFIELD>
+		<AGGREGATE><!-- 合計項目定義する -->
+		StayPersons__c
+		</AGGREGATE>
+		<HIDDENFIELD><!-- 初期非表示項目 -->
+		refTypeOfRooms__r.ShopInfoRef__r.Name
+		</HIDDENFIELD>
+		<COLNUMSIZE><!-- 項目の横幅サイズを設定する（例：100px, 10%) -->
+		 Rroom__r.Seq__c:46px
+		,Field353__c:36px
+		,Comment3__c:20%
+		</COLNUMSIZE>
+		<COLNUMTYPE>
+		EntryTime__c:date
+		,StayPersons__c:number
+		,Field276__c:boolean
+		,Mans__c:number
+		,Femails__c:number
+		</COLNUMTYPE>
+		<COLNUMEDIT>
+		 Field4__c
+		,StayPersons__c
+		,Mans__c
+		,Femails__c
+		</COLNUMEDIT>
+		<!-- 変更回数、時間により、項目色付ける機能設定 -->
+		<!-- 
+		<HISTORY>
+			<COLOR>
+				<VALUE TO="2">springgreen</VALUE>
+				<VALUE FROM="3" TO="4">lightblue</VALUE>
+				<VALUE FROM="5">papayawhip</VALUE>
+				<FIELDS>Field4__c,Comment3__c</FIELDS>
+			</COLOR>
+			<COLOR>
+				<VALUE TMTO="5">springgreen</VALUE>
+				<VALUE TMFROM="5" TMTO="60">lightblue</VALUE>
+				<VALUE TMFROM="60">papayawhip</VALUE>
+				<FIELDS>StayPersons__c</FIELDS>
+			</COLOR>
+			<COLOR>
+				<VALUE>lavender</VALUE>
+				<FIELDS>StayPersons__c</FIELDS>
+			</COLOR>
+			<FOODSUMMARYCOLOR DETAILISSHOW="TRUE">
+				<VALUE>springgreen</VALUE>
+			</FOODSUMMARYCOLOR>
+		</HISTORY>
+		 -->
+		<!-- EXPORTPDF：予定表PDF出力項目と全体ページ横幅定義用、該当タグがないと、該当店舗のPDF出力を行わない -->
+		<!-- PDF出力項目定義、該当タグを未定義、または　タグ内の内容は空欄の場合、SHOP→FIELDSに定義した項目をPDFに自動出力する 
+			 属性：SHOWFOOD="TRUE"を定義する場合、PDFに料理列は一番右にPDFへ出力する
+			 MAXWIDTH:PDFページの最大横幅サイズ、出力項目は多い場合、数字調整が必要
+		-->	
+		<!--
+		<EXPORTPDF >
+			<FIELDS SHOWFOOD="TRUE">
+			</FIELDS>
+			<MAXWIDTH>1980</MAXWIDTH>
+		</EXPORTPDF>
+		-->
+	</SHOP>
+	<!-- PDFファイルChatterGroupへ自動ポストバッチスケジール定義関連 -->
+	<EXPORTPDF_BATCHCONFIG>
+		<!-- 店舗毎に予定表PDF投稿用Chatterグループ名を定義する -->
+		<!-- 
+		<POSTDEFINE>
+			<GROUPNAME SHOPCODE="02">予定表02</GROUPNAME>
+			<GROUPNAME SHOPCODE="04">テストグループ</GROUPNAME>
+		</POSTDEFINE>
+		 -->
+		<!-- 予定表出力のインターバルタイマ（分単位）定義する 
+			最小起動時間単位は５分単位、デフォルト：120分
+		-->
+		<INTERVAL>120</INTERVAL>
+	</EXPORTPDF_BATCHCONFIG>
+</root>

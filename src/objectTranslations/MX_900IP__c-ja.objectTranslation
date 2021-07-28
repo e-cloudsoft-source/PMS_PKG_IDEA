@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>MX900IP</value>
+    </caseValues>
+    <fields>
+        <label><!-- 発信-話中 --></label>
+        <name>BUSY__c</name>
+    </fields>
+    <fields>
+        <help><!-- 電話発着信日付 --></help>
+        <label><!-- DAY --></label>
+        <name>DAY__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発信-呼量 --></label>
+        <name>DIALCALLS__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発信-平均保留時間 --></label>
+        <name>DIALTIMEAVG__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発信-総保留時間 --></label>
+        <name>DIALTIME__c</name>
+    </fields>
+    <fields>
+        <help><!-- 外線発信の数内線発信も含む？ --></help>
+        <label><!-- 発信 --></label>
+        <name>DIAL__c</name>
+    </fields>
+    <fields>
+        <label><!-- 内線着信呼数 --></label>
+        <name>EXT__c</name>
+    </fields>
+    <fields>
+        <label><!-- 途中放棄 &lt; 15秒 --></label>
+        <name>INCMP15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 途中放棄 &lt; 30秒 --></label>
+        <name>INCMP30__c</name>
+    </fields>
+    <fields>
+        <help><!-- あまりに相手を待たせた為、相手が切ってしまった[途中放棄時間帯別呼数] --></help>
+        <label><!-- 途中放棄 &lt; 5秒 --></label>
+        <name>INCMP5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 途中放棄 &gt;= 60秒 --></label>
+        <name>INCMP60O__c</name>
+    </fields>
+    <fields>
+        <label><!-- 途中放棄 &lt; 60秒 --></label>
+        <name>INCMP60__c</name>
+    </fields>
+    <fields>
+        <help><!-- 発信のとき、相手を呼び出したとき、出るまでまち続けとうとう出なかった数 --></help>
+        <label><!-- 発信-オーバーフロー呼 --></label>
+        <name>OVERFLOW__c</name>
+    </fields>
+    <fields>
+        <help><!-- 外線着信の数内線も含む？ --></help>
+        <label><!-- 着信 --></label>
+        <name>RECEIVING__c</name>
+    </fields>
+    <fields>
+        <help><!-- 稼働率みたいなもの、平均保留時間を1000secで割った数？ --></help>
+        <label><!-- 着信-呼量 --></label>
+        <name>RECIVINGCALLS__c</name>
+    </fields>
+    <fields>
+        <help><!-- 外線応答後、保留した平均時間、秒単位 --></help>
+        <label><!-- 着信-平均保留時間 --></label>
+        <name>RECIVINGTIMEAVG__c</name>
+    </fields>
+    <fields>
+        <help><!-- 外線応答後、保留した総時間、秒単位 --></help>
+        <label><!-- 着信-総保留時間 --></label>
+        <name>RECIVINGTIME__c</name>
+    </fields>
+    <fields>
+        <label><!-- 応答 &lt; 15秒 --></label>
+        <name>REV15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 応答 &lt; 30秒 --></label>
+        <name>REV30__c</name>
+    </fields>
+    <fields>
+        <help><!-- 何秒未満で受話器をとったか？[応答時間帯別呼数] --></help>
+        <label><!-- 応答 &lt; 5秒 --></label>
+        <name>REV5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 応答 &gt;= 60秒 --></label>
+        <name>REV60O__c</name>
+    </fields>
+    <fields>
+        <label><!-- 応答 &lt; 60秒 --></label>
+        <name>REV60__c</name>
+    </fields>
+    <fields>
+        <help><!-- 電話発着信時刻１時間単位 --></help>
+        <label><!-- TIME --></label>
+        <name>TIME__c</name>
+    </fields>
+    <fields>
+        <label><!-- WEEK --></label>
+        <name>Week__c</name>
+    </fields>
+</CustomObjectTranslation>

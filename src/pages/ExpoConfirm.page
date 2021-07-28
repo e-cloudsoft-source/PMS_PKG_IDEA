@@ -1,0 +1,249 @@
+<apex:page controller="ExpoForgotpwdCtrl" showHeader="false" standardStylesheets="false" title="成功したアプリケーション">
+<style>
+#content,.container {
+	background-color: #fff;
+}
+
+#header {
+	color: #16325c;
+}
+
+.mb12 {
+	margin-bottom: .75rem;
+}
+
+.mb16 {
+	margin-bottom: 1rem;
+}
+
+.mb24 {
+	margin-bottom: 1.5rem;
+}
+
+.button {
+	padding: 12px 24px;
+	border: 0;
+	border-radius: 4px;
+	background-color: #D8DDE6;
+	background-image: none!important;
+	color: #fff;
+	font-size: .8125rem;
+	font-family: SFS,Arial,sans-serif;
+	cursor: pointer;
+}
+
+a.button {
+	display: inline-block;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+a.primary,a.primary:active,a.primary:hover,a.primary:link,a.primary:visited {
+	color: #fff;
+}
+
+.primary {
+	border: 1px solid transparent;
+	background-color: #0070d2;
+	color: #fff;
+	transition: all .1s;
+}
+
+.primary:focus,.primary:hover {
+	background-color: #005fb2;
+}
+
+.wide {
+	width: 100%;
+}
+
+#wrapper {
+	margin-top: 0;
+	margin-right: auto;
+	margin-bottom: 0;
+	margin-left: auto;
+	padding: 20px 0 0 0;
+	max-width: 380px;
+	-webkit-transition: all .25s;
+	-moz-transition: all .25s;
+	-o-transition: all .25s;
+	transition: all .25s;
+}
+
+.standard_logo_wrapper {
+	display: table;
+	overflow: hidden;
+	margin-right: auto;
+	margin-left: auto;
+	width: 180px;
+	height: 113px;
+	text-align: center;
+}
+
+.standard_logo {
+	margin-right: auto;
+	margin-left: auto;
+	max-width: 180px;
+	max-height: 113px;
+	vertical-align: middle;
+}
+
+#header {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+	font-size: 1.5rem;
+	font-family: SFSLight,Arial,sans-serif;
+}
+
+#wrap {
+	min-height: 100%;
+}
+
+#main {
+	overflow: auto;
+	padding-bottom: 48px;
+}
+
+#content {
+	margin: 0 auto;
+	padding: 1.25rem;
+	border: 1px solid #D8DDE6;
+	border-radius: .25rem;
+	color: #16325c;
+}
+
+p {
+	display: block;
+	text-align: left;
+	text-align: start;
+	margin: 0px;
+	line-height: 1.5rem;
+}
+
+img.logo {
+	width: 160px;
+}
+
+img {
+	vertical-align: middle;
+	border: 0;
+}
+
+a {
+	text-decoration: none;
+	transition: all 0.1s;
+}
+
+a:hover,
+a:active {
+	color: #005fb2;
+}
+
+a:focus {
+	outline: thin dotted #333;
+	outline: 5px auto -webkit-focus-ring-color;
+	outline-offset: -2px;
+}
+
+h1 {
+	font-size: 1.5rem;
+	font-family: SFSLight, Arial, sans-serif;
+}
+
+h2 {
+	font-size: 1.125rem;
+	font-family: SFSLight, Arial, sans-serif;
+}
+
+
+@media only screen and (max-width: 480px) {
+	#wrapper {
+		max-width: 100%;
+		margin-left: inherit;
+		left: inherit;
+		padding-top: 20px !important;
+	}
+	#content {
+		border-left: 0px;
+		border-right: 0px;
+		border-radius: 0px;
+	}
+	.button {
+		font-size: 1rem;
+	}
+	.label,
+	.small {
+		font-size: .875rem;
+	}
+}
+
+@media only screen and (min-height: 1200px) {
+	#wrapper {
+		padding-top: 240px;
+	}
+}
+
+@media only screen and (max-height: 1200px) {
+	#wrapper {
+		padding-top: 180px;
+	}
+}
+
+@media only screen and (max-height: 1000px) {
+	#wrapper {
+		padding-top: 140px;
+	}
+}
+
+@media only screen and (max-height: 900px) {
+	#wrapper {
+		padding-top: 100px;
+	}
+}
+
+@media only screen and (max-height: 736px) {
+	#wrapper {
+		padding-top: 60px;
+	}
+}
+
+@media only screen and (max-height: 670px) {
+	#wrapper {
+		padding-top: 40px;
+	}
+}
+
+@media only screen and (max-height: 610px) {
+	#wrapper {
+		padding-top: 20px;
+	}
+}
+</style>
+<div id="wrap">
+	<div id="main">
+		<div id="wrapper">
+			<div id="logo_wrapper" class="standard_logo_wrapper mb24">
+				<h1 style="height: 100%; display: table-cell; vertical-align: bottom;">
+				<apex:image url="{!URLFOR(LogoUrl)}" />
+				</h1></div>
+			<h2 id="header" class="mb12">メールの確認</h2>
+			<div id="content">
+
+				<div id="forgotPassForm">
+					<div class="message">
+						<p class="senttext mb12">パスワードのリセットを完了させるためのリンクが記載されたメールを送信しました。</p>
+						<p class="senttext mb12">メールが見つかりませんか? スパムフォルダを確認してください。</p>
+
+						<p class="senttext mb12">まだログインできない場合は、メールの再送信を依頼するか、 システム管理者にお問い合わせください。</p>
+
+					</div>
+					<a href="{!URLFOR($Page.ExpoLogin)}" class="primary button wide mb16">ログインへ戻る</a>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>
+</apex:page>

@@ -1,0 +1,918 @@
+<!--2018/12/15 APEXのVersion最新化対応 zyz BY BEGIN-->
+<apex:page standardcontroller="Lead__c" extensions="SeminarOrderPDF" showHeader="false" sidebar="false" renderAs="PDF" applyHtmlTag="false" applyBodyTag="false">
+<!--2018/12/15 APEXのVersion最新化対応 zyz BY END-->
+<html>
+<head>
+ <style>
+  @page {
+   size: 16.54in 11.69in;   /* A4 portlate size */
+   margin: 0cm;
+  }
+  body {
+   font-family: Arial Unicode MS;
+   width: 40.2cm;
+   height: 27.9cm;
+   position:absolute;
+   top: 1cm;
+   left: 0.8cm;
+   overflow: hidden;
+   font-size: 0.4cm;
+  }
+    #BanquetName1{
+   width: 100%;
+   border: 0.25px solid #000;
+  }
+    #BanquetName2{
+   width: 100%;
+   border: 0.25px solid #000;
+  }
+  tr{
+   height: 0.3cm;
+  }
+
+ </style>
+</head>
+<body>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+<td width="50%">&nbsp;</td>
+
+<td>
+  <div style="position:absolute;font-size: 0.43cm; top: -0.9cm;left:-0.2cm;text-align: top;">
+  <table cellspacing="0" cellpadding="0" boder="0" style="width:3cm;">
+  <tr>
+  	<td style="border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;border-left: 0.5px solid #000;border-right: 0.5px solid #000;width: 0.5cm;">&nbsp;予&nbsp;&nbsp;&nbsp;&nbsp;</td>
+  	<td style="border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;border-left: 0.5px solid #000;width: 3cm;">&nbsp;宿&nbsp;&nbsp;&nbsp;&nbsp;サ&nbsp;&nbsp;&nbsp;&nbsp;洋&nbsp;&nbsp;&nbsp;&nbsp;和&nbsp;&nbsp;&nbsp;&nbsp;中</td>
+  </tr>
+  </table>
+  </div>
+  <div style="position:absolute;font-size: 0.8cm; top: -0.9cm;left:6cm;text-align: top;"><b><i>セミナーオードーシート</i></b>
+  </div>
+<table width="100%" style=" border-collapse: collapse" cellpadding="0" cellspacing="0" border="0" bgcolor="white" >
+<tr><td>
+
+  <table id="BanquetName1" cellspacing="0" cellpadding="0" style="width:19.5cm;height:13.5cm;">
+   <tr style="height: 0.001cm;">
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   </tr>
+   <tr style="height: 0.6cm;">
+    <td colspan="1" style="border-bottom: 0.5px solid #FFF;background: #056; color: #FFF;width: 0.15cm;">席<br />名</td>
+    <td colspan="9" style="width: 7.6cm; text-align: center; font-size: 0.4cm;border-top: 0.5px solid #000;" >
+     <div style="width: 7.55cm; height: 0.5cm; overflow: hidden; ">
+      &nbsp;&nbsp;{!booking.name}
+     </div>
+    </td>
+    <td colspan="1" style="background: #056; color: #FFF;width: 0.15cm;">幹<br />事</td>
+    <td colspan="10" style="width: 3.5cm; text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;">
+     <div style="width: 3.45cm; height: 0.45cm; overflow: hidden; ">
+      &nbsp;{!booking.Field352__c}
+     </div>
+    </td>
+   </tr>
+   <tr>
+     <td colspan="4" style="width: 2.1cm;background: #056; color: #FFF; text-align: center;" >宿泊</td>
+     <td colspan="2" style="width: 1.35cm;background: #056; color: #FFF;text-align: center;">室数</td>
+     <td colspan="1" style="width: 1.7cm;background: #056; color: #FFF; text-align: center;">人数</td>
+     <td colspan="3" style="width: 1.45cm; background: #056; color: #FFF;text-align: center; ">宿泊備考</td>
+     <td colspan="2" style="width: 0.2cm; background: #056; color: #FFF;border-left: 0.5px solid #FFF; text-align: center;">内容</td>
+     <td colspan="9" style="width: 1.45cm;border-top: 0.5px solid #000;border-right: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="4" rowspan="3" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">2月20日（月）</td>
+     <td colspan="2" style="border-left: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm;  background: #056; color: #FFF; border-top: 0.5px solid #FFF;">前回</td>
+     <td colspan="9" style="border-top: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">2011年8月2日</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm;  border-top: 0.5px solid #FFF;background: #056; color: #FFF;">次回</td>
+     <td colspan="9" style="border-top: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">2011年8月2日</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="width: 0.2cm;  border-top: 0.5px solid #FFF;background: #056; color: #FFF;"></td>
+     <td colspan="9" style="border-top: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">受講生：２５名</td>
+   </tr>
+
+    <tr>
+     <td colspan="4" rowspan="3" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">2月21日（火）</td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm; background: #056; color: #FFF;"></td>
+     <td colspan="9" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">男性：３２名　女性：０名</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm; background: #056; color: #FFF;">人数</td>
+     <td colspan="9" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">年齢層：３５歳　　５０歳</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="width: 0.2cm; background: #056; color: #FFF;"></td>
+     <td colspan="9" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;">事務局：１名</td>
+   </tr>
+
+   <tr>
+     <td colspan="4" rowspan="3" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">2月22日（水）</td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm;background: #056; color: #FFF;"></td>
+     <td colspan="9" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">オブサーバー：6名</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF;background: #056; color: #FFF;text-align: center;">講師</td>
+     <td colspan="9" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">事務局　芋上</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">S*9</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: right;">9名</td>
+     <td colspan="3" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="width: 0.2cm;border-top: 0.5px solid #FFF;background: #056; color: #FFF;text-align: center;">VIP</td>
+     <td colspan="9" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+   </tr>
+
+    <tr>
+     <td colspan="3" style="background: #056; color: #FFF;">宿泊備考</td>
+     <td colspan="7" style="border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF;background: #056; color: #FFF;text-align: center;">受付</td>
+     <td colspan="9" style="border-top: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">&nbsp;&nbsp;&nbsp;&nbsp;有・無　　　　　本　　　名</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">シングル</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">ツイン</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">トリプル</td>
+     <td colspan="3" ></td>
+     <td colspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF;background: #056; color: #FFF;text-align: center;">資料</td>
+     <td colspan="9" style="border-top: 0.5px solid #000;border-right: 0.5px solid #000;text-align: left;">&nbsp;&nbsp;&nbsp;&nbsp;有・無　　　　　　　個
+     <div style="position: absolute;top: 4.85cm; left: 9.72cm; font-size: 0.75cm;">◯</div>
+     </td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">8100</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">6600</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">5600</td>
+     <td colspan="3" ></td>
+     <td colspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF;background: #056; color: #FFF;text-align: center;">立会</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">要</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">不要</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">8100</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">6600</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">5600</td>
+     <td colspan="3" ></td>
+     <td colspan="2" style="width: 0.2cm;  border-top: 0.5px solid #FFF;background: #056; color: #FFF;text-align: center;">TEL</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">つなぐ</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">メモ</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">8100</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">6600</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">5600</td>
+     <td colspan="3" ></td>
+     <td colspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF; background: #056; color: #FFF;text-align: center;">TV</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">PA</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">COA</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">8100</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">6600</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">5600</td>
+     <td colspan="3" ></td>
+     <td colspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF; background: #056; color: #FFF;text-align: center;">TEL</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">PA</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">COA</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">8100</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">6600</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">5600</td>
+     <td colspan="3" ></td>
+     <td colspan="2" rowspan="2" style="width: 0.2cm; border-top: 0.5px solid #FFF; background: #056; color: #FFF;text-align: center;">Key</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;">〇</td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">届ける</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="3" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">ピッヶアップ</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">8100</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">6600</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">5600</td>
+     <td colspan="3" ></td>
+     <td colspan="5" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;">時間：</td>
+     <td colspan="2" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">ノック</td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">可
+     <div style="position: absolute;top: 7.21cm; left: 12.1cm; font-size: 0.75cm;">◯</div>
+     </td>
+     <td colspan="1" style="border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">否</td>
+   </tr>
+
+   <tr>
+     <td colspan="3" style="border-left: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">14720</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">13070</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">11970</td>
+     <td colspan="14" style="border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="21" style="text-align: center;background: #056; color: #FFF;">会議室</td>
+   </tr>
+
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">月日</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">全体会</td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">講師控室</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="7" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">料金</td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">割引</td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">2</td>
+     <td colspan="4" rowspan="2"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">わかくさ</td>
+     <td colspan="2" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">講師控室</td>
+     <td colspan="4" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">全</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">月</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">①</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">20</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">9:00   12:00</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">②</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">日</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">2</td>
+     <td colspan="4" rowspan="2"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">わかくさ</td>
+     <td colspan="2" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">講師控室</td>
+     <td colspan="4" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">全</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">月</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">①</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">21</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">9:00   12:00</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">②</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">日</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">2</td>
+     <td colspan="4" rowspan="2"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">わかくさ</td>
+     <td colspan="2" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">講師控室</td>
+     <td colspan="4" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">全</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">月</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">①</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">22</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">9:00   12:00</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">②</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">日</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">2</td>
+     <td colspan="4" rowspan="2"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;text-align: center;">わかくさ</td>
+     <td colspan="2" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">講師控室</td>
+     <td colspan="4" rowspan="3"  style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">全</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">月</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">①</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">23</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">9:00   12:00</td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">②</td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">日</td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="4" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;"></td>
+     <td colspan="6" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;text-align: center;">55000</td>
+     <td colspan="2" style="border-left: 0.5px solid #000;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="9" style="text-align: center;background: #056; color: #FFF;">レイアウト</td>
+     <td colspan="12" style="text-align: center;background: #056; color: #FFF;">備品</td>
+   </tr>
+
+   <tr>
+     <td colspan="9" style="border-left: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">備品</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">使用日</td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">数</td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">料金</td>
+   </tr>
+   <tr>
+     <td colspan="9" style="border-left: 0.5px solid #000;text-align: center;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">W-B</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">2/20 - 23</td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">1</td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">サービス</td>
+   </tr>
+         <tr>
+     <td colspan="9" style="border-left: 0.5px solid #000;text-align: center;">スクール形式</td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="9" rowspan="5" style="border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;text-align: center;">講師１名＋オブザーバー８名</td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">テープルタブ</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">3</td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">水差し</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">1</td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">朝・昼・夕</td>
+   </tr>
+   <tr>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">お絞り</td>
+     <td colspan="4" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1" style="text-align: center;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">1</td>
+     <td colspan="6" style="text-align: center;border-left: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">朝・昼・夕</td>
+   </tr>
+  </table>
+
+</td>
+
+<td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 10px;"/></td>
+
+<td>
+
+  <table id="BanquetName2" cellspacing="0" cellpadding="0" style="width:19.5cm;height:13.5cm;">
+     <tr style="height: 0.001cm;">
+   <td style="width: 0.3cm;"></td>
+   <td style="width: 0.3cm;"></td>
+   <td style="width: 0.3cm;"></td>
+   <td style="width: 0.6cm;"></td>
+   <td style="width: 1.2cm;"></td>
+   <td style="width: 0.35cm;"></td>
+   <td style="width: 0.85cm;"></td>
+   <td style="width: 1.2cm;"></td>
+   <td style="width: 1.2cm;"></td>
+   <td style="width: 0.55cm;"></td>
+   <td style="width: 0.65cm;"></td>
+   <td style="width: 0.8cm;"></td>
+   <td style="width: 0.6cm;"></td>
+   <td style="width: 0.2cm;"></td>
+   <td style="width: 0.4cm;"></td>
+   <td style="width: 0.8cm;"></td>
+   <td style="width: 0.6cm;"></td>
+   <td style="width: 0.6cm;"></td>
+   <td style="width: 1.2cm;"></td>
+   </tr>
+   <tr style="height: 1.2cm;">
+    <td colspan="2" style="background: #056; color: #FFF;border-bottom: 0.5px solid #000;">席名</td>
+    <td colspan="10" style="width: 6.6cm;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000 ;text-align: center; font-size: 0.4cm;">
+     <div style="width: 6.55cm; overflow: hidden; ">
+      &nbsp;&nbsp;{!booking.name}
+     </div>
+    </td>
+    <td colspan="1" style="background: #056; color: #FFF;text-align: center;width:0.3cm;border-bottom: 0.5px solid #000;">幹事</td>
+    <td colspan="6" style="width: 1.5cm;border-bottom: 0.5px solid #000;border-right: 0.5px solid #000;border-top: 0.5px solid #000; text-align: center;">
+     <div style="width: 1.45cm;  overflow: hidden; ">
+      &nbsp;{!booking.Field352__c}
+     </div>
+    </td>
+   </tr>
+   <tr>
+     <td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 5px; height: 30px;"/></td>
+   </tr>
+
+   <tr>
+     <td colspan="1" style="background: #056; color: #FFF;text-align:center;">変</td>
+     <td colspan="3" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="1" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" rowspan="3" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;"></td>
+     <td colspan="2" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">OS</td>
+     <td colspan="2" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">表</td>
+     <td colspan="1" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">レイアウト</td>
+   </tr>
+
+   <tr>
+     <td colspan="1" style="background: #056; color: #FFF;"></td>
+     <td colspan="2" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;">OS</td>
+     <td colspan="2" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;">表</td>
+     <td colspan="1" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;border-bottom: 0.5px solid #000;">レイアウト</td>
+   </tr>
+
+   <tr>
+     <td colspan="1" style="background: #056; color: #FFF;text-align:center;">更</td>
+   </tr>
+
+   <tr>
+     <td colspan="15" style="text-align: center;background: #056; color: #FFF;">食事</td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">記入者</td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-top: 0.5px solid #000;">担当</td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">月日</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">時間</td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">単価</td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">数量</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">2/13尾崎</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">尾崎</td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">朝</td>
+     <td colspan="3"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">バイキング</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">７：００～</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１０００</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  rowspan="3" style="text-align: center;border-right: 0.5px solid #000;">上長</td>
+     <td colspan="2"  rowspan="3" style="text-align: center;border-right: 0.5px solid #000;">最終</td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">月</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">昼</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF; font-size: 0.5cm; ">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF; ">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF; ">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF; ">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF; ">１名鶏NG</td>
+   </tr>
+
+   <tr>
+     <td colspan="2" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２０</td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;background: #056; color: #FFF;">食事備考</td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">日</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">夕</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000; font-size: 0.5cm;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１名鶏NG</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">(月)</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;">社長さんが鶏がＮＧです</td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">夜</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;">２１日はやらない</td>
+   </tr>
+
+   <!--  22  -->
+
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">朝</td>
+     <td colspan="3"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">バイキング</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">７：００～</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１０００</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">月</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">昼</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">１名鶏NG</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;">洋食さん</td>
+   </tr>
+
+   <tr>
+     <td colspan="2" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２１</td>
+     <td colspan="4" rowspan="4" style="text-align: center;border-right: 0.5px solid #000;">一回カレーを入れてください</td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">日</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">夕</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１名鶏NG</td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">(月)</td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">夜</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;background: #056; color: #FFF;">食事備考</td>
+   </tr>
+
+   <!-- 333 -->
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">朝</td>
+     <td colspan="3"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">バイキング</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">７：００～</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１０００</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">月</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">昼</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">１名鶏NG</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２２</td>
+     <td colspan="4" rowspan="4" style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">日</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">夕</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１名鶏NG</td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">(月)</td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">夜</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+   <!-- 4444  -->
+      <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">朝</td>
+     <td colspan="3"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">バイキング</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">７：００～</td>
+     <td colspan="2"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１０００</td>
+     <td colspan="1"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-top: 0.5px solid #000;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">月</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">昼</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;border-top: 0.5px solid #000;background: #00BFFF;">１名鶏NG</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2" rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">２３</td>
+     <td colspan="4" rowspan="4" style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">喫</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr style="height:0.6cm;">
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;">日</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;background: #056; color: #FFF;">夕</td>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">中　洋　和</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">12:00</td>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">1200</td>
+     <td colspan="1"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">29</td>
+     <td colspan="4"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">１名鶏NG</td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  rowspan="2" style="text-align: center;border-right: 0.5px solid #000;border-left: 0.5px solid #000;border-bottom: 0.5px solid #000;">(月)</td>
+   </tr>
+
+   <tr>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">夜</td>
+     <td colspan="3"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="1"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="15"  style="text-align: center;background: #056; color: #FFF;">請求</td>
+     <td colspan="4"  style="text-align: center;background: #056; color: #FFF;border-right: 0.5px solid #000;">請求備考</td>
+   </tr>
+
+   <tr>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">請求先</td>
+     <td colspan="12"  style="text-align: left;border-left: 0.5px solid #000; border-right: 0.5px solid #000;">103-0007</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="12"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">東京都中央区日本橋</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="3"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">社名</td>
+     <td colspan="12"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">株式　会社</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;">090-1234-5678</td>
+   </tr>
+   <tr>
+     <td colspan="3"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">部署</td>
+     <td colspan="12"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">営業部</td>
+     <td colspan="4"  style="text-align: center; border-right: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="3"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">役職</td>
+     <td colspan="6"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">営業マン</td>
+     <td colspan="2"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">TEL</td>
+     <td colspan="4"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">090-1234-5678</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="3"  rowspan="2" style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">氏名</td>
+     <td colspan="6"  rowspan="2" style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">名前</td>
+     <td colspan="2"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">FAX</td>
+     <td colspan="4"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">090-1234-5678</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+
+   <tr>
+     <td colspan="2"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">支払</td>
+     <td colspan="4"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;"></td>
+   </tr>
+   <tr>
+     <td colspan="3"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">業種</td>
+     <td colspan="6"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+     <td colspan="2"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">規定</td>
+     <td colspan="4"  style="text-align: center;border-left: 0.5px solid #000; border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;">月末　締め　　　　翌末　</td>
+     <td colspan="4"  style="text-align: center;border-right: 0.5px solid #000;border-bottom: 0.5px solid #000;"></td>
+   </tr>
+   </table>
+
+</td>
+</tr></table>
+
+
+</td>
+
+<td width="50%" >&nbsp;</td>
+
+</tr>
+</table>
+</body>
+</html>
+</apex:page>

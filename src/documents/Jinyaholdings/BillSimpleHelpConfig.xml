@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>	
+<!--
+概要：新会計メニューロジック転換用関連定義情報
+書式：
+	<SHOP>	店舗別の定義情報、店舗別支払情報を定義可能
+		<SHOPCODE></SHOPCODE>			店舗コード
+		<PAYMENT>						会計商品の「支払種別」と会計支払「メディア名称」の関連定義
+										注：会計商品の「支払種別」の選択リスト値を新規項目を追加する場合、このタグ関連の情報を修正することが必要
+			<CONVERT>						変換定義情報
+				<PAYTYPE>現金</PAYTYPE>			会計商品の「支払種別」
+				<MEIDALAB>預り／現計</MEIDALAB>	会計支払の「メディア名称」
+			</CONVERT>
+		</PAYMENT>
+		<PAYMEIDA>						会計支払「メディア名称」は新会計メニューの明細に表示する場合、該当メディアを紐付くの会計商品コードを定義する
+			<CONVERT>						変換定義情報
+				<MEIDALAB>預り／現計</MEIDALAB>		会計支払の「メディア名称」
+				<PRODCODE>D99000</PRODCODE>			会計商品の「商品コード」
+			</CONVERT>
+		</PAYMEIDA>
+注意事項
+	新会計メニュー機能導入に従って、上記タグ「PAYMEIDA」に定義する商品コードは
+	必ず！！！会計商品オブジェクトに存在するが必要
+	日本語以外の言語を設定の場合、[MEIDALAB]のキーワードは必ず翻訳後のキーワードで一致が必要
+	預り／現計　→　Label.CONST_012_0438　→　翻訳後のキーワード
+	ｸﾚ計・掛計等　→　Label.CONST_012_0439　→　翻訳後のキーワード
+	掛計　→　Label.CONST_012_0440　→　翻訳後のキーワード
+	クーポン　→　Label.CONST_012_0441　→　翻訳後のキーワード
+	値引・割引券　→　Label.CONST_012_0442　→　翻訳後のキーワード
+	予約金　→　Label.CONST_012_0443　→　翻訳後のキーワード
+2021.02.26 会計飛ばし機能追加
+	会計飛ばしを実行した端末がmpopと連携している場合、会計飛ばしを実行した際にレシートを印刷する
+	MERGETAB->PRINT 選択した明細内容をレシート自動印刷する・しないフラグ
+		TRUE:自動印刷する
+		FALSE：自動印刷しない
+	MERGETABｰ>ACCOUNTFILTER 飛ばし先リスト表示制限条件定義用タグ
+注意事項：
+	該当機能有効する前に、ブラウザのポップアップを許可が必要です。
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<!-- 
+		2021.04.30 会計明細自動保存機能
+			AUTOSAVEMESSAGE：自動保存の提示メッセージ定義用タグ(デフォルト値：自動保存中...)
+			　DETAIL_LIMIT： 自動保存呼び出し明細件数の定義(デフォルト値：200)
+						     会計画面に会計明細を新規、更新（行間移動も含める）件数が該当数字を満たす場合、変更内容は会計に自動保存処理を呼び出す
+		-->
+		<AUTOSAVEMESSAGE DETAIL_LIMIT="200">自動保存中...</AUTOSAVEMESSAGE>
+		<!-- 2021.02.26 会計飛ばし機能追加 
+			下記例は下記機能あります
+			1)ACCOUNTFILTERタグ設定により、会計飛ばし先リストに「予約タイプが「宿泊」」のみの予約をリストに表示する
+			2)PRINTがTRUE設定により、会計飛ばしを実行した端末がmpopと連携している場合、会計飛ばしを実行した際にレシートを印刷する
+		-->
+		<!-- 
+		<MERGETAB PRINT="TRUE">
+			<ACCOUNTFILTER>Relreserve__r.ReservedType__c in ('宿泊')</ACCOUNTFILTER>
+		</MERGETAB>
+		 -->
+		<PAYMENT>	<!-- 会計商品：商品処理種別が「支払」の場合、会計商品の「支払種別」から会計支払Media種別変更ルール -->
+			<CONVERT>
+				<PAYTYPE>現金</PAYTYPE>
+				<MEIDALAB>預り／現計</MEIDALAB>
+			</CONVERT>
+			<CONVERT>
+				<PAYTYPE>カード</PAYTYPE>
+				<MEIDALAB>ｸﾚ計・掛計等</MEIDALAB>
+			</CONVERT>
+			<CONVERT>
+				<PAYTYPE>売掛金</PAYTYPE>
+				<MEIDALAB>掛計</MEIDALAB>
+			</CONVERT>
+			<CONVERT>
+				<PAYTYPE>クーポン</PAYTYPE>
+				<MEIDALAB>クーポン</MEIDALAB>
+			</CONVERT>
+			<CONVERT>
+				<PAYTYPE>値引</PAYTYPE>
+				<MEIDALAB>値引・割引券</MEIDALAB>
+			</CONVERT>	
+			<CONVERT>							<!-- 未使用 -->
+				<PAYTYPE>割引</PAYTYPE>
+				<MEIDALAB>値引・割引券</MEIDALAB>
+			</CONVERT>	
+			<CONVERT>
+				<PAYTYPE>予約金</PAYTYPE>
+				<MEIDALAB>予約金</MEIDALAB>
+			</CONVERT>
+			<CONVERT>
+				<PAYTYPE>現金返金</PAYTYPE>
+				<MEIDALAB>預り／現計</MEIDALAB>
+			</CONVERT>
+			<CONVERT>
+				<PAYTYPE>カード返金</PAYTYPE>
+				<MEIDALAB>ｸﾚ計・掛計等</MEIDALAB>
+			</CONVERT>
+		</PAYMENT>
+		<PAYMEIDA>	<!-- 元の支払メデイア情報により、どの会計商品を紐付くを定義する -->
+			<CONVERT>
+				<MEIDALAB>預り／現計</MEIDALAB>		<!-- 支払メディア種別 -->
+				<PRODCODE>M99000</PRODCODE>			<!-- 会計商品コード -->
+			</CONVERT>
+			<CONVERT>
+				<MEIDALAB>ｸﾚ計・掛計等</MEIDALAB>
+				<PRODCODE>M99001</PRODCODE>
+			</CONVERT>
+			<CONVERT>
+				<MEIDALAB>掛計</MEIDALAB>
+				<PRODCODE>M99002</PRODCODE>
+			</CONVERT>
+			<CONVERT>
+				<MEIDALAB>クーポン</MEIDALAB>
+				<PRODCODE>M99003</PRODCODE>
+			</CONVERT>
+			<CONVERT>
+				<MEIDALAB>値引・割引券</MEIDALAB>
+				<PRODCODE>M99004</PRODCODE>
+			</CONVERT>
+			<CONVERT>
+				<MEIDALAB>予約金</MEIDALAB>
+				<PRODCODE>M99005</PRODCODE>
+			</CONVERT>
+		</PAYMEIDA>
+	</SHOP>
+	
+</root>

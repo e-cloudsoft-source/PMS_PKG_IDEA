@@ -1,0 +1,322 @@
+<apex:page sidebar="true" controller="AppMenu" >
+
+<style type="text/css">
+
+.urbangreymenu{
+width: 160px; /*width of menu*/
+}
+
+.urbangreymenu .headerbar{
+	font: bold 18px Verdana;
+	color: white;
+	line-height:26px;
+	background: #606060;
+	/*background: #606060 url(/img/knowledge/publishing/knowledgemanagement32.png) no-repeat 8px 6px; *//*last 2 values are the x and y coordinates of bullet image*/
+	margin-bottom: 0; /*bottom spacing between header and rest of content*/
+	text-transform: uppercase;
+	padding: 7px 0 7px 7px; /*31px is left indentation of header text*/
+}
+
+.urbangreymenu ul{
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	margin-bottom: 0; /*bottom spacing between each UL and rest of content*/
+}
+
+.urbangreymenu ul li{
+	padding-bottom: 2px; /*bottom spacing between menu items*/
+	vertical-align:middle;
+}
+
+.urbangreymenu ul li a{
+	font: normal 12px Arial;
+	color: black;
+	background: white;
+	display: block;
+	padding: 5px 0;
+	line-height: 17px;
+	padding-left: 8px; /*link text is indented 8px*/
+	text-decoration: none;
+}
+
+.urbangreymenu ul li a:visited{
+color: black;
+}
+
+.urbangreymenu ul li a:hover{ /*hover state CSS*/
+background: #FFEBCD;
+}
+.imgstyle{
+    vertical-align:text-bottom;
+    margin-right: 5px;
+}
+</style>
+<!--
+<apex:panelBar >
+
+    <apex:panelBarItem label="Item 1">
+ -->
+
+<div style="width:900px;overflow:hidden;background: white">
+<div style="width: 480;margin-left: 20px">
+<img alt="Jinya Connect" src="{!URLFOR($Resource.AppImages, 'menulogo.png')}" style="width: 460px; height: 40px;margin-top: 10px" />
+<!--
+<img alt="Jinya Connect" src="{!$Resource.menuicon}" style="width: 300px; height: 40px;margin-top: 10px" /> -->
+</div>
+
+<div class="urbangreymenu" id="submenu1" style="float:left">
+
+<ul>
+
+    <!-- 予約 -->
+    <li><a href="{!URLFOR('/'+$ObjectType.Lead__c.KeyPrefix)}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" />{!$ObjectType.Lead__c.Label}</a>
+	</li>	
+    <li><a href="{!URLFOR('/'+$ObjectType.Lead__c.KeyPrefix)}/e?retURL=/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}&RecordType={!leadRcType4}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" /><!-- 宿泊 -->{!$Label.MSG_012_0322}</a></li>
+    <li><a href="{!URLFOR('/'+$ObjectType.Lead__c.KeyPrefix)}/e?retURL=/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}&RecordType={!leadRcType3}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" /><!-- 宴会と会議室 -->{!$Label.MSG_012_0300}</a></li>
+    <li><a href="{!URLFOR('/'+$ObjectType.Lead__c.KeyPrefix)}/e?retURL=/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}&RecordType={!leadRcType1}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" /><!-- ケータリング -->{!$Label.MSG_012_0301}</a></li>
+        
+	<!-- カレンダー -->    
+    <li><a href="{!URLFOR($Page.CCalendar, null,null, true)}" >
+        <img src="/img/icon/circle32.png" class="imgstyle" /><!-- こよみ -->{!$Label.MSG_012_0302}</a></li>
+	
+    <!-- 予約ポップ -->
+    <li><a href="{!URLFOR($Page.RoomTypeInventory, null,null, true)}" >
+        <img src="/img/icon/custom51_100/headset32.png" class="imgstyle" /><!-- 予約ポップ -->{!$Label.MSG_012_0303}</a></li>
+
+    <!-- ルームインジケータ -->
+    <li><a href="{!URLFOR($Page.RoomIndicatorInfo, null,null, true)}" >
+    	<img src="/img/icon/service_contracts32.png" class="imgstyle" /><!-- ﾙｰﾑｲﾝｼﾞｹｰﾀ -->{!$Label.MSG_012_0304}</a></li>
+	
+    <!-- マップ -->
+    <li><a href="/{!URLFOR($ObjectType.BookingPlus__c.KeyPrefix)}" >
+        <img src="/img/icon/camera32.png" class="imgstyle" />{!$ObjectType.BookingPlus__c.Label}</a></li>
+
+    <!-- タイムテーブル -->
+	<li><a href="{!URLFOR($Page.RoomScheduleReport, null,null, true)}" >
+        <img src="/img/icon/knight32.png" class="imgstyle" />{!$ObjectType.BookingTimeTable__c.Label}</a></li>
+
+    <!-- 時間割 -->
+    <li><a href="/{!URLFOR($ObjectType.TimeassinCustomObject2__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/safe32.png" class="imgstyle" />{!$ObjectType.TimeassinCustomObject2__c.Label}</a></li>
+
+    <!-- 取込 -->
+    <li><a href="{!URLFOR('/apex/Document', null,null, true)}" >
+    <!--<li><a href="{!URLFOR($Page.Document)}" >-->
+        <img src="/img/icon/custom51_100/can32.png" class="imgstyle" /><!-- 取込 -->{!$Label.MSG_012_0305}</a></li>
+    
+    <!-- リアルAGTデータ取込 -->
+    <li><a href="{!URLFOR($Page.FileUploadImpForMst, null,null, true)}" >
+        <img src="/img/icon/custom51_100/can32.png" class="imgstyle" /><!-- ﾘｱﾙAGTﾃﾞｰﾀ取込 -->{!$Label.MSG_012_0306}</a></li>
+
+    <!-- 料金データ取込 -->
+   	<li><a href="{!URLFOR($Page.FileUploadImpForRackRate, null,null, true)}" >	
+        <img src="/img/icon/custom51_100/can32.png" class="imgstyle" /><!-- ﾗｯｸﾚｰﾄﾃﾞｰﾀ取込 -->{!$Label.MSG_012_0307}</a></li>
+
+    <!-- バッチ -->
+    <li><a href="{!URLFOR($Page.BulkProcessBatch, null,null, true)}" >
+        <img src="/img/icon/custom51_100/can32.png" class="imgstyle" /><!-- バッチ -->{!$Label.MSG_012_0308}</a></li>
+</ul>
+</div>
+<div class="urbangreymenu" id="submenu2" style="float:left">
+<ul>
+    <!-- 売上 -->
+    <li><a href="/{!URLFOR($ObjectType.RsvAccount__c.KeyPrefix)}" >
+        <img src="/img/icon/cash32.png" class="imgstyle" />{!$ObjectType.RsvAccount__c.Label}</a></li>
+    <!-- 会計 -->
+    <li><a href="/{!URLFOR($ObjectType.AccountAcount__c.KeyPrefix)}" >
+        <img src="/img/icon/bank32.png" class="imgstyle" />{!$ObjectType.AccountAcount__c.Label}</a></li>
+    <!-- 会計支払 -->
+    <li><a href="/{!URLFOR($ObjectType.TTend__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/helicopter32.png" class="imgstyle" />{!$ObjectType.TTend__c.Label}</a></li>
+    <!-- 会計明細 -->
+    <li><a href="/{!URLFOR($ObjectType.Tran1__c.KeyPrefix)}" >
+        <img src="/img/icon/creditCard32.png" class="imgstyle" />{!$ObjectType.Tran1__c.Label}</a></li>
+    <!-- 会計商品 -->
+    <li><a href="/{!URLFOR($ObjectType.AccountMaster__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/cup32.png" class="imgstyle" />{!$ObjectType.AccountMaster__c.Label}</a></li>
+    <!-- 会計DP -->
+    <li><a href="/{!URLFOR($ObjectType.DP__c.KeyPrefix)}" >
+        <img src="/img/icon/hexagon32.png" class="imgstyle" />{!$ObjectType.DP__c.Label}</a></li>
+    <!-- 会計GP -->
+    <li><a href="/{!URLFOR($ObjectType.GP__c.KeyPrefix)}" >
+        <img src="/img/icon/leaf32.png" class="imgstyle" />{!$ObjectType.GP__c.Label}</a></li>
+    <!-- 会計OP -->
+    <li><a href="/{!URLFOR($ObjectType.OP__c.KeyPrefix)}" >
+        <img src="/img/icon/sack32.png" class="imgstyle" />{!$ObjectType.OP__c.Label}</a></li>
+    <!-- 会計科目 -->
+    <li><a href="/{!URLFOR($ObjectType.KanjoKamoku__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/apple32.png" class="imgstyle" />{!$ObjectType.KanjoKamoku__c.Label}</a></li>
+    <!-- 予算 -->
+    <li><a href="/{!URLFOR($ObjectType.Estimate__c.KeyPrefix)}" >
+        <img src="/img/icon/building32.png" class="imgstyle" />{!$ObjectType.Estimate__c.Label}</a></li>
+    <!-- 損益 -->
+    <li><a href="/{!URLFOR($ObjectType.ProfitandLoss__c.KeyPrefix)}" >
+        <img src="/img/icon/chest32.png" class="imgstyle" />{!$ObjectType.ProfitandLoss__c.Label}</a></li>
+    <!-- 入金 -->
+    <li><a href="{!URLFOR($Page.CashManagentBulkInput, null,[pm='IN'], true)}" >
+    	<img src="/img/icon/flag32.png" class="imgstyle" />{!$Label.MSG_012_0309}</a></li>   
+    <!-- 出金 -->
+    <li><apex:outputLink value="/apex/CashManagentBulkInput?pm=OU">
+        <img src="/img/icon/bridge32.png" class="imgstyle" /><!-- 出金 -->{!$Label.MSG_012_0310}</apex:outputlink></li>
+    <!-- 現金合わせ -->
+    <li><a href="{!URLFOR($Page.CashRollupBook, null,null, true)}" >
+        <img src="/img/icon/custom51_100/tvCTR32.png" class="imgstyle" />{!$ObjectType.CashVerification__c.Label}</a></li>
+    <!-- 消費税 -->
+    <li><a href="{!URLFOR('/'+$ObjectType.JMST__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/gears32.png" class="imgstyle" />{!$ObjectType.JMST__c.Label}</a></li>
+    <li><a href="/{!URLFOR($ObjectType.Jinyaconnect__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/buildingBlock32.png" class="imgstyle" />{!$ObjectType.Jinyaconnect__c.Label}</a></li>
+    <!-- プラン明細 -->
+    <li><a href="/{!URLFOR($ObjectType.PlanDetail__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/pencil32.png" class="imgstyle" />{!$ObjectType.PlanDetail__c.Label}</a></li>
+</ul>
+</div>
+<div class="urbangreymenu" id="submenu3" style="float:left">
+<ul>
+	<!--  プラン  -->
+    <li><a href="/{!URLFOR($ObjectType.Plan__c.KeyPrefix)}" >
+        <img src="/img/icon/desk32.png" class="imgstyle" />{!$ObjectType.Plan__c.Label}</a></li>
+	<!--  お部屋  -->
+    <li><a href="/{!URLFOR($ObjectType.Room__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/sailboat32.png" class="imgstyle" />{!$ObjectType.Room__c.Label}</a></li>
+	<!--  お部屋状態管理  -->
+    <li><a href="/{!URLFOR($ObjectType.RoomsStatus__c.KeyPrefix)}" >
+        <img src="/img/icon/hammer32.png" class="imgstyle" />{!$ObjectType.RoomsStatus__c.Label}</a></li>
+	<!--  部屋タイプ  -->
+    <li><a href="/{!URLFOR($ObjectType.TypeOfRooms__c.KeyPrefix)}" >
+        <img src="/img/icon/pda32.png" class="imgstyle" />{!$ObjectType.TypeOfRooms__c.Label}</a></li>
+	<!--  部屋在庫管理  -->
+    <li><a href="/{!URLFOR($ObjectType.GuestRoomStock__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/handsaw32.png" class="imgstyle" />{!$ObjectType.GuestRoomStock__c.Label}</a></li>
+	<!--  お料理  -->
+    <li><a href="/{!URLFOR($ObjectType.FoodMenu__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/bell32.png" class="imgstyle" />{!$ObjectType.FoodMenu__c.Label}</a></li>
+	<!--  仕入[調理]  -->
+    <li><a href="{!URLFOR($Page.PurchaseManagentInput, null,null, true)}" >
+        <img src="/img/icon/star32.png" class="imgstyle" /><!-- 仕入 -->{!$Label.MSG_012_0323}</a></li>
+	<!--  宿帳  -->
+    <li><a href="/{!URLFOR($ObjectType.Yadochou__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/tvWidescreen32.png" class="imgstyle" />{!$ObjectType.Yadochou__c.Label}</a></li>
+	<!--  宿帳明細  -->
+    <li><a href="/{!URLFOR($ObjectType.Guestbookcustomer__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/castle32.png" class="imgstyle" />{!$ObjectType.Guestbookcustomer__c.Label}</a></li>
+	<!--  アンケート  -->
+    <li><a href="/{!URLFOR($ObjectType.Customersurvey__c.KeyPrefix)}" >
+        <img src="/img/icon/jewel32.png" class="imgstyle" />{!$ObjectType.Customersurvey__c.Label}</a></li>
+	<!--  タイムテーブル時間帯  -->
+    <li><a href="/{!URLFOR($ObjectType.BookingTimeTable__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/stopwatch32.png" class="imgstyle" /><!-- タイム時間帯 -->{!$Label.MSG_012_0311}</a></li>
+	<!--  TIME  -->
+    <li><a href="/{!URLFOR($ObjectType.TIME__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/balls32.png" class="imgstyle" />{!$ObjectType.TIME__c.Label}</a></li>
+    <!-- 店舗情報 -->
+    <li><a href="/{!URLFOR($ObjectType.ShopInformation__c.KeyPrefix)}">
+    	<img src="/img/icon/custom51_100/shoppingCart32.png" class="imgstyle" />{!$ObjectType.ShopInformation__c.Label}</a></li>
+	<!--  レポートロゴ  -->
+    <li><a href="/{!URLFOR($ObjectType.ReportLogo__c.KeyPrefix)}" >
+        <img src="/img/icon/wrench32.png" class="imgstyle" />{!$ObjectType.ReportLogo__c.Label}</a></li>
+	<!--  従業員  -->
+    <li><a href="/{!URLFOR($ObjectType.Worker__c.KeyPrefix)}" >
+        <img src="/img/icon/lightning32.png" class="imgstyle" />{!$ObjectType.Worker__c.Label}</a></li>
+	<!--  キーワード  -->
+    <li><a href="/{!URLFOR($ObjectType.Jinyakeyword__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/bottle32.png" class="imgstyle" />{!$ObjectType.Jinyakeyword__c.Label}</a></li>
+	<!--  タイプ  -->
+    <li><a href="/{!URLFOR($ObjectType.Type__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/redcross32.png" class="imgstyle" />{!$ObjectType.Type__c.Label}</a></li>
+	<!--  ランク  -->
+    <li><a href="/{!URLFOR($ObjectType.Rank__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/books32.png" class="imgstyle" />{!$ObjectType.Rank__c.Label}</a></li>
+	<!--  MX900IP  -->
+    <li><a href="/{!URLFOR($ObjectType.MX_900IP__c.KeyPrefix)}" >
+        <img src="/img/icon/custom51_100/ship32.png" class="imgstyle" />{!$ObjectType.MX_900IP__c.Label}</a></li>
+</ul>
+</div>
+<div class="urbangreymenu" id="submenu4" style="float:left">
+<ul>
+    <!--  Chatter  -->
+    <li><a href="/_ui/core/chatter/ui/ChatterPage" >
+        <img src="/img/icon/chatterC32.png" class="imgstyle" /><!-- Chatter -->{!$Label.MSG_012_0312}</a></li>
+    <!--  お客様  -->
+    <li><a href="/{!URLFOR($ObjectType.Contact.KeyPrefix)}" >
+        <img src="/img/icon/people32.png" class="imgstyle" />{!$ObjectType.Contact.Label}</a></li>
+    <!--  取引先  -->
+    <li><a href="/{!URLFOR($ObjectType.Account.KeyPrefix)}" >
+        <img src="/img/icon/accounts32.png" class="imgstyle" />{!$ObjectType.Account.Label}</a></li>
+    <!--  人  -->
+    <li><a href="/_ui/core/chatter/people/PeopleListPage" >
+        <img src="/img/icon/profile32.png" class="imgstyle" /><!-- 人 -->{!$Label.MSG_012_0313}</a></li>
+    <!--  グループ  -->
+    <li><a href="/{!URLFOR($ObjectType.CollaborationGroup.KeyPrefix)}" >
+        <img src="/img/icon/groups32.png" class="imgstyle" /><!-- グループ -->{!$Label.MSG_012_0314}</a></li>
+    <!--  ファイル  -->
+    <li><a href="/_ui/core/chatter/files/FileTabPage" >
+        <img src="/img/icon/files32.png" class="imgstyle" /><!-- ファイル -->{!$Label.MSG_012_0315}</a></li>
+    <!--  ドキュメント  -->
+    <li><a href="/{!URLFOR($ObjectType.Document.KeyPrefix)}" >
+        <img src="/img/icon/documents32.png" class="imgstyle" />{!$ObjectType.Document.Label}</a></li>
+    <!--  レポート  -->
+    <li><a href="/00O" >
+        <img src="/img/icon/reports32.png" class="imgstyle" /><!-- レポート -->{!$ObjectType.Report.Label}</a></li>
+    <!--  ダッシュボード  -->
+    <li><a href="/01Z" >
+        <img src="/img/icon/dashboards32.png" class="imgstyle" /><!-- ダッシュボード -->{!$ObjectType.Dashboard.Label}</a></li>
+
+</ul>
+</div>
+<!-- 非表示 -->
+<div class="urbangreymenu" id="submenu5" style="float:left; display: none;">
+<ul>
+	<!--  リード  -->
+    <li><a href="/{!URLFOR($ObjectType.Lead.KeyPrefix)}" >
+        <img src="/img/icon/leads32.png" class="imgstyle" />{!$ObjectType.Lead.Label}</a></li>
+	<!--  ケース  -->
+    <li><a href="/{!URLFOR($ObjectType.Case.KeyPrefix)}" >
+        <img src="/img/icon/cases32.png" class="imgstyle" />{!$ObjectType.Case.Label}</a></li>
+	<!--  商談  -->
+    <li><a href="/{!URLFOR($ObjectType.Opportunity.KeyPrefix)}" >
+        <img src="/img/icon/opportunities32.png" class="imgstyle" />{!$ObjectType.Opportunity.Label}</a></li>
+	<!--  契約  -->
+    <li><a href="/{!URLFOR($ObjectType.Contract.KeyPrefix)}" >
+        <img src="/img/icon/contracts32.png" class="imgstyle" />{!$ObjectType.Contract.Label}</a></li>
+	<!--  キャンペーン  -->
+    <li><a href="/{!URLFOR($ObjectType.Campaign.KeyPrefix)}" >
+        <img src="/img/icon/campaigns32.png" class="imgstyle" />{!$ObjectType.Campaign.Label}</a></li>
+	<!--  商品  -->
+    <li><a href="/{!URLFOR($ObjectType.Product2.KeyPrefix)}" >
+        <img src="/img/icon/products32.png" class="imgstyle" />{!$ObjectType.Product2.Label}</a></li>
+	<!--  売上予測  -->
+    <li><a href="/_ui/sales/forecasting/ui/ForecastingTabPage" >
+        <img src="/img/icon/telescope32.png" class="imgstyle" /><!-- 売上予測 -->{!$Label.MSG_012_0318}</a></li>
+</ul>
+</div>
+<!-- 非表示 -->
+<div class="urbangreymenu" id="submenu6" style="float:right;width: 180px; display: none;">
+<ul>
+    <li><a href="/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}/e?retURL=/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}&RecordType={!leadRcType4}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" /><!-- 宿泊(新規) -->{!$Label.MSG_012_0319}</a></li>
+    <li><a href="/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}/e?retURL=/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}&RecordType={!leadRcType3}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" /><!-- 宴会と会議室(新規) -->{!$Label.MSG_012_0320}</a></li>
+    <li><a href="/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}/e?retURL=/{!URLFOR($ObjectType.Lead__c.KeyPrefix)}&RecordType={!leadRcType1}" >
+        <img src="/img/icon/phone32.png" class="imgstyle" /><!-- ケータリング(新規) -->{!$Label.MSG_012_0321}</a></li>
+
+</ul>
+</div>
+
+
+ </div>
+
+<!--
+ </apex:panelBarItem>
+</apex:panelBar> -->
+
+
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup loadJquery="true"></c:CallRegisterPopup>
+
+</apex:page>

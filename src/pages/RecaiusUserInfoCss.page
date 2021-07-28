@@ -1,0 +1,22 @@
+<!-- 
+	各VisualforceページのCssクラス	
+
+	Copyright (c) 2018 TOSHIBA CORPORATION,  All Rights Reserved.
+-->
+<apex:page rendered="false" >
+    <style type="text/css">
+         #vf-page *{
+        	font-family:"ProximaNovaSoft-Regular",Calibri,"Gill Sans","Gill Sans MT",Candara,Segeo,"Segeo UI",Arial,sans-serif;
+        	font-size:24px;
+        }
+        
+        #list-table *{
+        	font-family:"ProximaNovaSoft-Regular",Calibri,"Gill Sans","Gill Sans MT",Candara,Segeo,"Segeo UI",Arial,sans-serif;
+        }
+        
+        #Group-page *{
+        	font-family:"ProximaNovaSoft-Regular",Calibri,"Gill Sans","Gill Sans MT",Candara,Segeo,"Segeo UI",Arial,sans-serif;
+        	font-size:24px;
+        }    
+    </style>
+</apex:page>

@@ -1,0 +1,1036 @@
+<!-- リクエストバッチ -->
+<apex:page controller="BatchControlCenter" title="{!$Label.ps__msg_046_0005}" action="{!refreshBranShop}" showheader="true" sidebar="false" tabStyle="BatchControllerTab__tab">
+<c:CommHeaderComp />
+<!-- 2019/01/30 优化显示不换行 WGCH BEGIN -->
+<style>
+.autoWidth {
+	width: auto !important;
+	white-space: nowrap !important;
+	min-width: 170px !important;
+}
+</style>
+<!-- 2019/01/30 优化显示不换行 WGCH END -->
+<script>
+beenFocused = true;
+var $j = jQuery.noConflict();
+
+</script>
+<!-- リクエストバッチ -->
+<apex:sectionHeader title="{!$Label.ps__msg_046_0005}" />
+<!-- 2018/12/15 請求書の作成など自動繰返し機能 by zy BEGIN -->
+<apex:form id="exportBlock">
+	<apex:pageBlock rendered="{!!billPDFFlag}">
+<!-- 2018/12/15 請求書の作成など自動繰返し機能 by zy END -->
+		<div class="cancelMessage" style="display: none;">
+		<!-- リクエストは処理中です。処理が完了致しましたら、メールにて通知致します。 -->
+		<apex:pageMessage summary="{!$Label.ps__msg_046_0006}" severity="info" strength="1" />
+		</div>
+		<div class="warningMessage" style="{!if(!isCanStopFlag && !isCanStargFlag,'','display:none;')}" >
+		<!-- リクエストは処理中です。処理が完了致しましたら、メールにて通知致します。 -->
+		<apex:pageMessage summary="{!$Label.ps__msg_046_0006}" severity="info" strength="1" />
+		</div>
+		<apex:outputPanel id="messagePanel">
+			<apex:pageMessages id="messageBlock"/>
+			<!-- 2020/03/31 会計ロック機能 by zy BEGIN -->
+			<div class="message errorM3" id="inputFormErrorMsg" role="alert" style="display:none;">
+				<table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+					<tbody>
+						<tr valign="top">
+							<td><img alt="ERROR" class="msgIcon" src="/s.gif" title="ERROR"/></td>
+							<td class="messageCell">
+								<div class="messageText">
+									<span style="color:#cc0000"><h4>{!$Label.CONST_003_0132}:</h4></span><span class="J_MSG_CONTENT"></span><br/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<!--2020/03/31 会計ロック機能 by zy END -->
+		</apex:outputPanel>
+		<apex:inputHidden value="{!delayLength}" id="hidDelayLen"/>
+		<table>
+			<tr>
+				<td>
+					<!-- 2019/02/28 シフトで入っている時間の範囲しか勤怠打刻を認めない機能はある BY zyz BEGIN -->
+				 	<apex:selectList value="{!currentShopCode}" multiselect="false" size="1" id="ShopSelect" styleClass="j-dropDownList" rendered="{!(shopOpts.size > 0 && !isShopNoShow)}" style="margin-left: 10px;margin-top: 1px; width:170px ;">
+					<!-- 2019/02/28 シフトで入っている時間の範囲しか勤怠打刻を認めない機能はある BY zyz END -->
+		    			<apex:selectOptions value="{!shopOpts}"/>
+		    			<apex:actionSupport event="onchange" action="{!refreshBranShop}" rerender="exportBlock" status="refStatusBlock"  oncomplete="afterStartFun(false);"  />
+			        </apex:selectList>
+	        		<apex:selectList value="{!currentBatchName}" multiselect="false" size="1" id="BatchSelect" styleClass="j-dropDownList" rendered="{!batchOpts.size > 0}" 
+			           style="margin-left: 10px; width:170px;">
+				  			<apex:selectOptions value="{!batchOpts}"/>
+				   			<apex:actionSupport event="onchange" action="{!refreshBranShop}" rerender="exportBlock" status="refStatusBlock"  oncomplete="afterStartFun(false);"  />
+				    </apex:selectList>
+				</td>
+				<td>
+					<div id="denpyoukeiPanel">
+					<apex:outputPanel rendered="{!!IsTimeTerm}">
+				  	<!-- 2018/09/25 棚卸しバッチ起動できるように改善対応 BEGIN -->
+				    <apex:inputField value="{!currentBatch.Checkinday__c}"  id="denpyoukei" styleClass="k-textbox" style="width:90px;margin-left:30px;" rendered="{!!productStockFlag}"/>
+				    <apex:outputpanel style="margin-left:30px;" rendered="{!productStockFlag}">
+				    	処理締日
+				    	<img style="margin-top:5px;vertical-align:top" src="/img/alohaSkin/help_orange.png" title="棚卸画面の確認列値がONかつ棚卸日小なりイコール当日付の棚卸明細を棚卸締め処理を行なう"/>
+					    <apex:inputField value="{!currentBatch.Checkinday__c}" styleClass="k-textbox" style="width:90px;margin-left:10px;"/>
+				    </apex:outputpanel>
+				    <!-- 2018/09/25 棚卸しバッチ起動できるように改善対応 END -->
+				    </apex:outputPanel>
+				    <apex:outputPanel rendered="{!IsTimeTerm}">
+				    <apex:outputField value="{!currentBatch.Checkinday__c}" />
+				    </apex:outputPanel>
+			   		</div>
+			   	</td>
+			   	<!--2017/02/21 Freee仕訳集計対象期間指定できるように改善対応 begin by wx -->
+			   	<td>
+					<div id="endPanel">
+					<apex:outputPanel rendered="{!IsShowFromTo}">
+					&nbsp;{!$Label.MSG_006_0097}
+					<apex:outputPanel rendered="{!!IsTimeTerm}">
+				    <apex:inputField value="{!currentBatchTo.Checkinday__c}"  id="end" styleClass="k-textbox" style="width:90px;margin-left:10px;"/>
+				    </apex:outputPanel>
+				    <apex:outputPanel rendered="{!IsTimeTerm}">
+				    <apex:outputField value="{!currentBatchTo.Checkinday__c}"/>
+				    </apex:outputPanel>
+			   		</apex:outputPanel>
+			   		</div>
+			   	</td>
+			   	<!--2017/02/21 Freee仕訳集計対象期間指定できるように改善対応 end by wx -->
+			   	<td>
+			   		<apex:outputPanel rendered="{!profileNm == $Label.ps__msg_1016}">
+			   		<!-- 2019/01/15 支払いメディアの一括自動入力機能 WGCH BEGIN -->
+			   		<apex:outputPanel rendered="{!!bulkAccPaymentFlag}">
+			   		<!-- 開始 -->
+			   		<apex:commandButton value="{!$Label.ps__msg_046_0007}" rendered="{!isCanStargFlag && batchOpts.size > 0 && !noSettingFlag}" action="{!startBatch}" reRender="exportBlock" status="refStatusBlock" oncomplete="afterStartFun(true);" style="min-width:100px;height:27px;">
+			   			<span class="k-icon k-i-clock" style="width:15px;position: relative;left:25px;"></span>
+			   		</apex:commandButton>
+			   		<!-- 取消 -->
+			   		<apex:commandButton value="{!$Label.ps__msg_046_0008}" rendered="{!isCanStopFlag}" id="cancelBtn" action="{!stopBatch}" reRender="exportBlock" status="refStatusBlock" oncomplete="afterStartFun(false);"  style="min-width:100px;height:27px;text-align:right;" >
+			   			<span class="k-icon k-i-cancel cancelCls"  style="width:15px;position: relative;left:25px;"></span>
+			   		</apex:commandButton>
+			   		</apex:outputPanel>
+			   		<apex:outputPanel rendered="{!bulkAccPaymentFlag}">
+			   		<!-- 2019/06/28 支払いメディアの対象の予約の一覧表示機能 WGCH BEGIN -->
+			   		<apex:outputPanel rendered="{!!accViewIsNoShowFlg}">
+				   		<style>
+							.accGrid{
+								position: relative;
+								display: none;
+							}
+							.panel-item {
+							    margin-bottom: 10px;
+							    clear: both;
+							}
+							.panel-item-label {
+							    float: left;
+							    display: block;
+							    padding: 9px 9px;
+							    width: 70px;
+							    font-weight: 400;
+							    text-align: left;
+							    line-height: 9px;
+							    position: relative;
+							}
+							.panel-item-block {
+							    margin-left: 80px;
+							    min-height: 26px;
+							    position: relative;
+							}
+							.accGrid td {
+								vertical-align: top;
+							}
+						</style>
+				   		<span id="accSearchBtn">
+				   			<span class="k-icon k-i-search" style="width:15px;position: relative;left:25px;"></span>
+					  		<input class="btn" onclick="bindAccGrid()" value="検索" style="min-width:100px;height:27px;" type="button" />
+						</span>
+					</apex:outputPanel>
+					<apex:outputPanel rendered="{!accViewIsNoShowFlg}">
+			   		<!-- 開始 -->
+			   		<apex:commandButton value="{!$Label.ps__msg_046_0007}" rendered="{!batchOpts.size > 0}" action="{!startBatch}" reRender="exportBlock" status="refStatusBlock" id="startBtn" oncomplete="payOncompleteFun();" style="min-width:100px;height:27px;">
+			   			<span class="k-icon k-i-clock startCls" style="width:15px;position: relative;left:25px;"></span>
+			   		</apex:commandButton>
+			   		</apex:outputPanel>
+			   		</apex:outputPanel>
+			   		<!-- 2019/06/28 支払いメディアの対象の予約の一覧表示機能 WGCH END -->
+			   		<!-- 2019/01/15 支払いメディアの一括自動入力機能 WGCH END -->
+			   		</apex:outputPanel>
+			    </td>
+			</tr>
+		</table>
+		<!-- 2019/06/28 支払いメディアの対象の予約の一覧表示機能 WGCH BEGIN -->
+		<apex:outputpanel id="accGrid" style="display: inline-block; width: 100%;margin-left: 12px;" rendered="{!bulkAccPaymentFlag && !accViewIsNoShowFlg}" >
+			<div id="splitter">
+				<div class="accGrid">
+					<div id="accountGrid"></div>
+				</div>
+				<div class="accGrid" style="border: 1px solid #c5c5c5;">
+					<table style="width:100%;">
+						<caption style="text-align: left;">
+							選択件数
+							<!-- 2018/12/15 bug修正JINYABUG-1272　by zy BEGIN -->
+							(<span class="selectCount">0</span>/<span class="totalCount"></span>)
+							<!-- 2018/12/15 bug修正JINYABUG-1272　by zy END -->
+							<!--  2020/03/31 会計ロック機能 by zy BEGIN --> 
+							<span class="ttendBtnPanel">
+							<!--  2020/03/31 会計ロック機能 by zy END -->
+								<span class="k-icon k-i-clock startCls" style="width:15px;position: relative;left:25px;"></span>
+								<input class="btn" onclick="startBatch()" value="{!$Label.MSG_046_0007}" style="min-width:100px;height:27px;" type="button" />
+								
+							</span>
+							<apex:actionFunction action="{!startBatch}" name="startBatchFun" reRender="exportBlock" status="refStatusBlock" oncomplete="payOncompleteFun();ingBatch();" >
+					   			<apex:param name="searchMode" value="" assignTo="{!searchMode}"/>
+					   			<apex:param name="pShopCdStr" value="" assignTo="{!pShopCdStr}"/>
+					   			<apex:param name="accSlDtStr" value="" assignTo="{!accSlDtStr}"/>
+					   			<apex:param name="accIdStr" value="" assignTo="{!accIdStr}"/>
+					   		</apex:actionFunction>
+						</caption>
+					</table>
+				</div>
+			</div>
+		</apex:outputpanel>
+		<!-- 2019/06/28 支払いメディアの対象の予約の一覧表示機能 WGCH END -->
+	</apex:pageBlock>
+	<!-- 2018/12/15 請求書の作成など自動繰返し機能 by zy BEGIN -->
+	<apex:pageBlock id="billBatchBlock" rendered="{!billPDFFlag}">
+		<style>
+			span.dateFormat{
+				display:none;
+			}
+			.contentGrid{
+				position: relative;
+				display: none;
+			}
+			.panel-item {
+			    margin-bottom: 10px;
+			    clear: both;
+			}
+			.panel-item-label {
+			    float: left;
+			    display: block;
+			    padding: 9px 9px;
+			    width: 70px;
+			    font-weight: 400;
+			    text-align: left;
+			    line-height: 9px;
+			    position: relative;
+			}
+			.panel-item-block {
+			    margin-left: 80px;
+			    min-height: 26px;
+			    position: relative;
+			}
+			.warningClass {
+			    width: 16px;
+			    height: 16px;
+			    display: block;
+			    margin-left: 4px;
+			    text-align: center;
+			    background-repeat: no-repeat;
+			    background-image: url(/img/msg_icons/warning16.png);
+			}
+			.contentGrid td {
+				vertical-align: top;
+			}
+		</style>
+		<div class="warningMessage" style="display:none;" >
+		<!-- リクエストは処理中です。処理が完了致しましたら、メールにて通知致します。 -->
+		<apex:pageMessage summary="{!$Label.ps__msg_046_0006}" severity="info" strength="1" />
+		</div>
+		<apex:outputPanel id="messagePanel">
+			<apex:pageMessages id="messageBlock"/>
+			<!-- 2020/03/31 会計ロック機能 by zy BEGIN -->
+			<div class="message errorM3" id="inputFormErrorMsg" role="alert" style="display:none;">
+				<table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+					<tbody>
+						<tr valign="top">
+							<td><img alt="ERROR" class="msgIcon" src="/s.gif" title="ERROR"/></td>
+							<td class="messageCell">
+								<div class="messageText">
+									<span style="color:#cc0000"><h4>{!$Label.CONST_003_0132}:</h4></span><span class="J_MSG_CONTENT"></span><br/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<!--2020/03/31 会計ロック機能 by zy END -->
+		</apex:outputPanel>
+		<apex:inputHidden value="{!delayLength}" id="hidDelayLen"/>
+		<!-- 2019/09/15 Security Check BY zyz BEGIN -->
+		<input type="hidden" value="{!$Setup.CommDefine__c.ps__BillReportStampIsShowFlg__c}" id="hidBillReportStampIsShowFlg" />
+		<!-- 2019/09/15 Security Check BY zyz END -->
+		<table>
+			<tr>
+				<td>
+				 	<apex:selectList value="{!currentShopCode}" multiselect="false" size="1" id="ShopSelect" styleClass="j-dropDownList" rendered="{!shopOpts.size > 0}" 
+							            style="margin-left: 10px;margin-top: 1px; width:170px ;">
+		    			<apex:selectOptions value="{!shopOpts}"/>
+		    			<apex:actionSupport event="onchange" action="{!refreshBranShop}" rerender="exportBlock" status="refStatusBlock"  oncomplete="afterStartFun(false);"  />
+			        </apex:selectList>
+	        		<apex:selectList value="{!currentBatchName}" multiselect="false" size="1" id="BatchSelect" styleClass="j-dropDownList" rendered="{!batchOpts.size > 0}" 
+			           style="margin-left: 10px; width:170px;">
+				  			<apex:selectOptions value="{!batchOpts}"/>
+				   			<apex:actionSupport event="onchange" action="{!refreshBranShop}" rerender="exportBlock" status="refStatusBlock"  oncomplete="afterStartFun(false);"  />
+				    </apex:selectList>
+				</td>
+				<td class="dateInputClass">
+					<span style="margin-left:30px;">
+						<apex:outputLabel value="{!$ObjectType.AccountAcount__c.Fields['SalesDate__c'].label}" />
+						<!-- 2019/05/15 ⑩請求書重複作成できるの改善 by zy BEGIN -->
+						/<apex:outputLabel value="{!JSENCODE(SHOW_LEAD_LABEL)}" />
+						<!-- 2019/05/15 ⑩請求書重複作成できるの改善 by zy END -->
+						<img style="margin-top:5px;vertical-align:top" src="/img/alohaSkin/help_orange.png" title="請求書作成元データの検索対象期間"/>
+						<apex:inputField value="{!leadFrom.Checkinday__c}"  id="startDt" styleClass="k-textbox" style="width:110px;margin-left:5px;"/>
+					</span>
+					<span>
+						&nbsp;{!$Label.ps__msg_006_0097}
+						<apex:inputField value="{!leadTo.Checkinday__c}"  id="endDt" styleClass="k-textbox" style="width:110px;margin-left:5px;"/>
+					</span>
+				</td>
+			   	<td>
+		   			<span id="searchBtn">
+					  	<span class="k-icon k-i-search" style="width:15px;position: relative;left:25px;"></span>
+				  		<input class="btn" onclick="bindLeadGrid()" value="検索" style="min-width:100px;height:27px;" type="button" />
+					</span>
+				</td>
+			</tr>
+		</table>
+		<apex:outputpanel id="leadGrid" style="display: inline-block; width: 100%;margin-left: 12px;">
+			<div id="splitter">
+				<div class="contentGrid">
+					<div id="accountGrid"></div>
+				</div>
+				<div class="contentGrid" style="border: 1px solid #c5c5c5;">
+					<table style="width:100%;">
+						<caption style="text-align: left;">
+							作成先請求書設定情報
+							<!-- 2018/12/15 bug修正JINYABUG-1272　by zy BEGIN -->
+							(<span class="selectCount">0</span>/<span class="totalCount"></span>)
+							<!-- 2018/12/15 bug修正JINYABUG-1272　by zy END -->
+						</caption>
+						<tr>
+							<td style="width:360px">
+								<apex:outputLabel value="{!$ObjectType.AccountAcount__c.Fields['SalesDate__c'].label}" />
+								/
+								<apex:outputLabel value="{!JSENCODE(SHOW_LEAD_LABEL)}" />
+								<img style="margin-top:5px;vertical-align:top" src="/img/alohaSkin/help_orange.png" title="売上計上日/{!JSENCODE(SHOW_LEAD_LABEL)}が月末日を指定される場合、複数カ月分の売上計上日/{!JSENCODE(SHOW_LEAD_LABEL)}も月末日にする"/>
+								<apex:inputField value="{!oAcountSobj.SalesDate__c}" onchange="selDateChange()" id="saleDate" styleClass="k-textbox" style="width:110px;margin-left:5px;"/>
+								<!-- 12ヶ月分の予約がまとめて作成出来る WSQ BEGIN -->
+								から<select id="unitnum" class="k-textbox" style="width:30px" onchange="selDateChange()" >
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
+									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
+									<option value="8">8</option>
+									<option value="9">9</option>
+									<option value="10">10</option>
+									<option value="11">11</option>
+									<option value="12">12</option>
+								</select>カ月分
+								<!-- 12ヶ月分の予約がまとめて作成出来る WSQ END -->
+							</td>
+							<td style="width:180px">
+								<!-- 発行日付-->
+								<apex:outputLabel value="{!$Label.ps__msg_006_0219}" />
+								<apex:inputField id="accountNameSel" value="{!oAcountSobj.IssueDate__c}" style="min-height: 26px; width: 110px;margin-left:5px;" styleClass="k-textbox" />
+							</td>
+							<td style="width:90px;padding-top:3px;">
+								<!-- ハンコ表示-->
+								<apex:outputLabel value="{!$Label.ps__msg_006_0220}" />
+								<input type="checkbox" id="dialog_stampIsShowFlg" class="k-checkbox row-checkbox" />
+							</td>
+							<!-- 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN-->
+							<td style="width:90px;padding-top:3px;{!if(BILL_LETTER_FLG,'','display:none;')}">
+								<!-- 送付状あり-->
+								<apex:outputLabel value="送付状あり" />
+								<input type="checkbox" id="dialog_billLetterFlg" class="k-checkbox row-checkbox" checked="checked"/>
+							</td>
+							<!-- 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END-->
+							<td style="width:60px;padding-top:6px;">
+								<!-- コメント-->
+								<apex:outputLabel value="{!$Label.ps__msg_006_0221}" />
+							</td>
+							<td style="width:250px;padding-top:3px;">
+								<apex:selectList value="{!oAcountSobj.comment__c}" multiselect="false" size="1" id="commentSel" style="width:250px;" rendered="{!commentOpts.size > 1}" onchange="commentSel()">
+									<apex:selectOption itemValue="" itemLabel="" />
+									<apex:selectOptions value="{!commentOpts}" />
+								</apex:selectList>	
+								<div>
+									<textarea id="billComent" rows="3" style="min-width:246px;">{!billComment}</textarea>
+								</div>
+							</td>
+							<td>
+								<span id="dobillBtn">
+									<span class="k-icon k-i-clock" style="width:15px;position: relative;left:25px;"></span>
+									<input class="btn" onclick="doBillBtn()" value="{!$Label.msg_046_0007}" style="min-width:100px;height:27px; padding: inherit;" type="button" />
+								</span>
+								<span id="cancelBtn" style="display:none;">
+									<span class="k-icon k-i-cancel" style="width:15px;position: relative;left:25px;"></span>
+									<input class="btn" onclick="cancelBtn()" value="{!$Label.msg_046_0008}"  style="min-width:100px;height:27px; padding: inherit;" type="button" />
+								</span>
+							</td>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</apex:outputpanel>
+	</apex:pageBlock>
+	<!-- 2018/12/15 請求書の作成など自動繰返し機能 by zy END -->
+</apex:form>
+
+<apex:actionStatus onstart="javascript:blockUi();" onstop="javascript:unblockUi();" id="refStatusBlock"/>
+<script>
+var clearTimeOutId;
+$j(document).ready(function() {
+	// 2017/02/21 Freee仕訳集計対象期間指定できるように改善対応 begin by wx
+	var batchVal = $j("[id$='BatchSelect']").val();
+	if (batchVal == "{!JSENCODE(BATCH_KEY_POS_IMP)}") {
+		$j("#denpyoukeiPanel").toggle(false);
+	}
+	// 2017/02/21 Freee仕訳集計対象期間指定できるように改善対応 end by wx	
+	bindEvent();
+});
+function bindEvent(){
+   	$j(".j-comboxInput").kendoComboBox();
+   	// 2019/01/30 优化显示不换行 WGCH BEGIN
+   	// $j(".j-dropDownList").kendoDropDownList();
+   	$j(".j-dropDownList").kendoDropDownList({
+   		dataBound: function(e) {
+    		// 只处理BatchSelect
+    		if(e.sender.element.is("[id$=':BatchSelect']")) e.sender.list.addClass("autoWidth");
+   		},
+   	});
+   	// 2019/01/30 优化显示不换行 WGCH END
+}
+function afterStartFun(flag){
+	// 2016/01/20 POS IMPORT BEGIN
+	var batchVal = $j("[id$='BatchSelect']").val();
+	if (batchVal == "{!JSENCODE(BATCH_KEY_POS_IMP)}") {
+		$j("#denpyoukeiPanel").toggle(false);
+	} else {
+		$j("#denpyoukeiPanel").toggle(true);
+	}
+	// 2019/12/30 Css BUGFIX WGCH BEGIN
+	bindEvent();
+	// 2019/12/30 Css UGFIX WGCH END
+	// エラーが存在する場合
+	if ($j("span[id$=':messageBlock']").text().length > 0) {
+		return;
+	}
+	// 2019/12/30 Css BUGFIX WGCH BEGIN
+	// bindEvent();
+	// 2019/12/30 Css UGFIX WGCH END
+	if(flag) setTimeOutFun();
+}
+function setTimeOutFun(){
+	if(clearTimeOutId) clearInterval(clearTimeOutId);
+	var delayLen = $j("input[id$='hidDelayLen']").val();
+	if(delayLen > 0){
+		clearTimeOutId = setInterval(autoChangeMessage,1000);
+		$j("input[id$='cancelBtn']").data("time",delayLen);
+	}else{
+		$j("input[id$='cancelBtn']").hide();
+		$j(".cancelCls").hide();
+		$j(".cancelMessage").show();
+	}
+}
+function autoChangeMessage(){
+	var nowTime = $j("input[id$='cancelBtn']").data("time");
+	nowTime--;
+	if(nowTime == 0){
+		clearInterval(clearTimeOutId);
+		$j("input[id$='cancelBtn']").hide();
+		$j(".cancelCls").hide();
+		$j(".cancelMessage").show();
+	}else{
+		$j("input[id$='cancelBtn']").data("time",nowTime);
+		$j("input[id$='cancelBtn']").val('{!$Label.ps__msg_046_0008}(' + nowTime + ')');
+	}
+	
+	
+}
+// Block UI
+function blockUi() {
+ 	$j.blockUI({
+ 	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_040_0024}</h1>'
+    }); 
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j.unblockUI({ fadeOut: 200 }); 
+}
+// 2018/12/15 請求書の作成など自動繰返し機能 by zy BEGIN
+var PageInfo = {
+	filterable: {
+		operators: {
+			number: {
+				// 指定の値に等しい
+				eq: "{!$Label.MSG_041_0033}",
+				// 指定の値に等しくない
+				neq: "{!$Label.MSG_041_0034}",
+				// 指定の値より以上
+				gte: "{!$Label.MSG_041_0043}",
+				// 指定の値より大きい
+				gt: "{!$Label.MSG_041_0044}",
+				// 指定の値より以下
+				lte: "{!$Label.MSG_041_0045}",
+				// 指定の値より小さい
+				lt: "{!$Label.MSG_041_0046}",
+			},
+			string: {
+				// 指定の値に等しい
+				eq: "{!$Label.MSG_041_0033}",
+				// 指定の値に等しくない
+				neq: "{!$Label.MSG_041_0034}",
+				// 指定の値で始まる
+				startswith: "{!$Label.MSG_041_0035}",
+				// 指定の値を含む
+				Contains: "{!$Label.MSG_041_0036}",
+				// 指定の値を含まない
+				doesnotcontain: "{!$Label.MSG_041_0037}",
+				// 指定の値で終わる
+				endswith: "{!$Label.MSG_041_0038}",
+			}
+		},
+		messages: {
+			// フィルター:
+			info: "{!$Label.MSG_041_0032}",
+			// および
+			and: "{!$Label.MSG_041_0039}",
+			// または
+			or: "{!$Label.MSG_041_0040}",
+			// フィルター
+			filter: "{!$Label.MSG_041_0041}",
+			// クリア
+			clear: "{!$Label.MSG_041_0042}",
+	    }
+	},
+};
+function bindLeadGrid() {
+	$j(".contentGrid").show();
+	var docHeight = $j(window).height() - $j("#splitter").offset().top - 120;
+	if (!window.resizeAble) {
+		$j(window).resize(function(){
+			var height = $j(window).height() - $j("#splitter").offset().top - 120;
+			$j("#accountGrid").height(height);
+			var headerHeight = $j("#accountGrid div.k-grid-header").outerHeight();
+			$j("#accountGrid div.k-grid-content").height(height - headerHeight);
+			window.resizeAble = true;
+		});
+	}
+	// 2018/12/15 bug修正JINYABUG-1272　by zy BEGIN
+	$j("#header-chb").prop("checked",false);
+	// 2018/12/15 bug修正JINYABUG-1272　by zy END
+	// 2019/09/15 Security Check BY zyz BEGIN
+	var billStamp = $j("#hidBillReportStampIsShowFlg").val() == "true";
+	// 2019/09/15 Security Check BY zyz END
+	$j("#dialog_stampIsShowFlg").prop("checked",billStamp);
+	var accountGrid = $j("#accountGrid").data("kendoGrid");
+	if (!accountGrid) {
+		$j("#accountGrid").kendoGrid({
+			filterable:PageInfo.filterable, 
+			sortable:true,
+			dataBound:ondataBound,
+			height:docHeight,
+			columns: [
+				{
+					headerTemplate: '<input type="checkbox" id="header-chb" onclick="checkAllRow()" class="k-checkbox header-checkbox"><label class="k-checkbox-label" for="header-chb" style="position: absolute; left: 2px; top: 5px;"></label>',
+					// 2019/05/15 ⑩請求書重複作成できるの改善 by zy BEGIN
+					template: '#if (checkflag){# <input type="checkbox" id="#= leadid#" onclick="oncheck()" value="#= leadid#" class="k-checkbox row-checkbox" checked="checked"><label for="#= leadid#" class="k-checkbox-label" style="left: -6px; top: -6px"></label> #} else {#<input type="checkbox" id="#= leadid#" value="#= leadid#" class="k-checkbox row-checkbox" onclick="oncheck()"><label for="#= leadid#" class="k-checkbox-label" style="left: -6px; top: -6px"></label>#}#',
+					// 2019/05/15 ⑩請求書重複作成できるの改善 by zy END
+					width: 30,
+					field:'checkflag',
+					filterable:false,
+					sortable:false,
+				},
+				{
+					field: "leadName",
+					title: "予約名",
+					width:"auto",
+					template: "<a href='/#=leadid#'>#=leadName#</a>",
+				},
+				{
+					field: "contactName",
+					title: "お客様",
+					width:"auto",
+					template: "<a href='/#=contactid#'>#=contactName#</a>",
+				},
+				{
+					field:"accountName",
+					title: "会計",
+					width:150,
+					template: "<a href='/#=accountid#'>#=accountName#</a>",
+				},
+				{
+					field:"salesDate",
+					title: "売上日/{!JSENCODE(SHOW_LEAD_LABEL)}",
+					width:120,
+				},
+				{
+					field:"chanel",
+					title: "予約チャネル",
+					width:150,
+				},
+				{
+					field:"leadType",
+					title: "予約タイプ",
+					width:100,
+				},
+				// 2019/07/31 請求書一括作成の改善対応（リクエストバッチ＞請求書自動作成 ＞）、この画面に、「お客様ステータス」の欄を追加していただき、すでにチェックイン完の予約がわかるように希望します by zy BEGIN
+				{
+					field:"contactStatus",
+					title: "{!$ObjectType.Lead__c.Fields.Field298__c.label}",
+					width:150,
+				},
+				// 2019/07/31 請求書一括作成の改善対応（リクエストバッチ＞請求書自動作成 ＞）、この画面に、「お客様ステータス」の欄を追加していただき、すでにチェックイン完の予約がわかるように希望します by zy END
+				/*
+				2019/07/31 20190731.02.バッチの「請求書自動作成」についての質問がございます。 状態▲がついているものの吹き出しの意味がわからず、教えていただけますでしょうか。by zy BEGIN
+				{
+					title: "状態",
+					template: "#if(checkType == '1') {#<span class='warningClass' title='該当売上計上日/{!JSENCODE(SHOW_LEAD_LABEL)}の会計データが存在しているため、再作成したい場合、既存データをVOID処理してください'></span>#}#",
+					width: "50px"
+				}
+				2019/07/31 20190731.02.バッチの「請求書自動作成」についての質問がございます。 状態▲がついているものの吹き出しの意味がわからず、教えていただけますでしょうか。by zy END
+				*/
+			],
+			dataSource:{
+				transport: {
+		    		read: function (options) {
+		    			var spcd = $j("[id$=ShopSelect]").val();
+		    			var querDt = $j("[id$=startDt]").val();
+		    			var end = $j("[id$=endDt]").val();
+		    			var saleDt = $j("[id$=saleDate]").val();
+		    			if (spcd == undefined) spcd = '';
+		    			if (querDt == undefined) querDt = '';
+		    			var objectInfo = {
+		    				spcd:spcd,
+		    				queryDt:querDt,
+		    				endDtStr:end,
+		    				saleDt:saleDt
+		    			};
+						var req = JSON.stringify(objectInfo);
+						// 2020/03/31 会計ロック機能 by zy BEGIN
+						remoteQuery('queryLead',req,options,selDateChange);
+						// 2020/03/31 会計ロック機能 by zy END
+		    		}
+		    	}
+			}
+		});
+	} else {
+		accountGrid.dataSource.read();
+	}
+}
+function doBillBtn(){
+	var itemArr = [];
+	$j("#accountGrid tbody tr.k-checked").each(function(){
+		itemArr.push($j("input:checkbox",this).val());
+	});
+	if (itemArr.length == 0) return alert('{!$LABEL.MSG_012_0473}');
+	var saleDate = $j("input[id$=saleDate]").val();
+	// 12ヶ月分の予約がまとめて作成出来る WSQ BEGIN
+	var unitNums = $j("#unitnum").val();
+	// 12ヶ月分の予約がまとめて作成出来る WSQ END	
+	if (!confirm('売上計上日/{!JSENCODE(SHOW_LEAD_LABEL)}が' + saleDate + 'から'+unitNums+'カ月分の請求書を作成する、よろしいですか')) return;
+	var checkDate = $j("input[id$=accountNameSel]").val();
+	var checkbox = $j("#dialog_stampIsShowFlg").is(":checked");
+	// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN
+	var letterFlag = $j("#dialog_billLetterFlg").is(":checked");
+	// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END
+	var comment = $j("#billComent").val();
+	var reqObj = {
+		leads:itemArr,
+		saleDt:saleDate,
+		queryDt:checkDate,
+		checkflag:checkbox,
+		comment:comment
+		// 12ヶ月分の予約がまとめて作成出来る WSQ BEGIN
+		,loopsize:unitNums
+		// 12ヶ月分の予約がまとめて作成出来る WSQ END
+		// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN
+		,letter:letterFlag
+		// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END
+	};	
+	var req = JSON.stringify(reqObj);
+	//kendo.ui.progress($j("#accountGrid"), true);
+	var delayLen = kendo.parseInt($j("input[id$='hidDelayLen']").val());
+	if(delayLen != null){
+		$j("#cancelBtn").data("time",delayLen);
+		$j("#cancelBtn input").val('{!$Label.msg_046_0008}(' + delayLen + ')');
+		setExcuteTimeOut(remoteQuery,new Array('batchExcute',req,false,afterBatchExcute));
+	}  else {
+		remoteQuery('batchExcute',req,false,afterBatchExcute);
+	}
+	$j("#dobillBtn").hide();
+	$j("#searchBtn").hide();
+	$j("#cancelBtn").show();
+}
+function cancelBtn(){
+	if (PageInfo.excuBatchId) clearTimeout(PageInfo.excuBatchId);
+	$j("#dobillBtn").show();
+	$j("#cancelBtn").hide();
+	$j("#searchBtn").show();
+}
+function setExcuteTimeOut(callBack,arr){
+	PageInfo.excuBatchId = setTimeout(function(){
+		var delayLen = $j("#cancelBtn").data("time");
+		if (delayLen > 0) {
+			delayLen--;
+			$j("#cancelBtn").data("time",delayLen);
+			$j("#cancelBtn input").val('{!$Label.msg_046_0008}(' + delayLen + ')');
+			setExcuteTimeOut(callBack,arr);
+		} else {
+			callBack.apply(window,arr);
+			$j("#cancelBtn").hide();
+			$j("#splitter").hide();
+			$j(".warningMessage").show();
+		}
+	},1000);
+}
+function afterBatchExcute(result){
+	kendo.ui.progress($j("#accountGrid"), false);
+	// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN
+	/*
+	if (result) {
+		var kendoGrid = $j("#accountGrid").data("kendoGrid");
+		var datas = kendoGrid.dataSource.data();
+		for (var i = 0 ; i < result.length ; i++) {
+			var dataId = result[i];
+			for (var j = 0 ; j < datas.length; j++) {
+				var data = datas[j];
+				if (data.leadid == dataId) {
+					var curRow = $j("tr[data-uid='" + data.uid + "']");
+					curRow.removeClass("k-checked");
+					$j("input:checkbox",curRow).prop("checked",false);
+					data.set("checkType",'1');
+				}
+			}
+		}
+	}
+	*/
+	// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END
+}
+function remoteQuery(type,req,options,callback){
+	Visualforce.remoting.Manager.invokeAction(
+	'{!$RemoteAction.BatchControlCenter.remoteQuery}',type,req, function(result, event){
+        // 異常
+     	if(event.type == 'exception') {
+            alert(event.message);
+            if (options) options.error();
+     	} else {
+     		if (options) options.success(result);
+     	}
+     	if (callback) callback(result);
+	});
+}
+function deleteOther(grid,excuteRow){
+	var hadSelRow = $j("tr:not(.k-checked)",grid.tbody).has("input:checkbox:checked");
+	if (excuteRow) hadSelRow = hadSelRow.not(excuteRow)
+	if (hadSelRow.length > 0) {
+    	hadSelRow.find("input:checkbox:checked").prop("checked",false);
+    	hadSelRow.each(function(){
+    		var item = grid.dataItem($j(this));
+    		item.checkflag = false;
+    	});
+    }
+}
+// 全て選択
+function checkAllRow(){
+	var curTarget = $j(event.currentTarget);
+	var accountGrid = $j("#accountGrid").data("kendoGrid");
+	var allData = accountGrid.dataSource.data();
+	var checkFlag = curTarget.is(":checked");
+	for (var i = 0 ; i < allData.length ; i++) {
+		var data = allData[i];
+		data.checkflag = checkFlag;
+	}
+    accountGrid.refresh();
+}
+function commentSel(){
+	var comment = $j(event.currentTarget).val();
+	$j("#billComent").val(comment);
+}
+function selDateChange(){
+	var saleDt = $j("[id$=saleDate]").val();
+	var accountids = getAllAccounts();
+	var spcd = $j("[id$=ShopSelect]").val();
+	// 12ヶ月分の予約がまとめて作成出来る WSQ BEGIN
+	var unitNums = $j("#unitnum").val();
+	// 12ヶ月分の予約がまとめて作成出来る WSQ END	
+	// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN
+	var leads = getAllLeads();
+	// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END
+	var objectInfo = {
+		accountids:accountids,
+		spcd:spcd,
+		saleDt:saleDt
+		// 12ヶ月分の予約がまとめて作成出来る WSQ BEGIN
+		,loopsize:unitNums
+		// 12ヶ月分の予約がまとめて作成出来る WSQ END
+		// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN
+		,leads:leads
+		// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END
+	};
+	kendo.ui.progress($j("#accountGrid"), true);
+	var req = JSON.stringify(objectInfo);
+	remoteQuery('queryExitLead',req,false,afterExitCheck);
+}
+function afterExitCheck(result){
+	// 2020/03/31 会計ロック機能 by zy BEGIN
+	if (typeof result === "string") {
+		setErrorMessge(result)
+	} else 
+	// 2020/03/31 会計ロック機能 by zy END
+	if (result) {
+		var accountGrid = $j("#accountGrid").data("kendoGrid");
+		var datas = accountGrid.dataSource.data();
+		for (var i = 0 ; i < result.length ; i++) {
+			var data = result[i];
+			for (var j = 0 ; j < datas.length ; j++) {
+				var item = datas[j];
+				if (item.leadid == data.leadid) {
+					item.set("checkType",data.checkType);
+					item.set("lockType",data.lockType);
+				}
+			}
+		}
+	}
+	kendo.ui.progress($j("#accountGrid"), false);
+}
+// 2020/03/31 会計ロック機能 by zy BEGIN
+function refreshErrorMsg(){
+	$j("#dobillBtn,.ttendBtnPanel").show();
+	$j("#inputFormErrorMsg").hide();
+}
+function setErrorMessge(msg){
+	if (msg != "") {
+		$j("#inputFormErrorMsg").show();
+		$j("#dobillBtn,.ttendBtnPanel").hide();
+	}
+	$j("#inputFormErrorMsg .J_MSG_CONTENT").text(msg);
+}
+// 2020/03/31 会計ロック機能 by zy END
+function getAllAccounts(){
+	var accountGrid = $j("#accountGrid").data("kendoGrid");
+	var datas = accountGrid.dataSource.data();
+	var leadIds = [];
+	datas.forEach(function(item){
+		leadIds.push(item.accountid);
+	});
+	return leadIds;
+}
+function getSelLeads(){
+	var accountGrid = $j("#accountGrid").data("kendoGrid");
+	var leadIds = [];
+	$j("tr[data-uid] input:checked").each(function(){
+		leadIds.push($j(this).val());
+	});
+	return leadIds;
+}
+function ondataBound(e){
+	var datas = e.sender.dataSource.data();
+	for (var i = 0 ; i < datas.length ; i++) {
+		var data = datas[i];
+		if (data.checkflag) {
+			var curRow = $j("tr[data-uid='" + data.uid + "']");
+			curRow.addClass("k-checked");
+		}
+	}
+	selectMessage();
+}
+function oncheck(){
+	var $target = $j(event.currentTarget);
+	var grid = $j("#accountGrid").data("kendoGrid");
+	var curRow = $target.closest("tr");
+	var checkFlag = $target.is(":checked");
+	var dataItem = grid.dataItem(curRow);
+    dataItem.set("checkflag",checkFlag);
+    checkAllCheck();
+}
+function checkAllCheck(){
+	var curRows = $j("tr[data-uid]");
+	var selectedRows = curRows.has("input:checkbox:checked");
+	if (selectedRows.length == curRows.length) $j("#header-chb").prop("checked",true);
+	else $j("#header-chb").prop("checked",false);
+	selectMessage();
+}
+function selectMessage(){
+	var curRows = $j("tr[data-uid]");
+	var selectedRows = curRows.has("input:checkbox:checked");
+	$j(".selectCount").text(selectedRows.length);
+	$j(".totalCount").text(curRows.length);
+}
+// 2018/12/15 請求書の作成など自動繰返し機能 by zy END
+// 2019/01/15 支払いメディアの一括自動入力機能 WGCH BEGIN
+function payOncompleteFun(){
+	$j("#denpyoukeiPanel").toggle(true);
+	// エラーが存在する場合
+	if ($j("span[id$=':messageBlock']").text().length > 0) {
+		return;
+	}
+	bindEvent();
+	$j(".startCls").hide();
+	$j("input[id$='startBtn']").hide();
+	$j(".cancelMessage").show();
+}
+// 2019/06/28 支払いメディアの対象の予約の一覧表示機能 WGCH BEGIN
+function bindAccGrid() {
+	$j(".accGrid").show();
+	var docHeight = $j(window).height() - $j("#splitter").offset().top - 120;
+	if (!window.resizeAble) {
+		$j(window).resize(function(){
+			var height = $j(window).height() - $j("#splitter").offset().top - 120;
+			$j("#accountGrid").height(height);
+			var headerHeight = $j("#accountGrid div.k-grid-header").outerHeight();
+			$j("#accountGrid div.k-grid-content").height(height - headerHeight);
+			window.resizeAble = true;
+		});
+	}
+	// 2018/12/15 bug修正JINYABUG-1272　by zy BEGIN
+	$j("#header-chb").prop("checked",false);
+	// 2018/12/15 bug修正JINYABUG-1272　by zy END
+	var billStamp = "{!$Setup.CommDefine__c.BillReportStampIsShowFlg__c}" == "true";
+	$j("#dialog_stampIsShowFlg").prop("checked",billStamp);
+	var accountGrid = $j("#accountGrid").data("kendoGrid");
+	if (!accountGrid) {
+		$j("#accountGrid").kendoGrid({
+			filterable:PageInfo.filterable, 
+			sortable:true,
+			dataBound:ondataBound,
+			height:docHeight,
+			columns: [
+				{
+					headerTemplate: '<input type="checkbox" id="header-chb" onclick="checkAllRow()" class="k-checkbox header-checkbox"><label class="k-checkbox-label" for="header-chb" style="position: absolute; left: 2px; top: 5px;"></label>',
+					template: '#if (checkflag){# <input type="checkbox" id="#= accId#" onclick="oncheck()" value="#= accId#" class="k-checkbox row-checkbox accIdCls" accSlDt="#= accSlDt#" pShopCd="#= pShopCd#"  checked="checked"><label for="#= accId#" class="k-checkbox-label" style="left: -6px; top: -6px"></label> #} else {#<input type="checkbox" id="#= accId#" value="#= accId#" accSlDt="#= accSlDt#" pShopCd="#= pShopCd#" class="k-checkbox row-checkbox accIdCls" onclick="oncheck()"><label for="#= accId#" class="k-checkbox-label" style="left: -6px; top: -6px"></label>#}#',
+					width: 30,
+					field:'checkflag',
+					filterable:false,
+					sortable:false,
+				},
+				{
+					field: "accLdNm",
+					title: "予約名",
+					width:"auto",
+					template: "<a href='/#=accLdId#'>#=accLdNm#</a>",
+				},
+				{
+					field: "accCtNm",
+					title: "お客様",
+					width:"auto",
+					template: "<a href='/#=accCtId#'>#=accCtNm#</a>",
+				},
+				{
+					field:"accNm",
+					title: "会計",
+					width:150,
+					template: "<a href='/#=accId#'>#=accNm#</a>",
+				},
+				{
+					field:"accSlDt",
+					title: "売上日",
+					width:120,
+					filterable:false,
+					sortable:false,
+				},
+				{
+					field:"leadNight",
+					title: "泊目",
+					width: 120,
+				},
+				{
+					field:"totalAmoutIncTax",
+					title: "未払い額",
+					width: 120,
+					type: "number",
+					format: "{0:#,0.##}",
+					attributes: {
+						style: "text-align: right;"
+					},
+				},
+				{
+					field:"paymentNm",
+					title: "支払いメディア",
+					width: 120,
+					template: "<a href='/#=paymentId#'>#=paymentNm#</a>",
+				}
+			],
+			dataSource:{
+				transport: {
+		    		read: function (options) {
+		    			var spcd = $j("[id$=ShopSelect]").val();
+		    			var querDt = $j("[id$=denpyoukei]").val();
+		    			if (spcd == undefined) spcd = '';
+		    			if (querDt == undefined) querDt = '';
+		    			accQuery(spcd, querDt, options);
+		    		}
+		    	}
+			}
+		});
+	} else {
+		accountGrid.dataSource.read();
+	}
+}
+function accQuery(spcd, querDt, options){
+	// 2020/03/31 会計ロック機能 by zy BEGIN
+	refreshErrorMsg();
+	// 2020/03/31 会計ロック機能 by zy END
+	Visualforce.remoting.Manager.invokeAction(
+	'{!$RemoteAction.BatchControlCenter.accQuery}',spcd, querDt, function(result, event){
+        // 異常
+     	if(event.type == 'exception') {
+			 // 2020/03/31 会計ロック機能 by zy BEGIN
+			setErrorMessge(event.message);
+			// alert(event.message);
+			if (options) options.success([]);
+			// 2020/03/31 会計ロック機能 by zy END
+     	} else {
+     		if (options) options.success(result);
+     	}
+	});
+}
+function startBatch(){
+	var pShopCd = '';
+	var accSlDt = '';
+	var accIdArr = [];
+	$j("#accountGrid tbody tr.k-checked").each(function(){
+		var $chk = $j("input:checkbox",this);
+		pShopCd = $chk.attr("pShopCd");
+		accSlDt = $chk.attr("accSlDt");
+		accIdArr.push($chk.val());
+	});
+	if(accIdArr.length == 0) return alert('{!$LABEL.MSG_012_0473}');
+	startBatchFun(1, pShopCd, accSlDt, accIdArr.join(','));
+}
+function ingBatch(){
+	$j("[id='accSearchBtn']").hide();
+	$j("[id$=':accStartBatchId']").hide();
+}
+// 2019/06/28 支払いメディアの対象の予約の一覧表示機能 WGCH END
+// 2019/01/15 支払いメディアの一括自動入力機能 WGCH END
+// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy BEGIN
+function getAllLeads(){
+	var accountGrid = $j("#accountGrid").data("kendoGrid");
+	var datas = accountGrid.dataSource.data();
+	var leadIds = [];
+	datas.forEach(function(item){
+		if (item.accountid == '' && item.leadid != '') leadIds.push(item.leadid);
+	});
+	return leadIds;
+}
+// 2019/05/15 チェックインをかけた予約しかコピーができませんが、チェックインをかけない段階での予約コピーはできませんでしょうか by zy END
+</script>
+</apex:page>

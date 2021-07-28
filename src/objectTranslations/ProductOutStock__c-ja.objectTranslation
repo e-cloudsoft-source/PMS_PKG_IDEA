@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>商品出庫情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計商品 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- ProductOutStock --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 単位 --></label>
+        <name>AccountMasterUnit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売高（税抜） --></label>
+        <name>GoukeinoneTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 在庫集計対象外 --></label>
+        <name>IsNotTarget__c</name>
+    </fields>
+    <fields>
+        <label><!-- 出庫日 --></label>
+        <name>OutStockDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品数量 --></label>
+        <name>ProductNumber__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品在庫情報 --></label>
+        <name>ProductStock__c</name>
+        <relationshipLabel><!-- ProductOutStock --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $出庫日 --></label>
+        <name>StockOutDateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売単価（税抜) --></label>
+        <name>Tankanonetax__c</name>
+    </fields>
+</CustomObjectTranslation>

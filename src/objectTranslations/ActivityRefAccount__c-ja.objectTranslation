@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>活動関連取引先</value>
+    </caseValues>
+    <fields>
+        <label><!-- 取引先(主） --></label>
+        <name>AccountMainRef__c</name>
+        <relationshipLabel><!-- 活動関連取引先 (取引先(主）) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 取引先 --></label>
+        <name>AccountSubRef__c</name>
+        <relationshipLabel><!-- 活動関連取引先 (取引先) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- プロジェクト明細 --></label>
+        <name>ProjectDetailRef__c</name>
+        <relationshipLabel><!-- 活動関連取引先 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 活動リンク --></label>
+        <name>RelationIdRefCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 件名 --></label>
+        <name>RelationIdRefName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 活動ID --></label>
+        <name>RelationIdRef__c</name>
+    </fields>
+</CustomObjectTranslation>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Withdraw(Usage prohibited)</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Withdraw(Usage prohibited)</value>
+    </caseValues>
+    <fields>
+        <label><!-- 取引先 --></label>
+        <name>AccountRef__c</name>
+        <relationshipLabel><!-- 出金(使用不可) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 最終更新者 --></label>
+        <name>LastModifiedByUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- 最終更新日 --></label>
+        <name>LastModifiedDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金額(税抜) --></label>
+        <name>PamountExc__c</name>
+    </fields>
+    <fields>
+        <label>Amount</label>
+        <name>Pamount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 出金先 --></label>
+        <name>PaymentRef__c</name>
+        <relationshipLabel><!-- 出金伝票 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Summary</label>
+        <name>Pitem__c</name>
+    </fields>
+    <fields>
+        <label>Account name</label>
+        <name>Pkamoku__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ケーキ</masterLabel>
+            <translation><!-- ケーキ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>マッサージ</masterLabel>
+            <translation><!-- マッサージ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>交通費</masterLabel>
+            <translation><!-- 交通費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>雑費</masterLabel>
+            <translation><!-- 雑費 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 扱者 --></label>
+        <name>Pperson__c</name>
+        <relationshipLabel><!-- 出金 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 予約会計 --></label>
+        <name>Relpayment__c</name>
+        <relationshipLabel><!-- 出金 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 営業日付 --></label>
+        <name>SalesDateCal__c</name>
+    </fields>
+    <fields>
+        <label>Sales recorded date</label>
+        <name>SalesDate__c</name>
+    </fields>
+    <fields>
+        <label>Shop code</label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label>Shop information</label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 出金 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>TaxRate__c</name>
+    </fields>
+    <nameFieldLabel><!-- Payment# --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

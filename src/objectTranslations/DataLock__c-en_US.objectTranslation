@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Data lock</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Data lock</value>
+    </caseValues>
+    <fields>
+        <label>Function name</label>
+        <name>AppName__c</name>
+    </fields>
+    <fields>
+        <label>Lock key</label>
+        <name>DataLockKey__c</name>
+    </fields>
+    <fields>
+        <label>User</label>
+        <name>LockByRef__c</name>
+        <relationshipLabel><!-- データロック --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Lock time</label>
+        <name>LockTime__c</name>
+    </fields>
+    <fields>
+        <label>Shop information</label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel>Data lock</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Time No.</label>
+        <name>TimeStmp__c</name>
+    </fields>
+    <nameFieldLabel>Data lock number</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

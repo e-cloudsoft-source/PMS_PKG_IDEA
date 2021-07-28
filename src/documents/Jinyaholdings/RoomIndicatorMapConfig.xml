@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ROOT>
+<!-- 
+概要：該当XML利用して、マップ機能関連情報を定義する
+     店舗毎に設定したい場合、タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容を修正する
+書式：
+	SHOPCODE:        店舗コード、支店が非存在　または　各店舗は共通化する場合、空白のままに定義する
+	MAPROOTPATH:	 施設の地図ファイルは「静的リソース」にアップロードして、アップロードした静的リソースの「名前」を該当タグに定義を行う
+	MAPSUBPATH:		 地図ファイルを含めているフォルダ名
+補足：
+	1.フォルダの詳細構造は「設定→開発→静的リソース→jinya_map」を参照してください
+	2.施設表示用の地図ファイルはツールで事前加工が必要
+ -->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<MAPROOTPATH>jinya_map</MAPROOTPATH>
+		<MAPSUBPATH>jinya-tiles</MAPSUBPATH>
+	</SHOP>
+</ROOT>

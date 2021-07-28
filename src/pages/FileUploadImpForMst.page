@@ -1,0 +1,78 @@
+<!-- ファイル取込 -->
+<apex:page controller="FileUploadImpForRealAGT" title="{!$Label.ps__msg_014_0001}" sidebar="false" tabstyle="RealAgtFileUploadTab__tab">
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+
+<!-- リアルAGT取込 -->         <!-- Upload Real AGT CSV -->
+<apex:sectionHeader subtitle="{!$Label.ps__msg_014_0002}" title="{!$Label.ps__msg_014_0003}"/>
+
+    <apex:pageMessage summary="{!result.strErrorMessage}" severity="error" strength="1"
+        rendered="{!result.isHasErrMsg}" escape="false"/>
+    <apex:pageMessage summary="{!result.InfoMessage}" severity="info" strength="1"
+        rendered="{!result.isHasInfoMsg}" escape="false"/>
+
+    <!-- アップロード機能 -->
+    <apex:form id="header" >
+        <apex:actionFunction action="{!processCsvFile}" name="uploadFun_1"/>
+    	
+    	<!-- リアルAGT -->
+        <apex:pageBlock mode="Edit" title="{!$Label.ps__msg_014_0004}">
+        <apex:pageBlockSection columns="1" >
+			
+			<li><!-- 新規作成：CSV作成用Excelテンプレートファイルを -->{!$Label.MSG_014_0005}<a href="/servlet/servlet.FileDownload?file={!strTemplateId}"><!-- ダウンロードする -->{!$Label.MSG_014_0006}</a></li>
+			<apex:outputPanel rendered="{!!ISNULL(lastDoc)}">
+            <li style="margin-top: 10px"><!-- 既存編集：最新作成したCSVファイル「 -->{!$Label.MSG_014_0007}{!lastDoc.Name}<!-- 」を -->{!$Label.MSG_014_0008}<a href="/servlet/servlet.FileDownload?file={!lastDoc.Id}"><!-- ダウンロードする -->{!$Label.MSG_014_0006}</a></li>
+            <li style="margin-top: 16px"><!-- 既にアップロード済みリアルAGTファイルリストを -->{!$Label.MSG_014_0009}<a href="/015?fcf={!LEFT(strDocFolderId,15)}" target="_blank"><!-- 表示 -->{!$Label.MSG_014_0010}</a></li>
+            </apex:outputPanel>
+            <apex:pageBlockSectionItem >
+                <apex:inputFile value="{!filehand.fileBody}" filename="{!filehand.fileName}" id="file_File_1" size="100"  style="margin-top: 16px"/>
+                <!-- 取込開始 -->
+                <input type="button" value="{!$Label.MSG_014_0011}" id="saBtn_1" class="btn"  style="margin-top: 16px"/>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    
+
+<script>
+    // Jquey Init
+    $j = jQuery.noConflict();
+	$j(document).ready(function () {
+        bindEvent();
+    });
+    
+    <!-- Juqery Function Begin -->
+    function bindEvent() {
+        // Csv Upload Process
+            $j("#saBtn_1, #saBtn_2").click(function(){
+                var fileNameVal = "";
+                if (this.id == "saBtn_1") fileNameVal = $j("input[name$=':file_File_1:inputFile:file']").val();
+                else if (this.id == "saBtn_2") fileNameVal = $j("input[name$=':file_File_2:inputFile:file']").val();
+                if (fileNameVal == '') {
+                //対象ファイルが存在しません。
+                    alert("{!$Label.MSG_014_0012}");
+                    return false;
+                }
+                blockUi();
+                // Upload File To Server
+                if (this.id == "saBtn_1") uploadFun_1();
+                else if (this.id == "saBtn_2") uploadFun_2();
+            });
+    }
+    // 画面Lockする
+    function blockUi() {
+        $j.blockUI({
+        //Processing...
+             message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_014_0013}</h1>'
+        }); 
+        return true;
+    }
+    // 画面Lock解除
+    function unblock() {
+        $j.unblockUI({ fadeOut: 200 }); 
+    }
+</script>
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

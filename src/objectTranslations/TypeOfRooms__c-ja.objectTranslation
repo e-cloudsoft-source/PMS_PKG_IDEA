@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>部屋タイプ</value>
+    </caseValues>
+    <fields>
+        <label><!-- 部屋タイプ種別 --></label>
+        <name>ActionType__c</name>
+        <picklistValues>
+            <masterLabel>E/B</masterLabel>
+            <translation><!-- E/B --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>架空</masterLabel>
+            <translation><!-- 架空 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 未利用、保留 --></help>
+        <label><!-- RFU(保留) --></label>
+        <name>AgtInitStockCal__c</name>
+    </fields>
+    <fields>
+        <help><!-- 未利用、保留 --></help>
+        <label><!-- RFU(保留) --></label>
+        <name>AgtInitStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- 説明 --></label>
+        <name>Description__c</name>
+    </fields>
+    <fields>
+        <label><!-- 説明（英） --></label>
+        <name>EnDescription__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名（英） --></label>
+        <name>EnRoomTypeName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 写 --></label>
+        <name>Image__c</name>
+    </fields>
+    <fields>
+        <label><!-- 最大人数 --></label>
+        <name>MaxNumber__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋タイプの最大部屋数 --></help>
+        <label><!-- 数 --></label>
+        <name>MaxRooms__c</name>
+    </fields>
+    <fields>
+        <label><!-- $数 --></label>
+        <name>Nums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプコード --></label>
+        <name>RoomTypeCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>RoomTypeName__c</name>
+    </fields>
+    <fields>
+        <label><!-- #Seq --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 部屋タイプ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 集計対象外 --></label>
+        <name>SumNotApplicableFlg__c</name>
+    </fields>
+    <webLinks>
+        <label><!-- RoomTypeMasterDefineBtn --></label>
+        <name>RoomTypeMasterDefineBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- RoomTypeMasterImportBtn --></label>
+        <name>RoomTypeMasterImportBtn</name>
+    </webLinks>
+</CustomObjectTranslation>

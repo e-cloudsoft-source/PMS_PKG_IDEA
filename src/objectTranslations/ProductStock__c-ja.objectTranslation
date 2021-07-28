@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>商品在庫情報</value>
+    </caseValues>
+    <fields>
+        <help><!-- 棚卸し後の繰越在庫値情報を格納する --></help>
+        <label><!-- 繰越在庫 --></label>
+        <name>InitQtyOfStock__c</name>
+    </fields>
+    <fields>
+        <help><!-- 棚卸後の前月繰越＋締切日後の入庫数-締切日後の出庫数 --></help>
+        <label><!-- 在庫数 --></label>
+        <name>LogicQtyOfStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品出庫数(理論） --></label>
+        <name>ProductOutStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計商品 --></label>
+        <name>ProductRef__c</name>
+        <relationshipLabel><!-- 商品在庫情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 会計商品ID --></label>
+        <name>ProductSfId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品入庫数(理論） --></label>
+        <name>PurchaseSummary__c</name>
+    </fields>
+    <fields>
+        <label><!-- 適正在庫 --></label>
+        <name>ReasonableStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- 在庫金額（税抜） --></label>
+        <name>StockAmount__c</name>
+    </fields>
+</CustomObjectTranslation>

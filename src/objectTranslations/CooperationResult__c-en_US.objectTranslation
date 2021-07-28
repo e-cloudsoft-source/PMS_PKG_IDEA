@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Results</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Results</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計 --></label>
+        <name>AccountAcountRef__c</name>
+        <relationshipLabel><!-- 連携結果 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- エラーコード --></label>
+        <name>ErrorCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- エラー内容 --></label>
+        <name>ErrorContent__c</name>
+    </fields>
+    <fields>
+        <label><!-- エラー回数 --></label>
+        <name>ErrorCount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機能種別 --></label>
+        <name>FunctionType__c</name>
+        <picklistValues>
+            <masterLabel>メール取込</masterLabel>
+            <translation><!-- メール取込 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>レーシト印刷</masterLabel>
+            <translation><!-- レーシト印刷 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約取込</masterLabel>
+            <translation><!-- 予約取込 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>仕入_買掛</masterLabel>
+            <translation><!-- 仕入_買掛 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>仕入_買掛決済</masterLabel>
+            <translation><!-- 仕入_買掛決済 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>在庫調整</masterLabel>
+            <translation><!-- 在庫調整 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>操作ログ</masterLabel>
+            <translation><!-- 操作ログ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ジョブ処理タイプ --></label>
+        <name>JobProcessType__c</name>
+        <picklistValues>
+            <masterLabel>NORMAL</masterLabel>
+            <translation><!-- NORMAL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>STOP</masterLabel>
+            <translation><!-- STOP --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- メール通知先1 --></label>
+        <name>MailSendAddress1__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール通知先2 --></label>
+        <name>MailSendAddress2__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール通知先3 --></label>
+        <name>MailSendAddress3__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール通知先4 --></label>
+        <name>MailSendAddress4__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール通知先5 --></label>
+        <name>MailSendAddress5__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール送信済 --></label>
+        <name>MailSendComplete__c</name>
+    </fields>
+    <fields>
+        <label><!-- 管理ID --></label>
+        <name>ManageID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親連携結果 --></label>
+        <name>ParentRef__c</name>
+        <relationshipLabel><!-- 連携結果 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 処理ログ --></label>
+        <name>ProcessLog__c</name>
+    </fields>
+    <fields>
+        <label><!-- 処理種別 --></label>
+        <name>ProcessingType__c</name>
+        <picklistValues>
+            <masterLabel>JR</masterLabel>
+            <translation><!-- JR --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TA</masterLabel>
+            <translation><!-- TA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TL</masterLabel>
+            <translation><!-- TL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TR</masterLabel>
+            <translation><!-- TR --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Shop code</label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label>Status</label>
+        <name>Status__c</name>
+        <picklistValues>
+            <masterLabel>XML取込完了</masterLabel>
+            <translation><!-- XML取込完了 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約取込NG</masterLabel>
+            <translation><!-- 予約取込NG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約取込完了</masterLabel>
+            <translation><!-- 予約取込完了 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約取込待ち</masterLabel>
+            <translation><!-- 予約取込待ち --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>在庫調整NG</masterLabel>
+            <translation><!-- 在庫調整NG --></translation>
+        </picklistValues>
+    </fields>
+    <nameFieldLabel><!-- 連携名 --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

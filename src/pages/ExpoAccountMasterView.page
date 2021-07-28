@@ -1,0 +1,230 @@
+<apex:page controller="ExpoAccountMasterViewCtrl" action="{!initAct}" showHeader="false" standardStylesheets="false" title="会計商品一覧">
+<!-- css -->
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.default.min.css')}"/>
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/kendo.all.min.js')}"/>
+<style type="text/css">
+.k-pager-wrap>.k-link>.k-icon{
+	margin-top: 4px;
+}
+.k-active-filter, .k-state-active, .k-state-active:hover {
+	border-color: #e45200;
+	background-color: #ff6b18;
+}
+#buttonBar{
+	position: relative;
+}
+.icon-status{
+	width: 14px;
+	margin-left: 5px;
+	display:none;
+}
+.boxDiv{
+	border: 3px solid #e3e3e3;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+</style>
+<apex:form >
+	<input type="hidden" value="{!colnumJson}" id="hidColumns" /> 
+</apex:form>
+<header id="header">
+	<c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}"/>
+</header>
+<div id="bodyDiv">
+	<div class="boxDiv">
+		<div id="grid" style="margin: 5px;"></div>
+	</div>
+</div>
+<footer id="footer">
+	<c:ExpoFooterComp />
+</footer>
+<script>
+$(document).ready(function() {
+	kendo.culture("ja-JP");
+	var wH = $(window).height();
+	var grid = $("#grid");
+	var position = grid.offset();
+	var columnsSetting = customColumnsSetting();
+	// Grid Table Size AutoSetup
+	grid.css('height', (wH - position.top - 55) + 'px').kendoGrid({
+		toolbar: [{
+					// 2019/08/15 商品の詳細情報を削除、削除した商品復元 BY zyz BEGIN
+					// template: '<a href="{!URLFOR($Page.ExpoAccountMasterEdit, null,null, false)}?sid={!sessionId}" class="btn bc-bl" style="margin: 5px 0;padding: 4px 0;">新規商品</a>'
+					template: '<a href="{!URLFOR($Page.ExpoAccountMasterEdit, null,null, false)}?sid={!sessionId}" class="btn bc-bl" style="margin: 5px 0;padding: 4px 0;display: inline-block;">新規商品</a><input type="button" value="削除" id="cleanBtn" style="margin: 5px 0;padding: 4px 0;display: inline-block;margin-left:20px;" class="btn bc-bl" onclick="clearAccountMaster()"/><a href="{!URLFOR($Page.ExpoAccountMasterUndelete, null,null, false)}?sid={!sessionId}" class="btn bc-bl" style="margin: 5px 0;padding: 4px 0;display: inline-block;float: right;margin-right:20px;">ごみ箱</a>'
+					// 2019/08/15 商品の詳細情報を削除、削除した商品復元 BY zyz END
+				}],
+		dataSource: getGridsDs(fieldsTyp),
+		height: (wH - position.top - 41),
+		serverPaging: true,
+		sortable: true, // 排序Flg
+		columnMenu: {
+			messages: {
+				// 昇順
+				sortAscending: "{!$Label.MSG_041_0051}",
+				// 降順
+				sortDescending: "{!$Label.MSG_041_0052}",
+				// 列
+				columns: "{!$Label.MSG_041_0053}",
+				// フィルター	
+				filter: "{!$Label.MSG_041_0041}",
+			},
+			columns: false,
+		},
+		filterable: {
+			operators: {
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				},
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: "{!$Label.MSG_041_0032}",
+				// および
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+				// 昇順
+				sortAscending: "{!$Label.MSG_041_0051}",
+				// 降順
+				sortDescending: "{!$Label.MSG_041_0052}",
+				// 列
+				columns: "{!$Label.MSG_041_0053}",
+			}
+		}, // 筛选Flg
+		resizable: true,
+		groupable: false, // 自定义分组Flg
+		pageable:{ // 分页Flg
+			refresh: true,
+			//pageSizes: true,
+			buttonCount: 5
+		},
+		// 对应上面的显示，并且显示对应的名头
+		columns: columnsSetting,
+	});
+	// 2019/08/15 商品の詳細情報を削除、削除した商品復元 BY zyz BEGIN
+	allCheckBoxFun();
+	// 2019/08/15 商品の詳細情報を削除、削除した商品復元 BY zyz END
+});
+fieldsTyp = {};
+// 自定义内容
+function customColumnsSetting(columns){
+	var columnStr = $("#hidColumns").val();
+	var columns = [];
+	if (columnStr != undefined && columnStr != "") {
+		columns = JSON.parse(columnStr);
+		for (var i = 0 ; i < columns.length ; i++) {
+			if (columns[i].typ == 'DOUBLE' || columns[i].typ == 'INTEGER' || columns[i].typ == 'PERCENT' || columns[i].typ == 'CURRENCY') {
+				fieldsTyp[columns[i].field] = {type : "number"};
+				columns[i].attributes = {style: "text-align: right!important;"};
+				if(columns[i].typ == 'CURRENCY') columns[i].template = "#= kendo.toString(Number(" + columns[i].field + "), 'c') || ''#";
+				var filedName = columns[i].field;
+				if(columns[i].typ == 'PERCENT') columns[i].template ='#if (' + filedName + ' == "" || ' + filedName + ' == null ){##}else{# #=' + filedName + ' #%#}#';
+			}else if (columns[i].typ == 'DATE') {
+				// columns[i].template = "#= kendo.toString(kendo.parseDate(" + columns[i].field + ", 'yyyy-MM-dd HH:mm:ss'), 'yyyy-MM-dd') || ''#";
+			}else if (columns[i].typ == 'TIME') {
+				columns[i].template = "#= kendo.toString(kendo.parseDate(" + columns[i].field + ", 'yyyy-MM-dd HH:mm:ss'), 'HH:mm:ss') || ''#";
+			}
+		}
+	}
+	return columns;
+}
+function getGridsDs(fieldsType){
+	return new kendo.data.DataSource({
+				transport: {
+					read: function (options) {
+						Visualforce.remoting.Manager.invokeAction(
+							"{!$RemoteAction.ExpoAccountMasterViewCtrl.getModel}", "{!JSENCODE(currentUser.ShopCode__c)}" , "{!JSENCODE(currentUser.ExpoOrgInfoRef__c)}" , function (result, event) {
+								if (event.type == 'exception') {
+									alert(event.message);
+								} else {
+									options.success(result);
+								}
+						}, {escape: false});
+					}
+				},
+				pageSize: 100,
+				schema : {
+					model :{
+						fields : fieldsType
+					}	
+				}
+			});
+}
+// 2019/08/15 商品の詳細情報を削除、削除した商品復元 BY zyz BEGIN
+// allcheckbox响应
+function allCheckBoxFun(){
+    $("[name=checkNmAll]").on("click",function(){
+        // 所有Tr子数据 的CheckBox
+        $(".clearCheck").prop("checked",$(this).prop("checked"));
+    });
+}
+// checkbox响应
+function clearCheckBoxFun(e){
+	$("input[id='clearId']",$(e)).prop("checked",$(e).prop("checked"));
+	$("[name=checkNmAll]").prop("checked",$("input.clearCheck").length == $("input.clearCheck:checked").length);
+}
+// 用于删除商品
+function clearAccountMaster(){
+	startLoading();
+	var clearids = new Array();
+    $("tr[role='row'] input[name=checkNm]:checked").each(function() {
+    	var trDelete = $(this).attr("accDefId");
+    	clearids.push(trDelete);
+    });
+    if(clearids.length > 0) {
+		Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.ExpoAccountMasterViewCtrl.clearAccData}", clearids ,"{!JSENCODE(currentUser.Name)}", function (result, event) {
+				if (event.type == 'exception') {
+					alert(event.message);
+				} else {
+					if(result != null && result.length != 0){
+						alert(result);
+						stopLoading();
+					}else{
+						window.location.reload();
+					}
+				}
+		});
+	} else {
+		alert("会計商品データは1件以上選択してください。");
+		stopLoading();
+	}
+}
+// 2019/08/15 商品の詳細情報を削除、削除した商品復元 BY zyz END
+</script>
+</apex:page>

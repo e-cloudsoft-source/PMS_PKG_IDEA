@@ -1,0 +1,729 @@
+<!--2018/12/15 APEXのVersion最新化対応 zyz BY BEGIN-->
+<apex:page standardcontroller="Lead__c" extensions="CateringPDF" showHeader="false" sidebar="false" renderAs="PDF" applyHtmlTag="false" applyBodyTag="false">
+<!--2018/12/15 APEXのVersion最新化対応 zyz BY END-->
+<html>
+<head>
+ <style>
+  @page {
+   size: 8.27in 11.69in;   /* A4 portlate size */
+   //size: 11.69in 16.54in;   /* A3 portlate size */
+   margin: 0cm;
+  }
+  body {
+   font-family: Arial Unicode MS;
+   width: 19.25cm;
+   height: 27.9cm;
+   position:absolute;
+   top: 0.7cm;
+   left: 0.7cm;
+   overflow: hidden;
+  }
+  
+  #TitleSection{
+   width: 100%;
+   height: 1.0cm;
+   position: absolute;
+   top: 0cm;
+  }
+  #Title{
+   width: 7cm;
+   height: 0.8cm;
+   position:absolute;
+   top: 0cm;
+   font-size: 0.5cm;
+   text-align: center;
+  }
+  #Title2{
+   font-size: 0.3cm;
+   text-align: right;
+  }
+  #BookingInfo{
+   width: 100%;
+   position:absolute;
+   top: 0.7cm;
+   font-size: 0.3cm;
+   text-align:center;
+  }
+  #BookingInfoItem{
+   font-size: 0.25cm;
+   text-align:center;
+   background: #eff;
+   color: #000;
+  }
+  #PlaceInfo{
+   width: 100%;
+   position:absolute;
+   top: 3.7cm;
+   font-size: 0.3cm;
+   text-align:center;
+  }
+   #PlaceInfoItem{
+   font-size: 0.25cm;
+   background: #eff; 
+   color: #000;
+  }
+   #PlaceInfoEtc{
+   font-size: 0.25cm;
+   text-align:left;
+  }
+  #Detail{
+   width: 100%;
+   position:absolute;
+   top: 9.7cm;
+   font-size: 0.25cm;
+  }
+  #DetailItem{
+   width:10%;
+   font-size: 0.25cm;
+   border-left: 0.5px solid #FFF; 
+   border-right: 0.5px solid #FFF;
+   background: #056; 
+   color: #FFF;
+  }
+  #Tategaki{
+   width: 0.4cm;
+   font-size: 0.3cm;
+   border-top: 0.5px solid #FFF; 
+   border-bottom: 0.5px solid #FFF;
+   background: #056; 
+   color: #FFF;
+   text-align:center;
+  }
+  #Kasen{
+  border-bottom: 1px solid #777;
+  }
+   #Address{
+   width: 100%;
+   position:absolute;
+   top: 24.2cm;
+   font-size: 0.3cm;
+  }
+   #AddItem{
+   width:1.5cm;
+   font-size: 0.25cm;
+   background: #eff;
+   text-align:center;
+   border: 0.5px solid #777;
+  }
+  th{
+   text-align: center;
+   height: 0.35cm;
+   border: 0.5px solid #777;
+  }
+  td{
+   height: 0.35cm;
+   border: 0.25px solid #777;
+  }
+ </style>
+</head>
+<body>
+ <div id="TitleSection">                                                            <!-- タイトル -->
+<div id="Title">ケータリング オーダーシート</div>
+<div id="Title2" align="right">（サービス・和食・洋食・中華・フロント・ケータ）　　　　宴会NO[　{!booking.EnkaiNO__c}　]　</div>
+<div style="position: absolute;top: -0.3cm;left: {!CateringPos}; font-size: 0.7cm;">◯</div>　
+ </div>
+
+  <table id="BookingInfo" cellspacing="0" cellpadding="0" style="border: 1px solid #777">                                 <!-- ご宴席名・日付 -->
+   <tr id="BookingInfoItem">
+    <th style="width: 30%;">席名</th>
+    <th colspan="2" style="width: 30%">実施日</th>
+    <th colspan="2" style="width: 20%">幹事</th>
+    <th style="width: 10%">人数</th>
+    <th style="width: 10%; border-width: 2px 2px 0.5px 2px;">Mgr印</th>
+   </tr>
+   <tr style="height: 0.6cm; ">
+    <td >{!booking.name}</td>
+    <td colspan="2" >平成　{!YEAR(DATEVALUE(booking.EntryTime__c))-1988}年　　{!MONTH(DATEVALUE(booking.EntryTime__c))}月　　{!DAY(DATEVALUE(booking.EntryTime__c))}日　（{!booking.Week__c}）</td>
+    <td colspan="2" >{!booking.Relcontact__r.name}　　様</td>
+    <td >{!TEXT(booking.StayPersons__c)}　名</td>
+    <td style="border-width: 0px 2px 2px 2px;">{!booking.ReceptionChecker__c}</td>
+   </tr>
+    <tr id="BookingInfoItem">
+    <th >ホール／住所</th>
+    <th style="width: 10%">ホール申請書</th>
+    <th colspan="2" style="width: 20%">ホール提出書類</th>
+    <th style="width:10%">営業担当</th>
+    <th >支援担当</th>
+    <th >キャプテン</th>
+   </tr>
+   <tr>
+    <td rowspan="2">　{!booking.Relcontact__r.Account.ShippingState}　{!booking.Relcontact__r.Account.ShippingCity}　{!booking.Relcontact__r.Account.ShippingStreet}</td>
+    <td style="font-size:0.25cm;">　{!booking.Hall1__c}　</td>
+    <td colspan="2" style="font-size:0.25cm;">作成　{!MONTH(DATEVALUE(booking.Hall2__c))}／{!DAY(DATEVALUE(booking.Hall2__c))}　　　提出　{!MONTH(DATEVALUE(booking.Hall3__c))}／{!DAY(DATEVALUE(booking.Hall3__c))}　</td>
+    <td rowspan="2">{!booking.ReservedContact__c}</td>
+    <td rowspan="2">{!booking.FrontChecker__c}</td>
+    <td rowspan="2">{!booking.ServiceChecker__c}</td>
+   </tr>
+    <tr>
+    <td id="BookingInfoItem">入館手続き</td>
+    <td colspan="2" style="font-size:0.25cm;">　{!booking.Hall4__c}　　　　　（1階警備室）</td>
+   </tr>  
+    <tr id="BookingInfoItem">
+    <th >主旨</th>
+    <th colspan="3" >※ホール注意事項</th>
+    <th colspan="3" >実績</th>
+   </tr>
+   <tr style="height: 0.5cm; ">
+    <td >{!booking.Field352__c} </td>
+    <td colspan="3" >{!booking.Comment2__c}</td>
+    <td colspan="3">{!booking.Field387__c}</td>
+   </tr>
+  </table>
+
+ <table id="PlaceInfo" cellspacing="0" cellpadding="0" style="border: 1px solid #777">                             <!-- 会場設備 -->
+  <tr style="background: #056; color: #FFF;font-size:0.3cm;"><th colspan="10">会場設備</th>
+  </tr>
+      <tr id="PlaceInfoItem">
+       <th colspan="2" >水まわり</th>
+       <th colspan="2" >パントリー専用スペース</th>
+       <th colspan="2" >搬出・入専用エレベータ</th>
+       <th >搬入出入口</th>
+       <th colspan="2">荷捌き（高さ制限）</th>
+       <th >駐車場</th>
+      </tr>
+      <tr style="height: 0.5cm;">
+        <td colspan="2" >{!booking.Field373__c}</td>
+       <td colspan="2" >{!booking.Field374__c}</td>
+       <td colspan="2">{!booking.Field375__c}</td>
+       <td >{!booking.Field376__c}</td>
+       <td colspan="2" >{!booking.Field377__c}</td>
+       <td>{!booking.Parking__c}</td>
+      </tr>
+      <tr id="PlaceInfoItem">
+          <th rowspan="2" style="width:0.8cm; background:#fff">打合せ<br/>履歴</th>
+          <th style="border-width:2px 2px 0.5px 2px">営業チェック</th>
+          <th>新規発信</th>
+          <th>変更</th>
+          <th>変更</th>
+          <th>１週間前</th>
+          <th>ひきつぎ</th>
+          <th>最終確認</th>
+          <th colspan="2" style="border-width:2px">会場内火気取扱</th>
+      </tr>
+      <tr style="height: 0.5cm; ">
+        <td style="border-width:0px 2px 2px 2px">
+        </td>
+       <td></td>
+       <td></td>
+       <td></td>
+       <td></td>
+       <td></td>
+       <td></td>
+       <td style="border-width:0.5px 2px 2px 2px">{!booking.Field382__c}</td>
+       <td style="border-width:0.5px 2px 2px 0px">{!booking.Field383__c}</td>
+      </tr>
+      <tr id="PlaceInfoItem">
+      <th rowspan="4" style="background:#fff">スケジ<br/>ュール</th>
+       <th style="border-width:2px 0.5px 0.5px 2px">到着予定時間</th>
+       <th colspan="2" style="border-top-width:2px">料理アップ時間</th>
+       <th colspan="2" style="border-top-width:2px">会議開始時間</th>
+       <th style="border-width:2px 2px 0.5px 0.5px">会議終了時間</th>
+       <th>つくり</th>
+       <th>もどし</th>
+       <th>レイアウト</th>
+      </tr>
+      <tr style="height: 0.5cm; ">
+       <td style="border-left-width:2px">{!addTime4}</td>
+       <td colspan="2" >{!addTime2}</td>
+       <td colspan="2" >{!booking.Meeting1__c}</td>
+       <td style="border-right-width:2px">{!booking.Meeting2__c}</td>
+       <td>{!booking.Field378__c}</td>
+       <td>{!booking.Field379__c}</td>
+       <td>{!booking.Field380__c}</td>
+      </tr>   
+      <tr id="PlaceInfoItem">
+       <th style="border-width:2px 0.5px 0.5px 2px">完スタ予定</th>
+       <th colspan="2" style="border-top-width:2px">パーティー開始時間</th>
+       <th colspan="2" style="border-top-width:2px">パーティー終了時間</th>
+       <th style="border-width:2px 2px 0.5px 0.5px">撤収時間</th>
+       <th colspan="2" >会場予約時間</th>
+       <th >会場どんでん</th>
+      </tr>
+      <tr style="height: 0.5cm; ">
+        <td style="border-width:0.5px 0.5px 2px 2px">{!addTime1}</td>
+       <td colspan="2" style="border-bottom-width:2px">{!booking.Party1__c}</td>
+       <td colspan="2" style="border-bottom-width:2px">{!booking.Party2__c}</td>
+       <td style="border-width:0.5px 2px 2px 0.5px">{!addTime3}</td>
+       <td colspan="2" >{!booking.HallReserve1__c}〜{!booking.HallReserve2__c}</td>
+       <td>{!booking.Field381__c}</td>
+      </tr>
+      <tr id="PlaceInfoItem">
+       <th colspan="2" >案件情報</th>
+       <th >内容区分</th>
+       <th colspan="3" style="background: #fff; ">　接待系・食事系・親睦系・商談系
+       <div style="position: absolute;top: 3.9cm;left: {!NaiyouPos}; font-size: 0.6cm;">◯</div>
+       </th>
+       <th >年齢層</th>
+       <th style="background: #fff;">{!booking.Older__c}</th>
+       <th >男女比</th>
+       <th colspan="2" style="background: #fff;">　女性　{!TEXT(booking.Femails__c)}　名</th>
+      </tr>
+      <tr id="PlaceInfoEtc">
+        <td colspan="2" style="border-width:0.5px 0px 0px 0.5px">※決定のポイント</td>
+        <td rowspan="4" colspan="8" style="border-width:0.5px 1px 1px 0px">
+         <apex:repeat value="{!Comments}" var="c">
+         {!c}<br />
+         </apex:repeat>
+        </td>
+      </tr> 
+      <tr id="PlaceInfoEtc"><td colspan="2" style="border-width:0px 0px 0px 0.5px">※顧客情報</td></tr> 
+      <tr id="PlaceInfoEtc"><td colspan="2" style="border-width:0px 0px 0px 0.5px">※詳細内容</td></tr> 
+      <tr id="PlaceInfoEtc"><td colspan="2" style="border-width:0px 0px 0.5px 0.5px">※その他</td></tr>       
+ </table>
+ 
+ <table id="Detail" style="width: 100%;border: 1px solid #777" cellspacing="0" cellpadding="0">           <!-- 明細 -->
+  <tr>
+   <th style="background: #fff;"></th> 
+   <th id="DetailItem" style="border-width: 0px 0.5px 0px 0px solid #FFF;">内容</th>
+   <th id="DetailItem" >単価</th>
+   <th id="DetailItem" >数量</th>
+   <th id="DetailItem" >変更</th>
+   <th id="DetailItem" >変更</th>
+   <th id="DetailItem" >最終</th>
+   <th id="DetailItem" >発注日</th>
+   <th id="DetailItem" >付帯原価</th>
+   <th colspan="2" id="DetailItem" style="border-width: 0px 0px 0px 0.5px solid #FFF; width:20%;">備考</th>
+  </tr>
+  <!-- 変更・最終に仮データとして数量を入れてあります -->
+  <tr>
+   <td rowspan="2" id="Tategaki">食<br/>事</td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!list.refAccountMaster__r.Name}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.UnitPrice__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!MONTH(list.OrderDate__c)}{!IF(ISBLANK(list.OrderDate__c),"","/")}{!DAY(list.OrderDate__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+	   </td>
+   <td rowspan="2" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!foods}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Field7__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td colspan="2" style="border-width:0px 0.5px;height:1.4cm;">
+   {!booking.FoodComment__c}
+   </td>
+ </tr>
+ <tr>
+   <td id="Kasen" style="height: 0.35cm;">メニュー</td>
+   <td id="Kasen"></td>
+ </tr>
+
+ <tr>
+   <td rowspan="7" Id="Tategaki">ド<br/>リ<br/>ン<br/>ク</td>
+   <td rowspan="7" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!list.refAccountMaster__r.Name}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.UnitPrice__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+    <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!MONTH(list.OrderDate__c)}{!IF(ISBLANK(list.OrderDate__c),"","/")}{!DAY(list.OrderDate__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td rowspan="7" id="Kasen">
+    <table style="width:100%;" cellspacing="0" cellpadding="0">
+	      <apex:repeat value="{!drinks}" var="list">
+   　		<tr><td><apex:outputText value="{!TEXT(list.Field7__c)}"/></td></tr>
+   		  </apex:repeat>
+	   </table>
+   </td>
+   <td colspan="2" style="border-width:0px 0.5px">※ウエルカムドリンク　{!booking.WDrink1__c}</td>
+ </tr>
+   <tr>
+   <td colspan="2" style="border-width:0px 0.5px">種類（　{!booking.WDrink2__c}　）</td>
+ </tr>
+   <tr>
+   <td colspan="2" style="border-width:0px 0.5px; height: 2.45cm;">{!booking.DrinkComment__c}</td>
+ </tr>
+  <tr>
+   <td style="border-width:0px 0px 0px 0.5px"></td>
+   <td style="background:#eff;border-width:0px 1px 0px 0px">実数ドリンク規制</td>
+ </tr>
+ <tr>
+   <td style="border-width:0px 0px 0px 0.5px"></td>
+   <td style="border-width:0px 1px 0px 0px">【金額上限　{!booking.DrinkControl1__c}】</td>
+ </tr>
+ <tr>
+   <td style="border-width:0px 0px 0px 0.5px"></td>
+   <td style="border-width:0px 1px 0px 0px">【追加ドリンク確認　{!booking.DrinkControl2__c}】</td>
+ </tr>
+   <tr >
+   <td style="background:#eff;" id="Kasen">指定銘柄</td>
+   <td id="Kasen">{!booking.DrinkName__c}</td>
+ </tr>
+  <tr>
+   <td rowspan="6" id="Tategaki">付<br/>帯</td>
+   <td>　出張備品費</td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td colspan="2" style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td>　出張運搬費</td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td colspan="2" style="border-width:0px 0.5px"></td>
+ </tr>
+    <tr>
+   <td>　出張人件費</td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td colspan="2" style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td colspan="2" style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td colspan="2" style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td colspan="2" style="border-width:0px 0.5px 1px 0.5px"></td>
+ </tr>
+  <tr>
+   <td rowspan="6" id="Tategaki">発<br/>注</td>
+   <td rowspan="6" id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!othersTest}" var="list">
+   　        <tr><td>{!list.Supplier__c}</td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td>小丸</td>
+   <td>大丸</td>
+   <td>一間</td>
+   <td>二間</td>
+   <td></td>
+   <td style="background:#eff;"></td>
+   <td></td>
+   <td style="background:#eff;">当日連絡先</td>
+   <td style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td style="background:#eff;"></td>
+   <td></td>
+   <td style="border-width:0px 0.5px"></td>
+   <td style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td style="background:#eff;"></td>
+   <td></td>
+   <td style="border-width:0px 0.5px"></td>
+   <td style="border-width:0px 0.5px"></td>
+ </tr>
+  <tr>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td style="background:#eff;"></td>
+   <td></td>
+   <td style="border-width:0px 0.5px"></td>
+   <td style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td style="background:#eff;"></td>
+   <td></td>
+   <td style="border-width:0px 0.5px"></td>
+   <td style="border-width:0px 0.5px"></td>
+ </tr>
+   <tr>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td style="background:#eff;" id="Kasen"></td>
+   <td id="Kasen"></td>
+   <td style="border-width:0px 0.5px 1px 0.5px"></td>
+   <td style="border-width:0px 0.5px 1px 0.5px"></td>
+ </tr>
+   <tr>
+   <td rowspan="8" id="Tategaki">備<br/>品</td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td>{!list.refAccountMaster__r.Name}</td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!TEXT(list.UnitPrice__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!TEXT(list.Amount__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!MONTH(list.OrderDate__c)}{!IF(ISBLANK(list.OrderDate__c),"","/")}{!DAY(list.OrderDate__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td id="Kasen">
+   <table style="width:100%;" cellspacing="0" cellpadding="0">
+          <apex:repeat value="{!others}" var="list">
+   　        <tr><td><apex:outputText value="{!TEXT(list.Field7__c)}"/></td></tr>
+          </apex:repeat>
+       </table>
+   </td>
+   <td colspan="2" id="Kasen">
+   {!booking.OtherComment__c}
+   </td>
+ </tr>
+
+ <!-- <tr><td colspan="6"></td>
+   <td></td>
+   <td></td>
+   <td></td>
+   <td colspan="2"></td>
+ </tr> -->
+ 
+ </table>
+  <table id="Address" style="width: 100%;border: 1px solid #777" cellspacing="0" cellpadding="0">    <!-- 請求先 -->
+  <tr>
+   <td rowspan="4" id="Tategaki">請<br/>求<br/>先</td>
+   <td id="AddItem">住所</td>
+   <td colspan="3" style="border-width:0.5px 0.5px 0px 0.5px;">　〒　{!booking.Relcontact__r.Account.BillingPostalCode}　{!booking.Relcontact__r.Account.BillingCountry}</td>
+   <td id="AddItem" style="width:2.2cm;">当日の先方担当者</td>
+   <td colspan="3" style="border-width:0.5px 0.5px 0px 0.5px;"></td>
+ </tr>
+   <tr>
+   <td colspan="5" style="border-width:0px;">　{!booking.Relcontact__r.Account.BillingState}　{!booking.Relcontact__r.Account.BillingCity}　{!booking.Relcontact__r.Account.BillingStreet}</td>
+   <td colspan="3" style="border-width:0px 0.5px 0px 0px;">連絡先：</td>
+ </tr>
+   <tr>
+   <td id="AddItem">社名・部署</td>
+   <td style="border-width:0.5px 0.5px 0px 0px;">　{!booking.Relcontact__r.Account.Name}</td>
+   <td id="AddItem">役職</td>
+   <td colspan="2">　{!booking.Relcontact__r.Title}</td>
+   <td id="AddItem">TEL</td>
+   <td colspan="2">　{!booking.Relcontact__r.Phone}</td>
+ </tr>
+   <tr>
+   <td colspan="2" style="border-width:0px 0.5px 0px 0px;">　{!booking.Relcontact__r.Department}</td>
+   <td id="AddItem">担当者</td>
+   <td colspan="2">　{!booking.Relcontact__r.Name}　　様</td>
+   <td id="AddItem">FAX</td>
+   <td colspan="2">　{!booking.Relcontact__r.Fax}</td>
+ </tr>
+ <tr>
+   <td rowspan="5" id="Tategaki">支<br/>払</td>
+   <td id="AddItem">お支払</td>
+   <td>　{!booking.PaymentWay__c}</td>
+   <td id="AddItem">登録票</td>
+   <td>　有・無
+   <div style="position: absolute;top: 1.5cm;left: {!TourokuPos}; font-size: 0.7cm;">◯</div>
+   </td>
+   <td id="AddItem">請求指示</td>
+   <td style="border-width:0px 0.5px;"></td>
+   <td id="AddItem">支払確認</td>
+   <td style="border-width:0px 0.5px;"></td>
+ </tr>
+  <tr>
+   <td id="AddItem">支払規定</td>
+   <td>　{!booking.Field385__c}</td>
+   <td id="AddItem">確認書</td>
+   <td>　有・無
+   <div style="position: absolute;top: 1.9cm;left: {!KakuninPos}; font-size: 0.7cm;">◯</div>
+   </td>
+   <td rowspan="3" colspan="2" style="border-width:0px 0.5px;">
+   		<apex:repeat value="{!PayDirect}" var="c">　{!c}<br />
+         </apex:repeat></td>
+   <td rowspan="3" colspan="2" style="border-width:0px 0.5px;color:#f00;">
+   		<apex:repeat value="{!PayConfirm}" var="c">　{!c}<br />
+         </apex:repeat></td>
+ </tr>
+  <tr>
+   <td id="AddItem">支払日</td>
+   <td>　{!Year(DATEVALUE(booking.PaymentDate__c))}／{!MONTH(DATEVALUE(booking.PaymentDate__c))}／{!Day(DATEVALUE(booking.PaymentDate__c))}</td>
+   <td id="AddItem">決済書</td>
+   <td>　未・済   
+   <div style="position: absolute;top: 2.3cm;left: {!KessanPos}; font-size: 0.7cm;">◯</div>
+   </td>
+ </tr>
+  <tr>
+   <td id="AddItem">事前入金</td>
+   <td colspan="2">　請求書発効日　{!Year(DATEVALUE(booking.BillIssue__c))}／{!MONTH(DATEVALUE(booking.BillIssue__c))}／{!Day(DATEVALUE(booking.BillIssue__c))}</td>
+   <td></td>
+ </tr>
+   <tr>
+   <td id="AddItem">確認</td>
+   <td colspan="2">　確認者　{!booking.VBChecker__c}　確認日　{!MONTH(DATEVALUE(booking.VBCheckTime__c))}／{!Day(DATEVALUE(booking.VBCheckTime__c))}　</td>
+   <td></td>
+   <td id="AddItem">発行連絡</td>
+   <td colspan="3">　　　　　営業　　　・　　サービス　　　　　
+   <div style="position: absolute;top: 3.24cm;left: {!HakkouPos}; font-size: 0.7cm;">◯</div>
+   </td>
+ </tr>
+ </table>
+ 
+</body>
+</html>
+</apex:page>

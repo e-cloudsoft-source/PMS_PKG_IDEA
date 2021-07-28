@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>EXPO設定</value>
+    </caseValues>
+    <fields>
+        <help><!-- 宿屋EXPOドメインURL(リモートサイト登録不要) --></help>
+        <label><!-- ExpoDomain --></label>
+        <name>ExpoDomain__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿屋EXPOの画像APIのURL(リモートサイトに登録不要) --></help>
+        <label><!-- ExpoImgEndPoint --></label>
+        <name>ExpoImgEndPoint__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宿屋EXPOの機能APIのURL(リモートサイトに登録必須)
+例：https://api.jexpo.biz --></help>
+        <label><!-- ExpoApiEndPoint --></label>
+        <name>ServiceEndpoint__c</name>
+    </fields>
+</CustomObjectTranslation>

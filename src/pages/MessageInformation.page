@@ -1,0 +1,158 @@
+<apex:page sidebar="false" showHeader="false" controller="MessageInformationCtrl" >
+<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/cometd.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/json2.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/jquery.cometd.js')}" />
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}" />
+<style type="text/css">    
+.lineOverflow {         
+	text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;  
+    text-align: left;
+}
+</style>   
+<script type="text/javascript">
+var lineNo = 0;
+var JS_APPNS = "{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+$(document).ready(function() {
+	initCometd();
+});
+function disconnect() {
+    $.cometd.disconnect();
+}
+// BookingFlexApp Window Function
+function _callParentFun() {
+	if (window.parent.window.showWarning != undefined) {
+		window.parent.window.showWarning();
+	}
+}
+//Function to initialize comet D
+function initCometd(){
+    try{
+        disconnect();
+        //console.log('in init commetd function');
+        // Connect to the CometD endpoint
+        $.cometd.init({
+            url: window.location.protocol+'//'+window.location.hostname+'/cometd/27.0/',
+            requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'}
+        });
+        
+       $.cometd.addListener('/meta/handshake', function(message){ 
+            console.log("--handshake status: " + JSON.stringify(message));
+            if(message.successful){
+                callInfoSubscription();
+                $("#errorDiv").html('');
+            }else if(!message.successful && message.error != undefined){
+                $("#errorDiv").html('<span style="color: RED;">' + message.error + '</span><br>');
+            }
+        });
+        
+        $.cometd.addListener('/meta/connect', function(message){
+            if(!message.successful){
+                console.log('--Connection not successful. Trying to handshake.')
+                var topicToUnsubscribe = pushTopicSubscription;
+                $.cometd.unsubscribe(topicToUnsubscribe);
+                pushTopicSubscription = null;
+                $.cometd.handshake();
+                //Retry for 3 time
+            }else{
+                console.log('--Got Connected');
+                //refreshCallTable();
+            }
+        });
+        
+        $.cometd.addListener('/meta/disconnect', function(message){
+            console.log('--Got Disconnected');
+            $.cometd.handshake();
+        });   
+    }catch(exception){
+        console.log('--Exception: ' + exception);
+    }
+}
+function callInfoSubscription(){
+	try{
+		console.log('--in call info subscription function');
+		// Subscribe to a topic. JSON-encoded update will be returned in the callback
+		pushTopicSubscription = $.cometd.subscribe('/topic/MessageInformation', function(message) {
+            var modifyDate = kendo.parseDate(message.data.sobject.LastModifiedDate);
+            //var dateparse = kendo.toString(modifyDate,"{!DateTimeFormat}");
+            var dateparse = kendo.toString(new Date(message.data.sobject.LastModifiedDate),'{!DateTimeFormat}');
+            var msgtype = JS_APPNS + 'MessageType__c';
+            var msgtypeval = message.data.sobject[msgtype];
+            if (msgtypeval == undefined) msgtypeval = "";
+            var callDiv = '<tr>';
+                callDiv += '<td style="width:10%;" class="lineOverflow">' + dateparse + '</td>';
+                callDiv += '<td style="width:10%;" class="lineOverflow">' + msgtypeval + '</td>';
+            var messageKey = JS_APPNS + 'Message__c';
+	            // 2017/03/23 指定URL対応 BEGIN
+	            var linkVal = "/"+message.data.sobject.Id;
+            	var linkKey = JS_APPNS + 'MessageHelpUrl__c';
+            	if(message.data.sobject[linkKey] != undefined){
+            		linkVal = message.data.sobject[linkKey];
+            	}
+            	// 2017/03/23 指定URL対応 END
+                if(message.data.sobject[messageKey] != undefined){
+                	// 2017/03/23 指定URL対応 BEGIN
+                    //link = '<a href="/' + message.data.sobject.Id + '" target="_blank">' + message.data.sobject[messageKey] + '</a>';
+                    link = '<a href="' + linkVal + '" target="_blank">' + message.data.sobject[messageKey] + '</a>';
+                    // 2017/03/23 指定URL対応 END
+                }
+                callDiv += '<td class="lineOverflow">' + link + '</td>';
+                callDiv += '</tr>';
+            $('#messageQueueTable tbody').prepend(callDiv);
+			lineNo++;
+			var sumLineNo = lineNo + {!numberOfDispRec};
+			if(sumLineNo > {!numberOfDispRec}){
+                //Remove old entry
+                $('#messageQueueTable tr:last').remove();
+	        }
+	        // Parent Window Js Function CallBack
+	        _callParentFun();  
+		}); 
+	}
+	catch(exception){
+          console.log('--Exception: ' + exception);
+	}
+}
+window.onbeforeunload = disconnect;
+</script>
+<apex:form >
+<div id="errorDiv"></div>
+<table style="width:100%;text-align: center;" class="list" id="messageQueueTable">
+	<thead>
+		<tr class="headRow" style="background: #B8D7F1;">
+			<td style="width:10%">日付</td>
+			<td>カテゴリ</td>
+			<td>メッセージ</td>
+		</tr>
+	</thead>
+	<tbody>
+		<apex:repeat value="{!messageLst}" var="var">
+			<tr>
+				<td style="width:10%;" class="lineOverflow">
+					<apex:outputText value="{!var.lastModifiedDate}"/>
+				</td>
+				<td style="width:10%;" class="lineOverflow">
+					<apex:outputText value="{!var.sobj.MessageType__c}"/>
+				</td>
+				<td class="lineOverflow">
+					<apex:outputLink value="javascript:void(0)" onclick="window.open('{!URLFOR(var.helpUrl)}' , '_blank')" styleClass="msglinkitem" html-data="{!HTMLENCODE(var.sobj.Message__c)}">
+					</apex:outputLink>
+				</td>
+			</tr>
+		</apex:repeat>		
+	</tbody>
+</table>
+</apex:form>
+<script>
+$(document).ready(function() {
+    $(".msglinkitem").each(function(i, elem){
+        var $o = $(elem);
+        var wkdiv = $("<div/>").html($o.attr("data")).get(0);
+        $o.html(wkdiv.textContent);
+    });
+});
+</script>
+</apex:page>

@@ -1,0 +1,2 @@
+<apex:page showheader="false" sidebar="false" standardcontroller="Lead__c" extensions="RepGeneralExtendCtrl" action="{!redirectConfirm}" 
+title="発注請書"/>

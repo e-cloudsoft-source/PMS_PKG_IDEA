@@ -1,0 +1,1568 @@
+<!-- ご予約 -->
+<apex:page standardController="LeadIndex__c" extensions="BookingApp" action="{!initSwitchPage}"
+	sidebar="false" tabstyle="BookingAppTab__tab" title="{!$Label.ps__msg_001_0002}">
+<!-- Load jQuery -->
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.tablescroll.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'timmer/jquery.plugin.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'timmer/jquery.timeentry.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<apex:includeScript value="{!$Resource.planExtendPlug}"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="false"/>
+<script>
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+var dateFormatEqu = new DateFormat("yyyyMMdd");//固定、変更しないてください
+$j=jQuery.noConflict();
+var JS_APPNS = "{!JSENCODE($Setup.CommDefine__c.AppNS__c)}";
+var JS_DEFCHKIN_DT = "{!JSENCODE(JS_DEFCHKIN_DT)}";
+var JS_DEFCHKOT_DT = "{!JSENCODE(JS_DEFCHKOT_DT)}";
+var JS_DEF_TARIFKEY = "{!JSENCODE($Label.ps__cst_0001)}";
+//var JS_SYS_TODAY = dateFormat.format(Date.parse("{!TODAY()}"),JINYACONNECT.DateFormat);
+var JS_SYS_TODAY = Date.parse("{!TODAY()}");
+</script>
+
+<style>
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+
+.tableHeader {
+    padding-left: 6px;
+}
+.ui-autocomplete {
+    max-height: 160px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+}
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+  */
+* html .ui-autocomplete {
+    height: 160px;
+}
+
+.apexp .bPageBlock.apexDefaultPageBlock .pbBody{
+	margin-left: 2px;
+	margin-right:2px;
+}
+.bPageBlock .detailList span table td {
+	white-space: nowrap;
+}
+</style>
+
+<!-- 処理ステータス制御する -->
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<!-- ご予約 --><!-- 新規ご予約 -->
+<apex:sectionHeader title="{!$Label.ps__msg_001_0002}" subtitle="{!$Label.ps__msg_001_0003}" id="blockTitle"/>
+<!-- 予約登録・編集 -->
+<apex:pageBlock title="{!$Label.ps__msg_001_0004}" id="condBlock">
+<apex:outputPanel id="messagePanel">
+<apex:pageMessages />
+</apex:outputPanel>
+<!-- wgch -->
+<div style="width:100%" id="allPage">
+<div id="splitter" style="height: 100%; width: 100%;">
+<div style="width: 100%; vertical-align: top;" id="bookingDiv">
+<!-- wgch -->
+<apex:outputPanel id="leftPanel">
+<script>
+$j(document).ready(function() {
+    bindEvent();
+});
+</script>
+<apex:form id="bookingForm" >
+<div style="background-color:#FFA07A; height: 18px;"><span><!-- 予約基本情報 -->{!$Label.MSG_001_0005}</span></div>
+<apex:pageBlock id="createPageBlock" rendered="{!(pageSwitchCode == '1')}">
+    <apex:pageBlockSection columns="1" id="createPageBlockSection">
+	<!-- 予約番号 -->
+	<apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0006}"/>
+        <apex:outputPanel >
+        <apex:inputText id="LeadNo" value="{!leadBaseInf.leadNo}">
+            <c:AutoCompleteComp objectname="LeadIndex__c" additionalfield="{!$Setup.CommDefine__c.AppNS__c}ID__c,{!$Setup.CommDefine__c.AppNS__c}TravelLeadNo__c" 
+            	autocomplete_textbox="{!$Component.LeadNo}"  addFilter="{!autoComLeadNoFilter}" soslExtend="false"/>
+        </apex:inputText>
+        <img src='{!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}' id="leadNoIcon" style="display: none;"/>
+        <apex:actionStatus onstart="javascript:document.getElementById('leadNoIcon').style.display='';"
+        onstop="javascript:document.getElementById('leadNoIcon').style.display='none';" id="leadNoIconStatus"/>
+		<!-- 
+        <apex:commandButton value="情報更新" action="{!refreshExistLeadInfo}" rerender="condBlock" status="refStatusBlock" />
+         -->
+	<!-- 情報更新 -->
+        <input type="button" onclick="refreshInfoFunction()" value="{!$Label.MSG_001_0007}" class="btn" />
+        <span style="margin-left: 160px">
+	<!-- タイムテーブル -->
+        <input type="button" value="{!$Label.MSG_001_0008}" class="btn" onclick="openBookingInfoWin()"/>
+        </span>
+        </apex:outputPanel>
+	</apex:pageBlockSectionItem>
+
+    <!-- 到着日 -->
+    <apex:pageBlockSectionItem id="entryDateItem">
+        <apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.EntryDate__c.label}"/>
+        <apex:outputPanel >
+        <apex:outputPanel styleClass="requiredInput" layout="block">
+        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+
+        <apex:inputField id="entryDt" value="{!leadBaseInf.s.EntryDate__c}"  />
+        <apex:inputText id="entryTime" value="{!leadBaseInf.s.EntryTime__c}" size="5" rendered="false"/>
+
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <!-- 泊数 -->
+        <apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.Nights__c.label}"/>
+        <apex:inputText id="staysNums" value="{!leadBaseInf.s.Nights__c}" size="3"/>
+		<input type="hidden" id="isExistCheckInHid" value="{!isExistCheckIn}" />
+		<input type="hidden" id="isEditPageHid" value="{!isEditPage}" />
+        </apex:outputPanel>
+
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+    <!-- 出発日 -->
+    <apex:pageBlockSectionItem id="departureDateItem">
+        <apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.DepartureDate__c.label}"/>
+        <apex:outputPanel >
+        <apex:outputPanel styleClass="requiredInput" layout="block">
+        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+        <apex:inputField id="departDt" value="{!leadBaseInf.s.DepartureDate__c}"  />
+        <apex:inputText id="departTime" value="{!leadBaseInf.s.DepartureTime__c}" size="5"  rendered="false"/>
+        </apex:outputPanel>
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+    <!-- お客様 -->
+    <apex:pageBlockSectionItem id="relcontactItem" helpText="{!$ObjectType.Contact.Fields.KanaName1__c.InlineHelpText}" >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0009}"/>
+        <apex:outputPanel styleClass="requiredInput" layout="block">
+        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+        <span class="lookupInput">
+        <apex:inputText id="relcontact" value="{!leadBaseInf.contactName}" html-placeholder="{!$Label.ps__inf_0002}" size="80" maxlength="80">
+        <apex:inputHidden value="{!leadBaseInf.s.contactRef__c}" id="relcontact_lkid"/>
+        <apex:inputHidden id="relcontact_lkold"/>		<!-- PopupWin利用 -->
+        <input type="hidden" id="relcontact_lkid_org" />	<!-- JS判断用 -->
+        <c:AutoCompleteComp objectname="Contact" 
+        	additionalfield="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Name1__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c"
+        	autocomplete_textbox="{!$Component.relcontact}" 
+			showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,Description"
+			maxLenFilter="Description:16"
+        	showFieldSeparator=", "
+        	addFilter="IsDelete__c!=true"
+        />
+        </apex:inputText>
+        <!-- 部屋選択 -->
+        <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+         onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+         onfocus="this.className = 'lookupIconOn';"
+         onblur="this.className = 'lookupIcon';"
+         class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px"
+         name="accountPopup" />
+        </span>
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+    
+    <!-- 予約名 -->
+    <apex:pageBlockSectionItem >
+	    <apex:outputLabel value="{!$Label.ps__msg_001_0010}"/>
+	    <apex:outputPanel styleClass="requiredInput" layout="block">
+	    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+    	<apex:inputText id="leadName" value="{!leadBaseInf.s.LeadName__c}" size="80" maxlength="80" onkeyup="syncInputLeadName(this.value);"/>
+    	</apex:outputPanel>
+    </apex:pageBlockSectionItem>
+	 
+	<!-- お客様（漢字） -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0011}"/>
+        <apex:inputText id="custName" value="{!leadBaseInf.c.Name1__c}" size="80" maxlength="80" />
+    </apex:pageBlockSectionItem>
+
+	<!-- TEL -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0012}"/>
+        <apex:inputText id="custPhone" value="{!leadBaseInf.c.Phone}" />
+    </apex:pageBlockSectionItem>
+
+	<!-- 会社名（団体名） -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0013}"/>
+        <apex:inputText id="company" value="{!leadBaseInf.accoutName}" size="80" maxlength="80"/>
+    </apex:pageBlockSectionItem>
+
+    <!-- 申込者 -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$ObjectType.Contact.Fields.ApplicantName__c.label}"/>
+        <apex:inputText id="appName" value="{!leadBaseInf.c.ApplicantName__c}" />
+    </apex:pageBlockSectionItem>
+    <!-- 申込者電話 -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$ObjectType.Contact.Fields.ApplicantPhone__c.label}"/>
+        <apex:inputText id="appPhone" value="{!leadBaseInf.c.ApplicantPhone__c}" />
+    </apex:pageBlockSectionItem>
+    
+	<!-- 客室情報 -->
+	<apex:pageBlockSectionItem >
+		<apex:outputLabel value="{!$Label.ps__msg_001_0014}"/>
+		<apex:inputText id="memo1" value="{!leadBaseInf.c.Memo1__c}" size="80" maxlength="200"/>
+	</apex:pageBlockSectionItem>
+    <!--
+    <apex:outputLabel value="" /> -->
+
+	<!-- 付帯情報 -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0015}"/>
+        <apex:inputText id="memo2" value="{!leadBaseInf.c.Memo2__c}" size="80" maxlength="200"/>
+    </apex:pageBlockSectionItem>
+
+	<!-- 支払情報 -->
+    <apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0016}"/>
+        <apex:inputText id="memo3" value="{!leadBaseInf.c.Memo3__c}" size="80" maxlength="200"/>
+    </apex:pageBlockSectionItem>
+
+    <!-- 支払方法 -->
+    <!--
+    <apex:pageBlockSectionItem id="paymentTypeItem" rendered="false">
+        <apex:outputLabel value="支払方法"/>
+        <apex:selectList value="{!leadBaseInf.l.Field315__c}" multiselect="false" size="1">
+            <apex:selectOptions value="{!paymentTypeLst}"/>
+        </apex:selectList>
+    </apex:pageBlockSectionItem>
+     -->
+    <!-- 予約チャネル -->
+    <apex:pageBlockSectionItem id="channel">
+	    <apex:outputLabel value="{!$Label.ps__msg_001_0017}"/>
+
+	    <apex:outputPanel styleClass="requiredInput" layout="block">
+	    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	    <apex:inputField value="{!leadBaseInf.l.Field2__c}" />
+		</apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+
+    <!-- セグメント -->
+    <apex:pageBlockSectionItem id="segmentItem">
+        <apex:outputLabel value="{!$Label.ps__msg_001_0018}"/>
+
+	    <apex:outputPanel styleClass="requiredInput" layout="block">
+	    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+        <apex:inputField id="segment" value="{!leadBaseInf.l.Segment__c}" />
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+  </apex:pageBlockSection>
+
+</apex:pageBlock>
+
+
+
+<!-- type 2 input block  -->
+<apex:pageBlock id="createPageBlock2" rendered="{!(pageSwitchCode == '2')}">
+    <apex:pageBlockSection columns="1" id="createPageBlockSection">
+	<!-- 予約番号 -->
+	<apex:pageBlockSectionItem >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0006}"/>
+        <apex:outputPanel >
+        <apex:inputText id="LeadNo" value="{!leadBaseInf.leadNo}">
+            <c:AutoCompleteComp objectname="LeadIndex__c" additionalfield="{!$Setup.CommDefine__c.AppNS__c}ID__c,{!$Setup.CommDefine__c.AppNS__c}TravelLeadNo__c" 
+            	autocomplete_textbox="{!$Component.LeadNo}"  addFilter="{!autoComLeadNoFilter}" soslExtend="false"/>
+        </apex:inputText>
+        <img src='{!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}' id="leadNoIcon" style="display: none;"/>
+        <apex:actionStatus onstart="javascript:document.getElementById('leadNoIcon').style.display='';"
+        onstop="javascript:document.getElementById('leadNoIcon').style.display='none';" id="leadNoIconStatus"/>
+		<!-- 
+        <apex:commandButton value="情報更新" action="{!refreshExistLeadInfo}" rerender="condBlock" status="refStatusBlock" />
+         -->
+	<!-- 情報更新 -->
+        <input type="button" onclick="refreshInfoFunction()" value="{!$Label.MSG_001_0007}" class="btn" />
+        <span style="margin-left: 160px">
+	<!-- タイムテーブル -->
+        <input type="button" value="{!$Label.MSG_001_0008}" class="btn" onclick="openBookingInfoWin()"/>
+        </span>
+        </apex:outputPanel>
+	</apex:pageBlockSectionItem>
+
+    <!-- 到着日 -->
+    <apex:pageBlockSectionItem id="entryDateItem">
+        <apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.EntryDate__c.label}"/>
+        <apex:outputPanel >
+        <apex:outputPanel styleClass="requiredInput" layout="block">
+        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+		
+        <apex:inputField id="entryDt" value="{!leadBaseInf.s.EntryDate__c}"  />
+        <apex:inputText id="entryTime" value="{!leadBaseInf.s.EntryTime__c}" size="5"  rendered="false"/>
+
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <!-- 泊数 -->
+        <apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.Nights__c.label}"/>
+        <apex:inputText id="staysNums" value="{!leadBaseInf.s.Nights__c}" size="3"/>
+		<input type="hidden" id="isExistCheckInHid" value="{!isExistCheckIn}" />
+		<input type="hidden" id="isEditPageHid" value="{!isEditPage}" />
+        </apex:outputPanel>
+
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+    <!-- 出発日 -->
+    <apex:pageBlockSectionItem id="departureDateItem">
+        <apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.DepartureDate__c.label}"/>
+        <apex:outputPanel >
+        <apex:outputPanel styleClass="requiredInput" layout="block">
+        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+        <apex:inputField id="departDt" value="{!leadBaseInf.s.DepartureDate__c}"  />
+        <apex:inputText id="departTime" value="{!leadBaseInf.s.DepartureTime__c}" size="5"  rendered="false"/>
+        </apex:outputPanel>
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+    <!-- お客様 -->
+    <apex:pageBlockSectionItem id="relcontactItem" helpText="{!$ObjectType.Contact.Fields.Name1__c.InlineHelpText}" >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0009}"/>
+        <apex:outputPanel styleClass="requiredInput" layout="block">
+        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+        <span class="lookupInput">
+        <apex:inputText id="relcontact" value="{!leadBaseInf.contactName}" html-placeholder="{!$Label.ps__inf_0002}" size="80" maxlength="80">
+        <apex:inputHidden value="{!leadBaseInf.s.contactRef__c}" id="relcontact_lkid"/>
+        <apex:inputHidden id="relcontact_lkold"/>		<!-- PopupWin利用 -->
+        <input type="hidden" id="relcontact_lkid_org" />	<!-- JS判断用 -->
+        <c:AutoCompleteComp objectname="Contact" 
+        	additionalfield="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Name1__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c"
+        	autocomplete_textbox="{!$Component.relcontact}" 
+			showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,Description"
+			maxLenFilter="Description:16"
+        	showFieldSeparator=", "
+        	addFilter="IsDelete__c!=true"
+        />
+        </apex:inputText>
+        <!-- 部屋選択 -->
+        <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+         onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+         onfocus="this.className = 'lookupIconOn';"
+         onblur="this.className = 'lookupIcon';"
+         class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px"
+         name="accountPopup" />
+        </span>
+        </apex:outputPanel>
+    </apex:pageBlockSectionItem>
+    
+    <!-- 予約名 -->
+    <apex:pageBlockSectionItem >
+	    <apex:outputLabel value="{!$Label.ps__msg_001_0010}"/>
+	    <apex:outputPanel styleClass="requiredInput" layout="block">
+	    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+    	<apex:inputText id="leadName" value="{!leadBaseInf.s.LeadName__c}" size="80" maxlength="80" onkeyup="syncInputLeadName(this.value);"/>
+    	</apex:outputPanel>
+    </apex:pageBlockSectionItem>
+	 
+    <apex:pageBlockSectionItem helpText="{!$ObjectType.Contact.Fields.Katakana__c.InlineHelpText}">
+        <apex:outputLabel value="{!$ObjectType.Contact.Fields.Katakana__c.label}"/>
+        <apex:inputText id="katakana" value="{!leadBaseInf.c.Katakana__c}" size="80" maxlength="80" />
+    </apex:pageBlockSectionItem>
+
+    <apex:pageBlockSectionItem helpText="{!$ObjectType.Contact.Fields.KanaName1__c.InlineHelpText}">
+	<!-- カタカナ -->
+        <apex:outputLabel value="{!$Label.ps__msg_001_0019}"/>
+        <apex:inputText id="kanaName" value="{!leadBaseInf.c.KanaName1__c}" />
+    </apex:pageBlockSectionItem>
+
+    <apex:pageBlockSectionItem >
+	<!-- TEL -->
+        <apex:outputLabel value="{!$Label.ps__msg_001_0012}"/>
+        <apex:inputText id="custPhone" value="{!leadBaseInf.c.Phone}" />
+    </apex:pageBlockSectionItem>
+    
+    <!-- 支払方法 -->
+    <apex:pageBlockSectionItem id="paymentTypeItem" >
+        <apex:outputLabel value="{!$Label.ps__msg_001_0020}"/>
+        <apex:selectList value="{!leadBaseInf.s.Payment__c}" multiselect="false" size="1">
+            <apex:selectOptions value="{!paymentTypeLst}"/>
+        </apex:selectList>
+    </apex:pageBlockSectionItem>
+
+
+    <!-- 予約チャネル -->
+    <apex:pageBlockSectionItem id="channel">
+	    <apex:outputLabel value="{!$Label.ps__msg_001_0017}"/>
+
+	    <apex:outputPanel styleClass="requiredInput" layout="block">
+	    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	    <apex:inputField value="{!leadBaseInf.l.Field2__c}" />
+		</apex:outputPanel>
+    </apex:pageBlockSectionItem>
+
+    <!-- セグメント -->
+    <apex:pageBlockSectionItem id="segmentItem">
+        <apex:outputLabel value="{!$Label.ps__msg_001_0018}"/>
+        <apex:inputField id="segment" value="{!leadBaseInf.l.Segment__c}" />
+    </apex:pageBlockSectionItem>
+	
+	<!-- 初回のみ入力可能となります、変更されるときはご予約の特記事項を変更ください。 -->
+	<apex:pageBlockSectionItem helpText="{!$Label.ps__msg_001_0021}" rendered="{!commentIsShow}">
+	<!-- 特記事項 -->
+		<apex:outputLabel value="{!$Label.ps__msg_001_0022}"/>
+		<apex:outputPanel >
+	<!-- 初回のみ入力可能となります、変更されるときはご予約の特記事項を変更ください。 -->
+		<!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz BEGIN -->
+		<apex:outputPanel rendered="{!!isEditPage}">
+		<c:CommentHelperComp commentId="comment3" commentFlg="false" commentWidth="500px"/>
+		<br/>
+		</apex:outputPanel>
+		<!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz END -->
+		<apex:inputTextarea value="{!leadBaseInf.s.Comment__c}" id="comment3" richtext="false" 
+		html-placeholder="{!$Label.ps__msg_001_0021}"
+		rows="5" cols="80" rendered="{!!isEditPage}"/>
+		<apex:outputField value="{!leadBaseInf.s.Comment__c}" rendered="{!isEditPage}"/>
+		</apex:outputPanel>
+	</apex:pageBlockSectionItem>
+		
+  </apex:pageBlockSection>
+
+</apex:pageBlock>
+
+<div class="hideCurrDate">
+<div style="background-color:#FFA07A; height: 18px;"><span><!-- 明細情報 -->{!$Label.MSG_001_0023}</span></div>
+
+<apex:pageMessage summary="{!$Label.ps__msg_0001}" severity="info" strength="1" rendered="{!isEditPage}"/>
+
+<apex:pageBlock id="bookingItem">
+<!-- 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 -->
+<input type="hidden" id="defStaysNums" value="{!gStaysNums}" />
+<!-- wgch -->
+    <apex:actionFunction name="addSubIdxItemFun" action="{!addSubIdxItem}" status="refStatusBlock" oncomplete="spliterResize();bindEventSubIdx()" reRender="subIndexBlock"/>
+<!-- wgch -->    
+	<apex:pageBlockButtons location="top">
+	<!-- 行追加 -->
+	<!-- 2017/01/18 行追加共通化　by zy BEGIN
+	<input class="btn" value="{!$Label.MSG_001_0024}" type="button" onclick="javascript:addSubIdxItemFun();" style="width: 100px" />
+		 2017/01/18 行追加共通化　by zy END -->
+	</apex:pageBlockButtons>
+<!-- wgch -->	
+	<apex:pageBlockTable value="{!oLeadLst}" var="leadSub" id="subIndexBlock" columnsWidth="22px,27px,21px,91px,41px,32px,91px,41px,67px,32px,32px,,61px">
+<!-- wgch -->	
+		<!-- No -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0025}">
+			<apex:outputText value="{!leadSub.rowNo}" />
+			<input type="hidden" value="{!leadSub.orgSobj.id}" id="orgSubIdxId_{!(leadSub.rowNo-1)}"/>
+		</apex:column>
+		<!-- C -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0026}">
+			<apex:inputCheckbox value="{!leadSub.isCancel}" disabled="{!leadSub.isReadOnly}" id="cancelItem" html-lineNo="{!(leadSub.rowNo)}"/>
+		</apex:column>
+		<!-- D -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0027}">
+			<apex:image url="{!$Resource.Checkin}" width="14" height="14" style="cursor: {!IF(leadSub.s.Id != null, 'pointer;','auto')}"
+			 onclick="javascript:showGuest('{!leadSub.s.Id}','{!leadSub.rowNo}','{!leadSub.s.RoomTypeRef__c}','{!leadSub.s.EntryDate__c}','{!leadSub.s.DepartureDate__c}');"/>
+		</apex:column>
+		<!-- C/I -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0028}">
+			<apex:inputField value="{!leadSub.s.EntryDate__c}" id="cidate" rendered="{!!leadSub.isReadOnly}"/>
+			<apex:outputField value="{!leadSub.s.EntryDate__c}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<apex:column >
+			<apex:inputField value="{!leadSub.s.EntryTime__c}" id="citime" rendered="{!!leadSub.isReadOnly}" style="width:30px;ime-mode: inactive;"/>
+			<apex:outputField value="{!leadSub.s.EntryTime__c}" rendered="{!leadSub.isReadOnly}" style="width:30px;"/>
+		</apex:column>
+		<!-- 泊 -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0029}">
+			<apex:inputText value="{!leadSub.nights}" size="2" id="nights" rendered="{!!leadSub.isReadOnly}"  html-rowindex="{!(leadSub.rowNo-1)}" />
+			<apex:outputText value="{!leadSub.nights}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<!-- C/O -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0030}">
+			<apex:inputField value="{!leadSub.s.DepartureDate__c}" id="codate" rendered="{!!leadSub.isReadOnly}" html-rowindex="{!(leadSub.rowNo-1)}" />
+			<apex:outputField value="{!leadSub.s.DepartureDate__c}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<apex:column >
+			<apex:inputField value="{!leadSub.s.DepartureTime__c}" id="cotime" rendered="{!!leadSub.isReadOnly}" style="width:30px;ime-mode: inactive;"/>
+			<apex:outputField value="{!leadSub.s.DepartureTime__c}" rendered="{!leadSub.isReadOnly}" style="width:30px;"/>
+		</apex:column>
+		<!-- TYP -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0031}">
+			<apex:selectList value="{!leadSub.s.RoomTypeRef__c}" id="roomType" multiselect="false" size="1" style="width:60px" styleClass="widthStyleClass" rendered="{!!leadSub.isReadOnly}">
+			<apex:selectOption itemValue="" itemLabel=""/>
+			<apex:selectOptions value="{!roomTypeLst}"/>
+			</apex:selectList>
+			<apex:outputField value="{!leadSub.s.RoomTypeRef__c}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<!-- 人 -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0032}">
+			<apex:inputText value="{!leadSub.persons}" size="2" id="perpsons" rendered="{!!leadSub.isReadOnly}"  html-rowindex="{!(leadSub.rowNo-1)}" />
+			<apex:outputText value="{!leadSub.persons}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<!-- 室 -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0033}">
+			<apex:inputText value="{!leadSub.rooms}" size="2" id="rooms" rendered="{!!leadSub.isReadOnly}"  html-rowindex="{!(leadSub.rowNo-1)}" />
+			<apex:outputText value="{!leadSub.rooms}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<!-- プラン -->
+		<!-- wgch -->
+        <apex:column headerValue="{!$Label.ps__msg_001_0034}" style="min-width:112px;">
+        <!-- wgch -->
+			<apex:outputPanel rendered="{!!leadSub.isReadOnly}">
+			<span class="lookupInput">
+			<apex:inputField value="{!leadSub.s.PlanRef__c}" id="dlPlanItem" style="min-width: 60px" html-rowindex="{!(leadSub.rowNo-1)}">
+			<c:AutoCompleteComp objectname="Plan__c"
+			     additionalfield="{!$Setup.CommDefine__c.AppNS__c}PlanNo__c,{!$Setup.CommDefine__c.AppNS__c}PackageCode__c"
+			     autocomplete_textbox="{!$Component.dlPlanItem}" addFilter="IsClosed__c=false And BasePlanFlg__c=false " soslExtend="false"/>
+			</apex:inputField>
+			<!-- プラン詳細 -->
+            <img src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}" style="cursor: pointer; width: 18px; height: 18px;"
+            	rowindex="{!(leadSub.rowNo-1)}"
+            	onclick="javascript:openMiniPlanSetup(this);" id="planCustomeBtn" title="{!$Label.MSG_001_0035}"/>
+           	</span>
+           	<apex:inputHidden value="{!leadSub.s.PlanDetailSyncInfo__c}" id="nl_hidPlanDetailInfo"/>
+            </apex:outputPanel>
+            <apex:outputField value="{!leadSub.s.PlanRef__c}" rendered="{!leadSub.isReadOnly}"/>
+		</apex:column>
+		<!-- DIS -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0036}" rendered="false">
+			<apex:inputText value="{!leadSub.discount}" size="6"/>
+		</apex:column>
+		<!-- 売価 -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0037}" rendered="true" style="text-align: right;">
+            <!-- 2013/01/23 TARIF売価機能対応
+            <apex:outputField id="salescnt" value="{!leadSub.s.SalesPrice__c}" style="text-align: right;" />
+            <apex:inputHidden id="hidSalescnt" value="{!leadSub.s.SalesPrice__c}" />
+             -->
+            <apex:inputText id="salescnt" value="{!leadSub.salescnt}"
+                    style="width:50px" rendered="{!!leadSub.isReadOnly}"/>
+            <!-- 2014/09/30 金額小数点機能対応
+            <apex:outputField value="{!leadSub.s.SalesPrice__c}"
+                    style="text-align: right; width:60px" rendered="{!leadSub.isReadOnly}"/>
+             -->
+            <apex:outputtext value="{0,number,{!NumberFormat}}" style="text-align: right; width:60px" rendered="{!leadSub.isReadOnly}" >
+            	<apex:param value="{!leadSub.s.SalesPrice__c}" />
+            </apex:outputtext>
+            <!-- <apex:inputHidden id="hidSalescnt" value="{!leadSub.s.SalesPrice__c}" /> -->
+        </apex:column>
+	<!-- DS -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0038}" rendered="false">
+		<apex:inputText value="{!leadSub.dsField}" size="4"/>
+	</apex:column>
+	<!-- E/B -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0039}" rendered="{!isHaveEbInfo}" style="width:29px">
+            <apex:inputField value="{!leadSub.s.ExtraBedChk__c}" rendered="{!!leadSub.isReadOnly}"/>
+            <apex:outputField value="{!leadSub.s.ExtraBedChk__c}" rendered="{!leadSub.isReadOnly}"/>
+        </apex:column>
+	</apex:pageBlockTable>
+
+</apex:pageBlock>
+
+<!-- BUTTON SECTION -->
+<div style="text-align: right;">
+<!-- 一括チェックイン -->
+<!-- チェックイン -->
+<apex:commandButton style="width:100px;height=20px" value="{!$Label.ps__msg_001_0040}" action="{!bulkCheckIn}" id="bulkCheckinBtn"
+  
+	rendered="{!isCanCheckinFlg}"
+	rerender="condBlock" status="refStatusBlock"/>
+	 
+<!-- 予約登録 -->
+<apex:commandButton style="min-width:100px;height=20px" value="{!$Label.ps__msg_001_0041}" action="{!createLeadInfo}" onclick="if(!preSaveConfirm()) return false" id="leadUpsertBtn"
+	rerender="condBlock" status="refStatusBlock"/>
+	<!--
+<input type="button" style="width:100px;height=20px;" class="btn" value="予約登録" onclick="preCheckforSubmit()"/>	
+<apex:commandButton style="width:100px;height=20px;display:none;" value="予約登録" action="{!createLeadInfo}" id="leadUpsertBtn"
+	rerender="condBlock" status="refStatusBlock"/>
+	-->
+</div>
+
+</div>
+<!-- 顧客情報を更新する -->
+<apex:actionFunction name="actRefreshCust" action="{!refreshContcatInfo}" rendered="false"
+    rerender="condBlock" status="refStatusBlock" oncomplete="autoSetupLeadName();focusField(':leadName')"/>
+</apex:form>
+
+</apex:outputPanel> <!-- left panel end -->
+
+</div>
+
+<!-- wgch -->
+<div style="vertical-align: top;" id="Right"> 
+<!-- wgch -->
+<apex:outputPanel id="rightPanel" rendered="{!isEditPage}">
+
+<!-- プラン詳細情報 -->
+<!-- プラン明細 -->
+<apex:pageBlockSection collapsible="true" columns="1" id="PlanInfo" title="{!$Label.ps__msg_001_0042}" rendered="true">
+
+    <apex:pageBlockSection columns="1" id="planBlockSection">
+    
+<apex:outputPanel >
+<table width="80%" style="border-spacing:0;">
+  <tr>
+    <td width="15%" style="border-bottom:1px solid #888;"><!-- 室料合計 -->{!$Label.MSG_001_0043}</td>
+    <td width="30%" style="border-bottom:1px solid #888;text-align: right;">
+	     <apex:outputtext value="{0,number,#,###}"><apex:param value="{!oPlanInfo.roomPrice}" /></apex:outputtext>
+    </td>
+    <td width="5%"></td>
+	<td width="15%"></td>
+	<td width="25%"></td>
+  </tr>
+  
+  <tr>
+    <td width="15%" style="border-bottom:1px solid #888;"><!-- 朝食 -->{!$Label.MSG_001_0044}</td>
+    <td width="30%" style="border-bottom:1px solid #888;text-align: right;">
+	     <apex:outputtext value="{0,number,#,###}"><apex:param value="{!oPlanInfo.breakfastPrice}" /></apex:outputtext>
+    </td>
+    <td width="5%"></td>
+	<td width="15%" style="border-bottom:1px solid #888;">({!if( oPlanInfo.breakfastPrice > 0 ,oPlanInfo.breakfastCnt , 0)})</td>
+	<td width="25%" style="border-bottom:1px solid #888;"></td>
+  </tr>
+  
+  <tr>
+    <td width="15%" style="border-bottom:1px solid #888;"><!-- 夕食 -->{!$Label.MSG_001_0045}</td>
+    <td width="30%" style="border-bottom:1px solid #888;text-align: right;">
+	     <apex:outputtext value="{0,number,#,###}"><apex:param value="{!oPlanInfo.dinnerPrice}" /></apex:outputtext>
+    </td>
+    <td width="5%"></td>
+	<td width="15%" style="border-bottom:1px solid #888;">({!if( oPlanInfo.dinnerPrice > 0 ,oPlanInfo.dinnerCnt , 0)})</td>
+	<td width="25%" style="border-bottom:1px solid #888;"></td>
+  </tr>
+  
+  <tr>
+    <td width="15%" style="border-bottom:1px solid #888;"><!-- その他 -->{!$Label.MSG_001_0046}</td>
+    <td width="30%" style="border-bottom:1px solid #888;text-align: right;">
+	     <apex:outputtext value="{0,number,#,###}"><apex:param value="{!oPlanInfo.otherPrice}" /></apex:outputtext>
+    </td>
+    <td width="5%"></td>
+	<td width="15%" style="border-bottom:1px solid #888;"><!-- 人数合計 -->{!$Label.MSG_001_0047}</td>
+	<td width="25%" style="border-bottom:1px solid #888;text-align: right;">{!oPlanInfo.totalPeople}</td>
+  </tr>
+  
+  <tr>
+    <td width="15%" style="border-bottom:1px solid #888;"><!-- 総合計 -->{!$Label.MSG_001_0048}</td>
+    <td width="30%" style="border-bottom:1px solid #888;text-align: right;">
+	     <apex:outputtext value="{0,number,#,###}"><apex:param value="{!oPlanInfo.totalPrice}" /></apex:outputtext>
+    </td>
+    <td width="5%"></td>
+	<td width="15%"></td>
+	<td width="25%"></td>
+  </tr>
+</table>
+</apex:outputPanel>
+
+    </apex:pageBlockSection>
+</apex:pageBlockSection>
+
+<apex:form id="guestInForm" >
+	<!-- 宿泊名簿 -->
+    <apex:pageBlockSection collapsible="true" columns="1" title="{!$Label.ps__msg_001_0049}">
+    <apex:outputPanel id="rightBotomPanel" layout="block" styleclass="tablescroll_wrapper">
+    <apex:pageBlockTable value="{!oGuestLst}" var="guest" id="guestTabel" headerClass="tableHeader">
+	<!-- No -->
+        <apex:column headerValue="{!$Label.ps__msg_001_0025}">
+		<apex:outputText value="{!indexSubNo}" />
+	</apex:column>
+	<!-- 代 -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0050}">
+		<apex:outputText value="{!if(guest.s.DelegateFlg__c,'*','')}" />
+	</apex:column>
+	<!-- C -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0051}" rendered="false">
+		<apex:inputCheckbox value="{!guest.isCancel}"/>
+	</apex:column>
+        <!-- 宿泊者名（カナ） -->
+		<apex:column headerValue="{!$Label.ps__msg_001_0052}">
+            <apex:inputText value="{!guest.customKana}" style="width:90px"/>
+        </apex:column>
+        <!-- 宿泊者名（漢字） -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0053}">
+            <apex:inputText value="{!guest.customName}" style="width:90px"/>
+        </apex:column>
+	<!-- 性別 -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0054}">
+			<apex:inputField value="{!guest.s.Sex__c}" style="width:60px"/>
+        </apex:column>
+	<!-- TYP -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0031}">
+		<apex:outputText value="{!guest.roomType}" />
+	</apex:column>
+	<!-- 部屋 -->
+        <!-- 最低 2 文字指定してください -->
+	<apex:column headerValue="{!$Label.ps__msg_001_0055}" title="{!$Label.ps__msg_001_0056}">
+            <apex:inputText id="guestRoom" value="{!guest.roomNo}" style="width:60px" rendered="{!guest.s.DelegateFlg__c}"/>
+            <apex:inputHidden id="guestRoomId" value="{!guest.roomId}" />
+            <apex:inputHidden id="guestRoomTypeId" value="{!guest.roomTypeId}" />
+        </apex:column>
+    </apex:pageBlockTable>
+
+    </apex:outputPanel>
+    </apex:pageBlockSection>
+	<!-- BUTTON処理する -->
+	<!-- 名簿登録 -->
+	<apex:commandButton style="min-width:100px;height=20px" value="{!$Label.ps__msg_001_0057}" rendered="{!oGuestLst.size>0}"
+	action="{!createGuestInfo}" reRender="rightPanel,messagePanel" status="refStatusBlock"/>
+</apex:form>
+
+<script>
+    $j(document).ready(function() {bindEventRight();});
+</script>
+
+</apex:outputPanel> <!-- rightPanel End -->
+</div>
+</div>
+<!-- 予約明細設定画面 -->
+
+</div>
+
+<apex:form id="commForm" >
+<!-- wgch -->
+<apex:actionFunction name="showGuestLst" action="{!expandGuestLst}" rerender="rightPanel" status="refStatusBlock" oncomplete="showGuestInfoSplitter()"/>
+<!-- wgch -->
+<apex:inputHidden value="{!indexSubId}" id="indexSubId"/>
+<apex:inputHidden value="{!indexSubNo}" id="indexSubNo"/>
+<apex:inputHidden value="{!indexSubRType}" id="indexSubRType"/>
+<apex:inputHidden value="{!indexSubStrDt}" id="indexSubStrDt"/>
+<apex:inputHidden value="{!indexSubEndDt}" id="indexSubEndDt"/>
+</apex:form>
+
+<apex:form >
+<!-- 予約情報を更新する -->
+<apex:actionFunction name="actRefreshLead" action="{!refreshExistLeadInfo}" 
+	rerender="condBlock" status="refStatusBlock">
+</apex:actionFunction>
+
+<apex:inputHidden value="{!leadBaseInf.leadNo}" id="inputLeadNo"/>
+<apex:inputHidden value="{!leadBaseInf.s.contactRef__c}" id="inputContactId"/>
+<apex:inputHidden value="{!leadBaseInf.contactName}" id="inputContactNm"/>
+
+</apex:form>
+
+
+</apex:pageblock>
+
+<!-- ※※※※※※※※※[SCRIPT]※※※※※※※※※※ -->
+<script>
+var _localMap = new Map();
+// 画面Lockする
+function blockUi() {
+    //$j("[id$=':bookingForm']").block({
+    $j("#allPage").block({
+	//Processing...
+		 message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_001_0058}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    //$j("[id$=':bookingForm']").unblock();
+    $j("#allPage").unblock();
+}
+
+// SUBINDEXに関連付くの顧客名簿情報
+function showGuest(subId, subNo, rtype, startDt, endDt) {
+	if (subId == "") return;
+    $j("input[id$=':indexSubId']").val(subId);
+    $j("input[id$=':indexSubNo']").val(subNo);
+    $j("input[id$=':indexSubRType']").val(rtype);
+    $j("input[id$=':indexSubStrDt']").val(startDt);
+    $j("input[id$=':indexSubEndDt']").val(endDt);
+    showGuestLst();
+}
+function focusField(filedId) {
+    $j("[id$='"+filedId+"']").focus();
+}
+
+// 予約名自動設定機能
+function autoSetupLeadName() {
+	var contactName = $j("input[id$=':relcontact']").val();
+	var leadName = $j("input[id$=':leadName']").val();
+	if (leadName == "" && contactName != "") {
+		$j("input[id$=':leadName']").val(contactName);
+	}
+	// 件名の内容はBLOCK　TITLEに連動する
+	syncInputLeadName($j("input[id$=':leadName']").val());
+}
+
+// 予約名連動設定SCRIPT
+function syncInputLeadName(val) {
+	//新規ご予約
+	if (val == "") val="{!$Label.ps__msg_001_0003}";
+	$j(".pageDescription").text(val);
+}
+// 2015/10/28 CTI->PAST機能対応
+function _call_pasteInfo() {
+	$j("[id$=':relcontact']").unbind('paste');
+	$j("[id$=':relcontact']").bind('paste',function(e){
+        // 2017/09/23 新規予約ウインドウ、お客様情報反映されない不具合改修 WGCH BEGIN
+        var $relcontact = $j(this);
+        $relcontact.autocomplete('search', this.value);
+        // 2017/09/23 新規予約ウインドウ、お客様情報反映されない不具合改修 WGCH END
+		var pastedText = undefined;
+		if (window.clipboardData && window.clipboardData.getData) {
+			pastedText = window.clipboardData.getData('Text');
+		}else {
+			pastedText = e.originalEvent.clipboardData.getData('Text');
+		}
+		/* 2015/11/09 CTI->PAST機能対応
+		if (pastedText.indexOf('#') > 0) {
+			e.preventDefault();
+			$j("[id$=':relcontact']").val(pastedText.split('#')[0]);
+			$j("input[id$=':relcontact_lkid']").val(pastedText.split('#')[1]);
+			$j("[id$=':relcontact']").blur();
+		}*/
+		cti_call_pasteInfo(e, pastedText);
+	});
+}
+// 2015/11/09 CTI->PAST機能対応
+function cti_call_pasteInfo(e, pastedText) {
+	if (!$j("[id$=':relcontact']").is(":visible")) return false;
+	if (pastedText != undefined && pastedText.indexOf('#') > 0) {
+		if (e != null) e.preventDefault();
+		$j("[id$=':relcontact']").val(pastedText.split('#')[0]);
+		$j("input[id$=':relcontact_lkid']").val(pastedText.split('#')[1]);
+		$j("[id$=':relcontact']").blur();
+	}
+	return true;
+}
+// ****************************
+// Componet Action Binding
+// 基本情報関連のJsのEvent Bindする
+// ****************************
+function bindEvent() {
+
+	// お客名にて、自動予約名に設定を行う
+	$j("input[id$=':leadName']").focus(function() {
+		autoSetupLeadName();
+	});
+	
+	// 基本情報のTitle自動設定
+	syncInputLeadName($j("input[id$=':leadName']").val());
+	
+	// 2014.10.28 基本情報の到着日、出発日入力項目を外す??TODO
+	// 新規・更新フラグを取得する
+	var isEditMode = $j("#isEditPageHid").val();
+	// 編集モードの場合、日付変更不可になる、期間は自動的にAPEXのトリガーで自動設定を行う
+	if (isEditMode.toLowerCase() == "true") {
+		// 既にチェックイン場合、到着日の入力不可制御になる
+		$j("input[id$=':entryDt']").attr("disabled", "disabled");
+		$j("input[id$=':entryTime']").attr("disabled", "disabled");
+		// 泊数
+		$j("input[id$=':staysNums']").attr("disabled", "disabled");
+		// 既にチェックイン場合、到着日の入力不可制御になる
+		$j("input[id$=':departDt']").attr("disabled", "disabled");
+		$j("input[id$=':departTime']").attr("disabled", "disabled");
+	} else {
+		$j("input[id$=':entryDt']" + "," +"input[id$=':entryTime']" + "," + "input[id$=':staysNums']" + "," + "input[id$=':departDt']"+ "," + "input[id$=':departTime']").attr("disabled", null);
+	}
+	// *****************************
+	// 2015/10/28 CTI->PAST機能対応
+	// *****************************
+	_call_pasteInfo();
+	// *******************************************************
+	// お客様情報関連処理
+	// *******************************************************
+	// お客様情報を選択する、お客様PopupWin起動
+    $j("img[name='accountPopup']").click(function() {
+        var lkfmVal = $j("form[id$=':bookingForm']").attr("id");
+        var lknmVal= $j("input[id$=':relcontact']").attr("id");
+        var lktpVal ="003";
+        // 2017/08/08 SFのJavascriptからパラメータ指定ENCODE化対応 by zh BEGIN
+        var lksrchVal =  encodeURIComponent($j("input[id$=':relcontact']").val());
+        // 2017/08/08 SFのJavascriptからパラメータ指定ENCODE化対応 by zh END
+		var url = "/_ui/common/data/LookupPage?lkfm=" + lkfmVal + "&lknm=" +lknmVal + "&lktp=" + lktpVal; 
+		openLookup(url, 670, '1', "&lksrch=" + lksrchVal);
+    });
+	// お客名はクリアする場合、自動的にIDをクリアする
+	$j("input[id$=':relcontact']").blur(function() {
+		if ($j(this).val() == "") {
+			$j("input[id$=':relcontact_lkid']").val("");
+			$j("input[id$=':relcontact_lkold']").val("");
+			$j("#relcontact_lkid_org").val("");
+			
+			$j("input[id$=':custName']").val("");	// お客様（漢字）
+			$j("input[id$=':katakana']").val("");	// ひらがな
+			$j("input[id$=':kanaName']").val("");	// カタカナ
+			$j("input[id$=':custPhone']").val("");	// TEL
+			
+			$j("input[id$=':company']").val("");	// 団体
+			$j("input[id$=':appName']").val("");	// 申込者
+			$j("input[id$=':appPhone']").val("");	// 申込者電話 
+			
+			$j("input[id$=':memo1']").val("");		// 客室情報
+			$j("input[id$=':memo2']").val("");		// 付帯情報
+			$j("input[id$=':memo3']").val("");		// 支払情報
+		}
+	});
+	// 顧客変更する場合、顧客情報を自動取得、基本情報を画面に設定する　
+	$j("[id$=':relcontact']").on('blur', function(){
+		var $this = $j(this);
+		// 設定内容が存在する場合
+		if ($j("input[id$=':relcontact_lkid']").val() != "") {
+	    	// Content Changed
+		    //if ($this.attr("orgval") != $j("input[id$=':relcontact_lkid']").val()) {
+		    if ($j("#relcontact_lkid_org").val().substring(0,15) != $j("input[id$=':relcontact_lkid']").val().substring(0,15)) {
+		    	// お客様情報のID情報を格納する
+		        //$this.attr("orgval",$j("input[id$=':relcontact_lkid']").val());
+		        $j("#relcontact_lkid_org").val($j("input[id$=':relcontact_lkid']").val());
+		        // 顧客情報を更新する
+		        var contactId = $j("input[id$=':relcontact_lkid']").val();
+		        var contactName = $this.val();
+		        blockUi();
+				// 既に定義する売価はプランカラ取得、画面に設定する
+				Visualforce.remoting.Manager.invokeAction(
+				"{!$RemoteAction.BookingApp.refreshContcatInfo}", contactId,contactName, function(result, event){
+					if(event.type == 'exception') {
+		                alert(event.message);
+		            } else {
+						// 取得するお客様情報を画面に設定する
+						$j("input[id$=':custName']").val(result.KanjiName);	// お客様（漢字）
+						$j("input[id$=':katakana']").val(result.KatakanaName);	// ひらがな
+						$j("input[id$=':kanaName']").val(result.KanaName);	// カタカナ
+						$j("input[id$=':custPhone']").val(result.phone);	// TEL
+						
+						$j("input[id$=':company']").val(result.accountName);	// 団体
+						$j("input[id$=':appName']").val(result.ApplicantName);	// 申込者
+						$j("input[id$=':appPhone']").val(result.ApplicantPhone);	// 申込者電話 
+						
+						$j("input[id$=':memo1']").val(result.Memo1);		// 客室情報
+						$j("input[id$=':memo2']").val(result.Memo2);		// 付帯情報
+						$j("input[id$=':memo3']").val(result.Memo3);		// 支払情報
+						// 予約名自動設定を行う
+						autoSetupLeadName();
+					}
+					// 画面解除する
+					unblockUi();
+				});
+			}
+		};
+	});
+	// *******************************************************
+	// 予約番号関連処理
+	// *******************************************************
+	// 予約番号が変更されている場合、既存予約情報を取得、画面へ反映する
+	$j("[id$=':LeadNo']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function(){
+		var $this = $j(this);
+    	// Content Changed
+	    if ($this.attr("orgval") != $this.val()) {
+	        // alert('TODO:顧客情報更新を行う');
+	        // TODO:顧客情報を取得する
+	        $this.attr("orgval",$this.val());
+	        // 予約情報取得する
+	        //actRefreshLead();
+	        refreshInfoFunction();
+	    }
+	});
+
+	// *******************************************************
+	// 日付項目関連処理
+	// *******************************************************
+	// C/I日付 / C/O日付
+	$j("input[id$=':entryDt']" + "," + "input[id$=':departDt']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function() {
+		var $this = $j(this);
+	    if ($this.val() == "") return;
+	    if (!checkDate($this.val())) {
+	    	//$j(this).focus();
+	    	return false;
+	    }
+	    // 日付書式化
+	    // 2016/11/25 TIMEZON fix BEGIN by zh
+	    //var inputDt = dateFormat.format(Date.parse($this.val()));
+	    var inputDt = Date.parseExact($this.val(),JINYACONNECT.DateFormat);
+	    var inputDtStr = dateFormat.format(inputDt);
+	    $this.val(inputDtStr);
+		if ($j("[id$=':LeadNo']").val() == "") {
+			if (dateFormatEqu.format(inputDt) < dateFormatEqu.format(JS_SYS_TODAY)) {
+		// 2016/11/25 TIMEZON fix END by zh
+		   		//対象外日付けです
+				alert("{!$Label.MSG_001_0059}");
+		   		return false;
+			}
+		}
+	});
+
+	// *******************************************************
+	// 明細情報 Event Bind
+	// *******************************************************
+	// プラングループ機能に対して、全部再BIND
+	$j("img[id='planCustomeBtn']").unbind("jinyaPlanExtend");
+	// 明細処理のEventBindする
+	bindEventSubIdx();
+// wgch	
+	$j("#splitter").kendoSplitter({
+        panes: [ 
+        {
+			collapsible: false,
+			min:"730px",
+			scrollable: false
+		}, {
+			collapsible: true,
+			collapsed: true,
+			size:"450px",
+			scrollable: false           
+		}],
+        resize:function(e){
+			// 高さを再設定を行う
+        	spliterResize();
+	     }     
+    }); 
+    // 2019/09/30 新規予約など、保存(Ctrl+S)対応 WGCH BEGIN
+    var $key = key.noConflict();
+    $key('command+s, ctrl+s', function(e){
+    	$j("input[id$=':leadUpsertBtn']").click();
+    	e.preventDefault();
+    	return false;
+    });
+    // 2019/09/30 新規予約など、保存(Ctrl+S)対応 WGCH END
+// wgch	    
+}
+// wgch
+function resizeHeightAndUnlockUi() {
+	spliterResize();
+	unblockUi();
+}
+function spliterResize() {
+	var paneHeight = $j("#splitter").find("form").innerHeight();
+    $j("#splitter").closest(".pbBody").height(paneHeight);
+    $j("#splitter").height(paneHeight);
+    $j("#splitter > div").height(paneHeight);
+	// プランの横幅再設定する
+    var $leftPanel = $j('#splitter > .k-pane').get(0);
+    // 左側のサイズ
+	var leftPanelWidth = $leftPanel.clientWidth;
+	// 該当サイズにより、プランの幅を調整する
+	if (leftPanelWidth < 800) {
+		$j("input[id$=':dlPlanItem']").width("60%");
+		$j(".widthStyleClass").width("60px");
+	}
+	else if (leftPanelWidth < 860 && leftPanelWidth >= 800) {
+		$j("input[id$=':dlPlanItem']").width("70%");
+		$j(".widthStyleClass").width("70px");
+	}
+	else if (leftPanelWidth < 1200 && leftPanelWidth >= 860) {
+		$j("input[id$=':dlPlanItem']").width("80%");
+		$j(".widthStyleClass").width("100px");
+	}
+	else if (leftPanelWidth > 1200) {
+		$j("input[id$=':dlPlanItem']").width("90%");
+		$j(".widthStyleClass").width("120px");
+	}
+	console.debug(leftPanelWidth);
+}
+function showGuestInfoSplitter() {
+    // SPLIT SHOW AGAIN
+    var splitter = $j("#splitter").data("kendoSplitter");
+    splitter.expand("#Right");
+}
+// wgch
+// *******************************************************
+// 明細情報関連のEvent Bindする
+// *******************************************************
+function bindEventSubIdx () {
+	
+	
+	// C/I日付 / C/O日付
+	$j("input[id$=':cidate']" + "," + "input[id$=':codate']")
+	.on('blur', function(){
+		var $this = $j(this);
+	    if ($this.val() == "") return;
+	    if (!checkDate($this.val())) {
+	    	return false;
+	    }
+	    // 2016/11/25 TIMEZON fix BEGIN by zh
+	    //var inputDt = Date.parse($this.val());
+	    var inputDt = Date.parseExact($this.val(),JINYACONNECT.DateFormat);
+	    // 2016/11/25 TIMEZON fix END by zh
+	    // 日付書式処理を行う
+		$this.val(dateFormat.format(inputDt));
+	});
+	
+	// *********************************
+	// 明細データ初期値自動設定機能
+	// *********************************
+    // 数字だけ入力可能の制御
+    $j("input[id$=':staysNums']" + "," +"input[id$=':nights']" + "," + "input[id$=':perpsons']" + "," + "input[id$=':rooms']"+ "," + "input[id$=':salescnt']").keyup(function(){
+        $j(this).val($j(this).val().replace(/[^\d\,]/g,''));
+    }).bind("paste",function(){
+        $j(this).val($j(this).val().replace(/[^\d\,]/g,''));
+    }).css("ime-mode","disabled");
+
+	// 到着時間初期値設定する
+	$j("input[id$=':citime']").timeEntry({spinnerImage:'', show24Hours: true, showSeconds: false, timeSteps : [1, 10]})
+	.on('blur', function(){
+		var $this = $j(this);
+	    if ($this.val() == "") {
+	        $this.val(JS_DEFCHKIN_DT);
+	}});
+	// 出発時間初期値設定する
+	$j("input[id$=':cotime']").timeEntry({spinnerImage:'', show24Hours: true, showSeconds: false, timeSteps : [1, 10]})
+	.on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.val() == "") {
+	        $this.val(JS_DEFCHKOT_DT);
+	}});
+	// 宿泊数初期値設定する
+	$j("input[id$=':staysNums']").on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.val() == "") {
+            // 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 BEGIN
+	        //$this.val("1");
+	        $this.val($j("#defStaysNums").val());
+	        // 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 END
+		}
+		// 泊数により、出発日計算を行う
+		var nights = $this.val();
+		// 出発日計算を行う
+		var entryDate = $j("input[id$=':entryDt']").val();
+		// 2016/11/25 TIMEZON fix BEGIN by zh
+		//if (entryDate != "") $j("input[id$=':departDt']").val(dateFormat.format(Date.parse(entryDate).addDays(nights)));
+		if (entryDate != "") $j("input[id$=':departDt']").val(dateFormat.format(Date.parseExact(entryDate,JINYACONNECT.DateFormat).addDays(nights)));
+		// 2016/11/25 TIMEZON fix END by zh
+	});
+	// C/I日付[基本情報の設定情報から明細にコピーを行う]
+	$j("input[id$=':cidate']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function() {
+	    var $this = $j(this);
+	    if ($this.attr("orgval") == "") {
+	    	if ($j("input[id$=':entryDt']").val() != "") $this.val($j("input[id$=':entryDt']").val());
+	    	$this.attr("orgval",$this.val());
+		}
+	});
+	// C/O日付[基本情報の設定情報から明細にコピーを行う]
+	$j("input[id$=':codate']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.attr("orgval") == "") {
+	    	if ($j("input[id$=':departDt']").val() != "") $this.val($j("input[id$=':departDt']").val());
+	    	$this.attr("orgval",$this.val());
+		}
+		// 泊数自動計算を行う
+		var row = $this.attr("rowindex");
+		// 開始日と終了日により、泊数自動計算を行う
+		// 2016/11/25 TIMEZON fix BEGIN by zh
+		//var entryDate = Date.parse($j("input[id$=':" + row + ":cidate']").val());
+		var entryDate = Date.parseExact($j("input[id$=':" + row + ":cidate']").val(),JINYACONNECT.DateFormat);
+		//var departDate= Date.parse($this.val());
+		var departDate= Date.parseExact($this.val(),JINYACONNECT.DateFormat);
+		// 2016/11/25 TIMEZON fix END by zh
+		if (entryDate != null && departDate != null) {
+			var nights = (departDate.getTime()-entryDate.getTime() )/1000/60/60/24;
+			if (nights >= 0) $j("input[id$=':" + row + ":nights']").val(nights);
+		}
+	});
+	// 泊数[基本情報の設定情報から明細にコピーを行う]
+	$j("input[id$=':nights']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.attr("orgval") == "") {
+	    	if ($this.val() == "") {
+                // 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 BEGIN
+	    		//$this.val( $j("input[id$=':staysNums']").val() == "" ? "1" : $j("input[id$=':staysNums']").val());
+	    		var defStayNums = $j("#defStaysNums").val();
+	    		$this.val( $j("input[id$=':staysNums']").val() == "" ? defStayNums : $j("input[id$=':staysNums']").val());
+	    		// 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 END
+	    	}
+	    }
+    	// Row Number
+    	var row = $j(this).attr("rowindex");
+		// 泊数により、出発日計算を行う
+		var nights = $this.val();
+		// 出発日計算を行う
+		var entryDate = $j("input[id$=':" + row + ":cidate']").val();
+		// 2016/11/25 TIMEZON fix BEGIN by zh
+		//if (entryDate != "") $j("input[id$=':" + row + ":codate']").val(dateFormat.format(Date.parse(entryDate).addDays(nights)));
+		if (entryDate != "") $j("input[id$=':" + row + ":codate']").val(dateFormat.format(Date.parseExact(entryDate,JINYACONNECT.DateFormat).addDays(nights)));
+		// 2016/11/25 TIMEZON fix END by zh
+		$this.attr("orgval",$this.val());
+	});
+
+	// 人の初期値
+	$j("input[id$=':perpsons']").on('blur', function(){
+		var $this = $j(this);
+    	// Row Number
+    	//var row = $j(this).closest('tr').prevAll().length;
+    	var row = $j(this).attr("rowindex");
+    	// 部屋タイプ設定値
+    	var roomTypeVal = $j("select[id$=':" + row + ":roomType']").val();
+    	// 部屋タイプの最大人数チェックを行う
+    	if (roomTypeVal != "") {
+    		var maxNumber = getMaxNumbers(roomTypeVal);
+    		// 最大人数のチェックと初期値設定を行う
+    		if ($this.val() == "")  {$this.val(maxNumber);}
+    		else if ( (1 * $this.val()) > maxNumber) {
+				//最大人数オーバーです
+				alert ("{!$Label.MSG_001_0060}");
+				$this.val(maxNumber);
+				//$this.focus();
+    		}
+    	}
+	});
+	// 室の初期値
+	$j("input[id$=':rooms']").on('blur', function(){
+		var $this = $j(this);
+	    if ($this.val() == "") $this.val("1");
+	});
+
+
+	// *******************************************************
+	// 明細のプラン項目関連処理
+	// *******************************************************
+	// プラングループ情報MAP初期化する
+	_localMap = new Map();
+	
+	// 既にプランを登録される場合、固定金額プランを指定する場合、金額変更不可になる
+	$j("input[id$=':dlPlanItem']").each(function(idx, ele) {
+		// 既に登録するプランに対して、金額入力可・不可制御を行う
+		var row = $j(this).attr("rowindex");
+		if (ele.value != "") {
+			if (ele.value.indexOf(JS_DEF_TARIFKEY) >= 0) {
+			    $j("input[id$=':" + row + ":salescnt']").attr('disabled', null);
+			} else {
+			    $j("input[id$=':" + row + ":salescnt']").attr('disabled', 'disabled');
+			}
+		}
+		
+		// プラングループ関連初期化
+		var planId = $j("input[id$=':" + row + ":dlPlanItem_lkid']").val();
+		var mapKey = "_" + row +"_planidKey";
+		_localMap.put(mapKey, planId);
+	});
+
+
+	// プランの売価編集制限チェックを行う
+	$j("input[id$=':dlPlanItem']").on('blur', function(e){
+		
+		var row = $j(this).attr("rowindex");
+		var planName = $j(this).val();
+		var planId = $j("input[id$=':" + row + ":dlPlanItem_lkid']").val();
+		var mapKey = "_" + row +"_planidKey";
+		// プラン未設定する場合、既に設定する情報はクリアする
+		if (planName == "") {
+		    // 関連項目の連動クリアする
+			$j("input[id$=':" + row + ":salescnt']").val("");
+			$j("input[id$=':" + row + ":salescnt']").attr("disabled", false);
+			//$j("hidden[id$=':" + row + ":hidSalescnt']").val("");
+			$j("input[id$=':" + row + ":dlPlanItem_lkid']").val("");
+			_localMap.remove(mapKey);
+			return;
+		} else {
+			// 元のIDと比較する
+			var orgPlanId = _localMap.get(mapKey);
+			if (orgPlanId) {
+				if (orgPlanId == planId) return;
+			}
+			_localMap.put(mapKey, planId);
+		}
+		blockUi();
+        // NameSpace追加する
+		var key = JS_APPNS + "Price__c";
+		// 既に定義する売価はプランカラ取得、画面に設定する
+		Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.BookingApp.getPlanInfo}", planId, function(result, event){
+            if(event.type == 'exception') {
+                alert(event.message);
+				// 画面解除する
+				unblockUi();
+            } else {
+            	// Result Info
+            	if (result.length > 0) {
+            		var price = result[0][key] != undefined ? result[0][key] : "";
+            		var num = commUtils.numFormat(price);
+            		$j("input[id$=':" + row + ":salescnt']").val(num);
+            		//$j("input[id$=':" + row + ":hidSalescnt']").val(price);
+            	} else {
+                    $j("input[id$=':" + row + ":salescnt']").val("");
+                    //$j("input[id$=':" + row + ":hidSalescnt']").val(0);
+            	}
+            }
+			if (planName.indexOf(JS_DEF_TARIFKEY) >= 0) {
+			    $j("input[id$=':" + row + ":salescnt']").attr("disabled", false);
+			} else {
+			    $j("input[id$=':" + row + ":salescnt']").attr("disabled", true);
+			}
+			// 画面解除する
+			unblockUi();
+		});
+	});
+
+ 	
+ 	// プランを切り替えする場合、関連のプラン明細・非表示制御追加
+	$j("input[id$=':dlPlanItem']").change(function () {
+		// 前に設定するプラン商品と金額情報をクリアする
+		var planItem = $j(this).parent().parent().find("[id='planCustomeBtn']").data("jinyaPlanExtend");
+		planItem.reset();
+		// 2016/08/29 処理済みから呼出関数
+		resizeHeightAndUnlockUi();
+	})
+	
+	// プラングループ機能初期化対応
+	$j("img[id='planCustomeBtn']").each(function(idx) {
+		$this = $j(this);
+		// 既にBind済みの場合、再BINDを行わない
+		if ($this.data("jinyaPlanExtend")) return true;
+		var rowIndex = $this.attr("rowindex");
+		$j(this).jinyaPlanExtend({
+	        selectorRoot : $this.parent().parent().parent().parent(),
+	        planInputField : $j("input[id$=':"+rowIndex+":dlPlanItem_lkid']"),
+	        //planId : planIdVal,
+	        colspanNum : 14,
+	        planSetupSyncField : $j("input[id$=':"+rowIndex+":nl_hidPlanDetailInfo']"),
+	        startfun : blockUi,
+	        endfun : unblockUi,
+			actionOpenImg : "{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}",
+			actionCloseImg: "{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}",
+	        groupIndex : rowIndex,
+	        summaryPriceField : $j("input[id$=':"+rowIndex+":salescnt']"),
+	        isReadonlyFun : planDetailIsReadonly,
+	        remotePlanQuery  : "{!$RemoteAction.BookingApp.getPlanDetailListById}",
+	        remoteProdQuery  : "{!$RemoteAction.BookingApp.getArrayProductItemInfo}",
+	        oncompleteFun : resizeHeightAndUnlockUi,
+	        labels : {NOFOUND:"{!JSENCODE($Label.MSG_006_0235)}",PRODUCTNM:"{!JSENCODE($Label.MSG_006_0212)}",UNITPRICE:"{!JSENCODE($Label.MSG_006_0213)}",SUMMARY:"{!JSENCODE($Label.MSG_006_0402)}"}
+		});
+	});
+	//2017/01/16 by zy BEGIN
+	lastBookingDetail();
+	//2017/01/16 by zy END
+}
+
+
+function bindEventRight() {
+    // Table Header Float Controll
+    $j("[id$=guestTabel]").tableScroll({height:400, containerClass:"detailList"});
+    // Room AutoComplete Js
+    $j("[id$=guestRoom]").autocomplete({
+        minLength: 2,
+        source: function(request, response) {
+        	// 明細行目番号を取得する
+        	var row = $j(this.element).closest('tr').prevAll().length;
+        	var roomTypeId = $j("input[id$=':" + row + ":guestRoomTypeId']").val();
+        	if (roomTypeId=="") roomTypeId= $j("input[id$=':indexSubRType']").val();
+        	Visualforce.remoting.Manager.invokeAction(
+        	"{!$RemoteAction.BookingApp.getIdleRoom}", roomTypeId, $j("input[id$=':indexSubStrDt']").val(), $j("input[id$=':indexSubEndDt']").val(), request.term, function(result, event){
+            //BookingApp.getIdleRoom($j("input[id$=':indexSubRType']").val(), $j("input[id$=':indexSubStrDt']").val(), $j("input[id$=':indexSubEndDt']").val(), request.term, function(result, event){
+                if(event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($j.map(result, function (item) {
+                      return {
+                         id: item.Id,
+                         value: item.Name
+                      }
+                    }));
+                } // End else
+            });
+        },
+        focus: function( event, ui ) {
+            //alert(ui.item.id);
+            $j(this).val( ui.item.value );
+            var eleId = $j(this).attr("id") + "Id";
+            $j("[id='" + eleId + "']").val(ui.item.id);
+
+            return false;
+        },
+        select: function( event, ui ) {
+            //alert(ui.item.value);
+            $j(this).val( ui.item.value );
+            var eleId = $j(this).attr("id") + "Id";
+            $j("[id='" + eleId + "']").val(ui.item.id);
+            return false;
+        },
+    });
+}
+
+// 部屋タイプ：最大格納人数関数
+function getMaxNumbers(roomType) {
+	var roomArray = <apex:outputText escape="true" value="{!roomTypeScript}" />;
+	if (roomArray[roomType] == undefined) {
+		// 未設定する場合、人数制限なしで戻る
+		return 99;
+	}
+	return 1*roomArray[roomType];
+}
+// 有効日付チェックを行う
+function checkDate(dt) {
+	// 2016/11/25 TIMEZON fix BEGIN by zh
+    //var dateValue = Date.parse(dt);
+    var dateValue = Date.parseExact(dt,JINYACONNECT.DateFormat);
+    // 2016/11/25 TIMEZON fix END by zh
+    if (dateValue == null) {
+    	//無効な日付です
+		alert('{!$Label.MSG_001_0061}');
+    	return false;
+   	}
+   	return true;
+}
+// 情報更新処理
+function refreshInfoFunction() {
+	var leadNo = $j("input[id$=':LeadNo']").val();
+	$j("input[id$=':inputLeadNo']").val(leadNo);
+	// 最新予約情報を取得する
+	actRefreshLead();
+}
+// 顧客様情報更新
+/*
+function refreshContactInfoFun() {
+	var contactId = $j("input[id$=':relcontact_lkid']").val();
+	var contactNm = $j("input[id$=':relcontact']").val();
+	$j("input[id$=':inputContactId']").val(contactId);
+	$j("input[id$=':inputContactNm']").val(contactNm);
+	// 顧客様最新情報を取得する
+	actRefreshCust();
+}*/
+// 有効性チェック
+function preCheckforSubmit(){
+	// 期間チェック削除(2013.08.19)
+	// 基本情報の設定期間
+	var baseEntryDate = $j("input[id$=':entryDt']").val();
+	var baseDepartDate = $j("input[id$=':departDt']").val();
+	// Check Result
+	var result = new Array();
+	// 期間チェック
+	$j("input[id$=':cidate']").each(function(){
+		var $this = $j(this);
+		// C/I
+		var newEntryDate = $this.val();
+		// Row Number
+    	var row = $this.closest('tr').prevAll().length;
+    	// C/O
+		var newDepartDate = $j("input[id$=':" + row + ":codate']").val();
+		//var leadId = $j("input[id$=':" + row + ":hidLeadId']").val();
+		// 期間範囲チェック
+		if(newEntryDate != "" && newDepartDate != ""){
+			if(baseEntryDate > newEntryDate || baseDepartDate < newDepartDate  ){
+				result.push('No' + row);
+			}
+		}
+	});
+	// チェック結果を判定する
+	if(result.length > 0 ){
+		//明細情報のC/I、C/O日付は予約基本情報の到着日、出発日の期間範囲外なりました
+		var msgBox = '{!$Label.MSG_001_0062}';
+		if(window.confirm(msgBox)){
+			$j("input[id$=':leadUpsertBtn']").click();
+	   	}
+	 }else{
+	 	$j("input[id$=':leadUpsertBtn']").click();
+	 }	
+}
+// ３０日間連泊情報照会画面起動
+function openBookingInfoWin() {
+    window.open("/apex/RoomScheduleReport");
+}
+
+// プラン設定機能
+function openMiniPlanSetup(item) {
+	// プラン明細を展開する 
+	var planItem = $j(item).data("jinyaPlanExtend");
+	planItem.switchStatus();
+	// 2016/08/29 処理済みから呼出関数
+	resizeHeightAndUnlockUi();
+}
+
+// プランの（＋）展開する場合、明細編集可・不可制御Method
+function planDetailIsReadonly(planRowIdx) {
+	//console.debug(planRowIdx)
+	//console.debug($j("#orgSubIdxId_"+planRowIdx).val());
+	return ($j("#orgSubIdxId_"+planRowIdx).val() != "");
+}
+
+// 2015/07/29 予約登録の確認
+function preSaveConfirm() {
+	var reflg = true;
+	var cancelLines = $j("input:[id$=':cancelItem']:checked");
+	var existDetail = $j("input:[id^='orgSubIdxId']");
+	var confirmMsg = "{!JSENCODE($Label.MSG_001_0001)}";
+	var sbuMsg = "";
+	cancelLines.each(function(i,obj) {
+		var lineNo = this.getAttribute("lineno");
+		if (existDetail[(1*lineNo-1)].value != "") {
+			sbuMsg += lineNo + ",";
+		}
+	});
+	if (sbuMsg.length > 1) {
+		sbuMsg = sbuMsg.slice(0,-1);
+		if (!window.confirm(confirmMsg.replace("$$_NO_$$", sbuMsg))) {
+			reflg = false;
+		}
+	}
+	return reflg;
+}
+//2017/01/16 by zy BEGIN
+function lastBookingDetail(){
+	var lastSector = "input[id$=cidate],input[id$=':citime'],input[id$=':nights'],input[id$=':codate'],input[id$=':cotime'],select[id$=':roomType'],input[id$=':perpsons'],input[id$=':rooms'],input[id$=':dlPlanItem'],input[id$=':salescnt'],input[id$=':extraBedChk']";
+	//$j(lastSector,"tr.dataRow:last").unbind("blur");
+	$j(lastSector,"tr.dataRow:last").on("blur",function(){
+		//2017/01/18 排除扩展子明细行取得index值 by zy BEGIN
+		//var rowIdx = $j(this).closest("tr.dataRow").index();
+		var rowIdx = $("tr.dataRow").index($(this).closest("tr.dataRow"));
+		//2017/01/18 排除扩展子明细行取得index值 by zy BEGIN
+		var curRow = $j(this).closest("tr.dataRow");
+		if (!chkValidate(rowIdx) ) return;
+		//if(checkIfHadRequiredItem()){
+			curFocusUUid = $j(this).attr("id");
+			$j(lastSector,"tr.dataRow:last").unbind("blur");
+			$j(lastSector,curRow).keydown(function(e){
+				if (e.which == 9) {
+			        e.preventDefault();
+			    }
+			});
+			$j(this).focus();
+			addSubIdxItemFun();
+		//}
+	});
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	$j("input.btn").unbind("mouseenter");
+	$j("input.btn").on("mouseenter",function(){
+		blurDisabled = true;
+	});
+	$j("input.btn").unbind("mouseleave");
+	$j("input.btn").on("mouseleave",function(){
+		blurDisabled = false;
+	});
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+}
+var curFocusUUid;var blurDisabled = false;
+function autoFocus(){
+	if (curFocusUUid != undefined){
+		$j("[id='" + curFocusUUid + "']").focus();
+		curFocusUUid = undefined;
+	}
+}
+function chkValidate(rowIdx){
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	if (blurDisabled) return false;
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+	var lastSector = "input[id$=cidate],input[id$=':citime'],input[id$=':nights'],input[id$=':codate'],input[id$=':cotime'],select[id$=':roomType'],input[id$=':perpsons'],input[id$=':rooms']";
+	var chkflag = true;
+	$j(lastSector,"tr.dataRow:eq(" + rowIdx + ")").each(function(){
+		if($j(this).val() == "") {
+			chkflag = false;
+			//break;
+			return false;
+		}
+	});
+	return chkflag;
+}
+//2017/01/16 by zy END
+</script>
+
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+
+</apex:page>

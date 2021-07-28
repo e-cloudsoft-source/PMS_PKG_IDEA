@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：釣銭機機能情報定義
+前提条件：		1.OSとブラウザの制限
+				1.1: ブラウザ: Chrome(Ver.54以上)
+				1.1: OS: タブレットの場合、アンドロイド(5.0以上）、PCの場合、MAC(10以上)/WINDOW(7/8/10)
+動作タイミング：
+			1.新会計画面、タグ「ACCOUNTSWITCH」はTRUEの場合、支払メデイアメニューの「現金」をクリックするタイミング、該当機能を起動する
+			2.現金合せ画面、タグ「CASHSWITCH」	はTRUEの場合、現金合せ画面を開く場合、機能起動する
+				注：多店舗の施設に対して、ALL店舗を選択する場合、該当機能を使えません	
+設定作業：
+			1.IPアドレスの確認と取得
+				1.1: タブレットデバイス/PC端末からChromeブラウザ下記URLを起動して、Your local IP addressesの下に表示した数字（例：192.168.10.100）は該当端末のIPアドレス
+					 https://diafygi.github.io/webrtc-ips/
+			2.端末IPから釣銭機のマッピング
+				2.1: 端末（タブレット/PC)のIPアドレスと該当端末を使う予定釣銭機のNAME値をマッピングする
+				例：端末Aは釣銭機（NAMEタグ値はPOSNO01）に使うの場合、
+					端末AのIPアドレスは：192.168.10.100
+					下記様にマッピングルールはXMLに定義する
+					<DEVICE>
+						<LOCAL>192.168.10.100</LOCAL>
+						<PRINTER>POSNO01</PRINTER>
+					</DEVICE>
+			3.XMLに店舗コードと機能有効フラグを設定する
+				3-1. SHOPCODE		店舗コード
+				3-2. ACCOUNTSWITCH	TRUE（新会計画面に釣銭機機能を利用する場合）
+				3-3. CASHSWITCH		TRUE（現金合せ画面に釣銭機機能を利用する場合）	
+書式：
+	SHOPCODE: 			店舗コード、支店が非存在する場合、空白のままに定義する
+	                    注意：該当定義は店舗毎に定義が必要!!!!!!
+ 	PRINTCONFIG:		釣銭機関連定義情報
+ 		NAME:			釣銭機識別番号、端末側はどの釣銭機を利用定義用
+ 		WEBSOCKET:		中継アプリ通信方式（WSS)
+ 		PRINT:			釣銭機接続のPCのIPアドレス(実際の環境により、変更要）
+ 		PRINTPORT:		釣銭機接続のPC通信ポート
+ 	DEVICECONFIG:		端末デバイス(タブレット/PC)のIPと関連部屋のマッピング定義
+ 		DEVICE:	
+ 			LOCAL:		端末デバイスのイントラネットIP(例：192.168.1.100)
+ 			PRINTER:	端末デバイスから接続する釣銭機識別番号を定義する
+ 	PRICEMAPPING:		釣銭機から返却値と現金合せ項目APIのマッピング定義
+ 						!!!該当タグの定義はそのまま変更しないください!!!
+ 		CONVERT:		
+ 			APINAME:	現金合せ項目API名
+ 			CHANGE:		釣銭機から返却値
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>		<!-- 店舗コード -->
+        <PRINTCONFIG NAME="POS01">
+			<WEBSOCKET>wss</WEBSOCKET>
+			<PRINT>192.168.10.10</PRINT>
+			<PRINTPORT>443</PRINTPORT>
+		</PRINTCONFIG>
+		<DEVICECONFIG>
+			<DEVICE>
+				<LOCAL>192.168.10.XXX</LOCAL>
+				<PRINTER>POS01</PRINTER>
+			</DEVICE>
+			<DEVICE>
+				<LOCAL>192.168.10.YYY</LOCAL>
+				<PRINTER>POS01</PRINTER><!-- 端末デバイスから接続する釣銭機識別番号を定義する -->
+			</DEVICE>
+		</DEVICECONFIG>
+
+
+		<!--　釣銭機から返却値と現金合せ項目APIのマッピング定義
+			  そのまま変更しないください -->
+		<PRICEMAPPING>
+			<CONVERT>
+				<APINAME>TenThousandMachNums__c</APINAME>
+        		<CHANGE>紙幣機内総金額-1万円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>FiveThousandMachNums__c</APINAME>
+        		<CHANGE>紙幣機内総金額-5千円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>TwoThousandMachNums__c</APINAME>
+        		<CHANGE>紙幣機内総金額-2千円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>OneThousandMachNums__c</APINAME>
+        		<CHANGE>紙幣機内総金額-1千円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>FiveHundredMachNums__c</APINAME>
+        		<CHANGE>硬貨機内総金額-500円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>OneHundredMachNums__c</APINAME>
+        		<CHANGE>硬貨機内総金額-100円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>FiftyMachNums__c</APINAME>
+        		<CHANGE>硬貨機内総金額-50円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>TenMachNums__c</APINAME>
+        		<CHANGE>硬貨機内総金額-10円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>FiveMachNums__c</APINAME>
+        		<CHANGE>硬貨機内総金額-5円</CHANGE>
+			</CONVERT>
+			<CONVERT>
+				<APINAME>OneMachNums__c</APINAME>
+        		<CHANGE>硬貨機内総金額-1円</CHANGE>
+			</CONVERT>
+		</PRICEMAPPING>
+	</SHOP>
+
+
+
+		<!--　釣銭機から返却値と現金合せ項目APIのマッピング定義
+			  そのまま変更しないください -->
+</root>

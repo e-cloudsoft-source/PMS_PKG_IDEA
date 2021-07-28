@@ -1,0 +1,203 @@
+<apex:component controller="SobjectLockComp">
+
+<apex:attribute name="isNeedIncludeBlockUI" description="Report Info Show blockui" type="Boolean" default="false"/>
+<apex:attribute name="isNeedIncludeJqueryJs" description="Report Info Show jqueryJs" type="Boolean" default="false"/>
+<apex:attribute name="LockAppName" type="String" description="Report Info lock app name" default=""/>
+<apex:attribute name="NS" type="String" description="App Name Space" default="" required="true"/>
+
+<apex:outputPanel rendered="{!isNeedIncludeBlockUI}">
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isNeedIncludeJqueryJs}">
+	<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+</apex:outputPanel>
+<input type="hidden" id="_JINYACONNECT_DATALOCK_KEY" />
+
+<div id="_JINYACONNECT_DATALOCK_MESSAGE" style="display:none; "></div>
+<!-- Process Msg -->
+<div id="_JINYACONNECT_DATALOCK_MESSAGE_LODING" style="display:none; cursor: default">
+	 <span><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> Processing...</span>
+</div>
+<!-- Data Lock Error -->
+<div id="_JINYACONNECT_DATALOCK_MESSAGE_WARN" style="display:none; cursor: default">
+	<span id="_JINYACONNECT_DATALOCK_MESSAGE_WARN_CONTENT"></span>
+	<div id="_JINYACONNECT_DATALOCK_MESSAGE_BTN">
+		<!-- 続行 -->
+        <input type="button" class="btn" style="width:100px" id="_JINYACONNECT_DATALOCK_MESSAGE_BTN_YES" name="_JINYACONNECT_DATALOCK_MESSAGE_BTN_YES" value="{!$Label.MSG_9203}" />
+        <!-- やり直す -->
+        <input type="button" class="btn" style="width:100px"  id="_JINYACONNECT_DATALOCK_MESSAGE_BTN_CANCEL" name="_JINYACONNECT_DATALOCK_MESSAGE_BTN_CANCEL" value="{!$Label.MSG_9204}" />
+	</div>
+</div>
+<!-- Data Lock Force Unlock Message -->
+<div id="_JINYACONNECT_DATALOCK_MESSAGE_END" style="display:none; cursor: default">
+	<span id="_JINYACONNECT_DATALOCK_MESSAGE_END_CONTENT"></span>
+	<div>
+		<!-- 完了 -->
+       	<input type="button" class="btn" style="width:100px" id="_JINYACONNECT_DATALOCK_YES" value="{!$Label.MSG_9205}" />
+	</div>
+</div>
+
+
+<script>
+//jQuery.noConflict();
+
+if (typeof JINYACONNECT === "undefined") {
+	JINYACONNECT = {};
+}
+if (typeof JINYACONNECT.DATALOCK === "undefined") {
+	JINYACONNECT.DATALOCK = {};
+}
+JINYACONNECT.DATALOCK.WINDOWZOOM = document.documentElement.clientWidth / window.innerWidth;
+JINYACONNECT.DATALOCK.MESSAGE={
+	LOCKCONFIRM:"{!JSENCODE($Label.MSG_9201)}",
+	LOCKENDALERT:"{!JSENCODE($Label.MSG_9202)}"
+};
+(function($){
+	/**
+	* データLOCK/プロセス処理機能対応
+	* isBlock: TRUE:DATALOCKメッセージ表示
+	*          FALSE:普通の処理プロセス
+	* msg    : 個別表示のメッセージ
+	**/
+	JINYACONNECT.DATALOCK.BlockUi = function(isBlock, message){
+		if(!message) message = '<h1 id="showMessage"><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> Processing...</span>';
+		var msg = jQuery("#_JINYACONNECT_DATALOCK_MESSAGE").html(message);
+		var zoomNew = document.documentElement.clientWidth / window.innerWidth;
+		var topScale = 2;
+	    if (JINYACONNECT.DATALOCK.WINDOWZOOM != zoomNew) {
+	        // zoom has changed
+	        // adjust your fixed element
+	        JINYACONNECT.DATALOCK.WINDOWZOOM = zoomNew
+	        if(JINYACONNECT.DATALOCK.WINDOWZOOM > 1)topScale = 3;
+	    }
+	    var vaildHeight = jQuery(window).height()/JINYACONNECT.DATALOCK.WINDOWZOOM;
+	    var vaildWidth = jQuery(window).width()/JINYACONNECT.DATALOCK.WINDOWZOOM;
+	    
+	    var messageWidth = 650/JINYACONNECT.DATALOCK.WINDOWZOOM;
+	    var messageHeight = 200/JINYACONNECT.DATALOCK.WINDOWZOOM;
+		$.blockUI({
+	        message: msg, 
+	        css: { 
+	        		width:   '650px',
+		            padding:'15px',
+		            '-webkit-border-radius': '5px',
+		            '-moz-border-radius': '5px',
+		            'left' : vaildWidth/2 - (650/2),  // half width - half element width
+	        		'top' :  vaildHeight/topScale - messageHeight/2 , // similar
+		            color: '#000'
+	        	 }
+	    });
+	}
+	JINYACONNECT.DATALOCK.UnblockUi = function(){
+		$.unblockUI({ fadeOut: 200 });
+	}
+	
+	JINYACONNECT.DATALOCK.BeforeEdit = function(shopCode,isNeedLoadingBlock,callbackSuccess,callbackFailure){
+		// Flg of The Block UI Is Show
+		if(isNeedLoadingBlock)JINYACONNECT.DATALOCK.BlockUi();
+		jQuery("#_JINYACONNECT_DATALOCK_KEY").val("");
+		var appName = "{!JSENCODE(LockAppName)}";//$j("#_JINYACONNECT_DATALOCK_APPNAME").val();
+		// make AJAX request to the remote service
+	    Visualforce.remoting.Manager.invokeAction(
+	    "{!$RemoteAction.SobjectLockComp.beforeEdit}", appName,shopCode,function (result, event) {
+	        if (event.type == 'exception') {
+	            alert(event.message);
+	            JINYACONNECT.DATALOCK.UnblockUi();
+	        } else {
+	        	if(result.isNewOrHadlock)
+	        	{
+	        		jQuery("#_JINYACONNECT_DATALOCK_KEY").val(result.dl["{!NS}TimeStmp__c"]);
+		        	if(callbackSuccess) callbackSuccess();
+	        	}else{
+					jQuery("#_JINYACONNECT_DATALOCK_KEY").val(result.dl["{!NS}TimeStmp__c"]);
+					JINYACONNECT.DATALOCK._CONFIRM_WIN(result, shopCode, callbackSuccess,callbackFailure);
+				}
+	        } // End else
+	        if(isNeedLoadingBlock)JINYACONNECT.DATALOCK.UnblockUi();
+	        }, {escape: false});
+	}
+	
+	JINYACONNECT.DATALOCK._CONFIRM_WIN = function (result, shopCode, callbackSuccess, callbackFailure) {
+      		var _confirmMsg = JINYACONNECT.DATALOCK.MESSAGE.LOCKCONFIRM.replaceAll("$$_USER_$$",result.userName).replaceAll("$$_TIME_$$", result.timeStr);
+      		//if(confirm('予定表編集処理中...... \n' + result.userName + 'さんは ' + result.timeStr + 'から編集開始、続いて処理を行いますか'))
+      		//_JINYACONNECT_BLOCK.message
+      		jQuery("#_JINYACONNECT_DATALOCK_MESSAGE_WARN_CONTENT").html(_confirmMsg);
+      		// Content Replace
+      		var $dataLockPanel = jQuery("#_JINYACONNECT_DATALOCK_MESSAGE");
+      		$dataLockPanel.html(jQuery("#_JINYACONNECT_DATALOCK_MESSAGE_WARN").html());
+      		// Add Btn Event Listion
+      		var $yesBtn = $dataLockPanel.find("#_JINYACONNECT_DATALOCK_MESSAGE_BTN_YES");
+      		var $noBtn = $dataLockPanel.find("#_JINYACONNECT_DATALOCK_MESSAGE_BTN_CANCEL");
+      		//jQuery("#JINYACONNECT.DATALOCK.BTN").show();
+      		$yesBtn.bind("click", {callbackSuccess: callbackSuccess, shopCode:shopCode, callbackFailure : callbackFailure}, function(e){
+      			//JINYACONNECT.DATALOCK.BlockUi();
+      			var $dataLockPanel = jQuery("#_JINYACONNECT_DATALOCK_MESSAGE");
+      			$dataLockPanel.html(jQuery("#_JINYACONNECT_DATALOCK_MESSAGE_LODING").html());
+      			JINYACONNECT.DATALOCK.unLockOrChangeLock(false,shopCode, callbackSuccess, callbackFailure);
+        		
+      		});
+      		$noBtn.bind("click", {callbackFailure:callbackFailure}, function(e){
+      			if(callbackFailure) callbackFailure();
+      		});
+	}
+	// 外部呼び出しあり
+	JINYACONNECT.DATALOCK.BeforeUpdate = function(shopCode,isNeedLoadingBlock,callbackSuccess,callbackFailure)
+	{
+		// Flg of The Block UI Is Show
+		if(isNeedLoadingBlock)JINYACONNECT.DATALOCK.BlockUi();
+		var timeStmp = jQuery("#_JINYACONNECT_DATALOCK_KEY").val();
+		var appName = "{!JSENCODE(LockAppName)}";//$j("#_JINYACONNECT_DATALOCK_APPNAME").val();
+		// make AJAX request to the remote service
+	    Visualforce.remoting.Manager.invokeAction(
+	    "{!$RemoteAction.SobjectLockComp.beforeUpdate}", appName,shopCode,timeStmp,function (result, event) {
+	        if (event.type == 'exception') {
+	            alert(event.message);
+	            JINYACONNECT.DATALOCK.UnblockUi();
+	        } else {
+	        	if(result.dl != null)
+	        	{
+	       			if(callbackSuccess)callbackSuccess();
+	       		}else{
+	       			var _confirmMsg = JINYACONNECT.DATALOCK.MESSAGE.LOCKENDALERT.replaceAll("$$_TIME_$$", result.timeStr);
+	       			jQuery("#_JINYACONNECT_DATALOCK_MESSAGE_END_CONTENT").html(_confirmMsg);
+	        		// Content Replace
+	        		var $dataLockPanel = jQuery("#_JINYACONNECT_DATALOCK_MESSAGE");
+	        		$dataLockPanel.html(jQuery("#_JINYACONNECT_DATALOCK_MESSAGE_END").html());
+	        		var $yesBtn = $dataLockPanel.find("#_JINYACONNECT_DATALOCK_YES");
+	        		$yesBtn.bind("click", {callbackFailure:callbackFailure}, function(e){
+	        			JINYACONNECT.DATALOCK.UnblockUi();
+	        			if(callbackFailure)callbackFailure();
+	        		});
+				}
+	        } // End else
+	        
+		}, {escape: false});
+	}
+	// 外部呼び出しあり
+	JINYACONNECT.DATALOCK.unLockOrChangeLock = function(isClearLockFlg,shopCode, callbackSuccess, callbackFailure)
+	{
+		var timeStmp = jQuery("#_JINYACONNECT_DATALOCK_KEY").val();
+		var appName = "{!JSENCODE(LockAppName)}";//$j("#_JINYACONNECT_DATALOCK_APPNAME").val();
+		// make AJAX request to the remote service
+	    Visualforce.remoting.Manager.invokeAction(
+	    "{!$RemoteAction.SobjectLockComp.unlockOrChangeLockStatus}",appName,isClearLockFlg, timeStmp , shopCode,function (result, event) {
+	        if (event.type == 'exception') {
+	            alert(event.message);
+	            JINYACONNECT.DATALOCK.UnblockUi();
+	        } else {
+	        	// キャンセル処理以外の処理場合,注：キャンセル処理の場合、戻る値はNULL
+	        	if (result != null) {
+		        	jQuery("#_JINYACONNECT_DATALOCK_KEY").val(result.dl["{!NS}TimeStmp__c"]);
+		        	if(result.isNewOrHadlock) {
+		        		if(callbackSuccess) callbackSuccess();
+	        		} else {
+		        		JINYACONNECT.DATALOCK._CONFIRM_WIN(result,shopCode, callbackSuccess, callbackFailure);
+		        	}
+	        	}
+	        } // End else
+		}, {escape: false});
+	}
+})(jQuery);
+</script>
+
+</apex:component>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Room Type</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Room Type</value>
+    </caseValues>
+    <fields>
+        <label>RoomTypeClasification</label>
+        <name>ActionType__c</name>
+        <picklistValues>
+            <masterLabel>E/B</masterLabel>
+            <translation><!-- E/B --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>架空</masterLabel>
+            <translation>Aerial</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation>Normal</translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 未利用、保留 --></help>
+        <label><!-- RFU(保留) --></label>
+        <name>AgtInitStockCal__c</name>
+    </fields>
+    <fields>
+        <help><!-- 未利用、保留 --></help>
+        <label><!-- RFU(保留) --></label>
+        <name>AgtInitStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- 説明 --></label>
+        <name>Description__c</name>
+    </fields>
+    <fields>
+        <label><!-- 説明（英） --></label>
+        <name>EnDescription__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名（英） --></label>
+        <name>EnRoomTypeName__c</name>
+    </fields>
+    <fields>
+        <label>Image</label>
+        <name>Image__c</name>
+    </fields>
+    <fields>
+        <label>MaxNumber</label>
+        <name>MaxNumber__c</name>
+    </fields>
+    <fields>
+        <help>MaxRooms</help>
+        <label>Number of rooms</label>
+        <name>MaxRooms__c</name>
+    </fields>
+    <fields>
+        <label>$Number</label>
+        <name>Nums__c</name>
+    </fields>
+    <fields>
+        <label>RoomTypeCode</label>
+        <name>RoomTypeCode__c</name>
+    </fields>
+    <fields>
+        <label>RoomTypeName</label>
+        <name>RoomTypeName__c</name>
+    </fields>
+    <fields>
+        <label><!-- #Seq --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label>ShopInfo</label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel>Room type</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Out of sum target</label>
+        <name>SumNotApplicableFlg__c</name>
+    </fields>
+    <nameFieldLabel>Name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+    <webLinks>
+        <label><!-- RoomTypeMasterDefineBtn --></label>
+        <name>RoomTypeMasterDefineBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- RoomTypeMasterImportBtn --></label>
+        <name>RoomTypeMasterImportBtn</name>
+    </webLinks>
+</CustomObjectTranslation>

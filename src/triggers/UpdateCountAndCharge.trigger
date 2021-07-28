@@ -1,0 +1,1 @@
+trigger UpdateCountAndCharge on Contact (before insert, before Update){}

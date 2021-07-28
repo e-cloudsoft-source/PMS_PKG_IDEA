@@ -1,0 +1,126 @@
+<apex:page standardcontroller="AccountAcount__c" extensions="AccountPDF" showHeader="false"
+    sidebar="false" contentType="application/vnd.ms-excel#contacts.xls" cache="true" readonly="true">
+<!--  Entry Css style sheet file to resource file -->
+<html>
+ <head>
+  <style>
+   @page {
+    size: 8.27in 11.69in;   /* A4 portlate size */
+    margin: 10px;
+   }
+   body {
+   font-family: Arial Unicode MS;
+   }
+   .odd {
+    border-bottom: 1px solid #000;
+    padding: 1px 1px 2px 2px;
+    font-size: 100%;
+   }
+   .even {
+    border-bottom: 1px solid #000;
+    background-color: #CCCCCC;
+    padding: 1px 1px 2px 2px;
+    font-size: 100%;
+   }
+  </style>
+ </head>
+ <body>
+
+
+<table style="width: 100%" cellpadding="0px" cellspacing="0px">
+<tr><td colspan="9" style="text-align: right;"><span>1 / {!allPageList.size}</span></td></tr>
+<tr><td colspan="9" style="text-align: center;"><span style="font-size:18pt;">会 　 計　  書</span></td></tr>
+<tr><td colspan="9" style="text-align: right;"><span style="font-size:8pt;">No.{!AccountNo}</span></td></tr>
+</table>
+
+<hr size="2" color="#000000"/>
+
+<table style="width: 100%" cellpadding="0px" cellspacing="0px">
+<tr>
+<td colspan="4" rowspan="4" width="40%" valign="top"><span style="font-size:16pt;">{!Customer}　様</span></td>
+<td rowspan="4"></td>
+<td colspan="4" rowspan="4" width="60%" valign="top">
+	<span style="float:right; width:255px;height:75px">ホテルロゴ</span>
+</td>
+</tr>
+</table>
+
+
+<apex:repeat value="{!allPageList}" var="onePage" >
+<div style="page-break-before: always; {!if( onePage.isFirstPage, 'display:none', 'display:true')}">
+<table width="100%"><tr><td colspan="9" style="text-align:right; margin-right: 4px;">{!onePage.currPages} / {!allPageList.size}</td>
+</tr></table>
+</div>
+
+<apex:dataTable rowClasses="odd,even" value="{!onePage.onePageList}" var="t" border="1" cellpadding="1" width="100%">
+   <apex:column width="5%" style="font-size:80%;">
+    <apex:facet name="header" >
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;">
+      No.
+     </div>
+    </apex:facet>
+    <div align="center">
+     <apex:outputtext value="{0,number,}">
+      <apex:param value="{!t.rowNo}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="50%" style="font-size:80%;" colspan="5">
+    <apex:facet name="header" >
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;">
+      摘要／項目
+     </div>
+    </apex:facet>
+    {!t.produceNm}
+   </apex:column>
+
+   <apex:column width="15%" style="font-size:80%;">
+    <apex:facet name="header">
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;">
+      単価
+     </div>
+    </apex:facet>
+    <div align="right">
+     <apex:outputtext value="{0,number,##,###}">
+      <apex:outputLabel value="¥ " rendered="{!t.isShowInfo}" />
+      <apex:param value="{!t.unitPrice}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="10%" style="font-size:80%;">
+    <apex:facet name="header">
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;">
+      数量
+     </div>
+    </apex:facet>
+    <div align="center">
+     <apex:outputtext value="{0,number,}">
+      <apex:param value="{!t.quantity}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="20%" style="font-size:80%;">
+    <apex:facet name="header">
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;">
+      金額
+     </div>
+    </apex:facet>
+    <div align="right">
+     <apex:outputtext value="{0,number,##,###}" >
+      <apex:outputLabel value="¥ " rendered="{!t.isShowInfo}" />
+      <apex:outputLabel value="　" rendered="{!!t.isShowInfo}" />
+      <apex:param value="{!t.unitPrice*t.quantity}" />
+     </apex:outputtext>
+    </div>
+   </apex:column>
+ </apex:dataTable>
+
+</apex:repeat>
+
+
+</body>
+</html>
+</apex:page>

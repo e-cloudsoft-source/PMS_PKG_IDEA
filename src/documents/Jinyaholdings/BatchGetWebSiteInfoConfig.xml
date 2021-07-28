@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：簡易会計のレシートに印刷した最新のお知らせと写真を取得するためのバッチスケジュール定義ファイル
+	WebSiteUrl:		最新お知らせ情報を取得したいサイトURL
+					注：バッチスケジュールを実施する前に、該当「WebSiteUrl」に指定のURLは
+					SF側の「設定→管理者設定→セキュリティのコントロール→リモートサイトの設定→新規リモートサイト」に事前登録が必要
+	MessageBlock:	最新お知らせメッセージ取得の定義情報、取得後の情報は「ドキュメント→ワーク→キャンペーンメッセージ」に反映する
+		HTML_BEG:	最新お知らせ情報をHTMLに格納場所の開始HTMLタグ
+		HTML_END:	最新お知らせ情報をHTMLに格納場所の最終HTMLタグ
+		FILTER:		取得したいメッセージの条件定義タグ、複数定義可能、複数定義すると、各FILTERで取得のメッセージは連携して、最新お知らせメッセージで設定する
+					例：下記定義する場合、①で取得のメッセージ「AAA」、②で取得のメッセージは「BBB」の場合、最終取得のお知らせメッセージは
+					「AAA
+					　BBB」になりました（AAAとBBBの間に自動改行する)
+					<FILTER>　→①
+						<HTML_BEG>&lt;h4 class="text-left"&gt;</HTML_BEG>
+						<HTML_END>&lt;/h4&gt;</HTML_END>
+						<HTML_STRIP>TRUE</HTML_STRIP>
+					</FILTER>
+					<FILTER>　→②
+						<HTML_BEG>&lt;p class="text-left mt10"&gt;</HTML_BEG>
+						<HTML_END>&lt;/p&gt;</HTML_END>
+						<HTML_STRIP>TRUE</HTML_STRIP>
+					</FILTER>
+			HTML_BEG:	メッセージ取得するため、該当メッセージの開始HTMLタグ、複数定義可能
+			HTML_END:	メッセージ取得するため、該当メッセージの終了HTMLタグ、複数定義可能
+					例：下記ように定義する場合、メッセージが「1234abcdefgh」の場合、
+						①定義キーワードでHTMLに捜す、ヒントすると、ヒントした場所から後ろ文字列を取得する、文字列：「bcdefgh」返却する
+						②上記①で取得内容から、②に定義のキーワードで再度捜す、ヒントすると、ヒントした場所から後ろ文字列を取得する、文字列：「cdefgh」返却する
+						③上記②で取得内容から、③に定義のキーワードで再度捜す、ヒントすると、ヒントした場所から前の文字列を取得する、文字列：「cde」返却する
+						④上記③で取得内容から、④に定義のキーワードで再度捜す、ヒントすると、ヒントした場所から前の文字列を取得する、文字列：「cd」返却する
+					<FILTER>　
+						<HTML_BEG>a</HTML_BEG>	→①
+						<HTML_BEG>b</HTML_BEG>　→②
+						<HTML_END>f</HTML_END>	→③
+						<HTML_END>e</HTML_END>　→④
+						<HTML_STRIP>TRUE</HTML_STRIP>
+					</FILTER>
+			HTML_STRIP:	取得の内容に対して、含めているHTMLタグを自動外す、文言のみ残るを変更処理ある、なしフラグ、TRUE:変換あり、FALSE：変換なし、デフォル値は変換なし（FALSE)
+					例：取得した文字列は「<a href="xxxx">test</a>」の場合、上記タグにTRUEを定義すると、「test」文字列のみ返却する
+		CONTENT_TYPE:	取得コンテンツの種類、文字列場合、[text/plain]を定義することが推奨する
+		FILE_NAME:		ドキュメントに作成の「キャンペーンメッセージ」の「ドキュメントの一意の名前」を指定可能、省略可能、省略の場合、「WorkFileMsgForCampaing」の一意の名前で設定する
+						注： バッチで「キャンペーンメッセージ」を取得後、誤って該当ドキュメントを削除すると、バッチスケジールを最新お知らせいを取得できない可能性があり場合、
+							該当場合、ゴミ箱から該当削除されたドキュメントを復活するが、または　該当タグ「FILE_NAME」に新た「ドキュメントの一意の名前」を定義する
+	ImageBlock:	最新お知らせ写真のURLを取得の定義情報、取得後の情報は「ドキュメント→ワーク→キャンペーン写真」に反映する
+		HTML_BEG:		MessageBlockのタグ説明を参照してください
+		HTML_END:		MessageBlockのタグ説明を参照してください
+		FILTER:			MessageBlockのタグ説明を参照してください
+			HTML_BEG:	MessageBlockのタグ説明を参照してください
+			HTML_END:	MessageBlockのタグ説明を参照してください
+			HTML_STRIP: MessageBlockのタグ説明を参照してください(写真URLを取得するため、該当タグを定義省略することが推奨する）
+		CONTENT_TYPE:	取得コンテンツの種類、画像の場合、[image/画像の拡張子]を定義することが推奨する(例：[image/png,image/gif,image/jpeg])
+						注：画像の拡張子はjpgの場合、[image/jpeg]を指定してください
+		FILE_NAME:		ドキュメントに作成の「キャンペーン写真」の「ドキュメントの一意の名前」を指定可能、省略可能、省略の場合、「WorkFileImgForCampaign」の一意の名前で設定する
+						注： バッチで「キャンペーン写真」を取得後、誤って該当ドキュメントを削除すると、バッチスケジールを最新お知らせいを取得できない可能性があり場合、
+							該当場合、ゴミ箱から該当削除されたドキュメントを復活するが、または　該当タグ「FILE_NAME」に新た「ドキュメントの一意の名前」を定義する
+	注：文字：< > はXMLの特殊処理文字列ので、情報に定義したい場合、下記ルールで変換して、設定する
+			<	変換：&lt;
+			>	変換：&gt;
+-->
+	<Campaign>				
+		<AutoGetInfo>
+			<WebSiteUrl>https://www.jinya-inn.com/databox/data.php/topics_ja/code#filter=.topics_01_ja</WebSiteUrl>
+			<!-- 最新お知らせメッセージを取得定義情報 -->
+			<MessageBlock>
+				<HTML_BEG>class="portfolio-item col-lg-4 col-md-6 col-sm-6 col-xs-12 topics_01_ja</HTML_BEG>
+				<HTML_END>/li</HTML_END>
+				<FILTER>
+					<HTML_BEG>&lt;h4 class="text-left"&gt;</HTML_BEG>
+					<HTML_END>&lt;/h4&gt;</HTML_END>
+					<HTML_STRIP>TRUE</HTML_STRIP>
+				</FILTER>
+				<!-- JOIN -->
+				<FILTER>
+					<HTML_BEG>&lt;p class="text-left mt10"&gt;</HTML_BEG>
+					<HTML_END>&lt;/p&gt;</HTML_END>
+					<HTML_STRIP>TRUE</HTML_STRIP>
+				</FILTER>
+				<CONTENT_TYPE>text/plain</CONTENT_TYPE>
+				<!-- 
+				<FILE_NAME>WorkFileMsgForCampaing</FILE_NAME>
+				 -->
+			</MessageBlock>
+			<!-- 最新お知らせ写真を取得定義情報 -->
+			<ImageBlock>
+				<HTML_BEG>class="portfolio-item col-lg-4 col-md-6 col-sm-6 col-xs-12 topics_01_ja</HTML_BEG>
+				<HTML_END>/li</HTML_END>
+				<FILTER>
+					<HTML_BEG>img src="</HTML_BEG>
+					<HTML_END>"</HTML_END>
+				</FILTER>
+				<CONTENT_TYPE>image/jpeg</CONTENT_TYPE>
+				<!-- 
+				<FILE_NAME>WorkFileImgForCampaign</FILE_NAME>
+				 -->
+			</ImageBlock>	
+		</AutoGetInfo>
+	</Campaign>
+</root>                    

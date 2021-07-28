@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Expoセッション</value>
+    </caseValues>
+    <fields>
+        <label><!-- ExpireDT --></label>
+        <name>ExpireDT__c</name>
+    </fields>
+    <fields>
+        <label><!-- ExpoUser --></label>
+        <name>ExpoUserRef__c</name>
+        <relationshipLabel><!-- Expoセッション --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- SessionId --></label>
+        <name>SessionId__c</name>
+    </fields>
+</CustomObjectTranslation>

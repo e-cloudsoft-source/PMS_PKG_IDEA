@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>会計科目</value>
+    </caseValues>
+    <fields>
+        <label><!-- 貸借 --></label>
+        <name>BalanceKbn__c</name>
+        <picklistValues>
+            <masterLabel>借方</masterLabel>
+            <translation><!-- 借方 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>貸方</masterLabel>
+            <translation><!-- 貸方 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 貸方部門コード --></label>
+        <name>CreditDepartCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸税区分 --></label>
+        <name>CreditTaxKbn__c</name>
+    </fields>
+    <fields>
+        <label><!-- 借方部門コード --></label>
+        <name>DebitDepartCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 借税区分 --></label>
+        <name>DebitTaxKbn__c</name>
+    </fields>
+    <fields>
+        <label><!-- 補助科目コード --></label>
+        <name>KanjoHojocode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 補助科目名 --></label>
+        <name>KanjoHojoname__c</name>
+    </fields>
+    <fields>
+        <label><!-- 勘定科目コード --></label>
+        <name>KanjocodeCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- Seq# --></label>
+        <name>Kanjocode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 会計科目 --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

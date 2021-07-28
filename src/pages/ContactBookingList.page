@@ -1,0 +1,269 @@
+<apex:page standardController="Contact" extensions="ContactBookingList" showHeader="false" sidebar="false" >
+
+<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/> 
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="false"/>
+    <apex:form id="queryCondtion">
+    <apex:pageBlock >
+    <apex:pageBlockButtons location="bottom">
+        <!-- 検索  -->
+        <apex:commandButton action="{!setQueryRsList}" value="{!$Label.ps__msg_012_0002}" id="theEditButton"/>
+    </apex:pageBlockButtons>
+
+    <!-- 検索条件 -->
+<!-- 表示オプション -->
+    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_012_0003}" >
+
+	    <apex:pageMessages rendered="{!topMsgShowFlg}"/>
+        <apex:outputPanel id="condtionPanel" >
+        <span class="lookupInput">
+        <!-- XXXXXX日から〜 -->
+        <apex:pageblockSectionItem >
+	<!-- 照会期間(yyyy/mm/dd) {!$Label.MSG_012_0004}-->
+			<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+        	<apex:outputPanel >{!thaiDate}&nbsp;&nbsp;</apex:outputPanel>
+        	<!-- 2016/11/25 TIMEZON fix END by zh -->
+        	<apex:outputPanel >
+			<apex:inputText value="{!c_fromSearchDate}" id="fromDate" maxlength="10" size="14" style="height: 1em; font-size: 100%;"/>〜
+			<apex:inputText value="{!c_toSearchDate}" id="toDate" maxlength="10" size="14" style="height: 1em; font-size: 100%;"/>
+			</apex:outputPanel>
+        </apex:pageblockSectionItem>    
+            
+        <!--　過去表示 -->
+        <!-- チェックイン・チェックアウト済みデータでも表示する -->
+        <apex:pageblockSectionItem helpText="{!$Label.ps__msg_012_0005}">
+        <!-- 全データ表示 -->
+            <apex:inputCheckbox value="{!c_showHistoryFlg}" style="margin-left: 10px;" /> <apex:outputlabel value="{!$Label.ps__msg_012_0006}" />
+        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+    </apex:pageBlockSection>
+    
+    </apex:pageBlock>
+    </apex:form>
+    
+    
+	<apex:form id="queryRsForm">
+    <apex:pageBlock id="queryPageBlcok">
+	<apex:pageMessages rendered="{!NOT(topMsgShowFlg)}"/>
+    <apex:pageBlockButtons location="top">
+        <!-- 一括キャンセル -->
+		<input type="button" class="btn" value="{!$Label.ps__msg_012_0007}" id="startAllcancelBtn"  style="width: 140px;{!IF(isCanUpdateLead,'','display:none')}" />
+        <!-- 一括チェックアウト -->
+        <apex:commandButton action="{!batchCheckoutProc}" value="{!$Label.ps__msg_012_0008}" 
+        	style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 140px"
+        	rerender="queryPageBlcok" status="refStatusBlock" oncomplete="javascript:bindEvent();" rendered="{!isCanUpdateLead}"/>
+        <!-- 一括チェックイン -->
+        <apex:commandButton action="{!batchCheckInProc}" value="{!$Label.ps__msg_012_0009}" 
+        	style="color: #ffffff; background-color: #00FF00; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 140px"
+        	rerender="queryPageBlcok" status="refStatusBlock" oncomplete="javascript:bindEvent();" rendered="{!isCanUpdateLead}"/>
+        	
+    </apex:pageBlockButtons>
+    <apex:pageBlockTable value="{!leadInfoLst}" var="var" styleClass="list" width="100%" id="queryRsList">
+    	<apex:column >
+    		<apex:facet name="header"><apex:inputCheckbox id="selectAll" /></apex:facet>
+    		<apex:inputCheckbox id="dataSelectChk" value="{!var.isSelected}" />
+    	</apex:column>
+	<!-- 予約名 -->
+    	<apex:column headerValue="{!$Label.ps__msg_012_0010}">
+    		<apex:outputLink value="javascript:void(0)" onclick="window.open('/{!var.sobj.Id}' , '_blank')" >
+    		<apex:outputField value="{!var.sobj.name}"/>
+    		</apex:outputLink>
+    	</apex:column>
+    	<!-- 到着日 -->
+    	<apex:column headerValue="{!$Label.ps__msg_012_0011}">
+    		<apex:outputField value="{!var.sobj.Field372__c}"/>
+    	</apex:column>
+    	<!-- 予約ステータス -->
+		<apex:column headerValue="{!$Label.ps__msg_012_0012} ">
+			<apex:outputField value="{!var.sobj.ReservedStatus__c}"/>
+		</apex:column>
+		<!-- お客様ステータス -->
+		<apex:column headerValue="{!$Label.ps__msg_012_0013} ">
+			<apex:outputField value="{!var.sobj.Field298__c}"/>
+		</apex:column>
+		<!-- 予約人数 -->
+		<apex:column headerValue="{!$Label.ps__msg_012_0014} ">
+			<apex:outputField value="{!var.sobj.StayPersons__c}"/>
+		</apex:column>
+		<!-- 部屋タイプ -->
+		<apex:column headerValue="{!$Label.ps__msg_012_0015} ">
+			<apex:outputField value="{!var.sobj.refTypeOfRooms__c}"/>
+		</apex:column>
+		<!-- 部屋 -->
+		<apex:column headerValue="{!$Label.ps__msg_012_0016} ">
+			<apex:outputField value="{!var.sobj.Rroom__c}"/>
+		</apex:column>
+		<!-- 予約受付日 -->
+		<apex:column headerValue="{!$Label.ps__msg_012_0017} ">
+			<apex:outputField value="{!var.sobj.Receptiondate__c}"/>
+		</apex:column>
+		   	
+    </apex:pageBlockTable>
+    </apex:pageBlock>
+	<!-- 
+	<apex:inputHidden value="{!cancelSeason}" id="cancelReasonHid"/> -->
+	<apex:inputTextarea value="{!cancelSeason}" rows="6" cols="50" id="cancelReason2" style="display:none"/>
+	
+	<!-- This is the content of the modal dialog -->
+	<div id="myPanel" style="display: none;" >
+	  <div class="hd">
+	    <!-- 一括キャンセル -->
+	    <apex:outputText value="{!$Label.ps__msg_012_0007}" />
+	  </div> 
+	  <div class="bd">
+	  <apex:pageBlock id="cancelReasonBlock">
+	  		<table>
+	  		<tr> <td style="vertical-align: top;">
+			<!-- 理由： -->
+	  		<apex:outputLabel value="{!$Label.ps__msg_012_0018}" for="cancelReason"/>
+	  		</td><td style="vertical-align: top;">
+	  		<apex:inputTextarea value="{!cancelSeason}" rows="6" cols="50" id="cancelReason"/>
+	  		</td>
+	  		</tr>
+	  		</table>
+	      	
+	        <div style="text-align: right;" >
+			<!-- 確定 -->
+	        	<input type="button" value="{!$Label.MSG_012_0019}" id="proAllCanelBtn" class="btn" />
+	        	<!-- キャンセル -->
+				<input type="button" value="{!$Label.MSG_012_0020}" id="cancelBtn" class="btn" />
+	        </div>
+	  </apex:pageBlock>
+	  </div>
+	  <div class="ft" style="font-size: 10px;">
+	    <apex:outputPanel layout="block"></apex:outputPanel>
+	  </div>
+	</div>  
+    <apex:actionFunction name="jsBatchCancelProc" action="{!batchCancelProc}" status="refStatusBlock" rerender="queryPageBlcok" oncomplete="bindEvent();" />
+	<!-- ステータス設定 -->
+	<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+    </apex:form>
+
+
+
+
+<script type="text/javascript">
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+<!-- Jqueryステータス定義 -->
+$j = jQuery.noConflict();
+$j(document).ready(function($) {
+	bindEvent();
+});
+
+// Create a namespace for our custom functions
+YAHOO.namespace("force.com");
+// Function called when we want to show the dialog
+YAHOO.force.com.showMe = function() {
+    document.getElementById("myPanel").style.display = "block";
+    YAHOO.force.com.myDialog.show();
+}
+// Function called when we want to hide the dialog
+YAHOO.force.com.hideMe = function() {
+    YAHOO.force.com.myDialog.hide();
+}
+// Function called when the DOM is ready to create the dialog,
+// render the dialog into the document body, add our dialog skin
+// css to the body tag, and wire up the buttons on our dialog    
+YAHOO.force.com.init = function() {
+	document.body.className = document.body.className + " yui-skin-sam";
+        
+	YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+	    "myPanel",  // The id of our dialog container
+	    { 
+	            width           :   600,    // You can play with this until it's right
+	            visible         :   false,  // Should be invisible when rendered
+	            draggable       :   true,   // Make the dialog draggable
+	            close           :   false,  // Don't include a close title button
+	            modal           :   true,   // Make it modal
+	            fixedCenter     :   true,   // Keep centered if window is scrolled
+	            zindex          :   4,     // Make sure it's on top of everything
+	            
+	            // This line adds the appear/vanish fade effect
+	            effect          :   {
+	                                  effect:YAHOO.widget.ContainerEffect.FADE,
+	                                  duration:0.35
+	                                } 
+	    }
+	); 
+	// Render the dialog to the document.body level of the DOM
+	YAHOO.force.com.myDialog.render(document.body);
+}
+// Add the init method to the window.load event
+//YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+<!-- YAHOO UI END ----------------------->
+
+<!-- Juqery Function Begin -->
+function bindEvent() {
+	//
+	$j("input[id$=':selectAll']").removeAttr('checked');
+	// 一括選択機能
+    $j("input[id$=':selectAll']").click(function(){
+        checks = $j("input[id$=':dataSelectChk']");
+        if ($j(this).attr('checked') == 'checked'){
+            checks.attr('checked','checked');
+        } else {
+            checks.removeAttr('checked');
+        }
+    });
+    // 一括キャンセル
+    /*
+    $j("#startAllcancelBtn").click(function(e) {
+    	YAHOO.force.com.showMe();
+    });*/
+    // キャンセルボタン
+    $j("#cancelBtn").click(function(e) {
+    	YAHOO.force.com.hideMe();
+    });
+    // 一括選択対象内容はSFに反映を行う
+    $j("#startAllcancelBtn").click(function(e) {
+    	// 2015/07/29 一括キャンセル確認メッセージを表示
+    	if (!window.confirm("{!JSENCODE($Label.MSG_012_0001)}")) {
+    		return false;
+    	}
+    	// 理由情報など設定
+    	//$j("input[id$=':cancelReasonHid']").val($j("textarea[id$=':cancelReason']").val());
+    	//$j("textarea[id$=':cancelReason2']").val($j("textarea[id$=':cancelReason']").val());
+    	// Input Window close
+    	//YAHOO.force.com.hideMe();
+    	// Js Action Function
+    	jsBatchCancelProc();
+    });
+    // 日付
+    $j("input[id$=':fromDate']" + "," + "input[id$=':toDate']")
+    .on('blur', function(){
+    	var $this = $j(this);
+    	if ($this.val() == "") return;
+    	// 2016/11/25 TIMEZON fix BEGIN by zh
+		//var inputDt = Date.parse($this.val());
+		var inputDt = Date.parseExact($this.val(), JINYACONNECT.DateFormat);
+		// 2016/11/25 TIMEZON fix END by zh
+	    // 日付書式処理を行う
+		$this.val(dateFormat.format(inputDt));
+    });
+    
+}
+// Block Action Window
+function blockUi() {
+    $j("form[id$=':queryRsForm']").block({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0021}</h1>'
+    }); 
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j("form[id$=':queryRsForm']").unblock(); 
+}
+</script>
+
+
+</apex:page>

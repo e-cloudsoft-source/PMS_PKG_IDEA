@@ -1,0 +1,8 @@
+ユーザ名{!ExpoUser__c.UserName__c} のパスワードのリセット要求を先ほどお受けいたしました。パスワードのリセットを完了するには、次のリンクにアクセスしてください。
+
+{!ExpoUser__c.SiteUrl__c}/{!$Setup.CommDefine__c.AppNS__c}ExpoUserActivation?tokenKey={!ExpoUser__c.TokenId__c}
+
+
+パスワードのリセットを要求していない場合は、システム管理者にお問い合わせください。
+
+JinyaConnect Enterprise system R&D team.

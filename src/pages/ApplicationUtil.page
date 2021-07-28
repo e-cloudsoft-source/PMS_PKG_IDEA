@@ -1,0 +1,213 @@
+<apex:page controller="ApplicationUtilCtrl" sidebar="false" >
+
+<c:CommHeaderComp />
+
+<style>
+fieldset {
+	padding: 0px;
+	margin-top:-5px;
+}
+select {
+	margin-top: -2px;
+}
+a {text-decoration: none;}
+a img { border-style: none; }
+img.txtAlign { vertical-align: baseline; }
+/*** Salesforce Style Class Modify **/
+.message {
+	margin-left: 5px;
+}
+</style>
+
+<script>
+	//メニュータブの名前{#DP|#GP|会計OP|リンクDPコード}を選択
+    sfdcPage.setHelp('TabNameHelp', '{!$Label.MSG_012_0177}');
+    //メニュータブの表示順序{カテゴリコード順|名前{昇順|降順}}を選択
+    sfdcPage.setHelp('SortTabHelp', '{!$Label.MSG_012_0155}');
+    //メニューボタンの表示順序{商品コード順|名前{昇順|降順}}を選択
+    sfdcPage.setHelp('SortProdHelp', '{!$Label.MSG_012_0156}');
+</script>
+
+
+<apex:form id="form">
+<!-- 会計メニューXMLジェネレート -->
+<apex:pageBlock id="block" title="{!$Label.ps__msg_012_0157}">
+	<apex:pageBlockSection columns="1" id="blockSection">
+        <apex:outputPanel >
+	        <table style="margin-left:5px;border-spacing: 0px;border-width: 0px;table-layout: fixed;">
+	            <tr>
+	                <td nowrap="nowrap">
+	                    <span class="helpButton" id="TabNameHelp-_help">
+	                    	<!-- タブ名 -->
+	                        <apex:outputLabel value="{!$Label.ps__msg_012_0158}" styleclass="label"/>
+	                        <img src="/s.gif" alt="" class="helpOrb" title=""/>
+	                    </span>
+	                    &nbsp;&nbsp;
+	                </td>
+	                
+	                <td style="margin-left: 10px;" nowrap="nowrap">
+	                    <apex:selectRadio value="{!tabName}" >
+	                        <apex:selectOption itemValue="DPChange__c"	itemLabel="{!$ObjectType.AccountMaster__c.Fields.DPChange__c.Label}"/>
+	                        <apex:selectOption itemValue="GPChange__c"	itemLabel="{!$ObjectType.AccountMaster__c.Fields.GPChange__c.Label}"/>
+	                        <apex:selectOption itemValue="OP__c" 		itemLabel="{!$ObjectType.AccountMaster__c.Fields.OP__c.Label}"/>
+	                        <apex:selectOption itemValue="Field4__c"	itemLabel="{!$ObjectType.AccountMaster__c.Fields.Field4__c.Label}"/>
+	                    </apex:selectRadio>
+	                </td>
+	                <td><!-- | -->{!$Label.MSG_012_0159}</td>
+	                <td style="margin-left: 10px" nowrap="nowrap">
+	                    <span class="helpButton" id="SortTabHelp-_help" >
+	                    	<!-- タブ表示順 -->
+	                        <apex:outputLabel value="{!$Label.ps__msg_012_0160}" />
+	                        <img src="/s.gif" alt="" class="helpOrb" title=""/>
+	                    </span>
+	                    &nbsp;&nbsp;
+	                </td>
+	                <td style="margin-left: 10px" nowrap="nowrap">
+	                    <apex:selectRadio value="{!sortTab}" >
+	                    	<!-- コード -->
+	                        <apex:selectOption itemValue="code" itemLabel="{!$Label.ps__msg_012_0161}"/>
+	                        <!-- 名 -->
+	                        <apex:selectOption itemValue="name" itemLabel="{!$Label.ps__msg_012_0162}"/>
+	                    </apex:selectRadio>
+	                </td>
+	                <td style="margin-left: 10px" nowrap="nowrap">
+	                    <apex:selectList value="{!sortTabOrder}" multiselect="false" size="1">
+	                    	<!-- 昇順 -->
+	                        <apex:selectOption itemValue="asc" itemLabel="{!$Label.ps__msg_012_0163}"/>
+	                        <!-- 降順 -->
+	                        <apex:selectOption itemValue="desc" itemLabel="{!$Label.ps__msg_012_0164}"/>
+	                    </apex:selectList>
+	                </td>
+	                <td style="width: 10px; text-align: center;">|</td>
+	                <td nowrap="nowrap">
+	                    <span class="helpButton" id="SortProdHelp-_help" style="margin-left: 5px;">
+	                    	<!-- 商品表示順 -->
+	                        <apex:outputLabel value="{!$Label.ps__msg_012_0165}" />
+	                        <img src="/s.gif" alt="" class="helpOrb" title=""/>
+	                    </span>
+	                    &nbsp;&nbsp;
+	                </td>
+	                <td style="margin-left: 10px" nowrap="nowrap">
+	                    <apex:selectRadio value="{!sortProd}" >
+	                    	<!-- 商品コード -->
+	                        <apex:selectOption itemValue="Field3__c" itemLabel="{!$Label.ps__msg_012_0166}"/>
+	                        <!-- 商品名 -->
+	                        <apex:selectOption itemValue="Name" itemLabel="{!$Label.ps__msg_012_0167}"/>
+	                    </apex:selectRadio>
+	                </td>
+	                <td nowrap="nowrap">
+	                    <apex:selectList value="{!sortProdOrder}" multiselect="false" size="1">
+	                    	<!-- 昇順 -->
+	                        <apex:selectOption itemValue="asc" itemLabel="{!$Label.ps__msg_012_0163}"/>
+	                        <!-- 降順 -->
+	                        <apex:selectOption itemValue="desc" itemLabel="{!$Label.ps__msg_012_0164}"/>
+	                    </apex:selectList>
+	                </td>
+	                <td>
+	                	<!-- 作成 -->
+	                    <apex:commandButton action="{!generalProdcutMenuXml}" value="{!$Label.ps__msg_012_0168}" style="margin-left: 10px;width:80px;margin-top:-6px;" reRender="messagePanel" status="JINYACONNECT_LOADINGSTATUS"/>
+	                </td>
+	
+	            </tr>
+	        </table>
+        
+	        <apex:outputPanel id="messagePanel" style="margin-left: 10px;margin-top: 10px;">
+	        <!-- 会計メニューxmlファイルの作成に成功しました。下記リンクで最新xmlファイルをダウンロードしてください。 -->
+	        	<apex:pageMessage summary="{!$Label.ps__msg_012_0169}" severity="info" strength="3" rendered="{!downUrl != null}">
+	        	<!-- ダウンロード -->
+	        		<span style="margin-top:10px;margin-left: 130px;border: 0px;"><a href="{!downUrl}"><img alt="{!$Label.MSG_012_0170}" src="{!URLFOR($Resource.AppImages, '/extend/download.png')}" class="txtAlign"/><!-- ダウンロード -->{!$Label.MSG_012_0170}</a></span>
+	        	</apex:pageMessage>
+	        </apex:outputPanel>
+        </apex:outputPanel>
+
+		</apex:pageBlockSection>
+		
+		<!-- ヘルプ -->
+		<apex:pageBlockSection title="{!$Label.ps__msg_012_0171}" columns="1" id="blockHelpSection">
+
+        <div class="k-block" style="margin-left: 10px;margin-top: 10px;background-color: #f5f5f5">
+			<table style="width: 100%;border-style: none;font-size: 14px;">
+				<tr>
+					<td>
+					<span>
+						<!-- 本ツールは、システム管理者権限でのみ使用可能となります、 -->{!$Label.MSG_012_0172}<br/>
+						<!-- 作成毎にジェネレートされたメニューXMLファイルは上書きされます。 -->{!$Label.MSG_012_0173}
+					</span>
+					</td>
+					
+        			<td rowspan="3">
+        				<img alt="" src="{!URLFOR($Resource.AppHelpInfo, 'img/help0001.png')}" style="width:500px; height: 372px;"/>
+        			</td>
+				</tr>
+				
+				<tr>
+					<td style="font-size: 11px">
+
+<table>
+	<tr>
+		<td>
+<pre>
+{!$Label.MSG_012_0178}
+
+<!--  書式：
+&lt;SHOP&gt;                                      
+    &lt;SHOPCODE&gt;&lt;/SHOPCODE&gt;             
+    &lt;TABLEWIDTH&gt;100%&lt;/TABLEWIDTH&gt;      
+    &lt;TABLEHEIGHT&gt;240px&lt;/TABLEHEIGHT&gt;    
+    &lt;TABGROUP&gt;                                
+        &lt;TABLABEL&gt;A1_料理&lt;/TABLABEL&gt;     
+        &lt;LAYOUT&gt;                              
+            &lt;BTNSTYLE&gt;width:115px;&lt;/BTNSTYLE&gt;
+        &lt;/LAYOUT&gt;
+        &lt;PRODUCT&gt;                             
+            &lt;CODE&gt;0101&lt;/CODE&gt;           
+            &lt;NAME&gt;季節会席&lt;/NAME&gt;       
+        &lt;/PRODUCT&gt;
+    &lt;/TABGROUP&gt;
+&lt;/SHOP&gt;-->
+</pre>
+
+		</td>
+		<td>
+<pre>
+
+{!$Label.MSG_012_0179}
+
+<!-- 店舗別会計商品選択メニュー定義
+店舗コード
+メニューの最大横幅(ピクセル単位)
+メニューの最大縦幅(ピクセル単位)
+１グループの会計商品ボタン定義(複数タブ定義可能)
+該当タブの表示ラベル
+該当タブにボタンのスタイル定義
+ボタンのWidth/Heightのスタイル定義
+
+表示する会計商品
+会計商品コード
+会計商品名 -->
+</pre>
+		</td>
+	</tr>
+</table>
+
+					
+					</td>
+				</tr>
+        		<tr>
+        			<td style="font-size: 14px;">
+						<span style="margin-top: 5px;"><!-- ①は、メニュータブの名前{#DP|#GP|会計OP|リンクDPコード}を選択 -->{!$Label.MSG_012_0174}</span><br/>
+						<span style="margin-top: 5px;"><!-- ②は、メニュータブの表示順序{カテゴリコード順|名前{昇順|降順}}を選択 -->{!$Label.MSG_012_0175}</span><br/>
+						<span style="margin-top: 5px;"><!-- ③は、メニューボタンの表示順序{商品コード順|名前{昇順|降順}}を選択 -->{!$Label.MSG_012_0176}</span><br/>
+        			</td>
+
+        		</tr>
+        	</table>
+        </div>
+        </apex:pageBlockSection>
+        
+        </apex:pageBlock>
+  </apex:form>
+  <script>
+  twistSection(document.getElementById('{!$Component.form.block.blockHelpSection}').getElementsByTagName('img')[0]);
+  </script>
+</apex:page>

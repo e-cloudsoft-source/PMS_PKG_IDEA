@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：項目変更により、指定のChatterグループへポスト機能
+	下記設定は全店舗共通、店舗ごとの定義ができません
+	Lead__c:						ご予約オブジェクトの項目値変更の場合、指定条件により、指定のチャターグループへ変更内容をポストする
+		LISTENFIELD:				ご予約の変更検知対象項目API定義、該当指定のAPI項目値を変更される場合、ポストロジックを起動する
+									定義必須
+									書式：項目API名 複数項目を定義できる、「項目API1,項目API2,項目APIN」方式で定義する
+		LISTENFILTER:				上記検知APIのデータに対して、通知対象データの条件を設定可能、定義省略可能
+									例：予約タイプが「日帰り」かつ　ご予約に割当部屋名が「部屋201　または　部屋　202」場合、チャターグループへポストする
+									ReservedType__c = '日帰り' and (Rroom__r.Name = '部屋201' or Rroom__r.Name = '部屋202')
+		CHATTERGROUP:				ポスト対象チャターグループコードを定義する(共通定義：チャターグループ名)
+									例：1
+	BookingEstimateItem__c: 		予約見積明細の項目値変更の場合、関連連動チェック定義を行う
+		LISTENFIELD:				予約見積明細の変更検知対象項目API定義、該当指定のAPI項目値を変更される場合、ポストロジックを起動する
+									書式：項目API名 複数項目を定義できる、「項目API1,項目API2,項目APIN」方式で定義する
+		LISTENFILTER:				上記検知APIのデータに対して、通知対象データの条件を設定可能、定義省略可能
+									例：予約タイプが「日帰り」かつ　ご予約に割当部屋名が「部屋201　または　部屋　202」場合、チャターグループへポストする
+									ReservedType__c = '日帰り' and (Rroom__r.Name = '部屋201' or Rroom__r.Name = '部屋202')
+		CHATTERGROUP:				ポスト対象チャターグループコードを定義する(共通定義：チャターグループ名)
+									例：1
+-->
+<!-- 
+例：ご予約の 「和食調理_確認済」 が「ON」 かつ「料理補足」が「アレルギー」含め場合
+	「料理補足」項目内容を変更される場合、指定のチャターグループ「コード:1」へ変更内容をポストする
+ -->
+<Lead__c>
+	<LISTENFIELD>Field354__c</LISTENFIELD>
+	<LISTENFILTER>JpCookCheck__c = true and Field354__c like '%アレルギー%'</LISTENFILTER>
+	<CHATTERGROUP>11</CHATTERGROUP>
+</Lead__c>
+<!-- 
+例：ご予約の 「和食調理_確認済」 が「ON」 かつ「予約見積明細」「会計OP」の「リンクOPコード」が「11」場合　
+	予約見積明細「数量」を変更される場合、指定のチャターグループ「コード:11」へ変更内容をポストする
+ -->
+<BookingEstimateItem__c>
+	<LISTENFIELD>Amount__c</LISTENFIELD>
+	<LISTENFILTER>refBooking__r.JpCookCheck__c = true and OP__r.OPcode1__c = 11</LISTENFILTER>
+	<CHATTERGROUP>11</CHATTERGROUP>
+</BookingEstimateItem__c>
+</root>

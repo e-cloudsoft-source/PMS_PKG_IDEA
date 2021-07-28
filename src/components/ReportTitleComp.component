@@ -1,0 +1,389 @@
+<apex:component controller="ReportTitleCompCtrl">
+	
+	<!-- Postion -->
+	<apex:attribute name="postion" description="Report Info Show Position Adjust Flg[top/bottom]" type="String" default="top"/>
+	<apex:attribute name="noExtendInfo" description="Report Info Show Email/Website Adjust Flg[top/bottom]" type="Boolean" default="false"/>
+	<apex:attribute name="isBillPdf" description="Is Bill Pdf Adjust Flg" type="Boolean" default="false"/>
+	<apex:attribute name="width" description="div block width info" type="String" default="255" />
+	<apex:attribute name="pdfType" description="stampImage position padding left length(leadShou/空白/stamp)" type="String" default="" />
+	<apex:attribute name="spaceNoWrap" description="半角スペース自動改行制御CSS" type="String" default="" />
+	<apex:attribute name="stampisShowFlg" description="ハンコ表示、非表示制御" type="Boolean" default="true" />
+	<apex:attribute name="shopCd" description="ShopCode Info" type="String" assignTo="{!billRTshopCd}" default="" />
+	<apex:attribute name="repInfo" description="Report Info" type="ReportLogo__c" assignTo="{!reportInfo}" />
+	<!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	<apex:attribute name="accStampisShowFlg" description="ハンコ表示、非表示制御" type="Boolean" default="false"/>
+	<!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+
+	<!-- 見積書専用パタン対応[組織情報で出力する] -->
+	<apex:outputPanel rendered="{!!isBranchShop && postion == 'top' && noExtendInfo && (pdfType =='leadShou')}">
+			 <div style="float:right;position:relative; width:{!width}px;height:75px;">
+           	 	<apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:{!width}px;text-align: left;font-size: 10pt;">
+            <table cellpadding="0" cellspacing="0" style="display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+	           <tr style="height: 2px;">
+	           <td style="width: 30px;"></td>
+	           <td style="width: 100px;"></td>
+	           <td style="width: 20px;"></td>
+	           <td style="width: 148px;"></td>
+	           </tr>
+
+	           <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!$Organization.Name}</span>
+	           
+					<div style="position:relative;">
+	         		<div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+		            	<apex:outputField value="{!reportInfo.StampImage__c}" rendered="{!stampisShowFlg}"/>
+		            </div>
+		            </div>
+	           
+	           </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+            </table>
+           	   
+            </div>
+	</apex:outputPanel>
+	<!-- 見積書専用パタン対応[支店単位で情報出力する] -->
+	<apex:outputPanel rendered="{!isBranchShop && postion == 'top' && noExtendInfo && (pdfType =='leadShou')}">
+			 <div style="float:right;position:relative; width:{!width}px;height:75px;">
+           	 	<apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:{!width}px;text-align: left;font-size: 10pt;">
+            <table cellpadding="0" cellspacing="0" style="display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+	           <tr style="height: 2px;">
+	           <td style="width: 30px;"></td>
+	           <td style="width: 100px;"></td>
+	           <td style="width: 20px;"></td>
+	           <td style="width: 148px;"></td>
+	           </tr>
+
+	          <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!reportInfo.ShopInfoRef__r.Name}</span>
+	           
+					<div style="position:relative;">
+	         		<div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+		            	<apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!stampisShowFlg}" />
+		            </div>
+		            </div>
+	           
+	           </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Post__c),'' , '〒')}{!reportInfo.ShopInfoRef__r.Post__c}</td></tr>
+               <tr height="10px;"><td colspan="4">{!reportInfo.ShopInfoRef__r.Address__c}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Phone__c),'' , 'Tel')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Phone__c}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Fax__c),'' , 'Fax')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Fax__c}</td></tr>
+            </table>
+           	   
+            </div>
+	</apex:outputPanel>
+	
+	
+	<!-- 請求書パタン対応：支店なし -->
+	<apex:outputPanel rendered="{!!isBranchShop && postion == 'top' && noExtendInfo && (pdfType =='') && isBillPdf}">
+	        <div style="float:right; width:{!width}px;height:75px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:{!width}px; text-align: left;font-size: 10pt;">
+            <table cellpadding="0" cellspacing="0" style="display: {!IF($Setup.CommDefine__c.AccountStampIsShowFlg__c, 'none', 'block')}">
+	           <tr style="height: 2px;">
+	           <td style="width: 30px;"></td>
+	           <td style="width: 100px;"></td>
+	           <td style="width: 20px;"></td>
+	           <td style="width: 148px;"></td>
+	           </tr>
+
+	           <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!$Organization.Name}</span>
+                  <div style="position:relative;">
+                     <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+                        <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!stampisShowFlg}" />
+                     </div>
+                  </div>
+               </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	<!-- 請求書パタン対応：支店あり -->
+	<apex:outputPanel rendered="{!isBranchShop && postion == 'top' && noExtendInfo && (pdfType =='') && isBillPdf}">
+	        <div style="float:right; width:{!width}px;height:75px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:{!width}px; text-align: left;font-size: 10pt;">
+            <table cellpadding="0" cellspacing="0" style="display: {!IF($Setup.CommDefine__c.AccountStampIsShowFlg__c, 'none', 'block')}">
+	           <tr style="height: 2px;">
+	           <td style="width: 30px;"></td>
+	           <td style="width: 100px;"></td>
+	           <td style="width: 20px;"></td>
+	           <td style="width: 148px;"></td>
+	           </tr>
+
+	           <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!reportInfo.ShopInfoRef__r.Name}</span>
+                  <div style="position:relative;">
+                     <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+                        <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!stampisShowFlg}" />
+                     </div>
+                  </div>
+              </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Post__c),'' , '〒')}{!reportInfo.ShopInfoRef__r.Post__c}</td></tr>
+               <tr height="10px;"><td colspan="4">{!reportInfo.ShopInfoRef__r.Address__c}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Phone__c),'' , 'Tel')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Phone__c}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Fax__c),'' , 'Fax')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Fax__c}</td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	<!-- これから会計書TITLE用設定情報 -->
+	<!-- 施設コード１，２専用パタン対応 -->
+	<apex:outputPanel rendered="{!!isBranchShop && postion == 'top' && noExtendInfo && (pdfType =='') && !isBillPdf}">
+	        <div style="float:right; width:{!width}px;height:75px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:{!width}px; text-align: left;font-size: 10pt;">
+            <table cellpadding="0" cellspacing="0" style="display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+	           <tr style="height: 2px;">
+	           <td style="width: 30px;"></td>
+	           <td style="width: 100px;"></td>
+	           <td style="width: 20px;"></td>
+	           <td style="width: 100px;"></td>
+	           </tr>
+
+	           <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!$Organization.Name}</span>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	<!-- 支店情報(施設コード１，２専用パタン対応) -->
+	<apex:outputPanel rendered="{!isBranchShop && postion == 'top' && noExtendInfo && (pdfType =='') && !isBillPdf}">
+	        <div style="float:right; width:{!width}px;height:75px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:{!width}px; text-align: left;font-size: 10pt;">
+            <table cellpadding="0" cellspacing="0" style="display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+	           <tr style="height: 2px;">
+	           <td style="width: 30px;"></td>
+	           <td style="width: 100px;"></td>
+	           <td style="width: 20px;"></td>
+	           <td style="width: 100px;"></td>
+	           </tr>
+
+	           <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!reportInfo.ShopInfoRef__r.Name}</span>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Post__c),'' , '〒')}{!reportInfo.ShopInfoRef__r.Post__c}</td></tr>
+               <tr height="10px;"><td colspan="4">{!reportInfo.ShopInfoRef__r.Address__c}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Phone__c),'' , 'Tel')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Phone__c}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Fax__c),'' , 'Fax')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Fax__c}</td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	<!-- 施設コード１，２専用パタン対応 -->
+	<apex:outputPanel rendered="{!!isBranchShop && postion != 'top' && noExtendInfo}">
+            <div style="float:right; width:255px;height:85px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:255px; text-align: left;font-size: 10pt;
+            			display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" >
+               <tr style="height: 2px;">
+               <td style="width: 30px;"></td>
+               <td style="width: 100px;"></td>
+               <td style="width: 20px;"></td>
+               <td style="width: 100px;"></td>
+               </tr>
+			   <!-- 会社名 -->
+               <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!$Organization.Name}</span>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+               </td></tr>
+               <tr height="10px;"><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	<!-- 支店情報(施設コード１，２専用パタン対応) -->
+	<apex:outputPanel rendered="{!isBranchShop && postion != 'top' && noExtendInfo}">
+            <div style="float:right; width:255px;height:85px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="float:right; width:255px; text-align: left;font-size: 10pt;
+            			display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" >
+               <tr style="height: 2px;">
+               <td style="width: 30px;"></td>
+               <td style="width: 100px;"></td>
+               <td style="width: 20px;"></td>
+               <td style="width: 100px;"></td>
+               </tr>
+			   <!-- 会社名 -->
+	           <tr height="10px;"><td width="1%"></td><td colspan="4"><span style="font-size: 11pt;">{!reportInfo.ShopInfoRef__r.Name}</span>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Post__c),'' , '〒')}{!reportInfo.ShopInfoRef__r.Post__c}</td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!reportInfo.ShopInfoRef__r.Address__c}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Phone__c),'' , 'Tel')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Phone__c}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Fax__c),'' , 'Fax')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Fax__c}</td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	
+	
+	
+	<!-- これから、施設コード３，４，６，７対応 -->
+	<!-- 元方式（組織情報と設定情報により、設定情報を表示する） -->
+	<apex:outputPanel rendered="{!!isBranchShop && postion == 'top' && !noExtendInfo && (pdfType =='')}">
+            <div style="float:right; width:255px;height:85px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="width:100%;float:left; text-align: left; font-size: 75%;
+						display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'block', 'none')}">
+				<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:20px; height: 84px;"/>
+			</div>
+            <div style="width:100%;float:left; text-align: left; font-size: 75%;
+            			display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" style="margin-right: 0px;width: 100%;text-align: left;">
+	           <!-- 会社名 -->
+	           <tr height="10px;"><td width="1%"></td><td colspan="4">{!$Organization.Name}
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Setup.CommDefine__c.ps__FacilityEmail__c),'' , 'Email')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.ps__FacilityEmail__c}</span></td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Setup.CommDefine__c.ps__FacilityWebsite__c),'' , 'URL')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.ps__FacilityWebsite__c}</span></td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	<!-- 支店情報 -->
+	<apex:outputPanel rendered="{!isBranchShop && postion == 'top' && !noExtendInfo && (pdfType =='')}">
+            <div style="float:right; width:255px;height:85px;">
+            <apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+            <div style="width:100%;float:left; text-align: left; font-size: 75%;
+						display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'block', 'none')}">
+				<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:20px; height: 84px;"/>
+			</div>
+            <div style="width:100%;float:left; text-align: left; font-size: 75%;
+            			display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" style="margin-right: 0px;width: 100%;text-align: left;">
+	           <!-- 会社名 -->
+	           <tr height="10px;"><td width="1%"></td><td colspan="4">{!reportInfo.ShopInfoRef__r.Name}
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Post__c),'' , '〒')}{!reportInfo.ShopInfoRef__r.Post__c}</td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!reportInfo.ShopInfoRef__r.Address__c}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Phone__c),'' , 'Tel')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Phone__c}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Fax__c),'' , 'Fax')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Fax__c}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Email__c),'' , 'Email')}</td><td colspan="3"><span style="margin-left: 2px">{!reportInfo.ShopInfoRef__r.Email__c}</span></td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.WebSite__c),'' , 'URL')}</td><td colspan="3"><span style="margin-left: 2px">{!reportInfo.ShopInfoRef__r.WebSite__c}</span></td></tr>
+            </table>
+            </div>
+	</apex:outputPanel>
+	
+
+	<apex:outputPanel rendered="{!!isBranchShop && postion != 'top' && !noExtendInfo}">
+		<div style="float:right; width:100%; text-align: right;font-size: 85%;
+					display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" style="margin-right: 0px;width: 100%;text-align: left;">
+	           <!-- 会社名 -->
+	           <tr height="10px;"><td width="100%"></td><td colspan="4">{!$Organization.Name}
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td width="100%"></td><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td colspan="4" style="{!spaceNoWrap}">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Setup.CommDefine__c.ps__FacilityEmail__c),'' , 'Email')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.ps__FacilityEmail__c}</span></td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Setup.CommDefine__c.ps__FacilityWebsite__c),'' , 'URL')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.ps__FacilityWebsite__c}</span></td></tr>
+            </table>
+		</div>
+	</apex:outputPanel>
+	<!-- 支店情報 -->
+	<apex:outputPanel rendered="{!isBranchShop && postion != 'top' && !noExtendInfo}">
+		<div style="float:right; width:100%; text-align: right;font-size: 85%;
+					display: {!IF($Setup.CommDefine__c.ps__AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" style="margin-right: 0px;width: 100%;text-align: left;">
+	           <!-- 会社名 -->
+	           <tr height="10px;"><td width="100%"></td><td colspan="4">{!reportInfo.ShopInfoRef__r.Name}
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+	           <div style="position:relative;">
+	           <div style="position:absolute;right:0;top:0;opacity:0.4;filter:alpha(opacity=40); ">
+	            <apex:outputField value="{!reportInfo.StampImage__c}"  rendered="{!accStampIsShowFlg}" />
+	           </div>
+	           </div>
+	           <!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+	           </td></tr>
+               <tr height="10px;"><td width="100%"></td><td colspan="4">{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Post__c),'' , '〒')}{!reportInfo.ShopInfoRef__r.Post__c}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td colspan="4" style="{!spaceNoWrap}">{!reportInfo.ShopInfoRef__r.Address__c}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Phone__c),'' , 'Tel')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Phone__c}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Fax__c),'' , 'Fax')}</td><td colspan="3">{!reportInfo.ShopInfoRef__r.Fax__c}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.Email__c),'' , 'Email')}</td><td colspan="3"><span style="margin-left: 2px">{!reportInfo.ShopInfoRef__r.Email__c}</span></td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK(reportInfo.ShopInfoRef__r.WebSite__c),'' , 'URL')}</td><td colspan="3"><span style="margin-left: 2px">{!reportInfo.ShopInfoRef__r.WebSite__c}</span></td></tr>
+            </table>
+		</div>
+	</apex:outputPanel>
+	<!-- 2019/05/15 領収書の収入印紙部分に添付の画像機能対応 BY zyz BEGIN -->
+	<!-- 印紙税画像印章显示 -->
+	<apex:outputPanel rendered="{!pdfType == 'stamp'}">
+            <table cellpadding="0" cellspacing="0" border="0">
+	           <tr><td>
+	           <div style="position:relative;">
+	           <div style="position:absolute;opacity:0.4;margin-left:20px ;filter:alpha(opacity=40); ">
+	             <apex:outputField value="{!reportInfo.StampDutyImage__c}" />
+	           </div>
+	           </div>
+	           </td></tr>
+            </table>
+	</apex:outputPanel>
+	<!-- 2019/05/15 領収書の収入印紙部分に添付の画像機能対応 BY zyz END -->
+</apex:component>

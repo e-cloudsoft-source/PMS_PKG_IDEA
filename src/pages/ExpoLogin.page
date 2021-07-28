@@ -1,0 +1,115 @@
+<apex:page controller="ExpoLoginCtrl" standardStylesheets="false" showHeader="false" title="ログイン" >
+<!-- css -->
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/login.css')}" />
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/loader.js')}"/>
+<style type="text/css">
+/* loader */
+#blockCream{
+	width:100%;
+	height:100%;
+	position: fixed;
+	background: #737373;
+}
+#loader-bg{
+	display: none;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background: #737373;
+	z-index: 1;
+}
+#loader{
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 200px;
+	height: 200px;
+	margin-top: -100px;
+	margin-left: -100px;
+	text-align: center;
+	color: #fff;
+	z-index: 2;
+	font-size: 62.5%;
+}
+#loader img{
+	width: 44px;
+	height: 44px;
+}
+#loader P{
+	font-size: 0.8125rem;
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+}
+@media (max-width: 1100px){
+	#loader {
+		font-size: 0.75rem;
+	}
+}
+/* message*/
+.messageTable{
+	color: #C23934 !important;;
+	margin-bottom: 14px !important;;
+	font-size: 12px !important;;
+}
+</style>
+<div id="left" class="pr">
+	<div id="wrap">
+		<div id="main">
+			<div id="wrapper">
+				<div id="logo_wrapper" class="standard_logo_wrapper mb24">
+					<h1 style="height: 100%; display: table-cell; vertical-align: bottom;">
+						<apex:image url="{!URLFOR(LogoUrl)}" />
+					</h1>
+				</div>
+				<div id="content" style="display: block;">
+					<div id="theloginform" style="display: block;">
+						<apex:form id="registerFrom">
+							<!-- エラーメッセージ情報 -->
+							<apex:outputPanel id="errPanel">
+								<apex:pageMessages />
+							</apex:outputPanel>
+							<div id="usernamegroup" class="inputgroup">
+								<label for="username" class="label">ユーザ名</label>
+								<div id="username_container">
+									<apex:inputText styleClass="input r4 wide mb16 mt8 username" value="{!username}" id="username" onkeydown="keyPassword()"/>
+								</div>
+							</div>
+							<label for="password" class="label">パスワード</label>
+							<apex:inputSecret styleClass="input r4 wide mb16 mt8 password" value="{!password}" id="password" onkeydown="keyLogin()" />
+							<apex:commandButton styleClass="button r4 wide primary" value="ログイン" id="login" onclick="startLoading();" action="{!actionLogin}" reRender="errPanel" oncomplete="setTextEmptyFun();stopLoading();"></apex:commandButton>
+						</apex:form>
+						<div class="w0 links bt pt16 mb20">
+							<a id="forgot_password_link" class="fl small" href="{!URLFOR($Page.ExpoForgotpwd)}">パスワードをお忘れですか?</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+window.onload = function(){
+	$("input[id$=':username']").focus();
+}
+// 必填项Css
+function setTextEmptyFun(){
+	$("input.input").each(function(){
+		if($(this).val() == "") $(this).addClass("textEmpty");
+		else $(this).removeClass("textEmpty");
+	});
+}
+function keyLogin(){
+	if (event.keyCode==13) { //回车键的键值为13
+		$("input[id$=':login']").click(); //调用登录按钮的登录事件
+	}
+}
+function keyPassword(){
+	if (event.keyCode==13) { //回车键的键值为13
+		$("input[id$=':password']").focus(); //光标跳转到password文本框里
+	}
+}
+</script>
+</apex:page>

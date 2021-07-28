@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Shop information</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Shop information</value>
+    </caseValues>
+    <fields>
+        <help><!-- 「サービス料別表示制御」は「2」で定義されている場合、該当フラグ定義により、サービス料税込み・税抜き切替できる
+TRUE：サービス料は税抜き金額を出力する
+FALSE:サービス料は税込みき金額を出力する(デフォルト値) --></help>
+        <label><!-- サービス料税抜表示フラグ --></label>
+        <name>AccountServiceChargeNoTaxFlg__c</name>
+    </fields>
+    <fields>
+        <label>Address</label>
+        <name>Address__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当店舗の入湯税商品を設定する
+共有定義「入湯税自動入力フラグ2」が「2」で設定場合、下記関連処理を行う
+1.該当項目を設定される場合、OTA取り込みに従って、プランを自動作成作成際に、該当設定値でプランの入湯税項目に設定する
+2.該当項目を設定されない場合、OTA取り込みに従って、プランを自動作成作成際に、共通定義「入湯税商品コード」でプランの入湯税項目に設定する --></help>
+        <label><!-- 入湯税 --></label>
+        <name>BathTaxAccMstRef__c</name>
+        <relationshipLabel><!-- 店舗情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「割当済」の色設定用、デフォルト値：#00ccff
+設定例：royalblue --></help>
+        <label>Color_Room Indicator_assigned</label>
+        <name>ColorRSRoomAssigned__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「故障」の色設定用、デフォルト値：#2554C7
+設定例：gray --></help>
+        <label>Color_Room Indicator_failure</label>
+        <name>ColorRSRoomBad__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「出発予定」の色設定用、デフォルト値：#FDD017 
+設定例：gold --></help>
+        <label>Color_Room Indicator_departure schedule</label>
+        <name>ColorRSRoomChkOutDay__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「出発」の色設定用、デフォルト値：#F75D59
+設定例：coral --></help>
+        <label>Color_Room Indicator_departure</label>
+        <name>ColorRSRoomChkOut__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「未清掃」の色設定用、デフォルト値：#B0C4DE
+設定例：lightsteelblue --></help>
+        <label>Color_Room Indicator_not clean</label>
+        <name>ColorRSRoomNoClean__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「外出」の色設定用、デフォルト値：#DB7093 
+設定例：darksalmon --></help>
+        <label><!-- 色_ルームインジケータ_外出 --></label>
+        <name>ColorRSRoomOut__c</name>
+    </fields>
+    <fields>
+        <help><!-- 店舗別のルームインジケータ画面のステータス「滞在」の色設定用、デフォルト値：#90EE90
+設定例：limegreen --></help>
+        <label>Color_Room Indicator_stay</label>
+        <name>ColorRSRoomStay__c</name>
+    </fields>
+    <fields>
+        <label>Mail</label>
+        <name>Email__c</name>
+    </fields>
+    <fields>
+        <label>Consumer tax related English</label>
+        <name>EnglishTaxLabel__c</name>
+    </fields>
+    <fields>
+        <help><!-- 施設側EXPOから商品購入履歴を公開する・しないフラグ
+TRUE:公開しない
+FALSE:公開する（デフォルト） --></help>
+        <label><!-- Expo購入履歴非公開 --></label>
+        <name>ExpoIsOpenBuyHistoryFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Expo組織情報 --></label>
+        <name>ExpoOrgInfoRef__c</name>
+        <relationshipLabel><!-- 店舗情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 該当コードで、会計書のレイアウトを切り替え制御する
+該当項目に非設定する場合、共通定義の「施設コード」項目設定で制御を行う --></help>
+        <label>Facility code</label>
+        <name>FacilityCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- Fax --></label>
+        <name>Fax__c</name>
+    </fields>
+    <fields>
+        <label>Payee1</label>
+        <name>Payee1__c</name>
+    </fields>
+    <fields>
+        <label>Payee2</label>
+        <name>Payee2__c</name>
+    </fields>
+    <fields>
+        <label>Payee3</label>
+        <name>Payee3__c</name>
+    </fields>
+    <fields>
+        <label>Payee account</label>
+        <name>PayeeAcount__c</name>
+    </fields>
+    <fields>
+        <help>店舗別のラックレート設定の人数デイフォル値(1?10)</help>
+        <label>Rack rate number default value</label>
+        <name>PeopleDefault__c</name>
+    </fields>
+    <fields>
+        <label>Telephone</label>
+        <name>Phone__c</name>
+    </fields>
+    <fields>
+        <label>Zip code</label>
+        <name>Post__c</name>
+    </fields>
+    <fields>
+        <help><!-- タイムテーブル画面情報を自動更新間隔分数 
+インターバルタイマの設定値は1以上を設定ください
+インターバルタイマの設定値は0 又は 空白に設定する場合、自動更新を行わない --></help>
+        <label><!-- タイムテーブルページ更新のインターバルタイマ --></label>
+        <name>RoomScheduleTimerMinute__c</name>
+    </fields>
+    <fields>
+        <label><!-- Seq# --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計書(施設コード33/34) 、請求書、見積書にサービス料合計金額は利用明細に表示する・しない制御 
+0/空欄：サービス料合計金額は明細行に追加表示しない（デフォルト値） 
+1：サービス料合計金額は明細行に追加表示 
+2：サービス料合計金額は内税消費税行の下に表示 --></help>
+        <label><!-- サービス料別表示制御 --></label>
+        <name>ServiceChargeIsShow__c</name>
+    </fields>
+    <fields>
+        <label>Shop code</label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <help>店舗別のラックレート設定のTierデイフォル値(Tier1?Tier8)</help>
+        <label>Rack rate Tier default value</label>
+        <name>TierDefault__c</name>
+    </fields>
+    <fields>
+        <label><!-- WebSite --></label>
+        <name>WebSite__c</name>
+    </fields>
+    <nameFieldLabel>Shop Name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

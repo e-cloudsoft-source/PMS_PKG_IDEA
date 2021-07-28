@@ -1,0 +1,1546 @@
+<!--2018/12/15 APEXのVersion最新化対応 zyz BY BEGIN-->
+<apex:page standardcontroller="Lead__c" extensions="EnkaiPDF" showHeader="false" sidebar="false" renderAs="PDF" applyHtmlTag="false" applyBodyTag="false">
+<!--2018/12/15 APEXのVersion最新化対応 zyz BY END-->
+<html>
+<head>
+ <style>
+  @page {
+   size: 8.27in 11.69in;   /* A4 portlate size */
+   margin: 0cm;
+  }
+  body {
+   font-family: Arial Unicode MS;
+   width: 19.25cm;
+   height: 27.9cm;
+   position:absolute;
+   top: 0.7cm;
+   left: 0.7cm;
+   overflow: hidden;
+  }
+  
+  #TitleSection{
+   width: 100%;
+   height: 1.3cm;
+   position: absolute;
+   top: 0cm;
+  }
+  #Title{
+   width: 8.3cm;
+   height: 1.3cm;
+   position:absolute;
+   top: 0cm;
+   font-size: 1.1cm;
+   text-align: center;
+   border-bottom: 1px solid #000;
+  }
+  #Check{
+   width: 10.35cm;
+   height: 1.3cm;
+   position:absolute;
+   top: 0cm;
+   right: 0cm;
+   padding: 0cm;
+   font-size: 0.3cm;
+   text-align: center;
+  }
+  
+  #BookingInfo{
+   width: 100%;
+   height: 4.38cm;
+   position: absolute;
+   top: 1.7cm;
+   font-size: 0.35cm;
+   text-align: center;
+  }
+  #Date{
+   width: 8.3cm;
+   border: 0.25px solid #777;
+  }
+  #Plan{
+   width: 10.35cm;
+   border: 0.25px solid #777;
+   position: absolute;
+   top: 0cm;
+   right: 0cm;
+  }
+  #BanquetName{
+   width: 100%;
+   border: 0.25px solid #777;
+  }
+  #Applicant{
+   width: 8.3cm;
+   border: 0.25px solid #777;
+   font-size: 0.4cm;
+  }
+  #Address{
+   width: 10.35cm;
+   border: 0.25px solid #777;
+   position: absolute;
+   bottom: 0cm;
+   right: 0cm;
+   font-size: 0.32cm;
+  }
+  
+  #PlaceInfo{
+   width: 100%;
+   height: 1.6cm;
+   position:absolute;
+   top: 6.3cm;
+   font-size: 0.3cm;
+  }
+  
+  #Detail{
+   width: 100%;
+   height: 19.6cm;
+   position:absolute;
+   top: 8.2cm;
+   font-size: 0.3cm;
+  }
+  #Drink{
+   font-size: 0.3cm;
+  }
+  #Drink tr{
+   height: 0.45cm;
+  }
+  #Drink td{
+   border: 0.25px solid #777;
+  }
+  #Item{
+   font-size: 0.3cm;
+   text-align: right;
+  }
+  #Item tr{
+   height: 0.45cm;
+  }
+  #Item td{
+   border: 0.25px solid #777;
+  }
+  #Other{
+   border: 0.25px solid #777;
+  }
+  #Bus{
+   border: 0.25px solid #777;
+   text-align: center;
+  }
+  #Payment{
+   border: 0.25px solid #777;
+   text-align: center;
+  }
+  th{
+   text-align: center;
+   height: 0.35cm;
+   border: 0.5px solid #777;
+  }
+  td{
+   height: 0.4cm;
+   border: 0.25px solid #777;
+  }
+ </style>
+</head>
+<body>
+ <div id="TitleSection">															<!-- タイトル -->
+  <div id="Title">
+   <span style="font-family:Tahoma,sans-serif;">宴会手配書</span>宴会手配書
+  </div>
+  <table id="Check" cellspacing="0" cellpadding="0">								<!-- チェックリスト -->
+   <tr style="line-height: 0.35cm;">
+    <td style="width: 1.4cm;">フロント</td>
+    <td style="width: 1.4cm;">サービス</td>
+    <td style="width: 1.4cm;">VB</td>
+    <td style="width: 1.4cm;">中華料理</td>
+    <td style="width: 1.4cm;">洋食料理</td>
+    <td style="width: 1.4cm;">和食料理</td>
+    <td style="width: 1.4cm;">受付</td>
+   </tr>
+   <tr style="height:0.97cm; font-size: 0.25cm; line-height: 0.3cm;">
+    <td>
+      {!IF(booking.FrontCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.FrontCheckTime__c))}{!IF(ISBLANK(booking.FrontCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.FrontCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.FrontCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.FrontChecker__c}
+    </td>
+    <td>
+      {!IF(booking.ServiceCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.ServiceCheckTime__c))}{!IF(ISBLANK(booking.ServiceCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.ServiceCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.ServiceCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.ServiceChecker__c}
+    </td>
+    <td>
+      {!IF(booking.VBCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.VBCheckTime__c))}{!IF(ISBLANK(booking.VBCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.VBCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.VBCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.VBChecker__c}
+    </td>
+    <td>
+      {!IF(booking.CnCookCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.CnCookCheckTime__c))}{!IF(ISBLANK(booking.CnCookCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.CnCookCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.CnCookCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.CnCookChecker__c}
+    </td>
+    <td>
+      {!IF(booking.EuCookCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.EuCookCheckTime__c))}{!IF(ISBLANK(booking.EuCookCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.EuCookCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.EuCookCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.EuCookChecker__c}
+    </td>
+    <td>
+      {!IF(booking.JpCookCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.JpCookCheckTime__c))}{!IF(ISBLANK(booking.JpCookCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.JpCookCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.JpCookCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.JpCookChecker__c}
+    </td>
+    <td>
+      {!IF(booking.ReceptionCheck__c,"✓","")}<br />
+      {!MONTH(DATEVALUE(booking.ReceptionCheckTime__c))}{!IF(ISBLANK(booking.ReceptionCheckTime__c),"","/")}{!DAY(DATEVALUE(booking.ReceptionCheckTime__c))}
+      <apex:outputText value="{0, time, HH:mm}">
+        <apex:param value="{!booking.ReceptionCheckTime__c+0.375}" />
+      </apex:outputText>
+      {!booking.ReceptionChecker__c}
+    </td>
+   </tr>
+  </table>
+ </div>
+ <div id="BookingInfo">
+  <table id="Date" cellspacing="0" cellpadding="0">									<!-- 日付 -->
+   <tr style="height: 0.9cm;">
+    <td style="width: 1.15cm;">開催日</td>
+    <td style="width: 7.15cm; font-size: 0.4cm;" colspan="3">平成　{!YEAR(DATEVALUE(booking.EntryTime__c))-1988}年　　{!MONTH(DATEVALUE(booking.EntryTime__c))}月　　{!DAY(DATEVALUE(booking.EntryTime__c))}日　{!booking.Week__c}曜日</td>
+   </tr>
+   <tr style="height: 0.9cm;">
+    <td style="width: 1.15cm;">受付</td>
+    <td style="width: 3.6cm;">平成&nbsp;{!YEAR(DATEVALUE(booking.ReservedDate__c))-1988}年&nbsp;{!MONTH(DATEVALUE(booking.ReservedDate__c))}月&nbsp;{!DAY(DATEVALUE(booking.ReservedDate__c))}日</td>
+    <td style="width: 1.65cm;">担当</td>
+    <td style="width: 1.8cm; font-size: 0.3cm;">
+     <div style="width: 1.75cm; height: 0.4cm; overflow: hidden; ">
+      {!booking.ReservedContact__c}
+     </div>
+    </td>
+   </tr>
+  </table>
+  <table id="Plan" cellspacing="0" cellpadding="0">									<!-- プラン -->
+   <tr style="background: #056; color: #FFF; font-size: 0.3cm;">
+    <th style="border-right: 0.5px solid #FFF; width: 5.9cm;">プラン名</th>
+    <th style="border-left: 0.5px solid #FFF; width: 4.4cm">プラン金額</th>
+   </tr>
+   <tr style="height: 1.0cm; ">
+    <td style="font-size: 0.35cm;">
+     <div style="width: 5.85cm; height: 0.45cm; overflow: hidden;">
+      {!booking.Field310__r.Name}
+     </div>
+    </td>
+    <td style="font-size: 0.4cm;">
+     {!IF(ISBLANK(booking.Field310__r.AccountTotal__c),"","¥")}
+     <apex:outputText value="{0, number, ###,###}">
+      <apex:param value="{!booking.Field310__r.AccountTotal__c}" />
+     </apex:outputText>
+    </td>
+   </tr>
+  </table>
+  <table id="BanquetName" cellspacing="0" cellpadding="0">							<!-- ご宴席名、主旨 -->
+   <tr style="height: 1.2cm;">
+    <td style="width: 2.7cm;">ご宴席名</td>
+    <td style="width: 10.6cm; text-align: left; font-size: 0.4cm;">
+     <div style="width: 10.55cm; height: 0.5cm; overflow: hidden; ">
+      &nbsp;&nbsp;{!booking.name}
+     </div>
+    </td>
+    <td style="width: 0.9cm;">主旨</td>
+    <td style="width: 5.0cm; text-align: left;">
+     <div style="width: 4.95cm; height: 0.45cm; overflow: hidden; ">
+      &nbsp;{!booking.Field352__c}
+     </div>
+    </td>
+   </tr>
+  </table>
+  <table id="Applicant" cellspacing="0" cellpadding="0">							<!-- お客様名 -->
+   <tr style="height: 1.35cm;">
+    <td style="width: 2.74cm; font-size: 0.35cm;">お申込者</td>
+    <td style="width: 5.6cm;">
+     <div style="position: absolute; top: 3.05cm; left: 2.9cm; font-size: 0.3cm; text-align: left; width: 5.3cm; height: 0.4cm; overflow: hidden; ">
+      {!booking.Relcontact__r.Katakana__c}
+     </div>
+     <div style="width: 4.45cm; height: 0.5cm; border-top: 0.25px solid #AAA; text-align: left; overflow: hidden; ">
+      &nbsp;{!booking.Relcontact__r.name}
+     </div>
+     <span style="position: absolute; top: 3.5cm; left: 7.5cm;">様</span>
+    </td>
+   </tr>
+  </table>
+  <table id="Address" cellspacing="0" cellpadding="0">								<!-- お客様住所、TEL -->
+   <tr>
+    <td style="width: 1.45cm; height: 1.35cm;" rowspan="3">連絡先<br />&nbsp;住所</td>
+    <td style="width: 4.45cm; height: 1.35cm; text-align: left; font-size: 0.3cm; line-height: 0.32cm; " rowspan="3">
+     <div style="width: 4.43cm; height: 1.3cm; overflow: hidden; ">
+      {!booking.Relcontact__r.MailingCountry}<br />
+      {!booking.Relcontact__r.MailingPostalCode}&nbsp;{!booking.Relcontact__r.MailingState}&nbsp;{!booking.Relcontact__r.MailingCity}<br />
+      {!booking.Relcontact__r.MailingStreet}
+     </div>
+    </td>
+    <td style="width: 4.4cm; height: 0.42cm; text-align: left; line-height: 0.39cm;">TEL</td>
+   </tr>
+   <tr>
+    <td style="width: 4.4cm; height: 0.45cm; text-align: left; line-height: 0.39cm; overflow: hidden; ">会社：{!booking.Relcontact__r.Account.Phone}</td>
+   </tr>
+   <tr>
+    <td style="width: 4.4cm; height: 0.45cm; text-align: left; line-height: 0.39cm; overflow: hidden; ">自宅：{!booking.Relcontact__r.Phone}</td>
+   </tr>
+  </table>
+ </div>
+
+ <table id="PlaceInfo" cellspacing="0" cellpadding="0">								<!-- 宴会場情報 -->
+  <tr style="background: #056; color: #FFF;">
+   <th style="width: 2.73cm; border-right: 0.5px solid #FFF;"></th>
+   <th style="width: 2.1cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">形式</th>
+   <th style="width: 2.35cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">会場</th>
+   <th style="width: 1.7cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">人数</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">開始時間</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;"></th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">終了時間</th>
+   <th style="width: 2.95cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">室料</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">幹事来館</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF;"></th>
+  </tr>
+  <tr style="text-align: center;">													<!-- 宴会場情報１ -->
+   <td></td>
+   <td>{!rbookings[0].Style__c}</td>
+   <td>{!rbookings[0].Rroom__r.Name}</td>
+   <td style="text-align: right;">
+    <apex:outputText value="{0, number,} 名">
+     <apex:param value="{!rbookings[0].StayPersons__c}" />
+    </apex:outputText>
+   </td>
+   <td>{!rbookings[0].Field4__c}</td>
+   <td style="text-align: center;">〜</td>
+   <td>{!rbookings[0].Field3__c}</td>
+   <td style="text-align: right;">
+    <apex:outputText value="¥{0, number, ###,###}　">
+     <apex:param value="{!NULLVALUE(rbookings[0].room1__c, 0)}" />
+    </apex:outputText>
+   </td>
+   <td>{!IF(rbookings[0].ManagerArrive__c = TRUE, "✓","")}</td>
+   <td></td>
+  </tr>
+  <tr style="text-align: center;">													<!-- 宴会場情報２ -->
+   <td></td>
+   <td>{!NULLVALUE(rbookings[1].Style__c, "")}</td>
+   <td>{!NULLVALUE(rbookings[1].Rroom__r.Name, "")}</td>
+   <td style="text-align: right;">
+    <apex:outputText value="{0, number,} 名">
+     <apex:param value="{!NULLVALUE(rbookings[1].StayPersons__c, 0)}" />
+    </apex:outputText>
+   </td>
+   <td>{!NULLVALUE(rbookings[1].Field4__c, "")}</td>
+   <td style="text-align: center;">〜</td>
+   <td>{!NULLVALUE(rbookings[1].Field3__c, "")}</td>
+   <td style="text-align: right;">
+    <apex:outputText value="¥{0, number, ###,###}　">
+     <apex:param value="{!NULLVALUE(rbookings[1].room1__c, 0)}" />
+    </apex:outputText>
+   </td>
+   <td>{!IF(rbookings[1].ManagerArrive__c, "✓","")}</td>
+   <td></td>
+  </tr>
+  <tr style="text-align: center;">													<!-- 宴会場情報３ -->
+   <td></td>
+   <td>{!NULLVALUE(rbookings[2].Style__c, "")}</td>
+   <td>{!NULLVALUE(rbookings[2].Rroom__r.Name, "")}</td>
+   <td style="text-align: right;">
+     <apex:outputText value="{0, number,} 名">
+      <apex:param value="{!NULLVALUE(rbookings[2].StayPersons__c, 0)}" />
+     </apex:outputText>
+   </td>
+   <td>{!NULLVALUE(rbookings[2].Field4__c, "")}</td>
+   <td style="text-align: center;">〜</td>
+   <td>{!NULLVALUE(rbookings[2].Field3__c, "")}</td>
+   <td style="text-align: right;">
+    <apex:outputText value="¥{0, number, ###,###}　">
+     <apex:param value="{!NULLVALUE(rbookings[2].room1__c, 0)}" />
+    </apex:outputText>
+   </td>
+   <td>{!IF(rbookings[2].ManagerArrive__c, "✓","")}</td>
+   <td></td>
+  </tr>
+ </table>
+ 
+ <table id="Detail" style="width: 100%;" cellspacing="0" cellpadding="0">			<!-- 予約見積明細 -->
+  <tr style="background: #056; color: #FFF;">
+   <th style="width: 4.85cm; border-right: 0.5px solid #FFF;">お料理</th>
+   <th style="width: 4.05cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">お飲物</th>
+   <th style="width: 2.95cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">品名</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">単価</th>
+   <th style="width: 0.95cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">数量</th>
+   <th style="width: 1.96cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">発注先</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF; border-right: 0.5px solid #FFF;">発注者</th>
+   <th style="width: 1.45cm; border-left: 0.5px solid #FFF;">チェック</th>
+  </tr>
+  <tr>
+   <td style="height: 0.45cm; border: 0.5px solid #777;">										<!-- お料理形式 -->
+     卓盛り・コース・会席・ビュッフェ
+     <div style="position: absolute;top: 0cm; left: {!MealStylePos}; font-size: 0.95cm;">◯</div>
+   </td>
+   <td style="height: 0.45cm; border: 0.5px solid #777;">										<!-- お飲物形式 -->
+     フリードリンク・カウント
+     <div style="position: absolute;top: 0cm; left: {!DrinkStylePos}; font-size: 0.95cm;">◯</div>
+   </td>
+   <td colspan="6" rowspan="6">
+    <table id="Item" style="width: 100%;" cellspacing="0" cellpadding="0">						<!-- その他商品 -->
+     <tr>
+      <td style="width: 2.83cm; text-align: left;">{!OtherItemName[0]}</td>
+      <td style="width: 1.4cm; ">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[0].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="width: 0.92cm; ">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[0].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td style="width: 1.9cm;">
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[0].Supplier__r.Name}
+       </div>
+      </td>
+      <td style="width: 1.4cm;">
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[0].OrderDate__c)}{!IF(ISBLANK(others[0].OrderDate__c),"","/")}{!DAY(others[0].OrderDate__c)}&nbsp;{!others[0].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="width: 1.4cm; text-align: center;">{!IF(NOT(others[0].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[1]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[1].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[1].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[1].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[1].OrderDate__c)}{!IF(ISBLANK(others[1].OrderDate__c),"","/")}{!DAY(others[1].OrderDate__c)}&nbsp;{!others[1].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[1].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[2]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[2].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[2].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[2].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[2].OrderDate__c)}{!IF(ISBLANK(others[2].OrderDate__c),"","/")}{!DAY(others[2].OrderDate__c)}&nbsp;{!others[2].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[2].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[3]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[3].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[3].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[3].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[3].OrderDate__c)}{!IF(ISBLANK(others[3].OrderDate__c),"","/")}{!DAY(others[3].OrderDate__c)}&nbsp;{!others[3].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[3].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[4]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[4].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[4].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[4].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[4].OrderDate__c)}{!IF(ISBLANK(others[4].OrderDate__c),"","/")}{!DAY(others[4].OrderDate__c)}&nbsp;{!others[4].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[4].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[5]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[5].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[5].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[5].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[5].OrderDate__c)}{!IF(ISBLANK(others[5].OrderDate__c),"","/")}{!DAY(others[5].OrderDate__c)}&nbsp;{!others[5].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[5].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[6]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[6].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[6].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[6].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[6].OrderDate__c)}{!IF(ISBLANK(others[6].OrderDate__c),"","/")}{!DAY(others[6].OrderDate__c)}&nbsp;{!others[6].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[6].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[7]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[7].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[7].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[7].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[7].OrderDate__c)}{!IF(ISBLANK(others[7].OrderDate__c),"","/")}{!DAY(others[7].OrderDate__c)}&nbsp;{!others[7].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[7].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[8]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[8].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[8].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[8].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[8].OrderDate__c)}{!IF(ISBLANK(others[8].OrderDate__c),"","/")}{!DAY(others[8].OrderDate__c)}&nbsp;{!others[8].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[8].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[9]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[9].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[9].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[9].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[9].OrderDate__c)}{!IF(ISBLANK(others[9].OrderDate__c),"","/")}{!DAY(others[9].OrderDate__c)}&nbsp;{!others[9].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[9].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[10]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[10].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[10].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[10].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[10].OrderDate__c)}{!IF(ISBLANK(others[10].OrderDate__c),"","/")}{!DAY(others[10].OrderDate__c)}&nbsp;{!others[10].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[10].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[11]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[11].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[11].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[11].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[11].OrderDate__c)}{!IF(ISBLANK(others[11].OrderDate__c),"","/")}{!DAY(others[11].OrderDate__c)}&nbsp;{!others[11].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[11].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[12]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[12].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[12].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[12].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[12].OrderDate__c)}{!IF(ISBLANK(others[12].OrderDate__c),"","/")}{!DAY(others[12].OrderDate__c)}&nbsp;{!others[12].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[12].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[13]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[13].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[13].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[13].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[13].OrderDate__c)}{!IF(ISBLANK(others[13].OrderDate__c),"","/")}{!DAY(others[13].OrderDate__c)}&nbsp;{!others[13].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[13].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[14]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[14].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[14].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[14].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[14].OrderDate__c)}{!IF(ISBLANK(others[14].OrderDate__c),"","/")}{!DAY(others[14].OrderDate__c)}&nbsp;{!others[14].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[14].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[15]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[15].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[15].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[15].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[15].OrderDate__c)}{!IF(ISBLANK(others[15].OrderDate__c),"","/")}{!DAY(others[15].OrderDate__c)}&nbsp;{!others[15].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[15].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[16]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[16].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[16].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[16].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[16].OrderDate__c)}{!IF(ISBLANK(others[16].OrderDate__c),"","/")}{!DAY(others[16].OrderDate__c)}&nbsp;{!others[16].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[16].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[17]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[17].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[17].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[17].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[17].OrderDate__c)}{!IF(ISBLANK(others[17].OrderDate__c),"","/")}{!DAY(others[17].OrderDate__c)}&nbsp;{!others[17].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[17].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: left;">{!OtherItemName[18]}</td>
+      <td>
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[18].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td>
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[18].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[18].Supplier__r.Name}
+       </div>
+      </td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[18].OrderDate__c)}{!IF(ISBLANK(others[18].OrderDate__c),"","/")}{!DAY(others[18].OrderDate__c)}&nbsp;{!others[18].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="text-align: center;">{!IF(NOT(others[18].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td style="text-align: center;">＜ブレイク＞</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>																<!-- 合計金額 -->
+      <td>料理</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number,}">
+         <apex:param value="{!FoodTotal}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td>フリードリンク</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number,}">
+         <apex:param value="{!DrinkTotal}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td>サービス料</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number,}">
+         <apex:param value="{!OtherTotal}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td>室料</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number,}">
+         <apex:param value="{!RoomTotal}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td>バス代</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number,}">
+         <apex:param value="{!BusTotal}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td>消費税</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number,###,###}">
+         <apex:param value="{!(FoodTotal + DrinkTotal + OtherTotal + RoomTotal + BusTotal)*0.05}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td>合計</td>
+      <td>
+       <div style="width: 100%; height: 100%; overflow: hidden; ">
+        <apex:outputText value="¥ {0, number, ###,###}">
+         <apex:param value="{!(FoodTotal + DrinkTotal + OtherTotal + RoomTotal + BusTotal)*1.05}" />
+        </apex:outputText>
+       </div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr style="height: 0.407cm; line-height: 0.35cm;">
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <table style="width: 100%; text-align: center;" cellspacing="0" cellpadding="0">		<!-- お料理内容 -->
+     <tr style="height: 0.9cm;">
+      <td style="width: 4.75cm;">
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[0].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[0].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+     <tr style="height: 0.9cm;">
+      <td>
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[1].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[1].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+     <tr style="height: 0.9cm;">
+      <td>
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[2].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[2].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+    </table>
+   </td>
+   <td rowspan="4">
+    <table id="Drink" style="width: 100%;" cellspacing="0" cellpadding="0">					<!-- お飲物 商品 -->
+     <tr>
+      <td style="width: 2.3cm; border-right: 0.75px solid #777">ビール</td>
+      <td style="width: 1.15cm; text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[0].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="width: 0.55cm; text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[0].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">ウイスキー</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[1].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[1].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">焼酎</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[2].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[2].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">焼酎（芋）</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[3].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[3].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">日本酒</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[4].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[4].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">冷酒</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[5].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[5].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">赤ワイン</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[6].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[6].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">白ワイン</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[7].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[7].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">紹興酒3年</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[8].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[8].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">紹興酒5年</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[9].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[9].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">ジュース</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[10].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[10].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">ウーロン茶</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[11].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[11].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">カクテル</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[12].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[12].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">サワー</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[13].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[13].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777">梅酒</td>
+      <td style="text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!drinks[14].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!drinks[14].Amount__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777"></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777"></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777"></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777"></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777"></td>
+      <td></td>
+      <td></td>
+     </tr>
+     <tr>
+      <td style="border-right: 0.75px solid #777"></td>
+      <td></td>
+      <td></td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <table style="width: 100%;" cellspacing="0" cellpadding="0">
+     <tr style="height: 0.445cm;">
+      <td colspan="2"></td>
+     </tr>
+     <tr style="height: 0.445cm;">
+      <td style="width: 1.15cm;"></td>
+      <td style="width: 3.6cm;"></td>
+     </tr>
+     <tr style="height: 0.445cm;">
+      <td></td>
+      <td></td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <table style="width: 100%;" cellspacing="0" cellpadding="0">
+     <tr style="height: 0.445cm;">
+      <td colspan="2"></td>
+     </tr>
+     <tr style="height: 0.445cm;">
+      <td style="width: 1.15cm;"></td>
+      <td style="width: 3.6cm;"></td>
+     </tr>
+     <tr style="height: 0.445cm;">
+      <td></td>
+      <td></td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+  <tr>
+   <td>
+    <table id="Other" style="width: 100%;" cellspacing="0" cellpadding="0">				<!-- お料理 その他 -->
+     <tr style="height: 0.45cm;">
+      <td>※その他</td>
+     </tr>
+     <tr style="height: 0.896cm;">
+      <td>
+       品名
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[3].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[3].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+     <tr style="height: 0.896cm;">
+      <td>
+       品名
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[4].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[4].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+     <tr style="height: 0.896cm;">
+      <td>
+       品名
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[5].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[5].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+     <tr style="height: 0.896cm;">
+      <td>
+       品名
+       <div style="height: 0.4cm; width: 4.74cm; text-align: right;">
+        {!foods[6].refAccountMaster__r.Name}&nbsp;&nbsp;&nbsp;
+        <apex:outputText value="×　{0, number,}">
+         <apex:param value="{!foods[6].Amount__c}" />
+        </apex:outputText>
+        &nbsp;名&nbsp;
+       </div>
+      </td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+  <tr>
+   <td colspan="2">
+    <table style="width: 100%;" cellspacing="0" cellpadding="0">						<!-- 特記事項 -->
+     <tr style="height: 0.405cm; line-height: 0.35cm;"><td>特記事項</td></tr>
+     <tr style="height: 0.405cm;">
+      <td>
+       <div style="position: absolute;top: 10.7cm; left: 0.05cm; font-size: 0.4cm; width: 8.8cm; height: 2.4cm; overflow: hidden; line-height: 0.4cm;">
+        <apex:repeat value="{!Comments}" var="c">
+         {!c}<br />
+        </apex:repeat>
+       </div>
+      </td>
+     </tr>
+     <tr style="height: 0.405cm;"><td></td></tr>
+     <tr style="height: 0.405cm;"><td></td></tr>
+     <tr style="height: 0.405cm;"><td></td></tr>
+     <tr style="height: 0.405cm;"><td></td></tr>
+     <tr style="height: 0.405cm;"><td></td></tr>
+    </table>
+   </td>
+  </tr>
+  <tr>																					<!-- 会場プラン -->
+   <td style="height: 5.8cm; vertical-align:top; border: 0.5px solid #777;" colspan="2" rowspan="2">
+     会場プラン<br />
+     <div style="text-align: center;">
+       <apex:image value="{!LayoutURL}" rendered="{!IF(LayoutURL <> '', 'true', 'false')}" height="200px" width="320px" />
+     </div>
+   </td>
+   <td colspan="6">
+    <table id="Bus" style="width: 100%;" cellspacing="0" cellpadding="0">				<!-- 送迎バス -->
+     <tr>
+      <td style="background: #056; color: #FFF;" colspan="2">送迎バス</td>
+      <td style="width: 1.45cm; text-align: right;">
+       <apex:outputText value="¥ {0, number,}">
+        <apex:param value="{!others[19].UnitPrice__c}" />
+       </apex:outputText>
+      </td>
+      <td style="width: 0.95cm; text-align: right;">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!others[19].Amount__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td style="width: 1.95cm;">
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: center;">
+        {!others[19].Supplier__r.Name}
+       </div>
+      </td>
+      <td style="width: 1.45cm;">
+       <div style="width: 100%; height: 100%; overflow: hidden; text-align: left;">
+        {!MONTH(others[19].OrderDate__c)}{!IF(ISBLANK(others[19].OrderDate__c),"","/")}{!DAY(others[19].OrderDate__c)}&nbsp;{!others[19].Orderer__r.Name}
+       </div>
+      </td>
+      <td style="width: 1.43cm; text-align: center;">{!IF(NOT(others[19].Amount__c=0),"✓","")}</td>
+     </tr>
+     <tr>
+      <td style="text-align: right;" colspan="2">
+       <apex:outputText value="{0, number,}">
+        <apex:param value="{!booking.BusCapacity__c}" />
+       </apex:outputText>
+       &nbsp;人乗り&nbsp;
+      </td>
+      <td style="text-align: right;" colspan="2">
+       <apex:outputText value="{0, number,}台">
+        <apex:param value="{!booking.NumOfBus__c}" />
+       </apex:outputText>
+       &nbsp;
+      </td>
+      <td style="text-align: left;" colspan="3">
+       乗車予定数
+       <apex:outputText value="　{0, number,} 名">
+        <apex:param value="{!booking.BusPassengers__c}" />
+       </apex:outputText>
+      </td>
+     </tr>
+     <tr>
+      <td style="width: 1.44cm;">現着時間</td>
+      <td style="width: 1.44cm;">出発時間</td>
+      <td colspan="5">
+       お迎え・お送り　場所
+       <div style="position: absolute;top: 14.1cm; left: 11.9cm; font-size: 0.32cm;">{!booking.BusDepartureTime__c}</div>
+       <div style="position: absolute;top: 13.65cm; left: {!BusWSPos}; font-size: 0.95cm;">◯</div>
+      </td>
+     </tr>
+     <tr>
+      <td>{!booking.BusArrivalTime__c}</td>
+      <td>
+       <div style="width: 1.43cm; height: 0.39cm; overflow: hidden;">
+        {!booking.BusOrigin__c}
+       </div>
+      </td>
+      <td colspan="5">
+       <div style="width: 7.23cm; height: 0.39cm; overflow: hidden;">
+        {!booking.BusDestination__c}
+       </div>
+      </td>
+     </tr>
+     <tr>
+      <td></td>
+      <td>↓</td>
+      <td colspan="5"></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td>ホテル</td>
+      <td colspan="5"></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td colspan="5"></td>
+     </tr>
+     <tr>
+      <td></td>
+      <td></td>
+      <td colspan="5"></td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+  <tr>
+   <td colspan="6">
+    <table id="Payment" style="width: 100%;" cellspacing="0" cellpadding="0">			<!-- 請求先 -->
+     <tr>
+      <td rowspan="5"><div style="width: 1.46cm;">請求先</div></td>
+      <td rowspan="2"><div style="width: 1.46cm;">住所</div></td>
+      <td colspan="3" style="text-align: left;">
+       <div style="width: 7.23cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;〒&nbsp;{!booking.Relcontact__r.Account.BillingPostalCode}&nbsp;&nbsp;{!booking.Relcontact__r.Account.BillingCountry}
+       </div>
+      </td>
+     </tr>
+     <tr>
+      <td colspan="3" style="text-align: left; ">
+       <div style="width: 7.23cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;{!booking.Relcontact__r.Account.BillingState}&nbsp;{!booking.Relcontact__r.Account.BillingCity}&nbsp;{!booking.Relcontact__r.Account.BillingStreet}
+       </div>
+      </td>
+     </tr>
+     <tr>
+      <td>会社名</td>
+      <td colspan="3" style="text-align: left; ">
+       <div style="width: 7.23cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;{!booking.Relcontact__r.Account.Name}
+       </div>
+      </td>
+     </tr>
+     <tr>
+      <td>部署名</td>
+      <td style="width: 3cm; text-align: left;">
+       <div style="width: 2.8cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;{!booking.Relcontact__r.Department}
+       </div>
+      </td>
+      <td style="width: 1.45cm;">宛先</td>
+      <td style="width: 2.95cm; text-align: left;">
+       <div style="width: 2.75cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;{!booking.Relcontact__r.Name}&nbsp;様
+       </div>
+      </td>
+     </tr>
+     <tr>
+      <td>電話</td>
+      <td style="text-align: left;">
+       <div style="width: 2.8cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;{!booking.Relcontact__r.Phone}
+       </div>
+      </td>
+      <td>内線</td>
+      <td style="text-align: left;">
+       <div style="width: 2.75cm; height: 0.4cm; overflow: hidden; ">
+        &nbsp;{!booking.Relcontact__r.Extension__c}
+       </div>
+      </td>
+     </tr>
+     <tr>																				<!--お支払い -->
+      <td>支払い</td>
+      <td style="text-align: left;" colspan="4">
+       現金・集金・振込　　　{!Year(DATEVALUE(booking.PaymentDate__c))}年　{!MONTH(DATEVALUE(booking.PaymentDate__c))}月　{!Day(DATEVALUE(booking.PaymentDate__c))}日
+       <div style="position: absolute;top: 18.32cm; left: {!PaymentPos}; font-size: 0.95cm;">◯</div>
+      </td>
+     </tr>
+    </table>
+   </td>
+  </tr>
+ </table>
+</body>
+</html>
+</apex:page>

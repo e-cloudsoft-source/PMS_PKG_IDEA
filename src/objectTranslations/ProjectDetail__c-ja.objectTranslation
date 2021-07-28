@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>プロジェクト明細</value>
+    </caseValues>
+    <fields>
+        <label><!-- 取引先 --></label>
+        <name>AccountRefs__c</name>
+    </fields>
+    <fields>
+        <label><!-- アサイン --></label>
+        <name>AssignUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- カレンダー非表示フラグ --></label>
+        <name>CalendarFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Chatter情報 --></label>
+        <name>ChatterRef__c</name>
+    </fields>
+    <fields>
+        <label><!-- 進捗メモ --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- 作成タイプ --></label>
+        <name>CreateType__c</name>
+    </fields>
+    <fields>
+        <label><!-- カスタム様式 --></label>
+        <name>CssStyle__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU --></label>
+        <name>Depart__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部署 --></label>
+        <name>Department__c</name>
+        <picklistValues>
+            <masterLabel>ゲストリレーション</masterLabel>
+            <translation><!-- ゲストリレーション --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ドライバー</masterLabel>
+            <translation><!-- ドライバー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>フロント</masterLabel>
+            <translation><!-- フロント --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>取締役</masterLabel>
+            <translation><!-- 取締役 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>営業部門</masterLabel>
+            <translation><!-- 営業部門 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接客</masterLabel>
+            <translation><!-- 接客 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>洗い場</masterLabel>
+            <translation><!-- 洗い場 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>清掃</masterLabel>
+            <translation><!-- 清掃 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>番頭</masterLabel>
+            <translation><!-- 番頭 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>研修生</masterLabel>
+            <translation><!-- 研修生 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>調理</masterLabel>
+            <translation><!-- 調理 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 予定終了日 --></label>
+        <name>DueEndDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予定開始日 --></label>
+        <name>DueStartDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 終了 --></label>
+        <name>EndDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 活動タイプ --></label>
+        <name>EventType__c</name>
+        <picklistValues>
+            <masterLabel>ToDo</masterLabel>
+            <translation><!-- ToDo --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>明細</masterLabel>
+            <translation><!-- 明細 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>行動</masterLabel>
+            <translation><!-- 行動 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 展開 --></label>
+        <name>Expanded__c</name>
+    </fields>
+    <fields>
+        <label><!-- グループコード --></label>
+        <name>GroupCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 優先度 --></label>
+        <name>Importance__c</name>
+        <picklistValues>
+            <masterLabel>中</masterLabel>
+            <translation><!-- 中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>低</masterLabel>
+            <translation><!-- 低 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>高</masterLabel>
+            <translation><!-- 高 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 変更不可フラグ --></label>
+        <name>IsCantUpdFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- マネージャー --></label>
+        <name>ManagerUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- マーキングタイプ --></label>
+        <name>MarkType__c</name>
+        <picklistValues>
+            <masterLabel>▼</masterLabel>
+            <translation><!-- ▼ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>●</masterLabel>
+            <translation><!-- ● --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- マーキング情報 --></label>
+        <name>Marks__c</name>
+    </fields>
+    <fields>
+        <label><!-- 後明細No --></label>
+        <name>NextRowNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 並び順 --></label>
+        <name>OrderID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親プロジェクト明細 --></label>
+        <name>ParentProject__c</name>
+        <relationshipLabel><!-- プロジェクト明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 進捗 --></label>
+        <name>PercentComplete__c</name>
+    </fields>
+    <fields>
+        <label><!-- 前明細No --></label>
+        <name>PreRowNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- プロジェクト --></label>
+        <name>ProjectMain__c</name>
+        <relationshipLabel><!-- プロジェクト明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 処理タイプ --></label>
+        <name>ProjectType__c</name>
+    </fields>
+    <fields>
+        <label><!-- 繰り返し番号 --></label>
+        <name>RecurrenceActivityId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 開始 --></label>
+        <name>StartDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 概要 --></label>
+        <name>Summary__c</name>
+    </fields>
+    <fields>
+        <label><!-- 参照ID --></label>
+        <name>TaskId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 件名 --></label>
+        <name>Title__c</name>
+    </fields>
+    <fields>
+        <help><!-- 利用対象外 --></help>
+        <label><!-- 担当者 --></label>
+        <name>UserRef__c</name>
+        <relationshipLabel><!-- プロジェクト明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 複数担当者 --></label>
+        <name>UserRefs__c</name>
+    </fields>
+</CustomObjectTranslation>

@@ -1,0 +1,275 @@
+<apex:page standardController="Account" extensions="AccountMerge" Id="AccountMerge"
+sidebar="false" showheader="false" action="{!initMergetFieldPage}">
+
+<!-- Load JsLib -->
+<!-- 
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+ -->
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+<!--
+<link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet"/>
+-->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<!-- 
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}"/>
+ -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<!-- 
+<script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+-->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<script>var $j = jQuery.noConflict();</script>
+
+<style>
+.fixFieldContainer    {border:1px dashed #FFAA00;width:190px;height:26px;margin-top:0px;white-space : nowrap;overflow: hidden;}
+.dropTargetContainer  {border:1px dashed #FFAA00;width:190px;height:26px;margin-top:0px;overflow: hidden;}
+
+.leftBox {border:1px;background-color:#eff2f3;width:190px;height:26px;overflow: hidden; white-space: nowrap;vertical-align:middle;display:table-cell;}
+/*.rightBox{border:0px;background-color:#ffefd5;width:200px;height:26px;margin-top:0px;overflow: hidden; white-space: nowrap;}*/
+.droptargetActive {
+	background-color: #f0e68c;
+}
+.childBox{border:0px;background-color:#008080;color:white;width:190px;height:26px;margin:0px;overflow: hidden; white-space: nowrap;vertical-align:middle;display:table-cell;cursor: pointer;}
+
+.labelText{
+	 overflow:hidden;
+	 width: 120px;
+	 white-space: nowrap;
+	 display:block;
+}
+
+</style>
+
+<apex:pageMessages />
+<table style="width: 960px; table-layout: fixed;border-spacing: 0px;border-collapse: 0px;">
+<colgroup style="width:590px;max-width:590px;"/>
+<colgroup style="width:350px;max-width:350px;"/>
+<tr><th width="590"></th><th width="350"></th></tr>
+
+<tr><td colspan="2" style="text-align: center;width: 980">
+<!-- マージ -->
+	<button class="btn" style="width:100px;font-size:1.3em;" onclick="mergetFiledInfo()">{!$Label.MSG_012_0148}</button>
+	<!-- 2019/07/15 マージ後で自動閉じる機能　by WSQ BEGIN -->
+	<span style="float:right;cursor:help;" title="マージ後、ウインドウを自動閉める"><input type="checkbox" id="closeInput" value="{!autoCloseFlag}" onclick="saveConfigMsg(this)"/>自動閉める</span>
+	<!-- 2019/07/15 マージ後で自動閉じる機能　by WSQ END -->
+	</td>
+</tr>
+
+<tr>
+<!-- Left Panel -->
+<td >
+
+<apex:form >
+<apex:actionFunction name="refreshInfoFun" rerender="toMergetPanel,fromMergetPanel,scriptPanel" action="{!readContactInf}" oncomplete="unblockUi()" />
+</apex:form>
+<!-- マージ先取引先 -->
+<div style="background-color:#FFA07A; height: 24px;font-size: 16px"><span>{!$Label.ps__msg_012_0149}</span></div>
+<apex:pageBlock mode="detail" id="toMergetPanel">
+<apex:pageBlockSection columns="1">
+
+	<apex:repeat value="{!mergeFieldsList}" var="fieldkey">
+		<apex:pageBlockSectionItem >
+           <apex:outputLabel value="{!editableFieldsMap[fieldkey]}" styleClass="labelText" title="{!editableFieldsMap[fieldkey]}"/>
+           <apex:outputPanel layout="block">
+	           	<div style="float: left;" class="fixFieldContainer" title="{!editableFieldsMap[fieldkey]} : {!newContact[fieldkey]}">
+					<div class="leftBox"><span >{!newContact[fieldkey]}</span></div>
+			   	</div>
+			   	<!-- ◀ -->
+			   	<div style="float: left;vertical-align: middle;display:table-cell;margin-left: 5px;margin-right: 5px">{!$Label.MSG_012_0150}</div>
+	           	<div style="float: left;" class="dropTargetContainer" toFieldKey="{!fieldkey}"></div>
+	           	<!-- キャンセル -->
+	           	<div style="float: left;display:table-cell;vertical-align: middle;" id="removeicon" title="{!$Label.MSG_012_0152}"><img src="/img/permissions_deny16.gif" style="margin-top: 5px;margin-left: 2px;cursor: pointer;" onclick="removeit(this)"/></div>
+		   </apex:outputPanel>
+        </apex:pageBlockSectionItem>
+	</apex:repeat>
+
+
+</apex:pageBlockSection>
+</apex:pageBlock>
+</td>
+
+<td width="350">
+<div style="background-color:#FFA07A; height: 24px;font-size: 16px"><span><!-- マージ元取引先 -->{!$Label.MSG_012_0153}</span></div>
+<apex:pageBlock mode="detail" id="fromMergetPanel">
+<apex:pageBlockSection columns="1">
+
+	<apex:repeat value="{!mergeFieldsList}" var="fieldkey">
+		<apex:pageBlockSectionItem >
+           <apex:outputLabel value="{!editableFieldsMap[fieldkey]}" styleClass="labelText" title="{!editableFieldsMap[fieldkey]}"/>
+           <div class="rightpanel">
+           	<div class="fixFieldContainer" id="{!fieldkey}">
+           	<div class="childBox" parentid="{!fieldkey}" title="{!editableFieldsMap[fieldkey]} : {!oldContact[fieldkey]}">
+           		<span >{!oldContact[fieldkey]}</span>
+           	</div>
+          	</div>
+          </div>
+        </apex:pageBlockSectionItem>
+	</apex:repeat>
+
+</apex:pageBlockSection>
+</apex:pageBlock>
+</td></tr>
+
+</table>
+<input type="hidden" value="{!oldContactId}" id="hidOldContactId"/>
+<input type="hidden" value="{!newContactId}" id="hidNewContactId"/>
+
+<apex:outputPanel id="scriptPanel">
+<script>
+	$j(document).ready(function() {
+		bindEvent();
+	});
+</script>
+</apex:outputPanel>
+<script>
+	
+	function bindEvent() {
+		// 2019/07/15 マージ後で自動閉じる機能　by WSQ BEGIN
+		var checkFlag = $j("#closeInput").val();
+		if (checkFlag == "true") $j("#closeInput").prop("checked",true);
+        // 2019/07/15 マージ後で自動閉じる機能　by WSQ END
+		// Drop選択対象設定
+		$j(".dropTargetContainer").kendoDropTarget({
+		    dragenter: droptargetOnDragEnter,
+		    dragleave: droptargetOnDragLeave,
+		    drop: droptargetOnDrop
+		});
+		// Drop選択できる対象設定
+		$j(".childBox").kendoDraggable({
+			hint: function(e) {
+				return $j(e).clone();
+			},
+            dragstart: draggableOnDragStart,
+            dragend: draggableOnDragEnd
+		});
+	}
+	// Drop Start
+	function draggableOnDragStart(e) {
+//console.debug("draggableOnDragStart");
+		//$j(".").addClass("droptargetActive");
+		//e.currentTarget.find(".moveisok").css("display","");
+		//e.currentTarget.find(".moveisng").css("display","true");
+	}
+	
+	function droptargetOnDragEnter(e) {
+//console.debug("droptargetOnDragEnter");
+		if (e.draggable.currentTarget.parent().hasClass("rightpanel") || 
+			e.dropTarget.children().length > 0) {
+			e.preventDefault();
+			return;
+		}
+		$j(e.dropTarget).addClass("droptargetActive");
+		//e.draggable.currentTarget.find(".moveisok").css("display","");
+		//e.draggable.currentTarget.find(".moveisng").css("display","none");
+	}
+	function droptargetOnDragLeave(e) {
+//console.debug("droptargetOnDragLeave");
+		$j(e.dropTarget).removeClass("droptargetActive");
+		
+		//e.draggable.currentTarget.find(".moveisok").css("display","");
+		//e.draggable.currentTarget.find(".moveisng").css("display","true");
+	}
+	function droptargetOnDrop(e) {
+		if ( !e.dropTarget.hasClass("droptargetActive") ) {
+	        e.preventDefault();
+	        return; 
+	    }
+//console.debug("droptargetOnDrop");
+		var newEl = $j(e.draggable.currentTarget);
+		var uid = kendo.guid();
+    	newEl.attr("id",uid);
+    	//newEl.removeClass("bor");
+    	//newEl.addClass("childBox");
+    	//newEl.append('<div class="closeicon" onclick="javascript:cancelMerge(\''+uid+'\')">×</div>');
+    	e.dropTarget.append(newEl);
+    	
+		//e.draggable.currentTarget.find(".moveisok").css("display","none");
+		//e.draggable.currentTarget.find(".moveisng").css("display","none");
+	}
+	
+	// Drop End
+	function draggableOnDragEnd(e) {
+		$j(".dropTargetContainer").removeClass("droptargetActive");
+		
+		e.currentTarget.find(".moveisok").css("display","none");
+		e.currentTarget.find(".moveisng").css("display","none");
+	}
+	// delete it and back to right panel
+	function cancelMerge (uid) {
+		//console.debug($j("#"+uid));
+		$j("#rightPanel").append($j("#"+uid).html());
+	}
+	
+	function removeit(thisitem){
+		//console.debug("--OK---");
+		var objs = $j(thisitem).parent().parent().find(".childBox").get();
+		if (objs.length == 0) return;
+		var dropItem = objs[0];
+		var parentid = $j(dropItem).attr("parentid");
+		$j("#"+parentid).append(dropItem);
+	}
+	function mergetFiledInfo() {
+		var fromFieldArray = new Array();
+		var toFieldArray = new Array();
+		$j(".dropTargetContainer").each(function() {
+			//console.debug("ok");
+			//$j(this).children()
+			var toField = $j(this).attr("toFieldKey");
+			var childrens = $j(this).children();
+			if (childrens.length > 0) {
+				fromFieldArray.push($j(childrens[0]).attr("parentid"));
+				toFieldArray.push(toField);
+			}
+		});
+//console.debug(fromFieldArray);
+//console.debug(toFieldArray);		
+	blockUi()
+		var newid = $j("#hidNewContactId").val();
+		var oldid = $j("#hidOldContactId").val();
+		Visualforce.remoting.Manager.invokeAction(
+		   "{!$RemoteAction.AccountMerge.mergetContatInfo}", newid,oldid, fromFieldArray.toString(), toFieldArray.toString(), function(result, event){
+	        // 異常
+	     	if(event.type == 'exception') {
+	            alert(event.message);
+	            unblockUi();
+	     	} else {
+	     		if (result != "") {
+	     			alert(result);
+	     			unblockUi();
+	     		} else {
+	     			// 画面最新情報を取得する
+	     			refreshInfoFun();
+	     			// 2019/07/15 マージ後で自動閉じる機能　by WSQ BEGIN
+	     			if ($j("#closeInput").is(":checked")) window.parent.closeKendoWin();
+	     			// 2019/07/15 マージ後で自動閉じる機能　by WSQ END
+	     		}
+	     	}
+	    });
+	}
+// 画面Lockする
+function blockUi() {
+    $j.blockUI({
+        baseZ: 60000,
+        //Processing...
+        message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0154}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j.unblockUI({ fadeOut: 200 }); 
+}
+// 2019/07/15 マージ後で自動閉じる機能　by WSQ BEGIN
+function saveConfigMsg(that){
+	var checkFlag = $j(that).is(":checked");
+	$j(that).val(checkFlag);
+	blockUi();
+	Visualforce.remoting.Manager.invokeAction(
+	   "{!$RemoteAction.AccountMerge.saveCookieValue}", checkFlag , function(result, event){
+        unblockUi();
+    });
+}
+// 2019/07/15 マージ後で自動閉じる機能　by WSQ END
+</script>
+</apex:page>

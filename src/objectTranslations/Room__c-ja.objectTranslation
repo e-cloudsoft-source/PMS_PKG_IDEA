@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>お部屋</value>
+    </caseValues>
+    <fields>
+        <label><!-- 場所 --></label>
+        <name>Area__c</name>
+        <picklistValues>
+            <masterLabel>別館</masterLabel>
+            <translation><!-- 別館 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>本館</masterLabel>
+            <translation><!-- 本館 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 大理石風呂付きの場合チェックしてください --></help>
+        <label><!-- 大理石風呂 --></label>
+        <name>Basu__c</name>
+    </fields>
+    <fields>
+        <label><!-- 支店 --></label>
+        <name>BranchShopName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定員 宿泊 --></label>
+        <name>CapacityHaku__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定員 食事 --></label>
+        <name>Capacity__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当フラグをON場合、チェックアウト音声通知機能対象外になる --></help>
+        <label><!-- チェックアウト音声通知除外 --></label>
+        <name>CoMessageNotifyFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- DisplayNo --></label>
+        <name>DisplayNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名の由来（英） --></label>
+        <name>EnField4__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋（英） --></label>
+        <name>EnName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定員 会議 --></label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸切露天風呂 --></label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label><!-- 夕料理[正月] --></label>
+        <name>Field12__c</name>
+        <relationshipLabel><!-- お部屋 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 朝料理[正月] --></label>
+        <name>Field13__c</name>
+        <relationshipLabel><!-- お部屋 (朝料理) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 夕料理[通常] --></label>
+        <name>Field14__c</name>
+        <relationshipLabel><!-- お部屋 (夕料理[通常]) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 朝料理[通常] --></label>
+        <name>Field15__c</name>
+        <relationshipLabel><!-- お部屋 (朝料理[通常]) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- ++ --></label>
+        <name>Field16__c</name>
+    </fields>
+    <fields>
+        <label><!-- ++ --></label>
+        <name>Field17__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料金タイプ --></label>
+        <name>Field18__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋ランク --></label>
+        <name>Field19__c</name>
+        <relationshipLabel><!-- お部屋 (部屋タイプ) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 客室名 --></label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名の由来 --></label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <help><!-- トイレは全客室あり、ただし、ウォシュレット付き／なしの区別のみ --></help>
+        <label><!-- トイレ --></label>
+        <name>Field5__c</name>
+        <picklistValues>
+            <masterLabel>W</masterLabel>
+            <translation><!-- W --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>○</masterLabel>
+            <translation><!-- ○ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- バス --></label>
+        <name>Field6__c</name>
+        <picklistValues>
+            <masterLabel>シャワー</masterLabel>
+            <translation><!-- シャワー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ユニット</masterLabel>
+            <translation><!-- ユニット --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>大理石</masterLabel>
+            <translation><!-- 大理石 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>総檜露天</masterLabel>
+            <translation><!-- 総檜露天 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>露天</masterLabel>
+            <translation><!-- 露天 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ベッド --></label>
+        <name>Field7__c</name>
+        <picklistValues>
+            <masterLabel>○</masterLabel>
+            <translation><!-- ○ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- △の場合は、移動が必要 --></help>
+        <label><!-- カラオケ --></label>
+        <name>Field8__c</name>
+        <picklistValues>
+            <masterLabel>△</masterLabel>
+            <translation><!-- △ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>○</masterLabel>
+            <translation><!-- ○ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 部屋出し --></label>
+        <name>Field9__c</name>
+        <picklistValues>
+            <masterLabel>△</masterLabel>
+            <translation><!-- △ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>○</masterLabel>
+            <translation><!-- ○ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- フロア --></label>
+        <name>Floor__c</name>
+        <picklistValues>
+            <masterLabel>1F</masterLabel>
+            <translation><!-- 1F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2F</masterLabel>
+            <translation><!-- 2F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>3F</masterLabel>
+            <translation><!-- 3F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>4F</masterLabel>
+            <translation><!-- 4F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5F</masterLabel>
+            <translation><!-- 5F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6F</masterLabel>
+            <translation><!-- 6F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7F</masterLabel>
+            <translation><!-- 7F --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8F</masterLabel>
+            <translation><!-- 8F --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Height --></label>
+        <name>Height__c</name>
+    </fields>
+    <fields>
+        <label><!-- 室商品ID --></label>
+        <name>ID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 有線LAN --></label>
+        <name>LAN__c</name>
+        <picklistValues>
+            <masterLabel>○</masterLabel>
+            <translation><!-- ○ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Lat --></label>
+        <name>Lat__c</name>
+    </fields>
+    <fields>
+        <label><!-- Left --></label>
+        <name>Left__c</name>
+    </fields>
+    <fields>
+        <label><!-- Lng --></label>
+        <name>Lng__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当部屋はマップに予約対象外の場合、TRUEに設定する --></help>
+        <label><!-- 予約アイコン非表示 --></label>
+        <name>NoShowLeadIcon__c</name>
+    </fields>
+    <fields>
+        <label><!-- 禁煙 --></label>
+        <name>Nosmoking__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宴会場は分ける利用したい場合、分けている場所の親部屋は設定が必要 --></help>
+        <label><!-- 親部屋 --></label>
+        <name>ParentRoomRef__c</name>
+        <relationshipLabel><!-- お部屋 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 客室Rank[II] --></label>
+        <name>Rank_2__c</name>
+        <relationshipLabel><!-- お部屋 (客室Rank[II]) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 客室Rank[III] --></label>
+        <name>Rank_3__c</name>
+        <relationshipLabel><!-- お部屋 (客室Rank[III]) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 客室Rank[IV] --></label>
+        <name>Rank_4__c</name>
+        <relationshipLabel><!-- お部屋 (客室Rank[IV]) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 客室Rank[V] --></label>
+        <name>Rank_5__c</name>
+        <relationshipLabel><!-- お部屋 (客室Rank[V]) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 客室Rank[I] --></label>
+        <name>Rank__c</name>
+        <relationshipLabel><!-- お部屋 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- R# --></label>
+        <name>Rnumber__c</name>
+    </fields>
+    <fields>
+        <help><!-- 外部システム連携の場合、部屋別名転換用、カンマで複数部屋別名を一括設定可能 --></help>
+        <label><!-- 部屋別名 --></label>
+        <name>RoomAlias__c</name>
+    </fields>
+    <fields>
+        <label><!-- 室名 --></label>
+        <name>RoomName__c</name>
+        <picklistValues>
+            <masterLabel>伊勢</masterLabel>
+            <translation><!-- 伊勢 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>初花</masterLabel>
+            <translation><!-- 初花 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>夕霧１</masterLabel>
+            <translation><!-- 夕霧１ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>夕霧２</masterLabel>
+            <translation><!-- 夕霧２ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>平安</masterLabel>
+            <translation><!-- 平安 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>扇</masterLabel>
+            <translation><!-- 扇 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>早蕨</masterLabel>
+            <translation><!-- 早蕨 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>松風</masterLabel>
+            <translation><!-- 松風 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>桐壺</masterLabel>
+            <translation><!-- 桐壺 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>梅枝</masterLabel>
+            <translation><!-- 梅枝 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>槿</masterLabel>
+            <translation><!-- 槿 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>横笛</masterLabel>
+            <translation><!-- 横笛 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>橘</masterLabel>
+            <translation><!-- 橘 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>浮舟</masterLabel>
+            <translation><!-- 浮舟 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>源氏館</masterLabel>
+            <translation><!-- 源氏館 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>牡丹</masterLabel>
+            <translation><!-- 牡丹 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>狩鞍庵</masterLabel>
+            <translation><!-- 狩鞍庵 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>竹河</masterLabel>
+            <translation><!-- 竹河 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>篝火</masterLabel>
+            <translation><!-- 篝火 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>若紫</masterLabel>
+            <translation><!-- 若紫 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>菊</masterLabel>
+            <translation><!-- 菊 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>藤</masterLabel>
+            <translation><!-- 藤 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>蝴蝶</masterLabel>
+            <translation><!-- 蝴蝶 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>賑い亭</masterLabel>
+            <translation><!-- 賑い亭 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>野分</masterLabel>
+            <translation><!-- 野分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>鈴虫</masterLabel>
+            <translation><!-- 鈴虫 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>須磨</masterLabel>
+            <translation><!-- 須磨 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>館外</masterLabel>
+            <translation><!-- 館外 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 該当部屋に対して、自動清掃データを作成制御フラグ、TRUE：該当部屋に対して、清掃データを作成しない --></help>
+        <label><!-- 清掃自動作成不要フラグ --></label>
+        <name>RoomNotCreateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予定表レポートの表示順序 --></help>
+        <label><!-- Seq# --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- お部屋 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 現在のTier Level --></label>
+        <name>Tier123__c</name>
+    </fields>
+    <fields>
+        <label><!-- Top --></label>
+        <name>Top__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ --></label>
+        <name>TypeRoomRef__c</name>
+        <relationshipLabel><!-- お部屋 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- UseOfRoom --></label>
+        <name>UseOfRoom__c</name>
+        <picklistValues>
+            <masterLabel>Time</masterLabel>
+            <translation><!-- Time --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>レストラン</masterLabel>
+            <translation><!-- レストラン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>客室</masterLabel>
+            <translation><!-- 客室 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>宴会場</masterLabel>
+            <translation><!-- 宴会場 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>広間</masterLabel>
+            <translation><!-- 広間 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>架空</masterLabel>
+            <translation><!-- 架空 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Width --></label>
+        <name>Width__c</name>
+    </fields>
+    <fields>
+        <label><!-- 延長料[1H] --></label>
+        <name>X1Henn__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[V] --></label>
+        <name>X1_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[VI] --></label>
+        <name>X1_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[VII] --></label>
+        <name>X1_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[VIII] --></label>
+        <name>X1_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[VIII]++ --></label>
+        <name>X1_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[VII]++ --></label>
+        <name>X1_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 1 Person[IV] --></label>
+        <name>X1_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 2 Person[V] --></label>
+        <name>X2_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 2 Person[VI] --></label>
+        <name>X2_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 2 Person[VII] --></label>
+        <name>X2_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 2 Person[VIII] --></label>
+        <name>X2_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 2 Person[VIII]++ --></label>
+        <name>X2_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <help><!-- サービス料は部屋毎で人数ではありません。 --></help>
+        <label><!-- 2 Person[VII]++ --></label>
+        <name>X2_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 2 Person[IV] --></label>
+        <name>X2_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸切料[3H]昼 --></label>
+        <name>X3H__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸切料[3H]夜 --></label>
+        <name>X3Hyoru__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[V] --></label>
+        <name>X3_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[VI] --></label>
+        <name>X3_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[VII] --></label>
+        <name>X3_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[VIII] --></label>
+        <name>X3_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[VIII]++ --></label>
+        <name>X3_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[VII]++ --></label>
+        <name>X3_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 3 Person[IV] --></label>
+        <name>X3_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[V] --></label>
+        <name>X4_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[VI] --></label>
+        <name>X4_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[VII] --></label>
+        <name>X4_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[VIII] --></label>
+        <name>X4_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[VIII]++ --></label>
+        <name>X4_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[VII]++ --></label>
+        <name>X4_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 4 Person[IV] --></label>
+        <name>X4_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[V] --></label>
+        <name>X5_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[VI] --></label>
+        <name>X5_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[VII] --></label>
+        <name>X5_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[VIII] --></label>
+        <name>X5_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[VIII]++ --></label>
+        <name>X5_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[VII]++ --></label>
+        <name>X5_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 5 Person[IV] --></label>
+        <name>X5_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[V] --></label>
+        <name>X6_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[VI] --></label>
+        <name>X6_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[VII] --></label>
+        <name>X6_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[VIII] --></label>
+        <name>X6_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[VIII]++ --></label>
+        <name>X6_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[VII]++ --></label>
+        <name>X6_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 6 Person[IV] --></label>
+        <name>X6_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[V] --></label>
+        <name>X7_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[VI] --></label>
+        <name>X7_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[VII] --></label>
+        <name>X7_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[VIII] --></label>
+        <name>X7_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[VIII]++ --></label>
+        <name>X7_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[VII]++ --></label>
+        <name>X7_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 7 Person[IV] --></label>
+        <name>X7_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[V] --></label>
+        <name>X8_Person_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[VI] --></label>
+        <name>X8_Person_6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[VII] --></label>
+        <name>X8_Person_7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[VIII] --></label>
+        <name>X8_Person_8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[VIII]++ --></label>
+        <name>X8_Person_VIII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[VII]++ --></label>
+        <name>X8_Person_VII__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8 Person[IV] --></label>
+        <name>X8_Person__c</name>
+    </fields>
+    <fields>
+        <label><!-- centreLat --></label>
+        <name>centreLat__c</name>
+    </fields>
+    <fields>
+        <label><!-- centreLng --></label>
+        <name>centreLng__c</name>
+    </fields>
+    <fields>
+        <label><!-- 風呂 --></label>
+        <name>furo__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料[通常] --></label>
+        <name>heyadashiryou__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料[正月] --></label>
+        <name>heyadashiryouryou__c</name>
+    </fields>
+    <fields>
+        <label><!-- 格付 --></label>
+        <name>kakuzuke__c</name>
+        <picklistValues>
+            <masterLabel>A</masterLabel>
+            <translation><!-- A --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>B</masterLabel>
+            <translation><!-- B --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>C</masterLabel>
+            <translation><!-- C --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>D</masterLabel>
+            <translation><!-- D --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 自動割当優先順位 --></label>
+        <name>priority__c</name>
+    </fields>
+    <fields>
+        <label><!-- イメージ --></label>
+        <name>roomimage__c</name>
+    </fields>
+    <fields>
+        <help><!-- 露天風呂付きの場合、チェックしてください --></help>
+        <label><!-- 露天風呂 --></label>
+        <name>rotenburo__c</name>
+    </fields>
+</CustomObjectTranslation>

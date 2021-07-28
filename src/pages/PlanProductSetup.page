@@ -1,0 +1,694 @@
+<!-- プラン編集 -->
+<apex:page standardcontroller="Plan__c" extensions="PlanProductSetup" showHeader="{!NOT(isPopupWinFlg)}" sidebar="false" title="{!$Label.ps__msg_009_0001}">
+<!-- autocompelete bug fix 1.8.21->1.10.2 version up
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+  -->
+
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<style>
+.totalRowNumCell {
+    text-align: right;
+}
+.ui-autocomplete-loading { background: white url({!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}) right center no-repeat; }
+.ui-autocomplete { max-height: 160px;overflow-y: auto;overflow-x: hidden;position: absolute; cursor: default;z-index:30 !important;}
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+  */
+* html .ui-autocomplete {
+    height: 160px;
+}
+body .bPageBlock .pbBody .dataCol{
+	padding-top: 0;
+	padding-bottom: 0;
+	vertical-align: middle;
+}
+</style>
+<script>
+$=jQuery.noConflict();
+var gTaxPointLen = "{!JSENCODE(TaxPointLen)}";
+// 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH BEGIN
+var planBrkFuSuFlg = {!planBrkFuSuFlg};
+// 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH END
+function bindEvents() {
+	// 登録済みの場合、＆＆ POPUPすると、自動WINDOW.CLOSE()
+	var dbSaveFinish = "{!JSENCODE(jsIsSaveFinishFlg)}";
+	var isPopUpFlg = "{!JSENCODE(jsIsPopupWinFlg)}";
+	if (dbSaveFinish == "true" && isPopUpFlg == "true") {
+		// プラン名とプランIDを取得して、親のIDへ設定する
+		var planId = "{!JSENCODE(planInfo.Id)}";
+		var planNm = $("input:[id$=':planName']").val();
+		objs = new Array(planId,planNm,1);
+		commUtils.popupSetter(objs);
+		top.window.close();
+	}
+    // clear the one row info
+    var clearItemIdArr=new Array(':hidProductId',':hidProductNm',':productName',':orderNums', ':serviceRate', ':taxRateType',':price',':hidPrice',':amoutPriceIncTax',':freePrice',':diffPrice');
+    // Clear Button
+    $("input[id='clearProduct']").click(function() {
+        currRowIndex = $(this).attr("rowindex");
+        //dispExtendImg(currRowIndex,"hidden"); // 展開imgを非表示にする
+        for (var i = 0; i < clearItemIdArr.length; i++){
+            clearObj = $("[id$=':planDetailTable:" + currRowIndex + clearItemIdArr[i] + "']");
+            if (clearObj.is(":checkbox")) {
+                clearObj.removeAttr('checked');
+            } else if (clearObj.is("select")) {
+                clearObj.get(0).selectedIndex = 0;
+            } else if (clearObj.is("span")) {
+                clearObj.text("");
+            } else {
+                clearObj.val("");
+            }
+        }
+    });
+
+    $("img[name='productPopup']").click(function() {
+        currRowIndex = $(this).attr("rowindex");
+        var dumyField = $("#dumyfieldId").get(0);
+        // 引き渡し値を設定して、選択画面を開く
+        ctrlNm = $("input:text[id$=':" + currRowIndex + ":productName']").get(0);
+        ctrlId = $("input:hidden[id$=':" + currRowIndex + ":hidProductId']").get(0);
+        ctrlHidNm = $("input:hidden[id$=':" + currRowIndex + ":hidProductNm']").get(0);
+        ctrlPriceId = $("span[id$=':" + currRowIndex + ":price']").get(0);
+        ctrlOrderNumId = dumyField;
+        ctrlTaxRate = $("input:text[id$=':" + currRowIndex + ":taxRateType']").get(0);;
+        ctrlHidTaxRate = dumyField;
+        ctrlServiceTaxRate = $("input:text[id$=':" + currRowIndex + ":serviceRate']").get(0);   // サービス料金
+        ctrlHidServiceTaxRate = dumyField;
+        ctrlSpecialTax = dumyField;
+        ctrlHidSpecialTax = dumyField;
+        ctrlHidActionType = dumyField;
+        var openUrl = "/apex/ProductSearch?np=1&npy=1&idx=" + currRowIndex;	// 2014/07/18 プラン明細に会計商品（プラン）を選べない様に対応
+        // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+		objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+			ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType);
+		commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, window.popupCallback);
+    });
+
+    // 数字だけ入力可能の制御
+    $("input[id$=':freePrice'],input[id$=':planPrice']").keyup(function(){
+    	// 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH BEGIN
+    	/*
+        $(this).val($(this).val().replace(/[^\d.\,]/g,''));
+        */
+        if(planBrkFuSuFlg) $(this).val($(this).val().replace(/[^\d.\,\-]/g,''));
+        else $(this).val($(this).val().replace(/[^\d.\,]/g,''));
+        // 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH END
+    }).bind("paste",function(){
+    	// 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH BEGIN
+    	/*
+        $(this).val($(this).val().replace(/[^\d.\,]/g,''));
+        */
+        if(planBrkFuSuFlg) $(this).val($(this).val().replace(/[^\d.\,\-]/g,''));
+        else $(this).val($(this).val().replace(/[^\d.\,]/g,''));
+        // 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH END
+    }).css("ime-mode","disabled");
+
+	// 2014/06/05 Select ADD
+	// 2018/11/2 文字列の途中からマウスを置いて、文字列を変更できるように希望します。 by cxw BEGIN
+	/*
+	$('input').on('focus', function(e) {
+		// 2014/06/05
+		$(this).select();
+	}).on('click', function(e) {
+		// 2014/06/05
+		$(this).select();
+	}).on('mouseup', function(e){
+		// 2014/06/05
+		e.preventDefault();
+	});
+	*/
+	// 2018/11/2 文字列の途中からマウスを置いて、文字列を変更できるように希望します。 by cxw END
+
+    // 入力金額の自動合計処理を行う
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+    $("input[id$=':freePrice'],input[id$=':planPrice'],input[id$=':productName'],input[id$=':opt_freePrice'],input[id$=':opt_productName']").blur( function () {
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+        var sumPrice = 0;
+        $("input[id$=':freePrice']").each(function(index) {
+            //sumPrice += 1 * ($(this).val().replace(/[^\d]/g,''));
+            // 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH BEGIN
+            /*
+            sumPrice = commUtils.mathNumAdd(sumPrice,$(this).val().replace(/[^\d.]/g,''));
+            */
+            if(planBrkFuSuFlg) sumPrice = commUtils.mathNumAdd(sumPrice,$(this).val().replace(/[^\d.\-]/g,''));
+            else sumPrice = commUtils.mathNumAdd(sumPrice,$(this).val().replace(/[^\d.]/g,''));
+            // 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH END
+        });
+        // 明細金額合計設定を行う
+        $("span[id$=':priceSumVal']").text(sumPrice);
+        if (this.id.lastIndexOf(':freePrice') >= 0 || this.id.lastIndexOf(':productName') >= 0) {
+            // 2014/05/29 プラン金額は自動設定を行う
+            $("input[id$=':planPrice']").val(sumPrice);
+        }
+        // 差額設定を行う
+        //var planPrice = 1 * ($("input[id$=':planPrice']").val().replace(/[^\d]/g,''));
+        // 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH BEGIN
+        /*
+        var planPrice = 1 * ($("input[id$=':planPrice']").val().replace(/[^\d.]/g,''));
+        */
+        var planPrice;
+        if(planBrkFuSuFlg) planPrice = 1 * ($("input[id$=':planPrice']").val().replace(/[^\d.\-]/g,''));
+        else planPrice = 1 * ($("input[id$=':planPrice']").val().replace(/[^\d.]/g,''));
+        // 2019/07/15 プラン内に入れたマイナス金額の商品に対応 WGCH END
+        //var diffVal =
+        //$("span[id$=':priceDiffVal']").text(planPrice - sumPrice);
+        $("span[id$=':priceDiffVal']").text(commUtils.mathNumSub(planPrice,sumPrice));
+
+    });
+
+    // 会計商品AutoComplete[1桁以上]
+    $("input[id$=':productName']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.PlanProductSetup.getArrayProductItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($.map(result, function (item) {
+                    	item.id = item.productId;
+                    	item.value = item.prodcutName + "("+item.prodcutCode+")";
+                    	return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+	    	var nameArray = $(this).attr("id").split(":");
+	    	currRowIndex = nameArray[nameArray.length - 2];
+    		ui.item.rowIndex = currRowIndex;
+			autoGetProductInfo(ui.item);
+            return false;
+        },
+        select: function (event, ui) {
+	    	var nameArray = $(this).attr("id").split(":");
+	    	currRowIndex = nameArray[nameArray.length - 2];
+            ui.item.rowIndex = currRowIndex;
+            autoGetProductInfo(ui.item);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+            return false;
+        },
+    });
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+    if(OPTION_MODE_ON) opt_bindEvents();
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+}
+// Gobal Var
+var currRowIndex = 0;
+function popupCallback() {    // 自動項目Focus
+	var planPrice = $("span[id$=':" + currRowIndex + ":price']").text();
+    $("input[id$=':" + currRowIndex + ":hidPrice']").val(planPrice);
+    $("input[id$=':" + currRowIndex + ":freePrice']").focus();
+    $("input[id$=':" + currRowIndex + ":freePrice']").val(planPrice);
+}
+// 最新商品情報を取得する
+function autoGetProductInfo(result) {
+	// 存在の商品情報は画面へ反映する
+	var currRowIndex = result.rowIndex;
+	var taxValLabel = (　result.tax == "" ? "0%" : result.tax + "%");
+	taxValLabel = commUtils.deleteRightZero(taxValLabel, gTaxPointLen);
+	var serviceLabel = (　result.serviceRate == "" ? "0%" : result.serviceRate + "%");
+
+	$("input:text[id$=':" + currRowIndex + ":productName']").val(result.prodcutName);
+	$("input:hidden[id$=':" + currRowIndex + ":hidProductId']").val(result.productId);
+	$("input:hidden[id$=':" + currRowIndex + ":hidProductNm']").val(result.prodcutName);
+	$("span[id$=':" + currRowIndex + ":price']").text(result.unitPrice);
+	$("input:text[id$=':" + currRowIndex + ":taxRateType']").val(taxValLabel);
+	$("input:text[id$=':" + currRowIndex + ":serviceRate']").val(serviceLabel);
+	// 表示用内容格納用
+	$("input[id$=':" + currRowIndex + ":hidPrice']").val($("span[id$=':" + currRowIndex + ":price']").text());
+    $("input[id$=':" + currRowIndex + ":freePrice']").val($("span[id$=':" + currRowIndex + ":price']").text());
+}
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+var OPTION_MODE = "{!JSENCODE(OPTION_MODE)}";
+var OPTION_MODE_ON = (OPTION_MODE == "1") && {!isReducedTaxFlg};
+function setOpt_currRowIndexFun(_this){
+	var rowIndex = $(_this).attr("rowindex");
+	var nameArray = $("input:text[id$=':opt_productName'][rowindex='" + rowIndex + "']").attr("id").split(":");
+	opt_currRowIndex = nameArray[nameArray.length - 2];
+}
+function opt_bindEvents() {
+	// clear the one row info
+	var clearItemIdArr=new Array(':opt_hidProductId',':opt_hidProductNm',':opt_productName',':opt_orderNums', ':opt_serviceRate', ':opt_taxRateType',':opt_price',':opt_hidPrice',':opt_amounte',':opt_freePrice');
+	// Clear Button
+	$("input[id='opt_clearProduct']").click(function() {
+		setOpt_currRowIndexFun(this);
+		//dispExtendImg(currRowIndex,"hidden"); // 展開imgを非表示にする
+		for (var i = 0; i < clearItemIdArr.length; i++){
+			clearObj = $("[id$=':opt_planDetailTable:" + opt_currRowIndex + clearItemIdArr[i] + "']");
+			if (clearObj.is(":checkbox")) {
+				clearObj.removeAttr('checked');
+			} else if (clearObj.is("select")) {
+				clearObj.get(0).selectedIndex = 0;
+			} else if (clearObj.is("span")) {
+				clearObj.text("");
+			} else {
+				clearObj.val("");
+			}
+		}
+	});
+
+	$("img[name='opt_productPopup']").click(function() {
+		setOpt_currRowIndexFun(this);
+		var dumyField = $("#dumyfieldId").get(0);
+		// 引き渡し値を設定して、選択画面を開く
+		ctrlNm = $("input:text[id$=':" + opt_currRowIndex + ":opt_productName']").get(0);
+		ctrlId = $("input:hidden[id$=':" + opt_currRowIndex + ":opt_hidProductId']").get(0);
+		ctrlHidNm = $("input:hidden[id$=':" + opt_currRowIndex + ":opt_hidProductNm']").get(0);
+		ctrlPriceId = $("span[id$=':" + opt_currRowIndex + ":opt_price']").get(0);
+		ctrlOrderNumId = dumyField;
+		ctrlTaxRate = $("input:text[id$=':" + opt_currRowIndex + ":opt_taxRateType']").get(0);;
+		ctrlHidTaxRate = dumyField;
+		ctrlServiceTaxRate = $("input:text[id$=':" + opt_currRowIndex + ":opt_serviceRate']").get(0);   // サービス料金
+		ctrlHidServiceTaxRate = dumyField;
+		ctrlSpecialTax = dumyField;
+		ctrlHidSpecialTax = dumyField;
+		ctrlHidActionType = dumyField;
+		var openUrl = "/apex/ProductSearch?np=1&npy=1&idx=" + opt_currRowIndex;	// 2014/07/18 プラン明細に会計商品（プラン）を選べない様に対応
+		// 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+		objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+			ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType);
+		commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, window.opt_popupCallback);
+	});
+
+	// 数字だけ入力可能の制御
+	$("input[id$=':opt_freePrice']").keyup(function(){
+		if(planBrkFuSuFlg) $(this).val($(this).val().replace(/[^\d.\,\-]/g,''));
+		else $(this).val($(this).val().replace(/[^\d.\,]/g,''));
+	}).bind("paste",function(){
+		if(planBrkFuSuFlg) $(this).val($(this).val().replace(/[^\d.\,\-]/g,''));
+		else $(this).val($(this).val().replace(/[^\d.\,]/g,''));
+	}).css("ime-mode","disabled");
+
+	// 会計商品AutoComplete[1桁以上]
+	$("input[id$=':opt_productName']").autocomplete({
+		minLength: 1,
+		source: function (request, response) {
+			Visualforce.remoting.Manager.invokeAction(
+				"{!$RemoteAction.PlanProductSetup.getArrayProductItemInfo}", request.term, function(result, event){
+				if (event.type == 'exception') {
+					alert(event.message);
+				} else {
+					response($.map(result, function (item) {
+						item.id = item.productId;
+						item.value = item.prodcutName + "("+item.prodcutCode+")";
+						return item;
+					}));
+				} // End else
+			});
+		},
+		focus: function (event, ui) {
+			var nameArray = $(this).attr("id").split(":");
+			opt_currRowIndex = nameArray[nameArray.length - 2];
+			ui.item.rowIndex = opt_currRowIndex;
+			opt_autoGetProductInfo(ui.item);
+			return false;
+		},
+		select: function (event, ui) {
+			var nameArray = $(this).attr("id").split(":");
+			opt_currRowIndex = nameArray[nameArray.length - 2];
+			ui.item.rowIndex = opt_currRowIndex;
+			opt_autoGetProductInfo(ui.item);
+			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+			if ("accMasterFun" in window) accMasterFun(ui.item.id);
+			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+			return false;
+		},
+	});
+}
+// Gobal Var
+var opt_currRowIndex = 0;
+function opt_popupCallback() {	// 自動項目Focus
+	var planPrice = $("span[id$=':" + opt_currRowIndex + ":opt_price']").text();
+	$("input[id$=':" + opt_currRowIndex + ":opt_hidPrice']").val(planPrice);
+	$("input[id$=':" + opt_currRowIndex + ":opt_amounte']").val(1);
+	$("input[id$=':" + opt_currRowIndex + ":opt_freePrice']").focus();
+	$("input[id$=':" + opt_currRowIndex + ":opt_freePrice']").val(planPrice);
+}
+// 最新商品情報を取得する
+function opt_autoGetProductInfo(result) {
+	// 存在の商品情報は画面へ反映する
+	var opt_currRowIndex = result.rowIndex;
+	var taxValLabel = (　result.tax == "" ? "0%" : result.tax + "%");
+	taxValLabel = commUtils.deleteRightZero(taxValLabel, gTaxPointLen);
+	var serviceLabel = (　result.serviceRate == "" ? "0%" : result.serviceRate + "%");
+
+	$("input:text[id$=':" + opt_currRowIndex + ":opt_productName']").val(result.prodcutName);
+	$("input:hidden[id$=':" + opt_currRowIndex + ":opt_hidProductId']").val(result.productId);
+	$("input:hidden[id$=':" + opt_currRowIndex + ":opt_hidProductNm']").val(result.prodcutName);
+	$("span[id$=':" + opt_currRowIndex + ":opt_price']").text(result.unitPrice);
+	$("input[id$=':" + opt_currRowIndex + ":opt_amounte']").val(1);
+	$("input:text[id$=':" + opt_currRowIndex + ":opt_taxRateType']").val(taxValLabel);
+	$("input:text[id$=':" + opt_currRowIndex + ":opt_serviceRate']").val(serviceLabel);
+	// 表示用内容格納用
+	$("input[id$=':" + opt_currRowIndex + ":opt_hidPrice']").val($("span[id$=':" + opt_currRowIndex + ":opt_price']").text());
+	$("input[id$=':" + opt_currRowIndex + ":opt_freePrice']").val($("span[id$=':" + opt_currRowIndex + ":opt_price']").text());
+}
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+</script>
+
+<apex:form id="planDetailForm" >
+<script>
+jQuery(document).ready(function() {
+    bindEvents();
+});
+</script>
+<!-- プラン情報 -->
+<apex:pageblock title="{!$Label.ps__msg_009_0002}" id="planBlock" >
+	<apex:pageMessages />
+
+    <apex:pageBlockButtons location="top">
+        <!-- 保存  -->
+        <apex:commandButton action="{!savePlanDetail}" value="{!$Label.ps__msg_009_0003}" style="width:100px" rendered="{!isCanUpdateLead}"/>
+        <!-- 戻る -->
+        <apex:commandButton action="{!gotoBlack}" value="{!$Label.ps__msg_009_0004}" immediate="true" style="width:100px" rendered="{!!isPopupWinFlg}"/>
+        <!-- 閉じる -->
+        <apex:commandButton value="{!$Label.ps__msg_009_0005}" onclick="javascript:self.window.close();" immediate="true" style="width:100px" rendered="{!isPopupWinFlg}"/>
+    </apex:pageBlockButtons>
+
+    <!-- 概要情報 -->
+    <apex:pageBlockSection columns="2">
+        <!-- 店鋪 -->
+        <apex:pageBlockSectionItem rendered="{!isShopPlanSetupFlg && branchShopIdLst.size > 0}" >
+            <apex:outputLabel value="{!$Label.ps__msg_009_0006}"/>
+		    <apex:selectList size="1" value="{!planInfo.ShopInfoRef__c}" >
+		    	<apex:selectOption itemValue="" itemLabel=""/>
+		        <apex:selectOptions value="{!branchShopIdLst}" />
+		    </apex:selectList>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem rendered="{!isShopPlanSetupFlg && branchShopIdLst.size > 0}" >
+            <apex:outputLabel value=""/>
+            <apex:outputLabel value=""/>
+        </apex:pageBlockSectionItem>
+
+        <!-- Seq# -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.Seq__c.label}" />
+            <apex:inputField value="{!planInfo.Seq__c}" />
+        </apex:pageblockSectionItem>
+        <!-- プランNO -->
+        <!-- 空白のまま新規登録場合、自動採番設定を行う -->
+        <apex:pageblockSectionItem helpText="{!$Label.ps__msg_009_0007}">
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.PlanNo__c.label}" />
+            <apex:inputField value="{!planInfo.PlanNo__c}" />
+        </apex:pageblockSectionItem>
+        <!--　プラン名 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.Name.label}" />
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <apex:inputField value="{!planInfo.name}" style="width:360px" id="planName"/>
+            </apex:outputPanel>
+        </apex:pageblockSectionItem>
+
+		<!-- サービス料 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.ServiceRate__c.label}" />
+            <apex:inputField value="{!planInfo.ServiceRate__c}" />
+        </apex:pageblockSectionItem>
+        <!-- プラン金額 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.Price__c.label}" />
+            <!-- <apex:inputField value="{!planInfo.Price__c}" id="planPrice"/> -->
+            <apex:inputText value="{!strPlanPrice}" id="planPrice"/>
+        </apex:pageblockSectionItem>
+		<!-- 消費税 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.JmstRef__c.label}" />
+            <apex:inputField value="{!planInfo.JmstRef__c}" />
+        </apex:pageblockSectionItem>
+        <!-- 商品積み上げ金額 -->
+        <apex:pageblockSectionItem >
+        <!-- 明細金額合計 -->
+            <apex:outputlabel value="{!$Label.ps__msg_009_0008}" />
+            <apex:outputtext value="{0,number, {!numberFormat}}" id="priceSumVal">
+              <apex:param value="{!productInputAmout}" />
+            </apex:outputtext>
+        </apex:pageblockSectionItem>
+		<!-- カテゴリ -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.DpRef__c.label}" />
+            <apex:inputField value="{!planInfo.DpRef__c}" />
+        </apex:pageblockSectionItem>
+        <!-- 差額 -->
+        <!-- 明細金額合計 -->
+        <apex:pageblockSectionItem helpText="{!$ObjectType.Plan__c.Fields.Price__c.label} - {!$Label.ps__msg_009_0008}">
+            <!-- 差額 -->
+            <apex:outputlabel value="{!$Label.ps__msg_009_0009}" />
+            <apex:outputtext value="{0,number, {!numberFormat}}" id="priceDiffVal">
+              <apex:param value="{!NULLVALUE(planInfo.Price__c,0) - productInputAmout}" />
+            </apex:outputtext>
+        </apex:pageblockSectionItem>
+
+		<!-- 部門 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.GpRef__c.label}" />
+            <apex:inputField value="{!planInfo.GpRef__c}" />
+        </apex:pageblockSectionItem>
+        <!-- AGT -->
+        <apex:inputField value="{!planInfo.client__c}" />
+        <!-- PackageCode -->
+        <apex:inputField value="{!planInfo.PackageCode__c}" />
+        <!-- ベースプアン -->
+        <apex:inputField value="{!planInfo.BasePlanFlg__c}" rendered="{!(jsIsPopupWinFlg!='true')}"/>
+        <!-- 非公開 -->
+        <apex:inputField value="{!planInfo.IsClosed__c}" rendered="{!(jsIsPopupWinFlg!='true')}"/>
+		<!-- コメント -->
+        <apex:inputField value="{!planInfo.Comment__c}" style="width:360px" />
+		<!-- プランオープン日時 -->
+		<apex:inputField value="{!planInfo.PlanStartDateandtime__c}" />
+		<apex:inputField value="{!planInfo.MealMemo__c}" style="width:360px" />
+		<apex:inputField value="{!planInfo.Planclosedateandtime__c}" />
+		<apex:inputField value="{!planInfo.PropRef__c}" />
+		<!-- 2019/02/28 ブッキングエンジンは多言語対応 By zh BEGIN -->
+		<apex:inputField value="{!planInfo.EnName__c}" style="width:360px" rendered="{!bookingApiFieldsShowFlg}" />
+		<apex:inputField value="{!planInfo.EnMealMemo__c}"  style="width:360px" rendered="{!bookingApiFieldsShowFlg}"/>
+		<!-- 2019/02/28 ブッキングエンジンは多言語対応 By zh END -->
+		<!-- 2020/07/30 入湯税の自動入力機能について改善 WGCH BEGIN -->
+		<!-- 入湯税会計商品 -->
+		<apex:inputField value="{!planInfo.BathTaxAccMstRef__c}" rendered="{!isBTaxSetMode}" />
+		<!-- 2020/07/30 入湯税の自動入力機能について改善 WGCH END -->
+    </apex:pageBlockSection>
+</apex:pageblock>
+
+
+<apex:actionFunction name="savePlanDetailFunction"
+        action="{!savePlanDetail}"
+        oncomplete="buttonsEnabled(true);"
+        rerender="planDetailForm" />
+
+<!-- 明細設定情報 -->
+<apex:pageblock title="{!$Label.ps__msg_009_0010}" id="leadInfoList" >
+    <apex:pageBlockButtons location="top" rendered="false">
+        <!-- 保存  -->
+        <apex:commandButton action="{!savePlanDetail}" value="{!$Label.ps__msg_009_0003}" onClick="savePlanDetailFunction();buttonsEnabled(false);blockUi(this.form)" style="width:100px" />
+        <!-- 戻る -->
+        <apex:commandButton action="{!gotoBlack}" value="{!$Label.ps__msg_009_0004}" immediate="true" style="width:100px" />
+    </apex:pageBlockButtons>
+	<input type="hidden" id="dumyfieldId" />
+	<!--
+	<input type="hidden" value="{!planInfo.Price__c}" id="planPrice"  />
+	 -->
+    <apex:pageBlockTable value="{!planDetailList}" var="t" id="planDetailTable" columnsWidth="20px, 200px">
+	 	<!-- アクション -->
+	 	<apex:column headerValue="{!$Label.ps__msg_009_0011}" >
+	 	<!-- クリア -->
+			<input type="button" title="{!$Label.MSG_009_0012}" value="{!$Label.MSG_009_0012}" id="clearProduct" rowIndex = "{!t.rowNo}" />
+		</apex:column>
+	 	<!-- 商品コード -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.AccountMasterRef__c.label}">
+            <span class="lookupInput">
+            	<apex:inputText value="{!t.productNm}" id="productName" maxlength="80" size="40"/>
+            	<!--
+                <input type="text" value="{!t.productNm}" id=":planDetailTable:{!t.rowNo}:productName" size="40"
+                    readonly="readonly" style="background-color:#f1f1f1; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')});" />
+                 -->
+                <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+	              onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+	              onfocus="this.className = 'lookupIconOn';"
+	              onblur="this.className = 'lookupIcon';"
+	              class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;{!IF(isCanUpdateLead,'','display:none')}"
+	              name="productPopup"
+	              rowIndex = "{!t.rowNo}" />
+            </span>
+            <apex:inputHidden value="{!t.sobj.AccountMasterRef__c}" id="hidProductId" />
+            <apex:inputHidden value="{!t.productNm}" id="hidProductNm" />
+		</apex:column>
+		<!-- 単価 -->
+		<apex:column headerValue="{!$Label.ps__msg_009_0013}" style="text-align: right; ">
+		<!--
+		<apex:outputText value="{!IF(LEN(t.productNm) > 0, t.productPrice, '')}" id="price"/>
+		 -->
+		<apex:outputtext value="{0,number, {!numberFormat}}" id="price" >
+        	<apex:param value="{!IF(LEN(t.productNm) > 0, t.productPrice, '')}" />
+        </apex:outputtext>
+
+		<apex:inputHidden value="{!t.productPrice}" id="hidPrice"/>
+		</apex:column>
+        <!-- 消費税 -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.TaxRate__c.label}">
+            <!-- <apex:inputField value="{!t.sobj.TaxRate__c}" id="taxRateType" style="width:60px;"/> -->
+            <apex:inputText value="{!t.strTaxRate}" id="taxRateType" style="width:60px;"/>
+        </apex:column>
+        <!-- サービス料 -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.ServiceRate__c.label}">
+            <apex:inputField value="{!t.sobj.ServiceRate__c}" id="serviceRate" style="width:60px;"/>
+        </apex:column>
+        <!-- 合計金額(税込) -->
+        <!-- 合計金額 -->
+        <apex:column headerValue="{!$Label.ps__msg_009_0014}" footerClass="totalRowNumCell"
+            style="text-align: right; background-color: #FFEBCD; width:100px;" >
+            <apex:outputText value="{0,number,{!numberFormat}}" id="amoutPriceIncTax" rendered="{!t.isValidata}">
+                <apex:param value="{!t.amoutIncTax}" />
+            </apex:outputText>
+            <!--
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,#,###}">
+            <apex:param value="{!productAmount}" />
+            </apex:outputText></apex:facet>
+            -->
+        </apex:column>
+		<!-- 金額　-->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.Price__c.label}"
+            style="text-align: right; width:100px;" footerClass="totalRowNumCell">
+
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <!--
+            <apex:inputField value="{!t.sobj.Price__c}" id="freePrice" style="width:100px; text-align: right;"/>
+             -->
+            <apex:inputText value="{!t.strSummary}" id="freePrice" style="width:100px; text-align: right;"/>
+            </apex:outputPanel>
+            <!--
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,#,###}">
+            <apex:param value="{!productInputAmout}" />
+            </apex:outputText></apex:facet>
+            -->
+        </apex:column>
+        <!-- 差額 -->      <!-- 差額 = (合計金額-金額) -->
+        <apex:column headerValue="{!$Label.ps__msg_009_0009}" title="{!$Label.ps__msg_009_0016}" footerClass="totalRowNumCell"
+            style="text-align: right; background-color: #FFEBCD; width:100px;" >
+            <apex:outputText value="{0,number,#,{!numberFormat}}" id="diffPrice" rendered="{!t.isValidata}">
+                <apex:param value="{!t.diffPrice}" />
+            </apex:outputText>
+            <!--
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,#,###}">
+            <apex:param value="{!productAmount - productInputAmout}" />
+            </apex:outputText></apex:facet>
+             -->
+         </apex:column>
+	</apex:pageBlockTable>
+
+</apex:pageblock>
+<!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN -->
+<!-- オプション明細設定情報 -->
+<apex:pageblock title="オプション{!$Label.ps__msg_009_0010}" id="opt_leadInfoList" rendered="{!((OPTION_MODE == '1') && isReducedTaxFlg)}" >
+	<apex:pageBlockTable value="{!optPlanDetailList}" var="t" id="opt_planDetailTable" columnsWidth="20px, 200px">
+	 	<!-- アクション -->
+	 	<apex:column headerValue="{!$Label.ps__msg_009_0011}" >
+	 	<!-- クリア -->
+			<input type="button" title="{!$Label.MSG_009_0012}" value="{!$Label.MSG_009_0012}" id="opt_clearProduct" rowIndex = "{!t.rowNo}" />
+		</apex:column>
+	 	<!-- 商品コード -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.AccountMasterRef__c.label}">
+            <span class="lookupInput">
+            	<apex:inputText value="{!t.productNm}" id="opt_productName" html-rowIndex="{!t.rowNo}" maxlength="80" size="40"/>
+                <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+	              onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+	              onfocus="this.className = 'lookupIconOn';"
+	              onblur="this.className = 'lookupIcon';"
+	              class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;{!IF(isCanUpdateLead,'','display:none')}"
+	              name="opt_productPopup"
+	              rowIndex = "{!t.rowNo}" />
+            </span>
+            <apex:inputHidden value="{!t.sobj.AccountMasterRef__c}" id="opt_hidProductId" />
+            <apex:inputHidden value="{!t.productNm}" id="opt_hidProductNm" />
+		</apex:column>
+		<!-- 単価 -->
+		<apex:column headerValue="{!$Label.ps__msg_009_0013}" style="text-align: right; ">
+		<apex:outputtext value="{0,number, {!numberFormat}}" id="opt_price" >
+        	<apex:param value="{!IF(LEN(t.productNm) > 0, t.productPrice, '')}" />
+        </apex:outputtext>
+
+		<apex:inputHidden value="{!t.productPrice}" id="opt_hidPrice"/>
+		</apex:column>
+        <!-- 消費税 -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.TaxRate__c.label}">
+            <apex:inputText value="{!t.strTaxRate}" id="opt_taxRateType" style="width:60px;"/>
+        </apex:column>
+        <!-- サービス料 -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.ServiceRate__c.label}">
+            <apex:inputField value="{!t.sobj.ServiceRate__c}" id="opt_serviceRate" style="width:60px;"/>
+        </apex:column>
+        <!-- 数量 -->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.Amount__c.label}">
+            <apex:inputField value="{!t.sobj.Amount__c}" id="opt_amounte" style="width:60px;"/>
+        </apex:column>
+		<!-- 金額　-->
+        <apex:column headerValue="{!$ObjectType.PlanDetail__c.Fields.Price__c.label}"
+            style="text-align: right; width:100px;" footerClass="totalRowNumCell">
+
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <apex:inputText value="{!t.strSummary}" id="opt_freePrice" style="width:100px; text-align: right;"/>
+            </apex:outputPanel>
+        </apex:column>
+	</apex:pageBlockTable>
+</apex:pageblock>
+<!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH END -->
+</apex:form>
+
+<script>
+//$=jQuery.noConflict();
+function blockUi(formobj) {
+	/*
+    $("form[id='" + formobj.id +"']").block({
+
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> Processing...</h1>'
+    });*/
+    $.blockUI({
+    	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_009_0015}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    //$("form[id$=':batchProcess']").unblock();
+    $.unblockUI({ fadeOut: 200 });
+}
+// Disable Button
+function buttonsEnabled(enabled) {
+    // retrieve all of the buttons or links on the page
+    // with the css class of btn
+    var $buttons = $('.btn');
+    if (enabled === false) {
+        // add the btnDisabled class to give it the look of being disabled
+        // add the disabled attribute to actually disable interactability
+        $buttons.toggleClass('btnDisabled', true).attr('disabled', 'disabled');
+    } else {
+        // remove the css class and the disabled attribute
+        $buttons.toggleClass('btnDisabled', false).attr('disabled', null);
+        // Remove BlockUI
+        unblockUi();
+    }
+}
+</script>
+
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

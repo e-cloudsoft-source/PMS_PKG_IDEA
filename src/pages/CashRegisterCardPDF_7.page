@@ -1,0 +1,274 @@
+<apex:page showHeader="false" title="STAY CARD 宿泊者カード" sidebar="false" action="{!initPdf}" renderas="PDF"
+    applyHtmlTag="false" applyBodyTag="false"
+    readonly="true" standardcontroller="Yadochou__c" extensions="CashRegisterCardExtPDF">
+<html>
+<head>
+<title>STAY CARD 宿泊者カード</title>
+<style>
+@page {
+	size: {!pageformat}        /* A5 portlate size */
+	/*2018/07/17 レジカードコード7の署名機能追加 zyz BEGIN*/
+	margin: 0cm 0.2cm {!if(pageSignaTureFlg ,' 0cm ',' 0.2cm ')} 0.2cm;
+	/*2018/07/17 レジカードコード7の署名機能追加 zyz END*/
+}
+body {
+	font-family: Arial Unicode MS;
+	font-size:12px;
+	top: 0.2cm;
+	left: 0.2cm;
+}
+.soldBorderTd {
+	height: 25px;
+	font-size: 1.1em;
+}
+table {
+	width: 100%;
+	border-spacing: 0px;
+}
+table tr {
+	height: 24px;
+	vertical-align: middle;
+}
+table tr td {
+	padding: 0px;
+}
+td.centerTd {
+	text-align: center;
+}
+/* 表格线控制 BEGIN */
+.tableborder {
+	border-top:1px solid #000;
+	border-left:1px solid #000;
+	border-right:1px solid #000;
+	//border-bottom:1px solid #000;
+}
+.tableborderright {
+	border-top:1px solid #000;
+	//border-left:1px solid #000;
+	border-right:1px solid #000;
+	//border-bottom:1px solid #000;
+}
+.tableborderleft {
+	border-top:1px solid #000;
+	//border-left:1px solid #000;
+	border-right:1px solid #000;
+	border-bottom:1px solid #000;
+}
+.tableborderbottom {
+	border-top:1px solid #000;
+	border-left:1px solid #000;
+	border-right:1px solid #000;
+	border-bottom:1px solid #000;
+}
+.tableborderall{
+	border-top:1px solid #000;
+	//border-left:1px solid #000;
+	border-right:1px solid #000;
+	border-bottom:1px solid #000;
+}
+/* 表格线控制 END */
+ </style>
+</head> 
+<body>
+<!--名头 -->
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ BEGIN -->
+<apex:variable var="idx" value="{!0}"/>
+<apex:repeat value="{!bulkAllPageList}" var="oneCards">
+<div style="vertical-align:top ;margin-top: 4px;height:4px;{!if( idx == 0, '', 'page-break-before: always;')} "></div>
+<apex:repeat value="{!oneCards}" var="oneCard">
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ END -->
+<apex:repeat value="{!oneCard.allPageList}" var="onePage" >
+    <!-- 2018/07/17 レジカードコード7の署名機能追加 zyz BEGIN -->
+    <apex:outputPanel rendered="{!onePage.isSignaImg}" >
+		<apex:outputtext value="{!onePage.signaImg}" escape="false" />
+	</apex:outputPanel>
+    <!-- 2018/07/17 レジカードコード7の署名機能追加 zyz END -->
+<apex:repeat value="{!onePage.onePageList}" var="gif" rendered="{!!onePage.isSignaImg}">
+<!-- 2019/07/15 レジカード７ロゴが左上表示改善対応 BY zyz BEGIN -->
+<table class="soldBorderTd" style="width: 100%; border-spacing: 0px; margin-top: 9px;{!if(logoPosiShow,imageheight,'')};" border="0">
+<!-- 2019/07/15 レジカード７ロゴが左上表示改善対応 BY zyz END -->
+	<tr class ="">
+		<!-- 2019/07/15 レジカード７ロゴが左上表示改善対応 BY zyz BEGIN -->
+		<td class="centerTd" style="text-align: left;width:20%;display:{!if(logoPosiShow,'','none;')}">
+			<apex:image url="{!imageUrl}" style="{!imageWidth};{!imageheight};" />
+		</td>
+		<td class="centerTd" style="text-align:{!if(logoPosiShow,'left;','center;')}">
+		<!-- 2019/07/15 レジカード７ロゴが左上表示改善対応 BY zyz END-->
+			<span style="font-size:18pt">STAY CARD 宿泊者カード</span>
+		</td>
+	</tr>
+</table>
+<table style="margin-left: 7px;width: 98%;" border="0" cellpadding="0px" cellspacing="0px">
+<!--発行日付 -->
+	<tr>
+		<td colspan="4" style="text-align: right;">
+			<apex:outputtext value="{0,date,yyyy年MM月dd日}" >
+				<apex:param value="{!onePage.footer4.LeadReceiptDate}"/>
+			</apex:outputtext>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="1" class="tableborder" style="text-align: center;">Name<br/>お名前</td>
+		<!-- 2018/06/04 お名前欄に「様」が表示されるようになってとの改善 zyz BEGIN -->
+		<!--<td colspan="3" class="tableborderright" ><span style="margin-left:5px;">{!gif.guestName}</span></td>-->
+		<td colspan="3" class="tableborderright" >
+			<table>
+				<tr>
+				<td ><span style="margin-left:5px;">{!gif.guestName}</span></td>
+				<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+				<td width="20px"><span style="margin-right:20px;">{!IF(onePage.footer4.mrStr !='' ,onePage.footer4.mrStr , '様')}</span></td>
+				<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+				</tr>
+			</table>
+		</td>
+		<!-- 2018/06/04 お名前欄に「様」が表示されるようになってとの改善 zyz END -->
+	</tr>
+	<tr>
+		<td colspan="1" class="tableborder" style="text-align: center;">Address<br/>住所</td>
+		<td colspan="3" class="tableborderright" >
+			<table>
+				<tr><td rowspan="2" width="5px"></td><td >〒&nbsp;{!gif.post}</td></tr>
+				<tr>
+					<td><apex:outputLabel value="{!gif.address6}" escape="false" /></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td style="width:50%;" colspan="2">
+			<table width="100%" border="0">
+				<tr>
+					<td class="tableborder" style="width:20%;text-align: center;">Sex<br/>性別</td>
+					<td class="tableborderright" style="width:30%;"><span style="margin-left:5px;">{!gif.gender}</span></td>
+					<td class="tableborderright" style="width:20%;text-align: center;">Age<br/>年齢</td>
+					<td class="tableborderright" style="width:30%;">
+						<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-left:5px;">
+							<apex:param value="{!IF(gif.age = 0 , '', gif.age)}"/>
+						</apex:outputtext>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td class="tableborderright" style="width:17%;text-align: center;">Occupation<br/>職業</td>
+		<td class="tableborderright" style="width:33%;"><span style="margin-left:5px;">{!LEFT(gif.titleNM,19)}</span></td>
+	</tr>
+	<!-- 2018/12/30 レジカード７、レイアウトもカスタマイズできるように改善 BY zyz BEGIN-->
+	<apex:repeat value="{!oneCard.layoutCardlst.layoutList}" var="lay" rendered="{!oneCard.layoutCardlst.layoutList.size > 0}">
+		<tr>
+			<apex:repeat value="{!lay.tdItemList}" var="layTd">
+				<td class="{!IF(layTd.rowIndex==1,'tableborder', 'tableborderright')}" style="width:17%;text-align: center;height:35px;" ><apex:outputText value="{!layTd.labelStr}" escape="false"/></td>
+				<!-- 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz BEGIN -->
+				<td class="tableborderright" style="width:{!if(layTd.colIndex==2,'33%','83%')};height:35px;" colspan="{!if(layTd.colIndex==2,1,3)}"><span style="margin-left:5px;"><apex:outputText value="{!layTd.valueStr}" escape="false"/></span></td>
+				<!-- 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz END -->
+			</apex:repeat>
+		</tr>
+	</apex:repeat>
+	<tr style="display:{!if(oneCard.layoutCardlst.layoutList.size <= 0,'','none')};">
+	<!-- 2018/12/30 レジカード７、レイアウトもカスタマイズできるように改善 BY zyz END-->
+		<td class="tableborder" style="width:17%;text-align: center;">Phone number<br/>電話番号</td>
+		<td class="tableborderright" style="width:33%;"><span style="margin-left:5px;">{!gif.phone}</span></td>
+		<td class="tableborderright" style="width:17%;text-align: center;">Nationality<br/>国籍</td>
+		<td class="tableborderright" style="width:33%;">
+			<table>
+				<tr>
+					<td width="5px"></td>
+					<td>{!oneCard.cardInflst.stayNationality}</td>
+				</tr>
+			</table>
+			
+		</td>
+	</tr>
+	<!-- 2018/12/30 レジカード７、レイアウトもカスタマイズできるように改善 BY zyz BEGIN-->
+	<tr style="display:{!if(oneCard.layoutCardlst.layoutList.size <= 0,'','none')};">
+	<!-- 2018/12/30 レジカード７、レイアウトもカスタマイズできるように改善 BY zyz END-->
+		<td class="tableborder" style="width:17%;text-align: center;">Email<br/>メールアドレス</td>
+		<td class="tableborderright" style="width:33%;">
+			<table>
+				<tr>
+					<td width="5px"></td>
+					<td>{!gif.emailAddress}</td>
+				</tr>
+			</table>
+		</td>
+		<td class="tableborderright" style="width:17%;text-align: center;">Passport<br/>number</td>
+		<td class="tableborderright" style="width:33%;">
+			<table>
+				<tr>
+					<td width="5px"></td>
+					<td>{!oneCard.cardInflst.stayPassport}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<!-- 2018/12/30 レジカード７、レイアウトもカスタマイズできるように改善 BY zyz BEGIN-->
+	<tr style="display:{!if(oneCard.layoutCardlst.layoutList.size <= 0,'','none')};">
+	<!-- 2018/12/30 レジカード７、レイアウトもカスタマイズできるように改善 BY zyz END-->
+		<td class="tableborder" style="width:17%;text-align: center;">Arrived from<br/>前泊地</td>
+		<td class="tableborderright" style="width:33%;">
+			<table>
+				<tr>
+					<td width="5px"></td>
+					<td>{!oneCard.cardInflst.stayArrived}</td>
+				</tr>
+			</table>
+		</td>
+		<td class="tableborderright" style="width:17%;text-align: center;">Next<br/>Destination</td>
+		<td class="tableborderright" style="width:33%;">
+			<table>
+				<tr>
+					<td width="5px"></td>
+					<td>{!oneCard.cardInflst.stayNext}</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td class="tableborder" style="width:17%;text-align: center;">Arrival Date<br/>到着日</td>
+		<td class="tableborderright" style="width:33%;"><apex:outputtext value="{!onePage.footer4.ciTime}" style="margin-left:5px;"/></td>
+		<td class="tableborderright" style="width:17%;text-align: center;">Departure Date<br/>出発日</td>
+		<td class="tableborderright" style="width:33%;"><apex:outputtext value="{!onePage.footer4.coTime}" style="margin-left:5px;"/></td>
+	</tr>
+	<tr>
+		<td colspan="1" class="tableborderbottom" style="text-align: center;">Signature<br/>署名</td>
+		<!--2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 BY zyz BEGIN -->
+		<td colspan="3" class="tableborderall" style="text-align: center;word-break: break-all;word-wrap:break-word;height:70px;width:100%;overflow: hidden;">
+		<!--2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 BY zyz END -->
+			<table style="width:100%;height:100%;">
+				<tr style="height:50%">
+					<!-- 2018/03/05 PDF7横向的A5纸张 zyz BEGIN -->
+					<!--<td>* I hereby agree and sign here that I/We will follow your hostel rules.<br/>私は当ホステルのルールに同意しここに署名します。</td>-->
+					<!--2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 BY zyz BEGIN -->
+					<td style="vertical-align: top;display: {!IF(signaShowFlg != true ,'none;','')}"><apex:outputtext value="{!signaturestr}" escape="false"/></td>
+					<td style="vertical-align: top;display: {!IF(signaShowFlg == true ,'none;','')}">* I hereby agree and sign here that I/We will follow your hotel rules.<br/>私は当館のルールに同意しここに署名します。</td>
+					<!--2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 BY zyz END -->
+					<!-- 2018/03/05 PDF7横向的A5纸张 zyz END -->
+				</tr>
+				<!--2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 BY zyz BEGIN -->
+				<tr style="height:50%;display: {!IF(signaShowFlg == true ,'none;','')}">
+				<!--2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 BY zyz END -->
+					<td>&nbsp;<br/>&nbsp;</td>
+				</tr>
+			</table>
+		
+		</td>
+	</tr>
+</table>
+<!-- 2019/07/15 レジカード７ロゴが左上表示改善対応 BY zyz BEGIN -->
+<table class="soldBorderTd" style="width: 100%; border-spacing: 0px; margin-top: 9px;display:{!if(logoPosiShow,'none;','')}" >
+<!-- 2019/07/15 レジカード７ロゴが左上表示改善対応 BY zyz END -->
+	<tr>
+		<td class="centerTd">
+		<apex:outputField value="{!ReportInfo.ReportLogo__c}" style="height:72px"/>
+		</td>
+	</tr>
+</table>
+</apex:repeat>
+</apex:repeat>
+</apex:repeat>
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ BEGIN -->
+<apex:variable var="idx" value="{!idx + 1}"/>
+</apex:repeat>
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ END -->
+</body>
+</html>
+</apex:page>

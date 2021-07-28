@@ -1,0 +1,3068 @@
+<!-- 仕入 -->
+<apex:page controller="PurchaseManagentInput" action="{!init}" title="{!$Label.ps__msg_040_0053}" tabstyle="PurchaseManagentTab__tab" 
+	id="cash" standardStylesheets="true" showheader="true" sidebar="false">
+<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+<!-- <c:CommHeaderComp /> -->
+ <c:CommHeaderComp loadJsLib="false" /> 
+<!-- -->
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2017, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2017, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2017, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2017, 'js/kendo.all.min.js')}"/>
+
+<!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN -->
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}" />
+<!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<apex:includeScript value="{!$Resource.CommLog}"/>
+<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+<style>
+/* 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN */
+* html .ui-autocomplete {
+    height: 160px;
+}
+.ui-autocomplete {
+    max-height: 160px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.ui-autocomplete-loading { background: white url({!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}) right center no-repeat; }
+.ui-autocomplete { max-height: 160px;overflow-y: auto;overflow-x: hidden;position: absolute; cursor: default;z-index:30 !important;}
+/* 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END */
+a.k-textbox{
+	width: 30px !important;
+}
+span.dateFormat{
+	display: none;
+}
+/*
+.uploadImg{
+	background-image:url('/img/chatterfiles/chatterfiles16_sprite.png'); 
+    background-position: 2px -38px;
+    height: 16px;
+    width: 20px;
+    position: relative;
+    top: -15px;
+    left: 30px;
+}*/
+.detail_headerRow {
+	text-align: center;
+	height: 28px;
+	width:36px;
+	min-width:36px;
+	background-color: green;
+}
+/* Kendoui Css Style */
+.lookupInput input {
+	width:100%;
+}
+.lookupInput a {
+	width: 25px;
+	height: 28px;
+	padding:0px;
+	margin-left: -25px;
+}
+.lookupIcon {
+	padding:0px;
+	margin-right:0px ;
+	margin-top: 3px;
+}
+.lookupIconOn {
+	margin-top: 3px;
+}
+#PurchaseManagentInput .pbTitle{
+	display: none;
+}
+#searchDiv a.k-textbox{
+	width: 25px !important;
+	margin-left: 0px !important;
+}
+div#searchDiv td.data2Col.last{
+	text-align: center;
+}
+div#existBlock1 td.detail_centerRow{
+	text-align: center;
+}
+div.k-list-container{
+	width: auto;
+}
+#backgroundCream{
+	background: black;
+	border: none;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    opacity: 0.6;
+    cursor: wait;
+    z-index:100;
+    position: fixed;
+    background-color: rgb(0, 0, 0);
+    display: none;
+}
+#exportWindow{
+	display: none;
+}
+.memoClass{
+	word-break:keep-all;/* 改行せず */
+    white-space:nowrap;/* 改行せず */
+    overflow:hidden;/* 内容自動隠す */
+    text-overflow:ellipsis;/* 隠される場合、...表示する */
+    max-width:120px;
+}
+.k-button .k-image {
+	height: 16px;
+	vertical-align:sub;
+}
+/* 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN */
+.headerCss{ 
+	padding-right: 0px !important;
+}
+.k-i-filterIcon{
+	padding-right: 15px !important;
+}
+.headerDiv1{
+	width:100%;
+	display: table;
+}
+.headerDiv2{
+	display: table-cell;
+	vertical-align:middle;
+}
+.headerDiv3{
+	width: 25px;
+	float: right;
+}
+.k-i-arrow-60-up{
+	top: 1px !important;
+}
+.k-i-arrow-60-down{
+	bottom: 1px !important;
+}
+.k-state-actives {
+    background-color: peachpuff !important;
+}
+.k-numeric-wrap.k-state-invalid input{
+	color: #000 !important;
+}
+.k-numeric-wrap.k-state-invalid{
+	border-color: #c5c5c5 !important;
+}
+/* 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+.k-grid-content.k-auto-scrollable{
+	 display: none;
+}
+*/
+.cloneRow li {
+    margin-left: 0.1em !important;
+    padding-left: 0 !important;
+}
+.cloneRow .k-button{
+    min-width: 40px !important;
+}
+.k-button:hover{
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,0) 0,rgba(255,255,255,0) 100%) !important;
+}
+/* 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END */
+/* 2017/07/07 検索結果にFilter機能の追加 WGCH END */
+</style>
+<script>
+beenFocused = true;
+var $j = jQuery.noConflict();
+// kendo culture custome 
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = {!JSENCODE(PointLen)};
+currency.symbol = "{!JSENCODE(CurrencySybmol)}";
+currency.pattern = ["$-n","$n"];
+</script>
+<!-- 仕入 -->
+<apex:sectionHeader title="{!$Label.ps__msg_040_0053}"/>
+<!-- エラーメッセージ情報 -->
+<apex:outputPanel id="errPanel">
+	<apex:pageMessages />
+</apex:outputPanel>
+
+<!-- 削除FORM -->
+<apex:form >
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+	<apex:actionFunction action="{!deleteData}" name="depDeleteData" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,changePanelTop,changePanelBottom"
+			oncomplete="depDmlCompleteEvent('0');boderBindEvent();">
+	   		<apex:param name="deleteRowIdx" value="" assignTo="{!deleteRowIdxs}"/>
+	</apex:actionFunction>
+	<apex:actionFunction action="{!dataRollBack}" name="depBataRollBack" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel"
+			oncomplete="depDmlCompleteEvent('0');setFilter();">
+	</apex:actionFunction>
+	<apex:inputHidden value="{!filter.filterDataJson}" id="hidFilterDataJsonDelete" />
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+</apex:form>
+<div id="searchDiv">
+<apex:form >
+	<apex:pageBlock id="searchDataBlock">
+
+    	<!-- 表示条件 -->
+	    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_040_0054}" >
+	
+	        <apex:outputPanel id="cond1" >
+	        <span class="lookupInput">
+	        <!--　会計期間 -->
+	        <apex:pageblockSectionItem >
+	        	<apex:outputlabel value="" />
+	            <apex:outputPanel >
+			        <!-- 店舗情報 -->
+					<apex:actionRegion >
+		 				<apex:selectList value="{!currentShopCode}" multiselect="false" size="1" id="queryShopCode" 
+		 					styleClass="j-dropDownList" rendered="{!shopOpts.size > 0}" style="width:170px">
+		    			<apex:selectOptions value="{!shopOpts}"/>
+			    		
+			        </apex:selectList>
+		        	</apex:actionRegion>
+		        	<!-- 仕入先 -->
+		        	<apex:outputlabel value="{!$Label.ps__msg_040_0055}" style="margin-left: 20px"/>
+	           		<apex:inputField value="{!input.pur.Purchasesource__c}" id="purChaseSrource" styleClass="k-textbox" style="margin-left: 10px;width:300px;" />
+	           		<!-- 計上日 -->
+					<span style="margin-left: 10px"><!-- 仕入日 -->{!$Label.ps__msg_040_0056}</span>
+	                <apex:inputField value="{!input.fromDateInput.Checkinday__c}" id="queryFromDate"  styleClass="k-textbox" style="margin-left: 10px;width:100px;"/>
+	                <span style="margin-left: 10px"><!-- 〜 -->{!$Label.MSG_040_0057}</span>
+	                <apex:inputField value="{!input.toDateInput.Checkinday__c}" id="queryToDate"  styleClass="k-textbox"   style="margin-left: 10px;width:100px;"/>
+	                <span style="margin-left: 10px">
+			        <!-- 検索 -->
+			        <!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+			        <apex:commandButton value="{!$Label.ps__msg_040_0058}" action="{!dataSearch}" 
+			        	reRender="depInfoTable,depAmount,errPanel,changePanelTop,changePanelBottom" onclick="hashMapClearFun();" status="refStatusBlock" 
+			        	oncomplete="depDmlCompleteEvent('0');boderBindEvent();" style="width:120px;height:27px;">
+			        	<span class="k-icon k-i-search" style="width:15px;position: relative;left: 25px;"></span>
+			        </apex:commandButton>
+			        <!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+			        </span>
+	            </apex:outputPanel>
+	            
+	        </apex:pageblockSectionItem>
+	        </span>
+	        </apex:outputPanel>
+	
+	    </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:form>
+</div>
+<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+<apex:form >
+	<apex:actionFunction action="{!filterDataSerch}" name="getFilterData" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,changePanelTop,changePanelBottom,queryShopCodeId,reportBtnOptionId,popWinInfoLstId,batchShopCodeId,statusId"
+			oncomplete="depDmlCompleteEvent('0');boderBindEvent();">
+	   		<apex:param name="filterDataJson" value="" assignTo="{!filter.filterDataJson}"/>
+	</apex:actionFunction>
+</apex:form>
+<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+<apex:form >
+<div id="PurchaseManagentInput">
+	<!-- 画面編集に切替する -->
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN-->
+    <apex:actionFunction action="{!historyEdit}" name="despEditHistory" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,purDetailTable"  immediate="true"
+            oncomplete="depDmlCompleteEvent('{!JSENCODE(TEXT(editRowIdx))}');setFilter();CloneRowFun('{!JSENCODE(TEXT(editRowIdx))}');">
+    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+	   		<apex:param name="editRowIdx" value="" assignTo="{!editRowIdx}"/>
+	</apex:actionFunction>
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+	<!-- 現金入金履歴 -->
+	<apex:pageBlock id="despDataBlock">
+		<apex:pageBlockButtons location="top" id="despDataBlockBtn">
+			<table style="width:100%">
+				<tr style="vertical-align: top;">
+					<td>
+					<apex:outputPanel rendered="{!reportBtnOption.size > 0}" >
+					<apex:selectList multiselect="false" size="1" id="reportOptionList"
+							styleClass="j-comboxInputNew" style="width:200px">
+						<apex:selectOptions value="{!reportBtnOption}"/>
+					</apex:selectList>
+					<button id="reportbtn" style="margin:2px;" onclick="hrefReport()" type="button">
+						&nbsp;<!-- レポート実行-->{!$Label.MSG_040_0087}&nbsp;
+					</button>
+					</apex:outputPanel>
+					</td>
+					<td style="text-align: right;{!IF(profileNm == $Label.ps__msg_1016, 'min-width:520px','')}">
+		            <!-- 出力機能 -->
+					<apex:outputPanel style="margin-right: 20px;" rendered="{!profileNm == $Label.ps__msg_1016}">
+						<!-- 口座情報種別 -->
+						<button id="accountinfobtn" type="button" style="margin: 2px;">
+						    {!$Label.MSG_040_0086}
+						</button>
+						<!-- 振込データ機能 -->
+						<apex:repeat value="{!popWinInfoLst}" var="winInfo" >
+		    				<button class="csvoutputbtn" onclick="showPopwin('{!winInfo.filterBtn.btnLabel}',this)" data-rowidx="{!winInfo.rowIdx}" type="button" style="margin: 2px;">
+							    {!winInfo.filterBtn.btnLabel}
+							</button>
+		    			</apex:repeat>
+					</apex:outputPanel>
+				<!--2016/1/29	</td>
+					<td style="width: 230px;"> -->
+ 			<!-- 税込 -->
+			<span id="depAmountBlock" style="font-size: 20px;float:right;clear:right; font-weight: bold; text-align: center; vertical-align: middle; height: 30px; min-width:220px; ">
+                <span style="float: left; margin-left: 2px; line-height: 30px;"><!-- 合計(税込) -->{!$Label.MSG_040_0059}	:</span>
+                <apex:outputPanel style="float: right;clear:right; margin-right: 2px;font-weight: bold; line-height: 30px;" id="depAmount">
+		    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" >
+			    		<apex:param value="{!depAmount}" />
+			    	</apex:outputtext>   
+<script>
+// 取引先の端数処理区分情報格納
+var _pointKbnJsonDs = JSON.parse("{!JSENCODE(accPointKbnJson)}");
+</script>	
+            	</apex:outputPanel>
+            </span> 
+					</td>
+				</tr>
+			</table>
+			<!-- 2018/10/03 SCANER機能新規 by zy BEGIN -->
+			<span id="scannerSpan" style="font-size: 15px;color: green;position: absolute;top:255px;">
+				<span class="label"></span><input type="button" style="display:none;" class="k-button" value="{!$LABEL.MSG_006_0457}" onclick="scrannerEnd()"/>
+			</span>
+			<!-- 2018/10/03 SCANER機能新規 by zy END -->
+		</apex:pageBlockButtons>
+		
+		<!-- bluk input page -->
+    	<div id="existBlock1" >
+    	<apex:pageBlockTable value="{!purchaseList}" var="var" width="100%" 
+    		rendered="{!purchaseList.size > 0}" id="depInfoTable">
+		    <apex:column headerClass="detail_headerRow" styleClass="detail_centerRow">
+		    	<!-- 削除Header -->
+		    	<apex:facet name="header">
+		    	<apex:outputPanel id="depDeleteBtnBlock">
+		    	<div id="deleteBtn" style="display: none;">
+		    		<!-- 削除 -->
+		    		<input type="button" value="{!$Label.MSG_040_0061}" onclick="preDeleteSubmit()" class="btn"/>
+		    	</div> 
+		    	<div id="deleteLab" style="display: true;">
+		    		<!-- 削除 -->
+		    		<span>{!$Label.MSG_040_0061}</span>
+		    	</div>
+				</apex:outputPanel> 
+		    	</apex:facet>
+		    	<!-- 削除レコードID -->
+                <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN -->
+                <apex:inputHidden value="{!var.pur.id}" id="hidPurId"/>
+                <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+		    	<apex:inputCheckbox value="{!var.pur.id}" html-rowIdx="{!var.pur.id}" id="dataSelectChk" rendered="{!var.pur.id != null}"  onclick="swithDeleteBtn()"/>
+		    </apex:column>
+		    <!-- 伝票# -->
+	    	<apex:column headerValue="Purchase#" style="width:90px;">
+	    		<apex:outputLink value="/{!if(var.pur.Id != null ,var.pur.Id,$ObjectType.Purchase__c.KeyPrefix + '/e?retURL=/'+$ObjectType.Purchase__c.KeyPrefix)}" target="_blank" >
+                     <!-- 新規 -->
+                     <apex:outputText value="{!IF(var.pur.Id == null , $Label.ps__msg_040_0062 , var.processNo)}"/>
+             	</apex:outputLink>
+	    	</apex:column>
+			<!-- 2015/12/15 Upload BEGIN -->
+			<!-- Attachment Upload -->
+			<apex:column headerValue="添付ファイル" style="width:90px;height:100%">
+				
+					<c:DragDropFileUploaderComp parentId="{!var.pur.id}" DragDropHeight="" isFirstComp="{!var.rowIdx==1}" 
+						linenum="{!var.rowIdx}" existFileId="{!var.fileId}" existFileNm="{!var.fileNm}" existFileUrl="{!var.fileUrl}"
+						rendered="{!(LEN(var.pur.id) > 0)}"
+						/>
+				
+				
+			</apex:column>
+			<!-- 2015/12/15 Upload END -->
+	    	
+	    	<!-- 店舗 -->	
+	    	<apex:column headerValue="{!$Label.ps__msg_040_0063}" rendered="{!shopOpts.size > 0}" width="5%">
+			<apex:outputField value="{!var.pur.ShopInfoRef__c}" rendered="{!var.isReadOnly}"/>
+	    		<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+				<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+				<span name="wrapSpanInput_{!!var.isReadOnly}">
+		    		<apex:selectList value="{!var.pur.ShopInfoRef__r.ShopCode__c}"  disabled="{!var.isReadOnly}" style="margin-left:0;margin-right:0; width:90px;"
+					multiselect="false" size="1" styleClass="j-dropDownList" id="depShopSel" onchange="autoNoTaxKbnFlg('{!JSENCODE(TEXT(var.rowIdx))}')">
+		    			<apex:selectOptions value="{!shopOpts}"/>
+		    		</apex:selectList>
+				</span>
+				</apex:outputPanel>
+	    	</apex:column>
+	    	
+	    	<!-- ステータス -->
+		<!--
+	    	<apex:column headerValue="{!$Label.MSG_040_0064}" width="5%" rendered="false">
+	    		<apex:outputField value="{!var.pur.StatusLst__c}" rendered="{!var.isReadOnly}"/>
+	    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+	    			<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+	    			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                        <apex:inputField value="{!var.pur.StatusLst__c}" id="staonDeviceStartonDeviceStarttusLst" rendered="{!!var.isReadOnly}" styleClass="j-comboxInput" style="margin-left:0;margin-right:0; width:100%"/>
+	    			</apex:outputPanel>
+	    		</span>
+	    	</apex:column>
+		-->
+	    	<!-- 種別 -->
+	    	<apex:column headerValue="{!$Label.ps__msg_040_0065}" width="10%">
+			<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+	    		<apex:facet name="header" >
+		    		<div class="headerDiv1">
+			    		<div class="headerDiv2">
+			    			{!$Label.MSG_040_0065}
+			    		</div>
+			    		<div id="purchaseTypeHeader" api="PurchaseType__c" class="headerDiv3"></div>
+	    			</div>
+	    		</apex:facet>
+			<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+	    		<apex:outputField value="{!var.pur.PurchaseType__c}" rendered="{!var.isReadOnly}"/>
+	    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+	    			<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+	    			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+						<apex:inputField value="{!var.pur.PurchaseType__c}" id="purChaseType" onchange="defaultChgKamuku(this);autoNoTaxKbnFlg('{!JSENCODE(TEXT(var.rowIdx))}')" rendered="{!!var.isReadOnly}" styleClass="j-comboxInput" style="margin-left:0;margin-right:0; width:100%"/>
+	    			</apex:outputPanel>
+	    		</span>
+	    	</apex:column>
+	    	<!-- 科目 -->
+	    	<apex:column headerValue="{!$Label.ps__msg_040_0066}" width="10%">
+			<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+	    		<apex:facet name="header" >
+	    			<div class="headerDiv1">
+			    		<div class="headerDiv2">
+			    			{!$Label.MSG_040_0066}
+			    		</div>
+			    		<div id="depKamokuHeader" api="KamokuLst__c" class="headerDiv3"></div>
+	    			</div>
+			    </apex:facet>
+			<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+	    		<apex:outputField value="{!var.pur.KamokuLst__c}" rendered="{!var.isReadOnly}"/>
+	    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+	    			<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+	    			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	    				<!-- 2016/07/15 wgch BEGIN -->
+	    				<apex:inputField value="{!var.pur.KamokuLst__c}" id="depKamoku" rendered="{!!var.isReadOnly}" onchange="defaultChgKamuku(this);autoNoTaxKbnFlg('{!JSENCODE(TEXT(var.rowIdx))}')" styleClass="j-comboxInput" style="margin-left:0;margin-right:0; width:100%"/>
+	    				<!-- 2016/07/15 wgch END -->
+	    			</apex:outputPanel>
+	    		</span>
+	    	</apex:column>
+	    	<!-- 仕入日 -->
+		    <apex:column headerValue="{!$Label.ps__msg_040_0056}"  style="text-align:right;width:100px;min-width:100px;">
+			    <!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+			    <apex:facet name="header">
+				    <div class="headerDiv1">
+					    <div class="headerDiv2">
+					    	{!$Label.MSG_040_0056}
+					    </div>
+					    <div id="SalesDateHeader" api="Field1__c" class="headerDiv3"></div>
+				    </div>
+			    </apex:facet>
+			    <!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+		    	<apex:outputField value="{!var.pur.Field1__c}" rendered="{!var.isReadOnly}"/>
+		    	
+		    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+				<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+				<span name="wrapSpanInput_{!!var.isReadOnly}">
+				<apex:inputField value="{!var.salesDate.Checkinday__c}" id="SalesDate" styleClass="k-textbox" style="width:100%;"/>
+		    	</span>
+		    	</apex:outputPanel>
+		    </apex:column>
+		    
+		    <!-- 仕入先 -->
+		    <apex:column headerValue="{!$Label.ps__msg_040_0055}"  style="width:20%;">
+		    	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+		    	<apex:facet name="header" >
+		    		<div class="headerDiv1">
+			    		<div class="headerDiv2">
+			    			{!$Label.MSG_040_0055}
+			    		</div>
+			    		<div id="purchaseSourceHeader" api="Purchasesource__r.Name" class="headerDiv3"></div>
+	    			</div>
+			    </apex:facet>
+		    	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+		    	<apex:outputField value="{!var.pur.Purchasesource__c}" rendered="{!var.isReadOnly}"/>
+		    	
+		    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+				<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+				<span name="wrapSpanInput_{!!var.isReadOnly}">
+				<apex:inputField value="{!var.pur.Purchasesource__c}" id="purchaseSource" styleClass="k-textbox" onchange="getKbnByAccount(this)" style="width:100%">
+					<c:AutoCompleteComp objectname="Account" 
+						additionalfield="Phone" rendered="false"
+						autocomplete_textbox="{!$Component.purchaseSource}"  soslExtend="true" jslibnew="true"/>	
+				</apex:inputField>
+		    	</span>
+		    	</apex:outputPanel>
+		    </apex:column>
+		    
+		    <!-- 会計商品 -->
+			<!--
+		    <apex:column headerValue="{!$Label.MSG_040_0067}"  style="width:10%;" rendered="false">
+		    	<apex:outputField value="{!var.pur.PsalesproductRef__c}" rendered="{!var.isReadOnly}"/>
+		    	
+				<span name="wrapSpanInput_{!!var.isReadOnly}">
+				<apex:inputField value="{!var.pur.PsalesproductRef__c}" id="psalesProduct" rendered="{!!var.isReadOnly}" styleClass="k-textbox" style="width:100%;"/>
+		    	</span>
+		    </apex:column>
+		  -->
+			<!-- 摘要 -->
+	    	<apex:column headerValue="{!$Label.ps__msg_040_0068}" title="{!var.pur.Memo__c}" styleClass="memoClass">
+	    		<apex:outputField value="{!var.pur.Memo__c}" rendered="{!var.isReadOnly}"/>
+	    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+	    			<apex:inputText value="{!var.pur.Memo__c}" id="memo" rendered="{!!var.isReadOnly}" styleClass="k-textbox" style="margin-left:0;margin-right:0; width:100%;min-width:80px;"/>
+	    		</span>
+	    	</apex:column>
+			<!-- 2015/12/03 Fix BEGIN -->
+			<!-- 税対象外 -->
+			<apex:column headerValue="{!$ObjectType.Purchase__c.Fields.NoTaxFlg__c.label}" style="width: 30px;text-align: center;">
+                <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN -->
+                <apex:inputHidden value="{!var.isDenpyoukeiflg}" id="hidisDenpyoukeiflg"/>
+                <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+				<apex:outputField value="{!var.pur.NoTaxFlg__c}" rendered="{!var.isReadOnly}" />
+				<span name="wrapSpanInput_{!!var.isReadOnly}">
+					<apex:inputCheckbox value="{!var.pur.NoTaxFlg__c}" id="notaxflg" rendered="{!!var.isReadOnly}" styleClass="noTaxFlgClass" onchange="callAutoTaxCon()"/>
+				</span>
+			</apex:column>
+			<!-- 2015/12/03 Fix END -->
+			<!-- 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN -->
+			<apex:column headerValue="{!$ObjectType.Purchase__c.Fields.TaxRate__c.label}" style="width: 30px;text-align: center;" rendered="{!taxOpts.size > 1}">
+				<apex:outputText value="{0,number,{!numberFormat}}" rendered="{!var.isReadOnly}"  >
+                    <apex:param value="{!var.pur.TaxRateCal__c}" />
+				</apex:outputText>
+				<apex:selectList value="{!var.rateTax}" id="selTaxType" styleClass="j-dropDownList" onchange="taxRateChange()" multiselect="false" style="width:60px;" size="1" rendered="{!!var.isReadOnly}">
+					<apex:selectOptions value="{!taxOpts}"/>
+				</apex:selectList>
+			</apex:column>
+			<!-- 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END -->
+	    	<!--金額(税抜)-->
+	    	<apex:column headerValue="{!$Label.ps__msg_040_0069}" style="text-align:right;margin-left:0;margin-right:0;width:115px;min-width:115px" >
+	    		<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+	    		<apex:facet name="header" >
+	    			<div class="headerDiv1">
+			    		<div class="headerDiv2">
+			    			{!$Label.MSG_040_0069}
+			    		</div>
+			    		<div id="denpyoukeiHeader" api="Denpyoukei__c" class="headerDiv3"></div>
+	    			</div>
+			    </apex:facet>
+	    		<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+	    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly}" >
+	    			<apex:param value="{!var.denpyokei}" />
+	    		</apex:outputtext>
+	    		
+		    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+				<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	    		<span name="wrapSpanInput_{!!var.isReadOnly}" >
+	    			<apex:inputField value="{!var.pur.Denpyoukei__c}"  id="denpyoukei" style="width:100%;" html-data-olddata="{!var.pur.Denpyoukei__c}" styleClass="j-numberInput-NoTax" />
+	    		</span>
+	    		</apex:outputPanel>
+	    	</apex:column>
+	    	
+	    	<!-- 金額(税込) -->
+	    	<apex:column headerValue="{!$Label.ps__msg_040_0070}" style="text-align:right;margin-left:0;margin-right:0;width:115px;min-width:115px" >
+	    		<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+				<apex:facet name="header" >
+					<div class="headerDiv1">
+			    		<div class="headerDiv2">
+			    			{!$Label.MSG_040_0070}
+			    		</div>
+			    		<div id="denpyoukeiIncTaxHeader" api="DenpyoukeiIncTax__c" class="headerDiv3"></div>
+	    			</div>
+			    </apex:facet>
+	    		<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+	    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly}" >
+	    			<apex:param value="{!var.denpyokeiIncTax}" />
+	    		</apex:outputtext>
+	    		
+		    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+				<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	    		<span name="wrapSpanInput_{!!var.isReadOnly}" >
+	    			<apex:inputField value="{!var.pur.DenpyoukeiIncTax__c}"  id="denpyoukeiIncTax" style="width:100%;" html-data-olddata="{!var.pur.DenpyoukeiIncTax__c}" styleClass="j-numberInput-IncTax" />
+	    		</span>
+	    		</apex:outputPanel>
+	    	</apex:column>
+	    	<!-- Action Colnum -->
+	    	<!-- アクション -->
+			<apex:column headerValue="{!$Label.ps__msg_040_0071}" width="80px" style="min-width:80px;">
+		    	<apex:outputPanel rendered="{!var.isReadOnly}">
+                    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN -->
+                    <a href="javascript:void(0)" onclick="removeContainer();editfun(false);despEditHistory('{!JSENCODE(TEXT(var.rowIdx))}', false)" ><!-- 編集 -->{!$Label.MSG_040_0072}</a>
+                    <a href="javascript:void(0)" onclick="removeContainer();editfun(true);despEditHistory('{!JSENCODE(TEXT(var.rowIdx))}', false)" style="display:{!if((JSENCODE(TEXT(var.rowIdx)) == '0' || !purchaseFlg),'none','')}"><!-- 明細 -->明細</a>
+                    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+		    	</apex:outputPanel>
+				<!-- Button Action -->
+		    	<apex:outputPanel rendered="{!!var.isReadonly && var.pur.Id == null}" style="white-space: nowrap;">
+		    		<!-- 新規 -->
+		    		<!-- 保存 -->
+		    		<input type="button" class="btn" name="inputBtn"  value="{!$Label.MSG_040_0073}" onclick="preSaveSubmit('{!JSENCODE(TEXT(var.rowIdx))}','');" />
+		    	</apex:outputPanel>
+		    	
+		    	<apex:outputPanel rendered="{!!var.isReadonly && var.pur.Id != null}" style="white-space: nowrap;">
+                <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN  -->
+                    <apex:outputpanel rendered="{!!var.isReadonly && purchaseFlg}">
+                        <img title="展開" src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}"
+                            style="cursor: pointer; width: 18px; height: 18px;vertical-align: middle;"
+                            id="showDetailEvent" onclick="showCloneRowFun(this)" rowIndex="{!var.rowIdx}" openStatus="true" />
+                    </apex:outputpanel>
+                    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END  -->
+					<!-- 保存 -->
+					<input type="button" class="btn" value="{!$Label.MSG_040_0073}" name="inputBtn" onclick="preSaveSubmit('{!JSENCODE(TEXT(var.rowIdx))}','');" />
+		    	 	<!-- 取消 -->
+		    	 	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+		    	 	<input type="button" class="btn" value="{!$Label.MSG_040_0074}" onclick="setHidFilterDataFun('hidFilterDataJsonDelete');depBataRollBack();" />
+			    	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+			    	</apex:outputPanel>
+			    </apex:column>
+		    
+	    	</apex:pageBlockTable>
+	    	</div>
+	    	
+	<apex:pageBlockButtons location="top" >
+	
+		<apex:outputpanel style="float: right;" id="changePanelTop">
+			<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+			<apex:inputHidden value="{!filter.purchaseTypeData}" 					id="hidPurchaseTypeData"/>
+			<apex:inputHidden value="{!filter.depKamokuData}" 	 					id="hidDepKamokuData"/>
+			<apex:inputHidden value="{!filter.salesDateData}" 	 					id="hidSalesDateData"/>
+			<apex:inputHidden value="{!filter.purchaseSourceData}" 					id="hidPurchaseSourceData"/>
+			<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+			<!-- 最大10000件まで表示できる -->
+			<apex:outputLabel value="{!$Label.ps__msg_040_0075}" rendered="{!if(pageCtrl.TotalRs >= canShowMaxRsNum, true, false)}" style="margin-right: 30px"/>
+		<!-- of -->    <!-- items -->
+          <apex:outputLabel value="{!pageCtrl.StartRsNo} - {!pageCtrl.EndRsNo} {!$Label.ps__msg_040_0076} {!pageCtrl.TotalRs} {!$Label.ps__msg_040_0077}"/>
+          <apex:commandLink action="{!firstPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();"  
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();" 
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 10px">
+          		<span class="k-icon k-i-seek-w"></span>
+          </apex:commandLink>
+          <apex:commandLink action="{!previousPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();"
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-w"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!nextPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();"
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-e"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!lastPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();" 
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-seek-e"></span>
+          </apex:commandLink> 
+         <apex:selectList value="{!currentSize}" multiselect="false" size="1" id="pageSize" 
+					        			styleClass="page-j-dropDownList"  onchange="changePageSize(this)"
+							            style="margin-left: 17px; width:55px">
+					    			<apex:selectOption itemValue="50" itemLabel="50" />
+					    			<apex:selectOption itemValue="100" itemLabel="100" />
+					    			<apex:selectOption itemValue="200" itemLabel="200" />
+		
+		 </apex:selectList> 
+          
+    	</apex:outputpanel>
+    </apex:pageBlockButtons>
+	<apex:pageBlockButtons location="bottom" >
+	
+		<apex:outputpanel style="float: right;" id="changePanelBottom">
+		<!-- of -->    <!-- items -->
+          <apex:outputLabel value="{!pageCtrl.StartRsNo} - {!pageCtrl.EndRsNo} {!$Label.ps__msg_040_0076} {!pageCtrl.TotalRs} {!$Label.ps__msg_040_0077}"/>
+          <apex:commandLink action="{!firstPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();" 
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 10px">
+          		<span class="k-icon k-i-seek-w"></span>
+          </apex:commandLink>
+          <apex:commandLink action="{!previousPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();"
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-w"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!nextPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();"
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-e"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!lastPage}" status="JINYACONNECT_LOADINGSTATUS" onclick="removeContainer();" 
+          	immediate="true" oncomplete="bindEvent();boderBindEvent();" 
+          	reRender="depInfoTable,changePanelTop,changePanelBottom" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-seek-e"></span>
+          </apex:commandLink> 
+          <apex:selectList value="{!currentSize}" multiselect="false" size="1" id="pageSizeSecond" 
+					        			styleClass="page-j-dropDownList"  onchange="changePageSize(this)"
+							            style="margin-left: 17px; width:55px">
+					    			<apex:selectOption itemValue="50" itemLabel="50" />
+					    			<apex:selectOption itemValue="100" itemLabel="100" />
+					    			<apex:selectOption itemValue="200" itemLabel="200" />
+		
+		 </apex:selectList>
+    	</apex:outputpanel>
+    </apex:pageBlockButtons>
+    
+	    </apex:pageBlock>
+	  </div>
+    </apex:form>
+<!-- 保存関連情報を格納する -->
+<apex:form id="saveForm">
+	<!-- 仕入 -->
+	<apex:inputHidden value="{!inpData.salesDt}" 						id="hidSalesDate"/>
+	<apex:inputHidden value="{!inpData.pur.KamokuLst__c}" 				id="hidKamokuLst"/>
+	<apex:inputHidden value="{!inpData.pur.StatusLst__c}" 				id="hidStatusLst"/>
+	<apex:inputHidden value="{!inpData.pur.DenpyoukeiIncTax__c	}" 		id="hidDenpyoukeiIncTax"/>
+	<apex:inputHidden value="{!inpData.pur.Denpyoukei__c}"				id="hidDenpyoukei"/>
+	<apex:inputHidden value="{!inpData.pur.PurchaseType__c}"			id="hidPurchaseType"/>
+	<apex:inputHidden value="{!inpData.pur.PsalesproductRef__c}"		id="hidPsalesproduct"/>
+	<apex:inputHidden value="{!inpData.productNm}" 						id="hidPsalesproductNm"/>
+	<apex:inputHidden value="{!inpData.pur.Purchasesource__c}"			id="hidPurchasesource"/>
+	<apex:inputHidden value="{!inpData.purchasesourceName}"				id="hidPurchaseSourceName"/>
+	<apex:inputHidden value="{!inpData.pur.Memo__c}"					id="hidMemo"/>
+	<apex:inputHidden value="{!inpData.shopCode}"						id="hidShopCode"/>
+	<apex:inputHidden value="{!editRowIdx}" 							id="hidInEditRowIdx"/>
+	<apex:inputHidden value="{!inpData.pur.NoTaxFlg__c}"				id="notaxflgHid"/>
+	<!--2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN -->		
+	<apex:inputHidden value="{!inpData.pur.TaxRate__c}"					id="hidTaxRate"/>
+	<!--2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END -->
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+	<apex:inputHidden value="{!filter.filterDataJson}" id="hidFilterDataJsonSave" />
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+	<apex:actionFunction action="{!dataUpsert}" name="depUpsert" rerender="errPanel" oncomplete="aftSaveSubmit()"/>
+
+
+</apex:form>
+<apex:form id="cancelBlock">
+    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN -->
+    <apex:actionFunction name="rerenderBlock" rerender="depInfoTable,depAmount,errPanel,changePanelTop,changePanelBottom" immediate="true" oncomplete="bindEvent();boderBindEvent();unblockUi ();buttononclick(1);"/>
+    <!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+	<apex:actionFunction name="chgPageSize" action="{!chgPageSize}" status="JINYACONNECT_LOADINGSTATUS" oncomplete="bindEvent();boderBindEvent();"  reRender="depInfoTable,changePanelTop,changePanelBottom" />
+	<apex:inputHidden value="{!currentSize}" id="hidCurrentSize"/>  
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN -->
+	<apex:inputHidden value="{!filter.filterDataJson}" id="hidFilterDataJson" />
+	<!-- 2017/07/07 検索結果にFilter機能の追加 WGCH END -->
+</apex:form>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="javascript:unblockUi();" id="refStatusBlock"/>
+<apex:actionStatus onstart="javascript:blockPopUi();" onstop="javascript:unblockPopUi();" id="refPopStatusBlock"/>
+<div id="backgroundCream"></div>
+<div id="exportWindow" >
+	<apex:form >
+		<apex:inputHidden value="{!currentRowIdx}" id="hidCurrentRowIdx"/>
+		<apex:actionFunction name="excuteDataBlock" action="{!batchExceute}" rerender="batchErrPanel" oncomplete="checkMessage()" status="refPopStatusBlock"/>
+		<apex:pageBlock id="exportBlock">
+			<apex:outputPanel id="batchErrPanel">
+			<apex:pageMessages />
+			</apex:outputPanel>
+				<apex:repeat value="{!popWinInfoLst}" var="winInfo" >
+					<div id="{!winInfo.filterBtn.btnLabel}" class="popwin">
+			<apex:pageBlockSection columns="1" >
+
+		
+		        <apex:outputPanel rendered="{!shopOpts.size > 0}">
+			        <span class="lookupInput">
+				        <!--　会計期間 -->
+				        <apex:pageblockSectionItem >
+				        	<span style="margin-left: 10px"><!--　店舗 -->{!$Label.ps__msg_040_0063}&nbsp;&nbsp;</span>
+				        	<apex:outputPanel >
+								        	<apex:selectList value="{!winInfo.batchShopCode}" multiselect="false" size="1" id="batchShopCode"
+					        			styleClass="j-dropDownList" rendered="{!shopOpts.size > 0}" 
+							            style="margin-left: 17px; width:170px">
+					    			<apex:selectOptions value="{!shopOpts}"/>
+						        </apex:selectList>
+							<span style="margin-left: 20px"><!--　ヘッダ出力 -->{!$Label.MSG_040_0085}</span>
+									        <apex:inputCheckbox value="{!winInfo.isBatchFlag}" style="width:20px" />
+					        </apex:outputPanel>
+				        </apex:pageblockSectionItem>
+			        </span>
+		        </apex:outputPanel>
+		        <apex:outputPanel rendered="{!shopOpts.size == 0}">
+			        <span class="lookupInput">
+				        <!-- ヘッダ出力 -->
+				        <apex:pageblockSectionItem >
+				        	<span style="margin-left: 10px"><!--　ヘッダ出力 -->{!$Label.MSG_040_0085}</span>
+				        	 <apex:inputCheckbox value="{!winInfo.isBatchFlag}" style="width:20px" />
+				        </apex:pageblockSectionItem>
+				    </span>
+				</apex:outputPanel>
+		        <apex:outputPanel >
+			        <span class="lookupInput">
+				        <apex:pageblockSectionItem > 
+							<span style="margin-left: 10px"><!--　状態 -->{!$Label.MSG_040_0078}&nbsp;&nbsp;</span>
+										<apex:outputPanel >
+								       		<apex:selectList value="{!winInfo.currentBatchStatus}" multiselect="false"
+								       					size="1" id="status" styleClass="j-dropDownList"
+											            style="margin-left: 17px; width:100px">
+								    <!--　作成中 -->
+					    			<apex:selectOption itemValue="作成中" itemLabel="{!$Label.ps__msg_040_0079}" />
+					    			<!--　確定 -->
+					    			<apex:selectOption itemValue="確定" itemLabel="{!$Label.ps__msg_040_0080}" />
+										    </apex:selectList>
+						        <span style="margin-left: 10px"><!--　振込指定日 -->{!$Label.MSG_040_0081}</span>
+									        <apex:inputField value="{!winInfo.queryInput.Checkinday__c}"  styleClass="k-textbox"  id="queryDate" style="margin-left: 10px;width:100px;"/>
+									    </apex:outputPanel>
+							        </apex:pageblockSectionItem>
+						        </span>
+					        </apex:outputPanel>
+			
+					        <apex:outputPanel >
+						        <span class="lookupInput">
+							        <apex:pageblockSectionItem >
+							<span style="margin-left: 10px"><!--　仕入日 -->{!$Label.ps__msg_040_0056}</span>
+										<apex:outputPanel >
+											<apex:inputField value="{!winInfo.batchFromDateInput.Checkinday__c}"  styleClass="k-textbox" id="batchFromDate" style="margin-left: 10px;width:100px;"/>
+						        <span style="margin-left: 10px"><!-- 〜 -->{!$Label.MSG_040_0057}</span>
+									        <apex:inputField value="{!winInfo.batchToDateInput.Checkinday__c}"  styleClass="k-textbox"  id="batchToDate" style="margin-left: 10px;width:100px;"/>
+									    </apex:outputPanel>
+							        </apex:pageblockSectionItem>
+						        </span>
+					        </apex:outputPanel>
+			
+					        <apex:outputPanel >
+						        <span class="lookupInput">
+
+							        <span style="margin-left: 140px">
+							        <!-- 確定 -->
+							        <input type="button" value="{!$Label.ps__msg_040_0080}" class="btn" onclick="excuteBatch()" style="width:100px"/>
+									 <!--
+									 	<input type="button" value="取消" class="btn" style="width:100px;" onclick="hideWindow()" />
+									  -->
+						        	</span>
+						        </span>
+					        </apex:outputPanel>
+					    </apex:pageBlockSection>
+				    </div>
+			    </apex:repeat>
+			</apex:pageBlock>
+	</apex:form>
+</div> 
+<script>
+$j(document).ready(function() {
+	bindEvent();
+	boderBindEvent();
+	initTypeObj();
+	// 2018/10/03 SCANER機能新規 by zy BEGIN
+	initChangeDevice();
+	// 2018/10/03 SCANER機能新規 by zy END
+	// 2018/10/29 09.商品関連情報の取得方式は改善要（商品情報を表示速度完全するため） by zy BEGIN
+	setTimeout(getAccountMasterInfos,10);
+	// 2018/10/29 09.商品関連情報の取得方式は改善要（商品情報を表示速度完全するため） by zy END
+});
+var typeToKamokuObj;
+var inputClearId;var inputNoTaxId; var kendoWin ;
+// 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+// function bindEvent(){
+function bindEvent(pRowIdx){
+// 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END
+	// 入力数値項目
+	var incTax = $j(".j-numberInput-IncTax").kendoNumericTextBox({
+   		format: "c",
+   		//min:0
+   		//decimals: {!JSENCODE(PointLen)},
+   		change:function(e){
+			callAutoIncTaxToNoTax(e);
+		}
+   	}).data("kendoNumericTextBox");
+	if (incTax != null) {
+	   	// 課税から非課税に自動計算
+	   	incTax.element.keyup(function(e){
+	   		if(inputClearId)clearTimeout(inputClearId);
+	   		inputClearId = setTimeout(callAutoIncTaxToNoTax, 200);
+	   	});
+   	}
+   	var noTax = $j(".j-numberInput-NoTax").kendoNumericTextBox({
+   		format: "c",
+   		//min:0
+		change:function(e){
+			callAutoNoTaxToIncTax(e);
+		}
+   	}).data("kendoNumericTextBox");
+   	if (noTax != null) {
+	   	// 非課税から課税に自動計算
+	   	noTax.element.keyup(function(e){
+	   		if(inputNoTaxId)clearTimeout(inputNoTaxId);
+	   		inputNoTaxId = setTimeout(callAutoNoTaxToIncTax, 200);
+	   	});
+   	}
+   	$j(".j-comboxInput").kendoComboBox({
+   		dataBound: function(e) {
+	      // handle the event
+	      e.sender.ul.css("white-space","nowrap");
+	      e.sender.list.css("width","auto");
+	      e.sender.ul.find("li").css({"overflow-x": "hidden", "padding-right": "15px"});
+		},
+		// 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN
+		// 关闭清空图标x
+		clearButton: false,
+		// 2017/07/07 検索結果にFilter機能の追加 WGCH END
+		filter: "contains",
+		suggest: false
+   	});
+   	/*
+   	$j("input[id$='0:SalesDate']").unbind("blur");
+   	$j("input[id$='0:SalesDate']").blur(function(e){
+   		var checkDt = checkDate($j(this).val());
+   		if(checkDt)
+   			$j(this).val(checkDt);
+   	});*/
+   	// 入力エリアのDropDownのBIND
+   	$j("#PurchaseManagentInput .j-dropDownList").kendoDropDownList({
+   		dataBound: function(e) {
+	      // handle the event
+	      e.sender.ul.css("white-space","nowrap");
+	      e.sender.list.css("width","auto");
+	  	}
+   	});
+	// Enter　Key対応
+	var numberInputArr = $j(" span[name='wrapSpanInput_true']");
+	$j(" span[name='wrapSpanInput_true']").keydown(function(e){
+    	if(e.keyCode == 13){
+    		var inputs = $j("span.k-numerictextbox");
+    		var idx = numberInputArr.index(this);
+    		if (idx == numberInputArr.length - 1) {
+                 $j("input[name=inputBtn]").focus();
+                 e.preventDefault();
+             } else {
+             	//  handles submit buttons
+                 $j(numberInputArr[idx + 1]).find("input").focus();
+
+                 $j(numberInputArr[idx + 1]).find("input").click();
+             }
+        }
+    });
+    //$j(" span[name='wrapSpanInput_true']:eq(0)").find(".k-widget").focus();
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN	
+	if (pRowIdx != undefined || pRowIdx == "0") {
+		var taxDropDown = $j("[id$=selTaxType]").getKendoDropDownList();
+		if (taxDropDown != undefined) {
+			taxDropDownEnable();
+			taxRateChange();
+		}
+	}
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END	
+    autoFoucsItem();
+}
+function boderBindEvent(){
+	// 入力エリアのDropDownのBIND
+   	$j(".page-j-dropDownList").kendoDropDownList({
+   		dataBound: function(e) {
+	      // handle the event
+	      e.sender.ul.css("white-space","nowrap");
+	      e.sender.wrapper.css("height",24);
+	      e.sender.span.parent().css("height",22);
+	      e.sender.list.css("width","auto");
+	  	}
+   	});
+	// バッチ起動画面初期化する
+    var window = $j("#exportWindow");
+    if (!window.data("kendoWindow")) {
+     	kendoWin = window.kendoWindow({
+            width: "500px",
+            animation: false,
+            actions: [
+                "Close"
+            ],
+            close: function(){
+            	$j("#backgroundCream").hide();
+            }
+        }).data("kendoWindow");
+        kendoWin.close();
+    }
+    // 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN
+    setFilter();
+    // 2017/07/07 検索結果にFilter機能の追加 WGCH END
+}
+//var ACCTOKBNMAP = new Object();
+function getKbnByAccount(that){
+	$j(".errorMsg").remove();
+	var accountId = $j(that).closest("[name=wrapSpanInput_true]").find("[id$=':purchaseSource_lkid']").val();
+	var accountName = $j(that).val();
+	if(!accountId && $j(that).val() == '') return;
+	if (accountId == "000000000000000" || accountId.includes("000000000000000") ) {
+		accountId = "";
+	}
+	// 有効な期間チェックを行う
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.PurchaseManagentInput.getAccount}", accountId,accountName, function(result, event){
+		// 異常
+		if(event.type == 'exception') {
+			alert(event.message);
+			unblockUi();
+		} else {
+			if(result){
+				var accountId = '';
+				if(result.errorMsg != '') $j(that).closest("span").after($j("<div class='errorMsg' style='color:red;'>" + result.errorMsg + "</div>"));
+				if(result.acc.Id){
+                    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+                    // if(result.acc.Id.length == 18) accountId = result.acc.Id.substring(0,15);
+                    if(result.acc.Id.length == 18){
+                        accountId = result.acc.Id.substring(0,15);
+                        getGridsDsFun(accountId,'');
+                    }
+                    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END
+					_pointKbnJsonDs[accountId] = result.acc.{!Ns}RoundType__c;
+					if(typeof($j("input.j-numberInput-NoTax[id]").data("orgmode")) != "undefined" && $j("input.j-numberInput-NoTax[id]").data("orgmode") != _pointKbnJsonDs[accountId] )
+						callAutoNoTaxToIncTax(event);
+				}
+				$j(that).closest("[name=wrapSpanInput_true]").find("[id$=':purchaseSource_lkid']").val(accountId);
+			}
+		}
+	});
+}
+// バッチ起動画面
+function showWindow(title){
+	// 画面に指定の店舗コードと仕入日情報から自動設定を行う
+	/*
+	var shopCodeObj = $j("[id$=':queryShopCode']");
+	if (shopCodeObj.length > 0) {
+		var queryShopCode = shopCodeObj.val();
+		var batchShop = $j("[id$=':batchShopCode']").data("kendoDropDownList");
+		batchShop.select(function(dataItem) {
+		    return dataItem.value === queryShopCode;
+		});
+	}
+	// 仕入日
+	$j("[id$=':batchFromDate']").val($j("[id$=':queryFromDate']").val());
+	$j("[id$=':batchToDate']").val($j("[id$=':queryToDate']").val());
+	*/
+	kendoWin.center();
+	kendoWin.open();
+	kendoWin.title(title);
+	var pickZindex = kendoWin.wrapper.css("z-index");
+    $j("#datePicker").css("z-index",parseInt(pickZindex) + 10);
+	$j("#backgroundCream").show();
+}
+function checkMessage(){
+	if ($j("[id$=':batchErrPanel']").text() != "") {
+		return false;
+	}
+	hideWindow();
+}
+function excuteBatch(){
+	// 必須チエック
+	var sDt = $j("[id$=':batchFromDate']").val();
+	var eDt = $j("[id$=':batchToDate']").val();
+	if (sDt == "" || eDt == "") {
+	//仕入開始日と終了日を入力してください.
+		alert("{!$Label.MSG_040_0082}");
+		return false;
+	}
+
+	excuteDataBlock();
+}
+function hideWindow(){
+	kendoWin.close();
+	$j("#backgroundCream").hide();
+	$j("#datePicker").css("z-index",0);
+	if ($j("[id$=':batchErrPanel']").text() != "") {
+		$j("[id$=':batchErrPanel']").hide();
+		return false;
+	}
+	//$j.unblockUI({fadeOut: 200});
+}
+var noTaxChangeFlg = false;
+function callAutoTaxCon() {
+	var noTaxFlg = $j("input.noTaxFlgClass");
+   	var noTax = $j(".j-numberInput-NoTax");
+	var incTax = $j(".j-numberInput-IncTax");
+	noTaxChangeFlg = true;
+	if (noTax != null) {
+   		if(inputNoTaxId)clearTimeout(inputNoTaxId);
+   		inputNoTaxId = setTimeout(callAutoNoTaxToIncTax, 200);
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+		var evt = $j(event.currentTarget);
+		if (!evt.is(":checked")) {
+			var curRow = evt.closest("tr");
+			// 展開フラグ
+			var hadExpland = curRow.next().hasClass("cloneRow");
+			var hadData = curRow.next().find("tr.dataRow").filter(function(){
+				var num = kendo.parseFloat($j("input[id$=accMasterPrice]",this).val());
+				var prodId = $j("input[id$=hidProductId]",this).val();
+				return prodId != "" && prodId != undefined && prodId != null && num != null && num != 0;
+			});
+			if (hadExpland && hadData.length > 0) {
+				setTimeout(TotalFun, 201);
+			}
+		}
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+   	}else {
+   		if(inputClearId)clearTimeout(inputClearId);
+   		inputClearId = setTimeout(callAutoIncTaxToNoTax, 200);
+   	}
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	taxDropDownEnable();
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+}
+function callAutoIncTaxToNoTax(e){
+	var valueTarget = $j("input.j-numberInput-IncTax[id]");
+	var accountId = valueTarget.closest("tr").find("[id$=':purchaseSource_lkid']").val();
+	var roundMode = "{!roundMode}";
+	if(_pointKbnJsonDs[accountId]) roundMode = _pointKbnJsonDs[accountId];
+	if (!noTaxChangeFlg) {
+		if(kendo.parseFloat(valueTarget.data("olddata")) == kendo.parseFloat(valueTarget.val()))return;
+	};
+	noTaxChangeFlg = false;
+	// 2015/12/03 Fix BEGIN
+	var noTaxFlg = $j("input.noTaxFlgClass[id]");
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	// var commTaxRate = "{!commTaxRate}";
+	var commTaxRate = getMasterRaxRate();
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+	if (noTaxFlg.is(':checked')) commTaxRate = 0;
+	var noTaxPrice = isNaN(valueTarget.val()) ? 0 : valueTarget.val();
+	// 2015/12/03 Fix END
+	var changePrice = JINYACONNECT.PRODUCT.CALNOTAXPRICE(noTaxPrice,commTaxRate,{!JSENCODE(PointLen)},roundMode);
+	valueTarget.closest("tr").find("input.j-numberInput-NoTax:eq(0)").val(kendo.format("{0:c}", changePrice));
+	valueTarget.closest("tr").find("input.j-numberInput-NoTax:eq(1)").val( changePrice);
+	valueTarget.closest("tr").find("input.j-numberInput-NoTax:eq(1)").data("olddata",changePrice);
+	console.log("inTax::round:" + roundMode);
+	console.log("inTax:::" + changePrice);
+	valueTarget.data("olddata",noTaxPrice);
+	valueTarget.data("orgmode",roundMode);
+	if(inputClearId)clearTimeout(inputClearId);
+}
+// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+function callAutoNoTaxToIncTax(e,processFlg){
+// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+	var valueTarget = $j("input.j-numberInput-NoTax[id]");
+	var accountId = valueTarget.closest("tr").find("[id$=':purchaseSource_lkid']").val();
+	var roundMode = "{!roundMode}";
+	if(_pointKbnJsonDs[accountId]) roundMode = _pointKbnJsonDs[accountId];
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	if (!noTaxChangeFlg && processFlg != true){
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+		if(kendo.parseFloat(valueTarget.data("olddata")) == kendo.parseFloat(valueTarget.val()))return;
+	};
+	noTaxChangeFlg = false;
+	// 2015/12/03 Fix BEGIN
+	var noTaxFlg = $j("input.noTaxFlgClass[id]");
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	// var commTaxRate = "{!commTaxRate}";
+	var commTaxRate = getMasterRaxRate();
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+	if (noTaxFlg.is(':checked')) commTaxRate = 0;
+	var incTaxPrice = isNaN(valueTarget.val()) ? 0 : valueTarget.val();
+	// 2015/12/03 Fix END
+	var changePrice = JINYACONNECT.PRODUCT.CALINCTAXPRICE(incTaxPrice,commTaxRate,{!JSENCODE(PointLen)},roundMode);
+	valueTarget.closest("tr").find("input.j-numberInput-IncTax:eq(0)").val(kendo.format("{0:c}", changePrice));
+	valueTarget.closest("tr").find("input.j-numberInput-IncTax:eq(1)").val( changePrice);
+	valueTarget.closest("tr").find("input.j-numberInput-IncTax:eq(1)").data("olddata",changePrice);
+	valueTarget.data("olddata",incTaxPrice);
+	valueTarget.data("orgmode",roundMode);
+	if(inputNoTaxId)clearTimeout(inputNoTaxId);
+}
+// Block UI
+function blockUi() {
+ 	$j.blockUI({
+ 	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_040_0083}</h1>'
+    }); 
+    return true;
+}
+// Block UI
+function blockPopUi() {
+ 	$j("#exportWindow").block();
+    return true;
+}
+// Lock解除
+function unblockPopUi () {
+    $j("#exportWindow").unblock();
+}
+// Lock解除
+function unblockUi () {
+    $j.unblockUI({ fadeOut: 200 });
+}
+function checkDate(date){
+	if(date.length == 8){
+		var result = date.match(/^(\d{1,4})(\d{1,2})(\d{1,2})$/);
+		var inDate = new Date(result[1], result[2] , result[3]);
+		return kendo.toString(inDate,JINYACONNECT.DateFormat);
+	} else if(date.length == 4){
+		var result = date.match(/^(\d{1,2})(\d{1,2})$/);
+		var currDt = new Date();
+		var inDate = new Date(currDt.getFullYear(),result[1],result[2]);
+		return kendo.toString(inDate,JINYACONNECT.DateFormat);
+	} else if(date.length == 10){
+		var result = date.match(/^(\d{1,4})(-|\/)(\d{1,2})(\d{1,2})$/);
+		if (result == null)  return kendo.toString(new Date(),JINYACONNECT.DateFormat);
+        return date;
+	}
+
+}
+// 保存処理前処理
+function preSaveSubmit(rowIdx) {
+
+	//必須項目を入力してください。
+	var checkMsg = '{!$Label.MSG_040_0084}';
+	var preKey = 'cash:saveForm';
+	//********** CLEAR FORM **************
+	$j("input[id='" + preKey + ":hidSalesDate']").val("");
+	$j("input[id='" + preKey + ":hidKamokuLst']").val("");
+	$j("input[id='" + preKey + ":hidStatusLst']").val("");
+	$j("input[id='" + preKey + ":hidDenpyoukeiIncTax']").val("");
+	$j("input[id='" + preKey + ":hidDenpyoukei']").val("");
+	$j("input[id='" + preKey + ":hidPurchaseType']").val("");
+
+	$j("input[id='" + preKey + ":hidPsalesproduct']").val("");
+	$j("input[id='" + preKey + ":hidPsalesproductNm']").val("");
+	$j("input[id='" + preKey + ":hidPurchasesource']").val("");
+	$j("input[id='" + preKey + ":hidMemo']").val("");
+	$j("input[id='" + preKey + ":hidShopCode']").val("");
+	$j("input[id='" + preKey + ":hidPurchaseSourceName']").val("");
+	$j("input[id='" + preKey + ":notaxflgHid']").val("");
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	$j("input[id='" + preKey + ":hidTaxRate']").val("");
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+	$j("input[id='"+preKey+":hidInEditRowIdx']").val(rowIdx);
+
+	var statusLst = $j("[id$=':depInfoTable:" + rowIdx + ":statusLst']").val();
+	var purChaseType= $j("[id$=':depInfoTable:" + rowIdx + ":purChaseType']").val();
+	var SalesDate  = $j("[id$=':depInfoTable:" + rowIdx + ":SalesDate']").val();
+	var psalesProduct = $j("[id$=':depInfoTable:" + rowIdx + ":psalesProduct']").val();
+	var psalesProductId = $j("[id$=':depInfoTable:" + rowIdx + ":psalesProduct_lkid']").val();
+	/*
+	if ($j.trim(psalesProduct) == "" && psalesProductId == "000000000000000") {
+		psalesProductId = "";
+	}
+	*/
+	var depKamoku   = $j("[id$=':depInfoTable:" + rowIdx + ":depKamoku']").val();
+	var memo     = $j("[id$=':depInfoTable:" + rowIdx + ":memo']").val();
+	var denpyoukeiIncTax  = $j("[id$=':depInfoTable:" + rowIdx + ":denpyoukeiIncTax']").val();
+	var denpyoukei  = $j("[id$=':depInfoTable:" + rowIdx + ":denpyoukei']").val();
+	var purchaseSourceId = $j("[id$=':depInfoTable:" + rowIdx + ":purchaseSource_lkid']").val();
+	var purchaseSource = $j("[id$=':depInfoTable:" + rowIdx + ":purchaseSource']").val();
+	var notaxflgHidvar = $j("[id$=':depInfoTable:" + rowIdx + ":notaxflg']").is(':checked');
+	if (purchaseSourceId == "000000000000000" || purchaseSourceId.includes("000000000000000") ) {
+		purchaseSourceId = "";
+	}
+	// 2018/10/05 店舗取得共通化 WSQ BEGIN
+	//var shopCode  = $j("[id$=':depInfoTable:" + rowIdx + ":depShopSel']").val();
+	var shopCode = getShopCode(":depInfoTable:" + rowIdx + ":depShopSel");
+	// 2018/10/05 店舗取得共通化 WSQ END
+	if (
+		//$j.trim(statusLst).length == 0 ||
+		$j.trim(purChaseType).length == 0 ||
+		$j.trim(SalesDate).length == 0 ||
+		$j.trim(depKamoku).length == 0 ||
+		$j.trim(denpyoukeiIncTax).length == 0 ||
+		$j.trim(denpyoukei).length == 0 ||
+		$j.trim(purchaseSource).length == 0) {
+		alert(checkMsg);
+		return false;
+	}
+	blockUi();
+
+	$j("input[id='" + preKey + ":hidSalesDate']").val(SalesDate);
+	$j("input[id='" + preKey + ":hidKamokuLst']").val(depKamoku);
+	//$j("input[id='" + preKey + ":hidStatusLst']").val(statusLst);
+	$j("input[id='" + preKey + ":hidDenpyoukeiIncTax']").val(denpyoukeiIncTax);
+	$j("input[id='" + preKey + ":hidDenpyoukei']").val(denpyoukei);
+	$j("input[id='" + preKey + ":hidPurchaseType']").val(purChaseType);
+	$j("input[id='" + preKey + ":hidPurchasesource']").val(purchaseSourceId);
+	$j("input[id='" + preKey + ":hidMemo']").val(memo);
+	$j("input[id='" + preKey + ":hidShopCode']").val(shopCode);
+	$j("input[id='" + preKey + ":hidPurchaseSourceName']").val(purchaseSource);
+	$j("input[id='" + preKey + ":hidPsalesproductNm']").val(psalesProduct);
+	$j("input[id='" + preKey + ":hidPsalesproduct']").val(psalesProductId);
+	$j("input[id='" + preKey + ":notaxflgHid']").val(notaxflgHidvar);
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	$j("input[id='" + preKey + ":hidTaxRate']").val(getMasterRaxRate(true));
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN
+	setHidFilterDataFun('hidFilterDataJsonSave');
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH END
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+    purDetailArr = []; // 数据集置空
+    $j(_clonePurDetailTr).each(function(index){ // 处理当前数据
+        var _tr = $j(this);
+        if($j("[id$=':hidPurDetailId']", _tr).val() != "" && $j("[id$=':hidProductId']", _tr).val() == ""){
+            delPurDetailArr.push($j("[id$=':hidPurDetailId']", _tr).val());
+            return true;
+        }
+        if($j("[id$=':hidProductId']", _tr).val() == "") return true;
+        // 日付はYYYYMMDDに転換する
+        var locSalesDate = kendo.parseDate(SalesDate,JINYACONNECT.DateFormat);
+        if (locSalesDate == null) locSalesDate = SalesDate;
+        else locSalesDate = kendo.toString(locSalesDate,"yyyyMMdd");
+        // 取得每一行的数据
+        var obj = { indexRow: index,
+                    // 2018/12/30 仕入明细保存对应不正 BY zyz BEGIN
+                    purId:  $j("[id$=':depInfoTable:"+ rowIdx +":hidPurId']").val(),
+                    // 2018/12/30 仕入明细保存对应不正 BY zyz END
+                    accMasterId: $j("[id$=':hidProductId']", _tr).val(),
+                    accMasterPrice: $j("[id$=':accMasterPrice']", _tr).val(),
+                    accMasterNum: $j("[id$=':accMasterNum']", _tr).val(),
+                    accMasterFlg:$j("[id$=':accMasterNoTaxflg']", _tr).is(':checked'),
+                    accMasterNoTax: kendo.parseFloat($j("[id$=':accMasterNoTax']", _tr).text()),
+                    accMasterIncTax: kendo.parseFloat($j("[id$=':accMasterIncTax']", _tr).text()),
+                    purDetailId: $j("[id$=':hidPurDetailId']", _tr).val(),
+                    putProStockId: $j("[id$=':hidPutProStockId']", _tr).val(),
+                    putProStockDate: locSalesDate,
+                    //purTaxType: $j("[id$=':purTaxType']", _tr).val()
+					// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+					accMasterRate:$j("input[id$=hidDetailTaxRate]",_tr).val(),
+					// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+                  };
+        
+        purDetailArr.push(JSON.stringify(obj));
+    });
+    saveIndexRow = rowIdx*1;
+	// Call Ajax Function
+	depUpsert();
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END
+}
+function aftSaveSubmit() {
+	var preKey = 'cash:saveForm';
+	// エラー存在チェックを行う
+	if ($j("[id='cash:errPanel']").text() != "") {
+		unblockUi();
+		return false;
+	}
+	rerenderBlock();
+}
+// 指定行目の関連処理
+function depDmlCompleteEvent(pRowIdx) {
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+    bindEvent(pRowIdx);
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END
+    autoFoucsItem(pRowIdx);
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+    denpyoukeiFun(pRowIdx);
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END
+}
+// 関連処理後の補足処理
+function autoFoucsItem (rowIdx) {
+	//var key2 = ':' + rowIdx + ':depKamoku';
+	//$j("input[id$=':hidPayEditRowIdx']").val(rowIdx);
+	//$element = $j("[id$='" + key2 + "']").data("kendoComboBox")
+	//$element.focus();
+	$j(" span[name='wrapSpanInput_true']:eq(0)").find(".k-widget").focus();
+}
+// 削除処理前処理
+function preDeleteSubmit() {
+	var rowIdxs = "";
+	var checkedLst = $j("#existBlock1").find("input[id$=':dataSelectChk']:checked");
+	//for (i = 0; i < checkedLst.length; i++) {
+	checkedLst.each(function() {
+		rowIdxs += $j(this).attr("rowIdx") + ",";
+	})
+	if (rowIdxs != "") rowIdxs = rowIdxs.slice(0, -1);
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN
+	setHidFilterDataFun('hidFilterDataJsonDelete');
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH END
+	depDeleteData(rowIdxs);
+}
+// 削除Checkbox選択する場合
+function swithDeleteBtn() {
+	// 入金BLOCK
+	var $deleteBtnBlock = $j("span[id$=':depDeleteBtnBlock']");
+	if ($j("#existBlock1").find("input[id$=':dataSelectChk']:checked").length > 0) {
+		$deleteBtnBlock.find("#deleteLab").hide();
+		$deleteBtnBlock.find("#deleteBtn").show();
+	} else {
+		$deleteBtnBlock.find("#deleteBtn").hide();
+		$deleteBtnBlock.find("#deleteLab").show();
+	}
+}
+function changePageSize(that){
+	$j("input[id$=hidCurrentSize]").val($j(that).val());
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN
+	setHidFilterDataFun('hidFilterDataJson');
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH END
+	chgPageSize();
+}
+// One Event Bind
+$j(document).ready(function() {
+	// 検索条件エリアの店舗リスト
+   	$j("#searchDiv .j-dropDownList").kendoDropDownList();
+   	 // バッチ起動画面の項目情報をBINDする
+   	$j("#exportWindow .j-dropDownList").kendoDropDownList();
+   	// バッチボタン初期化
+	$j(".csvoutputbtn").kendoButton({
+		icon: "clock",
+	});
+	$j("#accountinfobtn").kendoButton({
+		imageUrl: "{!URLFOR($Resource.AppImages, 'extend/csv.png')}",
+		click: function(e) {
+			var openUrl = "{!URLFOR('/apex/KouzaInfoCsvOutput')}";
+			window.open(openUrl);
+		}
+	});
+	$j("#reportbtn").kendoButton({
+		imageUrl: "/img/icon/reports16.png",
+	});
+	$j(".j-comboxInputNew").kendoComboBox({
+		dataBound: function(e) {
+			// handle the event
+			e.sender.ul.css("white-space","nowrap");
+			e.sender.list.css("width","auto");
+			e.sender.ul.find("li").css({"overflow-x": "hidden", "padding-right": "15px"});
+		},
+		change: function(e) {
+		    var value = this.value();
+		    var button = $j("#reportbtn").data("kendoButton");
+		    if (value == "") {
+				// disable button
+				button.enable(false);
+		    } else {
+				// enable button
+				button.enable(true);
+		    }
+		},
+		// 2017/07/07 wgch begin
+		// 关闭清空图标x
+		clearButton: false,
+		// 2017/07/07 wgch end
+		filter: "contains",
+		suggest: false
+	});
+	// 初期表示する場合、レポート実行ボタンを制御する
+	var button = $j("#reportbtn").data("kendoButton");
+	var repId = $j("[id$=':reportOptionList']").val();
+	if (repId == "") button.enable(false);
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN	
+	// 清除初期化选中的的 背景色
+	$j("div[id$=':reportOptionList-list'] .k-item.k-state-selected").removeClass('k-state-selected');
+	// 设置 第一个 选中的的 背景色
+	$j("div[id$=':reportOptionList-list'] .k-item:eq(0)").addClass('k-state-selected');
+	// 输入框内 设置第一个的信息
+	$j("[id$='reportOptionList']").data("kendoComboBox").select(0);
+	// 2017/07/07 検索結果にFilter機能の追加 WGCH END
+});
+function defaultChgKamuku(that){
+	var typeVal = $j(that).val();
+	if(typeToKamokuObj[typeVal]){
+		$j("select[id$=depKamoku]").data("kendoComboBox").value(typeToKamokuObj[typeVal]);
+	}
+}
+// 2016/04/21 課税対象外自動設定機能対応
+function autoNoTaxKbnFlg(rowidx) {
+	var noTaxDataSrc = JSON.parse("{!JSENCODE(xmlShopNotaxTypeMapJson)}");
+	var noTaxRightDataSrc = JSON.parse("{!JSENCODE(xmlShopNotaxTypeRightMapJson)}");
+	var defaultShopCode = "{!JSENCODE(xmlDefaultSetShopCode)}";
+	// 当前に選択の店舗情報を取得する
+	// 2018/10/05 店舗取得共通化 WSQ BEGIN
+	//var currShopCode = '';
+	//$shopObj = $j("select[id$=depShopSel]");
+	//if ($shopObj.length > 0) currShopCode = $shopObj.data("kendoDropDownList").value();
+	var currShopCode = getShopCode("depShopSel");
+	// 2018/10/05 店舗取得共通化 WSQ END
+	var typeVal = $j("select[id$=purChaseType]").data("kendoComboBox").value();
+	// 2016/07/15    科目    Wgch  BENGIN 
+	var typeVal2 = $j("select[id$=depKamoku]").data("kendoComboBox").value();
+	// 2016/07/15    科目    Wgch  END
+	var noTaxArray = noTaxRightArray = null;
+	var noTaxKbn = false;
+	if (noTaxDataSrc[currShopCode] === undefined) {
+		noTaxArray = noTaxDataSrc[defaultShopCode];
+	} else {
+		noTaxArray = noTaxDataSrc[currShopCode];
+	}
+	// 2016/07/15    科目    Wgch  BENGIN
+	if (noTaxRightDataSrc[currShopCode] === undefined) {
+		noTaxRightArray = noTaxRightDataSrc[defaultShopCode];
+	} else {
+		noTaxRightArray = noTaxRightDataSrc[currShopCode];
+	}
+	// 2016/07/15    科目    Wgch  END
+	if (noTaxArray != undefined && noTaxArray != null) {
+		if (noTaxArray.indexOf(typeVal) >= 0 ) {
+			noTaxKbn = true;
+		}
+	}
+	// 2016/07/15    科目    Wgch  BENGIN
+	if (noTaxRightArray != undefined && noTaxRightArray != null) {
+		if (noTaxRightArray.indexOf(typeVal2) >= 0 ) {
+			noTaxKbn = true;
+		}
+	}
+	// 2016/07/15    科目    Wgch  END
+	// 税区分により、金額再計算を再計算を行う
+	var $notaxObj = $j("input[id$=':"+rowidx+":notaxflg']");
+	var oldFlg = $notaxObj.prop("checked");
+	if (oldFlg != noTaxKbn) {
+		$notaxObj.prop("checked",noTaxKbn);
+		$notaxObj.trigger('change');
+	}
+}
+function initTypeObj(){
+	typeToKamokuObj = new Object();
+	var typeJsonStr = '{!JSENCODE(typeTokamokuJson)}';
+	if(typeJsonStr != ''){
+		var jsonResult = $j.parseJSON(typeJsonStr);
+		for(var i = 0 ; i < jsonResult.length ; i ++){
+			var result = jsonResult[i];
+			typeToKamokuObj[result.typeName] = result.kamokuName;
+		}
+	}
+}
+function showPopwin(labelName,that){
+	$j(".popwin").hide();
+	$j("input[id$=':hidCurrentRowIdx']").val($j(that).data("rowidx"));
+	$j("#" + labelName).show();
+	showWindow(labelName);
+}
+function hrefReport(){
+	var repId = $j("[id$=':reportOptionList']").val();
+	if (repId == "") return;
+	var url = '/' + repId;
+	window.open(url);
+}
+// 2017/07/07 検索結果にFilter機能の追加 WGCH BEGIN
+var purchaseTypeApi = 'PurchaseType__c',
+    depKamokuApi = 'KamokuLst__c',
+    salesDateApi = 'Field1__c',
+    purchaseSourceApi = 'Purchasesource__r.Name',
+    denpyoukeiApi = 'Denpyoukei__c',
+    denpyoukeiIncTaxApi = 'DenpyoukeiIncTax__c';
+function setSelectHeader(){
+	// 種別 => Json => PurchaseType__c
+	var purchaseTypeJson = JSON.parse($j("[id$=':hidPurchaseTypeData']").val());
+	// 科目 => Json => KamokuLst__c
+	var depKamokuJson = JSON.parse($j("[id$=':hidDepKamokuData']").val());
+	// 仕入日 => Json => Field1__c
+	var salesDateJson = JSON.parse($j("[id$=':hidSalesDateData']").val());
+	// 仕入先 => Json => Purchasesource__r.Name
+	var purchaseSourceJson = JSON.parse($j("[id$=':hidPurchaseSourceData']").val());
+	
+	// 種別 => KendoDs
+	var purchaseTypeDs = new kendo.data.DataSource({data: purchaseTypeJson});
+	// 科目 => KendoDs
+	var depKamokuDs = new kendo.data.DataSource({data: depKamokuJson});
+	// 仕入日 => KendoDs
+	var salesDateDs = new kendo.data.DataSource({data: salesDateJson});
+	// 仕入先 => KendoDs
+	var purchaseSourceDs = new kendo.data.DataSource({data: purchaseSourceJson});
+	
+    // 種別 => Kendo模版生成对应
+	$j("#purchaseTypeHeader").kendoGrid({
+		columns: 
+		[{
+			field: "purchaseType",
+			title: " ",
+			filterable: {
+				multi: true ,
+				search: true,
+				dataSource: purchaseTypeDs,
+				itemTemplate: function(e) {
+					if (e.field == "all") {
+						//handle the check-all checkbox template
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' />#= all#</label></li>";
+					} else {
+						//handle the other checkboxes
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' name='filter' api='#=purchaseTypeApi#' filter='eq' dataType='string' value='#=purchaseType#'/>#= purchaseType #</label></li>"
+					}
+				}
+			},
+			width: "10%"
+		}],
+		filterable: {
+			messages: {
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}"
+			}
+		},
+		filterMenuInit: function(e) {
+			if (e.field == "purchaseType") {
+				setOldCheckFun(e, purchaseTypeApi);
+			}
+		},
+		filter: function(e) {
+			getCheckDataFun(purchaseTypeApi, e.filter);
+		}
+	});
+	// 科目 => Kendo模版生成对应
+	$j("#depKamokuHeader").kendoGrid({
+		columns: 
+		[{
+			field: "depKamoku",
+			title: " ",
+			filterable: {
+				multi: true ,
+				search: true,
+				dataSource: depKamokuDs,
+				itemTemplate: function(e) {
+					if (e.field == "all") {
+						//handle the check-all checkbox template
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' />#= all#</label></li>";
+					} else {
+						//handle the other checkboxes
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' name='filter' api='#=depKamokuApi#' filter='eq' dataType='string' value='#=depKamoku#'/>#= depKamoku #</label></li>"
+					}
+				}
+			}
+		}],
+		filterable: {
+			messages: {
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}"
+			}
+		},
+		filterMenuInit: function(e) {
+			if (e.field == "depKamoku") setOldCheckFun(e, depKamokuApi);
+		},
+		filter: function(e) {
+			getCheckDataFun(depKamokuApi, e.filter);
+		}
+	});
+	
+	// 仕入日 => Kendo模版生成对应
+    $j("#SalesDateHeader").kendoGrid({
+		columns: 
+		[{
+			field: "SalesDate",
+			title: " ",
+			filterable: {
+				multi: true ,
+				search: true,
+				dataSource: salesDateDs,
+				itemTemplate: function(e) {
+					if (e.field == "all") {
+						//handle the check-all checkbox template
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' />#= all#</label></li>";
+					} else {
+						//handle the other checkboxes
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' name='filter' api='#=salesDateApi#' filter='eq' dataType='string' value='#=SalesDate#'/>#= SalesDate #</label></li>"
+					}
+				}
+			}
+		}],
+		filterable: {
+			messages: {
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}"
+			}
+		},
+		filterMenuInit: function(e) {
+			if (e.field == "SalesDate") setOldCheckFun(e, salesDateApi);
+		},
+		filter: function(e) {
+			getCheckDataFun(salesDateApi, e.filter);
+		}
+	});
+	
+	// 仕入先 => Kendo模版生成对应
+	$j("#purchaseSourceHeader").kendoGrid({
+		columns: 
+		[{
+			field: "purchaseSource",
+			title: " ",
+			filterable: {
+				multi: true ,
+				search: true,
+				dataSource: purchaseSourceDs,
+				itemTemplate: function(e) {
+					if (e.field == "all") {
+						//handle the check-all checkbox template
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' />#= all#</label></li>";
+					} else {
+						//handle the other checkboxes
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' name='filter' api='#=purchaseSourceApi#' filter='eq' dataType='string' value='#=purchaseSourceId#'/>#= purchaseSource #</label></li>"
+					}
+				}
+			}
+		}],
+		filterable: {
+			messages: {
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}"
+			}
+		},
+		filterMenuInit: function(e) {
+			if (e.field == "purchaseSource") setOldCheckFun(e, purchaseSourceApi);
+		},
+		filter: function(e) {
+			getCheckDataFun(purchaseSourceApi, e.filter);
+		}
+	});
+	
+	// 金額(税抜) => Kendo模版生成对应
+	$j("#denpyoukeiHeader").kendoGrid({
+		dataSource: {
+			schema: {
+				model: {
+					fields: {
+						denpyoukei: { type: "number"}
+					}
+				}
+			}
+		},
+		columns: 
+		[{
+			field: "denpyoukei",
+			title: " ",
+		}],
+		filterable: {
+			extra: false,
+			operators: {
+				number: {
+					// 指定の値に等しい          [查询值==输入值]
+					eq: "{!$Label.MSG_040_0097}",
+					// 指定の値に等しくない  [查询值!=输入值]
+					neq: "{!$Label.MSG_040_0098}",
+					// 指定の値より以上          [查询值>=输入值]
+					gte: "{!$Label.MSG_040_0099}",
+					// 指定の値より大きい      [查询值> 输入值]
+					gt: "{!$Label.MSG_040_0100}",
+					// 指定の値より以下 	 [查询值<=输入值]
+					lte: "{!$Label.MSG_040_0101}",
+					// 指定の値より小さい       [查询值< 输入值]
+					lt: "{!$Label.MSG_040_0102}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: " ",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+		    }
+		},
+		filterMenuInit: function(e) {
+			if (e.field == "denpyoukei") {	
+				setOldNumberDataFun(e, "notaxmenuform", 'denpyoukeiHeader', denpyoukeiApi, 'denpyoukei');
+			}
+		},
+		
+		filter: function(e) {
+			getCheckDataFun(denpyoukeiApi, e.filter, 'number');
+		}
+		
+	});
+	// 金額(税込) => Kendo模版生成对应
+	$j("#denpyoukeiIncTaxHeader").kendoGrid({
+		dataSource: {
+			schema: {
+				model: {
+					fields: {
+						denpyoukeiIncTax: { type: "number" }
+					}
+				}
+			}
+		},
+		columns: 
+		[{
+			field: "denpyoukeiIncTax",
+			title: " ",
+		}],
+		filterable: {
+			extra: false,
+			operators: {
+				number: {
+					// 指定の値に等しい          [查询值==输入值]
+					eq: "{!$Label.MSG_040_0097}",
+					// 指定の値に等しくない  [查询值!=输入值]
+					neq: "{!$Label.MSG_040_0098}",
+					// 指定の値より以上          [查询值>=输入值]
+					gte: "{!$Label.MSG_040_0099}",
+					// 指定の値より大きい      [查询值> 输入值]
+					gt: "{!$Label.MSG_040_0100}",
+					// 指定の値より以下 	 [查询值<=输入值]
+					lte: "{!$Label.MSG_040_0101}",
+					// 指定の値より小さい       [查询值< 输入值]
+					lt: "{!$Label.MSG_040_0102}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: " ",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+		    }
+		},
+		filterMenuInit: function(e) {
+			if (e.field == "denpyoukeiIncTax") {
+				setOldNumberDataFun(e, "inctaxmenuform", 'denpyoukeiIncTaxHeader', denpyoukeiIncTaxApi, 'denpyoukeiIncTax');
+			}
+		},
+		filter: function(e) {
+			getCheckDataFun(denpyoukeiIncTaxApi, e.filter);
+		}
+	});
+	// headerCss样式调整 
+	$j(".k-grid-header").addClass("headerCss");
+	$j(".k-i-filter").addClass("k-i-filterIcon");
+}
+// 选择filter之后调用 数据集计 后台查询
+function getCheckDataFun(filterApi, filter){
+	// clear功能处理
+	if(filter == null){
+		// OLD hashMap 有此API数据的情况下
+		if(hashMap.Contains(filterApi)){
+			hashMap.Remove(filterApi);
+			// OLD hashMap Remove 掉当前API 之后调用后台
+			getActionFunctionFun();
+		}
+		return;
+	}
+	// 税抜の金額
+	var $notaxForm = $j(".notaxmenuform");
+	if ($notaxForm.length > 0) {
+	   var notaxApi = $notaxForm.data("api");
+	   var notaxVal = $notaxForm.find("input.k-formatted-value.k-input").val();
+	   var notaxOpt = $notaxForm.find("select").val();
+	   if(notaxVal != "") hashMap.Put(notaxApi, [notaxVal, notaxOpt]);
+	}
+	// 税込の金額
+	var $inctaxForm = $j(".inctaxmenuform");
+	if ($inctaxForm.length > 0) {
+	   var inctaxApi = $inctaxForm.data("api");
+	   var inctaxVal = $inctaxForm.find("input.k-formatted-value.k-input").val();
+	   var inctaxOpt = $inctaxForm.find("select").val();
+	   if(inctaxVal != "") hashMap.Put(inctaxApi, [inctaxVal, inctaxOpt]);
+	}
+	// 获取所有      已经check的     有效对象
+	var $isFilterCheck = $j("[name='filter']:checked");
+	// newHashMap 新的 【目的:如过在同一个List里  原来选 1、2   现在只选 1 的情况 点Filter】
+	var newHashMap = new Map();
+	// 处理   当前   所有的   check对象
+	for(var i = 0; i < $isFilterCheck.length; i++){
+		var api = $isFilterCheck.eq(i).attr('api');
+		var val = $isFilterCheck.eq(i).val();
+		
+		if(newHashMap.containsKey(api)) newHashMap.get(api).push(val);
+		else newHashMap.put(api, [val]);
+	}
+	// 追加新数据/置换旧数据
+	newHashMap.each(function(newHashApi){
+		hashMap.Put(newHashApi, newHashMap.get(newHashApi));
+	});
+	// 调用 actionFunction 取后台最新数据
+	getActionFunctionFun();
+}
+// 调用后台的处理
+function getActionFunctionFun(){
+	getFilterData(JSON.stringify(hashMap));
+	// 清空数据模版 div
+	removeContainer();
+}
+// 复原    历史选中
+function setOldCheckFun(e,api){
+	e.container.addClass("filterFormCls");
+	// 定位当前所有 Name = "filter" 的标签
+	var thisCheckBox = e.container.find("[name='filter']");
+	// 复原  历史check的对象
+	for(var i = 0; i < thisCheckBox.length; i++){
+		// 判断   此值   在hashMap里是否存在
+		if($j.inArray(thisCheckBox.eq(i).val(),hashMap.Get(api)) == -1) continue;
+		// 如果满足以上条件 就选择
+		thisCheckBox[i].click();
+	}
+}
+// 复原    历史number类型筛选数据
+function setOldNumberDataFun(e, cls, divId, api, isField){
+	// 2018/11/01 Filter过滤脚本bug改正对应 zyz BEGIN
+	$j('.' + api).parent('div').remove();
+	// 2018/11/01 Filter过滤脚本bug改正对应 zyz END
+	e.container.addClass(cls).data("api", api);
+	// 2018/11/01 Filter过滤脚本bug改正对应 zyz BEGIN
+	// e.container.addClass("filterFormCls");
+	e.container.addClass(api);
+	// 2018/11/01 Filter过滤脚本bug改正对应 zyz END
+	var oldDataArr = hashMap.Get(api);
+	if(oldDataArr != undefined){
+		$j("#"+divId).data("kendoGrid").dataSource.filter({ field: isField, operator: oldDataArr[1], value: oldDataArr[0] });
+	}
+}
+// 清空old数据
+function hashMapClearFun(){
+	hashMap.Clear();
+	removeContainer();
+	// 2018/10/29 08.スキャナー終了に改善）by zy BEGIN
+	// 关闭射频
+	scrannerEnd();
+	// 2018/10/29 08.スキャナー終了に改善）by zy END
+}
+// filter标签设置背景色
+function setBgColorFun(){
+	for(var i= 0 ; i < hashMap.Size(); i++){
+		var key = hashMap.KeySet()[i];
+		$j("[api='" + key + "'] a.k-grid-filter").removeClass('k-state-actives').addClass('k-state-actives');
+	}
+}
+function setFilter(){
+	// 初始化过滤Header
+	setSelectHeader();
+	// filter标签设置背景色
+	setBgColorFun();
+	// 红色感叹号去掉
+	$j("span.k-icon.k-i-warning").remove();
+}
+function setHidFilterDataFun(hidId) {
+	$j("input[id$='"+ hidId +"']").val(JSON.stringify(hashMap));
+	removeContainer();
+	// 2018/10/29 08.スキャナー終了に改善）by zy BEGIN
+	// 关闭射频
+	scrannerEnd();
+	// 2018/10/29 08.スキャナー終了に改善）by zy END
+}
+// 清空FilterForm表单
+function removeContainer(){
+	$j('.filterFormCls').parent('div').remove();
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN
+    purDetailArr = new Array();
+    dataUidArr = new Array();
+    groupRowArr = new Array();
+    delPurDetailArr = new Array();
+    tabMap = new Map();
+    // 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END
+}
+// 2017/07/07 検索結果にFilter機能の追加 WGCH END
+// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+function taxRateChange(){
+	callAutoNoTaxToIncTax(false,true);
+}
+function getMasterRaxRate(val){
+	var taxDropDown = $j("[id$=selTaxType]").getKendoDropDownList();
+	var commTaxRate = "{!commTaxRate}";
+	if (taxDropDown != undefined) {
+		var taxRate = kendo.parseFloat(taxDropDown.value());
+		if (taxRate != null) commTaxRate = taxRate;
+		if (val) return taxDropDown.value();
+	}
+	return 	commTaxRate;
+}
+function taxDropDownEnable(rowIdx){
+	var taxDropDown = $j("[id$=selTaxType]").getKendoDropDownList();
+	if (taxDropDown != undefined) {
+		var curRow = $j("[id$=selTaxType]").closest("tr");
+		if (rowIdx == undefined) rowIdx = $j("table[id$=depInfoTable] tr.dataRow").index(curRow);
+		// 展開フラグ
+		var hadExpland = curRow.next().hasClass("cloneRow");
+		// 税対象外
+		var checkFlg = $j("input[id$=':" + rowIdx + ":notaxflg']");
+		// 明細あり
+		var isDenpyoukeiflg= $j("[id$=':depInfoTable:"+ rowIdx +":hidisDenpyoukeiflg']").val();
+		var enableFlg = !checkFlg.is(":checked") && isDenpyoukeiflg != "true" && !hadExpland;
+		taxDropDown.enable(enableFlg);
+	}
+}
+// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+</script>
+<c:CommProductFeeCalJsComp />
+<!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH BEGIN -->
+<apex:form style="display:none;">
+    <apex:pageBlock id="org">
+        <!-- 自动行追加功能  appendTblToRowFun();onResponse(0) -->
+        <apex:actionFunction name="addTranItemFun" action="{!addPurDetailItem}" status="refStatusBlock"
+            oncomplete="autoFocusFun();refreshCloneTable();lastPurDetailFun();changeclock();scrannCallBack();" reRender="purDetailTable"/>
+        
+        <apex:pageBlockTable value="{!purDetailLst}" var="tab" id="purDetailTable" columnsWidth="5%,54%,9%,9%,5%,9%,9%" rowClasses="purDetailRow">
+            <!-- アクション -->
+            <apex:column headerValue="{!$Label.ps__msg_011_0061}" footerClass="totalRowCenCell" width="5%">
+                <!-- クリア -->
+                <input type="button" title="{!$Label.MSG_011_0062}" value="{!$Label.MSG_011_0062}" class="k-button clearProduct" rowIndex="{!tab.indexRow}" onclick="clearAcc(this)"/>
+                <apex:inputHidden value="{!tab.indexRow}" id="hidRowNo" />
+                <apex:inputHidden value="{!tab.purDetailId}" id="hidPurDetailId" />
+                <apex:inputHidden value="{!tab.putProStockId}" id="hidPutProStockId" />
+				<!-- 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN -->
+				<apex:inputHidden value="{!tab.accMasterRate}" id="hidDetailTaxRate"/>
+				<!-- 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END -->
+            </apex:column>
+        
+            <!-- 商品 headerValue="{!$ObjectType.PlanDetail__c.Fields.AccountMasterRef__c.label}"-->
+            <apex:column headerValue="{!$Label.ps__msg_011_0063}">
+                <span class="lookupInput">
+                <table style="width: 100%; border-spacing: 0; border: 0; padding: 0;">
+                <tr>
+                <td style="border-bottom:0px;padding: 0px;">
+                <apex:inputText value="{!tab.accMasterNm}" id="productName" onfocus="onDeviceStart()" maxlength="80" style="width:99%;" html-rowIndex="{!tab.indexRow}" styleClass="detailCommStyle k-textbox"/>
+                </td>
+                <td style="width: 44px; border-bottom:0px;padding: 0px 0px 0px 2px">
+                <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+                  onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+                  onfocus="this.className = 'lookupIconOn';"
+                  onblur="this.className = 'lookupIcon';"
+                  class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+                  name="productPopup"
+                  rowIndex = "{!tab.indexRow}" />
+                </td></tr></table>
+                </span>
+                <apex:inputHidden value="{!tab.accMasterId}" id="hidProductId" />
+            </apex:column>
+        
+            <!-- 原価-->
+            <apex:column headerValue="原価" >
+                <apex:inputText value="{!tab.accMasterPrice}" id="accMasterPrice" style="width:120px"/>
+            </apex:column>
+        
+            <!-- 数量-->
+            <apex:column headerValue="{!$Label.ps__msg_006_0405}" >
+                <apex:inputText value="{!tab.accMasterNum}" id="accMasterNum" maxlength="8" style="width:60px"/>
+            </apex:column>
+            <!--税抜/税込-->
+            <!--
+            <apex:column headerValue="税抜/税込">
+            <apex:selectList value="{!tab.purTaxType}" multiselect="false" size="1" id="purTaxType" 
+                            styleClass="j-dropDownList" rendered="{!purTaxTypeLst.size > 0}" style="width:60px">
+                <apex:selectOptions value="{!purTaxTypeLst}"/>
+            </apex:selectList>
+            </apex:column>
+            -->
+            <!-- 税区分-->
+            <apex:column style="text-align: center;">
+                <apex:facet name="header" >
+                	<div style="vertical-align: middle;">
+                    <input type="checkbox" id="isHideAllId" onclick="isHideAllFun(this)"></input><span>税込</span>
+                    </div>
+                </apex:facet>
+                <apex:inputCheckbox value="{!tab.accMasterFlg}" id="accMasterNoTaxflg" styleClass="chk" html-rowIndex="{!tab.indexRow}"/>
+                <apex:inputHidden value="{!tab.accMasterFlg}" id="hidaccMasterNoTaxflg" />
+            </apex:column>
+            <apex:column headerValue="金額(税抜)" style="text-align: right;">
+                <!--<apex:inputCheckbox value=""  id=""  onclick="swith()"/>-->
+                <!-- 2018/12/30 仕入明细保存对应不正 BY zyz BEGIN -->
+                <apex:outputText value="{!CurrencySybmol}{0,number,{!numberFormat}}" id="accMasterNoTax" >
+                <!-- 2018/12/30 仕入明细保存对应不正 BY zyz END -->
+                    <apex:param value="{!tab.accMasterNoTax}" />
+                </apex:outputText>
+                <apex:inputHidden value="{!tab.accMasterNoTax}" id="hidaccMasterNoTax" />
+            </apex:column>
+            <apex:column headerValue="金額(税込)" style="text-align: right;">
+                <!--<apex:inputCheckbox value=""  id=""  onclick="swith()"/>-->
+                <!-- 2018/12/30 仕入明细保存对应不正 BY zyz BEGIN -->
+                <apex:outputText value="{!CurrencySybmol}{0,number,{!numberFormat}}" id="accMasterIncTax" >
+                <!-- 2018/12/30 仕入明细保存对应不正 BY zyz END -->
+                    <apex:param value="{!tab.accMasterIncTax}" />
+                </apex:outputText>
+                <apex:inputHidden value="{!tab.accMasterIncTax}" id="hidaccMasterIncTax" />
+            </apex:column>
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+</apex:form>
+<script>
+// 全局变量
+var curFocusUUid, purInfoMap, saveIndexRow;
+var g_currRowIndex = 0;
+var _orgPurDetailTr = "[id$='org:purDetailTable'] tr.purDetailRow";
+var _clonePurDetailTr = "[id$='clone:purDetailTable'] tr.purDetailRow";
+var _cloneTabstripDiv = "[id='clone:tabstrip']";
+var lastSector = "input[id$=productName],input[id$=accMasterPrice],input[id$=accMasterNum]";
+var purDetailArr = new Array();
+var dataUidArr = new Array();
+var groupRowArr = new Array();
+var delPurDetailArr = new Array();
+var tabMap = new Map();
+var rowInfoEdit = 0; // 仕入行
+function showCloneRowFun(obj){
+    // 操作行
+    var cloneRow = $j("tr.cloneRow");
+    var rowOneIndex = $j(obj).attr("rowIndex");
+    rowInfoEdit = rowOneIndex;
+    // 2018/08/08 BEGIN
+    //setDisabledFun(rowOneIndex);
+    // 2018/08/08 END
+    $j("img[id='showDetailEvent']").not($j(obj)).remove();
+    if(cloneRow.length == 0) onResponse(rowOneIndex);
+    if ($j(obj).attr("openStatus") == "false") {
+        // 2018/08/08 BEGIN
+        setDisabledFun(rowOneIndex,false);
+        // 2018/08/08 END
+        $j(obj).attr("openStatus","true");
+        $j(obj).attr("title","展開");
+        $j(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}");
+        cloneRow.css({'display':'none'});
+    } else if ($j(obj).attr("openStatus") == "true") {
+        // 2018/08/08 BEGIN
+        setDisabledFun(rowOneIndex,true);
+        // 2018/08/08 END
+        $j(obj).attr("openStatus","false");
+        $j(obj).attr("title","折りたたむ");
+        $j(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}");
+        cloneRow.css({'display':''});
+    }
+    // 原价和数量变更响应
+    changeclock();
+}
+// 检索会计数据，部分值需要调整
+function onResponse(pRowIdx){
+    appendTblToRowFun(pRowIdx); // 插入克隆Table
+    lastPurDetailFun(); // 绑定克隆Table最后一行事件
+}
+// cloneTable
+function refreshCloneTable(){
+    // 行追加remove();
+    var curRowIdx = $j("tr.curExplandRow").index();
+    appendTblToRowFun(curRowIdx);
+}
+// 插入克隆Table
+function appendTblToRowFun(rowOneIndex){
+    $j("tr.cloneRow").remove();
+    // 数据下商品明细显示
+    var tbl = $j("[id$=':purDetailTable']").clone();
+    tbl.attr("id","clone:purDetailTable");
+    var row = $j("table[id$=':depInfoTable']>tbody>tr.dataRow").eq(rowOneIndex);
+    var _td = $j("<td class='newTd' valign='top'></td>");
+    _td.attr("colspan",getColspanFun() * 0.65);
+    _td.append(tbl);
+    var cloneRow = $j("<tr class='cloneRow'></tr>");
+    cloneRow.append(_td);
+    row.after(cloneRow);
+    var _div = $j("[id='tabstrip']").clone();
+    _div.attr("id","clone:tabstrip");
+    var _oldPurDetailTd = $j("<td class='oldTd' valign='top'></td>");
+    _oldPurDetailTd.attr("colspan", Math.ceil(getColspanFun() * 0.35));
+    _oldPurDetailTd.append(_div.css({"display" : ""}));
+    cloneRow.append(_oldPurDetailTd);
+    row.addClass("curExplandRow");
+    bindImgPopFun(); // 绑定放大镜
+    searchAcc(); // 绑定商品检索
+    initOrgPurDetailFun();// 清空org数据
+    setTabstripFun(); // 设定Tabstrip
+    var gridHt = tbl.height() - 60;
+    $j('#grid_purDetail, #grid_pur', _cloneTabstripDiv).css('height', gridHt+ 'px');
+    var accountId = $j("[id$=':" + rowOneIndex +":purchaseSource_lkid']").val();
+    if(!accountId && $j("[id$=':" + rowOneIndex +":purchaseSource']").val() == '') return;
+    // 2018/08/08 BEGIN
+    var purchaseId = $j("[id$=':" + rowOneIndex +":hidPurId']").val();
+    if(accountId != "000000000000000" && accountId != "") getGridsDsFun(accountId,purchaseId);
+    // 2018/08/08 END
+    setKendoUIFun(); // 设定KendoUI
+}
+﻿
+function setKendoUIFun(){
+    $j("input[id$=':accMasterPrice']", "tr.cloneRow").kendoNumericTextBox({
+        format: "c",
+        min:0,
+        decimals: {!JSENCODE(PointLen)},
+        change:function(e){
+			var curRow = e.sender.wrapper.closest("tr.purDetailRow");
+			var rowIndex = $j("input.clearProduct",curRow).attr("rowindex");
+			setTimeout(setupCalAmoutPrice(rowIndex),1000);
+		}
+    });
+    $j("input[id$=':accMasterNum']", "tr.cloneRow").kendoNumericTextBox({
+        format: "0",
+        min:0,
+        change:function(e){
+			var curRow = e.sender.wrapper.closest("tr.purDetailRow");
+			var rowIndex = $j("input.clearProduct",curRow).attr("rowindex");
+			setTimeout(setupCalAmoutPrice(rowIndex),1000);
+		}
+    });
+    /*
+    $j("select[id$=':purTaxType']", "tr.cloneRow").kendoDropDownList({
+        dataBound: function(e) {
+            // handle the event
+            e.sender.ul.css("white-space","nowrap");
+            e.sender.list.css("width","auto");
+        }
+    });
+    */
+}
+// 获取所有列
+function getColspanFun(){
+    var colspanInt = 0;
+    $j("table[id$=':depInfoTable']>thead>tr>th").each(function(){
+        var colspan = $j(this).attr("colspan");
+        var parse_Span = kendo.parseInt(colspan);
+        if (parse_Span != null) colspanInt += parse_Span;
+        else colspanInt += 1;
+    });
+    return colspanInt;
+}
+// 重置Org仕入明细数据
+function initOrgPurDetailFun(currRowIndex){
+    $j(_orgPurDetailTr).each(function(index) {
+        var _tr = $j(this);
+        if($j("[id$=':hidProductId']", _tr).val() == "") return true;
+        // 取得每一行的数据
+        $j("[id$=':" + index + ":productName']", _orgPurDetailTr).val("");
+        $j("[id$=':" + index + ":hidProductId']", _orgPurDetailTr).val("");
+        $j("[id$=':" + index + ":accMasterPrice']", _orgPurDetailTr).val("");
+        $j("[id$=':" + index + ":accMasterNum']", _orgPurDetailTr).val("");
+        $j("[id$=':" + index + ":hidaccMasterNoTaxflg']", _orgPurDetailTr).val("1");
+        $j("[id$=':" + index + ":hidaccMasterNoTax']", _orgPurDetailTr).val("");
+        $j("[id$=':" + index + ":hidaccMasterIncTax']", _orgPurDetailTr).val("");
+        $j("span[id$=':" + index + ":accMasterNoTax']", _orgPurDetailTr).text("");
+        $j("span[id$=':" + index + ":accMasterIncTax']", _orgPurDetailTr).text("");
+    });
+}
+// 商品检索
+function searchAcc(){
+    // 会計商品AutoComplete[1桁以上]
+    $j("input[id$=':productName']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.PurchaseManagentInput.getArrayProductItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($j.map(result, function (item) {
+                        item.id = item.productId;
+                        item.value = item.prodcutName + "("+item.prodcutCode+")";
+                        return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+            var nameArray = $j(this).attr("id").split(":");
+            currRowIndex = nameArray[nameArray.length - 2];
+            ui.item.rowIndex = currRowIndex;
+            autoGetProductInfo(ui.item);
+            return false;
+        },
+        select: function (event, ui) {
+            var nameArray = $j(this).attr("id").split(":");
+            currRowIndex = nameArray[nameArray.length - 2];
+            ui.item.rowIndex = currRowIndex;
+            autoGetProductInfo(ui.item);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+            return false;
+        },
+    });
+}
+function bindImgPopFun(){
+    $j("img[name='productPopup']", "tr.cloneRow").unbind("click");
+    $j("img[name='productPopup']", "tr.cloneRow").click(function() {
+        currRowIndex = $j(this).attr("rowindex");
+        g_currRowIndex = currRowIndex;
+        curFocusUUid = (currRowIndex + 1) + ':productName';
+        // 引き渡し値を設定して、選択画面を開く
+        ctrlNm =  $j("input:text[id$=':" + currRowIndex + ":productName']", "tr.cloneRow").get(0);
+        ctrlId = $j("input:hidden[id$=':" + currRowIndex + ":hidProductId']", "tr.cloneRow").get(0);
+        ctrlPriceId = $j("input:text[id$=':" + currRowIndex + ":accMasterPrice']", "tr.cloneRow").get(0);
+        ctrlOrderNumId = $j("input:text[id$=':" + currRowIndex + ":accMasterNum']", "tr.cloneRow").get(0);
+        ctrlNoTax = $j("span[id$=':" + currRowIndex + ":accMasterNoTax']", "tr.cloneRow").get(0);
+        ctrlIncTax = $j("span[id$=':" + currRowIndex + ":accMasterIncTax']", "tr.cloneRow").get(0);
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+		ctrlTax =  $j("input[id$=':" + currRowIndex + ":hidDetailTaxRate']", "tr.cloneRow").get(0);
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+        var openUrl = "/apex/ProductSearch?np=1&npy=1&bp=1&idx=" + currRowIndex;
+        // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+        objs = new Array(ctrlNm, ctrlId, '', ctrlPriceId, ctrlOrderNumId, 'ctrlNoTax', ctrlTax, '', '', '', '', '');
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+        commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupCallback);
+    });
+}
+function popupCallback(){
+    $j("input:text[id$=':" + g_currRowIndex + ":accMasterPrice']", "tr.cloneRow").data("kendoNumericTextBox").value($j("input:text[id$=':" + g_currRowIndex + ":accMasterPrice']", "tr.cloneRow").val());
+    $j("input:text[id$=':" + g_currRowIndex + ":accMasterNum']", "tr.cloneRow").data("kendoNumericTextBox").value($j("input:text[id$=':" + g_currRowIndex + ":accMasterNum']", "tr.cloneRow").val());
+    setupCalAmoutPrice(g_currRowIndex);
+}
+// 绑定事件【获得焦点时触发】
+function autoFocusFun(){
+    if (curFocusUUid != undefined){
+        $j("[id$='" + curFocusUUid + "']").focus();
+        curFocusUUid = undefined;
+    }
+}
+// 重新排序
+function refreshOrder(){
+    var rowIndex = 0;
+    var rowArr = new Array();
+    $j(_orgPurDetailTr).each(function(){
+        if($j(this).find('[id$=productName]').val() !=''){
+            $j(this).find('[id$=hidRowNo]').val(rowIndex);
+            rowIndex++;
+        } else {
+            rowArr.push(this);
+        }
+    });
+    for (var i = 0; i < rowArr.length ; i++) {
+        $j(rowArr[i]).find('[id$=hidRowNo]').val(rowIndex);
+        rowIndex++;
+    }
+}
+// 绑定最后一行事件【行追加用】
+function lastPurDetailFun(){
+    //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+    $j(lastSector, $j(_clonePurDetailTr).last()).unbind("blur");
+    $j(lastSector, $j(_clonePurDetailTr).last()).on("blur",function(){
+        if($j("[id$=':hidProductId']", $j(_clonePurDetailTr).last()).val() == "") return false;
+        $j(lastSector, $j(_clonePurDetailTr).last()).unbind("blur"); //
+        autoFocusFun();
+        beforeAddTranItemFun();
+    }).addClass("lastBlurRow");
+}
+// 保存仕入明细数据
+function buttononclick(rowIdx){
+    rowIdx = saveIndexRow != 0 ? saveIndexRow : rowIdx;
+    // 2018/12/30 仕入明细保存对应不正 BY zyz BEGIN
+    //var purId = $j("[id$=':depInfoTable:"+ rowIdx +":hidPurId']").val();
+    //if(purDetailArr.length == 0 || purId =="" || purId == undefined) return;
+    //if(purId !="" && purId != undefined) {
+    if(purDetailArr.length > 0 || delPurDetailArr.length > 0) {
+    Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.PurchaseManagentInput.savePurchaseDetail}", purDetailArr, delPurDetailArr, function(result, event){
+    // 2018/12/30 仕入明细保存对应不正 BY zyz END
+            if (event.type == 'exception') {
+                alert(event.message);
+            } else {
+                purDetailArr = new Array();
+                delPurDetailArr = new Array();
+                saveIndexRow = 1;
+            }
+        });
+    }
+}
+// 行追加处理
+function beforeAddTranItemFun(){
+    $j(_clonePurDetailTr).each(function(index){ // 处理当前数据
+        var _tr = $j(this);
+        if($j("[id$=':hidProductId']", _tr).val() == "") return true;
+        // 取得每一行的数据
+        $j("[id$=':" + index + ":productName']", _orgPurDetailTr).val( $j("[id$=':productName']", _tr).val() );
+        $j("[id$=':" + index + ":hidProductId']", _orgPurDetailTr).val( $j("[id$=':hidProductId']", _tr).val() );
+        $j("[id$=':" + index + ":accMasterPrice']", _orgPurDetailTr).val( $j("[id$=':accMasterPrice']", _tr).val() );
+        $j("[id$=':" + index + ":accMasterNum']", _orgPurDetailTr).val( $j("[id$=':accMasterNum']", _tr).val() );
+        $j("[id$=':" + index + ":hidaccMasterNoTaxflg']", _orgPurDetailTr).val( $j("[id$=':accMasterNoTaxflg']", _tr).is(':checked') );
+        $j("[id$=':" + index + ":hidaccMasterNoTax']", _orgPurDetailTr).val(kendo.parseFloat($j("span[id$=':accMasterNoTax']", _tr).text()));
+        $j("[id$=':" + index + ":hidaccMasterIncTax']", _orgPurDetailTr).val(kendo.parseFloat($j("span[id$=':accMasterIncTax']", _tr).text()));
+    });
+    // 行编号处理
+    refreshOrder();
+    // 行追加
+    addTranItemFun();
+}
+// 最新商品情報を设定する
+function autoGetProductInfo(result) {
+    // 存在の商品情報は画面へ反映する
+    var currRowIndex = result.rowIndex;
+    $j("[id$=':" + currRowIndex + ":productName']", _clonePurDetailTr).val(result.prodcutName);
+    $j("[id$=':" + currRowIndex + ":hidProductId']", _clonePurDetailTr).val(result.productId);
+    $j("[id$=':" + currRowIndex + ":accMasterPrice']", _clonePurDetailTr).data("kendoNumericTextBox").value(result.basePrice);
+    $j("[id$=':" + currRowIndex + ":accMasterNum']", _clonePurDetailTr).data("kendoNumericTextBox").value((result.proNumber != undefined ? result.proNumber : 1 ));
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	$j("[id$=':" + currRowIndex + ":hidDetailTaxRate']", _clonePurDetailTr).val(result.tax);
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+    // 2018/10/03 SCANER機能新規 by zy BEGIN
+	try{
+		if (curGuuid != undefined && curGuuid != "") $j("tr.purDetailRow").eq(currRowIndex).attr("scanUid",curGuuid);
+	}catch(err){ console.log(err)}
+	// 2018/10/03  SCANER機能新規 by zy END
+    setupCalAmoutPrice(currRowIndex);
+    //$j("[id$=':" + currRowIndex + ":purTaxType']", _clonePurDetailTr).data("kendoDropDownList").value(result.purTaxType == "" ? "税抜" : result.purTaxType);
+}
+// 清空行处理
+function clearAcc(row){
+    var clearIndex = $j(row).attr("rowIndex");
+    $j("[id$=':" + clearIndex + ":productName']", _clonePurDetailTr).val("");
+    $j("[id$=':" + clearIndex + ":hidProductId']", _clonePurDetailTr).val("");
+    $j("input:text[id$=':" + clearIndex + ":accMasterNum']", "tr.cloneRow").data("kendoNumericTextBox").value("");
+    $j("input:text[id$=':" + clearIndex + ":accMasterPrice']", "tr.cloneRow").data("kendoNumericTextBox").value("");
+    $j("span[id$=':" + clearIndex + ":accMasterNoTax']", "tr.cloneRow").text("");
+    $j("span[id$=':" + clearIndex + ":accMasterIncTax']", "tr.cloneRow").text("");
+    // 计算值
+    TotalFun();
+}
+// 一括设定处理
+function setPurInfoAllFun(_this, purId){
+    var purRowArr = $j("[purId="+ purId +"]:not([disabled='disabled'])",  $j("#grid_pur", _cloneTabstripDiv)); // 获取当前未点过的Tr
+    var blankRowArr = $j("input:hidden[id$=':hidProductId'][value][value='']", _clonePurDetailTr); // 获取所有空白行 hidProductId
+    if(purRowArr.length > blankRowArr.length){
+        // 新行を追加する
+        beforeAddTranItemFun();
+        return;
+    }
+    // tab
+    var key = $j('li.k-state-active').attr("mode") + ";" + purId;
+    groupRowArr.push(key);
+    $j(_this).attr("disabled", "disabled");
+    purRowArr.each(function(){ // 获取当前未点过的Tr
+        $j(this).click();
+    });
+}
+// 每行设定处理
+function setPurInfoFun(_this, currRowIndex){
+    currRowIndex = getBlankCurrRowIndexFun(currRowIndex);
+    if(currRowIndex > ($j(_clonePurDetailTr).length - 1)){
+        // 新行を追加する
+        beforeAddTranItemFun();
+        return;
+    }
+    $j(_this).attr("disabled", "disabled");
+    var _tr = $j(_this).closest("tr");
+    var key = $j('li.k-state-active').attr("mode") + ";" + $j(_this).attr("purId") + ";" + $j(_this).attr("id");
+    dataUidArr.push(key);
+    obj = { rowIndex: currRowIndex, 
+            prodcutName: $j("#accMasterId", _tr).text(),
+            productId: $j("#accMasterId", _tr).attr("accMasterId"),
+            // 2018/10/04 原価金額設定 WSQ BEGIN
+            //unitPrice: $j("#accMasterPrice", _tr).text(),
+			basePrice: $j("#accMasterPrice", _tr).text(),
+            // 2018/10/04 原価金額設定 WSQ BEGIN
+            proNumber: 1,//$j("#accMasterNum", _tr).text()
+            //purTaxType: $j("#purTaxType", _tr).text()
+			// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+			tax : kendo.parseFloat(_this.getAttribute('tax'))
+			// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+            
+         };
+    autoGetProductInfo(obj);
+}
+// 获取空白行Index
+function getBlankCurrRowIndexFun(wk_g_currRowIndex){
+    while ($j("input:hidden[id$=':" + wk_g_currRowIndex + ":hidProductId']", _clonePurDetailTr).val() != "") {
+        if($j("input:hidden[id$=':" + wk_g_currRowIndex + ":hidProductId']", _clonePurDetailTr).val() == undefined) break;
+        wk_g_currRowIndex ++;
+    }
+    return wk_g_currRowIndex;
+}
+// Tab样式设定
+function setTabstripFun(){
+    var tabModeKey = 'tabMode';
+    var $tabStripElement = $j(_cloneTabstripDiv).kendoTabStrip({
+            animation:  {
+                open: {
+                    effects: "fadeIn"
+                }
+            },
+            select:function(e,options){
+                var tabId = e.item["id"];
+                tabMap.put(tabModeKey, tabId);
+            }
+            
+        });
+    var tabId = tabMap.containsKey(tabModeKey) ? tabMap.get(tabModeKey) : 'tab_purDetail';
+    $j("#" + tabId  + " .k-loading", _cloneTabstripDiv).click();
+}
+// 获取当前仕入先相关联的数据
+// 2018/08/08 BEGIN
+function getGridsDsFun(purSourceId,PurchaseId){
+// 2018/08/08 END
+    JINYACONNECT.blockUi();
+    Visualforce.remoting.Manager.invokeAction(
+        // 2018/08/08 BEGIN
+        "{!$RemoteAction.PurchaseManagentInput.getPurDetailInfo}", purSourceId,PurchaseId, function(result, event){
+        // 2018/08/08 END
+        if (event.type == 'exception') {
+            alert(event.message);
+            JINYACONNECT.unblockUi();
+        } else {
+            purInfoMap = result.purInfoMap;
+            setGridsFun(result.purDetailItemLst, result.purDetailAllLst);
+        } // End else
+    });
+}
+
+// 设定Tab数据
+function setGridsFun(purDetailItemDs, purDetailAllDs){
+    if(purDetailItemDs != undefined){
+        purDetailItemDs = new kendo.data.DataSource({data: purDetailItemDs,
+            schema: {
+                model: {
+                    fields: {
+                        accMasterId: { type: "string" },
+                        accMasterPrice: { type: "number" }
+                    }
+                }
+            }
+        })
+        
+        setGridFun("grid_purDetail", purDetailItemDs);
+    }
+    if(purDetailAllDs != undefined){
+        purDetailAllDs = new kendo.data.DataSource({data: purDetailAllDs, group: <apex:outputText escape="true" value="{!colnumGroupJson}" />,
+            schema: {
+                model: {
+                    fields: {
+                        accMasterId: { type: "string" },
+                        accMasterPrice: { type: "number" }
+                    }
+                }
+            }
+        });
+        setGridFun("grid_pur", purDetailAllDs);
+    }
+    JINYACONNECT.unblockUi();
+}
+// 设定Grid模版
+function setGridFun(gridDivId, kendoDS){
+    $j.getScript( "{!URLFOR($Resource.kendoFiles2018, 'js/messages/kendo.messages.ja-JP.min.js')}" , function () {
+        var grid = $j("#" + gridDivId, _cloneTabstripDiv);
+        if(grid.data("kendoGrid") != undefined) grid.data("kendoGrid").destroy();
+        var gridHt = $j("[id='clone:purDetailTable']").height() - 60;
+        // Grid Table Size AutoSetup
+        grid.kendoGrid({
+            dataSource: kendoDS,
+            height: gridHt,
+            filterable: true, // 筛选Flg
+            resizable: false,
+            // 对应上面的显示，并且显示对应的名头
+            columns: <apex:outputText escape="true" value="{!colnumJson}" />,
+            dataBound:function(e){
+                setGroupAbleTitleFun(e);
+                // 重新设定disabled Btn
+                dataUidArr.forEach(function(value, index, array){
+                    keyArr = value.split(";");
+                    if(keyArr.length != 3) return true;
+                    var _tabDiv = $j("[id='" + keyArr[0] +"']", _cloneTabstripDiv); // tab -> div
+                    var _tabDivPurDetailRow = $j("[purId='" + keyArr[1] +"']#" + keyArr[2], _tabDiv); // tab -> div -> purDetailRow
+                    _tabDivPurDetailRow.attr("disabled", "disabled");
+                });
+                groupRowArr.forEach(function(value, index, array){
+                    keyArr = value.split(";");
+                    if(keyArr.length != 2) return true;
+                    var _tabDiv = $j("[id='" + keyArr[0] +"']", _cloneTabstripDiv);
+                    $j("#" + keyArr[1], _tabDiv).attr("disabled", "disabled");
+                });
+            },
+        filterable: {
+            operators: {
+                number: {
+                    // 指定の値に等しい          [查询值==输入值]
+                    eq: "{!$Label.MSG_040_0097}",
+                    // 指定の値に等しくない  [查询值!=输入值]
+                    neq: "{!$Label.MSG_040_0098}",
+                    // 指定の値より以上          [查询值>=输入值]
+                    gte: "{!$Label.MSG_040_0099}",
+                    // 指定の値より大きい      [查询值> 输入值]
+                    gt: "{!$Label.MSG_040_0100}",
+                    // 指定の値より以下      [查询值<=输入值]
+                    lte: "{!$Label.MSG_040_0101}",
+                    // 指定の値より小さい       [查询值< 输入值]
+                    lt: "{!$Label.MSG_040_0102}",
+                },
+                string: {
+                    // 指定の値に等しい
+                    eq: "{!$Label.MSG_041_0033}",
+                    // 指定の値に等しくない
+                    neq: "{!$Label.MSG_041_0034}",
+                    // 指定の値で始まる
+                    startswith: "{!$Label.MSG_041_0035}",
+                    // 指定の値を含む
+                    Contains: "{!$Label.MSG_041_0036}",
+                    // 指定の値を含まない
+                    doesnotcontain: "{!$Label.MSG_041_0037}",
+                    // 指定の値で終わる
+                    endswith: "{!$Label.MSG_041_0038}",
+                }
+            },
+            messages: {
+                // フィルター:
+                info: " ",
+                // および
+                and: "{!$Label.MSG_041_0039}",
+                // または
+                or: "{!$Label.MSG_041_0040}",
+                // フィルター
+                filter: "{!$Label.MSG_040_0103}",
+                // クリア
+                clear: "{!$Label.MSG_040_0106}",
+            }
+        },
+        });
+    });
+}
+// 明细GroupTitle设定
+function setGroupAbleTitleFun(e){
+    $j("th[data-field='checkFun']").css({'vertical-align':'top'});
+    e.sender.tbody.find(".k-grouping-row").each(function(){
+        var newTitleStr = '仕入: ';
+        $this = $j(this);
+        var $querStrDom = $this.find('p');
+        var titleStr = $querStrDom.text();
+        var titleArr = titleStr.split(":");
+        var titleKe = buttonStr = "";
+        if(titleArr.length == 2 && titleArr[0] == 'purId'){
+            titleKey = titleArr[1].replace(/(^\s*)|(\s*$)/g, "");
+            if (titleKey != "" && purInfoMap != undefined) {
+                newTitleStr += kendo.htmlEncode(purInfoMap[titleKey]);
+                buttonStr = '  <input type="button" title="設定[' + kendo.htmlEncode(purInfoMap[titleKey]) + ']" value="設定" id="'+ titleKey +'" onclick="setPurInfoAllFun(this, \''+ titleKey +'\');"/>';
+            }
+            repHtml = '<span title=\'' + newTitleStr + '\'>' + newTitleStr + buttonStr +  '</span>';
+            $querStrDom.html('<div class="groupHeaderCls" style="display:inline-block" >'+$querStrDom.html().replace(titleStr, repHtml)+'<div>');
+        }
+    });
+}
+// 2018/08/08 BEGIN
+function setDisabledFun(currRowIndex,disabledflg){
+    var isDenpyoukeiflg= $j("[id$=':depInfoTable:"+ currRowIndex +":hidisDenpyoukeiflg']").val();
+    if(disabledflg){
+		// 2018/10/05 店舗取得共通化 WSQ BEGIN
+		//$j("select[id$='" + currRowIndex + ":depShopSel']").data("kendoDropDownList").enable(false); // 店舗
+		var $shopobj = $j("select[id$='" + currRowIndex + ":depShopSel']");
+		if ($shopobj.length > 0) $shopobj.data("kendoDropDownList").enable(false);
+        // 2018/10/05 店舗取得共通化 WSQ END
+        $j("select[id$='" + currRowIndex + ":purChaseType']").data("kendoComboBox").enable(false); // 種別
+        $j("select[id$='" + currRowIndex + ":depKamoku']").data("kendoComboBox").enable(false); // 科目
+        $j("input[id$='" + currRowIndex + ":SalesDate']").attr('disabled', 'disabled'); // 仕入日
+        $j("input[id$='" + currRowIndex + ":purchaseSource']").attr('disabled', 'disabled'); // 仕入先
+        $j("a[id$='" + currRowIndex + ":purchaseSource_lkwgt']").css("pointer-events","none"); // 仕入先IMG
+        $j("input[id$='" + currRowIndex + ":memo']").attr('disabled', 'disabled'); // 摘要
+        if(isDenpyoukeiflg != "true"){
+            //$j("input[id$='" + currRowIndex + ":notaxflg']").removeAttr('disabled'); // 税対象外
+        //} else {
+            $j("input:text[id$=':" + currRowIndex + ":denpyoukei']").data("kendoNumericTextBox").enable(false);
+            $j("input:text[id$=':" + currRowIndex + ":denpyoukeiIncTax']").data("kendoNumericTextBox").enable(false);
+        }
+    }else{
+    	// 2018/10/05 店舗取得共通化 WSQ BEGIN
+        //$j("select[id$='" + currRowIndex + ":depShopSel']").data("kendoDropDownList").enable(true); // 店舗
+		var $shopobj = $j("select[id$='" + currRowIndex + ":depShopSel']");
+		if ($shopobj.length > 0) $shopobj.data("kendoDropDownList").enable(true);
+        // 2018/10/05 店舗取得共通化 WSQ END
+        $j("select[id$='" + currRowIndex + ":purChaseType']").data("kendoComboBox").enable(true); // 種別
+        $j("select[id$='" + currRowIndex + ":depKamoku']").data("kendoComboBox").enable(true); // 科目
+        $j("input[id$='" + currRowIndex + ":SalesDate']").removeAttr('disabled'); // 仕入日
+        $j("input[id$='" + currRowIndex + ":purchaseSource']").removeAttr('disabled'); // 仕入先
+        $j("a[id$='" + currRowIndex + ":purchaseSource_lkwgt']").css("pointer-events","auto"); // 仕入先IMG
+        $j("input[id$='" + currRowIndex + ":memo']").removeAttr('disabled'); // 摘要
+        if(isDenpyoukeiflg == "false"){
+            $j("input:text[id$=':" + currRowIndex + ":denpyoukei']").data("kendoNumericTextBox").enable(true);
+            $j("input:text[id$=':" + currRowIndex + ":denpyoukeiIncTax']").data("kendoNumericTextBox").enable(true);
+        //}else{
+            //$j("input[id$='" + currRowIndex + ":notaxflg']").attr('disabled', 'disabled'); // 税対象外
+        }
+    }
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN	
+	taxDropDownEnable(currRowIndex);
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END	
+}
+// 仕入明细存在，金额税拔和税入的值不可编辑处理
+function denpyoukeiFun(rowNum){
+    var isDenpyoukeiflg= $j("[id$=':depInfoTable:"+ rowNum +":hidisDenpyoukeiflg']").val();
+    var purchaseFlg= '{!purchaseFlg}';
+    if(isDenpyoukeiflg == "true" && purchaseFlg == 'true' ){
+        //$j("input[id$='" + rowNum + ":notaxflg']").attr('disabled', 'disabled'); // 税対象外
+        $j("input:text[id$=':" + rowNum + ":denpyoukei']").data("kendoNumericTextBox").enable(false);
+        $j("input:text[id$=':" + rowNum + ":denpyoukeiIncTax']").data("kendoNumericTextBox").enable(false);
+    }else{
+        //$j("input[id$='" + rowNum + ":notaxflg']").removeAttr('disabled'); // 税対象外
+        $j("input:text[id$=':" + rowNum + ":denpyoukei']").data("kendoNumericTextBox").enable(true);
+        $j("input:text[id$=':" + rowNum + ":denpyoukeiIncTax']").data("kendoNumericTextBox").enable(true);
+    }
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN	
+	taxDropDownEnable(rowNum);
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+}
+// 2018/08/08 END
+// 2018/09/19 BEGIN
+// 明細金額リアルタイム計算
+// rowIndex对应明细的行
+function setupCalAmoutPrice(rowIndex) {
+    // 原价
+    var unitPrice = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":accMasterPrice']").val());
+    if (unitPrice == null) unitPrice = 0;
+    // 数量
+    var nums = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":accMasterNum']").val());
+    if (nums == null) nums = 0;
+    var TaxPrice =  kendo.parseFloat(commUtils.mathNumMulti(unitPrice , nums));
+    // 税和端数处理
+    // 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN	
+	// var commTaxRate = "{!commTaxRate}";
+	var commTaxRate = kendo.parseFloat($j("input[id$=':" + rowIndex + ":hidDetailTaxRate']").val());
+    	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+    var roundMode = "{!roundMode}";
+    // 获取checkbox状态
+    var Taxflg = $j("[id$=':" + rowIndex + ":accMasterNoTaxflg']").prop('checked');
+    if(Taxflg){
+        // 单价/1.08
+        var changePrice = kendo.parseFloat(JINYACONNECT.PRODUCT.CALNOTAXPRICE(TaxPrice,commTaxRate,{!JSENCODE(PointLen)},roundMode));
+        $j("span[id$=':" + rowIndex + ":accMasterNoTax']").text(kendo.toString(changePrice,"c"));
+        $j("span[id$=':" + rowIndex + ":accMasterIncTax']").text(kendo.toString(TaxPrice,"c"));
+        //$j("span[id$=':" + rowIndex + ":hidaccMasterNoTax']").text(changePrice);
+        //$j("span[id$=':" + rowIndex + ":hidaccMasterIncTax']").text(TaxPrice);
+    } else{
+        // 单价/1.08
+        var changePrice = kendo.parseFloat(JINYACONNECT.PRODUCT.CALINCTAXPRICE(TaxPrice,commTaxRate,{!JSENCODE(PointLen)},roundMode));
+        $j("span[id$=':" + rowIndex + ":accMasterNoTax']").text(kendo.toString(TaxPrice,"c"));
+        $j("span[id$=':" + rowIndex + ":accMasterIncTax']").text(kendo.toString(changePrice,"c"));
+        //$j("span[id$=':" + rowIndex + ":hidaccMasterNoTax']").text(TaxPrice);
+        //$j("span[id$=':" + rowIndex + ":hidaccMasterIncTax']").text(changePrice);
+    }
+    // 全部集计放入仕入合计值内
+    TotalFun();
+}
+function TotalFun(){
+    var valTotal = 0;
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	var taxDropDown = $j("[id$=selTaxType]").getKendoDropDownList();
+	var hadDropList = taxDropDown != undefined,totalIncTax = 0;
+	var taxFlg = $j("input[id$=notaxflg]").is(":checked");
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+    $j(_clonePurDetailTr).each(function(index){ // 处理当前数据
+        var _tr = $j(this);
+        if($j("[id$=':hidPurDetailId']", _tr).val() != "" && $j("[id$=':hidProductId']", _tr).val() == ""){
+            delPurDetailArr.push($j("[id$=':hidPurDetailId']", _tr).val());
+            return true;
+        }
+        if($j("[id$=':hidProductId']", _tr).val() == "") return true;
+        valTotal += kendo.parseFloat($j("[id$=':accMasterNoTax']", _tr).text());
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+		if (hadDropList && !taxFlg) totalIncTax += kendo.parseFloat($j("[id$=':accMasterIncTax']", _tr).text());
+		// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy END
+    });
+    $j("[id$=':depInfoTable:" + rowInfoEdit + ":denpyoukei']").data("kendoNumericTextBox").value(valTotal);
+	// 2019/09/15 11.10月以降の仕入れ入力について税率が10%の商品と8%の商品入力をすることになると思うのですが、どうやって入力するのでしょうか by zy BEGIN
+	if (hadDropList && !taxFlg) $j("[id$=':depInfoTable:" + rowInfoEdit + ":denpyoukeiIncTax']").data("kendoNumericTextBox").value(totalIncTax);
+	else
+    $j("[id$=':depInfoTable:" + rowInfoEdit + ":denpyoukei']").data("kendoNumericTextBox").options.change();
+    $j("input[id='" + rowInfoEdit + ":hidDenpyoukei']").val(valTotal);
+}
+function changeclock(){
+    // 监听数量
+    $j("input[id$=':accMasterNum']").unbind("keyup");
+    $j("input[id$=':accMasterNum']").on("keyup", function(e){
+        $this =$j(this);
+        if (kendo.parseFloat($this.val()) == null) $this.val("0");
+        var rowIndex = $this.closest('tr').children().first().children().first().attr("rowindex");
+        setTimeout(setupCalAmoutPrice(rowIndex),1000);
+    });
+    // 监听单价
+    $j("input[id$=':accMasterPrice']").unbind("keyup");
+    $j("input[id$=':accMasterPrice']").on("keyup",function(){
+        $this =$j(this);
+        if (kendo.parseFloat($this.val()) == null) $this.val("0");
+        var rowIndex = $this.closest('tr').children().first().children().first().attr("rowindex");
+        setTimeout(setupCalAmoutPrice(rowIndex),1000);
+    });
+    // 监听税区分
+    $j("input[id$=':accMasterNoTaxflg']").on("change",function(){
+        $this =$j(this);
+        if (kendo.parseFloat($this.val()) == null) $this.val("0");
+        var rowIndex = $this.closest('tr').children().first().children().first().attr("rowindex");
+        setupCalAmoutPrice(rowIndex);
+            
+    });
+}
+// 税区分All
+function isHideAllFun($this){
+    $j("input[id$=':accMasterNoTaxflg']").each(function(){
+        this.checked = $this.checked;
+        var rowIndex = this.closest("td").firstElementChild.getAttribute("rowindex");
+        setupCalAmoutPrice(rowIndex);
+    });
+}
+function CloneRowFun(rowIndex){
+    if(rowIndex =="0" || !$j("[id$='PurchaseManagentInput']").hasClass('CloneImgCla')) return;
+    $j("[id$='PurchaseManagentInput']").removeClass('CloneImgCla');
+    var imgType = $j("img[id$='showDetailEvent']");
+    showCloneRowFun(imgType);
+}
+function editfun(cloneRowflg){
+    if(cloneRowflg) $j("[id$='PurchaseManagentInput']").addClass('CloneImgCla');
+}
+// 2018/09/19 END
+// 2018/10/05 店舗取得共通化 WSQ BEGIN
+function getShopCode(elementId){
+	// 当前に選択の店舗情報を取得する
+	var currShopCode = '';
+	var $shopObj = $j("select[id$='"+elementId+"']");
+	if ($shopObj.length > 0) currShopCode = $shopObj.data("kendoDropDownList").value();
+	return currShopCode;
+}
+// 2018/10/05 店舗取得共通化 WSQ END
+</script>
+<!-- TAB化処理 -->
+<div id="tabstrip" style="display: none;">
+    <ul>
+        <li id="tab_purDetail" mode="grid_purDetail" >仕入明細</li>
+        <li id="tab_pur" mode="grid_pur"  >仕入先</li>
+    </ul>
+    <div>
+        <div id="grid_purDetail" style="overflow: hidden; height: 120px;"></div>
+    </div>
+    <div>
+        <div id="grid_pur" style="overflow: hidden; height: 120px;"></div>
+    </div>
+</div>
+<!-- 2018/05/24 仕入画面で入庫処理を行う機能対応 WGCH END -->
+<!-- 2018/06/12 SCANER機能新規 by zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/process.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/PrintJs.js')}"/>
+<apex:form id="printPanel">
+	<apex:inputHidden value="{!localIp}" id="hidLocalIp" />
+	<apex:inputHidden value="{!prinUrl}" id="hidPrinUrl" />
+	<apex:actionFunction name="initDeviceFun" action="{!initDevice}"  rerender="printPanel" oncomplete="scrannerInit();" />
+</apex:form>
+<input type="hidden" id="hidCallBtnId"/>
+<script>
+var devicePnt,loadingData = [],curGuuid,itemRowIndex;
+var getDataCommand = '{"parameter":{},"scanner":true,"sequence":"barcodereaderdata"}';
+var endDataCommand = '{"parameter":{},"scanner":true,"sequence":"barcodereaderclear"}';
+var processInterId,scrannTimeoutId;
+var hadClosed = false;
+var SCANNERLABEL = {
+	BEGIN:"{!$LABEL.MSG_006_0456}",
+	END:"{!$LABEL.MSG_006_0457}",
+}
+// 設備初期化
+function initChangeDevice(){
+	try{
+		// 処理フラグ
+		var hadProcessedFlag = true;
+		// 計時機能
+		var ipTimoutId;
+		// 該当設備IP取得
+		getIPs(function(ip){
+			console.log(ip);
+			// 未取得IPの場合
+			if (hadProcessedFlag) {
+				if (ip != undefined && ip != ""){
+					$j("input[id$=hidLocalIp]").val(ip);
+				}
+				hadProcessedFlag = false;
+			}
+			//清除上一次调用
+			clearTimeout(ipTimoutId);
+			//启动下一次调用
+			ipTimoutId = setTimeout(afterGetIp(),1000);
+		});
+	} catch(err){
+		afterGetIp();
+	}
+}
+function afterGetIp(){
+	var ip = $j("input[id$=hidLocalIp]").val();
+	$j("input[id$=hidLocalIp]").val(ip);
+	initDeviceFun();
+}
+function scrannerInit(){
+	if (devicePnt == undefined) {
+		var url = $j("[id$=hidPrinUrl]").val();
+			if (url == "" || url == null) return;
+		try {
+		devicePnt = $j.WebPrint({
+			// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+			//ログ保存アド
+			remoteSaveLog:"{!$RemoteAction.PurchaseManagentInput.savePrintLodToDb}",
+			// 2017/07/26 4）ログ情報はDBに記載する by zy END
+			webComm:url,
+			isDebug:true,
+			// 2018/06/25 ログのメーセッジ表示不正修正　JINYABUG-649　by zy  BEGIN
+			baseInfo:'****Scanner：' + '[ip：' + $j("#hidLocalIp").val() + ']****',
+			// 2018/06/25 ログのメーセッジ表示不正修正　JINYABUG-649　by zy  END
+			sendMesssage:function(e){
+				try{
+					analyScrannResponse(e.data);
+				}catch(err){
+				}
+			},
+			curSeq:getDataCommand,
+		});
+		}catch(e){
+			console.log(e);
+		}
+	}
+}
+// 选中时启动时间
+function onDeviceStart(){
+	console.log("focus start");
+	hadClosed = false;
+	// 防止多次启动
+	if (devicePnt != undefined && !devicePnt.isRunning) {
+		$j("#scannerSpan .label").text(SCANNERLABEL.BEGIN);
+		// 2018/10/29 08.スキャナー終了に改善）by zy BEGIN
+		//$j("#scannerSpan .k-button").show();
+		// 2018/10/29 08.スキャナー終了に改善）by zy END
+		devicePnt.isRunning = true;
+		// 无连接时进行启动，防止重复链接
+		if (!devicePnt.isConnect()) scrannerStart();
+		if (processInterId) clearInterval(processInterId);
+		processInterId = setInterval(function(){
+			getNextProdAccount();
+		},100);
+		
+	}
+}
+// 关闭射频
+function scrannerEnd(){
+	if (devicePnt == undefined) return;
+	try{
+		// 清除监视器
+		// 链接断开、处理数据为空
+		if (processInterId) clearInterval(processInterId);
+		// 清除计时器
+		if (scrannTimeoutId) clearTimeout(scrannTimeoutId);
+		devicePnt.isRunning = false;
+		devicePnt.disconnect();
+		hadClosed = true;
+		// 2018/06/25 再開データ取込不正エラー修正 JINYABUG-650　by zy BEGIN
+		curGuuid = '';
+		loadingData = [];
+		// 2018/06/25 再開データ取込不正エラー修正 JINYABUG-650　by zy END
+	}catch(e) {
+		console.log(e);
+	}
+	/*
+	if ($j("#scannerSpan").is(":visible")) {
+		$j("#scannerSpan .label").text(SCANNERLABEL.END);
+		$j("#scannerSpan .k-button").hide();
+	}*/
+	$j("#scannerSpan").hide();
+}
+// 清空射频内容
+function clearScan(){
+	devicePnt.send(endDataCommand);
+}
+//射频处理开始
+function scrannerStart(){
+	// 正常链接
+	devicePnt.reConnectLast();
+}
+// 回传值分析
+function analyScrannResponse(res){
+	// 射频抢反馈信息
+	if (res.indexOf("scanner")>=0) {
+		// 分析返回字符串
+		var response = JSON.parse(res);
+		// 射频抢中读取到数据
+		if (response.prods.length > 0) {
+			// 存在处理中的数据
+			setAccountData(response.prods);
+		}
+	}
+	if (scrannTimeoutId) clearTimeout(scrannTimeoutId);
+	scrannTimeoutId = setTimeout(function(){
+		scrannerStart();
+	},50);
+}
+// 回传值存放
+function setAccountData(prods){
+	if (prods.length == 0) return;
+	loadingData = loadingData.concat(prods);
+}
+// 处理商品
+function processAccountMaster(){
+	if (loadingData.length > 0) {
+		var loadLength = loadingData.length;
+		var prodCode = loadingData[0];
+		if (prodCode == "" || prodCode == undefined) {
+			skipAccount();
+			return;
+		}
+		if (getCurrRowIndex(prodCode)) return;
+		doProdItem(prodCode);
+	}
+}
+// 跳过一个商品
+function skipAccount(){
+	curGuuid = "";
+	// 下一个执行内容作成
+	nextAccountData();
+}
+// 下一个执行内容作成
+function nextAccountData(){
+	if (loadingData.length > 0) loadingData.splice(0,1);
+	if (loadingData.length == 0) curGuuid = "";
+}
+// 判断是否要进行下一个
+function getNextProdAccount(){
+	// 当前有处理中的prod
+	if (curGuuid != undefined && curGuuid != "") {
+		var tranDetail = $j("tr.purDetailRow[scanUid='" + curGuuid + "']");
+		// 证明处理成功可以进行下一个
+		if (tranDetail.length > 0) {
+			nextAccountData();
+			processAccountMaster();
+			
+		}
+	} else processAccountMaster();
+}
+function getCurrRowIndex(prodCode){
+	var lastRow = $j("tr.purDetailRow.lastSetProd");
+	if (lastRow.length > 0) {
+		var orgCode = lastRow.attr("prodCode");
+		// 同じ会計商品
+		if (prodCode == orgCode) {
+			curGuuid = kendo.guid();
+			var textBox = $j("input[id$=':accMasterNum']", lastRow).data("kendoNumericTextBox");
+			var curValue = textBox.value();
+			textBox.value(curValue + 1);
+			lastRow.attr("scanUid",curGuuid);
+			return true;
+		}
+	}
+	var blankRowIdx = -1;
+	$j("table[id$='clone:purDetailTable'] tr.purDetailRow").each(function(){
+		var curRow = $j(this);
+		var input = $j("input[id$=hidProductId]",curRow);
+		var prodId = input.val();
+		if (prodId == '') {
+			blankRowIdx = curRow.index();
+			return false;
+		}
+	});
+	// 行列番号を数字に変更を行う
+	blankRowIdx = kendo.parseInt(blankRowIdx);
+	if (blankRowIdx > -1) {
+		itemRowIndex = blankRowIdx;
+		curGuuid = kendo.guid();
+		return false;
+	}
+	// BlankRowがなかっか場合、新規追加必要列の場合
+	$j("#hidCallBtnId").val(JSON.stringify(loadingData));
+	scrannerEnd();
+	beforeAddTranItemFun();
+	return true;
+}
+function doProdItem(prodCode){
+	// 2018/10/29 09.商品関連情報の取得方式は改善要（商品情報を表示速度完全するため） by zy BEGIN
+	if (J_ProdMap != undefined && J_ProdMap.containsKey(prodCode)) {
+		var item = J_ProdMap.get(prodCode);
+		item.rowIndex = itemRowIndex;
+		$j(".lastSetProd").removeClass("lastSetProd");
+        var lastRow = $j("tr.purDetailRow").eq(itemRowIndex);
+		lastRow.attr("prodCode",prodCode);
+		lastRow.addClass("lastSetProd");
+		return autoGetProductInfo(item);
+	}
+	// 2018/10/29 09.商品関連情報の取得方式は改善要（商品情報を表示速度完全するため） by zy END
+	JINYACONNECT.blockUi();
+	Visualforce.remoting.Manager.invokeAction(
+       "{!$RemoteAction.PurchaseManagentInput.getProductItemInfo}", prodCode, function(result, event){
+       JINYACONNECT.unblockUi();
+       if (event.type == 'exception') {
+        } else {
+        	if (result.length == 0) {
+        		alert("商品コード「" + prodCode + "」の会計商品データは会計商品マスタに見つかりません、読み込み対象外になる");
+        		skipAccount();
+        		return;
+        	}
+        	var item = result[0];
+        	item.rowIndex = itemRowIndex;
+        	$j(".lastSetProd").removeClass("lastSetProd");
+        	var lastRow = $j("tr.purDetailRow").eq(itemRowIndex);
+			lastRow.attr("prodCode",prodCode);
+			lastRow.addClass("lastSetProd");
+      		autoGetProductInfo(item);
+        } // End else
+    });
+}
+function scrannCallBack(){
+	var prodCode = $j("#hidCallBtnId").val();
+	$j("#hidCallBtnId").val("");
+	loadingData = JSON.parse(prodCode);
+	onDeviceStart();
+	//if (getCurrRowIndex(item)) doProdItem(prodCode);
+}
+// 2018/10/29 09.商品関連情報の取得方式は改善要（商品情報を表示速度完全するため） by zy BEGIN
+function getAccountMasterInfos(){
+	// 有効な期間チェックを行う
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.PurchaseManagentInput.getProductViewInfo}", function(result, event){
+		// 異常
+		if(event.type == 'exception') {
+			alert(event.message);
+			unblockUi();
+		} else {
+			window.J_ProdMap = new Map();
+			setTimeout(function(){
+				for (var i = 0 ; i < result.length ; i++) {
+					var prod = result[i];
+					J_ProdMap.put(prod.prodcutCode,prod);
+				}
+			});
+		}
+	});
+}
+// 2018/10/29 09.商品関連情報の取得方式は改善要（商品情報を表示速度完全するため） by zy END
+</script>
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<!-- 2018/06/12 SCANER機能新規 by zy END -->
+</apex:page>

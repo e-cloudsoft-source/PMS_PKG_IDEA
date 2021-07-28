@@ -1,0 +1,3 @@
+<apex:page showHeader="false" title="レジカード" sidebar="false" 
+	standardcontroller="Yadochou__c" extensions="CashRegisterCardPDF" action="{!switchPdf}">
+</apex:page>

@@ -1,0 +1,264 @@
+<apex:page standardcontroller="AccountAcount__c" extensions="AccountPdfSwitch" action="{!AccAcountsSelectorInit}"
+sidebar="false" showHeader="false">
+
+<c:CommHeaderComp />
+
+<style>
+.odd {
+	background-color: #F5F5F5;
+}
+
+.numbercol {
+	text-align: right;
+}
+.centercol {
+	text-align: center;
+}
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+</style>
+    <apex:form id="pdfBulkSelector">
+    <!-- 会計表示期間 -->
+        <apex:pageBlock title="{!$Label.ps__msg_006_0112}">
+            <apex:pageMessages />
+
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+            <apex:inputField value="{!c_termSt.WorkDay__c}" id="fromDate" style="margin-left: 10px;"/><!-- (yyyy/mm/dd) {!$Label.MSG_006_0110}-->({!DateFormat})
+            <!-- 2016/11/25 TIMEZON fix END by zh -->
+            <!-- 〜 -->
+            &nbsp;{!$Label.MSG_006_0097} &nbsp;
+            <!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+            <apex:inputField value="{!c_termEt.WorkDay__c}" id="toDate" style="margin-left: 10px"/><!-- (yyyy/mm/dd) {!$Label.MSG_006_0110}-->({!DateFormat})
+            <!-- 2016/11/25 TIMEZON fix END by zh -->
+            &nbsp;&nbsp;&nbsp;
+            <!-- 表示 -->
+            <apex:commandButton value="{!$Label.ps__msg_006_0098}" action="{!queryAccAcountList}" onClick="blockUi(this.form)"/>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+
+    <apex:form id="pdfBulkAcountList">
+    <!-- 会計情報 -->
+    	<apex:pageBlock title="{!$Label.ps__msg_006_0099}">
+	    <apex:pageBlockButtons location="top">
+	    <!-- 会計書 -->
+			<apex:commandButton value="{!$Label.ps__msg_006_0111}" action="{!redirectPlugin}" onClick="blockUi(this.form)" rendered="{!accAcountLst.size > 0}"/>
+	    </apex:pageBlockButtons>
+
+        <apex:pageBlockTable value="{!accAcountLst}" var="v" id="grid">
+        <!-- 一括対象 -->
+        <!-- <apex:column headerValue="{!$Label.MSG_006_0100}" > --> 
+            <!-- 2016/04/21　 呉  checkbox　BEGIN-->
+            <apex:column > 
+            <apex:facet name="header">  
+            <input type="checkbox" name="allpick" style="vertical-align:middle;" checked="checked"/>
+            <label style="vertical-align:middle;">{!$Label.MSG_006_0100}</label> 
+            </apex:facet>
+            <!-- 2016/04/21　 呉  checkbox　END-->
+            <apex:inputCheckbox id="processed" value="{!v.isChecked}" styleClass="check"/>
+				<!--
+				<apex:image value="/img/checkbox_checked.gif" rendered="{!checkedFlgMap[v.Id]}"/>
+				<apex:image value="/img/checkbox_unchecked.gif" rendered="{!NOT(checkedFlgMap[v.Id])}"/>-->
+			</apex:column>
+			<apex:column headerValue="{!$ObjectType.AccountAcount__c.Fields.Name.label}">
+				<!-- <a href="/{!v.s.id}/e?retURL={!v.s.id}" target="_blank"><apex:outputField value="{!v.s.name}"/></a> -->
+				<span objId="{!v.s.id}">{!v.s.name}</span>
+			</apex:column>
+			<apex:column headerValue="{!$ObjectType.AccountAcount__c.Fields.relaccount__c.label}" >
+				<apex:outputField value="{!v.s.relaccount__c}"/>
+			</apex:column>
+			<apex:column headerValue="{!$ObjectType.AccountAcount__c.Fields.Relreserve__c.label}" >
+				<apex:outputField value="{!v.s.Relreserve__c}"/>
+			</apex:column>
+			<apex:column value="{!v.s.Field147__c}" rendered="false"/>
+			
+			<apex:column >
+				<apex:facet name="header">{!$ObjectType.Lead__c.Fields['EntryTime__c'].label}</apex:facet>
+				<apex:outputText value="{0,date,{!DateFormat}}">
+				<apex:param value="{!v.s.Relreserve__r.EntryTime__c}"/>
+				</apex:outputText>
+			</apex:column>
+			<!-- お部屋 -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0101}" >
+                <apex:outputText value="{!v.s.Relreserve__r.Rroom__r.Name}"/>
+			</apex:column>
+			<!-- 部屋タイプ -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0102}" >
+                <apex:outputText value="{!v.s.Relreserve__r.refTypeOfRooms__r.Name}"/>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header"><!-- 売上計上日 -->{!$Label.ps__msg_006_0103}</apex:facet>
+				<apex:outputText value="{0,date,{!DateFormat}}">
+				<apex:param value="{!v.s.frs__r.Salesday__c}"/>
+				</apex:outputText>
+			</apex:column>
+			<!-- 2013/11/05 ADD -->
+			<!-- 会計日時 -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0104}" >
+                <apex:outputText value="{0,date,{!DateFormat}}">
+                <apex:param value="{!v.s.Field148__c}"/>
+                </apex:outputText>&nbsp;
+                <apex:outputText value="{!v.s.Field149__c}" rendered="{!LEN(v.s.Field149__c) > 1}"/>
+			</apex:column>
+			<!-- 明細数 -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0105}" styleClass="numbercol">
+				<apex:outputText value="{!v.childrens}" />
+			</apex:column>
+			<!-- 会計済 -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0106}" styleClass="centercol">
+				<apex:outputField value="{!v.s.AccountedFlgCal__c}" />
+			</apex:column>
+			<!-- 会計人数 -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0107}" styleClass="centercol">
+                <apex:outputText value="{!v.s.Field57__c}"/>
+			</apex:column>
+			<!-- ご利用金額(税込) -->
+			<apex:column headerValue="{!$Label.ps__msg_006_0108}" styleClass="numbercol">
+				<!-- <apex:outputField value="{!v.s.Field151__c}"/> -->
+	            <apex:outputText value="{0,number,}">
+	                <apex:param value="{!NULLVALUE(v.s.Field151__c,0)}" />
+	            </apex:outputText>
+			</apex:column>
+		</apex:pageBlockTable>
+
+		</apex:pageBlock>
+
+    </apex:form>
+<script>
+$=jQuery.noConflict();
+//---
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = JINYACONNECT.NumberPointLen;
+currency.symbol = JINYACONNECT.CurrencySybmol;
+currency.pattern = ["-n","n"];
+//---
+
+function blockUi(formobj) {
+    $("form[id='" + formobj.id +"']").block({
+    //Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_006_0109}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $("form[id$=':batchProcess']").unblock();
+}
+//2016/04/21　 呉  checkbox　 BEGIN 
+var checkTemplate = '<input id="$_ID_$" type="checkbox" name="$_NAME_$" $_CHECK_$ class="check" >';
+$(document).ready(function() {
+    // 初期化
+    var $grid = $("table[id$=':grid']");
+    var $headers = $grid.find('th');
+    
+    for (i=0;i<$headers.length;i++) {
+		$headers[i].setAttribute("data-field","col_"+i);
+    }
+    $(".headerRow").find("div[id$=sortDiv]").each(function(e){
+        $("<span id='" + $(this).attr("id") + "'>" + $(this).html() + "</span>").replaceAll($(this));
+    });
+    
+    $grid.kendoGrid({
+        scrollable:false,
+        sortable:true,
+        columns:[
+        {	field:"col_0",sortable: false,},
+        {	field:"col_1",
+        	sortable: {
+                compare: function(a, b) {
+                    return sortableCompare(a,b,"col_1");
+                }
+            }
+ 		},
+        {	field:"col_2",
+        	sortable: {
+                compare: function(a, b) {
+                    return sortableCompare(a,b,"col_2");
+                }
+            }
+        },
+        {	field:"col_3",
+        	sortable: {
+                compare: function(a, b) {
+					return sortableCompare(a,b,"col_3");
+                }
+            }
+        },
+        {	field:"col_4",sortable: true,},
+        {	field:"col_5",sortable: true,},
+        {	field:"col_6",sortable: true,},
+        {	field:"col_7",sortable: true,},
+        {	field:"col_8",sortable: true,},
+        {	field:"col_9",sortable: true, type:"number",attributes: {"class": "numbercol"}},
+        {	field:"col_10",sortable: false,},
+        {	field:"col_11",sortable: true, type:"number",attributes: {"class": "numbercol"}},
+        {
+        	field:"col_12",
+        	sortable: true,
+        	type:"number",
+        	format: "{0:c}",
+        	attributes: {
+      			"class": "numbercol"
+			}
+        }],
+        dataBound: function(e) {
+            $(".check").unbind("click");
+            $(".check").bind("click",function(){
+                var a =true;
+                $(".check").each(function(){
+                    if(!$(this).prop("checked"))
+                    a = false;
+                });
+                $("[name=allpick]").prop("checked",a);
+                var propFlag = $(this).prop("checked");
+                var checkRs = propFlag ? 'checked="checked"' : '';
+                var datas = $("table[id$=':grid']").data("kendoGrid").dataSource.data();
+                for(var i = 0 ; i < datas.length ; i ++){
+                    var data = datas[i].col_0;
+                    if($(data).attr("name") == $(this).attr("name")){
+                        datas[i].col_0 = checkTemplate.replace("$_ID_$",$(data).attr("id"))
+                                                     .replace("$_NAME_$",$(data).attr("name"))
+                                                     .replace("$_CHECK_$",checkRs);
+                        break;
+                    
+                    }
+               }
+               
+            });
+            var items = e.sender.items();
+            for(var i = 0 ; i < items.length;i++){
+            	var curTd = $(items[i]).find("td:eq(1)");
+            	var objId = curTd.find("span").attr("objId");
+            	curTd.find("span").wrap($('<a href="/' + objId + '/e?retURL=' + objId + '" target="_blank"></a>'));
+            }
+        }
+    });
+    $("[name=allpick]").on("click",function(){
+            var propFlag = $(this).prop("checked");
+            $(".check").prop("checked",$(this).prop("checked"));
+            var datas = $("table[id$=':grid']").data("kendoGrid").dataSource.data();
+            for(var i = 0 ; i < datas.length ; i++){
+                var colStr = datas[i].col_0;
+                var checkRs = propFlag ? 'checked="checked"' : '';
+                datas[i].col_0 = checkTemplate.replace("$_ID_$",$(colStr).attr("id"))
+                             .replace("$_NAME_$",$(colStr).attr("name"))
+                             .replace("$_CHECK_$",checkRs);
+            }
+    })
+});
+function sortableCompare(a, b, field) {
+     var atext = $(a[field].trim()).text();
+     var btext = $(b[field].trim()).text();
+     if (atext > btext) return 1;
+     if (atext < btext) return -1;
+     return 0;
+}
+//2016/04/21　 呉  checkbox　 END
+</script>
+</apex:page>

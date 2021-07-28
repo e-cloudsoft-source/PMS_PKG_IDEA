@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>会計</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計書言語 --></label>
+        <name>AccountLanguage__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計宛名 --></label>
+        <name>AccountName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 但し書き内容 --></label>
+        <name>AccountProviso__c</name>
+    </fields>
+    <fields>
+        <label><!-- 領収証日付 --></label>
+        <name>AccountReceiptDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 請求書宛名 --></label>
+        <name>AccountReceiptName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計済 --></label>
+        <name>AccountedFlgCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 特別税 --></label>
+        <name>AmoutSpecialPrice__c</name>
+    </fields>
+    <fields>
+        <label><!-- バッチ処理区分 --></label>
+        <name>BatchProcessStatusDiv__c</name>
+    </fields>
+    <fields>
+        <label><!-- ご請求先 --></label>
+        <name>BillingCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント(社内) --></label>
+        <name>Comment2__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様名 --></label>
+        <name>ContactName__c</name>
+    </fields>
+    <fields>
+        <label><!-- クーポン利用の返金 --></label>
+        <name>CouponReturnFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 並べ順項目 --></label>
+        <name>DetailSortBy__c</name>
+    </fields>
+    <fields>
+        <label><!-- 割引金額 --></label>
+        <name>Discount__c</name>
+    </fields>
+    <fields>
+        <label><!-- $部門 --></label>
+        <name>DivisionName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 外貨から日本の通貨へ変換する場合、該当消費税で使って、内消費税を計算する --></help>
+        <label><!-- 日本消費税 --></label>
+        <name>ExchangeTaxRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上合計2（内税込み）金額 --></label>
+        <name>Field100__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上合計2（内税込み）点数 --></label>
+        <name>Field101__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上外税対象金額 --></label>
+        <name>Field102__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上外税対象点数 --></label>
+        <name>Field103__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上内税対象（内税抜き）金額 --></label>
+        <name>Field104__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上内税対象（内税抜き）点数 --></label>
+        <name>Field105__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上内税対象（内税込み）金額 --></label>
+        <name>Field106__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上内税対象（内税込み）点数 --></label>
+        <name>Field107__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上非課税対象金額 --></label>
+        <name>Field108__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上非課税対象点数 --></label>
+        <name>Field109__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計1（内税抜き）金額 --></label>
+        <name>Field110__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計1（内税抜き）点数 --></label>
+        <name>Field111__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計2（内税込み）金額 --></label>
+        <name>Field112__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計2（内税込み）点数 --></label>
+        <name>Field113__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計3（内税抜き）金額 --></label>
+        <name>Field114__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計3（内税抜き）点数 --></label>
+        <name>Field115__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計4（内税込み）金額 --></label>
+        <name>Field116__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計4（内税込み）点数 --></label>
+        <name>Field117__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金券販売合計　金額 --></label>
+        <name>Field118__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金券販売合計　回数 --></label>
+        <name>Field119__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金券販売合計　枚数 --></label>
+        <name>Field120__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税（外） --></label>
+        <name>Field121__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税（内） --></label>
+        <name>Field122__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税（外）対象額 --></label>
+        <name>Field123__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税（内）対象額 --></label>
+        <name>Field124__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税非課税対象額 --></label>
+        <name>Field125__c</name>
+    </fields>
+    <fields>
+        <label><!-- 請求金額 --></label>
+        <name>Field126__c</name>
+    </fields>
+    <fields>
+        <label><!-- 課税１　種別 --></label>
+        <name>Field127__c</name>
+    </fields>
+    <fields>
+        <label><!-- 課税１　税率 --></label>
+        <name>Field128__c</name>
+    </fields>
+    <fields>
+        <label><!-- 課税２　種別 --></label>
+        <name>Field129__c</name>
+    </fields>
+    <fields>
+        <label><!-- 課税２　税率 --></label>
+        <name>Field130__c</name>
+    </fields>
+    <fields>
+        <label><!-- 課税３　種別 --></label>
+        <name>Field131__c</name>
+    </fields>
+    <fields>
+        <label><!-- 課税３　税率 --></label>
+        <name>Field132__c</name>
+    </fields>
+    <fields>
+        <label><!-- レシートＮｏ．（ＦＲＯＭ） --></label>
+        <name>Field133__c</name>
+    </fields>
+    <fields>
+        <label><!-- レシートＮｏ．（ＴＯ） --></label>
+        <name>Field134__c</name>
+    </fields>
+    <fields>
+        <label><!-- 今回未精算　組数 --></label>
+        <name>Field135__c</name>
+    </fields>
+    <fields>
+        <label><!-- 今回未精算　金額 --></label>
+        <name>Field136__c</name>
+    </fields>
+    <fields>
+        <label><!-- 釣銭準備金 --></label>
+        <name>Field137__c</name>
+    </fields>
+    <fields>
+        <label><!-- シフト精算／日計精算回数 --></label>
+        <name>Field138__c</name>
+    </fields>
+    <fields>
+        <label><!-- 今回精算日時 --></label>
+        <name>Field139__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計5(外税込み)金額 --></label>
+        <name>Field140__c</name>
+    </fields>
+    <fields>
+        <label><!-- 営業日付 --></label>
+        <name>Field141__c</name>
+    </fields>
+    <fields>
+        <label><!-- 明細数（商品／監査） --></label>
+        <name>Field142__c</name>
+    </fields>
+    <fields>
+        <label><!-- 明細数（支払） --></label>
+        <name>Field143__c</name>
+    </fields>
+    <fields>
+        <label><!-- レシートＮｏ． --></label>
+        <name>Field145__c</name>
+    </fields>
+    <fields>
+        <label><!-- 扱者Ｎｏ． --></label>
+        <name>Field146__c</name>
+        <relationshipLabel><!-- 会計 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $売上計III（税抜）金額 --></label>
+        <name>Field147__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計日付 --></label>
+        <name>Field148__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計時刻 --></label>
+        <name>Field149__c</name>
+    </fields>
+    <fields>
+        <label><!-- テーブルＮｏ． --></label>
+        <name>Field150__c</name>
+        <relationshipLabel><!-- 会計 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $売上計IV（税込）金額 --></label>
+        <name>Field151__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計人数 --></label>
+        <name>Field152__c</name>
+    </fields>
+    <fields>
+        <label><!-- $予約受付日 --></label>
+        <name>Field154__c</name>
+    </fields>
+    <fields>
+        <help><!-- 客単価 - 支払金額(税抜) / 会計人数 --></help>
+        <label><!-- $客単価 --></label>
+        <name>Field155__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ご利用目的 --></label>
+        <name>Field156__c</name>
+    </fields>
+    <fields>
+        <label><!-- $組数 --></label>
+        <name>Field157__c</name>
+    </fields>
+    <fields>
+        <label><!-- 営業担当者 --></label>
+        <name>Field158__c</name>
+    </fields>
+    <fields>
+        <label><!-- $プラン --></label>
+        <name>Field159__c</name>
+    </fields>
+    <fields>
+        <label><!-- 取引種別 --></label>
+        <name>Field39__c</name>
+    </fields>
+    <fields>
+        <label><!-- ＶＯＩＤレシートＮｏ． --></label>
+        <name>Field40__c</name>
+    </fields>
+    <fields>
+        <label><!-- 担当者Ｎｏ． --></label>
+        <name>Field42__c</name>
+    </fields>
+    <fields>
+        <label><!-- 元扱者Ｎｏ． --></label>
+        <name>Field43__c</name>
+    </fields>
+    <fields>
+        <label><!-- 元担当者Ｎｏ． --></label>
+        <name>Field44__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計種別 --></label>
+        <name>Field45__c</name>
+    </fields>
+    <fields>
+        <label><!-- 伝票枝番 --></label>
+        <name>Field48__c</name>
+    </fields>
+    <fields>
+        <label><!-- 伝票一連Ｎｏ． --></label>
+        <name>Field49__c</name>
+    </fields>
+    <fields>
+        <label><!-- 新規オーダー時刻 --></label>
+        <name>Field50__c</name>
+    </fields>
+    <fields>
+        <label><!-- 追加オーダー時刻 --></label>
+        <name>Field51__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理提供時刻 --></label>
+        <name>Field52__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計日時 --></label>
+        <name>Field53__c</name>
+    </fields>
+    <fields>
+        <label><!-- 組数 --></label>
+        <name>Field54__c</name>
+    </fields>
+    <fields>
+        <label><!-- ＰＯＳ入力人数 --></label>
+        <name>Field55__c</name>
+    </fields>
+    <fields>
+        <label><!-- オーダー人数 --></label>
+        <name>Field56__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計人数 --></label>
+        <name>Field57__c</name>
+    </fields>
+    <fields>
+        <label><!-- フリー１集計コード --></label>
+        <name>Field58__c</name>
+    </fields>
+    <fields>
+        <label><!-- フリー１集計名称 --></label>
+        <name>Field59__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上客数 --></label>
+        <name>Field60__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店頭売上客数 --></label>
+        <name>Field61__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上高客数 --></label>
+        <name>Field62__c</name>
+    </fields>
+    <fields>
+        <label><!-- 収入計客数 --></label>
+        <name>Field63__c</name>
+    </fields>
+    <fields>
+        <label><!-- お通し人数 --></label>
+        <name>Field64__c</name>
+    </fields>
+    <fields>
+        <label><!-- 控え番号（任意情報１） --></label>
+        <name>Field65__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計人数の男性人数 --></help>
+        <label><!-- 客層１ --></label>
+        <name>Field66__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計人数の女性人数 --></help>
+        <label><!-- 客層２ --></label>
+        <name>Field67__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計人数の子供人数 --></help>
+        <label><!-- 客層３ --></label>
+        <name>Field68__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客層４ --></label>
+        <name>Field69__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客層５ --></label>
+        <name>Field70__c</name>
+    </fields>
+    <fields>
+        <label><!-- ディッシュアップ時間帯開始時間 --></label>
+        <name>Field71__c</name>
+    </fields>
+    <fields>
+        <label><!-- ディッシュアップ時間帯終了時間 --></label>
+        <name>Field72__c</name>
+    </fields>
+    <fields>
+        <label><!-- アイテム総点数 --></label>
+        <name>Field73__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食合計1（内税抜き）金額 --></label>
+        <name>Field74__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食合計1（内税抜き）点数 --></label>
+        <name>Field75__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食合計2（内税込み）金額 --></label>
+        <name>Field76__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食合計2（内税込み）点数 --></label>
+        <name>Field77__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食外税対象金額 --></label>
+        <name>Field78__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食外税対象点数 --></label>
+        <name>Field79__c</name>
+    </fields>
+    <fields>
+        <label><!-- 伝票Ｎｏ． --></label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食内税対象（内税抜き）金額 --></label>
+        <name>Field80__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食内税対象（内税抜き）点数 --></label>
+        <name>Field81__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食内税対象（内税込み）金額 --></label>
+        <name>Field82__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食内税対象（内税込み）点数 --></label>
+        <name>Field83__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食非課税対象金額 --></label>
+        <name>Field84__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店内飲食非課税対象点数 --></label>
+        <name>Field85__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト合計1（内税抜き）金額 --></label>
+        <name>Field86__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト合計1（内税抜き）点数 --></label>
+        <name>Field87__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト合計2（内税込み）金額 --></label>
+        <name>Field88__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト合計2（内税込み）点数 --></label>
+        <name>Field89__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト外税対象金額 --></label>
+        <name>Field90__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト外税対象点数 --></label>
+        <name>Field91__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト内税対象（内税抜き）金額 --></label>
+        <name>Field92__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト内税対象（内税抜き）点数 --></label>
+        <name>Field93__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト内税対象（内税込み）金額 --></label>
+        <name>Field94__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト内税対象（内税込み）点数 --></label>
+        <name>Field95__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト非課税対象金額 --></label>
+        <name>Field96__c</name>
+    </fields>
+    <fields>
+        <label><!-- テイクアウト非課税対象点数 --></label>
+        <name>Field97__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上合計1（内税抜き）金額 --></label>
+        <name>Field98__c</name>
+    </fields>
+    <fields>
+        <label><!-- レストラン売上合計1（内税抜き）点数 --></label>
+        <name>Field99__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 新会計フラグ --></label>
+        <name>IsNewLayout__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発行日 --></label>
+        <name>IssueDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 別店舗から編集チェックフラグ(システム用) --></label>
+        <name>OtherShopEditCheckFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 取引種別が00でVOIDなし売上金額が¥0でないのとき、集計対象の値１を返す --></help>
+        <label><!-- $集計対象外 --></label>
+        <name>OutSideAccount__c</name>
+    </fields>
+    <fields>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金確認 --></label>
+        <name>PaymentFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金確認手動設定フラグ --></label>
+        <name>PaymentHandReqFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- Plan Number がゼロのときは、プランではないとする --></help>
+        <label><!-- Plan# --></label>
+        <name>PlanNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金日 --></label>
+        <name>ReceiptDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- レシート番号 --></label>
+        <name>ReciptNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- ご予約 --></label>
+        <name>Relreserve__c</name>
+        <relationshipLabel><!-- 会計 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 敬称 --></label>
+        <name>RespectLst__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋DisplayNo --></label>
+        <name>RoomDisplayNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋名 --></label>
+        <name>RoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋Seq# --></label>
+        <name>RoomSeq__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計上日 --></label>
+        <name>SalesDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- $営業日付 --></label>
+        <name>SalesdayCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- SearchDate --></label>
+        <name>SearchDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- $Seq. --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗名 --></label>
+        <name>ShopName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗Seq# --></label>
+        <name>ShopSeq__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料（税抜） --></label>
+        <name>SumSrvPriceExcTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料（税込） --></label>
+        <name>SumSrvPriceIncTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>SumTax__c</name>
+    </fields>
+    <fields>
+        <help><!-- レストランでの実際のテーブル＃ --></help>
+        <label><!-- TableNo --></label>
+        <name>TableNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- A --></label>
+        <name>Target__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税率 --></label>
+        <name>TaxRate__c</name>
+    </fields>
+    <fields>
+        <help><!-- 客単価 &gt;= ¥3,150のとき、レストランにて食事&amp;ドリンク(TeaTimeFlag = 0)、以外はレストランにて喫茶となる --></help>
+        <label><!-- TeaTimeFlag --></label>
+        <name>TeaTimeFlag__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプコード --></label>
+        <name>TypeOfRoomCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>TypeOfRoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプSeq# --></label>
+        <name>TypeOfRoomSeq__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計商品単価定義区分 --></label>
+        <name>UnitPriceDefKb__c</name>
+    </fields>
+    <fields>
+        <help><!-- 40文字まで入力可能です
+B5 会計書: 12桁ごとにリターンキーを入力してください。
+A4 会計書: 16桁ごとにリターンキーを入力してください。 --></help>
+        <label><!-- コメント --></label>
+        <name>comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約会計 --></label>
+        <name>frs__c</name>
+        <relationshipLabel><!-- 会計 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- お客様 --></label>
+        <name>relaccount__c</name>
+        <relationshipLabel><!-- 会計 --></relationshipLabel>
+    </fields>
+    <webLinks>
+        <label><!-- AccountBillPdf --></label>
+        <name>AccountBillPdf</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- BlukAccAcountBtn --></label>
+        <name>BlukAccAcountBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- BlukBillPdfBtn --></label>
+        <name>BlukBillPdfBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- EnkaiKaikeishoBtn --></label>
+        <name>EnkaiKaikeishoBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Kaikeisho --></label>
+        <name>Kaikeisho</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- KaikeishoExcel --></label>
+        <name>KaikeishoExcel</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- KaikeishoSplitBtn --></label>
+        <name>KaikeishoSplitBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- SplitCostBtn --></label>
+        <name>SplitCostBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- VOID --></label>
+        <name>VOID</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- VOIDCancel --></label>
+        <name>VOIDCancel</name>
+    </webLinks>
+</CustomObjectTranslation>

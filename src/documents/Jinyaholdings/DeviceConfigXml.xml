@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：POS機能（オーダーエントリ）と釣銭機機能は各画面に有効、無効設定用
+書式：
+    SHOPCODE:           店舗コード、支店が非存在する場合、空白のままに定義する
+    ACCOUNT:            会計画面にPOS機能と釣銭機機能有効/無効設定
+        CHARGE:             釣銭機有効・無効フラグ（TRUE：有効、FALSE:無効（デフォルト値))
+        POSPRINT:           POS機能（オーダーエントリ）有効・無効フラグ（TRUE：有効、FALSE:無効（デフォルト値))
+    CASH:               現金合わせにPOS機能と釣銭機機能有効/無効設定(POS(オーダーエントリ)機器単位定義可能)
+        CHARGE:             釣銭機有効・無効フラグ（TRUE：有効、FALSE:無効（デフォルト値))
+                            該当機能有効すると、現金合わせて画面の機器有高情報は釣銭機から取得する
+        POSPRINT:           POS機能（オーダーエントリ）有効・無効フラグ（TRUE：有効、FALSE:無効（デフォルト値))
+        EDITABLE:           機器有高セクションの「金額」項目は編集可・不可フラグ（TRUE:編集可、FALSE：編集不可（デフォルト値)）
+                            注意：TRUEの場合、機器有高項目値保存する、FALSEの場合、参照のみ、保存しません
+    SIMPLEACCOUNT:      簡易会計画面にPOS機能有効/無効設定
+        POSPRINT:           POS機能（オーダーエントリ）有効・無効フラグ（TRUE：有効、FALSE:無効（デフォルト値))
+注意事項：1.POS＋現金合わせ機能利用する場合、タグ：POSPRINTは全部TRUEに設定が必要
+        2.POS＋現金合わせ機能利用する場合、施設の営業開始前または営業終了後に切替する、営業中に切替すると、現金合わせて金額は合わない可能性があります
+2017.10.13 タグ「CONFIGISVALIDATE」新規追加（TRUE/FALSE（デフォルト値）)
+        該当タグを新規追加に従って、該当ファイルの使うルールを変更される
+        CONFIGISVALIDATEはFALSE/定義省略の場合、釣銭機(タグ：CHARGE）、POS機能（タグ：POSPRINT）は無効になる、
+               オーダーエントリ定義情報（XMLファイル）と釣銭機定義情報（XMLファイル）定義により、各ページを自動有効・無効になる
+        CONFIGISVALIDATEはTRUEの場合、 釣銭機(タグ：CHARGE）、POS機能（タグ：POSPRINT）は有効になる 
+ -->
+	<SHOP>
+        <SHOPCODE></SHOPCODE>
+       	<!-- 会計画面 -->
+       	<ACCOUNT>
+       	   <CONFIG>
+        		<!-- 釣銭機 -->
+        		<CHARGE>FALSE</CHARGE>
+        		<!-- POS機能(オーダーエンドリ) -->
+        		<POSPRINT>FALSE</POSPRINT>
+       		</CONFIG>
+       	</ACCOUNT>
+       	<!-- 現金合わせ　-->
+       	<CASH>
+       	   <CONFIG>
+       	        <!-- 釣銭機 -->
+                <CHARGE>FALSE</CHARGE>
+                <!-- POS機能(オーダーエンドリ) -->
+                <POSPRINT>FALSE</POSPRINT>
+                <!-- 機器有高セクションの「金額」項目を編集可／不可フラグ -->
+                <EDITABLE>FALSE</EDITABLE>
+       	   </CONFIG>
+       	</CASH>	
+       	<!-- 簡易会計 -->
+        <SIMPLEACCOUNT>
+           <CONFIG>
+                <!-- POS機能(オーダーエンドリ) -->
+                <POSPRINT>FALSE</POSPRINT>
+           </CONFIG>
+        </SIMPLEACCOUNT>
+	</SHOP>
+</root>

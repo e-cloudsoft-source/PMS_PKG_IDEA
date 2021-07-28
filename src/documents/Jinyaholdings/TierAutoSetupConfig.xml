@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!-- 
+概要：1.該当XML利用して、バッチスケジュール(BatchRackRateSetup)で部屋タイプ別Tier値を設定する
+     2.Tier毎に背景と文字色を設定する
+     3.多店舗、店舗毎に設定が必要場合、
+　　　タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容を修正する
+書式：
+    SHOPCODE:                   店舗コード:支店がない場合、空白のままに定義する、多店舗の場合、店舗コードを設定ください
+    Rule:                       Tier設定用ルールタグ(定義回数：1)
+        RuleItem:               Tier設定用ルール(定義回数：N)
+            RoomTypeSeq:        部屋タイプの#Seq、定義省略可能、カンマで複数定義可能、定義省略の場合、全て部屋タイプは該当ルールチェック対象
+            RemainedMinRooms:   最小残室数
+            RemainedMaxRooms:   最大残室数
+            RemainedStartDays:  予約日の何日前から
+            RemainedEndDays:    予約日の何日前まで
+                                上記RemainedMinRooms、RemainedMaxRooms、RemainedStartDays、RemainedEndDaysいずれに設定必須
+            Tier:               該当ルールを適応の場合、設定するTier値、該当Tier値はオブジェクト「ラックレート」のTier定義値と一致が必要
+    TierColor:                  ラックレート色定義用
+        Tier:                   Tierの背景色を定義する
+            Key:                色設定対象Tier名、カンマで複数定義可能
+            fontColor:          文字色、省略可能（デフォルト値：黒色）
+-->
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE></SHOPCODE>
+        <!-- Tier設定用ルール -->
+        <!-- 
+        例：
+        1.部屋タイプのSEQが「100,101,102」、最大残室は３部屋、最小残室は２部屋、予約日の３日前までの場合、Tier4に設定する
+        2.部屋タイプのSEQが「100,101,102」、最大残室は１部屋、予約日の７日前から４日前までの場合、Tier3に設定する
+         -->
+        <!-- 
+        <Rule>
+            <RuleItem>
+                <RoomTypeSeq>100,101,102</RoomTypeSeq>
+                <RemainedMinRooms>2</RemainedMinRooms>
+                <RemainedMaxRooms>3</RemainedMaxRooms>
+                <RemainedEndDays>3</RemainedEndDays>
+                <Tier>Tier4</Tier>
+            </RuleItem>
+            <RuleItem>
+                <RoomTypeSeq>100,101,102</RoomTypeSeq>
+                <RemainedMaxRooms>1</RemainedMaxRooms>
+                <RemainedStartDays>7</RemainedStartDays>
+                <RemainedEndDays>4</RemainedEndDays>
+                <Tier>Tier3</Tier>
+            </RuleItem>
+        </Rule>
+        -->
+        <!-- ラックレート色定義 -->
+        <!-- 
+        例:
+        Tier1とTier2は文字色は白色、背景は青色
+        Tier3とTier4は文字色が黒色、背景はピンク  
+        <TierColor>
+            <Tier Key="Tier1,Tier2" fontColor="white">#4682b4</Tier>
+            <Tier Key="Tier3,Tier4">#ffdae0</Tier>
+        </TierColor>
+         -->
+         <!-- Tier色設定サンプル（Tier1~Tier8) -->
+         <!-- 
+         <TierColor>
+            <Tier Key="Tier1">#b0c4de</Tier>
+            <Tier Key="Tier2">#ffdae0</Tier>
+            <Tier Key="Tier3">#7fffd4</Tier>
+            <Tier Key="Tier4">#d8bfd8</Tier>
+            <Tier Key="Tier5">#b0e0e6</Tier>
+            <Tier Key="Tier6">#ffdead</Tier>
+            <Tier Key="Tier7">#e9967a</Tier>
+            <Tier Key="Tier8" fontColor="white">#4682b4</Tier>
+         </TierColor>
+          -->
+    </SHOP>
+</root>

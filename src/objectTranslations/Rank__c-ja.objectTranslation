@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>ランク</value>
+    </caseValues>
+    <fields>
+        <label><!-- 増減金額 --></label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 説明 --></label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label><!-- お布団代 --></label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸切露天風呂 --></label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier8 --></label>
+        <name>T8__c</name>
+    </fields>
+    <fields>
+        <help><!-- Tier0は料金レベルはありません --></help>
+        <label><!-- Tier0 --></label>
+        <name>Tier0__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier1 --></label>
+        <name>Tier1__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier1 --></label>
+        <name>Tier1c__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier2 --></label>
+        <name>Tier2__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier2 --></label>
+        <name>Tier2c__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier3 --></label>
+        <name>Tier3__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier3 --></label>
+        <name>Tier3c__c</name>
+    </fields>
+    <fields>
+        <help><!-- 平日料金 --></help>
+        <label><!-- Tier4 --></label>
+        <name>Tier4__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier4 --></label>
+        <name>Tier4c__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier5 --></label>
+        <name>Tier5__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier5 --></label>
+        <name>Tier5c__c</name>
+    </fields>
+    <fields>
+        <help><!-- 金土祝前日の料金 --></help>
+        <label><!-- Tier6 --></label>
+        <name>Tier6__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier6 --></label>
+        <name>Tier6c__c</name>
+    </fields>
+    <fields>
+        <help><!-- 正月料金 --></help>
+        <label><!-- Tier7 --></label>
+        <name>Tier7__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier7 --></label>
+        <name>Tier7c__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier8 --></label>
+        <name>Tier8c__c</name>
+    </fields>
+    <fields>
+        <label><!-- 延長料[1H] --></label>
+        <name>X1H__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸切料[3H]昼 --></label>
+        <name>X3H__c</name>
+    </fields>
+    <fields>
+        <label><!-- 貸切料[3H]夜 --></label>
+        <name>X3Hyu__c</name>
+    </fields>
+    <validationRules>
+        <errorMessage><!-- どれか一つしか選択できません、選択し直してください！ --></errorMessage>
+        <name>CheckSelectTanitsu</name>
+    </validationRules>
+</CustomObjectTranslation>

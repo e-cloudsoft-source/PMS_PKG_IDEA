@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <description>指定プロファイルにより、該当プロファイル配下のユーザは予約、会計新規・変更機能を制御できる</description>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>NoEditAccount__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>会計新規・変更不可フラグ
+TRUE：新規・変更不可
+FALSE:新規・変更可</inlineHelpText>
+        <label>会計新規変更不可</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>NoEditCleanStatusFlg__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>清掃ページに清掃ステータスを変更可／不可フラグ
+TRUE:清掃ページに清掃ステータスを変更不可 
+FALSE:清掃ページに清掃ステータスを変更可</inlineHelpText>
+        <label>清掃状態編集不可</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>NoEditLead__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>予約新規・変更不可フラグ
+TRUE：新規・変更不可
+FALSE:新規・変更可</inlineHelpText>
+        <label>予約新規変更不可</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <label>権限設定</label>
+    <visibility>Public</visibility>
+</CustomObject>

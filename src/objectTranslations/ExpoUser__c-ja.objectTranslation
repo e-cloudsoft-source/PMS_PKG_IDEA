@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Expoユーザ</value>
+    </caseValues>
+    <fields>
+        <label><!-- 活性化FLG --></label>
+        <name>ActivationFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 管理者フラグ --></label>
+        <name>AdministratorFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- パスワードリセットフラグ --></label>
+        <name>ChangePasswordFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール --></label>
+        <name>Email__c</name>
+    </fields>
+    <fields>
+        <label><!-- Expo組織情報 --></label>
+        <name>ExpoOrgInfoRef__c</name>
+        <relationshipLabel><!-- Expoユーザ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Fax --></label>
+        <name>Fax__c</name>
+    </fields>
+    <fields>
+        <help><!-- ユーザ有効 --></help>
+        <label><!-- 有効 --></label>
+        <name>IsActive__c</name>
+    </fields>
+    <fields>
+        <label><!-- パスワード --></label>
+        <name>PassWord__c</name>
+    </fields>
+    <fields>
+        <label><!-- 電話 --></label>
+        <name>Phone__c</name>
+    </fields>
+    <fields>
+        <label><!-- パスワードリセット送信 --></label>
+        <name>PwdResetSendMalFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- サイトURL --></label>
+        <name>SiteUrl__c</name>
+    </fields>
+    <fields>
+        <label><!-- TokenId --></label>
+        <name>TokenId__c</name>
+    </fields>
+    <fields>
+        <help><!-- 例：name@yourcompany.com --></help>
+        <label><!-- ユーザ名 --></label>
+        <name>UserName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 状態 --></label>
+        <name>UserStatusCal__c</name>
+    </fields>
+</CustomObjectTranslation>

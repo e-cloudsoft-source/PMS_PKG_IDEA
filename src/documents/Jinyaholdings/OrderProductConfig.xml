@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：オーダーエントリ機能情報定義
+前提条件：		1.OSとブラウザの制限
+				1.1: ブラウザ: Chrome(Ver.54以上)
+				1.1: OS: タブレットの場合、アンドロイド(5.0以上）、PCの場合、MAC(10以上)/WINDOW(7/8/10)
+設定作業：
+			1.IPアドレスの確認と取得
+				1.1: タブレットデバイス/PC端末からChromeブラウザ下記URLを起動して、Your local IP addressesの下に表示した数字（例：192.168.10.100）は該当端末のIPアドレス
+					 https://diafygi.github.io/webrtc-ips/
+			2.会計商品情報、画像登録
+				2.1: 会計商品レイアウトに、「■商品情報」、「商品写真」項目を追加する
+				2.2: 「■商品情報」項目に料理の説明情報を登録する、「商品写真」項目に該当料理の写真をアップロードする（写真サイズは 200px、200px が勧める）
+			3.部屋のマッピング
+				3.1: 端末（タブレット/PC)のIPアドレスと該当端末を使う予定部屋のSeq#値をマッピングする
+				例：端末Aは部屋「松風」に使うの場合、
+					端末AのIPアドレスは：192.168.10.100、部屋「松風」のSeq#値は290
+					下記様にマッピングルールはXMLに定義する
+					<DEVICE>
+						<LOCAL>192.168.10.100</LOCAL>
+						<ROOMSEQ>290</ROOMSEQ>
+					</DEVICE>
+			4.Force.com サイトの設定
+				4.1 ヘルプ「https://help.salesforce.com/articleView?id=sites_setup_overview.htm&type=0&language=ja」参考して、サイトを設定する
+				4.2 サイトの「有効なサイトのホームページ」を変更設定する
+					4.2.1：設定→開発→サイト→サイトの表示ラベルリンク→編集→有効なサイトのホームページ→「OrderMain」選択
+					4.2.2：保存ボタンをクリックして、上記設定を保存する
+				4.3 サイトのプロファイルに、権限を設定する
+					4.3.1: 設定→開発→サイト→サイトの表示ラベルリンク→公開アクセス設定ボタンをクリックする
+					4.3.2: プロファイル詳細画面→項目レベルセキュリティ→カスタム項目レベルセキュリティ→会計商品→参照→編集→商品写真→参照アクセス権はONにする
+					4.3.3: プロファイル詳細画面の編集ボタンをクリックする
+						標準オブジェクト権限→ドキュメント→参照権限はONにする
+						カスタムオブジェクト権限→会計商品→すべて表示、参照両方ONにする
+						保存ボタンをクリックして、上記設定を保存する
+					4.3.4: このプロファイルに属するユーザの参照ボタンをクリック→編集→タイムゾーンは（GTM+09:00日本標準時）→保存
+						
+						
+書式：
+	SHOPCODE: 			店舗コード、支店が非存在する場合、空白のままに定義する
+	LOGOIMG:			オーダーエントリ画面の左上のロゴの参照URLを指定する、定義省略可能、
+							省略するとき、「ドキュメン→Jinyaholdings→Jinyalogo」ファイルを自動参照する」
+	DEMODATE:			機能デモー用の場合、該当タグに日付を指定して、オーダーした明細は該当指定日付のご予約の会計明細に反映を行う
+						書式:YYYY-MM-DD
+						注：本番の時、該当タグを設定しないで下さい
+	CANCELTIMERANGE:	注文確定から、お客様側から、N分以内注文明細をキャンセルできる機能定義（分単位）、定義省略可能、省略の場合、キャンセル制限なし、お客様側から常にキャンセルできる
+						注：タグ値は数値「0」のとき、キャンセル制限なしで処理する
+						例：<CANCELTIMERANGE>5</CANCELTIMERANGE>を定義するとき、
+							注文確定後、５分以内にお客様側から会計明細キャンセルリクエストをできる、５分以上超えると、お客様側からキャンセルリクエストをできなくなる
+	LAYOUTSTYLE:		オーダーエントリのレイアウトは「簡易」モードの場合、商品メニューボタンの「横幅のサイズとフォントサイズの定義
+		BTNWIDTH:		商品メニューボタンの横幅
+		BTNFONTSIZE:	商品メニューボタンのフォントサイズ
+	INFO_CUSTOME_DEF:   レシート出力項目の情報取得ルール定義(2017/09/30新規追加)
+	    ALLERGIE:       アレルギー情報取得ルール定義
+	    LINEMAXSIZE:       アレルギー情報は長い文字列のとき、行単位の最大文字数（漢字数）(2017/10/16新規追加)
+	                       書式：数字1,数字2 
+	                       数字1:1行目の文字列の最大文字数（定義省略可、デフォルト数字：8)
+	                       数字2:2行目以後の文字列の最大文字数（定義省略可、デフォルト文字数：13
+	    FILTER:            ルール定義タグ
+	       FIELD:          情報取得元項目API
+	       KEY:            該当タグに定義の内容により、該当キーワードを捜す、見つかると、該当キーワード以後の文字列を戻る(複数キーワードはカンマ分けて複数定義可能)
+           BEG:            該当タグに定義の内容により、該当キーワードを捜す、見つかると、該当キーワード以後の文字列を戻る
+               saveKey:    タグBEG属性として、TRUE/FALSE定義可能 TRUEの場合、TAGに指定のキーワードも抽出の対象文字列一部として戻る、デフォルト値：FALSE
+           END:            該当タグに定義の内容により、該当キーワードを捜す、見つかると、該当キーワード以前の文字列を戻る
+               saveKey:    タグBEG属性として、TRUE/FALSE定義可能 TRUEの場合、TAGに指定のキーワードも抽出の対象文字列一部として戻る、デフォルト値：FALSE
+    DELETEFLAG:         オーダーエントリ画面から取り消す明細は会計明細から削除・更新切替用(2017/09/30新規追加)
+                           TRUE:明細削除(デフォルト値)、FALSE:明細更新
+ 	PRINTCONFIG:		レシートプリンタ関連定義情報
+ 		NAME:			レシートプリンター識別番号、端末側はどのレシートプリンターを利用定義用(2017/02/15新規追加)
+ 		WEBSOCKET:		中継アプリ通信方式（WS/WSS)
+ 		LAYOUT:			各機能のレイアウト名を定義する				(2017/03/02機能変更)
+ 			ORDER:			オーダーエントリ用レシートレイアウト名
+ 			SIMPLEACCOUNT:	簡易会計用レシートレイアウト名
+ 			ACCOUNT:		会計用レシートレイアウト名
+ 		PRINT:			レシートプリンタ接続のPCのIPアドレス(実際の環境により、変更要）
+ 		PRINTPORT:		レシートプリンタ接続のPC通信ポート、該当ポートは中継アプリ側の /conf/app.properties/web.server.ssl.portの設定値一致が必要です
+ 		STATUS:			レシートプリンタ接続状態確認のIPアドレス(実際の環境により、変更要）
+ 		STATUSPORT:		レシートプリンタ接続状態確認の通信ポート、該当ポートは中継アプリ側の /conf/app.properties/web.server.ssl.portの設定値一致が必要です
+ 		PREMARK:		各注文明細の左側にチェック用のマック定義する(2017/02/15新規追加)
+ 		HEADSTAND:		レシートは180度回転印刷する、しないフラグ（TRUE/FALSE： TRUEの場合、180度回転印刷）(2017/02/15新規追加)
+ 		PRINTNO:		レシートプリンター番号(2017/04/25新規追加)
+ 		HIKAE:          レシート印刷する場合、控分も印刷する、しないフラグ（デフォルト値は印刷なし、文字列を定義する場合、該当文字列をレシートに印刷する）(2017/07/05新規追加)  
+ 	DEVICECONFIG:		端末デバイス(タブレット/PC)のIPと関連部屋のマッピング定義
+ 		DEVICE:
+ 			LOCAL:		端末デバイスのイントラネットIP(例：192.168.1.100)
+ 			ROOMSEQ:	該当デバイスと関連の部屋のSeq#項目値を定義する
+ 			PRINTER:	端末デバイスから接続するレシートプリンター識別番号を定義する(2017/02/15新規追加)
+ 						該当端末から、オーダープリンター(デシャップ用) / 会計明細のレシートプリンターを同時に利用したい場合、該当タグに定義した内容は自動的に「オーダープリンター(デシャップ用) の識別番号」になる(2017/04/21新規追加)
+ 			ACCOUNTPRINTER:
+ 						新会計画面、レシートプリンター識別番号を定義する(2017/04/21新規追加)
+ 			SPACCOUNTPRINTER:
+ 						簡易会計画面、レシートプリンター識別番号を定義する(2017/04/21新規追加)
+ 			POSNO:		端末#、3桁まで英数字定義(2017/04/27新規追加)、どの端末から印刷リクエストを発生識別用、定義省略可能
+ 			
+    DEVICEFILTER:       注文伝票の出力先個別指定情報定義(2017/10/31新規追加)
+                        //会計商品 #DP(DP)/ #GP(GP)/会計OP(OP)/リンクＤＰコード(LINKDP) 項目により
+            DP:         会計商品 #DP(DP)項目コードにより、レシートプリンタ指定する
+                CODE:   会計商品 #DP(DP)項目コード、コンマで複数定義可能
+                POSNO:  レシートプリンタ(PRINTCONFIG) のNAMEタグ値を指定する
+            GP:         会計商品 #GP(GP)項目コードにより、レシートプリンタ指定する
+                CODE:   会計商品 #GP(GP)項目コード、コンマで複数定義可能
+                POSNO:  レシートプリンタ(PRINTCONFIG) のNAMEタグ値を指定する
+            OP:         会計商品 会計OP(OP)項目コードにより、レシートプリンタ指定する
+                CODE:   会計商品 会計OP(OP)項目コード、コンマで複数定義可能
+                POSNO:  レシートプリンタ(PRINTCONFIG) のNAMEタグ値を指定する
+            LINKDP:     会計商品 リンクＤＰコード項目コードにより、レシートプリンタ指定する
+                CODE:   会計商品 リンクＤＰコード項目コード、コンマで複数定義可能
+                POSNO:  レシートプリンタ(PRINTCONFIG) のNAMEタグ値を指定する
+ 	BUTTONTAB:			１グループの料理情報定義情報(複数タブ定義可能)
+ 		TABLABEL:		該当料理グループの表示ラベル
+ 		PRODUCT:		料理表示用情報を定義する 
+ 			NAME:		商品名情報を定義する(定義内容説明用、画面へ反映しません）
+ 			CODE:		会計商品コード、該当商品コードは必ず会計商品に存在が必要
+ 	CAMPTYPE:			最新お知らせと写真の取得元の切替パラメータタグ新規追加(1/2/3)
+			1:		スケジュールバッチ処理(クラス：BatchGetWebSiteInfo)で取得の最新お知らせと写真をレシートへ出力する
+			2:		該当XMLのタグ「CAMPAIGN」に定義のお知らせと写真情報をレシートへ出力する
+			3:		スケジュールバッチ処理(クラス：BatchGetWebSiteInfo)で取得の最新お知らせ＋XMLのタグ「CAMPAIGN」に定義のお知らせ連携して、レシートへ出力する
+					スケジュールバッチ処理(クラス：BatchGetWebSiteInfo)で取得の写真情報が存在すると、該当写真を出力する、写真がないと、レシートへ出力なし
+
+2017/01/17 指定日付のご予約へオーダーできる機能対応（デモー用）
+	注意：該当機能をデモーしたいとき、下記手順を推奨する
+		①「ルームインジケータ画面に、過去の日付の空いて部屋にデモー用予約データを登録して、該当予約をチェックインする」
+		②作成のデモーご予約データの到着日は「DEMODATE」タグに設定する
+		③DEVICECONFIGタグに該当部屋のSEQとデモー用端末PCのIPを定義する
+2017/03/02 
+		①タグ「LAYOUT」定義変更あり、簡易会計とオーダーエントリ関連のレイアウトは別々のタグ名で分ける
+2017/03/15 最新お知らせと写真の取得元の切替パラメータを新規追加
+		CAMPTYPE:	最新お知らせと写真の取得元の切替パラメータタグ新規追加(1/2/3)
+2017/04/21 
+		①.会計レシート印刷レイアウト定義
+		ACCOUNT:			会計用レシートレイアウト名
+        ②.同じ端末からから　オーダープリンター(デシャップ用)/ 会計明細のレシートプリンターを同時に利用できるのプリンター識別番号タグを新規追加
+		PRINTER:			オーダープリンター(デシャップ用)識別番号を定義する
+		ACCOUNTPRINTER:		新会計画面、レシートプリンター識別番号を定義する
+		SPACCOUNTPRINTER:	簡易会計画面、レシートプリンター識別番号を定義する
+		③オーダーエントリのレイアウトは「簡易」モードの場合、商品メニューボタンの「横幅のサイズとフォントサイズの定義 
+		BTNWIDTH:			商品メニューボタンの横幅
+		BTNFONTSIZE:		商品メニューボタンのフォントサイズ	
+2017/04/25
+		タグ：「PRINTCONFIG→PRINTNO」新規追加、レシートのレイアウトに該当プリンター番号情報を出力用
+2017/04/27
+		タグ：「DEVICECONFIG→DEVICE→POSNO」新規追加、レシートのレイアウトに「端末＃」として情報出力する
+2017/07/05
+        タグ：「PRINTCONFIG→HIKAE」新規追加、レシートのレイアウトに控ページ出力用
+        例：PRINTNO:S01のプリンター印刷すとき、会計書２ページ出力したい場合、<HIKAE>(控)</HIKAE>を定義すると、２ページを連続出力される
+2017/09/30
+        タグ：「INFO_CUSTOME_DEF」新規追加、アレルギー項目内容取得ルールを定義用
+        タグ：「DELETEFLAG」新規追加、オーダーエントリ画面から取り消す明細は会計明細から削除・更新切替用
+タグ：「INFO_CUSTOME_DEF」アレルギー関連の説明
+    CASE1.指定項目から全部内容はアレルギー情報として出力したい場合
+        お客様の「アレルギーの内容：DetailedAllergy__c」またはご予約の「料理補足：Field354__c」はレシートへ印刷する場合の定義方法
+        <INFO_CUSTOME_DEF>
+            <ALLERGIE>
+                <FILTER>
+                    <FIELD>relcontact__r.DetailedAllergy__c</FIELD>
+                </FILTER>
+                <FILTER>
+                    <FIELD>Field354__c</FIELD>
+                </FILTER>
+            </ALLERGIE>
+        </INFO_CUSTOME_DEF>
+    CASE2.指定項目からルールにより、一部内容はアレルギー情報として、出力したい場合
+    !!!重要:CASE2パターンの場合、アレルギー情報の書き方制限があります、
+          「アレルギー」キーワードは前方付けって、情報を入力してください
+           複数行アレルギー情報を入力したい場合、行毎の前方は「アレルギー」キーワードは必要
+           
+        例1：アレルギーは一行以内の入力例
+            ・漢字（XXXX　XXXXX様？）→OK
+			・アレルギー情報→女性１名がキウイフルーツ、サトイモNG,本人：甲殻類アレルギー
+			・男女割→OK
+			・お祝い？→ではない。
+        例2：アレルギーは複行は特記事項に入力例
+            ・漢字（XXXX　XXXXX様？）→OK
+            ・アレルギー情報→女性１名がキウイフルーツ、サトイモNG
+            ・アレルギー情報→本人が甲殻類アレルギー
+            ・男女割→OK
+            ・お祝い？→ではない。
+            
+        上記CASE2パターンのXMLの定義例（入力情報はご予約「特記事項」「メール本文」または　お客様「アレルギーの内容」項目入力予想）
+        <INFO_CUSTOME_DEF>
+            <ALLERGIE>
+                <FILTER>
+                    <FIELD>Comment3__c</FIELD>
+                    <KEY>アレルギー</KEY>
+                    <BEG saveKey='TRUE'></BEG>
+                    <END>\n</END>
+                </FILTER>
+                <FILTER>
+                    <FIELD>email__c</FIELD>
+                    <KEY>アレルギー</KEY>
+                    <BEG saveKey='TRUE'>回答</BEG>
+                    <END>\n</END>
+                </FILTER>
+                <FILTER>
+                    <FIELD>relcontact__r.DetailedAllergy__c</FIELD>
+                    <KEY>アレルギー</KEY>
+                    <BEG saveKey='TRUE'></BEG>
+                    <END>\n</END>
+                </FILTER>
+            </ALLERGIE>
+        </INFO_CUSTOME_DEF> 
+2017/10/31
+    タグ：DEVICEFILTER新規追加
+    注文伝票の出力先個別指定情報定義できる
+    例：
+    ①会計商品のDPコードは「01,02,03」の場合、レシートプリンタ：POS02 出力する
+    ②会計商品のDPコードは「04,05,06」の場合、レシートプリンタ：POS03 出力する
+    ③会計商品のDPコードは上記以外の場合、端末(DEVICECONFIG)からデフォルトレシートプリンタへ出力する
+    <DEVICEFILTER>
+        <DP>
+            <CODE POSNO="POS02">01,02,03</CODE>
+            <CODE POSNO="POS03">04,05,06</CODE>
+        </DP>
+    </DEVICEFILTER>
+2018/06/15
+	タグ：SCANNER新規追加(DEVICECONFIG→DEVICE->SCANNER)(該当端末は「バーコードスキャナー」機能を利用可・不可フラグ)
+		 TRUE:該当端末にバーコードスキャナーを使える（該当端末は接続しているプリンター側にスキャナーが正常に接続しているが前提）
+		 注意：①該当機能はMPOPのみ利用可能!!!
+		 	  ②１スキャナーは１端末のみ設定してください
+2018/07/31
+	タグ：QRCODEINFO新規追加(SHOP→QRCODEINFO）QRコード印刷する場合、引き渡すの商品情報の定義情報 
+		FIELDS:会計商品の項目API名、カンマ区切りに複数定義可能
+2018/09/10
+	タグ：FOODSCHEDULE新規追加（SHOP→FOODSCHEDULE）料理進捗画面の料理表示区間、色、デフォルトの処理作成時間など定義する
+2018/10/31
+	タグ：COOKTIME新規追加(SHOP->FOODSCHEDULE->BUSSINESSTIME->TIME->COOKTIME) 料理開始時間設定用、書式：HH:MM
+2019/01/31
+	タグ：ZOOM新規追加(SHOP->ZOOM) フォントサイズ(PX)をカスタマイズ用タグ
+2019/02/15
+	タグ：ROOMZOOM新規追加(SHOP->ZOOM->ROOMZOOM) フォントサイズ(PX)をカスタマイズ用タグ
+	タグ属性：BUTTONTAB→POSNO新規追加 商品ボタン表示内容を端末ごとに変更機能
+		BUTTONTABにPOSNOを指定する場合（カンマで複数端末のPOSNO指定可能）、指定の端末のみ該当商品メニューを見える
+		BUTTONTABにPOSNOを未指定場合、現状通りで、全て端末から該当商品メニューを見える
+2019/06/15
+	タグ：SAMEPRODMERGE新規(SHOP->SAMEPRODMERGE）オーダーエントリーで商品注文する場合、同じ商品は同じ会計明細にまとめる表示・別々会計明細に表示切り替えフラグタグ
+		TRUE:同じ商品は同じ会計明細にまとめる表示
+		FALSE:オーダー明細により、別々会計明細に表示する（デフォルト値）
+2019/10/30 
+	タグ	:ROOMFILTER新規(オーダーエントリー画面で、「部屋」から予約一覧を呼び出す際、ご予約の表示条件をカスタマイズタグ）
+2019/12/30
+	タグ：FOODSCHEDULE→COLORINFO->COOKPROCBG　タグ新規追加（状態：注文かけた）
+2020/03/31 料理機能改善
+	■初期画面を「テーブル選択画面」にする機能
+		タグ：ROOMPAGEAUTOSHOW 新規追加(SHOP->ROOMPAGEAUTOSHOW) 初期表示画面の切替フラグ
+			TRUE：テーブル選択画面を初期表示する（デフォルト値）
+			FALSE：商品選択画面を表示する
+			
+	■会計商品のリストを多層構造化（２階層まで)機能
+		タグ：BUTTONTAB->BUTTONSUBTABタグ新規追加、該当タグ配下の商品はサブメニュー商品として、画面に表示する
+				LABEL:サブメニュー名
+
+	■料理リスト・オーダーエンドのラストラン機能
+		タグ：LOCATIONS新規追加(SHOP->LOCATIONS)　ラストランリスト設定用タグ
+			LOCATION　ラストラン別情報を定義用タグ
+				NAME　ラストラン名
+				ROOMTYPESEQ　該当ラストランにどの部屋を表示するの部屋タイプ#Seqを定義する、コンマで複数定義可能
+				TIME:			表示範囲期間の時刻設定
+					BEGIN:		営業表示開始時間
+								書式:HH:mm
+					END:		営業表示終了時間
+								書式:HH:mm
+								終了時間 < 開始時間 終了日付+1
+					COOKTIME:   デフォルトの料理開始時刻、省略可能
+					LAYOUT:  	オーダー部屋レイアウト名（オーダー部屋レイアウト機能に設定した有効のレイアウト名を定義する）
+								
+	■テーブル選択後、注文を確定したタイミングで予約と会計を自動生成する
+		予約名は選択した「部屋名」と同じにして、その他の項目の値は「小部屋作成機能」と同様にドキュメントで定義する
+		タグ：CREATEINFO:オーダーエンドリー画面、自動生成予約のルール定義
+		LEADINFO:予約作成詳細の定義
+			NIGHTS:作成予約の泊数(0,1指定可能)、省略場合、デフォルト値が０
+			ASSIGN:ご予約の指定項目に固定値を設定用タグ、複数回定義可能
+				FIELD:ご予約の項目API
+				注：項目のデータ型は下記以外のデータ型を設定できない
+				テキスト、テキストエリア、日付（書式：YYYY-MM-DD）、日付/時間(書式：YYYY-MM-DD HH:MM:SS)
+				数値、通貨(書式：数値)、チェックボックス(書式：TRUE/FALSE)、選択リスト (複数選択)(書式：XX;XX)、選択リスト(テキス)
+				メール(書式：XXX@XX.com)、電話
+
+	■料理リストの新規レイアウト切替機能
+		タグ：NEWLAYOUT 属性タグ新規追加(FOODSCHEDULE→NEWLAYOUT) 料理リストのラストランと厨房レイアウト表示機能有効設定フラグ
+			TRUE：機能有効
+			FALSE：機能無効（デフォルト値）　
+			
+	■料理リストの並び順を「料理スタート時間」にする機能
+		タグ：TIMESORT属性タグ新規追加(FOODSCHEDULE→TIMESORT) 部屋の並び順を「料理スタート時間」にする
+			TRUE：一番初めに注文をかけたタイミングで部屋を並び順表示する（デフォルト値）
+			FALSE：既存（ROOM_SORTタグ指定により、部屋を表示する
+				
+	■料理リストの厨房機能
+		タグ：KITCHENS新規追加(SHOP->KITCHENS)　厨房リスト設定用タグ
+			KITCHEN　厨房別情報を定義用タグ
+				OPCODE　該当厨房にどの会計商品を表示するの会計OPコードを定義する(コンマで複数定義可能)@
+2020/04/15 
+	■全ての注文が提供済みになったテーブルは非表示する・しない切替機能
+		タグ：FINISHNOSHOW
+		TRUE:料理リスト、料理済みチェックボックス表示、オーダーエンドリー料理済みの部屋情報非表示
+		FALSE:元機能(デフォルト値)
+	■空のテーブルを選んだ場合のみ、「部屋付け」を指定できる機能
+		MERGEINFO:小部屋情報作成詳細の定義
+			NIGHTS:作成予約の泊数(0,1指定可能)、省略場合、デフォルト値が０
+			CLONE:作成予約の場合、コピー元予約どの項目設定値をそのまま小部屋に設定したい項目APIを指定する、カンマで複数API定義可能
+			ASSIGN:ご予約の指定項目に固定値を設定用タグ、複数回定義可能
+				FIELD:ご予約の項目API
+				注：項目のデータ型は下記以外のデータ型を設定できない
+				テキスト、テキストエリア、日付（書式：YYYY-MM-DD）、日付/時間(書式：YYYY-MM-DD HH:MM:SS)
+				数値、通貨(書式：数値)、チェックボックス(書式：TRUE/FALSE)、選択リスト (複数選択)(書式：XX;XX)、選択リスト(テキス)
+				メール(書式：XXX@XX.com)、電話
+2020/04/30 
+	タグ：FOODSCHEDULE->KITCHENORDERONLY 注文がかかったもののみ厨房レイアウトに表示する切替フラグ定義タグ
+		TRUE:注文がかかったもののみ厨房レイアウトに表示する(デフォルト値)
+		FALSE:全て料理が厨房レイアウトに表示する
+2020/06/30 
+	タグ：ORDERCONFIG->PRICECHANGE オーダーエントリーでの金額入力機能有効化フラグ
+		TRUE:オーダーエントリー上で商品単価を変更できる
+		FALSE:オーダーエントリー上で商品単価を変更できない(デフォルト値)
+2021/01/15
+	タグ： DEVICECONFIG->SCANNER->AUTOCONNECT 会計画面開く際に、「スキャナー」自動接続する・しないフラグ
+		TRUE:自動接続する
+		FALSE:自動接続しない、会計明細欄をフォーカス後接続受信する(デフォルト値)
+ -->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>		<!-- 店舗コード -->
+		<!-- デモー用の場合、オーダーした明細は該当指定日付のご予約の会計明細に反映を行う -->
+		<!-- 
+		<DEMODATE>2017-01-02</DEMODATE>
+		 -->
+		<!-- 
+		<LOGOIMG></LOGOIMG>
+		<CANCELTIMERANGE>0</CANCELTIMERANGE>
+		-->
+		<!-- オーダーエントリのレイアウトは「簡易」モードの場合、商品メニューボタンの「横幅のサイズとフォントサイズの定義 
+			BTNWIDTH:		商品メニューボタンの横幅
+			BTNFONTSIZE:	商品メニューボタンのフォントサイズ
+		-->
+		<!-- 
+		<LAYOUTSTYLE>
+			<BTNWIDTH>170px</BTNWIDTH>
+			<BTNFONTSIZE>20px</BTNFONTSIZE>
+		</LAYOUTSTYLE>
+		 -->
+        <!-- カスタム項目情報取得 -->
+        <!-- レシート出力用「アレルギー」項目内容取得ルールの定義 -->
+        <!--
+        <INFO_CUSTOME_DEF>
+            <ALLERGIE>
+                <FILTER>
+                    <FIELD>Comment3__c</FIELD>
+                    <KEY>アレルギー</KEY>
+                    <BEG saveKey='TRUE'></BEG>
+                    <END>\n</END>
+                </FILTER>
+                <FILTER>
+                    <FIELD>email__c</FIELD>
+                    <KEY>アレルギー</KEY>
+                    <BEG saveKey='FALSE'>回答</BEG>
+                    <END>\n</END>
+                </FILTER>
+                <FILTER>
+                    <FIELD>relcontact__r.DetailedAllergy__c</FIELD>
+                    <KEY>アレルギー,ALLEGRIE</KEY>
+                    <BEG saveKey='TRUE'></BEG>
+                    <END>\n</END>
+                </FILTER>
+            </ALLERGIE>
+        </INFO_CUSTOME_DEF> 
+        -->
+        <!-- オーダーエントリ画面から取り消す明細は会計明細から削除・更新切替フラグ -->
+        <!-- 
+        <DELETEFLAG>TRUE</DELETEFLAG>
+        -->
+		<!-- プリンターサーバー定義情報 -->
+		<PRINTCONFIG NAME="POS01">
+			<WEBSOCKET>wss</WEBSOCKET>
+			<LAYOUT>
+				<ORDER>table_reciept2</ORDER>					<!-- オーダーエントリ用レイアウト -->
+				<SIMPLEACCOUNT>retail_reciept2</SIMPLEACCOUNT>	<!-- 簡易会計用レイアウト -->
+				<ACCOUNT>retail_reciept1</ACCOUNT>				<!-- 新会計画面用レイアウト -->
+				<DOOROPENSEQ>kick_drawer</DOOROPENSEQ>
+			</LAYOUT>
+			<PRINT>192.168.10.10</PRINT>
+			<PRINTPORT>443</PRINTPORT>
+			<STATUS>192.168.10.10</STATUS>
+			<STATUSPORT>443</STATUSPORT>
+			<PREMARK>□ </PREMARK>
+			<HEADSTAND>true</HEADSTAND>
+			<PRINTNO>S01</PRINTNO>
+			<!-- <HIKAE>(控)</HIKAE> -->
+		</PRINTCONFIG>
+		<!-- 会計書明細レシート印刷用サーバー個別定義する -->
+		<PRINTCONFIG NAME="POS02">
+			<WEBSOCKET>wss</WEBSOCKET>
+			<LAYOUT>
+				<ORDER>table_reciept2</ORDER>
+				<SIMPLEACCOUNT>retail_reciept2</SIMPLEACCOUNT>
+				<ACCOUNT>retail_reciept1</ACCOUNT>
+				<DOOROPENSEQ>kick_drawer</DOOROPENSEQ>
+			</LAYOUT>
+			<PRINT>192.168.10.11</PRINT>
+			<PRINTPORT>443</PRINTPORT>
+			<STATUS>192.168.10.11</STATUS>
+			<STATUSPORT>443</STATUSPORT>
+			<PREMARK>□ </PREMARK>
+			<HEADSTAND>true</HEADSTAND>
+			<PRINTNO>S02</PRINTNO>
+			<!-- <HIKAE>(控)</HIKAE>-->
+		</PRINTCONFIG>
+		<DEVICECONFIG>
+			<DEVICE>
+				<LOCAL>192.168.10.XXX</LOCAL>
+				<ROOMSEQ>6</ROOMSEQ>
+				<PRINTER>POS01</PRINTER>
+				<!-- オーダープリンター(デシャップ用) / 会計明細のレシートプリンターを同時に利用したい場合、下記タグで個別定義が必要  -->
+				<!-- 
+				PRINTER:オーダープリンター(デシャップ用)識別番号を定義する
+				ACCOUNTPRINTER:新会計画面、レシートプリンター識別番号を定義する
+				SPACCOUNTPRINTER:簡易会計画面、レシートプリンター識別番号を定義する
+				-->
+				<ACCOUNTPRINTER>POS02</ACCOUNTPRINTER>
+				<SPACCOUNTPRINTER>POS02</SPACCOUNTPRINTER>
+				<POSNO>001</POSNO>
+				<!-- 該当端末は「バーコードスキャナー」機能を利用可・不可フラグ -->
+				<!-- 
+				<SCANNER AUTOCONNECT="FALSE">TRUE</SCANNER>
+				 -->
+			</DEVICE>
+			<DEVICE>
+				<LOCAL>192.168.10.YYY</LOCAL>
+				<ROOMSEQ>7</ROOMSEQ>
+				<PRINTER>POS02</PRINTER><!-- 端末デバイスから接続するレシートプリンター識別番号を定義する -->
+				<POSNO>002</POSNO>
+			</DEVICE>
+		</DEVICECONFIG>
+		<!-- 会計商品 #DP(DP)/ #GP(GP)/会計OP(OP)/リンクＤＰコード(LINKDP) 項目により、レシートプリンタを指定機能 -->
+		<!-- 
+        <DEVICEFILTER>
+            <DP>
+                <CODE POSNO="POS04">01</CODE>
+            </DP>
+            <GP>
+                <CODE POSNO="POS03">01</CODE>
+            </GP>
+            <OP>
+                <CODE POSNO="POS05">01,02</CODE>
+            </OP>
+            <LINKDP>
+                <CODE POSNO="POS05">01,02</CODE>
+            </LINKDP>
+        </DEVICEFILTER>
+         -->
+		<BUTTONTAB>
+			<TABLABEL>●会席料理</TABLABEL>
+			<PRODUCT >
+				<NAME>SF)かに丼</NAME>
+				<CODE>9127</CODE>
+			</PRODUCT>
+		    <PRODUCT >
+				<NAME>SF)幼児朝食</NAME>
+				<CODE>9128</CODE>
+			</PRODUCT>
+		    <PRODUCT >
+				<NAME>会席料理200</NAME>
+				<CODE>0140</CODE>
+			</PRODUCT>
+		    <PRODUCT >
+				<NAME>調理長お任せ会席</NAME>
+				<CODE>0103</CODE>
+			</PRODUCT>
+		</BUTTONTAB>
+		<BUTTONTAB>
+			<TABLABEL>ドリンク</TABLABEL>
+			<PRODUCT >
+				<NAME>生ビール</NAME>
+				<CODE>9129</CODE>
+			</PRODUCT>
+		    <PRODUCT >
+				<NAME>中ビール</NAME>
+				<CODE>9130</CODE>
+			</PRODUCT>
+		</BUTTONTAB>
+		<!-- 
+		2019/02/15 BUTTONTAB→POSNO属性新規追加
+		下記例の場合、DEVICECONFIG-》DEVICE-》POSNOは「001,002」端末のみ、該当商品メニューを表示する
+		 -->
+		<!-- 
+		<BUTTONTAB POSNO="002,001">
+			<TABLABEL>日本酒</TABLABEL>
+			<PRODUCT >
+				<NAME>陣屋十四代</NAME>
+				<CODE>8000</CODE>
+			</PRODUCT>
+		    <PRODUCT >
+				<NAME>陣屋花陽浴</NAME>
+				<CODE>8001</CODE>
+			</PRODUCT>
+		    <PRODUCT >
+				<NAME>陣屋而今</NAME>
+				<CODE>8002</CODE>
+			</PRODUCT>
+		</BUTTONTAB>
+		 -->
+		<!-- 最新お知らせと写真の取得元の切替パラメータ -->
+		<!-- 
+		<CAMPTYPE>1</CAMPTYPE>
+		 -->
+		<!-- キャンペーン定義情報、定義省略可能、該当タグに定義すると、簡易会計からレシートに情報を出力する -->
+		<!-- 
+		URL:		キャンペーン詳細情報のURL
+		MESSAGE:	キャンペーンの説明
+		IMGNAME:	キャンペーンの印刷画像のAPI名（ドキュメント→ワーク→キャンペーンファイル）
+		 -->
+		<!-- 
+		<CAMPAIGN>
+			<URL>http://www.jinya-inn.com/databox/data.php/topics_furusto_bridal_ja/code</URL>
+			<MESSAGE>
+本格的な和婚や、心のこもった家族婚の結婚式を挙げたいカップルにご好評いただいている陣屋の結婚式
+陣屋では結婚式でも「ふるさと納税」をご利用いただけます。
+うまく組み合わせていただければ、実質2,000円で結婚式ができる陣屋のふるさと納税の活用術をご紹介します。
+お嬢様、お孫様へのプレゼントにも最適です。
+			</MESSAGE>
+			<IMGNAME>WorkFileForCampaign</IMGNAME>
+		</CAMPAIGN>
+		 -->
+		<!-- QRコード印刷する場合、引き渡すの商品情報の定義情報 
+			FIELDS:会計商品の項目API名、カンマ区切りに複数定義可能
+		-->
+<!--  
+		<QRCODEINFO>
+			<FIELDS>
+				Name,ProductEnName__c,Field3__c,Field5__c
+			</FIELDS>
+		</QRCODEINFO>
+		 -->
+		
+<!-- 
+2018/09/10
+料理進捗機能情報定義
+書式：
+
+	BUSSINESSTIME:		料理表示範囲期間の設定
+		TIME:			表示範囲期間の時刻設定
+			LABEL:		選択項目表示ラベル
+			BEGIN:		営業表示開始時間
+						書式:HH:mm
+			END:		営業表示終了時間
+						書式:HH:mm
+						終了時間 < 開始時間 終了日付+1
+			COOKTIME:   料理開始時刻
+			COOKFIELD:  料理開始時刻(2019/09/17 ご予約の時刻項目を指定可能、時刻の書式はHH:MM)
+						COOKTIMEとCOOKFIELD両方とも定義される場合、COOKFIELD定義時刻が有効
+	COLORINFO:			カラー設定
+		COOKBG:			料理情報セクションの背景色、デフォルトは「白色」
+		COOKDETAILBG:	料理待ちの背景色
+		COOKPROCBG:		料理開始の背景色
+		COOKDONEBG:		料理出す済みの背景色
+	TIMEINFO:			1料理を作成のデフォルト時間(分）
+		MINUTE:			デファルト料理時間「分」、省略可能、省略の場合、デフォルト時間は10分
+						会計商品単位で料理時間を定義可能、個別定義したい場合、会計商品の「料理時間（分）」項目に定義ください
+	-->
+<!-- 
+2019/09/17
+	FOODSCHEDULE→ROOM_SORT		料理リストの料理部屋順表示指定用タグ新規追加
+		料理リストの部屋は部屋のSEQ#定義順で表示したい場合、下記ように定義する
+		<ROOM_SORT>Seq__c  asc</ROOM_SORT>
+2020/04/15
+	FOODSCHEDULE→FINISHNOSHOW　全ての注文が提供済みになったテーブルは非表示する・しない切替機能
+2020/04/30 
+	FOODSCHEDULE->KITCHENORDERONLY 注文がかかったもののみ厨房レイアウトに表示する切替フラグ定義タグ
+2020/08/31 料理進捗を横並び表示する場合、料理奇偶列切替の背景色設定タグを新規追加
+		COLORINFO→ODD 	奇数列の背景色定義
+		COLORINFO→EVEN  偶数列の背景色定義
+2020/12/04
+	タグ：FOODSCHEDULE→PRODSUM 明細が分かれていても同じ料理ならひとつにまとめて表示させるように機能フラグ
+		TRUE: 明細が分かれていても同じ料理ならひとつにまとめて表示する
+		FALSE:明細が分かれている場合、料理が分割表示（デフォルト値）
+-->
+	<FOODSCHEDULE NEWLAYOUT="FALSE" TIMESORT="TRUE" FINISHNOSHOW="FALSE" KITCHENORDERONLY="TRUE" PRODSUM="FALSE">
+		<BUSSINESSTIME>
+			<TIME>
+				<LABEL>朝</LABEL>
+				<BEGIN>7:00</BEGIN>
+				<END>11:00</END>
+				<COOKTIME>8:00</COOKTIME>
+			</TIME>
+			<TIME>
+				<LABEL>昼</LABEL>
+				<BEGIN>11:00</BEGIN>
+				<END>15:00</END>
+				<COOKTIME>11:30</COOKTIME>
+			</TIME>
+			<TIME>
+				<LABEL>夕</LABEL>
+				<BEGIN>15:00</BEGIN>
+				<END>24:00</END>
+				<COOKTIME>17:30</COOKTIME>
+				<!-- 2019/09/17 料理進捗の料理開始時刻カスタマイズ用タグ、ご予約項目のみ指定可能 -->
+				<!-- 
+				<COOKFIELD>Field293__c</COOKFIELD>
+				 -->
+			</TIME>
+		</BUSSINESSTIME>
+		<COLORINFO ODD="lightsalmon" EVEN="lightblue">
+			<COOKBG>white</COOKBG>
+			<COOKDETAILBG LABEL="未開始">blanchedalmond</COOKDETAILBG>
+			<COOKPROCBG LABEL="注文かけた">blue</COOKPROCBG>
+			<COOKDONEBG LABEL="料理出した">gray</COOKDONEBG>
+		</COLORINFO>
+		<TIMEINFO>
+			<MINUTE>10</MINUTE>
+		</TIMEINFO>
+		<!-- 2019/09/17 料理リストの料理部屋順表示指定用タグ新規追加 -->
+		<ROOM_SORT>Seq__c  asc</ROOM_SORT>
+	</FOODSCHEDULE>
+	<!-- 
+	2019/01/31 新規追加タグ
+	ZOOM	フォントサイズ(PX)をカスタマイズ用タグ
+		ONLYMOBILE : ZOOM属性として、該当カスタマイズはスマホ・PADのみ適用　または　スマホ・PAD・PC全部適用
+			TRUE:スマホ・PADのみ適用（デフォルト値）
+			FALSE:スマホ・PAD・PC全部適用
+		MENUZOOM:メニューのフォントサイズ(PX)をカスタマイズ用タグ(6~50間数値定義可能)
+	2019/02/15 新規追加タグ
+		ROOMZOOM:部屋名のフォントサイズ(PX)と枠の縦、横のサイズ(PX)をカスタマイズ用タグ
+			WIDTH:部屋枠の横サイズ
+			HEIGHT:部屋枠の縦サイズ
+	-->
+	<!-- 
+	<ZOOM ONLYMOBILE="TRUE">
+		<MENUZOOM>20</MENUZOOM>
+		<ROOMZOOM WIDTH="" HEIGHT="">20</ROOMZOOM>
+	</ZOOM>
+	-->
+	<!-- 
+	SAMEPRODMERGE オーダーエントリーで商品注文する場合、同じ商品は同じ会計明細にまとめる表示・別々会計明細に表示切り替えフラグ
+		TRUE:同じ商品は同じ会計明細にまとめる表示
+		FALSE:オーダー明細により、別々会計明細に表示する（デフォルト値）
+	-->
+	<SAMEPRODMERGE>FALSE</SAMEPRODMERGE>
+	<!-- 
+	ROOMFILTER	オーダーエントリー画面で、「部屋」から予約一覧を呼び出す際、ご予約の表示条件をカスタマイズタグ
+		例：到着日は今日中かつ未チェックアウトの予約のみ表示する(前提条件：該当予約が有効）
+	-->
+	<ROOMFILTER>Field298__c != 'チェックアウト完' AND DAY_ONLY(convertTimezone(EntryTime__c)) = TODAY</ROOMFILTER>
+	
+	<!-- 2020.03.31 料理改善機能対応 -->
+	<!-- 
+	<ROOMPAGEAUTOSHOW>TRUE</ROOMPAGEAUTOSHOW>
+	<CREATEINFO>
+		<LEADINFO NIGHTS="0">
+			<ASSIGN FIELD="Field2__c">ウォークイン</ASSIGN>
+			<ASSIGN FIELD="StayPersons__c">0</ASSIGN>
+			<ASSIGN FIELD="Mans__c">0</ASSIGN>
+			<ASSIGN FIELD="Femails__c">0</ASSIGN>
+	   </LEADINFO>
+	   <MERGEINFO NIGHTS="0">
+			<CLONE>Relcontact__c,Comment3__c,ReservedContact__c,ReservedType__c,ReservedDate__c</CLONE>
+			<ASSIGN FIELD="StayPersons__c">0</ASSIGN>				
+			<ASSIGN FIELD="Mans__c">0</ASSIGN>	
+			<ASSIGN FIELD="Femails__c">0</ASSIGN>
+		</MERGEINFO>
+	</CREATEINFO>
+	<LOCATIONS>
+        <LOCATION>
+			<NAME>和食レストラン</NAME>	
+			<ROOMTYPESEQ></ROOMTYPESEQ>
+            <TIME>
+                <BEGIN>7:00</BEGIN>
+                <END>11:00</END>
+                <COOKTIME>8:00</COOKTIME>
+                <LAYOUT>和食(朝)</LAYOUT>
+            </TIME>
+            <TIME>
+                <BEGIN>11:00</BEGIN>
+                <END>15:00</END>
+                 <COOKTIME>11:30</COOKTIME>
+                <LAYOUT>和食(昼)</LAYOUT>
+            </TIME>
+            <TIME>
+                <BEGIN>15:00</BEGIN>
+                <END>24:00</END>
+                <COOKTIME>17:30</COOKTIME>
+                <LAYOUT>和食(夕)</LAYOUT>
+            </TIME>
+        </LOCATION>
+        <LOCATION>
+            <NAME>洋食レストラン</NAME>
+            <TIME>
+                <BEGIN>7:00</BEGIN>
+                <END>11:00</END>
+                <COOKTIME>8:00</COOKTIME>
+                <LAYOUT>洋食(朝)</LAYOUT>
+            </TIME>
+            <TIME>
+                <BEGIN>11:00</BEGIN>
+                <END>15:00</END>
+                <COOKTIME>11:30</COOKTIME>
+                <LAYOUT>洋食(昼)</LAYOUT>
+            </TIME>
+            <TIME>
+                <BEGIN>15:00</BEGIN>
+                <END>24:00</END>
+                <COOKTIME>17:30</COOKTIME>
+                <LAYOUT>洋食(夕)</LAYOUT>
+            </TIME>
+        </LOCATION>
+	</LOCATIONS>
+	<KITCHENS>
+		<KITCHEN OPCODE="1,3">和食厨房</KITCHEN>
+	  	<KITCHEN OPCODE="4">洋食厨房</KITCHEN>
+	  	<KITCHEN OPCODE="9">お酒</KITCHEN>
+	 </KITCHENS>
+	  -->
+	<!-- 2020/06/30  オーダーエントリーでの金額入力機能有効化フラグ -->
+	<!--
+	<ORDERCONFIG>
+		<PRICECHANGE>TRUE</PRICECHANGE>
+	</ORDERCONFIG>
+	-->
+	</SHOP>
+</root>

@@ -1,0 +1,204 @@
+<apex:component >
+<apex:stylesheet value="{!URLFOR($Resource.multiselectlib, 'css/jquery.multiselect.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.multiselectlib, 'js/jquery.multiselect.min.js')}"/>
+
+<apex:attribute name="dataSourceId" description="The object dataSourceId you want to look for." type="String" default="" required="true" />
+<apex:attribute name="assingTargetId" description="The object assingTargetId you want to look for." type="String" default="" required="true" />
+<apex:attribute name="callBackFunction" description="The object callBackFunction you want to look for." type="String" default="" required="true" />
+<apex:attribute name="selectedValue" description="画面から既に選択した店舗情報" type="String" />
+<!-- 2021/05/31 #11036 bug fixed by zy BEGIN -->
+<apex:attribute name="popupMaxScreenHtFlag" description="選択リスト高幅" type="boolean" />
+<!-- 2021/05/31 #11036 bug fixed by zy END -->
+<style>
+.ui-state-default{
+	overflow:hidden;
+	background-image: none;
+	border-color: #c5c5c5;
+	background-color: #EEEEEE;
+	color: #2e2e2e;
+	vertical-align: middle;
+	font-weight: normal;
+	margin-left: 2px;
+	   height: 24px;
+}
+label.ui-corner-all.ui-state-hover{
+	border: 1px solid #bcb4b0;
+	background: #C7C1BD url(images/ui-bg_glass_100_fdf5ce_1x400.png) 50% 50% repeat-x;
+	font-weight: normal;
+	color: #2e2e2e;
+}
+.ui-widget {
+	font-family:'MS UI Gothic','MS PGothic','Hiragino Kaku Gothic Pro','Osaka','Arial','Helvetica',sans-serif;
+	font-size: 13px;
+}
+.ui-multiselect-checkboxes li{
+	font-size: 13px;
+}   
+.ui-state-default .ui-icon {
+	background-image: url({!URLFOR($Resource.kendoFiles, 'css/ui-lightness/images/ui-icons_222222_256x240.png')});
+}
+.ui-state-hover{
+	border: 1px solid #bcb4b0;
+	background: #C7C1BD url(images/ui-bg_glass_100_fdf5ce_1x400.png) 50% 50% repeat-x;
+	font-weight: normal;
+	color: #2e2e2e;
+}
+ul li, ol li{
+	margin-left: 0.5em;
+}
+.spanIco{
+	width: 20px;
+	display: block;
+	display: inline-block;
+}
+.spanText{
+	display: block;
+	display: inline-block;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	text-indent: .33em;
+	/* 2020/08/30 BUG-FIX-#7467-浏览器缩放问题改善 WGCH BEGIN */
+	width: calc(100% - 20px) !important;
+	/* 2020/08/30 BUG-FIX-#7467-浏览器缩放问题改善 WGCH END */
+}
+input.k-textbox {
+	height: 24px;
+}
+.k-dropdown-wrap .k-input {
+	height: 22px;
+	padding:0px;
+	margin-top: 0px;
+}
+</style>
+<script>
+(function($j){
+	// 2021/05/31 #11036 bug fixed by zy BEGIN
+	var popupMaxFlg = "{!popupMaxScreenHtFlag}" == "true";
+	// 2021/05/31 #11036 bug fixed by zy END
+	// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy BEGIN
+	_mulitiSelectInit{!dataSourceId} = function(){
+	// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy END
+		var multiselect = $j("select[id$=':{!JSENCODE(dataSourceId)}']").css({ fontSize: 13, height:24, padding:0}).multiselect({ 
+			selectedList: 4, // 选中时显示名字的最大个数
+			header: false,
+			click: function(event, ui){
+				$this = $j(this);
+				$multiselect = $this.multiselect("widget");
+				$thisLable= $j(event.currentTarget.parentElement); // 获取当前点中的标签元素
+				// 对当前点中的标签加样式处理
+				if(ui.checked) $thisLable.addClass("k-state-selected");
+				else $thisLable.removeClass("k-state-selected");
+				// All Selected
+				if (ui.value == "") {
+					$this.multiselect("uncheckAll");
+					$this.val(""); // 设置All状态的Val
+					$multiselect.find("input:first").prop('checked', true);
+					$multiselect.find("input:first").closest('label').addClass("k-state-selected"); // All对应的标签
+					$multiselect.find("input:not(:first)").closest('label').removeClass("k-state-selected"); // All以外的标签
+					$this.multiselect("close");
+				} else {
+					var length = $multiselect.find("input:checked").length;
+					if (length == 0) { // 当没有选中时All自动变成'选择'状态
+						$multiselect.find("input:first").prop('checked', true);
+						$multiselect.find("input:first").closest('label').addClass("k-state-selected");
+					} else { // 其它选中时All自动变成'未选择'状态
+						$multiselect.find("input:first").prop('checked', false);
+						$multiselect.find("input:first").closest('label').removeClass("k-state-selected");
+					}
+				}	
+			},
+			beforeopen: function(){
+				$multiselect = $j("select[id$=':{!JSENCODE(dataSourceId)}']").multiselect("widget");
+				$multiselect.find("input:checked").closest("label").addClass("k-state-selected"); // closest找最近的父节点元素,加样式
+			},
+			open: function(){
+				$this = $j(this);
+				$this.attr("oldVal", _getArrToStrValFun($this)); // 存入当前选择的数据
+				// 2021/05/31 #11036 bug fixed by zy BEGIN
+				var multiselectHt = $j(window).height() > 400 ? $j(window).height() - 300 : 100;
+				$j("div.roomTypeMaxHeight ul.ui-multiselect-checkboxes").css("height","");
+				$j("div.roomTypeMaxHeight ul.ui-multiselect-checkboxes").css("max-height", multiselectHt + "px");
+				// 2021/05/31 #11036 bug fixed by zy END
+			},
+			close: function(){
+				$this = $j(this);
+				var selectVal = _getArrToStrValFun($this);
+				if ($this.attr("oldVal") != selectVal) { // 历史数据与当前选择的对比后处理 
+					$j("input[id$=':{!JSENCODE(assingTargetId)}']").val(selectVal);
+					eval('{!JSENCODE(callBackFunction)}')();
+				}else{
+					//startRunning();
+				}
+			},
+		});
+		// 自动设置multiselect宽度[UI]
+		$target = $j(multiselect);
+		$mui = $target.multiselect("widget");
+		// 2021/05/31 #11036 bug fixed by zy BEGIN
+		if (popupMaxFlg) {
+			$mui.addClass("roomTypeMaxHeight");
+		}
+		// 2021/05/31 #11036 bug fixed by zy END
+		// 2021/05/31 #11001 bug fixed by zy BEGIN
+		$mui.css("width","auto");
+		var minWdgetWidth = 124,
+			widgetWidth = $mui.width(),
+			isOverWdFlg = widgetWidth > minWdgetWidth; // 最小横幅超出フラグ
+		var multiselectWidth = (isOverWdFlg ? minWdgetWidth : widgetWidth) + 26;
+		// 2021/05/31 #11001 bug fixed by zy END
+		// 2019/07/31 JINYABUG-2040 bug fix by zy BEGIN
+		var isMobile = false;
+		var maxWidth = null;
+		if (kendo) {
+			isMobile = kendo.support.mobileOS;
+			if (isMobile) {
+				maxWidth = 180;
+			}
+		}
+		var widthChgFlg = maxWidth != null && multiselectWidth > maxWidth;
+		if (widthChgFlg) multiselectWidth = maxWidth;
+		// 2021/05/31 #11001 bug fixed by zy BEGIN
+		$target.multiselect({minWidth: multiselectWidth});
+		// 2021/05/31 #11001 bug fixed by zy END
+		// 2019/07/31 JINYABUG-2040 bug fix by zy END
+		// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy BEGIN
+		$j("button.ui-multiselect[id*={!dataSourceId}] span").eq(0).addClass("spanIco");
+		$j("button.ui-multiselect[id*={!dataSourceId}] span").eq(1).addClass("spanText").css("width", multiselectWidth - 26);
+		// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy END
+		// 既に選択済情報を再度コンポネントに選択値に設定する
+		var sp = "{!JSENCODE(selectedValue)}";
+		//if (sp != "") {
+			$target.val(sp.split(','));
+			$target.multiselect('refresh');
+		//}
+		// 2019/07/31 JINYABUG-2040 bug fix by zy BEGIN
+		if (widthChgFlg) {
+			$mui.css("width","auto");
+			$j("button.ui-multiselect[id*={!dataSourceId}]").width(multiselectWidth);
+			$mui.find("label").css("white-space","nowrap");
+		}
+		// 2019/07/31 JINYABUG-2040 bug fix by zy END
+		// 2021/05/31 #11001 bug fixed by zy BEGIN
+		if (isOverWdFlg) {
+			$j("button.ui-multiselect[id*={!dataSourceId}]").width(multiselectWidth);
+			$target.width(multiselectWidth);
+			$mui.addClass("j-autoWdPopup");
+		}
+		// 2021/05/31 #11001 bug fixed by zy END
+	}
+	// 配列変換処理
+	_getArrToStrValFun = function($this) {
+		var valArr = $this.val();
+		// valArr.remove("") 目的:去掉默认值, 即使为All也没事
+		return (valArr == null ? "" : valArr.remove("").join(",")); // join数组转成字符串
+	}
+	// 処理化処理
+	$j(document).ready(function() {
+		// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy BEGIN
+		_mulitiSelectInit{!dataSourceId}();
+		// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy END
+	});
+})(jQuery);
+</script>
+</apex:component>

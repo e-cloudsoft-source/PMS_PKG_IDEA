@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>加工品</value>
+    </caseValues>
+    <fields>
+        <label><!-- 原材料 --></label>
+        <name>ItemProdcutRef__c</name>
+        <relationshipLabel><!-- 加工品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 完成商品 --></label>
+        <name>ProductRef__c</name>
+        <relationshipLabel><!-- 加工品（原材料） --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 使用量 --></label>
+        <name>Usage__c</name>
+    </fields>
+</CustomObjectTranslation>

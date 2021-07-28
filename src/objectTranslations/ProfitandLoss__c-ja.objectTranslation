@@ -1,0 +1,1304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>損益</value>
+    </caseValues>
+    <fields>
+        <label><!-- #A01_料理_会席 --></label>
+        <name>A01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A02_料理_お膳 --></label>
+        <name>A02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A03_料理_朝食 --></label>
+        <name>A03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A04_料理_単品 --></label>
+        <name>A04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A05_料理_仕出し --></label>
+        <name>A05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A06_料理_その他 --></label>
+        <name>A06__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理の売上合計 --></help>
+        <label><!-- #A07_料理_合計 --></label>
+        <name>A07__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A07a_料理_合計 --></label>
+        <name>A07a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A12_飲料_一般飲料 --></label>
+        <name>A12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A13_飲料_ワンドリンク --></label>
+        <name>A13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A14_飲料_飲み放題 --></label>
+        <name>A14__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A15_飲料_その他 --></label>
+        <name>A15__c</name>
+    </fields>
+    <fields>
+        <help><!-- 飲料の売上合計 --></help>
+        <label><!-- #A16_飲料_合計 --></label>
+        <name>A16__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A16a_飲料_合計 --></label>
+        <name>A16a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A21_室料_宿泊室料 --></label>
+        <name>A21__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A22_室料_入浴料 --></label>
+        <name>A22__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A23_室料_タオル・浴衣 --></label>
+        <name>A23__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A24_室料_マイクロバス・ファントム --></label>
+        <name>A24__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A25_室料_その他 --></label>
+        <name>A25__c</name>
+    </fields>
+    <fields>
+        <help><!-- 室料の売上合計 --></help>
+        <label><!-- #A26_室料_合計 --></label>
+        <name>A26__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A26a_室料_合計 --></label>
+        <name>A26a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A31_旅館外注_芸者 --></label>
+        <name>A31__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A32_旅館外注_タクシー --></label>
+        <name>A32__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A33_旅館外注_マッサージ --></label>
+        <name>A33__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A34_旅館外注_その他 --></label>
+        <name>A34__c</name>
+    </fields>
+    <fields>
+        <help><!-- 旅館外注の売上合計 --></help>
+        <label><!-- #A35_旅館外注_合計 --></label>
+        <name>A35__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A35a_旅館外注_合計 --></label>
+        <name>A35a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A40_ブライダル外注_美容・着付 --></label>
+        <name>A40__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A41_ブライダル外注_司会・音響 --></label>
+        <name>A41__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A42_ブライダル外注_生花 --></label>
+        <name>A42__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A43_ブライダル外注_衣装 --></label>
+        <name>A43__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A44_ブライダル外注_写真・動画 --></label>
+        <name>A44__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A45_ブライダル外注_引出物 --></label>
+        <name>A45__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A46_ブライダル外注_その他 --></label>
+        <name>A46__c</name>
+    </fields>
+    <fields>
+        <help><!-- ブライダル外注の売上合計 --></help>
+        <label><!-- #A47_ブライダル外注_合計 --></label>
+        <name>A47__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A47a_ブライダル外注_合計 --></label>
+        <name>A47a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A52_ブライダル自社販売_着物レンタル（陣屋所有） --></label>
+        <name>A52__c</name>
+    </fields>
+    <fields>
+        <help><!-- $3000　全体売上の&quot;62_小物販売&quot;の集計値を入れます --></help>
+        <label><!-- #A53_ブライダル自社販売_衣装手数料（他社への紹介料） --></label>
+        <name>A53__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A54_ブライダル自社販売_その他 --></label>
+        <name>A54__c</name>
+    </fields>
+    <fields>
+        <help><!-- ブライダル自社販売の売上合計 --></help>
+        <label><!-- #A55_ブライダル自社販売_合計 --></label>
+        <name>A55__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A55a_ブライダル自社販売_合計 --></label>
+        <name>A55a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A60_売店_豚付け・シチュー --></label>
+        <name>A60__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A61_売店_どら焼き・饅頭 --></label>
+        <name>A61__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A62_売店_たばこ --></label>
+        <name>A62__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A63_売店_その他 --></label>
+        <name>A63__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売店の売上合計 --></help>
+        <label><!-- #A64_売店_合計 --></label>
+        <name>A64__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A64a_売店_合計 --></label>
+        <name>A64a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A69_調整額 --></label>
+        <name>A69__c</name>
+    </fields>
+    <fields>
+        <help><!-- 各部門の売上と調整額の合計から値引割引合計をひいたもの
+#A72_値引割引合計は必ず0以上の値を入力 --></help>
+        <label><!-- #A70_売上合計 --></label>
+        <name>A70__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #A70a_売上合計 --></label>
+        <name>A70a__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A71_その他_その他 --></label>
+        <name>A71__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A72_値引割引合計 --></label>
+        <name>A72__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A73_経理売上合計 --></label>
+        <name>A73__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上合計（フォース上で合計したもの）-経理売上合計 --></help>
+        <label><!-- #A74_差額 --></label>
+        <name>A74__c</name>
+    </fields>
+    <fields>
+        <help><!-- #A70_売上合計 の値をそのまま入力してください。 --></help>
+        <label><!-- #A75_売上合計 --></label>
+        <name>A75__c</name>
+    </fields>
+    <fields>
+        <label><!-- ADR --></label>
+        <name>ADR__c</name>
+    </fields>
+    <fields>
+        <label><!-- 線形近似傾き（GOP） --></label>
+        <name>AofGOP__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B01_期首棚卸高_材料 --></label>
+        <name>B01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B02_期首棚卸高_売店 --></label>
+        <name>B02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B03_期首棚卸高_飲料 --></label>
+        <name>B03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B04_期首棚卸高_室料 --></label>
+        <name>B04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B05_期首棚卸高_ブライダル自社販売 --></label>
+        <name>B05__c</name>
+    </fields>
+    <fields>
+        <help><!-- 期首棚卸高の合計 --></help>
+        <label><!-- #B06_期首棚卸高_合計 --></label>
+        <name>B06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B07_仕入高_材料 --></label>
+        <name>B07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B08_仕入高_売店 --></label>
+        <name>B08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B09_仕入高_飲料 --></label>
+        <name>B09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B10_仕入高_室料 --></label>
+        <name>B10__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B11_仕入高_旅館外注 --></label>
+        <name>B11__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B12_仕入高_ブライダル外注 --></label>
+        <name>B12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B13_仕入高_ブライダル自社販売 --></label>
+        <name>B13__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高の合計 --></help>
+        <label><!-- #B14_仕入高_合計 --></label>
+        <name>B14__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B15_期末棚卸高_材料 --></label>
+        <name>B15__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B16_期末棚卸高_売店 --></label>
+        <name>B16__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B17_期末棚卸高_飲料 --></label>
+        <name>B17__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B18_期末棚卸高_室料 --></label>
+        <name>B18__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B19_期末棚卸高_ブライダル自社販売 --></label>
+        <name>B19__c</name>
+    </fields>
+    <fields>
+        <help><!-- 期末棚卸高の合計 --></help>
+        <label><!-- #B20_期末棚卸高_合計 --></label>
+        <name>B20__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B21_原価_材料 --></label>
+        <name>B21__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B22_原価_売店 --></label>
+        <name>B22__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B23_原価_飲料 --></label>
+        <name>B23__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B24_原価_室料 --></label>
+        <name>B24__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B25_原価_旅館外注 --></label>
+        <name>B25__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B26_原価_ブライダル外注 --></label>
+        <name>B26__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入高 - ( 期末棚卸高 - 期首棚卸高 ) --></help>
+        <label><!-- #B27_原価_ブライダル自社販売 --></label>
+        <name>B27__c</name>
+    </fields>
+    <fields>
+        <help><!-- 原価の合計 --></help>
+        <label><!-- #B28_原価_合計 --></label>
+        <name>B28__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #B28a_原価_合計 --></label>
+        <name>B28a__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理原価/料理売上高 --></help>
+        <label><!-- #B29_原価率_料理（実績） --></label>
+        <name>B29__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B30_原価率_料理（理論） --></label>
+        <name>B30__c</name>
+    </fields>
+    <fields>
+        <help><!-- 実績-理論値 --></help>
+        <label><!-- #B31_原価率_料理（ロス） --></label>
+        <name>B31__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売店原価/売店売上高 --></help>
+        <label><!-- #B32_原価率_売店（実績） --></label>
+        <name>B32__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B33_原価率_売店（理論） --></label>
+        <name>B33__c</name>
+    </fields>
+    <fields>
+        <help><!-- 実績-理論値 --></help>
+        <label><!-- #B34_原価率_売店（ロス） --></label>
+        <name>B34__c</name>
+    </fields>
+    <fields>
+        <help><!-- 飲料原価/飲料売上高 --></help>
+        <label><!-- #B35_原価率_飲料（実績） --></label>
+        <name>B35__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B36_原価率_飲料（理論） --></label>
+        <name>B36__c</name>
+    </fields>
+    <fields>
+        <help><!-- 実績-理論値 --></help>
+        <label><!-- #B37_原価率_飲料（ロス） --></label>
+        <name>B37__c</name>
+    </fields>
+    <fields>
+        <help><!-- 室料原価 / 室料売上 --></help>
+        <label><!-- #B38_原価率_室料（実績） --></label>
+        <name>B38__c</name>
+    </fields>
+    <fields>
+        <help><!-- 旅館外注原価 / 旅館外注売上 --></help>
+        <label><!-- #B39_原価率_旅館外注（実績） --></label>
+        <name>B39__c</name>
+    </fields>
+    <fields>
+        <help><!-- ブライダル外注原価 / ブライダル外注売上 --></help>
+        <label><!-- #B40_原価率_ブライダル外注（実績） --></label>
+        <name>B40__c</name>
+    </fields>
+    <fields>
+        <help><!-- ブライダル自社販売原価 / ブライダル自社販売売上 --></help>
+        <label><!-- #B41_原価率_ブライダル自社販売（実績） --></label>
+        <name>B41__c</name>
+    </fields>
+    <fields>
+        <help><!-- 原価 / 売上合計 --></help>
+        <label><!-- #B42_原価率_合計（実績） --></label>
+        <name>B42__c</name>
+    </fields>
+    <fields>
+        <label><!-- 線形近似傾切片（GOP） --></label>
+        <name>BofGOP__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C01_電気 [kWh] --></label>
+        <name>C01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C02_プロパンガス [m3] --></label>
+        <name>C02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C03_灯油 [L] --></label>
+        <name>C03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C04_水道 [m3] --></label>
+        <name>C04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D01_社員 --></label>
+        <name>D01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D02_パート_長助さん --></label>
+        <name>D02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D03_パート_助さん --></label>
+        <name>D03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D04_パート_調理補助 --></label>
+        <name>D04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D05_パート_接待 --></label>
+        <name>D05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D06_パート_配膳会 --></label>
+        <name>D06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D07_パート_番頭 --></label>
+        <name>D07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D08_パート_掃除 --></label>
+        <name>D08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D09_パート_ゲストリレーション --></label>
+        <name>D09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D10_パート_洗い場 --></label>
+        <name>D10__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D11_パート_経理＆設備＆デザイン --></label>
+        <name>D11__c</name>
+    </fields>
+    <fields>
+        <help><!-- パートの合計 --></help>
+        <label><!-- #D12_パート_合計 --></label>
+        <name>D12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D13_深夜手当 --></label>
+        <name>D13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D14_労働保険 --></label>
+        <name>D14__c</name>
+    </fields>
+    <fields>
+        <help><!-- 社員+パート+深夜手当+労働保険 --></help>
+        <label><!-- #D15_人件費_雇用形態別_合計 --></label>
+        <name>D15__c</name>
+    </fields>
+    <fields>
+        <help><!-- 内訳が不明な場合は直接合計金額を入力する --></help>
+        <label><!-- #D15a_人件費_雇用形態別_合計 --></label>
+        <name>D15a__c</name>
+    </fields>
+    <fields>
+        <help><!-- 雇用形態別人件費合計 / 売上合計 --></help>
+        <label><!-- #D16_人件費_雇用形態別_人件費率 --></label>
+        <name>D16__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D17_調理部門 --></label>
+        <name>D17__c</name>
+    </fields>
+    <fields>
+        <help><!-- 調理部門 / 料理売上 --></help>
+        <label><!-- #D18_調理部門_人件費率 --></label>
+        <name>D18__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D19_現場オペレーション部門_接客 --></label>
+        <name>D19__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D20_現場オペレーション部門_サービス管理 --></label>
+        <name>D20__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D21_現場オペレーション部門_フロント --></label>
+        <name>D21__c</name>
+    </fields>
+    <fields>
+        <help><!-- 現場オペレーション部門の合計 --></help>
+        <label><!-- #D22_現場オペレーション部門_合計 --></label>
+        <name>D22__c</name>
+    </fields>
+    <fields>
+        <help><!-- 現場オペレーション部門 / (料理売上 + 飲料売上 + 室料売上 + 売店売上) --></help>
+        <label><!-- #D23_現場オペレーション部門_人件費率 --></label>
+        <name>D23__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D24_営業・マーケティング部門_ブライダル --></label>
+        <name>D24__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D25_営業・マーケティング部門_営業 --></label>
+        <name>D25__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D26_営業・マーケティング部門_その他 --></label>
+        <name>D26__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業・マーケティング部門の合計 --></help>
+        <label><!-- #D27_営業・マーケティング部門_合計 --></label>
+        <name>D27__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業・マーケティング部門人件費 / (法人部門売上 + 個人部門（ブライダル）売上) --></help>
+        <label><!-- #D28_営業・マーケティング部門_人件費率 --></label>
+        <name>D28__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D29_経理部門 --></label>
+        <name>D29__c</name>
+    </fields>
+    <fields>
+        <help><!-- 年月[年月名]の月の1日 --></help>
+        <label><!-- 日付（年月[損益名]） --></label>
+        <name>Date__c</name>
+    </fields>
+    <fields>
+        <label><!-- #E01_社員 --></label>
+        <name>E01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #E02_パート --></label>
+        <name>E02__c</name>
+    </fields>
+    <fields>
+        <help><!-- 正社員とパートの合計 --></help>
+        <label><!-- #E03_従業員数_合計 --></label>
+        <name>E03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F01_役員報酬 --></label>
+        <name>F01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F02_給与手当 --></label>
+        <name>F02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F03_雑給 --></label>
+        <name>F03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F04_賞与引当金 --></label>
+        <name>F04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F05_退職金引当金 --></label>
+        <name>F05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F06_法定福利費 --></label>
+        <name>F06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F07_福利厚生費 --></label>
+        <name>F07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F08_旅費交通費 --></label>
+        <name>F08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F09_通信費 --></label>
+        <name>F09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F10_接待交際費 --></label>
+        <name>F10__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F11_減価償却費 --></label>
+        <name>F11__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F12_ブライダル開業償却費 --></label>
+        <name>F12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F13_販売手数料（エージェント） --></label>
+        <name>F13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F14_販売手数料（カード） --></label>
+        <name>F14__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F15_保険料 --></label>
+        <name>F15__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F16_修繕費 --></label>
+        <name>F16__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F17_消耗品費 --></label>
+        <name>F17__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F18_支払手数料 --></label>
+        <name>F18__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F19_広告宣伝費（ブライダル） --></label>
+        <name>F19__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F20_広告宣伝費（旅館） --></label>
+        <name>F20__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F21_販促物制作費 --></label>
+        <name>F21__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F22_食器購入費 --></label>
+        <name>F22__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F23_租税公課 --></label>
+        <name>F23__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F24_諸会費 --></label>
+        <name>F24__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F25_研究研修費 --></label>
+        <name>F25__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F26_家賃 --></label>
+        <name>F26__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F27_地代 --></label>
+        <name>F27__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F28_駐車料等 --></label>
+        <name>F28__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F29_リース料 --></label>
+        <name>F29__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F30_電力料 --></label>
+        <name>F30__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F31_ガス代 --></label>
+        <name>F31__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F32_水道料 --></label>
+        <name>F32__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F33_清掃作業費 --></label>
+        <name>F33__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F34_植木手入費 --></label>
+        <name>F34__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F35_クリーニング費 --></label>
+        <name>F35__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F36_新聞図書費 --></label>
+        <name>F36__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F37_寄付金 --></label>
+        <name>F37__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F38_会議費 --></label>
+        <name>F38__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F39_管理諸費 --></label>
+        <name>F39__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F40_権利金等償却費 --></label>
+        <name>F40__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F41_車両関係費 --></label>
+        <name>F41__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F42_燃料費 --></label>
+        <name>F42__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F43_振込手数料等 --></label>
+        <name>F43__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F44_料飲経費 --></label>
+        <name>F44__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F45_雑費 --></label>
+        <name>F45__c</name>
+    </fields>
+    <fields>
+        <help><!-- 販売管理費の合計 --></help>
+        <label><!-- #F46_販売管理費_合計 --></label>
+        <name>F46__c</name>
+    </fields>
+    <fields>
+        <help><!-- #F46_販売管理費_合計 の値をそのまま入力してください。 --></help>
+        <label><!-- #F47_販売管理費_合計 --></label>
+        <name>F47__c</name>
+    </fields>
+    <fields>
+        <help><!-- 販売管理費合計 / 売上合計 --></help>
+        <label><!-- #G01_販管費率 --></label>
+        <name>G01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上合計-原価の合計 --></help>
+        <label><!-- #H01_売上総利益（粗利） --></label>
+        <name>H01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 粗利 / 売上合計 --></help>
+        <label><!-- #H02_粗利率 --></label>
+        <name>H02__c</name>
+    </fields>
+    <fields>
+        <help><!-- (売上合計 - 原価合計) - (販売管理費合計 - (役員報酬 + 賞与引当金 + 退職金引当金 + 減価償却費 + ブライダル開業償却費 + 権利金等償却費)) --></help>
+        <label><!-- #J01_営業粗利益（GOP） --></label>
+        <name>J01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業粗利益（GOP） / 売上合計 --></help>
+        <label><!-- #J02_GOP率 --></label>
+        <name>J02__c</name>
+    </fields>
+    <fields>
+        <help><!-- (売上合計 - 原価合計) - 販売管理費合計 --></help>
+        <label><!-- #K01_営業利益 --></label>
+        <name>K01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業利益 / 売上合計 --></help>
+        <label><!-- #K02_営業利益率 --></label>
+        <name>K02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #L01_収益 --></label>
+        <name>L01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #L02_費用 --></label>
+        <name>L02__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業外収益 - 営業外費用 --></help>
+        <label><!-- #L03_損益 --></label>
+        <name>L03__c</name>
+    </fields>
+    <fields>
+        <help><!-- ((売上合計 - 原価合計) - 販売管理費合計) + (営業外収益 - 営業外費用) --></help>
+        <label><!-- #M01_経常利益 --></label>
+        <name>M01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 経常利益 / 売上合計 --></help>
+        <label><!-- #M02_経常利益率 --></label>
+        <name>M02__c</name>
+    </fields>
+    <fields>
+        <label><!-- 月 --></label>
+        <name>Month__c</name>
+    </fields>
+    <fields>
+        <label><!-- #R01_法人部門_法人予約_営業担当付_組数 --></label>
+        <name>R01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #R02_法人部門_法人予約_営業担当付_人数 --></label>
+        <name>R02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #R03_法人部門_法人予約_営業担当付_売上 --></label>
+        <name>R03__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #R04_法人部門_法人予約_営業担当付_客単価 --></label>
+        <name>R04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #R05_法人部門_法人予約_営業担当無し_組数 --></label>
+        <name>R05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #R06_法人部門_法人予約_営業担当無し_人数 --></label>
+        <name>R06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #R07_法人部門_法人予約_営業担当無し_売上 --></label>
+        <name>R07__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #R08_法人部門_法人予約_営業担当無し_客単価 --></label>
+        <name>R08__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計組数 --></help>
+        <label><!-- #R09_法人部門_合計_組数 --></label>
+        <name>R09__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計人数 --></help>
+        <label><!-- #R10_法人部門_合計_人数 --></label>
+        <name>R10__c</name>
+    </fields>
+    <fields>
+        <help><!-- 法人部門合計売上 --></help>
+        <label><!-- #R11_法人部門_合計_売上 --></label>
+        <name>R11__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #R12_法人部門_合計_客単価 --></label>
+        <name>R12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S01_個人部門（ブライダル）_婚礼_組数 --></label>
+        <name>S01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S02_個人部門（ブライダル）_婚礼_人数 --></label>
+        <name>S02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S03_個人部門（ブライダル）_婚礼_売上 --></label>
+        <name>S03__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 組数 --></help>
+        <label><!-- #S04_個人部門（ブライダル）_婚礼_組単価 --></label>
+        <name>S04__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #S05_個人部門（ブライダル）_婚礼_客単価 --></label>
+        <name>S05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S06_個人部門（ブライダル）_フォトプラン_組数 --></label>
+        <name>S06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S07_個人部門（ブライダル）_フォトプラン_売上 --></label>
+        <name>S07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S08_個人部門（ブライダル）_結納・顔合わせ_組数 --></label>
+        <name>S08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S09_個人部門（ブライダル）_結納・顔合わせ_人数 --></label>
+        <name>S09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S10_個人部門（ブライダル）_結納・顔合わせ_売上 --></label>
+        <name>S10__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #S11_個人部門（ブライダル）_結納・顔合わせ_客単価 --></label>
+        <name>S11__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計組数 --></help>
+        <label><!-- #S12_個人部門（ブライダル）_合計_組数 --></label>
+        <name>S12__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計人数 --></help>
+        <label><!-- #S13_個人部門（ブライダル）_合計_人数 --></label>
+        <name>S13__c</name>
+    </fields>
+    <fields>
+        <help><!-- _個人部門（ブライダル）合計売上 --></help>
+        <label><!-- #S14_個人部門（ブライダル）_合計_売上 --></label>
+        <name>S14__c</name>
+    </fields>
+    <fields>
+        <label><!-- #T01_個人部門（法事・一般）_個人予約_法事_組数 --></label>
+        <name>T01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #T02_個人部門（法事・一般）_個人予約_法事_人数 --></label>
+        <name>T02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #T03_個人部門（法事・一般）_個人予約_法事_売上 --></label>
+        <name>T03__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #T04_個人部門（法事・一般）_個人予約_法事_客単価 --></label>
+        <name>T04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #T05_個人部門（法事・一般）_個人予約_一般_組数 --></label>
+        <name>T05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #T06_個人部門（法事・一般）_個人予約_一般_人数 --></label>
+        <name>T06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #T07_個人部門（法事・一般）_個人予約_一般_売上 --></label>
+        <name>T07__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #T08_個人部門（法事・一般）_個人予約_一般_客単価 --></label>
+        <name>T08__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計組数 --></help>
+        <label><!-- #T09_個人部門（法事・一般）_合計_組数 --></label>
+        <name>T09__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計人数 --></help>
+        <label><!-- #T10_個人部門（法事・一般）_合計_人数 --></label>
+        <name>T10__c</name>
+    </fields>
+    <fields>
+        <help><!-- 個人部門（法事・一般）合計売上 --></help>
+        <label><!-- #T11_個人部門（法事・一般）_合計_売上 --></label>
+        <name>T11__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #T12_個人部門（法事・一般）_合計_客単価 --></label>
+        <name>T12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U01_レストラン部門_賑わい亭でお食事_組数 --></label>
+        <name>U01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U02_レストラン部門_賑わい亭でお食事_人数 --></label>
+        <name>U02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U03レストラン部門_賑わい亭でお食事_売上 --></label>
+        <name>U03__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #U04_レストラン部門_賑わい亭でお食事_客単価 --></label>
+        <name>U04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U05_レストラン部門_賑わい亭で喫茶_組数 --></label>
+        <name>U05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U06_レストラン部門_賑わい亭で喫茶_人数 --></label>
+        <name>U06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U07_レストラン部門_賑わい亭で喫茶_売上 --></label>
+        <name>U07__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #U08_レストラン部門_賑わい亭で喫茶_客単価 --></label>
+        <name>U08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U09_レストラン部門_入浴_人数 --></label>
+        <name>U09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #U10_レストラン部門_入浴_売上 --></label>
+        <name>U10__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計人数 --></help>
+        <label><!-- #U11_レストラン部門_合計_人数 --></label>
+        <name>U11__c</name>
+    </fields>
+    <fields>
+        <help><!-- レストラン部門合計売上 --></help>
+        <label><!-- #U12_レストラン部門_合計_売上 --></label>
+        <name>U12__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #U13_レストラン部門_合計_客単価 --></label>
+        <name>U13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V01_客室部門_お部屋でお食事_組数 --></label>
+        <name>V01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V02_客室部門_お部屋でお食事_人数 --></label>
+        <name>V02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V03_客室部門_お部屋でお食事_売上 --></label>
+        <name>V03__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #V04_客室部門_お部屋でお食事_客単価 --></label>
+        <name>V04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V05_客室部門_お部屋でお食事_客室稼働率 --></label>
+        <name>V05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V06_客室部門_宿泊部門_人数 --></label>
+        <name>V06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V07_客室部門_宿泊部門_売上 --></label>
+        <name>V07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V08_客室部門_宿泊部門_客室稼働率 --></label>
+        <name>V08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V09_客室部門_宿泊部門_ADR --></label>
+        <name>V09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #V10_客室部門_宿泊部門_RevPER --></label>
+        <name>V10__c</name>
+    </fields>
+    <fields>
+        <help><!-- 客室部門合計売上 --></help>
+        <label><!-- #V11_客室部門_合計_売上 --></label>
+        <name>V11__c</name>
+    </fields>
+    <fields>
+        <help><!-- 客室稼働率合計 --></help>
+        <label><!-- #V12_客室部門_合計_客室稼働率 --></label>
+        <name>V12__c</name>
+    </fields>
+    <fields>
+        <help><!-- 合計人数 --></help>
+        <label><!-- #W01_料飲部門_人数 --></label>
+        <name>W01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理売上 + 飲料売上 --></help>
+        <label><!-- #W02_料飲部門_売上 --></label>
+        <name>W02__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理売上 / 人数 --></help>
+        <label><!-- #W03_料飲部門_料理客単価 --></label>
+        <name>W03__c</name>
+    </fields>
+    <fields>
+        <help><!-- 飲料売上 / 人数 --></help>
+        <label><!-- #W04_料飲部門_ドリンク客単価 --></label>
+        <name>W04__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上 / 人数 --></help>
+        <label><!-- #W05_料飲部門_客単価 --></label>
+        <name>W05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X01_竹河 --></label>
+        <name>X01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X02_富月殿 --></label>
+        <name>X02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X03_源氏館 --></label>
+        <name>X03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X04_松風 --></label>
+        <name>X04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X05_藤 --></label>
+        <name>X05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X06_伊勢 --></label>
+        <name>X06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X07_平安 --></label>
+        <name>X07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X08_須磨 --></label>
+        <name>X08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X09_若紫 --></label>
+        <name>X09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X10_梅枝 --></label>
+        <name>X10__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X11_桐壺 --></label>
+        <name>X11__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X12_野分 --></label>
+        <name>X12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X13_篝火 --></label>
+        <name>X13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X14_菊 --></label>
+        <name>X14__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X15_牡丹 --></label>
+        <name>X15__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X16_橘 --></label>
+        <name>X16__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X17_扇 --></label>
+        <name>X17__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X18_夕霧１ --></label>
+        <name>X18__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X19_夕霧２ --></label>
+        <name>X19__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X20_浮舟 --></label>
+        <name>X20__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X21_横笛 --></label>
+        <name>X21__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X22_鈴虫 --></label>
+        <name>X22__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X23_胡蝶 --></label>
+        <name>X23__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X24_槿 --></label>
+        <name>X24__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X25_初花 --></label>
+        <name>X25__c</name>
+    </fields>
+    <fields>
+        <label><!-- #X26_早蕨 --></label>
+        <name>X26__c</name>
+    </fields>
+    <fields>
+        <help><!-- レポート：$5051 損益分岐点(GOP)[線形近似] の線形近似直線の端点のX座標 --></help>
+        <label><!-- 線形近似X（GOP） --></label>
+        <name>XofGOP__c</name>
+    </fields>
+    <fields>
+        <help><!-- レポート：$5053 損益分岐点(営業利益)[線形近似] の線形近似直線の端点のX座標 --></help>
+        <label><!-- 線形近似X（営業利益） --></label>
+        <name>XofNetOperatingProfit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 線形近似Y(x)（GOP） --></label>
+        <name>Y_x_GOP__c</name>
+    </fields>
+    <fields>
+        <label><!-- 年度 --></label>
+        <name>Year__c</name>
+    </fields>
+    <fields>
+        <help><!-- レポート：$5051 損益分岐点(GOP)[線形近似] の線形近似直線の端点のY座標 --></help>
+        <label><!-- 線形近似Y（GOP） --></label>
+        <name>YofGOP__c</name>
+    </fields>
+    <fields>
+        <help><!-- レポート：$5053 損益分岐点(営業利益)[線形近似] の線形近似直線の端点のY座標 --></help>
+        <label><!-- 線形近似Y（営業利益） --></label>
+        <name>YofNetOperatingProfit__c</name>
+    </fields>
+</CustomObjectTranslation>

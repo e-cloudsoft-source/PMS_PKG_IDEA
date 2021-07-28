@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Billing</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Billing</value>
+    </caseValues>
+    <fields>
+        <label>Language</label>
+        <name>AccountLanguage__c</name>
+    </fields>
+    <fields>
+        <label>Name to be send</label>
+        <name>AccountName__c</name>
+    </fields>
+    <fields>
+        <label>ProvisoContent</label>
+        <name>AccountProviso__c</name>
+    </fields>
+    <fields>
+        <label>ReceiptDate</label>
+        <name>AccountReceiptDate__c</name>
+    </fields>
+    <fields>
+        <label>Receipt name</label>
+        <name>AccountReceiptName__c</name>
+    </fields>
+    <fields>
+        <label>Accounted</label>
+        <name>AccountedFlgCal__c</name>
+    </fields>
+    <fields>
+        <label>SpecialTax</label>
+        <name>AmoutSpecialPrice__c</name>
+    </fields>
+    <fields>
+        <label><!-- バッチ処理区分 --></label>
+        <name>BatchProcessStatusDiv__c</name>
+    </fields>
+    <fields>
+        <label>BillingName</label>
+        <name>BillingCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント(社内) --></label>
+        <name>Comment2__c</name>
+    </fields>
+    <fields>
+        <label>GuestName</label>
+        <name>ContactName__c</name>
+    </fields>
+    <fields>
+        <label>ReturnCoupons</label>
+        <name>CouponReturnFlg__c</name>
+    </fields>
+    <fields>
+        <label>Sortby</label>
+        <name>DetailSortBy__c</name>
+    </fields>
+    <fields>
+        <label>DiscountAmount</label>
+        <name>Discount__c</name>
+    </fields>
+    <fields>
+        <label>$Division name</label>
+        <name>DivisionName__c</name>
+    </fields>
+    <fields>
+        <help>When you convert the foreign currency into Japanese Yen calculate the consumer tax by using the internal consumer tax</help>
+        <label>JpnTax</label>
+        <name>ExchangeTaxRate__c</name>
+    </fields>
+    <fields>
+        <label>Sales2（WithTax）</label>
+        <name>Field100__c</name>
+    </fields>
+    <fields>
+        <label>Sales2（WithTax）points</label>
+        <name>Field101__c</name>
+    </fields>
+    <fields>
+        <label>SalesOutsideTax</label>
+        <name>Field102__c</name>
+    </fields>
+    <fields>
+        <label>SalesOutsideTaxPoints</label>
+        <name>Field103__c</name>
+    </fields>
+    <fields>
+        <label>TaxRelatedSales</label>
+        <name>Field104__c</name>
+    </fields>
+    <fields>
+        <label>TaxRelatedPoints</label>
+        <name>Field105__c</name>
+    </fields>
+    <fields>
+        <label>TaxRelatedSales</label>
+        <name>Field106__c</name>
+    </fields>
+    <fields>
+        <label>TaxRelatedSalesPointa</label>
+        <name>Field107__c</name>
+    </fields>
+    <fields>
+        <label>SalesTaxableAmount</label>
+        <name>Field108__c</name>
+    </fields>
+    <fields>
+        <label>NonSalesTaxableAmount</label>
+        <name>Field109__c</name>
+    </fields>
+    <fields>
+        <label>Sales1（Ex:Tax）</label>
+        <name>Field110__c</name>
+    </fields>
+    <fields>
+        <label>Sales1（Ex:Tax）Points</label>
+        <name>Field111__c</name>
+    </fields>
+    <fields>
+        <label>Sales2（Ex:Tax）</label>
+        <name>Field112__c</name>
+    </fields>
+    <fields>
+        <label>Sales 2（Ex:Tax）Points</label>
+        <name>Field113__c</name>
+    </fields>
+    <fields>
+        <label>Sales3（Ex:Tax）</label>
+        <name>Field114__c</name>
+    </fields>
+    <fields>
+        <label>Sales3（Ex:Tax）Points</label>
+        <name>Field115__c</name>
+    </fields>
+    <fields>
+        <label>Sales4（Ex:Tax）</label>
+        <name>Field116__c</name>
+    </fields>
+    <fields>
+        <label>Sales4（Ex:Tax）Points</label>
+        <name>Field117__c</name>
+    </fields>
+    <fields>
+        <label>VouchersTotal</label>
+        <name>Field118__c</name>
+    </fields>
+    <fields>
+        <label>VouchersTimes</label>
+        <name>Field119__c</name>
+    </fields>
+    <fields>
+        <label>VouchersNu:sheets</label>
+        <name>Field120__c</name>
+    </fields>
+    <fields>
+        <label>Tax（Ex:）</label>
+        <name>Field121__c</name>
+    </fields>
+    <fields>
+        <label>Tax（In:）</label>
+        <name>Field122__c</name>
+    </fields>
+    <fields>
+        <label>Tax（Ex:）</label>
+        <name>Field123__c</name>
+    </fields>
+    <fields>
+        <label>Tax（In:）</label>
+        <name>Field124__c</name>
+    </fields>
+    <fields>
+        <label>TaxExempt</label>
+        <name>Field125__c</name>
+    </fields>
+    <fields>
+        <label>BillingAmount</label>
+        <name>Field126__c</name>
+    </fields>
+    <fields>
+        <label>TaxationType1</label>
+        <name>Field127__c</name>
+    </fields>
+    <fields>
+        <label>TaxationType1%</label>
+        <name>Field128__c</name>
+    </fields>
+    <fields>
+        <label>TaxationType2</label>
+        <name>Field129__c</name>
+    </fields>
+    <fields>
+        <label>TaxationType2%</label>
+        <name>Field130__c</name>
+    </fields>
+    <fields>
+        <label>TaxationType3</label>
+        <name>Field131__c</name>
+    </fields>
+    <fields>
+        <label>TaxationType3%</label>
+        <name>Field132__c</name>
+    </fields>
+    <fields>
+        <label>ReceiprtNo(From)</label>
+        <name>Field133__c</name>
+    </fields>
+    <fields>
+        <label>ReceiprtNo(To)</label>
+        <name>Field134__c</name>
+    </fields>
+    <fields>
+        <label>UnsetteledPairs</label>
+        <name>Field135__c</name>
+    </fields>
+    <fields>
+        <label>UnsetteledAmount</label>
+        <name>Field136__c</name>
+    </fields>
+    <fields>
+        <label>ChangeFund</label>
+        <name>Field137__c</name>
+    </fields>
+    <fields>
+        <label>ShiftCsl:／DailyCount</label>
+        <name>Field138__c</name>
+    </fields>
+    <fields>
+        <label>DailyCount</label>
+        <name>Field139__c</name>
+    </fields>
+    <fields>
+        <label>Sales5(Ex:Tax)</label>
+        <name>Field140__c</name>
+    </fields>
+    <fields>
+        <label>BusinessDay</label>
+        <name>Field141__c</name>
+    </fields>
+    <fields>
+        <label>Item number(Product／Audit）</label>
+        <name>Field142__c</name>
+    </fields>
+    <fields>
+        <label>ItemNumber（Payment）</label>
+        <name>Field143__c</name>
+    </fields>
+    <fields>
+        <label>ReceiptNumber．</label>
+        <name>Field145__c</name>
+    </fields>
+    <fields>
+        <label>AttendantNo</label>
+        <name>Field146__c</name>
+        <relationshipLabel>Billing</relationshipLabel>
+    </fields>
+    <fields>
+        <label>$SalesIII（WithTax）</label>
+        <name>Field147__c</name>
+    </fields>
+    <fields>
+        <label>$Date</label>
+        <name>Field148__c</name>
+    </fields>
+    <fields>
+        <label>$Time</label>
+        <name>Field149__c</name>
+    </fields>
+    <fields>
+        <label>TableNumber</label>
+        <name>Field150__c</name>
+        <relationshipLabel>Billing</relationshipLabel>
+    </fields>
+    <fields>
+        <label>$SalesIV（WithTax）</label>
+        <name>Field151__c</name>
+    </fields>
+    <fields>
+        <label>$Person(s)</label>
+        <name>Field152__c</name>
+    </fields>
+    <fields>
+        <label>$Reservation date</label>
+        <name>Field154__c</name>
+    </fields>
+    <fields>
+        <help>Room unit price- Paid amount / Account persons</help>
+        <label>$Guest unit price</label>
+        <name>Field155__c</name>
+    </fields>
+    <fields>
+        <label>$Use purpose</label>
+        <name>Field156__c</name>
+    </fields>
+    <fields>
+        <label>$Pair(s)</label>
+        <name>Field157__c</name>
+    </fields>
+    <fields>
+        <label>SalesRepresentative</label>
+        <name>Field158__c</name>
+    </fields>
+    <fields>
+        <label>$Plan</label>
+        <name>Field159__c</name>
+    </fields>
+    <fields>
+        <label>TransactionType</label>
+        <name>Field39__c</name>
+    </fields>
+    <fields>
+        <label>ViodReceiptNo．</label>
+        <name>Field40__c</name>
+    </fields>
+    <fields>
+        <label>PersonInChargeNo．</label>
+        <name>Field42__c</name>
+    </fields>
+    <fields>
+        <label>Pre-AttendantNo</label>
+        <name>Field43__c</name>
+    </fields>
+    <fields>
+        <label>Pre-InchargeNo．</label>
+        <name>Field44__c</name>
+    </fields>
+    <fields>
+        <label>Type(s)</label>
+        <name>Field45__c</name>
+    </fields>
+    <fields>
+        <label>SlipNumber</label>
+        <name>Field48__c</name>
+    </fields>
+    <fields>
+        <label>SlipSeries No．</label>
+        <name>Field49__c</name>
+    </fields>
+    <fields>
+        <label>NewOrdertime</label>
+        <name>Field50__c</name>
+    </fields>
+    <fields>
+        <label>AdditionalOrderTime</label>
+        <name>Field51__c</name>
+    </fields>
+    <fields>
+        <label>CuisineTime</label>
+        <name>Field52__c</name>
+    </fields>
+    <fields>
+        <label>Date</label>
+        <name>Field53__c</name>
+    </fields>
+    <fields>
+        <label>Pair(s)</label>
+        <name>Field54__c</name>
+    </fields>
+    <fields>
+        <label>POS input by(s)</label>
+        <name>Field55__c</name>
+    </fields>
+    <fields>
+        <label>Order num:</label>
+        <name>Field56__c</name>
+    </fields>
+    <fields>
+        <label>Person(s)</label>
+        <name>Field57__c</name>
+    </fields>
+    <fields>
+        <label>Free 1 collective code</label>
+        <name>Field58__c</name>
+    </fields>
+    <fields>
+        <label>Free 1 collective name</label>
+        <name>Field59__c</name>
+    </fields>
+    <fields>
+        <label>Res: sales number of guest(s)</label>
+        <name>Field60__c</name>
+    </fields>
+    <fields>
+        <label>Number of guest(s) for counter sales</label>
+        <name>Field61__c</name>
+    </fields>
+    <fields>
+        <label>High sales Guest(s)</label>
+        <name>Field62__c</name>
+    </fields>
+    <fields>
+        <label>Total revenue number of guest(s)</label>
+        <name>Field63__c</name>
+    </fields>
+    <fields>
+        <label>Number of people persist in</label>
+        <name>Field64__c</name>
+    </fields>
+    <fields>
+        <label>Notes number (optional information)</label>
+        <name>Field65__c</name>
+    </fields>
+    <fields>
+        <help>Number of males in the account persons</help>
+        <label>Guest layer 1</label>
+        <name>Field66__c</name>
+    </fields>
+    <fields>
+        <help>Number of females in the account persons</help>
+        <label>Guest layer 2</label>
+        <name>Field67__c</name>
+    </fields>
+    <fields>
+        <help>Number of children in the account persons</help>
+        <label>Guest layer 3</label>
+        <name>Field68__c</name>
+    </fields>
+    <fields>
+        <label>Guest layer 4</label>
+        <name>Field69__c</name>
+    </fields>
+    <fields>
+        <label>Guest layer 5</label>
+        <name>Field70__c</name>
+    </fields>
+    <fields>
+        <label>Dish up time starting time</label>
+        <name>Field71__c</name>
+    </fields>
+    <fields>
+        <label>Dish up time ending time</label>
+        <name>Field72__c</name>
+    </fields>
+    <fields>
+        <label>Items total points</label>
+        <name>Field73__c</name>
+    </fields>
+    <fields>
+        <label>Food store total 1 (Exc: Tax) Amount</label>
+        <name>Field74__c</name>
+    </fields>
+    <fields>
+        <label>Food store total 1 (Exc: Tax) Points</label>
+        <name>Field75__c</name>
+    </fields>
+    <fields>
+        <label>Tax in-store food (Inc: Tax) Amount</label>
+        <name>Field76__c</name>
+    </fields>
+    <fields>
+        <label>Food store total 2 (Exc: Tax) Points</label>
+        <name>Field77__c</name>
+    </fields>
+    <fields>
+        <label>Food store taxable amount</label>
+        <name>Field78__c</name>
+    </fields>
+    <fields>
+        <label>Food store taxable points</label>
+        <name>Field79__c</name>
+    </fields>
+    <fields>
+        <label>Voucher No</label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label>Tax in-store food (Exc: Tax) amount</label>
+        <name>Field80__c</name>
+    </fields>
+    <fields>
+        <label>Tax in-store food (Exc: Tax) points</label>
+        <name>Field81__c</name>
+    </fields>
+    <fields>
+        <label>Tax in-store food (Inc: Tax) Amount</label>
+        <name>Field82__c</name>
+    </fields>
+    <fields>
+        <label>Tax in-store food (Inc: Tax) Points</label>
+        <name>Field83__c</name>
+    </fields>
+    <fields>
+        <label>Taxable amount-store food and drink</label>
+        <name>Field84__c</name>
+    </fields>
+    <fields>
+        <label>Taxable amount-store food and points</label>
+        <name>Field85__c</name>
+    </fields>
+    <fields>
+        <label>Take out charges 1 (Ex: tax) amount</label>
+        <name>Field86__c</name>
+    </fields>
+    <fields>
+        <label>Take out charges 1 (Ex: tax) points</label>
+        <name>Field87__c</name>
+    </fields>
+    <fields>
+        <label>Take out charges 2 (Inc: tax) amount</label>
+        <name>Field88__c</name>
+    </fields>
+    <fields>
+        <label>Take out charges 2 (Inc: tax) points</label>
+        <name>Field89__c</name>
+    </fields>
+    <fields>
+        <label>Out charges excluded from Tax</label>
+        <name>Field90__c</name>
+    </fields>
+    <fields>
+        <label>Out charges excluded from points</label>
+        <name>Field91__c</name>
+    </fields>
+    <fields>
+        <label>Target take out charges (Ex: Tax) Amount</label>
+        <name>Field92__c</name>
+    </fields>
+    <fields>
+        <label>Target take out charges (Ex: Tax) Points</label>
+        <name>Field93__c</name>
+    </fields>
+    <fields>
+        <label>Target take out charges (Inc Tax) Amount</label>
+        <name>Field94__c</name>
+    </fields>
+    <fields>
+        <label>Target take out charges (Inc Tax) Points</label>
+        <name>Field95__c</name>
+    </fields>
+    <fields>
+        <label>Tax non target take out amount</label>
+        <name>Field96__c</name>
+    </fields>
+    <fields>
+        <label>Tax non target take out points</label>
+        <name>Field97__c</name>
+    </fields>
+    <fields>
+        <label>Restaurant sales total 1 (Ex:Tax) Amount</label>
+        <name>Field98__c</name>
+    </fields>
+    <fields>
+        <label>Restaurant sales total 1 (Ex:Tax) Points</label>
+        <name>Field99__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label>New account flag</label>
+        <name>IsNewLayout__c</name>
+    </fields>
+    <fields>
+        <label>IssueDate</label>
+        <name>IssueDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 別店舗から編集チェックフラグ(システム用) --></label>
+        <name>OtherShopEditCheckFlg__c</name>
+    </fields>
+    <fields>
+        <help>If the account type is 00 with not void and if the total amount is zero, return 1</help>
+        <label>$Excluded from totalization</label>
+        <name>OutSideAccount__c</name>
+    </fields>
+    <fields>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label>PaymentConfirmation</label>
+        <name>PaymentFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金確認手動設定フラグ --></label>
+        <name>PaymentHandReqFlg__c</name>
+    </fields>
+    <fields>
+        <help>If the plan number is Zero, this will not be taken as a plan.</help>
+        <label><!-- Plan# --></label>
+        <name>PlanNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金日 --></label>
+        <name>ReceiptDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- レシート番号 --></label>
+        <name>ReciptNo__c</name>
+    </fields>
+    <fields>
+        <label>Reservation</label>
+        <name>Relreserve__c</name>
+        <relationshipLabel>Billing</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 敬称 --></label>
+        <name>RespectLst__c</name>
+    </fields>
+    <fields>
+        <label>Room_Seq#</label>
+        <name>RoomDisplayNo__c</name>
+    </fields>
+    <fields>
+        <label>RoomName</label>
+        <name>RoomName__c</name>
+    </fields>
+    <fields>
+        <label>RoomType_Seq#</label>
+        <name>RoomSeq__c</name>
+    </fields>
+    <fields>
+        <label>SalesDate</label>
+        <name>SalesDate__c</name>
+    </fields>
+    <fields>
+        <label>$Sales　day</label>
+        <name>SalesdayCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- SearchDate --></label>
+        <name>SearchDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- $Seq. --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label>ShopCode</label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label>ShopName</label>
+        <name>ShopName__c</name>
+    </fields>
+    <fields>
+        <label>Shop_Seq#</label>
+        <name>ShopSeq__c</name>
+    </fields>
+    <fields>
+        <label>ServiceCharge（WithoutTax）</label>
+        <name>SumSrvPriceExcTax__c</name>
+    </fields>
+    <fields>
+        <label>ServiceCharge（WithTax）</label>
+        <name>SumSrvPriceIncTax__c</name>
+    </fields>
+    <fields>
+        <label>ConsumerTax</label>
+        <name>SumTax__c</name>
+    </fields>
+    <fields>
+        <help>Actual table # of the restaurant</help>
+        <label><!-- TableNo --></label>
+        <name>TableNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- A --></label>
+        <name>Target__c</name>
+    </fields>
+    <fields>
+        <label>TaxRate</label>
+        <name>TaxRate__c</name>
+    </fields>
+    <fields>
+        <help>If the room unit price is &gt;=3,150Yen, will be consider as a tea service from the restaurant</help>
+        <label><!-- TeaTimeFlag --></label>
+        <name>TeaTimeFlag__c</name>
+    </fields>
+    <fields>
+        <label>RoomTypeCode</label>
+        <name>TypeOfRoomCode__c</name>
+    </fields>
+    <fields>
+        <label>RoomTypeName</label>
+        <name>TypeOfRoomName__c</name>
+    </fields>
+    <fields>
+        <label>RoomType_Seq#</label>
+        <name>TypeOfRoomSeq__c</name>
+    </fields>
+    <fields>
+        <label>UnitPriceDefinition</label>
+        <name>UnitPriceDefKb__c</name>
+    </fields>
+    <fields>
+        <help>You can input upto 40 letters. For B5 account slip input the return key in every 12 digits. For A4 account slip input the return key in every 16 digits.</help>
+        <label>Comments</label>
+        <name>comment__c</name>
+    </fields>
+    <fields>
+        <label>Related reservation</label>
+        <name>frs__c</name>
+        <relationshipLabel>Billing</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Guest</label>
+        <name>relaccount__c</name>
+        <relationshipLabel>Billing</relationshipLabel>
+    </fields>
+    <nameFieldLabel><!-- Account# --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+    <webLinks>
+        <label>invoice</label>
+        <name>AccountBillPdf</name>
+    </webLinks>
+    <webLinks>
+        <label>Bulk account</label>
+        <name>BlukAccAcountBtn</name>
+    </webLinks>
+    <webLinks>
+        <label>BlukBill</label>
+        <name>BlukBillPdfBtn</name>
+    </webLinks>
+    <webLinks>
+        <label>Accounting（Banquet）</label>
+        <name>EnkaiKaikeishoBtn</name>
+    </webLinks>
+    <webLinks>
+        <label>Accounting manual</label>
+        <name>Kaikeisho</name>
+    </webLinks>
+    <webLinks>
+        <label>Accounting（Excel）</label>
+        <name>KaikeishoExcel</name>
+    </webLinks>
+    <webLinks>
+        <label>SplitAccount</label>
+        <name>KaikeishoSplitBtn</name>
+    </webLinks>
+    <webLinks>
+        <label>SplitCost</label>
+        <name>SplitCostBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- VOID --></label>
+        <name>VOID</name>
+    </webLinks>
+    <webLinks>
+        <label>VOIDCancel</label>
+        <name>VOIDCancel</name>
+    </webLinks>
+</CustomObjectTranslation>

@@ -1,0 +1,11 @@
+Expo へようこそ
+				
+下をクリックしてアカウントを確認してください。
+
+{!ExpoUser__c.SiteUrl__c}/{!$Setup.CommDefine__c.AppNS__c}ExpoUserActivation?tokenKey={!ExpoUser__c.TokenId__c}
+
+ユーザ名:{!ExpoUser__c.UserName__c}
+
+よろしくお願い申し上げます。
+
+JinyaConnect Enterprise system R&D team.

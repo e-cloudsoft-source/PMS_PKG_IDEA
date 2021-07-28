@@ -1,0 +1,30 @@
+<apex:page showHeader="{!!isMobile && !isFromSite}" standardStylesheets="{!!isFromSite}" sidebar="false" 
+ controller="ExpoUiApiCtrl"  action="{!initOrgInfoAct}" title="Expo Sync Config">
+	<apex:pageBlock id="createPageBlock" title="EXPO連携情報設定">
+   	<apex:iframe id="idIframe" width="98%" src="{!imgEndPoint}/expoSfManager/setSfInfo?orgId={!orgid}&isSandBox={!isSandbox}" scrolling="false"   />  
+   </apex:pageBlock>
+   <script>
+   
+   window.addEventListener("resize", function(){
+
+        setDfFrameHeight();
+   });
+
+     window.addEventListener("load", function(){
+    
+        setDfFrameHeight();
+   });
+  
+   function setDfFrameHeight(){
+       var footerHeight = document.getElementsByClassName("bPageFooter noTableFooter")[0].clientHeight;
+       var headerHeight = document.getElementById("AppBodyHeader").clientHeight;
+       headerHeight = headerHeight + 55;
+    
+       var windowHeight  = window.innerHeight;
+       var iframeHeight = windowHeight - (footerHeight + headerHeight);
+       var sframe = document.getElementById("idIframe");
+       sframe.style.height = iframeHeight+"px";
+    }
+   
+   </script>
+</apex:page>

@@ -1,0 +1,201 @@
+<apex:page controller="UserManager" showHeader="false" sidebar="false" >
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+
+<apex:includeScript value="{!$Resource.jquery_balloon_js}"/>
+<style>
+body .btn{
+	height:23px;
+}
+body {
+	background:transparent;
+	-webkit-text-size-adjust: none;
+}
+body td{
+	font-family: 'MS UI Gothic','MS PGothic','Hiragino Kaku Gothic Pro','Osaka','Arial','Helvetica',sans-serif;
+}
+@media only screen and (max-device-width : 1024px) {
+	body .btn{
+		font-size:0.85em;
+	}
+	span .smartPhone {
+		font-size: 0.9em;
+	}
+	span .smartPhoneBalloon {
+		font-size: 0.9em;
+	}
+} /*IPAD/IPAD MINI/IPHONE*/
+</style>
+<script>
+jQuery.noConflict();    
+//function setFocusOnLoad() {}
+// 勤怠登録を行う
+function jsRegiestWorkTime(actionType){
+	  blockUi();
+	  try{
+      apexRegiestWorkTime(actionType);
+      }catch( e ){
+      	unblockUi();
+      }
+}
+// 画面LOCK
+function blockUi() {
+ 	jQuery.blockUI({message: null});
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    jQuery.unblockUI({ fadeOut: 200 }); 
+}
+</script>
+<html>
+<body>
+<apex:form id="mainForm">
+<apex:actionPoller rerender="timerBlock" interval="60"/>
+<apex:actionFunction action="{!BeforeApprovalProcess}" name="BeforeApprovalProcess"></apex:actionFunction>
+<apex:actionFunction action="{!ViewReportProcess}" name="ViewReportProcess"></apex:actionFunction>
+<apex:actionFunction action="{!apexRegiestWorkTime}" name="apexRegiestWorkTime" rerender="buttonBlock" oncomplete="javascript:unblockUi();">
+	<apex:param id="actionType" name="actionType" value="" />
+</apex:actionFunction>
+<apex:outputPanel id="buttonBlock">
+    <table border="0" cellpadding="0" cellspacing="0">
+    	<tr>
+            <td>
+            	<input id="BeginTimeBtn" type="button" class="btn" value="{!validateBeginTime}" onclick="javaScript:jsRegiestWorkTime('1');"
+					style="{!workBtnInfo.startStyle}; background-image: url(); width: 90px" />
+            </td>
+            <td>
+			    <input id="EndTimeBtn" type="button" class="btn" value="{!validateEndTime}" onclick="javaScript:jsRegiestWorkTime('9');"
+					style="{!workBtnInfo.endStyle}; background-image: url(); width: 90px" />
+            </td>
+        </tr>
+    </table>
+    <div id="container1" style="text-align:left; width:220px;">
+    <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+			    <input id="OutingBtn" type="button" class="btn" value="{!validateOutingTime}" onclick="javaScript:jsRegiestWorkTime('2');"
+			    	style="{!workBtnInfo.restStartStyle}; background-image: url(); width: 90px" />
+            </td>
+            <td>
+			    <input id="EnteringBtn" type="button" class="btn" value="{!validateEnteringTime}" onclick="javaScript:jsRegiestWorkTime('3');"
+			    	style="{!workBtnInfo.restEndStyle}; background-image: url(); width: 90px" />
+            </td>
+        </tr>
+        <tr>
+        	<td colspan="2">
+        		<apex:outputPanel id="timerBlock" style="width: 100%; height: 22px; margin-left: 2px; " styleClass="smartPhone" >{!$Label.ps__msg_1001}：{!NowDateTime}</apex:outputPanel>
+        	</td>
+        </tr>
+        <tr>
+        	<td colspan="2">
+        		<apex:outputPanel style="width: 100%; height: 22px; margin-left: 2px; " styleClass="smartPhone" >{!$Label.ps__msg_1002}：{!currentStatus}</apex:outputPanel>
+        	</td>
+        </tr>
+
+    </table>
+    </div>
+    <div id="container2" style="text-align:left; width:220px;">
+    <table border="0" cellpadding="0" cellspacing="0">
+    	<tr>
+    		<!-- 
+        	<td>
+        		<apex:commandButton value="{!$Label.MSG_1003}" id="currentDayEditBtn" 
+        							rendered="{!IF(currentRecordId == null,false,true)}"
+        							onclick="javascript:BeforeApprovalProcess();"
+        		                    style="color: #ffffff; background-color: #66cc00; background-image: url(); width: 90px"
+        		                    oncomplete="javascript:window.open('/{!currentRecordId}', '_blank'); return false;"
+        		                     />
+        	</td>
+        	 -->
+        	<td>
+        		<apex:commandButton value="{!$Label.ps__msg_1004}" id="currentMonthEditBtn" 
+        							rendered="{!IF(currentRecordId == null || LEN(reportUrlPara) == 0,false,true)}"
+        							onclick="javascript:window.open('/{!reportUrlPara}', '_blank'); return false;"
+        		                    style="{!workBtnInfo.wkTimeEditStyle}; background-image: url(); width: 182px"
+        		                     />
+        	</td>
+        </tr>
+    </table>
+    </div>
+
+<!-- HIDDEN / POP-UP DIV -->
+<script>
+// Goto Detail Page
+function toDetailPage() {
+    window.open('/{!lastWorkDateId}', '_blank');
+}
+
+jQuery(function($) {
+	   
+    $("input#BeginTimeBtn").balloon({
+	    contents: '{!alertBeginBtnMsg}', 
+        offsetX: 25,
+        css: {
+            border: 'solid 2px #3E6697',
+            padding: '1px',
+            fontWeight: 'bold',
+            lineHeight: '1',
+            opacity: "1",
+            backgroundColor: '#FFFFFF',
+            color: '#F00202'
+        },
+        position: "bottom"
+    });
+  
+    $("input#EndTimeBtn").balloon({
+        contents: '{!alertEndBtnMsg}',
+        offsetX: {!offsetX_EndBtn},
+        css: {
+            border: 'solid 2px #3E6697',
+            padding: '1px',
+            fontWeight: 'bold',
+            lineHeight: '1',
+            opacity: "1",
+            backgroundColor: '#FFFFFF',
+            color: '#F00202'
+        },
+        position: "bottom"
+    });
+
+    $("div#container1").balloon({
+        contents: '{!alertInOutBtnMsg}',
+        offsetX: -18,
+        offsetY: 28,
+        css: {
+            border: 'solid 2px #3E6697',
+            padding: '1px',
+            fontWeight: 'bold',
+            lineHeight: '1',
+            opacity: "1",
+            backgroundColor: '#FFFFFF',
+            color: '#F00202'
+        },
+        position: "bottom"
+    });
+
+    $("div#container2").balloon({
+        contents: '{!alertDataCheckMsg}',
+        offsetX: -16,
+        css: {
+            border: 'solid 2px #3E6697',
+            padding: '1px',
+            fontWeight: 'bold',
+            lineHeight: '1',
+            opacity: "1",
+            backgroundColor: '#FFFFFF',
+            color: '#F00202'
+        },
+        position: "top"
+    });
+
+});
+</script>
+</apex:outputPanel>
+
+</apex:form>
+</body>
+</html>
+</apex:page>

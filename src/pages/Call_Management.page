@@ -1,0 +1,1122 @@
+<apex:page showHeader="false" sidebar="false" standardstylesheets="false" controller="CallManagementController">
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/cometd.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/json2.js')}" />
+    <apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/jquery.cometd.js')}" />
+	<!-- 2015/10/27 clipboard BEGIN-->
+	<apex:includeScript value="{!URLFOR($Resource.Clipboard, 'js/clipboard.js')}" />
+	<!-- 2015/10/27 clipboard END-->
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}" />
+    
+    <script src="../../soap/ajax/28.0/connection.js" type="text/javascript"></script>
+    <script src="{!URLFOR($Resource.CallPopupWindow,'js/jBeep.js')}" type="text/javascript"></script>
+    <script src="{!URLFOR($Resource.CallPopupWindow,'js/postmessage.js')}" type="text/javascript"></script>
+    
+    <style>
+        #window .k-grid-header table{
+            table-layout: auto;
+        }
+        #queue{
+        	background-color:none !important;
+        }
+        #window .k-grid-header{
+        	padding-right:0px !important;
+        }
+        #window tr:nth-child(odd){ 
+            background-color:#f5f5f5
+        }
+        #callQueueTable{
+            font-size: 12px;
+            width: 100%;
+        }
+        #callQueueTable .carInfoIcon {
+        	width: 24px;
+        }
+        #window .k-grid-header .k-header{
+            padding: 0.3em;
+        }
+        #window{
+            font-family:"MS PGothic", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro",Osaka, "メイリオ", Meiryo, "ＭＳ Ｐゴシック", sans-serif;
+        }
+        #errorDiv{
+            padding: 10px;
+        }
+        div.highlightCls{
+			box-shadow: 0 0 5px #1797c0;
+		  	-webkit-box-shadow: 0 0 5px #1797c0; 
+		  	-moz-box-shadow: 0 0 5px #1797c0;
+		  	border:1px solid #1797c0; 
+		}
+		.detailRow{
+			border:1px solid transparent; 
+		}
+    </style>
+     
+    <script type="text/javascript">
+        console.log('--start');
+        var pushTopicSubscription;
+        var timeZoneGMTOffset = '{!timeZoneGMTOffset}';
+        var callCount = {!JSENCODE(TEXT(lstCallInfo.size))};
+		var alarmPopup = null;
+        var blinkIntervalIns;
+        var otherColumnsCount = {!JSENCODE(TEXT(otherHeaders.size))};
+        var recentNotificationData;
+        var JS_APPNS = "{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+        var userAcceptDno = "{!JSENCODE(TRIM(userPrefValue.acceptDno))}".split(",");
+		//window.onbeforeunload = closeAlarmWindow;
+		// 2015/10/08 車No機能対応 BEGIN
+        var ptk = "{!JSENCODE(PhoneTypeKey)}";
+        var ctk = "{!JSENCODE(CarTypeKey)}";
+        var iot = "{!JSENCODE(IotTypeKey)}";
+        // 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz BEGIN
+        var cok = "{!JSENCODE(CoTypeKey)}";
+        // 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz END
+        // 2019/10/15 チェックイン時に自動音声で通知 BY zyz BEGIN
+        var cik = "{!JSENCODE(CiTypeKey)}";
+        // 2019/10/15 チェックイン時に自動音声で通知 BY zyz END
+        var resCarNoId = "{!JSENCODE($Setup.CommDefine__c.ps__ResCarNoRef__c)}";
+		// 2015/10/08 車No機能対応 END
+		function closeAlarmWindow(){
+			if(alarmPopup != undefined){
+                resetIsAlarmPopup();
+				alarmPopup.close();
+			}
+		}
+		
+        $(document).ready(function() {
+            try{
+                initCometd();
+                initAjaxToolkit();
+                _call_kendoPicZoom();
+				// 2015/10/27 clipboard BEGIN
+				_call_copyInfoBtn();
+				// 2015/10/27 clipboard END
+            }catch(exception){
+                console.log('--Exception: ' + exception);
+            }
+        });
+		// 2015/10/27 clipboard BEGIN
+		function _call_copyInfoBtn() {
+			var clipboard = new Clipboard('.copyInfost');
+			// 2017/11/28 ZeroClipboard SWF廃止
+			//ZeroClipboard.config({ swfPath: "{!URLFOR($Resource.Clipboard, 'swf/ZeroClipboard.swf')}" });
+			//var client = new ZeroClipboard(document.getElementsByName("copyInfoBtn"));
+			//var isSendOk = false;
+			clipboard.on('success', function(e) {
+				//isSendOk = true;
+				var rs = true;
+				try {
+				 	rs = window.parent.cti_call_pasteInfo(null, e.text);
+				} catch(ex) {rs = true;}
+				if (rs) {
+					var tooltip = $(e.trigger).kendoTooltip({position: "top",content: "Copied!",showOn: "click"}).data("kendoTooltip");
+					if (tooltip != null) tooltip.show();
+				}
+				return;
+			});
+			/*
+			client.on("aftercopy", function(e) {
+				if (!isSendOk) {
+					var rs = true;
+					try {
+					 	rs = window.parent.cti_call_pasteInfo(null, e.data["text/plain"]);
+					} catch(ex) {rs = true;}
+					if (rs) {
+						var tooltip = $(e.target).kendoTooltip({position: "top",content: "Copied!",showOn: "click"}).data("kendoTooltip");
+						if (tooltip != null) tooltip.show();
+					}
+				}
+			});*/
+		}
+		// 2015/10/27 clipboard END
+        function _call_kendoPicZoom() {
+         $(".carInfoIcon").hover(function() {
+                kendo.fx(this).zoom("in").startValue(1).endValue(4).play();
+            }, function() {
+                kendo.fx(this).zoom("out").endValue(1).startValue(4).play();
+                $(".carInfoIcon").css("transform","");
+                
+            });
+        }
+        //Function to initialize comet D
+        function initCometd(){
+            try{
+                $.cometd.disconnect();
+                //console.log('in init commetd function');
+                // Connect to the CometD endpoint
+                $.cometd.init({
+                    url: window.location.protocol+'//'+window.location.hostname+'/cometd/27.0/',
+                    requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'}
+                });
+                
+               $.cometd.addListener('/meta/handshake', function(message){ 
+                    console.log("--handshake status: " + JSON.stringify(message));
+                    if(message.successful){
+                        callInfoSubscription();
+                        $("#errorDiv").html('');
+                    }else if(!message.successful && message.error != undefined){
+                        $("#errorDiv").html('<span style="color: RED;">' + message.error + '</span><br>');
+                    }
+                });
+                
+                $.cometd.addListener('/meta/connect', function(message){
+                    if(!message.successful){
+                        console.log('--Connection not successful. Trying to handshake.')
+                        var topicToUnsubscribe = pushTopicSubscription;
+                        $.cometd.unsubscribe(topicToUnsubscribe);
+                        pushTopicSubscription = null;
+                        $.cometd.handshake();
+                        //Retry for 3 time
+                    }else{
+                        console.log('--Got Connected');
+                        //refreshCallTable();
+                    }
+                });
+                
+                $.cometd.addListener('/meta/disconnect', function(message){
+                    console.log('--Got Disconnected');
+                    $.cometd.handshake();
+                });
+
+                //$.cometd.handshake();
+                
+            }catch(exception){
+                console.log('--Exception: ' + exception);
+            }
+        }
+        
+        // Function returns cookie value of passed cookie name
+		function getCookie(cname){
+			var name = cname + "=";
+			var ca = document.cookie.split(';');
+			for(var i = 0; i < ca.length; i++){
+  				var c = ca[i].trim();
+  				if (c.indexOf(name)==0) 
+					// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz BEGIN
+					//return c.substring(name.length,c.length);
+					return decodeURIComponent(c.substring(name.length,c.length));
+					// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz END
+			}
+			return "";
+		}
+
+        //Function to subscribe to call information API
+        function callInfoSubscription(){
+            try{
+                console.log('--in call info subscription function');
+                // Subscribe to a topic. JSON-encoded update will be returned in the callback
+                pushTopicSubscription = $.cometd.subscribe('/topic/CallInformation', function(message) {
+                	recentNotificationData = message;
+                	var dnoKey = JS_APPNS + "DNO__c";
+                	var currUseIsAcceptTelNo = ( (userAcceptDno.length == 1 && userAcceptDno[0] == "") || $.inArray(recentNotificationData.data.sobject[dnoKey], userAcceptDno) >= 0);
+                	// Based on selected preference add details in sticky window or open new alaram window
+                	if({!userPrefValue.isStickyPopup} == true){
+                		// 2014/11/20 ADD
+                		if (currUseIsAcceptTelNo) {
+                    		addStickyWindowDetails(message);
+                    	}
+                    }
+                    else if({!userPrefValue.isAlarmPopup} == true){
+                    	// 2014/11/20 ADD
+                		if (currUseIsAcceptTelNo) {
+							checkAlarmOpened();
+						}
+                  	}
+                }); 
+            }
+            catch(exception){
+                console.log('--Exception: ' + exception);
+            }
+        }
+                
+        // Function adds call information on sticky window
+        function addStickyWindowDetails(message){
+            //console.log('--message: ' + message);
+			// 2015/10/08 車No機能対応 BEGIN
+			var callTypeKey = JS_APPNS + "CallType__c";
+            var callType = message.data.sobject[callTypeKey];
+			// 2015/10/08 車No機能対応 END
+           if(!message.data.sobject.ps__IsCustomerUpdated__c){
+	            replaceNullToBlank(message.data.sobject);
+	            // 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz BEGIN
+	            // 2019/10/15 チェックイン時に自動音声で通知 BY zyz BEGIN
+				// if (callType == iot || callType == cok) {
+				if (callType == iot || callType == cok || callType == cik) {
+				// 2019/10/15 チェックイン時に自動音声で通知 BY zyz END
+				// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz END
+					if ('speechSynthesis' in window) {
+						_call_funTextToSpeech(message.data.sobject,callType);
+					}
+					//playBeepVoice();
+					return;
+				}
+	            showCallDetails(message);
+	            addCallInfoToQueue(message.data.sobject);
+	            if(callCount > {!numberOfDispRec}){
+	                //Remove old entry
+	                $('#callQueueTable tr:last').remove();
+	            }
+           
+                callCount++;
+                // 2016/10/25 自動車ナンバーのポップアップと電話のポップアップをユーザー毎にするかしないかの設定を分離対応 BEGIN
+                if (callType == ptk && {!userPrefValue.isNotCallPhoneInformation} == true) {
+					return;
+				}
+				else if (callType == ctk && {!userPrefValue.isNotCallCarInformation} == true) {
+					return;
+				}
+				// 2016/10/25 自動車ナンバーのポップアップと電話のポップアップをユーザー毎にするかしないかの設定を分離対応 END
+	            playBeepVoice();
+				clearBlinkInterval();
+				blinkIntervalIns = setInterval(blinkDetailRow,1000);
+				window.onmousemove = clearBlinkInterval;
+	            try{
+	                 pm({
+	                     target: window.parent,
+	                     type:"newCall", 
+	                     data:{origin:'{!JSENCODE(baseURL)}'}
+	                 });
+	                 
+	             }catch(Exception){
+	                 console.log('--Exception: ' + Exception);
+	             }
+	        }
+        }
+        
+        function playBeepVoice(){
+	        try{
+	            jBeep('{!$Resource.CallPopupWindow}/js/jBeep/jBeep.wav');
+	        }catch(Exception){
+	            console.log('--Exception: ' + Exception);
+	        }
+	    }
+	    
+        // Function opens alarm window if 'isAlarmOpened' cookie is not present or if it is present and alaramPopup is previously opened by this window
+		function createAlarmWindow(){
+            
+           var openAlarmPopup;
+			if(document.getElementById("{!$Component.form.openAlarmPopup}")!= null){
+				openAlarmPopup = document.getElementById("{!$Component.form.openAlarmPopup}").value;
+				
+				if(recentNotificationData.data.sobject.ps__IsCustomerUpdated__c == true){
+					return;
+				}
+				if(openAlarmPopup == "true"){
+					if(alarmPopup != null){
+						alarmPopup.close();
+					}
+					var height = 260;
+					var numberOfDispRec = parseInt('{!JSENCODE(TEXT(numberOfDispRec))}');
+					var callListSize = parseInt(document.getElementById("{!$Component.form.callListSize}").value);
+					if(callListSize > 4){
+						if(callListSize >=10 && numberOfDispRec >= 10){
+							height = 460;
+						}else if( ((callListSize < 10) && (callListSize <= numberOfDispRec))){
+							height = height + ((callListSize - 4) * 30);
+						}else if( ((callListSize < 10) && (numberOfDispRec< callListSize )) || ((callListSize > 10) && (numberOfDispRec< callListSize ))){
+							height = height + ((numberOfDispRec - 4) * 30);
+						}else{
+						}
+					}
+					var isNew = true;
+					if(recentNotificationData != undefined){
+						isNew = !(recentNotificationData.data.sobject.ps__IsCustomerUpdated__c);
+					}
+					alarmPopup = window.open("{!$Page.CallAlarmPage}?isNew="+isNew+"&height="+height,"CallAlarm","width=650,height="+height+",location=no,dependent=no,resizable=yes,toolbar=no,status=no,directories=no,menubar=no,scrollbars=yes");
+					//if(alarmPopup == null || typeof(alarmPopup) == "undefined" || alarmPopup == undefined) {
+						//document.cookie = "isAlarmOpened=";
+						//resetIsAlarmPopup();
+					//}
+				}else{
+					if(alarmPopup != null){
+						alarmPopup.close();
+					}
+				}
+			}
+			console.log('openAlarmPopup end of the block: '+openAlarmPopup);
+        }
+        
+		// Function clears the blinkInterval on mouseover
+        var clearBlinkInterval = function() {
+			clearInterval(blinkIntervalIns);
+		    window.onmousemove = null;
+			$('.detailRow').removeClass('highlightCls');
+			blinkIntervalIns = null;
+		};
+        
+        //Function to add current call information to queue
+        function addCallInfoToQueue(message){
+			// 2015/10/08 車No機能対応 BEGIN
+            var callType = message.ps__CallType__c;
+			// 2015/10/08 車No機能対応 END
+            try{
+                if(message != undefined || message !=  null){
+                    console.log('--Date: ' + message.ps__Call_Time__c);
+                    var rowHTML = '<tr id="'+message.ps__SNO__c+'">';
+					// 2015/10/27 clipboard BEGIN
+					if(message.ps__Contact__c != undefined){
+						rowHTML += '<td><img Name="copyInfoBtn" class="copyInfost" data-clipboard-text="' + message.ps__Contact_Name__c + '#' + message.ps__Contact__c + '" value="COPY" src="{!URLFOR($Resource.Clipboard, "png/copy_v2.png")}" alt="COPY" style="cursor: pointer;" /></td>';
+					}else {
+						rowHTML += '<td></td>';
+					}
+					// 2015/10/27 clipboard END
+                    rowHTML += '<td>' + generateDate(message.ps__Call_Time__c) + '</td>';
+                    // 2015/10/08 車No機能対応 BEGIN
+					if ({!LEN($Setup.CommDefine__c.ps__CTICarAPIName__c) > 0}) {
+                    if (callType == ptk || callType.length == 0) {
+                        rowHTML += '<td><img src="{!URLFOR($Resource.ps__Confirming)}" width="16" height="16" /></td>';
+                    }else if(callType == ctk){
+                    	var guidId = kendo.guid();
+                        rowHTML += '<td style="overflow: inherit;" id="'+guidId+'"></td>';
+                        _call_CarImgIconById(message.Id, guidId);
+                        //2016/08/17 wgch BEGIN
+                        if ('speechSynthesis' in window) {
+							_call_funTextToSpeech(message, callType);
+       					}
+       					//2016/08/17 wgch END
+                    }else {
+                        rowHTML += '<td></td>';
+						}
+					}
+		    		// 2015/10/08 車No機能対応 END
+                    if(message.ps__No_of_Matching_Customers__c == 0 && !(message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true')){
+                        rowHTML += '<td>' +createNewLink(!(message.ps__isDCD1__c == true || message.ps__isDCD1__c == 'true'),message)+'</td>';
+                    }
+                    else{
+                        rowHTML += '<td>' + (message.ps__SNO__c != ""  ? (message.ps__SNO__c + ' ('+message.ps__No_of_Matching_Customers__c+')') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) + '</td>';
+                    }
+                    var link = message.ps__DT0__c != undefined? message.ps__DT0__c : '';
+                    if(message.ps__Contact__c != undefined){
+                        link = '<a href="/' + message.ps__Contact__c + '" target="_blank">' + message.ps__Contact_Name__c + '</a>';
+                    }
+                    rowHTML += '<td ' + (message.ps__isDCD1__c == true || message.ps__isDCD1__c == 'true' || message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true' ? '' : (' id="' + message.Id + '_Tab_Contact"> ' + (link))) +'</td>';
+                    link = message.ps__NAM__c;
+                    if(message.ps__Account__c != undefined){
+                        link = '<a href="/' + message.ps__Account__c + '" target="_blank">' + message.ps__Company_Name__c + '</a>';
+                    }
+                    rowHTML += '<td id="' + message.Id + '_Tab_Account">' + link + '</td>';
+                    rowHTML += '<td>' + message.ps__LNO__c + '</td>';
+                    for(var i = 0;i < otherColumnsCount; i++){
+                    	rowHTML += '<td></td>';	
+                    }
+                    if(!(message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') && !(message.IsCustomerUpdated__c == true || message.IsCustomerUpdated__c == 'true')){
+                		getOtherColumnDataJson(message.ps__Contact__c,message.ps__Account__c,message.ps__SNO__c,message.ps__isDCD1__c);
+                   	}
+
+                    rowHTML += '</tr>';
+                    if(message.ps__IsCustomerUpdated__c && !(message.ps__SNO__c == '')){
+                        $('#callQueueTable > tbody tr#'+message.ps__SNO__c).replaceWith(rowHTML);
+                    }
+                    else{
+                    	$('#callQueueTable > tbody:last').prepend(rowHTML);
+                	}
+                }
+            }catch(Exception){
+                console.log('--Exception: ' + Exception);
+            }
+        }
+        
+        function getNameDetails(str){
+        	var nameArray = ['',''];
+        	if(str.indexOf(" ")!=-1){
+        		nameArray[0] = str.substring(str.lastIndexOf(" ")+1, str.length);
+				nameArray[1] = str.substring(0,str.lastIndexOf(" "));
+			}else{
+				nameArray[0] = str;
+			}
+			return nameArray;
+        }
+        
+        function createNewLink(isContact,message){
+            // 2015/10/08 車No機能対応 BEGIN
+	    	var callType = message.ps__CallType__c;
+	    	// 2015/10/08 車No機能対応 END
+            var link = '';
+            if(isContact){
+                //link = '<a href="/003/e?con10='+message.ps__SNO__c+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+                
+                var nameArray = ['',''];
+                if(message.ps__DT0__c != undefined){
+                	nameArray = getNameDetails(message.ps__DT0__c.trim());
+                }
+				// 2015/10/08 車No機能対応 BEGIN
+                if (callType == ptk || callType.length == 0) {
+                    link = '<a href="/003/e?con10='+message.ps__SNO__c+'&name_lastcon2='+nameArray[0]+'&name_firstcon2='+nameArray[1]+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+
+                }else if (callType == ctk && resCarNoId.length>0) {
+                	var carInfo = message.ps__CarModel__c + " " + message.ps__CarColor__c + " " + message.ps__SNO__c;
+                    link = '<a href="/003/e?'+resCarNoId+'='+carInfo+'&name_lastcon2='+nameArray[0]+'&name_firstcon2='+nameArray[1]+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+
+                }else if (callType == ctk && resCarNoId.length==0) {
+                    link = '<a href="/003/e?name_lastcon2='+nameArray[0]+'&name_firstcon2='+nameArray[1]+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+                };
+				// 2015/10/08 車No機能対応 END
+            }
+            else{
+                //link = '<a href="/001/e?acc10='+message.ps__SNO__c+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+                // 2015/10/08 車No機能対応 BEGIN
+                if (callType == ptk || callType.length == 0) {
+                // 2015/10/08 車No機能対応 END
+                link = '<a href="/001/e?acc10='+message.ps__SNO__c+'&acc2='+message.ps__NAM__c+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+            	// 2015/10/08 車No機能対応 BEGIN
+            	}else if (callType == ctk) {
+            	link = '<a href="/001/e?acc2='+message.ps__NAM__c+'" target="_blank">'+((message.ps__SNO__c != null && message.ps__SNO__c != "" ) ? (message.ps__SNO__c + '('+message.ps__No_of_Matching_Customers__c+')</a>') : ((message.ps__isRSNP__c == true || message.ps__isRSNP__c == 'true') ? message.ps__RSN_Code__c  : '')) ;
+            	}
+            }
+            return link;
+        }
+        
+        //Function to create popup window
+        function showCallDetails(message){
+            //console.log("Creating popup window");
+            var callDiv = '<div id="' + message.data.sobject.ps__SNO__c + '">';
+            callDiv += '<table width="100%">';
+            //Call time Row
+            try{
+                callDiv += '<tr>';
+                    callDiv += '<td>Call Time' + '</td>';
+                    callDiv += '<td>' + generateDate(message.data.sobject.ps__Call_Time__c) + '</td>';
+                callDiv += '</tr>';
+            }catch(exception){
+                console.log('Exception: '  + exception);
+            }
+            if(!message.data.sobject.ps__isRSNP__c){
+                //Phone number row
+                callDiv += '<tr>';
+                callDiv += '<td>Number' + '</td>';
+                if(message.data.sobject.ps__No_of_Matching_Customers__c == 0){
+                    callDiv += '<td>' +createNewLink(!(message.data.sobject.ps__isDCD1__c == true || message.data.sobject.ps__isDCD1__c == 'true'),message.data.sobject)+'</td>';
+                }
+                else{
+                    callDiv += '<td>' + message.data.sobject.ps__SNO__c + ' ('+message.data.sobject.ps__No_of_Matching_Customers__c+')</td>';
+               }
+                callDiv += '</tr>';
+            }else{
+                //Name Row for internal call
+                callDiv += '<tr>';
+                callDiv += '<td>Number' + '</td>';
+                callDiv += '<td>' + message.data.sobject.ps__RSN_Code__c + '</td>';
+                callDiv += '</tr>';
+            }
+            
+            if(!(message.data.sobject.ps__isDCD1__c) && message.data.sobject.ps__DT0__c != undefined && message.data.sobject.ps__DT0__c != null && message.data.sobject.ps__DT0__c != 'null'){
+                //Create table for personal contact
+                callDiv += createPersonalContactDetails(message);
+            }else if(message.data.sobject.ps__DT0__c != undefined && message.data.sobject.ps__DT0__c != null && message.data.sobject.ps__DT0__c != 'null'){
+                //Create table for Company contact
+                callDiv += createCompanyContactDetails(message);
+            }else{
+                //Name Row If RSNP ==  true, dont show Name row
+                 if(!message.data.sobject.ps__isRSNP__c){
+                    var link = message.data.sobject.ps__DT0__c != undefined ? message.data.sobject.ps__DT0__c: '';
+                    if(message.data.sobject.ps__Contact__c != undefined){
+                        link = '<a href="/' + message.data.sobject.ps__Contact__c + '" target="_blank">' + message.data.sobject.ps__Contact_Name__c + '</a>';
+                    }
+                    callDiv += '<tr>';
+                        callDiv += '<td>Name' + '</td>';
+                        callDiv += '<td id="' + message.data.sobject.Id + '_Contact">' + link + '</td>';
+                    callDiv += '</tr>';
+                }
+            }
+            
+            //Phone line Row
+            callDiv += '<tr>';
+            callDiv += '<td>Phone Line' + '</td>';
+            callDiv += '<td>' + message.data.sobject.ps__LNO__c + '</td>';
+            callDiv += '</tr>';
+                
+            callDiv += '</table>';
+            callDiv += '</div>';
+            var tr = $('#content div');
+            if((message.data.sobject.ps__IsCustomerUpdated__c && tr.attr('id') == message.data.sobject.ps__SNO__c) ||
+                !message.data.sobject.ps__IsCustomerUpdated__c){
+            		$('#content').html(callDiv);
+        	}
+        
+        }
+        
+        //Function to create personal contact details (Type 1)
+        function createCompanyContactDetails(message){
+            var link = message.data.sobject.ps__NAM__c;
+            if(message.data.sobject.ps__Account__c != undefined){
+                link = '<a href="/' + message.data.sobject.ps__Account__c + '" target="_blank">' + message.data.sobject.ps__Company_Name__c + '</a>';
+            }
+            var callDiv = '';
+        
+            //Company Row
+            callDiv += '<tr>';
+            callDiv += '<td>Company Name' + '</td>';
+            callDiv += '<td id="' + message.data.sobject.Id + '_Account">' + link + '</td>';
+            callDiv += '</tr>';
+            
+            //Name Row
+            callDiv += '<tr>';
+            callDiv += '<td>Address' + '</td>';
+            callDiv += '<td>' + message.data.sobject.ps__DT1__c + '</td>';
+            callDiv += '</tr>';
+            
+            //Comment Row
+            callDiv += '<tr>';
+            callDiv += '<td>Zip code' + '</td>';
+            callDiv += '<td>' + message.data.sobject.ps__DT0__c + '</td>';
+            callDiv += '</tr>';
+            
+            return callDiv;
+        }
+        
+        //Function to create personal contact details (Type 2)
+        function createPersonalContactDetails(message){
+            var callDiv = '';
+            var link = message.data.sobject.ps__NAM__c;
+            if(message.data.sobject.ps__Account__c != undefined){
+                link = '<a href="/' + message.data.sobject.ps__Account__c + '" target="_blank">' + message.data.sobject.ps__Company_Name__c + '</a>';
+            }
+            //Company Row
+            callDiv += '<tr>';
+            callDiv += '<td>Company Name' + '</td>';
+            callDiv += '<td id="' + message.data.sobject.Id + '_Con_Account">' + link + '</td>';
+            callDiv += '</tr>';
+            
+            link = message.data.sobject.ps__DT0__c;
+            if(message.data.sobject.ps__Contact__c != undefined){
+                link = '<a href="/' + message.data.sobject.ps__Contact__c + '" target="_blank">' + message.data.sobject.ps__Contact_Name__c + '</a>';
+            }
+            
+            //Name Row
+            callDiv += '<tr>';
+            callDiv += '<td>Name' + '</td>';
+            callDiv += '<td id="' + message.data.sobject.Id + '_Contact">' + link + '</td>';
+            callDiv += '</tr>';
+            
+            //Comment Row
+            callDiv += '<tr>';
+            callDiv += '<td>Comment' + '</td>';
+            callDiv += '<td>' + message.data.sobject.ps__DT1__c + '</td>';
+            callDiv += '</tr>';
+            
+            //Department Row
+            callDiv += '<tr>';
+            callDiv += '<td>Department' + '</td>';
+            callDiv += '<td>' + message.data.sobject.ps__DT4__c + '</td>';
+            callDiv += '</tr>';
+            
+            return callDiv;
+        }
+        
+        //Function to initialize ajax toolkit
+        function initAjaxToolkit(){
+            sforce.connection.sessionId = '{!GETSESSIONID()}';
+        }
+        
+        function generateDate(dateToGenerate){
+            console.log('--DateToGenerate: ' + dateToGenerate);
+            var dateTimeSplit = dateToGenerate.split("T");
+            var dateSplit = dateTimeSplit[0].split("-");
+            var timeSplit = dateTimeSplit[1].split(":");
+            var seconds = timeSplit[2].split(".");
+            var date = new Date(dateSplit[0],(dateSplit[1]-1),dateSplit[2],timeSplit[0],timeSplit[1],seconds[0]);
+            var sec = date.getSeconds();
+            date.setSeconds(sec +  parseInt(timeZoneGMTOffset));
+            var seconds = (date.toTimeString()).split(" ");
+            var timeString = seconds[0];
+            var month = (date.getMonth()+ 1);
+            if((month+'').length == 1){
+            	month = '0'+month;
+            }
+            var dt = date.getDate();
+            if((dt+'').length == 1){
+            	dt = '0'+dt;
+            }
+            var dateString =  month + '/' + dt + '/' + date.getFullYear();
+            return dateString + ' ' +timeString;
+        }
+        
+        function replaceNullToBlank(callInfo){
+            if(callInfo.ps__LNO__c == undefined || callInfo.ps__LNO__c == null){
+                callInfo.ps__LNO__c = '';
+            } 
+            if(callInfo.ps__SNO__c == null || callInfo.ps__SNO__c == undefined){
+                callInfo.ps__SNO__c = '';
+            }
+            if(callInfo.ps__NAM__c == null || callInfo.ps__NAM__c == undefined){
+                callInfo.ps__NAM__c = '';
+            }
+            if(callInfo.ps__DT1__c == null || callInfo.ps__DT1__c == undefined){
+                callInfo.ps__DT1__c = '';
+            }
+            if(callInfo.ps__DT4__c == null || callInfo.ps__DT4__c == undefined){
+                callInfo.ps__DT4__c = '';
+            }
+            if(callInfo.ps__RSN_Code__c == null || callInfo.ps__RSN_Code__c == undefined){
+                callInfo.ps__RSN_Code__c = '';
+            }
+            if(callInfo.ps__CallType__c == null || callInfo.ps__CallType__c == undefined) {
+            	callInfo.ps__CallType__c = '';
+            }
+            if(callInfo.ps__CarModel__c == null || callInfo.ps__CarModel__c == undefined) {
+            	callInfo.ps__CarModel__c = '';
+            }
+            if(callInfo.ps__CarColor__c == null || callInfo.ps__CarColor__c == undefined) {
+            	callInfo.ps__CarColor__c = '';
+            }
+        }
+        
+        function blinkDetailRow(){
+			$('.detailRow').toggleClass('highlightCls');
+		}
+        
+        function populateOtherColumns(){
+        	// 2015/10/08 CarNo ADD BEGIN
+			var fixColnums = {!IF (LEN($Setup.CommDefine__c.ps__CTICarAPIName__c)>0,7,6)};
+        	// 2015/10/08 CarNo ADD END
+        	//alert('in Pouplate Other columns');
+        	for(var i = 0; i < otherColumns.length ;i++){
+        		var data = otherColumns[i];
+        		var content = data.text;
+        		if(data.link != undefined){
+        			content = '<a href="'+data.link+'" target="_blank">'+content+'</a>';
+        		}
+        		$('#callQueueTable td').eq(fixColnums+i).html(content);
+        	}
+        }
+        // 2015/11/08 コピー先の項目を自動捜す、INTERFACE関数が存在すると、自動呼出する
+        // 2016/08/17 EDIT BEGIN
+		function _call_funTextToSpeech(message,type) {
+			// 2017/04/17 Source Security Fix BEGIN
+			var ctrlFlg = ("{!JSENCODE(CtiCarNoSpeechFlgStr)}" == "true");
+			// 2017/04/17 Source Security Fix END
+			// 2017/05/05 BugFix Iot通知影響されるため、判断ロジック修正 BEGIN
+			//if (!ctrlFlg) return;
+			// 2016/10/25 自動車ナンバーのポップアップと電話のポップアップをユーザー毎にするかしないかの設定を分離対応 BEGIN
+			//if (type == ctk && {!userPrefValue.isNotCallCarInformation} == true) return;
+			// 音通知タイプは車通知案内　かつ　（共通定義：CTI_CarNo_Speech = FALSE || ユーザー：自動車ナンバーのポップアップ対象外 = TRUE)、音通知処理中止
+			if (type == ctk && (!ctrlFlg || {!userPrefValue.isNotCallCarInformation} == true)) return;
+			// 2017/05/05 BugFix Iot通知影響されるため、判断ロジック修正 END
+			else if (type == iot && {!userPrefValue.isNotNotifyIotInfomation} == true) return;
+			// 2016/10/25 自動車ナンバーのポップアップと電話のポップアップをユーザー毎にするかしないかの設定を分離対応 END
+			// 2017/07/04 チェックアウト音通知機能対応 BEGIN
+			else if (type == cok && ("{!JSENCODE(CtiCoNoSpeechFlgStr)}" != "true")) return;
+			// 2017/07/04 チェックアウト音通知機能対応 END
+			// 2019/10/15 チェックイン時に自動音声で通知 BY zyz BEGIN
+			else if (type == cik && ("{!JSENCODE(CtiCiNoSpeechFlgStr)}" != "true")) return;
+			// 2019/10/15 チェックイン時に自動音声で通知 BY zyz END
+			// COOKIEに一回放送済みがどうかチェックする
+			var _messageidKey = JS_APPNS + "MessageUUID__c";
+			var _speech_cookie_Val = message[_messageidKey];
+			var _speech_cookie_key =  '_call_speech_flg_'+type;
+			var _old_speech_cookie_Val = getCookie(_speech_cookie_key);
+			// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz BEGIN
+			var _oldCookieValArr = _old_speech_cookie_Val.split(',');
+			// 既に放送済みの場合、処理中止
+			if (_oldCookieValArr.indexOf(_speech_cookie_Val) >= 0) {
+                return;
+			} else {
+                _oldCookieValArr.unshift(_speech_cookie_Val);
+                if (_oldCookieValArr.length > 10) {
+                    _oldCookieValArr.pop()
+                }
+                _call_setCookie(_speech_cookie_key,_oldCookieValArr.join(','));
+			}
+			// 重複の発送判断する
+			//if (_old_speech_cookie_Val == _speech_cookie_Val) return;
+			//else _call_setCookie(_speech_cookie_key,_speech_cookie_Val);
+			// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz END
+			// 該当機能有効可がどうか制御
+			var msg = message.ps__Contact_Name__c;
+			// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz BEGIN
+			// 2019/10/15 チェックイン時に自動音声で通知 BY zyz BEGIN
+			// if (type != undefined && (type == iot || type == cok)) {
+			if (type != undefined && (type == iot || type == cok || type == cik)) {
+			// 2019/10/15 チェックイン時に自動音声で通知 BY zyz END
+			// 2017/06/26 お客様がチェックアウトしたタイミングで音声通知機能 zyz END
+				var NamKey = JS_APPNS + "NAM__c";
+				msg = message[NamKey];
+			} else {
+				if (typeof msg !== "undefined" && msg != null && msg.length > 0 &&  type == ctk) { 
+					// 2016/10/20 お客様のひらがな情報を優先で読み上げする BEGIN
+					var kanaNameKey = JS_APPNS + "Contact_KatakanaCal__c";
+					var kanaNameVal = message[kanaNameKey];
+					if (kanaNameVal != null && kanaNameVal.length > 0) {
+						msg = kanaNameVal;
+					}
+					// 2016/10/20 お客様のひらがな情報を優先で読み上げする END
+					// 2017/12/07 車ナンバーの通知メッセージは自由にカスタマイズできるように改善対応 zyz BEGIN
+					//msg += "{!$LABEL.MSG_045_0002}";
+					var Dt4Key = JS_APPNS + "DT4__c";
+					if(message[Dt4Key] != ''){msg = message[Dt4Key];}
+					else {msg +="{!$LABEL.MSG_045_0002}";}
+					// 2017/12/07 車ナンバーの通知メッセージは自由にカスタマイズできるように改善対応 zyz END
+				}
+			}
+			if (typeof msg !== "undefined" && msg != null && msg.length > 0 ) {
+				var synthes = new SpeechSynthesisUtterance(msg);
+				//synthes.rate = 0.75; 
+				//synthes.lang = "ja-JP"
+				speechSynthesis.speak( synthes );
+			}
+		}
+		function _call_setCookie(key, val) {
+			var cookies = '';
+			var expire = new Date();
+			expire.toLocaleString();
+			cookies += key + '=' + encodeURIComponent(val) + ';'
+	 		expire.setTime( expire.toLocaleString() + expire.getTime() + 1000 * 60);
+			expire.toUTCString();
+			cookies += 'expires=' + expire + ';';
+			document.cookie = cookies;	
+		};
+		// 2016/08/17 EDIT END
+    </script>
+    
+     <script type="text/javascript">
+        sforce.Transport = function(url) {
+            this.url = url;
+            this.connection = null;
+        
+            this.newConnection = function() {
+                try {
+                    this.connection = new ActiveXObject('Msxml2.XMLHTTP');
+                } catch(e) {
+                    try {
+                        this.connection = new ActiveXObject('Microsoft.XMLHTTP');
+                    } catch(e) {
+                        this.connection = new XMLHttpRequest();
+                    }
+                }
+        
+                return this.connection;
+            };
+        
+            this.send = function (envelope, callback, async, timeout) {
+                this.newConnection();
+                if (async) {
+                    this.connection.onreadystatechange = this.httpConnectionCallback;
+                }
+                var holder = new sforce.internal.ConnectionHolder(this.connection, callback);
+                sforce.internal._connections.push(holder);
+                this.connection.open("POST", this.url, async);
+                this.connection.setRequestHeader("Content-Type", "text/xml; charset=UTF-8");
+                this.connection.setRequestHeader("SOAPAction", "\"\"");
+                this.connection.setRequestHeader("Accept", "text/xml");
+                //this.connection.setRequestHeader("User-Agent", "SFAJAX 1.0");
+                this.connection.send(envelope);
+                if (async && typeof(timeout) !== "undefined") {
+                    this.setTimeoutOn(holder, timeout);
+                }
+                if (!async) {
+                    this.httpConnectionCallback();
+                }
+            };
+        
+            this.setTimeoutOn = function (holder, timeout) {
+                function abortConnection() {
+                    if (holder.connection.readyState !== 4) {
+                        holder.timedout = true;
+                        holder.connection.abort();
+                    }
+                }
+                setTimeout(abortConnection, timeout);
+            };
+        
+            this.httpConnectionCallback = function () {
+        
+                for (var i = 0; i < sforce.internal._connections.length; i++) {
+                    var holder = sforce.internal._connections[i];
+                    if (holder !== null) {
+                        if (holder.timedout) {
+                            sforce.internal._connections[i] = null;
+                            sforce.internal._connections.slice(i,1);
+                            holder.callback.httpCallback("Remote invocation timed out", false);
+                        } else  if (holder.connection.readyState == 4) {
+                            sforce.internal._connections[i] = null;
+                            sforce.internal._connections.slice(i,1);
+                            var success = holder.connection.status == 200;
+                            if (sforce.debug.trace) {
+                                sforce.debug.log("Response : status - " + holder.connection.status);
+                                sforce.debug.logXml(holder.connection.responseText);
+                            }
+                            if (sforce.debug.apexTrace) {
+                                sforce.debug.logApex(holder.connection.responseText);
+                            }
+                            if (holder.connection.responseXML && holder.connection.responseXML.documentElement) {
+                                holder.callback.httpCallback(holder.connection.responseXML.documentElement, success);
+                            } else {
+                                holder.callback.httpCallback("Remote invocation failed, due to: " + holder.connection.responseText +
+                                                             " status code: ", holder.connection.status);
+                            }
+                        }
+                    }
+                }
+            };
+        };
+    </script>
+    <apex:form id="form">
+    	<apex:pageMessages />
+    	<body>
+		    <div id="errorDiv"></div>
+		    <div id="window">
+        	<div id="content" class="detailRow">
+					<apex:repeat value="{!callList}" var="row" rows="1">
+                                	<apex:variable var="callInfo" value="{!row.callInfo}"/>
+                                	<apex:variable var="conFirstName" value="{!row.conFirstName}"/>
+                                	<apex:variable var="conLastName" value="{!row.conLastName}"/>
+                    <div id="{!callInfo.SNO__c}">
+                    <table width="100%">
+                        <tr>
+                            <td>Call Time</td>
+                            <td> <apex:outputText value="{!callInfo.Time__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Number</td>
+                            <td>
+                                <apex:outputPanel rendered="{!callInfo.isRSNP__c == false && callInfo.No_of_Matching_Customers__c != 0}">
+                                    <apex:outputText value="{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})" />
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!callInfo.isRSNP__c == false && callInfo.No_of_Matching_Customers__c == 0 }">
+                                    <apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?con10='+callInfo.SNO__c+'&name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc10='+callInfo.SNO__c+'&acc2='+URLENCODE(callInfo.NAM__c))}"  target="_blank"
+                                        rendered="{!(callInfo.CallType__c == PhoneTypeKey || LEN(callInfo.CallType__c) == 0)}" >{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+                                    <apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?'+$Setup.CommDefine__c.ResCarNoRef__c+'='+URLENCODE(callInfo.CarModel__c  + ' ' + callInfo.CarColor__c + ' ' + callInfo.SNO__c)+'&name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc2='+URLENCODE(callInfo.NAM__c))}"  target="_blank"
+                                        rendered="{!(callInfo.CallType__c == CarTypeKey && LEN($Setup.CommDefine__c.ResCarNoRef__c)>0)}" >{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+                                    <apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc2='+URLENCODE(callInfo.NAM__c))}"  target="_blank"
+                                        rendered="{!(callInfo.CallType__c == CarTypeKey && LEN($Setup.CommDefine__c.ResCarNoRef__c)=0)}" >{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+                                </apex:outputPanel>
+                                <apex:outputText rendered="{!(callInfo.isRSNP__c = true)}" value="{!callInfo.RSN_Code__c}" />
+                            </td>
+                        </tr>
+                        <apex:outputPanel rendered="{!Not(callInfo.isDCD1__c) && NOt(ISBLANK(callInfo.DT0__c))}">
+                            <tr>
+                                <td>Company Name</td>
+                                <td id="{!callInfo.Id}_Con_Account">
+                                    <apex:outputPanel rendered="{!callInfo.Account__c != null}">
+                                        <a href="{!baseURL}/{!callInfo.Account__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                            <span>{!callInfo.Account__r.Name}</span>
+                                        </a>
+                                    </apex:outputPanel>
+                                     <apex:outputPanel rendered="{!callInfo.Account__c == null && NOt(ISBLANK(callInfo.NAM__c))}">
+                                       <apex:outputText value="{!callInfo.NAM__c}"/>
+                                    </apex:outputPanel>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Name</td>
+                                <td id="{!callInfo.Id}_Contact">
+                                    <apex:outputPanel rendered="{!callInfo.Contact__c != null}">
+                                        <a href="{!baseURL}/{!callInfo.Contact__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                            <span>{!callInfo.Contact__r.Name}</span>
+                                        </a>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!callInfo.Contact__c == null && NOT(callInfo.isDCD1__c && callInfo.isRSNP__c)}">
+                                        <apex:outputText value="{!callInfo.DT0__c}"/>
+                                    </apex:outputPanel>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Comment</td>
+                                <td><apex:outputText value="{!callInfo.DT1__c}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Department</td>
+                                <td><apex:outputText value="{!callInfo.DT4__c}"/> </td>
+                            </tr>
+                        </apex:outputPanel>
+                        <!--  Company Details -->
+                        <apex:outputPanel rendered="{!(callInfo.isDCD1__c && NOt(ISBLANK(callInfo.DT0__c)))}">
+                            <tr>
+                                <td>Company Name</td>
+                                <td id="{!callInfo.id}_Account">
+                                    <apex:outputPanel rendered="{!callInfo.Account__c != null}">
+                                        <a href="{!baseURL}/{!callInfo.Account__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                            <span>{!callInfo.Account__r.Name}</span>
+                                        </a>
+                                    </apex:outputPanel>
+                                     <apex:outputPanel rendered="{!callInfo.Account__c == null && NOt(ISBLANK(callInfo.NAM__c))}">
+                                       <apex:outputText value="{!callInfo.NAM__c}"/>
+                                    </apex:outputPanel>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td><apex:outputText value="{!callInfo.DT1__c}"/></td>
+                            </tr>
+                            <tr>
+                                <td>Zip code</td>
+                                <td><apex:outputText value="{!callInfo.DT0__c}"/> </td>
+                            </tr>
+                        </apex:outputPanel>
+                        <!-- DT0 is blank -->
+                        <apex:outputPanel rendered="{!(ISBLANK(callInfo.DT0__c) && Not(callInfo.isRSNP__c))}">
+                            <tr>
+                                <td>Name</td>
+                                <td id="{!callInfo.Id}_Contact">
+                                    <span>
+                                        <a href="{!baseURL}/{!callInfo.Contact__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                            <span>{!callInfo.Contact__r.Name}</span>
+                                        </a>
+                                    </span>
+                                </td>
+                            </tr>
+                        </apex:outputPanel>
+                        <tr>
+                            <td>Phone Line</td>
+                            <td><apex:outputText value="{!callInfo.LNO__c}"/></td>
+                        </tr>
+                    </table>
+                </div>
+            </apex:repeat>
+        </div>
+        <hr/>
+        <div id="queue" class="k-grid k-grid-header">
+            <table id="callQueueTable" >
+                <thead>
+                    <tr>
+						<!-- Copy Btn -->
+						<th class="k-header" style="width: 23px;">&nbsp;</th>
+                        <th class="k-header">Call Time</th>
+						<apex:outputPanel rendered="{!(LEN($Setup.CommDefine__c.CTICarAPIName__c) >0)}">
+                        <th class="k-header">&nbsp;</th>
+						</apex:outputPanel>
+                        <th class="k-header">Number</th>
+                        <th class="k-header">Name</th>
+                        <th class="k-header">Company</th>
+                        <th class="k-header">Line</th>
+                                <apex:repeat value="{!otherHeaders}" var="h">
+                                	<th class="k-header">{!h}</th>	
+                                </apex:repeat>
+                                
+                    </tr>
+                </thead>
+                <tbody>
+
+                                <apex:repeat value="{!callList}" var="row" >
+                                	<apex:variable var="conFirstName" value="{!row.conFirstName}"/>
+                                	<apex:variable var="conLastName" value="{!row.conLastName}"/>
+                                	<apex:variable var="callInfo" value="{!row.callInfo}"/>
+                                    <tr id="{!callInfo.SNO__c}">
+								<!-- Copy Btn -->
+                                <td>
+								<!-- 2015/10/27 clipboard BEGIN -->
+									<apex:outputPanel rendered="{!callInfo.Contact__c != null}">
+									<img Name="copyInfoBtn" class="copyInfost" data-clipboard-text="{!callInfo.Contact__r.Name}#{!callInfo.Contact__r.Id}" value="COPY" src="{!URLFOR($Resource.Clipboard, 'png/copy_v2.png')}" alt="COPY" style="cursor: pointer;" />
+									</apex:outputPanel>
+								</td>
+								<!-- 2015/10/27 clipboard END -->
+								<td>
+                                    <!--<apex:outputText value="{0,date, HH':'MM':'SS)}">
+                                        <apex:param value="{!callInfo.Call_Time__c}" />
+                                    </apex:outputText> -->
+                                    <apex:outputText value="{!callInfo.Time__c}"/>
+                                   
+                                </td>
+                                <!-- ICON -->
+								<apex:outputPanel rendered="{!(LEN($Setup.CommDefine__c.CTICarAPIName__c) >0)}">
+                                <td style="overflow: inherit;">
+                                <apex:outputPanel rendered="{!(callInfo.CallType__c == PhoneTypeKey || LEN(callInfo.CallType__c) == 0)}">
+                                        <img src="{!URLFOR($Resource.ps__Confirming)}" width="16" height="16" />
+                                </apex:outputPanel>
+                                <apex:outputPanel rendered="{!callInfo.CallType__c == CarTypeKey && LEN(row.imgData) > 100}">
+                                        <img src="{!row.imgData}" height="18" class="carInfoIcon"/>
+                                </apex:outputPanel>&nbsp;
+                                </td>
+								</apex:outputPanel>
+                                <!-- Call Number -->
+                                <td>
+                                    <apex:outputPanel rendered="{!callInfo.isRSNP__c == false && callInfo.No_of_Matching_Customers__c != 0}">
+                                        <apex:outputText value="{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})" />    
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!callInfo.isRSNP__c == false && callInfo.No_of_Matching_Customers__c == 0 }">
+                                        <apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?con10='+callInfo.SNO__c+'&name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc10='+callInfo.SNO__c+'&acc2='+URLENCODE(callInfo.NAM__c))}"  target="_blank" 
+                                        	rendered="{!(callInfo.CallType__c == PhoneTypeKey || LEN(callInfo.CallType__c) == 0)}" >{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+										<apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?'+$Setup.CommDefine__c.ResCarNoRef__c+'='+URLENCODE(callInfo.CarModel__c  + ' ' + callInfo.CarColor__c + ' ' + callInfo.SNO__c)+'&name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc2='+URLENCODE(callInfo.NAM__c))}"  target="_blank" 
+                                        	rendered="{!(callInfo.CallType__c == CarTypeKey && LEN($Setup.CommDefine__c.ResCarNoRef__c)>0)}" >{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+                                        <apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc2='+URLENCODE(callInfo.NAM__c))}"  target="_blank" 
+                                        	rendered="{!(callInfo.CallType__c == CarTypeKey && LEN($Setup.CommDefine__c.ResCarNoRef__c)=0)}" >{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+                                    </apex:outputPanel>
+                                    <apex:outputText rendered="{!(callInfo.isRSNP__c = true)}" value="{!callInfo.RSN_Code__c}" />
+                                </td>
+                                
+                                <!-- Salesforce Contact -->
+                                <td>
+                                    <apex:outputPanel rendered="{!callInfo.Contact__c != null}">
+                                        <a href="{!baseURL}/{!callInfo.Contact__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                            <span>{!callInfo.Contact__r.Name}</span>
+                                        </a>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel rendered="{!callInfo.Contact__c == null && NOT(callInfo.isDCD1__c || callInfo.isRSNP__c)}">
+                                        <apex:outputText value="{!callInfo.DT0__c}"/>
+                                    </apex:outputPanel>
+                                </td>
+                                
+                                <!-- Salesforce Account -->
+                                <td>
+                                    <apex:outputPanel rendered="{!callInfo.Account__c != null}">
+                                        <a href="{!baseURL}/{!callInfo.Account__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                            <span>{!callInfo.Account__r.Name}</span>
+                                        </a>
+                                    </apex:outputPanel>
+                                     <apex:outputPanel rendered="{!callInfo.Account__c == null && NOt(ISBLANK(callInfo.NAM__c))}">
+                                       <apex:outputText value="{!callInfo.NAM__c}"/>
+                                    </apex:outputPanel>
+                                </td>
+                                <td><apex:outputField value="{!callInfo.LNO__c}" /></td>
+                                        <apex:repeat var="col" value="{!row.otherColumns}">
+                                       		<td>
+                                    			<apex:outputlink target="_blank" rendered="{!NOT(ISBlank(col.link))}" value="{!URLFOR(col.link)}">
+                                    			{!col.text}
+                                    			</apex:outputlink>
+                                    			<apex:outputText rendered="{!ISBlank(col.link)}" value="{!col.text}"/>
+                                    		</td>
+                                         </apex:repeat>
+                            </tr>
+                        </apex:repeat>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </body>
+        <apex:outputPanel id="otherColumnsPanel">
+        	<script>
+        		var otherColumns = JSON.parse('{!JSENCODE(otherColumnData)}');
+        		var sno = '{!JSENCODE(sno)}';
+        	</script>
+        </apex:outputPanel>
+        <apex:actionRegion >
+            
+			<apex:actionFunction name="refreshCallTable"  action="{!generateCallInfoList}" reRender="callpanel" />
+			<apex:inputhidden value="{!callInforRowCount}" id="callListSize"/>
+        	<apex:inputhidden value="{!openAlarmPopup}" id="openAlarmPopup"/>
+			<apex:actionFunction name="checkAlarmOpened" action="{!checkAlarmOpened}" rerender="openAlarmPopup,callListSize" oncomplete="createAlarmWindow();"/>
+            <apex:actionFunction name="resetIsAlarmPopup" action="{!resetIsAlarmPopup}" reRender="blankId" oncomplete="alarmPopup.close();" />
+            <apex:actionFunction name="getOtherColumnDataJson" action="{!getOtherColumnDataJson}" reRender="otherColumnsPanel" oncomplete="populateOtherColumns();" >
+            	<apex:param name="conId" value=""/>
+            	<apex:param name="accId" value=""/>
+            	<apex:param name="sno" value=""/>
+            	<apex:param name="isDCD1" value=""/>
+            </apex:actionFunction>
+
+        </apex:actionRegion>
+        <div id="audio"></div>
+    </apex:form>
+    <script>
+    // 2015/10/08 車No機能対応 BEGIN
+    function _call_CarImgIconById(callid, dataid) {
+    	Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.CallManagementController.getCarImgInfo}", callid, function(result, event){
+				if(event.type == 'exception') {
+	                // 処理なし
+	            } else {
+					if (result != "") {
+		                var rowHTML = '<img src="' + result + '" height="18" class="carInfoIcon"/>';
+		                $('#'+ dataid).html(rowHTML);
+		                _call_kendoPicZoom();
+					}
+				}
+		});
+	}
+	// 2015/10/08 車No機能対応 END
+    </script>
+</apex:page>

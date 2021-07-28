@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>ユーザ決済情報</value>
+    </caseValues>
+    <fields>
+        <help><!-- 決済方法が「カード」の場合、該当項目に設定が必要 --></help>
+        <label><!-- カード番号 --></label>
+        <name>CardNo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当項目はONに設定すると、該当決済情報が利用不可になる --></help>
+        <label><!-- 無効 --></label>
+        <name>DeleteFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Expoユーザ --></label>
+        <name>ExpoUserInfoRef__c</name>
+        <relationshipLabel><!-- ユーザ決済情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 決済方法がカード以外の場合、関連の決済補足情報を入力する --></help>
+        <label><!-- 決済詳細 --></label>
+        <name>PayDetail__c</name>
+    </fields>
+    <fields>
+        <label><!-- 決済方法 --></label>
+        <name>PayType__c</name>
+        <picklistValues>
+            <masterLabel>カード</masterLabel>
+            <translation><!-- カード --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>代引</masterLabel>
+            <translation><!-- 代引 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>売掛</masterLabel>
+            <translation><!-- 売掛 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>振込（事前入金）</masterLabel>
+            <translation><!-- 振込（事前入金） --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 支払者 --></label>
+        <name>UserRef__c</name>
+        <relationshipLabel><!-- ユーザ決済情報 --></relationshipLabel>
+    </fields>
+    <validationRules>
+        <errorMessage><!-- カード番号を入力して下さい --></errorMessage>
+        <name>CardNoInputCheck</name>
+    </validationRules>
+</CustomObjectTranslation>

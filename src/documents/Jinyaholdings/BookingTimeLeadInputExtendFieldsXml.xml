@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+2014/01/15 Ver1.0 タイムテーブル画面の予約情報入力フォームに入力項目カスタマイズ用
+		注意：該当VERSIONに、カスタマイズできる項目は「ご予約」オブジェクトの項目のみです、ご注意ください
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		FIELDS：		店舗単位に、カスタマイズ項目定義情報	
+					書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<FIELDS>
+		</FIELDS>
+	</SHOP>
+	<SHOP>
+		<SHOPCODE>01</SHOPCODE>
+		<FIELDS>
+		Mans__c
+		,Femails__c
+		,Hall1__c
+		,Morningfood__c
+		</FIELDS>
+	</SHOP>
+</root>

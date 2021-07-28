@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>予算</value>
+    </caseValues>
+    <fields>
+        <label><!-- #A01_料理 --></label>
+        <name>A01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A02_飲料 --></label>
+        <name>A02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A03_売店 --></label>
+        <name>A03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A04_室料 --></label>
+        <name>A04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A05_旅館外注 --></label>
+        <name>A05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A06_ブライダル外注 --></label>
+        <name>A06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A07_その他 --></label>
+        <name>A07__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理+飲料+売店+室料+旅館外注+ブライダル外注+その他 --></help>
+        <label><!-- #A08_売上合計 --></label>
+        <name>A08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B01_原価率_料理 --></label>
+        <name>B01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B02_原価率_飲料 --></label>
+        <name>B02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B03_原価率_売店 --></label>
+        <name>B03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B04_原価率_室料 --></label>
+        <name>B04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B05_原価率_旅館外注 --></label>
+        <name>B05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B06_原価率_ブライダル外注 --></label>
+        <name>B06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B07_原価率（全体） --></label>
+        <name>B07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C01_電気 [kWh] --></label>
+        <name>C01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C02_プロパンガス [m3] --></label>
+        <name>C02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C03_灯油 [L] --></label>
+        <name>C03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C04_水道 [m3] --></label>
+        <name>C04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D01_正社員 --></label>
+        <name>D01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D02_パート（直接雇用） --></label>
+        <name>D02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D03_パート（配膳会） --></label>
+        <name>D03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D04_パート（助さん） --></label>
+        <name>D04__c</name>
+    </fields>
+    <fields>
+        <help><!-- #D02〜#D04の合計 --></help>
+        <label><!-- #D05_パート（合計） --></label>
+        <name>D05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D06_深夜手当 --></label>
+        <name>D06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D07_労働保険 --></label>
+        <name>D07__c</name>
+    </fields>
+    <fields>
+        <help><!-- ROUNDUP(#D01+#D05+#D06+#D07, -3) --></help>
+        <label><!-- #D08_人件費_雇用形態別（合計-金額） --></label>
+        <name>D08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D11_調理部門 --></label>
+        <name>D11__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D12_現場オペレーション部門 --></label>
+        <name>D12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D13_営業・マーケティング部門 --></label>
+        <name>D13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D14_経理部門 --></label>
+        <name>D14__c</name>
+    </fields>
+    <fields>
+        <help><!-- #D11～#D14の合計 --></help>
+        <label><!-- #D15_人件費_部門別（合計） --></label>
+        <name>D15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 日付（年月[予算名]） --></label>
+        <name>Date__c</name>
+    </fields>
+    <fields>
+        <label><!-- #E01_正社員 --></label>
+        <name>E01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #E02_長期パート --></label>
+        <name>E02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #E03_臨時パート --></label>
+        <name>E03__c</name>
+    </fields>
+    <fields>
+        <help><!-- #E01〜#E03の合計 --></help>
+        <label><!-- #E04_従業員数（合計） --></label>
+        <name>E04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F01_役員報酬 --></label>
+        <name>F01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F02_給与手当 --></label>
+        <name>F02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F03_雑給 --></label>
+        <name>F03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F04_賞与引当金 --></label>
+        <name>F04__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F05_退職金引当金 --></label>
+        <name>F05__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F06_法定福利費 --></label>
+        <name>F06__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F07_福利厚生費 --></label>
+        <name>F07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F08_旅費交通費 --></label>
+        <name>F08__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F09_通信費 --></label>
+        <name>F09__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F10_接待交際費 --></label>
+        <name>F10__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F11_減価償却費 --></label>
+        <name>F11__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F12_ブライダル開業償却費 --></label>
+        <name>F12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F13_販売手数料（エージェント） --></label>
+        <name>F13__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F14_販売手数料（カード） --></label>
+        <name>F14__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F15_保険料 --></label>
+        <name>F15__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F16_修繕費 --></label>
+        <name>F16__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F17_消耗品費 --></label>
+        <name>F17__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F18_支払手数料 --></label>
+        <name>F18__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F19_広告宣伝費（ブライダル） --></label>
+        <name>F19__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F20_広告宣伝費（旅館） --></label>
+        <name>F20__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F21_販促物制作費 --></label>
+        <name>F21__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F22_食器購入費 --></label>
+        <name>F22__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F23_租税公課 --></label>
+        <name>F23__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F24_諸会費 --></label>
+        <name>F24__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F25_研究研修費 --></label>
+        <name>F25__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F26_家賃 --></label>
+        <name>F26__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F27_地代 --></label>
+        <name>F27__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F28_駐車料等 --></label>
+        <name>F28__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F29_リース料 --></label>
+        <name>F29__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F30_電力料 --></label>
+        <name>F30__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F31_ガス代 --></label>
+        <name>F31__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F32_水道料 --></label>
+        <name>F32__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F33_清掃作業費 --></label>
+        <name>F33__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F34_植木手入費 --></label>
+        <name>F34__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F35_クリーニング費 --></label>
+        <name>F35__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F36_新聞図書費 --></label>
+        <name>F36__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F37_寄付金 --></label>
+        <name>F37__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F38_会議費 --></label>
+        <name>F38__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F39_管理諸費 --></label>
+        <name>F39__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F40_権利金等償却費 --></label>
+        <name>F40__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F41_車両関係費 --></label>
+        <name>F41__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F42_燃料費 --></label>
+        <name>F42__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F43_振込手数料等 --></label>
+        <name>F43__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F44_料飲経費 --></label>
+        <name>F44__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F45_雑費 --></label>
+        <name>F45__c</name>
+    </fields>
+    <fields>
+        <help><!-- #F01〜#F45の合計 --></help>
+        <label><!-- #F46_販売管理費合計（予算） --></label>
+        <name>F46__c</name>
+    </fields>
+    <fields>
+        <help><!-- 販売管理費予測 / 売上予測 --></help>
+        <label><!-- #G01_販管費率 --></label>
+        <name>G01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上合計 - 原価 --></help>
+        <label><!-- #H01_売上総利益（粗利） --></label>
+        <name>H01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上総利益（粗利）予測 / 売上予測 --></help>
+        <label><!-- #H02_粗利率 --></label>
+        <name>H02__c</name>
+    </fields>
+    <fields>
+        <help><!-- (売上合計 - 原価合計) - (販売管理費合計 - (役員報酬 + 賞与引当金 + 退職金引当金 + 減価償却費 + ブライダル開業償却費 + 権利金等償却費)) --></help>
+        <label><!-- #J01_営業粗利益（GOP） --></label>
+        <name>J01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業粗利益（GOP）予測 / 売上予測 --></help>
+        <label><!-- #J02_GOP率 --></label>
+        <name>J02__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上合計*(1 - 原価率) - 販売管理費合計 --></help>
+        <label><!-- #K01_営業利益 --></label>
+        <name>K01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業利益予測/ 売上予測 --></help>
+        <label><!-- #K02_営業利益率 --></label>
+        <name>K02__c</name>
+    </fields>
+    <fields>
+        <label><!-- #L01_収益 --></label>
+        <name>L01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #L02_費用 --></label>
+        <name>L02__c</name>
+    </fields>
+    <fields>
+        <help><!-- #L01_収益 - #L02_費用 --></help>
+        <label><!-- #L03_損益 --></label>
+        <name>L03__c</name>
+    </fields>
+    <fields>
+        <help><!-- ((売上合計 - 原価合計) - 販売管理費合計) + (営業外収益 - 営業外費用) --></help>
+        <label><!-- #M01_経常利益 --></label>
+        <name>M01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 経常利益予測/ /売上予測 --></help>
+        <label><!-- #M02_経常利益率 --></label>
+        <name>M02__c</name>
+    </fields>
+    <fields>
+        <help><!-- レポートの棒グラフで会計年度の4月から並べるため --></help>
+        <label><!-- 月 --></label>
+        <name>Month__c</name>
+    </fields>
+    <fields>
+        <label><!-- #Q01_広告宣伝費 --></label>
+        <name>Q01__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S01_個人部門（ブライダル）_婚礼_組数 --></label>
+        <name>S01__c</name>
+    </fields>
+    <fields>
+        <help><!-- 婚礼組数＊1,800,000 --></help>
+        <label><!-- #S03_個人部門（ブライダル）_婚礼_売上 --></label>
+        <name>S03__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S06_個人部門（ブライダル）_フォトプラン_組数 --></label>
+        <name>S06__c</name>
+    </fields>
+    <fields>
+        <help><!-- フォトプラン組数＊200,000 --></help>
+        <label><!-- #S07_個人部門（ブライダル）_フォトプラン_売上 --></label>
+        <name>S07__c</name>
+    </fields>
+    <fields>
+        <label><!-- #S08_個人部門（ブライダル）_結納・顔合わせ_組数 --></label>
+        <name>S08__c</name>
+    </fields>
+    <fields>
+        <help><!-- 結納・顔合わせ組数 * 100000 --></help>
+        <label><!-- #S10_個人部門（ブライダル）_結納・顔合わせ_売上 --></label>
+        <name>S10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 年度 --></label>
+        <name>Year__c</name>
+    </fields>
+</CustomObjectTranslation>

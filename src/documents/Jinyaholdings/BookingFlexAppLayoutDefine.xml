@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+2016/10/17 Ver1.0 一画面の予約情報入力フォームに入力項目カスタマイズ用
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		FIELDS:		店舗単位に、カスタマイズ項目定義情報	
+			SECTION:	セクションに、表示したい入力項目を定義する
+						書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+				TITLE:	セクションのタイトル定義、該当属性が定義しないと、セクション枠が非表示になる
+				COLNUM:	新規予約ウィンドウに入力の項目の表示の列数「1 OR 2 OR 空白」で定義可能
+						説明：空白の場合、該当項目は１列のみ表示する（特記事項、メール本文など長い文字列の項目対応用）
+				EXPAND:	該当セクションは常に展開するがどうか、（TRUEの場合、該当セクションの項目内容がなくでも、セクションを展開する）
+		REQUIREDFIELDS:	新規予約ウインドウの入力項目のの必須属性を設定可能、該当タグに指定のAPI名は必須項目、未指定の場合、非必須になる
+					書式：項目API名 複数項目を定義できる、【項目1,項目2,項目N】方式で定義する
+		COLOR: セクションの色を定義する
+                    書式：lightskyblue,#EFEFEF etc
+        CHGMAXLINE: レイアウトに４列表示判断用数字、縦項目行数は該当数字を超えると、２列→4列に変更する、デフォルト値は15
+		補足：
+			①下記特殊キーワードで個別機能対応する
+			$_blank_$:	ウインドウに該当箇所は空白になる
+2017/01/19	複数レイアウト定義できる機能対応
+	複数レイアウト定義書式
+	LAYOUT				レイアウト情報定義、レイアウト定義情報は店舗区別なし、全て店舗を共有使える
+						注：LAYOUTタグに定義内容は優先です、LAYOUTにレイアウト情報を定義すると、SHOPタグに定義するレイアウト情報は自動無効になる
+		LAYOUTLABEL:	レイアウト表示レベル名
+		LAYOUTCODE:		レイアウトNo、ユーザレイアウトに該当Noを項目「一画面のレイアウトNo」に定義すると、ユーザごと使えるレイアウトを定義可能
+		FIELDS:			該当レイアウトにカスタマイズ項目定義情報	
+			SECTION:	セクションに、表示したい入力項目を定義する
+						書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+				TITLE:	セクションのタイトル定義、該当属性が定義しないと、セクション枠が非表示になる
+				COLNUM:	新規予約ウィンドウに入力の項目の表示の列数「1 OR 2 OR 空白」で定義可能
+						説明：空白の場合、該当項目は１列のみ表示する（特記事項、メール本文など長い文字列の項目対応用）
+				EXPAND:	該当セクションは常に展開するがどうか、（TRUEの場合、該当セクションの項目内容がなくでも、セクションを展開する）
+		REQUIREDFIELDS:	新規予約ウインドウの入力項目のの必須属性を設定可能、該当タグに指定のAPI名は必須項目、未指定の場合、非必須になる
+					書式：項目API名 複数項目を定義できる、【項目1,項目2,項目N】方式で定義する
+		COLOR: セクションの色を定義する
+                    書式：lightskyblue,#EFEFEF etc
+        CHGMAXLINE: レイアウトに４列表示判断用数字、縦項目行数は該当数字を超えると、２列→4列に変更する、デフォルト値は15
+2017/12/30  親部屋予約から小部屋に反映できる項目をカスタマイズできる機能対応
+    詳細：親部屋の項目内容を変更される場合、該当カスタマイズにより、子部屋の同じ項目へ設定する
+    定義書式：項目API名 複数項目を定義できる、【項目1,項目2,項目N】方式で定義する
+            定義のAPI項目は「FIELDS」タグに定義済前提あり
+    例：親部屋の項目A、項目Bはカスタマイズに定義する、一画面に、項目Bを変更すると、親部屋と子部屋の項目Bは同じ内容を設定される
+    該当タグは「SHOP」または「LAYOUT」タグに含める可能
+    注意：データ型が数式、項目の連動関係ある項目　または　到着日、出発日、お客様ステータスなど予約別の項目はカスタマイズ対象外してくさい
+2019/11/30 項目編集を親部屋以外にも明細行別反映できる機能の追加
+	SYNCFIELDS->SUB(属性新規追加）
+		TRUE:親部屋から明細別関連の予約のみ情報反映する
+		FALSE:親部屋からすべて小部屋へ反映する
+2019/12/30 一括予約でのコピー時にアサインされた部屋もコピーする・しないフラグ
+	CLONEROOMEXIT(新規追加タグ)
+		TRUE:一括予約でのコピー時にアサインされた部屋もコピーする　
+		FALSE:一括予約でのコピー時にアサインされた部屋もコピーしない（デフォルト値）
+2020/02/28 一括予約での延泊した際、アサイン済みの部屋は自動で延泊分もアサインする、しないフラグ
+	CHGNOTCOPYROOM(新規追加タグ)
+		TRUE:アサイン済みの部屋は自動で延泊分もアサインする（デフォルト値）
+		FALSE:アサイン済みの部屋は自動で延泊分もアサインしない
+-->
+
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<CLONEROOMEXIT>FALSE</CLONEROOMEXIT>
+		<CHGNOTCOPYROOM>TRUE</CHGNOTCOPYROOM>
+		<FIELDS>
+			<SECTION COLNUM="2" TITLE="ご予約の受付内容">
+			<!-- お客様 -->
+			Relcontact__c,
+			$_blank_$,
+			Name,
+			ReservedStatus__c,
+			ReservedType__c,
+			Field298__c,
+			SalesOfficeInfoRef__c,
+			$_blank_$,
+			Field2__c,
+			ReservedDate__c,
+			Segment__c,
+			$_blank_$,
+			Field315__c,
+			$_blank_$,
+			CouponTypeLst__c
+			</SECTION>
+			<SECTION COLNUM= "2" TITLE="お客様">
+				Relcontact__r.Katakana__c,
+				Relcontact__r.Birthdate,
+				Relcontact__r.Phone,
+				Relcontact__r.MobilePhone,
+				Relcontact__r.Email,
+				Relcontact__r.Fax
+            </SECTION>
+			<SECTION COLNUM= "2" TITLE="料理">
+                Field293__c,
+                Field305__c,
+                Checkmorining__c
+            </SECTION>
+            <SECTION COLNUM= "2" TITLE="ブライダル">
+                Field370__c,
+                Field371__c
+            </SECTION>
+            <SECTION TITLE="ご予約メール" >
+                email__c
+            </SECTION>
+		</FIELDS> 
+		<!-- 必須項目対象API名 -->
+		<REQUIREDFIELDS>
+			Name,Relcontact__c,ReservedDate__c,EntryTime__c,Field4__c,Departure__c,Field3__c
+		</REQUIREDFIELDS>
+		<!-- セクションの色を定義する -->
+        <COLOR>lightskyblue</COLOR>
+        
+        <CHGMAXLINE>10</CHGMAXLINE>
+        
+        <!--親部屋変更するとき、子部屋へ自動反映する項目を定義する -->
+        <!--下記項目は常に親部屋から子部屋へ連動する
+			================================
+			お客様：        relcontact__c
+			予約名：        Name
+			御支払：        Field315__c
+			予約チャネル：Field2__c
+			セグメント：  Segment__c
+			予約タイプ：  ReservedType__c
+			================================
+			下記定義のAPI項目は「FIELDS」タグに定義済前提あり
+			2019.11.30 属性：SUB新規追加、該当属性がTRUEに設定する場合、該当親部屋所属の明細関連の予約のみ情報反映する
+        -->
+        <!-- 
+        <SYNCFIELDS SUB="FALSE">
+        CouponTypeLst__c
+        </SYNCFIELDS>
+         -->
+	</SHOP>
+	<!-- 複数レイアウトを定義する -->
+	<!-- 
+	<LAYOUT>
+    	<LAYOUTLABEL>宿泊</LAYOUTLABEL>
+    	<LAYOUTCODE>01</LAYOUTCODE>
+		<FIELDS>
+			<SECTION COLNUM="2" TITLE="ご予約の受付内容">
+			Name,
+			$_blank_$,
+			Relcontact__c,
+			ReservedStatus__c,
+			ReservedType__c,
+			Field298__c,
+			SalesOfficeInfoRef__c,
+			$_blank_$,
+			Field2__c,
+			ReservedDate__c,
+			Segment__c,
+			$_blank_$,
+			Field315__c,
+			$_blank_$,
+			CouponTypeLst__c
+			</SECTION>
+			<SECTION COLNUM= "2" TITLE="お客様">
+				Relcontact__r.Katakana__c,
+				Relcontact__r.Birthdate,
+				Relcontact__r.Phone,
+				Relcontact__r.MobilePhone,
+				Relcontact__r.Email,
+				Relcontact__r.Fax
+            </SECTION>
+			<SECTION COLNUM= "2" TITLE="料理">
+                Field293__c,
+                Field305__c,
+                Checkmorining__c
+            </SECTION>
+            <SECTION COLNUM= "2" TITLE="ブライダル">
+                Field370__c,
+                Field371__c
+            </SECTION>
+            <SECTION TITLE="ご予約メール" >
+                email__c
+            </SECTION>
+		</FIELDS>
+		<REQUIREDFIELDS>
+			Name,Relcontact__c,ReservedDate__c,EntryTime__c,Field4__c,Departure__c,Field3__c
+		</REQUIREDFIELDS>
+        <COLOR>lightskyblue</COLOR>
+        <CHGMAXLINE>10</CHGMAXLINE>
+        
+        <SYNCFIELDS SUB="FALSE">
+        </SYNCFIELDS>
+    </LAYOUT>
+	<LAYOUT>
+    	<LAYOUTLABEL>日帰り</LAYOUTLABEL>
+    	<LAYOUTCODE>02</LAYOUTCODE>
+		<FIELDS>
+			<SECTION COLNUM="2" TITLE="ご予約の受付内容">
+			Name,
+			$_blank_$,
+			Relcontact__c,
+			ReservedStatus__c,
+			ReservedType__c,
+			Field298__c,
+			SalesOfficeInfoRef__c,
+			$_blank_$,
+			Field2__c,
+			ReservedDate__c,
+			Segment__c,
+			$_blank_$,
+			Field315__c,
+			$_blank_$,
+			CouponTypeLst__c
+			</SECTION>
+			<SECTION COLNUM= "2" TITLE="お客様">
+				Relcontact__r.Katakana__c,
+				Relcontact__r.Birthdate,
+				Relcontact__r.Phone,
+				Relcontact__r.MobilePhone,
+				Relcontact__r.Email,
+				Relcontact__r.Fax
+            </SECTION>
+			<SECTION COLNUM= "2" TITLE="料理">
+                Field293__c,
+                Field305__c,
+                Checkmorining__c
+            </SECTION>
+            <SECTION COLNUM= "2" TITLE="ブライダル">
+                Field370__c,
+                Field371__c
+            </SECTION>
+            <SECTION TITLE="ご予約メール" >
+                email__c
+            </SECTION>
+		</FIELDS>
+		<REQUIREDFIELDS>
+			Name,Relcontact__c,ReservedDate__c,EntryTime__c,Field4__c,Departure__c,Field3__c
+		</REQUIREDFIELDS>
+        <COLOR>lightskyblue</COLOR>
+        <CHGMAXLINE>10</CHGMAXLINE>
+        
+        <SYNCFIELDS SUB="FALSE">
+        </SYNCFIELDS>
+    </LAYOUT>
+    -->
+</root>

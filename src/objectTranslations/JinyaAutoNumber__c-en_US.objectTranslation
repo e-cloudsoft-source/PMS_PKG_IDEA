@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Automatic numbering</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Automatic numbering</value>
+    </caseValues>
+    <fields>
+        <label>Common numbering 10</label>
+        <name>CommAutoNumber10__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 1</label>
+        <name>CommAutoNumber1__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 2</label>
+        <name>CommAutoNumber2__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 3</label>
+        <name>CommAutoNumber3__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 4</label>
+        <name>CommAutoNumber4__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 5</label>
+        <name>CommAutoNumber5__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 6</label>
+        <name>CommAutoNumber6__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 7</label>
+        <name>CommAutoNumber7__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 8</label>
+        <name>CommAutoNumber8__c</name>
+    </fields>
+    <fields>
+        <label>Common numbering 9</label>
+        <name>CommAutoNumber9__c</name>
+    </fields>
+    <fields>
+        <label>Plan number</label>
+        <name>PlanNoAutoNumber__c</name>
+    </fields>
+    <nameFieldLabel>Automatic numbering</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

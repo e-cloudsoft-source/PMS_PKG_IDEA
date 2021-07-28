@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+NOEXPO入力画面項目レイアウトをカスタマイズ用
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		FIELDS:		店舗単位に、カスタマイズ項目定義情報	
+			SECTION:	セクションに、表示したい入力項目を定義する
+						書式：書式：項目ＡＰＩ名:画面に表示ラベル 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+				TITLE:	セクションのタイトル定義、該当属性が定義しないと、セクション枠が非表示になる
+				COLNUM:	新規予約ウィンドウに入力の項目の表示の列数「1 OR 2 OR 空白」で定義可能
+						説明：空白の場合、該当項目は１列のみ表示する（特記事項、メール本文など長い文字列の項目対応用）
+		REQUIREDFIELDS:	新規予約ウインドウの入力項目のの必須属性を設定可能、該当タグに指定のAPI名は必須項目、未指定の場合、非必須になる
+					書式：項目API名 複数項目を定義できる、【項目1,項目2,項目N】方式で定義する
+        HEIGHT: 		行高のサイズ
+		補足：
+			①下記特殊キーワードで個別機能対応する
+			$_blank_$:	ウインドウに該当箇所は空白になる
+2019.04.02 EXPO(店舗なし）場合、組織のWEBサイトのURL、及び通知メール情報を設定用タグを追加する
+		ORGANIZATION:	組織情報定義用タグ
+2019.04.02 店舗情報に「Expo購入履歴非公開」項目追加に従って、タグ：SHOPINFOFIELDS→SECTIONに表示項目リスト定義追加	
+2019.04.15 稼働率レポート機能追加に従って、<ANALYTICS> タグ新規追加、
+-->
+    <SHOP>
+        <SHOPCODE></SHOPCODE>
+        <!--========================================================================================-->
+        <!-- 会計商品の出力項目 -->
+        <ACCMASTERFIELDS>
+            <FIELDS>
+                <SECTION TITLE="商品基本" COLNUM="2">
+Name,
+Field7__c,
+DisplayDate__c,
+jmstRef__c:消費税,
+Category__c,
+ServiceRate__c:サービス料,
+CategorySub__c,
+ShopInfoRef__c,
+Field5__c,
+ExpoStockCount__c:在庫,
+Charge__c,
+SalesStatus__c,
+ShippingDays__c,
+$_blank_$,
+PayType__c:決済方法,
+$_blank_$,
+DeliveryType__c,
+Genkaritsu__c
+				</SECTION>
+                <SECTION TITLE="EXPO基本情報" COLNUM="1">
+SpDescription__c,
+Description__c,
+Content__c,
+Material__c,
+Origin__c,
+BestDateInfo__c,
+SpecialMemo__c,
+PurchaseMaxNum__c
+				</SECTION>
+                <SECTION TITLE="定期購入" COLNUM="2">
+RepeaterFlg__c,
+RepeatDiscountPrice__c,
+DiscountType__c,
+RepeatDiscountRate__c
+				</SECTION>
+                <SECTION TITLE="商品フラグ" COLNUM="1">
+LimitedFlg__c,
+ProductStatus__c:商品状態,
+OutsourceFlg__c,
+GoodFlg__c
+				</SECTION>
+                <SECTION TITLE="人材" COLNUM="1">
+StaffName__c,
+WorkRole__c,
+ExpoHrInfoRef__c,
+WorkContent__c
+				</SECTION>
+				<SECTION TITLE="地域" COLNUM="1">
+ExpoAreaMstLab__c
+				</SECTION>
+            </FIELDS>
+            <REQUIREDFIELDS>
+				Name,Field5__c,DisplayDate__c,Category__c,CategorySub__c,PayType__c,DeliveryType__c,ShopInfoRef__c,ExpoStockCount__c,ShippingDays__c
+			</REQUIREDFIELDS>
+            <HEIGHT></HEIGHT>
+        </ACCMASTERFIELDS>
+        <!--========================================================================================-->
+        <!-- 店舗情報編集画面 -->
+        <SHOPINFOFIELDS>
+            <FIELDS></FIELDS>
+            <REQUIREDFIELDS></REQUIREDFIELDS>
+            <HEIGH>30px</HEIGH>
+        </SHOPINFOFIELDS>
+        <!--========================================================================================-->
+        <!-- ユーザ編集画面 -->
+        <USERINFOFIELDS>
+            <FIELDS></FIELDS>
+            <REQUIREDFIELDS></REQUIREDFIELDS>
+            <HEIGHT>30px</HEIGHT>
+        </USERINFOFIELDS>
+        <!--========================================================================================-->
+        <!-- 組織情報編集画面 -->
+        <ORGINFOFIELDS>
+            <FIELDS></FIELDS>
+            <REQUIREDFIELDS></REQUIREDFIELDS>
+            <HEIGHT>30px</HEIGHT>
+        </ORGINFOFIELDS>
+        <!-- 稼働率レポート集計条件 -->
+        <ANALYTICS>
+			<!-- 集計予約対象条件 -->
+			<!-- 予約の集計条件：予約タイプ：宿泊　かつ　部屋タイプ名は「'アウトバス','アウトバス（SD*2）'」限定したい場合 -->
+			<LEAD_FILTER>
+			ReservedType__c = '宿泊' And refTypeOfRooms__r.Name in ('アウトバス','アウトバス（SD*2）','檜内風呂付','露天風呂付','露天風呂付（エステ）','露天風呂付（SD*2）','貴賓室','離れ貴賓室（Q*2）')
+			</LEAD_FILTER>
+			<!-- 会計明細金額合計場合、集計対象条件[商品処理種別：室料] -->
+			<ACCOUNT_FILTER>
+			ActionType__c = '室料'
+			</ACCOUNT_FILTER>
+		</ANALYTICS>
+        <!--========================================================================================-->
+    </SHOP>
+    <!-- 2019/03/29 組織情報設定用タグ、店舗情報なし場合、該当タグ利用して、組織関連の属性情報を定義する -->
+    <ORGANIZATION>
+    	<WEBSITE>xxxxx@xxxxx.xxx</WEBSITE><!-- 施設のサイトURL -->
+    	<EMAIL>yyyyy@yyyy.yyy</EMAIL><!-- 施設の連絡通知メールアドレス -->
+    	<!-- Expo購入履歴非公開属性定義用タグ（TRUE/FALSE)
+    		TRUE:EXPOに施設側の購入履歴情報を非公開する 
+    		FALSE:EXPOに施設側の購入履歴情報を公開する(デフォルト値) 
+    	-->
+    	<ISOPENBUYHISTORY>TRUE</ISOPENBUYHISTORY>
+    </ORGANIZATION>
+</root>

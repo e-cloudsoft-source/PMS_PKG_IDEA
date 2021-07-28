@@ -1,0 +1,24 @@
+<apex:component controller="AutoAccountMasterCtrl">
+<script type="text/javascript">
+// 已经使用过的商品记录list
+var _g_accountmstid_filter_array = {};
+function accMasterFun(accId){
+	if (accId != undefined && accId != "" && accId != null ){
+		// 已经使用过的商品不在记录
+		if(!(accId in _g_accountmstid_filter_array)){
+			_g_accountmstid_filter_array[accId] = true ;
+			accMasterView(accId);
+		}
+	}
+}
+function accMasterView(IdVal){
+    // 已经使用过的商品不在记录
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.AutoAccountMasterCtrl.referenecInfo}", IdVal, function(result, event){
+        if (event.type == 'exception') {
+            // alert(event.message);
+        } else {}
+    });
+}
+</script>
+</apex:component>

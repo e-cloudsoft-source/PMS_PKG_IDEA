@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Address</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Address</value>
+    </caseValues>
+    <fields>
+        <label>Address1</label>
+        <name>Address1__c</name>
+    </fields>
+    <fields>
+        <label>Address2</label>
+        <name>Address2__c</name>
+    </fields>
+    <fields>
+        <label>Address3</label>
+        <name>Address3__c</name>
+    </fields>
+    <fields>
+        <label>AddressType</label>
+        <name>AddressType__c</name>
+        <picklistValues>
+            <masterLabel>1：個人住所</masterLabel>
+            <translation>1. Personal address</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2：個人勤務先住所</masterLabel>
+            <translation>2. Personal office address</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>3：法人住所</masterLabel>
+            <translation>3. Company address</translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Guest№</label>
+        <name>ContactNo__c</name>
+    </fields>
+    <fields>
+        <label>Contact(s)</label>
+        <name>ContactRef__c</name>
+        <relationshipLabel>Address</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Delete Section</label>
+        <name>DeleteFlg__c</name>
+    </fields>
+    <fields>
+        <label>Foreign Key1</label>
+        <name>FK1__c</name>
+    </fields>
+    <fields>
+        <label>HotelCode</label>
+        <name>HotelCode__c</name>
+    </fields>
+    <fields>
+        <label>Zip Code</label>
+        <name>PostNo__c</name>
+    </fields>
+    <nameFieldLabel>Customer №</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

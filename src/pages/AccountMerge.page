@@ -1,0 +1,157 @@
+<apex:page standardController="Account" extensions="AccountMerge" Id="AccountMerge"
+sidebar="false" showheader="true" action="{!initAction}">
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+
+<script>$=jQuery.noConflict();</script>
+<!-- Account Info Merge -->     <!-- 取引先情報マージ -->
+<apex:sectionHeader title="{!$Label.ps__msg_012_0151}" subtitle="{!$Label.ps__msg_012_0135}"/>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock" />
+
+<apex:form Id="conditionForm">
+<apex:pageMessages id="conditionMsg"/>
+<apex:outputPanel id="wordSection">
+<!-- キーワード入力検索 -->
+    <apex:pageBlock title="{!$Label.ps__msg_012_0136}"  rendered="{!!initHaveErrFlg}">
+        <apex:pageBlockSection columns="1" >
+	 		<apex:outputPanel styleClass="requiredInput" layout="block">
+	        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+<!-- 取引先名を入力して下さい。 -->	        
+            <apex:inputText value="{!findKey}" style="width:500px;font-size:1.3em" 
+                html-placeholder="{!$Label.ps__msg_012_0137}"/>
+<!-- ※XXX株式会社　0312011211 -->	
+            <apex:outputLabel style="margin-left: 10px" value="{!$Label.ps__msg_012_0138}" />
+            </apex:outputPanel>
+        </apex:pageBlockSection>
+		<!-- 検索ボタン -->
+		<apex:pageBlockButtons location="bottom">
+		<!-- 検索 -->
+			<apex:commandButton style="min-width:120px;height:20px" value="{!$Label.ps__msg_012_0139}" action="{!queryConcatInfo}"/>
+		<!-- 戻る -->
+			<apex:commandButton style="min-width:120px;height:20px" value="{!$Label.ps__msg_012_0140}" action="{!gotoBack}" immediate="true"/>
+		</apex:pageBlockButtons>
+    </apex:pageBlock>
+    <!-- 処理エラーの場合、戻るボタンを指定する -->
+    <apex:pageBlock rendered="{!initHaveErrFlg}">
+    	<apex:pageBlockButtons location="bottom">
+    	<!-- 戻る -->
+		<apex:commandButton style="min-width:120px;height:20px" value="{!$Label.ps__msg_012_0140}" action="{!gotoBack}" immediate="true"/>
+		</apex:pageBlockButtons>
+	</apex:pageBlock>
+</apex:outputPanel>
+</apex:form>
+
+<apex:form Id="resultForm" rendered="{!!initHaveErrFlg}">
+<script>
+$(document).ready(function() { bindEvent(); });
+</script>
+<apex:inputHidden value="{!oldContactId}" id="hidOldContactId"/>
+<apex:inputHidden value="{!newContactId}" id="hidNewContactId"/>
+<!-- マージ元取引先情報 -->
+<apex:pageBlock title="{!$Label.ps__msg_012_0141}">
+    <apex:pageBlockButtons >
+    <!-- 取引先と関連リスト -->
+      <apex:commandButton value="{!$Label.ps__msg_012_0142}" style="min-width: 120px" action="{!mergerRelList}"
+      	reRender="conditionMsg,resultForm" status="refStatusBlock"/>
+      	<!-- 取引先のみマージ -->
+      <input type="button" value="{!$Label.MSG_012_0143}" id="cleanRoomBtn" style="min-width: 120px" class="btn" onclick="showMergerFieldPage()"/>
+    </apex:pageBlockButtons>
+
+	<apex:pageBlockTable value="{!queryRs}" var="item" >
+          <apex:column style="width:30px;">
+              <input type="radio" name="group1" locAttr="{!item.id}" onclick="syncIdToHidItem('{!JSENCODE(item.id)}');"/>
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Account.Fields.Name.Label}" >
+              <apex:outputLink value="/{!item.Id}" target="_blank" >
+                     <apex:outputText value="{!item.Name}" />
+              </apex:outputLink>
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Account.Fields.phone.Label}" >
+              <apex:outputField value="{!item.phone}" />
+          </apex:column>
+          <apex:column headervalue="{!$ObjectType.Account.Fields.fax.Label}" >
+              <apex:outputField value="{!item.fax}" />
+          </apex:column>
+          <!-- 郵便番号 -->
+          <apex:column headervalue="{!$Label.ps__msg_012_0144}" >
+              <apex:outputField value="{!item.BillingPostalCode}" />
+          </apex:column>
+          <!-- 住所 -->
+          <apex:column headervalue="{!$Label.ps__msg_012_0145}" >
+              <apex:outputText value="{!item.BillingCountry}" />
+              <apex:outputText value="{!item.BillingState}" />
+              <apex:outputText value="{!item.BillingCity}" />
+              <apex:outputText value="{!item.BillingStreet}" />
+          </apex:column>
+	</apex:pageBlockTable>
+</apex:pageBlock>
+<div id="mergeFieldDiv"></div>
+</apex:form>
+
+<script>
+function bindEvent() {
+	var mergeFieldWin = $("#mergeFieldDiv");
+	if (!mergeFieldWin.data("kendoWindow")) {
+		mergeFieldWin.kendoWindow({
+        	width: "1000px",
+        	height: "580px", 
+        // 取引先項目情報マージ  
+        	title: "{!$Label.MSG_012_0146}",
+            visible: false,
+            iframe: true,
+            type: "GET"
+        });  
+	}
+}
+function syncIdToHidItem(itemId) {
+	$("input:hidden[id$=':hidOldContactId']").val(itemId);
+}
+
+function preSelectCheck() {
+	var groupvalue=$("input:radio[name='group1']:checked").val();
+	if ($("input:radio[name='group1']:checked").length == 0) {
+    	//マージ元取引先情報を選択してください。
+    	alert("{!$Label.MSG_012_0147}");
+    	return false;
+  	}
+  	return true;
+}
+function showMergerFieldPage() {
+	if (!preSelectCheck()) return false;
+	var nwid = $("input[id$=':hidNewContactId']").val();
+	var odid = $("input[id$=':hidOldContactId']").val();
+	var win = $("#mergeFieldDiv").data("kendoWindow");
+	win.refresh({
+    	url: "/apex/AccountMergeField?nwid="+nwid+"&odid="+odid    
+	});
+	win.center().open();
+}
+// 2019/07/15 マージ後で自動閉じる機能　by WSQ BEGIN
+function closeKendoWin(){
+	var win = $("#mergeFieldDiv").data("kendoWindow");
+	if ( win != undefined ) {
+		win.close();
+	}
+}
+// 2019/07/15 マージ後で自動閉じる機能　by WSQ END
+// 画面Lockする
+function blockUi() {
+    $.blockUI({
+        baseZ: 60000,
+        //Processing...
+        message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0154}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+</script>
+</apex:page>

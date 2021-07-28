@@ -1,0 +1,79 @@
+<apex:page controller="ExpoUserActivationCtrl" action="{!initAct}" showHeader="false" standardStylesheets="false" title="新しいパスワード" cache="false" >
+<!-- css -->
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/useractivation.css')}" />
+<!-- js --> 
+<apex:includescript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}" /> 
+<style type="text/css">
+
+</style> 
+<div id="wrap1"> 
+	<div id="main"> 
+		<div id="wrapper"> 
+			<div id="logo_wrapper" class="standard_logo_wrapper mb24"> 
+				<p style="height: 100%; display: table-cell; vertical-align: bottom;"> 
+				<apex:image url="{!URLFOR(LogoUrl)}" />
+				</p> 
+			</div> 
+			<div id="content"> 
+				<p class="mb16">ログインに問題がありますか?</p> 
+				<ul> 
+					<li class="mb8">パスワードは大文字と小文字を区別します。</li> 
+					<li><a id="sandbox-login" href="{!URLFOR($Page.ExpoLogin)}">ログイン</a></li> 
+				</ul> 
+				<div class="verifyform"> 
+					<label for="un" class="label">新しいパスワード</label> 
+					<input type="password" name="user[password]" id="password" value="" class="input wide mb12 mt8 username" maxlength="255" autocomplete="off" placeholder="パスワード" tabindex="1" />
+					<div class="fieldError" id="passwordError" style="display: none;"><div class="errorContainer">半角英数字・記号（ _ ）8文字以上</div></div>
+					<div class="showPasswd"><input type="checkbox" id="chkShowPasswd" tabindex="-1" onchange="chkShowPasswdFun(this);"/><label for="chkShowPasswd" style="cursor: default;" onclick="">パスワードを表示</label></div>
+					<a name="continue" id="continue" class="button primary fiftyfifty focus" tabindex="2" onclick="saveCheckFun()"> 保存 </a> 
+				</div>
+			</div> 
+		</div> 
+	</div> 
+</div>
+<apex:form id="hidInfoForm">
+	<apex:inputHidden value="{!password}" id="hidPassword"/>
+	<apex:actionFunction action="{!updateData}" name="updateDataFun" rerender="hidInfoForm"/>
+</apex:form>
+<script>
+	$(document).ready(function() {
+		bindEvent();
+	});
+	function bindEvent(){
+		$("input[id='password']").unbind('blur');
+		$("input[id='password']").on('blur',function(){
+			setTextEmptyFun($(this));
+		});
+	}
+	// 必填项Css
+	function setTextEmptyFun(wkThis){
+		var val = wkThis.val();
+		if(val == "") wkThis.addClass("textEmpty");
+		else {
+			wkThis.removeClass("textEmpty");
+			$("div[id='passwordError']").hide();
+			var reg = /^[\w*\_*]{8,125}$/;
+			if(reg.test(val)){
+				$("div[id='passwordError']").hide();
+				$(this).removeClass("textEmpty");
+			}else{
+				$(this).addClass("textEmpty");
+				$("div[id='passwordError']").show();
+			}
+		}
+	}
+	// 显示隐藏密码处理
+	function chkShowPasswdFun(e){
+		if($(e).is(':checked')) $("#password").attr('type', 'text');
+		else $("#password").attr('type', 'password');
+	}
+	function saveCheckFun(){
+		setTextEmptyFun($("input[id='password']"));
+		if($("input.textEmpty").length > 0 || $("div.fieldError").is(':visible')){
+			return;
+		}
+		$("input[id$=':hidPassword']").val( $("input[id='password']").val() );
+		updateDataFun();
+	}
+</script>
+</apex:page>

@@ -1,0 +1,1481 @@
+<!-- 現金合せ -->
+<apex:page controller="CashRollupBook" action="{!init}" title="{!$Label.ps__msg_040_0025}"
+	id="cashRollup" standardStylesheets="true" showheader="true" sidebar="false">
+	<!--  現金照合 -->
+	
+<c:CommHeaderComp />
+<!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/process.js')}"/>
+<!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+<!-- 2017/08/31 页面抓图機能　by zyz BEGIN -->
+<apex:includeScript value="{!$Resource.html2canvas}"/>
+<!-- 2017/08/31 页面抓图機能　by zyz END -->
+<style>
+/* Salesforce Calendar Link No Show */
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+.colHeader {
+	text-align: right;
+	font-size: 1em;
+	margin-right: 2px;
+	white-space: nowrap;
+	font-size: 16px; 
+}
+.colAmountTd {
+	text-align: right;
+	font-size: 1em;
+	margin-right: 4px;
+	vertical-align:middle ;
+	height: 30px;  
+}
+.k-numerictextbox .j-numberInput ,.k-numerictextbox .j-numberInput3{
+	width:90%;
+    text-align: right;
+    padding-right: 5px !important;
+    font-size: 1em;
+    font-weight: bold; 
+}
+.k-numerictextbox .j-numberInput2 {
+	width:93%;
+    text-align: right;
+    padding-right: 5px !important;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+
+.colSybmolMark {
+	font-size: 20px; 
+	font-weight: bold; 
+	margin-right: 2px;
+}
+.colAmoutOutPanle {
+	font-size: 20px; 
+	font-weight: bold; 
+	text-align: right;
+	/*width: 100px;*/
+	float: right;
+	display:table-cell;
+}
+.bPageBlock .detailList th, .bPageBlock .detailList td {
+	vertical-align: middle;
+}
+.apexp .bPageBlock{
+	width: 800px;
+}
+.buttonclass{
+   border-top: 1px solid #e8e8e9;
+   /*background: #e8e8e9;*/
+   background: -webkit-gradient(linear, left top, left bottom, from(#e8e8e9), to(#e8e8e9));
+   background: -webkit-linear-gradient(top, #e8e8e9, #e8e8e9);
+   background: -moz-linear-gradient(top, #e8e8e9, #e8e8e9);
+   background: -ms-linear-gradient(top, #e8e8e9, #e8e8e9);
+   background: -o-linear-gradient(top, #e8e8e9, #e8e8e9);
+   padding: 5px 10px;
+   -webkit-border-radius: 4px;
+   -moz-border-radius: 4px;
+   border-radius: 4px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   /*box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;*/
+   color: #000000;
+   font-size: 14px;
+   /*font-family: Helvetica, Arial, Sans-Serif;*/
+   text-decoration: none;
+   vertical-align: middle;
+}
+/* 2017/08/31 页面抓图機能　by　zyz BEGIN */
+.fontFamclass{
+	font-family: Arial !important;
+}
+/* 2017/08/31 页面抓图機能　by　zyz END */
+</style>
+<script>
+beenFocused = true;
+var $j = jQuery.noConflict();
+// kendo culture custome 
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = {!JSENCODE(PointLen)};
+currency.symbol = "{!JSENCODE(CurrencySybmol)}";
+currency.pattern = ["$-n","$n"];
+</script>
+<!-- Cash Book -->     <!-- 現金合せ -->
+<apex:sectionHeader title="{!$Label.ps__msg_040_0026}" subtitle="{!$Label.ps__msg_040_0025}"/>
+<!-- オーダーエンドリの機能追加 by zy BEGIN -->
+<!--  -->
+<apex:form >
+	<apex:outputPanel id="messagePanel">
+		<apex:inputHidden id="requestInfo" value="{!requestJson}"/>
+	</apex:outputPanel>
+</apex:form>
+<!-- オーダーエンドリの機能追加 by zy END -->
+<!-- 情報登録 -->
+<apex:form >
+<!-- オーダーエンドリの機能追加 by zy BEGIN -->
+	<apex:actionFunction name="chgPosNoFun" action="{!refreshPosNo}" reRender="cashDataBlock,changePanel,messagePanel" status="JINYACONNECT_LOADINGSTATUS" oncomplete="afterRefreshPosNo();"/>
+<!-- オーダーエンドリの機能追加 by zy END -->
+	<!-- 2017/07/03 自動検索設備 -->
+	<apex:actionFunction name="initPrintInfo" action="{!loadOrderInf}" reRender="messagePanel,cashDataBlock,changePanel" status="JINYACONNECT_LOADINGSTATUS" oncomplete="afterRefreshPosNo();"/>
+<!-- 現金合せ履歴 -->
+<apex:pageBlock title="{!$Label.ps__msg_040_0027}" id="cashDataBlock">
+	<!-- メッセージ -->	
+	<apex:outputPanel id="errPanel">
+	<apex:pageMessages />
+	</apex:outputPanel>
+	<!-- 情報保存 -->
+	<apex:pageBlockButtons location="top" id="cashDataBlockBtn">
+		<apex:outputPanel id="saveBtnPanel">
+			<!-- オーダーエンドリの機能追加 by zy BEGIN -->
+			<input type="hidden" value="{!changeSwitch}" id="hidChangeSwitch"/>
+			<input type="hidden" value="{!isEditKikaiFlag}" id="hideEditKikaiFlag" />
+			<!-- 只配置一个posno就读取隐藏域的-->
+			<input type="hidden" value="{!curPos}" id="hidCurPos" />
+			<!-- pos リストメーセッジ -->
+			<input type="hidden" value="{!allPosStr}" id="hidAllPosStr" />
+			<!-- オーダーエンドリの機能追加 by zy END -->
+			<!-- 移动此处，切换店铺的时候ip提交到后台去 -->
+			<apex:inputHidden id="hidLocalIp" value="{!localIp}"/>
+		<!-- 保存 -->		
+		<!-- オーダーエンドリの機能追加 by zy BEGIN -->
+		<!-- 
+		<apex:commandButton value="{!$Label.ps__msg_040_0028}" style="width:100px;" action="{!saveCashInfo}" id="saveBtn"
+			rendered="{!!isEditSaveFlag}"
+			reRender="basePaymentInfo,errPanel" status="JINYACONNECT_LOADINGSTATUS" onclick="beforeRefreshPage();" oncomplete="bindLeftEvent();chkIsOpenChange();afterLoadPrint()"/>
+		 -->
+		<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN -->
+		<apex:outputPanel rendered="{!!isEditSaveFlag}">
+			<input type="button" style="width:100px;" class="btn" value="{!$Label.MSG_040_0028}" onclick="savePage(this)"/>
+		</apex:outputPanel>
+			<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+			<apex:actionFunction action="{!saveCashInfo}" name="_actSaveCashInfo" rendered="{!!isEditSaveFlag}" reRender="basePaymentInfo,errPanel" oncomplete="bindLeftEvent();canvasSaveInfo('{!JSENCODE(cashInfo.cash.Id)}');"/>
+			<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+		<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy END -->
+		</apex:outputPanel>
+		<apex:outputPanel style="float:right" id="sendList">
+		<!-- オーダーエンドリの機能追加 by zy END -->
+		<!-- <span style="float: left; margin-left: 2px;"> -->
+		<apex:selectList size="1" value="{!branchShopNm}" rendered="{!branchShopLst.size > 0}" id="branchShopCd" style="margin-right:3px;" styleClass="j-dropDownList" >
+			<!-- All -->	
+		    <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_040_0029}"/>
+		    <apex:selectOptions value="{!branchShopLst}" />
+		    <!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+		    <!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+		   <apex:actionSupport event="onchange" action="{!refreshBranShop}" onsubmit="beforeRefreshPage();" rerender="saveBtnPanel,basePaymentInfo,errPanel,changePanel,messagePanel,sendList" status="JINYACONNECT_LOADINGSTATUS" oncomplete="afterRefreshPosNo();"/>
+			<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+			<!-- 2017/03/17 お釣りプリンター機能　by zy END -->
+		</apex:selectList>
+		<!-- </span> -->
+		<!-- オーダーエンドリの機能追加 by zy BEGIN -->
+		<!-- fix poslst option ありの場合表示する -->
+		<apex:selectList size="1" value="{!curPos}" onChange="beforeRefreshPage();chgPosNoFun()" rendered="{!posLst.size > 0}" id="curPos" style="width:100px;" styleClass="j-dropDownList" >
+			<!-- All -->	
+		    <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_040_0029}"/>
+			<apex:selectOptions value="{!posLst}" />
+			<!-- 2017/07/07 ポースリストの「その他」項目追加　by　zy BEGIN -->
+			<apex:selectOption itemValue="{!otherPosValue}" itemLabel="{!$Label.ps__msg_040_0051_02}" />
+			<!-- 2017/07/07 ポースリストの「その他」項目追加　by　zy END -->
+		</apex:selectList>
+		<!-- オーダーエンドリの機能追加 by zy END -->
+		<!-- <span style="margin-left: 10px;">計上日：</span> -->
+		<!-- 計上日： -->	
+	    <apex:outputLabel value="{!$Label.ps__msg_040_0030}" styleClass="label" style="font-weight: bold;margin-left: 5px;"/>
+			<apex:actionRegion >
+		      <apex:inputField value="{!dateInput.Checkinday__c}" style="width:100px;margin-left:5px;" id="salesDate" styleClass="k-textbox" >
+		          <!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+		          <apex:actionSupport event="onchange" action="{!init}" onsubmit="beforeRefreshPage();"  rerender="basePaymentInfo,errPanel,changePanel,sendList,messagePanel,imgPanel" status="JINYACONNECT_LOADINGSTATUS" oncomplete="afterRefreshPosNo()">	
+		          </apex:actionSupport>
+		          <!-- 2017/08/31 页面抓图機能　by　zyz END -->
+		      </apex:inputField>
+			</apex:actionRegion>
+		<!-- </span> -->
+		</apex:outputPanel>
+	</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1" id="basePaymentInfo">
+		<apex:outputPanel style="width:600px">
+		<div style="float: left;width: 320px;min-width: 320px;" id="leftDiv">
+ 			<table style="width: 100%;border-spacing: 0;border-collapse: 0;border: 1;table-layout: fixed;">
+  				<colgroup style="width: 110px"></colgroup>
+ 				<colgroup style="width: 90px"></colgroup>
+ 				<colgroup style="width: 100px"></colgroup>
+ 				<tr>
+ 					<td class="colHeader" style="vertical-align: middle;">
+ 						<!-- 準備金 -->	
+ 						<apex:outputLabel value="{!$Label.ps__msg_040_0031}"/>
+ 					</td>
+ 					<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 					<td colspan="2" class="colAmountTd fontFamclass" style="text-align: left;">
+ 					<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 						<apex:inputField value="{!cashInfo.cash.ReserveFund__c}" styleClass="j-numberInput2" id="ReserveFundInput"/>
+ 					</td>
+
+ 				</tr>
+			</table>
+		</div>
+		<div style="float: left;width: 80px;min-width: 80px;font-size: 20px;font-weight: bold;">&nbsp;</div>
+		<div style="float: left;width: 320px;min-width: 320px;" id="leftDiv">
+			<table style="width: 100%;border-spacing: 0;border-collapse: 0;border: 1;table-layout: fixed;">
+  				<colgroup style="width: 110px"></colgroup>
+ 				<colgroup style="width: 10px"></colgroup>
+ 				<colgroup style="width: 180px"></colgroup>
+				<tr>
+
+ 					<td class="colHeader" style="vertical-align: middle;">
+ 						<!-- 現金有高[差額] -->	
+ 						<apex:outputLabel value="{!$Label.ps__msg_040_0032}"/>
+ 					</td>
+ 					<td></td>
+ 					<td class="colAmountTd" style="text-align: left;">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+						<div id="cashAmountActOnHand" class="colAmoutOutPanle fontFamclass" style="vertical-align: middle;">
+						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+                        <apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="cashDiffAmoutCal" style="{!IF(cashInfo.diffAmount>=0, 'color:black' ,'color:red' )}">
+							<apex:param value="{!NULLVALUE(cashInfo.diffAmount,0)}" />
+						</apex:outputtext>
+						</div>
+ 					</td>
+				</tr>
+			</table> 
+		</div>
+		
+		</apex:outputPanel>
+		<apex:outputPanel style="width:600px" id="cashDataPanel">
+ 		<!-- Left Div -->
+ 		<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN -->
+		<div style="float: left;width: 320px;" id="leftDiv">
+		<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy END -->
+ 			<table id="cashTable" style="width: 100%;border-spacing: 0;border-collapse: 0;border: 1;table-layout: fixed;">
+ 				<colgroup style="width: 110px"></colgroup>
+ 				<colgroup style="width: 90px"></colgroup>
+ 				<colgroup style="width: 100px"></colgroup>
+ 				<tr>
+ 					<!-- 手許有高[現物] -->	
+ 					<td class="colHeader" style="vertical-align: middle;min-width: 110px;"><apex:outputLabel value="{!$Label.ps__msg_040_0033}" /></td>
+ 					<td style="min-width: 90px">&nbsp;</td>
+ 					<td class="colAmountTd" style="min-width: 100px">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+						<div id="cashAmountActOnHand" class="colAmoutOutPanle fontFamclass" style="vertical-align: middle;">
+						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="cashAmountActCal" >
+								<apex:param value="{!NULLVALUE(cashInfo.cashActAmount,0)}" />
+							</apex:outputtext>
+							<apex:inputHidden id="hidCashAmountActCal" value="{!cashInfo.cashActAmount}"/>
+						</div>
+ 					</td>
+ 				</tr>
+ 				<tr><td></td>
+ 				<td colspan="2" style="background-color: green;"></td>
+ 				</tr>					
+ 				<!-- 2016/07/15 トランスレーション対応 by wx begin --> 				
+ 				<apex:repeat value="{!inputInf}" var="inf"> 
+ 				<tr>	 
+ 				   <!-- 2017/08/31 页面抓图機能　by　zyz BEGIN --> 
+ 				   <td class="colHeader fontFamclass" style="vertical-align: middle;"><apex:outputLabel value="{!inf.label}" />
+ 				   <!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 				   </td>
+ 				  <!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 				  <td class="fontFamclass">
+ 				  <!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 				  	<!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+ 				  	<apex:inputField value="{!cashInfo.cash[inf.apiName]}" styleClass="j-numberInput" html-unitPrice="{!inf.percount}" html-chgname="{!inf.changeName}" html-syncDivId="{!inf.elementId}"/>
+ 				  	<!-- 2017/03/17 お釣りプリンター機能　by zy END -->
+ 				  </td>
+ 				  <td class="colAmountTd">
+ 				       <!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 				       <div id="{!inf.elementId}" class="colAmoutOutPanle fontFamclass" style="vertical-align: middle;">
+ 				       <!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 				         <apex:outputtext value="{!inf.crrency}{0,number,{!NumberFormat}}" id="cashNumsId"><!-- {!inf.cashNumsId} {!inf.cashNumsparId} -->
+							<apex:param value="{!NULLVALUE(cashInfo.cash[inf.apiName],0) * inf.percount}" id="cashNumsparId"/>
+						</apex:outputtext>
+ 				       </div>
+ 				  </td>			       				
+ 			   </tr>	
+ 			   </apex:repeat>  			   			   	
+ 			   <!-- 2016/07/15 トランスレーション対応 by wx end -->	
+ 			</table>
+ 			<!-- 機械有高 -->
+ 			<table id="machineTable" style="width: 100%;border-spacing: 0;border-collapse: 0;border: 1;table-layout: fixed;">
+ 				<colgroup style="width: 110px"></colgroup>
+ 				<colgroup style="width: 90px"></colgroup>
+ 				<colgroup style="width: 100px"></colgroup>
+ 				<tr><!-- 機械有高 -->	
+ 					<td class="colHeader" style="vertical-align: middle;min-width: 110px;"><apex:outputLabel value="{!$Label.ps__msg_040_0038}" /></td>
+ 					<td style="min-width: 90px">&nbsp;</td>
+ 					<td class="colAmountTd" style="min-width: 100px;position:relative;">
+ 						<!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+						<div id="cashAmountMachOnHand" class="colAmoutOutPanle fontFamclass" style="vertical-align: middle;">
+						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+						<!-- 2017/03/17 お釣りプリンター機能　by zy END -->
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="cashAmountMachCal">
+								<apex:param value="{!NULLVALUE(cashInfo.cashMachAmount,0)}" />
+							</apex:outputtext>
+							<apex:inputHidden id="hidCashAmountMachCal" value="{!cashInfo.cashMachAmount}"/>
+						</div>
+						<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN -->
+						<div id="changeMsgPanel" style="position:absolute;top:8px;left:140px;width:255px;text-align: left;display:none;">
+						<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy END -->	
+							<span>
+								<img id="re-image" title="釣銭機精査" class="icon-status" src="../img/func_icons/util/ileUndo16.gif" alt="Loading..." onclick="imediateConnect()" />
+								<img id="error-image" class="icon-status" src="../img/msg_icons/error16.png" alt="Loading..." />
+								<img id="loading-image" class="icon-status" src="../img/loading.gif" alt="Loading..." />
+							</span>
+							<span id="errorMsg"></span>
+						</div>
+ 					</td>
+ 				</tr>
+ 				<tr><td></td>
+ 				<td colspan="2" style="background-color: green;"></td>
+ 				</tr>
+ 				<!-- 2017/06/22 機械有高可入力機能追加　by　zy　BEGIN -->
+ 				<apex:repeat value="{!inputMachineInf}" var="inf"> 
+ 				<tr>
+ 					<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 					<td class="colHeader fontFamclass" style="vertical-align: middle;"><apex:outputLabel value="{!inf.label}" /></td>
+ 					<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 					<td>
+ 						<!-- 2017/06/22 機械有高可入力機能追加　by　zy　BEGIN -->
+ 						<apex:inputField value="{!cashInfo.cash[inf.apiName]}" html-exitQty="{!cashInfo.cash[inf.apiName]}" styleClass="j-numberInput3" html-unitPrice="{!inf.percount}" html-chgname="{!inf.changeName}" html-syncDivId="{!inf.elementId}" rendered="{!isEditKikaiFlag}"/>
+ 						<span unitPrice="{!inf.percount}" chgname="{!inf.changeName}" syncDivId="{!inf.elementId}" style="display:none;" />
+ 						<apex:inputHidden id="hidMashInput" value="{!cashInfo.cash[inf.apiName]}" html-exitQty="{!cashInfo.cash[inf.apiName]}" html-unitPrice="{!inf.percount}" html-chgname="{!inf.changeName}" html-syncDivId="{!inf.elementId}" rendered="{!!isEditKikaiFlag && isSaveFlag}"/>
+ 						<!-- 2017/06/22 機械有高可入力機能追加　by　zy　END -->
+ 					</td>
+ 					<td class="colAmountTd" style="position:relative">
+ 						<!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<div id="{!inf.elementId}" class="colAmoutOutPanle machineClass fontFamclass" charge="{!inf.changeName}" incurment="{!inf.label}" >
+						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+						<!-- 2017/03/17 お釣りプリンター機能　by zy END -->	
+							 <apex:outputtext value="{!inf.crrency}{0,number,{!NumberFormat}}" id="cashNumsId"><!-- {!inf.cashNumsId} {!inf.cashNumsparId} -->
+								<apex:param value="{!NULLVALUE(cashInfo.cash[inf.apiName],0) * inf.percount}" id="cashNumsparId"/>
+							</apex:outputtext>
+ 						</div>
+ 						<div id="parntUnit" style="display:none;">
+	 						<div id="unitDiv" style="position: absolute;display: inline-flex;font-size: 20px; font-weight: bold;line-height: 23px;"> 
+	 							<!-- 2017/06/08  格式変更　by　zy　BEGIN -->
+	 							（<div id="unit" style="text-align: right;width:45px;">{!NULLVALUE(cashInfo.cash[inf.apiName],0) }</div>{!$Label.MSG_040_0051_01}）
+	 							<!-- 2017/06/08  格式変更　by　zy　END -->
+	 						</div>
+ 						</div>
+ 					</td>
+ 				</tr>
+ 				</apex:repeat>
+ 				<!-- 2016/07/15 トランスレーション対応 by wx end -->	
+ 				<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN -->
+ 				<tr><td colspan="3">&nbsp;</td></tr>
+ 				<apex:repeat value="{!labelInf}" var="inf"> 
+	 				<tr class="labelRow" style="display:none;">
+	 					<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+	 					<td class="colHeader fontFamclass" style="vertical-align: middle;"><apex:outputLabel value="{!inf.label}" /></td>
+	 					<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+	 					<td>
+	 					</td>
+	 					<td class="colAmountTd" style="position:relative">
+	 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+	 						<div id="{!inf.elementId}" class="colAmoutOutPanle machineClass labelClass fontFamclass" charge="{!inf.changeName}"  style="display:none;" ></div>
+	 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+	 						<div id="unitDiv" style="position: absolute;display: inline-flex;font-size: 20px; font-weight: bold;line-height: 23px;top:0px;">
+	 						（<div id="unit" style="text-align: right;width:45px;">{!NULLVALUE(cashInfo.cash[inf.apiName],0) }</div>{!$Label.MSG_040_0051_01}）
+	 						</div>
+	 					</td>
+	 				</tr>
+ 				</apex:repeat>
+ 				<!-- 2017/08/09 リジェクト部の保存可能追加　by　zy END -->										
+ 			</table>
+ 			
+ 		</div>		
+ 		<!-- RIGHT PANEL -->
+ 		<div style="float: left;width: 80px;font-size: 20px;font-weight: bold;">&nbsp;</div>
+ 		<div style="float: left;width: 320px;height:360px;" id="rightDiv">
+  			<table style="width: 100%;border-spacing: 0;border-collapse: 0px;border: 1;table-layout: fixed;">
+  				<colgroup style="width: 110px"></colgroup>
+ 				<colgroup style="width: 10px"></colgroup>
+ 				<colgroup style="width: 180px"></colgroup>
+ 				<tr><!-- 現金有高[論理] -->	
+ 					<td class="colHeader" style="vertical-align: middle;"><apex:outputLabel value="{!$Label.ps__msg_040_0039}" /></td>
+ 					<td>&nbsp;</td>
+ 					<td class="colAmountTd">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<div class="colAmoutOutPanle fontFamclass">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 							<span style="margin-top: 6px;">
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="cashAmountLogicCal">
+								<apex:param value="{!NULLVALUE(cashInfo.cashLogicAmount,0)}" />
+							</apex:outputtext>
+ 							</span>
+ 						</div>
+ 					</td>
+ 				</tr>
+				<tr ><td></td><td colspan="2" style="background-color: green"></td></tr>
+ 				<tr><!-- 売上現金 -->	
+ 					<td class="colHeader" style="vertical-align: middle;"><apex:outputLabel value="{!$Label.ps__msg_040_0040}" /></td>
+ 					<td>&nbsp;</td>
+ 					<td class="colAmountTd">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<div  class="colAmoutOutPanle fontFamclass">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 							<span style="margin-top: 6px;">
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="rightSalesAmount">
+								<apex:param value="{!NULLVALUE(cashInfo.salesAmount,0)}" />
+							</apex:outputtext>
+ 							</span>
+ 						</div>
+ 					</td>
+ 				</tr>
+ 				<tr><!-- 現金入金 -->	
+ 					<td class="colHeader" style="vertical-align: middle;"><apex:outputLabel value="{!$Label.ps__msg_040_0041}" /></td>
+ 					<td>&nbsp;</td>
+ 					<td class="colAmountTd">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<div  class="colAmoutOutPanle fontFamclass">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 							<span style="margin-top: 6px;">
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="rightDespAmount">
+								<apex:param value="{!NULLVALUE(cashInfo.despAmount,0)}" />
+							</apex:outputtext>
+ 							</span>
+ 						</div>
+ 					</td>
+ 				</tr>
+  				<tr><!-- 現金出金 -->	
+ 					<td class="colHeader" style="vertical-align: middle;"><apex:outputLabel value="{!$Label.ps__msg_040_0042}" /></td>
+ 					<td>&nbsp;</td>
+ 					<td class="colAmountTd">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<div  class="colAmoutOutPanle fontFamclass">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 							<span style="margin-top: 6px;">
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="rightPayAmount">
+								<apex:param value="{!NULLVALUE(cashInfo.payAmount,0)}" />
+							</apex:outputtext>
+ 							</span>
+ 						</div>
+ 					</td>
+ 				</tr>
+ 				<tr><!-- 準備金 -->	
+ 					<td class="colHeader" style="vertical-align: middle;"><apex:outputLabel value="{!$Label.ps__msg_040_0031}" /></td>
+ 					<td>&nbsp;</td>
+ 					<td class="colAmountTd">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<div  class="colAmoutOutPanle fontFamclass">
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 							<span style="margin-top: 6px;">
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" id="rightReserveFund">
+								<apex:param value="{!NULLVALUE(cashInfo.cash.ReserveFund__c,0)}" />
+							</apex:outputtext>
+ 							</span>
+ 						</div>
+ 					</td>
+ 				</tr>
+ 			</table>
+ 			<!-- ドルーオプンー-->
+ 			<input type="button" value="ドアオープン" id="openBtn" onclick="openDoor()" style="width:100px;height:50px;background: silver;float: right;margin-top: 20px;display: none;" class="buttonclass"/>
+ 		</div>
+		<!-- Update System Info -->
+		<!-- 
+     	<apex:outputPanel rendered="{!cashInfo.cash.Id != null}">
+ 			<div class="k-block" style="float: right;font-size: 14px;" id="systemInfo">
+ 				<table style="border-spacing: 3px">
+ 					<tr>
+ 						<td><apex:outputLabel value="最終更新者:" /></td>
+ 						<td><apex:outputField value="{!cashInfo.cash.LastModifiedBy.Name}" /></td>
+ 					</tr>
+ 					<tr>
+ 						<td><apex:outputLabel value="{!$ObjectType.CashVerification__c.Fields.LastModifiedDate.label}:" /></td>
+ 						<td><apex:outputField value="{!cashInfo.cash.LastModifiedDate}" /></td>
+ 					</tr>
+ 				</table>
+ 			</div>
+ 		</apex:outputPanel>
+	 	-->
+ 		</apex:outputPanel>
+ 		<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+		<apex:outputPanel id="imgPanel">
+			<div style="float: right;display:{!if(attaList.size > 0, 'block', 'none')};" id="imgDiv">
+                <select size="1" id="attaName" style="margin-right:3px;font-size: 1em;height: 22px">
+                    <apex:repeat value="{!attaList}" var="hisFile"> 
+                        <option value="{!hisFile.value}">{!hisFile.Label}</option>
+                    </apex:repeat>
+                </select>
+                <button type="button" class="btn" onclick="printImg()" style="width:100px;height: 21px">印刷</button>
+			</div>
+		</apex:outputPanel>
+		<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+     	<apex:outputPanel rendered="{!cashInfo.cash.Id != null}">
+ 			<div class="k-block" style="float: right;font-size: 14px;" id="systemInfo">
+ 				<table style="border-spacing: 3px">
+ 					<tr><!-- 最終更新者: -->	
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<td class="fontFamclass"><apex:outputLabel value="{!$Label.ps__msg_040_0043}" /></td>
+ 						<td class="fontFamclass"><apex:outputField value="{!cashInfo.cash.LastModifiedBy.Name}" /></td>
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 					</tr>
+ 					<tr>
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz BEGIN -->
+ 						<td class="fontFamclass"><apex:outputLabel value="{!$ObjectType.CashVerification__c.Fields.LastModifiedDate.label}:" /></td>
+ 						<td class="fontFamclass"><apex:outputField value="{!cashInfo.cash.LastModifiedDate}" /></td>
+ 						<!-- 2017/08/31 页面抓图機能　by　zyz END -->
+ 					</tr>
+ 				</table>
+ 			</div>
+ 		</apex:outputPanel>
+ 		<!-- // 2017/06/08 現金合せ論理値自動更新できるように改善対応 BEGIN -->
+ 		<script>var _gRsvId = "{!JSENCODE(rsvId)}";</script>	
+ 		<!-- // 2017/06/08 現金合せ論理値自動更新できるように改善対応 END -->
+    </apex:pageBlockSection>
+ 	
+</apex:pageBlock>
+</apex:form>		
+
+
+<script>
+
+$j(document).ready(function() {
+	//提前处理按钮等事务
+	//営業日
+	$j("input[id$=':cashDataBlockBtn:salesDate']").attr('readonly', true);
+	/*
+	// 現金合わせレポートリンクIDを追加する
+	var repId = "{!JSENCODE(reportId)}";
+	var repNm = "{!JSENCODE(reportNm)}";
+	if (repId != "") {
+		// レポート遷移用リンクを追加する
+		var $blockTitle = $j("[id$=':cashDataBlock']").find(".mainTitle");
+		var repUrl = "/" + repId;
+		var htmlStr = '<a href="' + repUrl + '" target="_blank" class="btn" style="text-decoration:none;padding: 4px;" title="'+repNm+'">&nbsp;<img src="/img/icon/reports16.png" style="vertical-align: middle;" class="imgstyle">&nbsp;$$_TITLE_$$</img>&nbsp;</a>';
+		var blockTitleHtmlStr = htmlStr.replace("$$_TITLE_$$",$blockTitle.text());
+		$blockTitle.html(blockTitleHtmlStr);
+	}*/
+	//2017/07/03 コードレビュー by zy BEGIN
+    //ip获取 只获取一次就可以，不需要每次都调用刷新零钱机以及pos机的配置
+    //如果有poslst的情况下 则不进行渲染
+    // 还需要判断釣銭機
+    //不要进行判断，因为刚进来的店铺有可能没有配置这些定义
+    //而且此处只会调用一次，如果跳过就不会重新读取ip
+    //所以每次都要进行ip取得
+	//if (chkHadPosLst() || switchFlag) {
+    	initMachineMessage();
+    	//return;
+    //}
+    //2017/07/03 コードレビュー by zy END
+	// 支店情報が存在する場合「選択リストUI処理」
+	//bindSendList();
+	// Event Bind
+	//bindLeftEvent();
+	// 画面初期表示する場合、FOCUS設定する
+	//$j("[id$=':ReserveFundInput']").data("kendoNumericTextBox").focus();
+});
+function bindSendList(){
+	// 支店情報が存在する場合「選択リストUI処理」
+	$j(".j-dropDownList").kendoDropDownList();
+}
+function bindLeftEvent() {
+	// 2017/08/31 页面抓图機能　by　zyz BEGIN
+	if(!isMac){
+		$j(".fontFamclass").removeClass("fontFamclass");
+	}
+	// 2017/08/31 页面抓图機能　by　zyz END
+	// 重复绑定处理
+	if ($j("input.j-numberInput,input.j-numberInput2,input.j-numberInput3").filter(":not([data-role='numerictextbox']):not('.k-formatted-value')").length > 0) {
+		// 現金有高
+		$j(".j-numberInput").width(80).kendoNumericTextBox({
+	    		format: "##,###",
+	    		min:0,
+	    		step: 1,
+	    		decimals: 0,
+				change: function() {
+					// 現金有高再計算を行う
+					var $value = this.value() == null ? 0 : this.value();
+					var $this = this.wrapper.find("input[syncdivid]");
+					var $thisId = $this.attr("id");
+					var forDivId = $this.attr("syncDivId");
+					var forUnitPrice = 1 * $this.attr("unitPrice");
+					var amoutPrice = commUtils.mathNumMulti(forUnitPrice, $value);
+					$j("#" + forDivId).text( kendo.toString(amoutPrice,"c") );
+					
+					// 全て再計算を行う
+					var totalAmout = amoutPrice;
+					// 2017/07/02 自動计算范围控制 by zy BEGIN
+					$j(".j-numberInput input[syncdivid]").each(function() {
+					// 2017/07/02 自動计算范围控制 by zy END
+						var $locthis = $j(this);
+						if ($locthis.attr("id") !== $thisId) {
+							var locForDivId = $locthis.attr("syncDivId");
+							// 2016/07/11 現金合せの金額単位XML設定 by wx begin 	
+							var locAmout = kendo.parseFloat($j("#" + locForDivId).text());
+							// 2016/07/11 現金合せの金額単位XML設定 by wx end 
+							totalAmout += locAmout == null ? 0 : locAmout;
+						}
+					});
+					$j("span[id$=':cashAmountActCal']").text(kendo.toString(totalAmout, "c") );
+					// 2017/03/01 手許有高[現物]の最新値を更新されない不具合改修 BEGIN
+					$j("input[id$=':hidCashAmountActCal']").val(totalAmout);
+					// 2017/03/01 手許有高[現物]の最新値を更新されない不具合改修 END
+					// 差額計算				
+					syncAmountDiffVal();
+				}
+		});
+		$j(".j-numberInput2").width(120).kendoNumericTextBox({
+	    		format: "c",
+	    		min:0,
+	    		step: 1,
+	    		decimals: {!JSENCODE(PointLen)},
+	    		change: function() {
+	    			var $value = kendo.parseFloat(this.value());
+	    			$value = ($value == null ? 0 : $value);
+	    			$j("span[id$=':rightReserveFund']").text(kendo.toString($value, "c") );
+	    			// 現金有高[論理]合計値再計算する
+	    			// 2017/06/08 現金合せ論理値自動更新できるように改善対応 BEGIN
+	    			/*
+	  			// 売上現金
+	    			var rightSalesAmount = kendoParseFloat($j("span[id$=':rightSalesAmount']").text());
+	    			// 現金入金
+	    			var rightDespAmount = kendoParseFloat($j("span[id$=':rightDespAmount']").text());
+	    			// 現金出金
+	    			var rightPayAmount = kendoParseFloat($j("span[id$=':rightPayAmount']").text());
+	    			// 現金有高[論理]	= 準備金 + 売上現金 + 現金入金 - 現金出金
+	    			var amout1 = commUtils.mathNumAdd($value, rightSalesAmount);
+	    			var amout2 = commUtils.mathNumSub(rightDespAmount, rightPayAmount);
+	    			logicTotalAmout = commUtils.mathNumAdd(amout1, amout2);
+	    			$j("span[id$=':cashAmountLogicCal']").text(kendo.toString(logicTotalAmout, "c") );
+	    			*/
+	    			_calLogicTotalAmount($value);
+	    			// 2017/06/08 現金合せ論理値自動更新できるように改善対応 END
+	    			// 差額計算
+					syncAmountDiffVal();
+			}
+		});
+		//2017/07/01 レビュー更新する　by　zy　BEGIN
+		// 機械有高
+		$j(".j-numberInput3").width(80).kendoNumericTextBox({
+	    		format: "##,###",
+	    		min:0,
+	    		step: 1,
+	    		decimals: 0,
+				change: function() {
+					// 現金有高再計算を行う
+					var amoutPrice = refreshSyncDiv(this);
+					refreshPrice("#machineTable .j-numberInput3 input[syncdivid]");
+				}
+		});
+		//2017/07/01 レビュー更新する　by　zy　END
+	}
+	var numberInputArr = $j("input.k-formatted-value");
+    numberInputArr[0].focus();
+    $j("span.k-numerictextbox").keydown(function(e){
+    	if(e.keyCode == 13){
+    		var inputs = $j("span.k-numerictextbox");
+    		var idx = inputs.index(this);
+    		if (idx == inputs.length - 1) {
+                 $j("input[id$=saveBtn]").focus();
+                 e.preventDefault();
+             } else {
+             	//  handles submit buttons
+                 numberInputArr[idx + 1].focus(); 
+                 
+                 //$j(inputs[idx + 1]).select();
+             }
+        }    
+    });
+    //2017/07/03 コードレビュー by zy BEGIN
+    //2017/03/17 お釣りプリンター機能　by zy BEGIN
+    //initMachineMessage();
+    //2017/03/17 お釣りプリンター機能　by zy END
+     //2017/07/03 コードレビュー by zy END
+	// 2017/06/08 現金合せ論理値自動更新できるように改善対応 BEGIN
+	_refreshLogicAmountTimer();
+	// 2017/06/08 現金合せ論理値自動更新できるように改善対応 END
+	// 2017/07/02 ポースの機能表示
+	_refreshMachineUnit();
+	return;
+}
+// 現金有高 差額再計算を行う
+function syncAmountDiffVal () {
+ 	//現金有高[論理]
+ 	var total1 = kendoParseFloat($j("span[id$=':cashAmountLogicCal']").text());
+ 	//現金有高[現物]
+ 	var total2 = kendoParseFloat($j("span[id$=':cashAmountActCal']").text());
+ 	//機械有高
+ 	//2017/03/17 お釣りプリンター機能　by zy BEGIN 
+ 	//2017/07/01 レビュー更新する　by　zy　BEGIN
+ 	var totalM = kendoParseFloat($j("span[id$=':cashAmountMachCal']").text());
+ 	//2017/07/01 レビュー更新する　by　zy　END
+	//現金有高[差額] = 現金有高[現物] - 現金有高[論理]
+	var total3 = commUtils.mathNumSub(total2 + totalM, total1);
+	//2017/03/17 お釣りプリンター機能　by zy END 
+	$j("span[id$=':cashDiffAmoutCal']").text(kendo.toString(total3, "c") );
+    if (total3 >= 0) {
+        $j("span[id$=':cashDiffAmoutCal']").css("color","black");
+    }
+    if(total3 < 0) {
+        $j("span[id$=':cashDiffAmoutCal']").css("color","red");
+    }
+}
+// kendo parsefloat bug fix
+function kendoParseFloat(val) {
+	var manasFlg = "-";
+	var manascal = 1;
+	if (val.indexOf(manasFlg) > -1) {
+		val = val.replace("-", "");
+		manascal = -1;
+	}
+	val = kendo.parseFloat(val);
+	if (val != null) return manascal * val;
+	return val;
+}
+//2017/03/17 お釣りプリンター機能　by zy BEGIN
+function initMachineMessage(){
+	if (typeof crgPnt !== "undefined") crgPnt.init();
+	//2017/06/08 オーダーエンドリ追加　by　zy　BEGIN
+	//if (!switchFlag) return;
+	var localIp = '';
+	//2017/06/08 オーダーエンドリ追加　by　zy　END
+	//2017/06/12 localStorage ipアドー廃棄　by　zy　BEGIN
+	var ipTimoutId;
+	//2017/06/12 localStorage ipアドー廃棄　by　zy　END
+	//ip获取
+	try{
+		var hadProcessedFlag = true;
+		// 2019/09/15 現金合せを最初に開いた際、画面の表示不具合（金額を入れても反映されず、日にちを選び直すといつもの画面に戻る） by zy BEGIN
+		var listenGetIpId = setTimeout(function(){
+			$("input[id$=hidLocalIp]").val(localIp);
+			if (hadProcessedFlag && localIp == "") afterGetIp();
+		},1000);
+		// 2019/09/15 現金合せを最初に開いた際、画面の表示不具合（金額を入れても反映されず、日にちを選び直すといつもの画面に戻る） by zy END
+		getIPs(function(ip){
+			localIp = ip;
+			//清除上一次调用
+			clearTimeout(ipTimoutId);
+			//console.log(ip);
+			if (hadProcessedFlag) {
+				$("input[id$=hidLocalIp]").val(localIp);
+				//getPrintFlag(localIp);
+				hadProcessedFlag = false;
+			}
+			//2017/06/12 localStorage ipアドー廃棄　by　zy　BEGIN
+			//启动下一次调用
+			ipTimoutId = setTimeout(afterGetIp(),1000);
+			//2017/06/12 localStorage ipアドー廃棄　by　zy　END
+		});
+	} catch(err){
+		//2017/06/12 localStorage ipアドー廃棄　by　zy　BEGIN
+		//getPrintFlag();
+		console.log(err);
+		//清除上一次调用
+		clearTimeout(ipTimoutId);
+		afterGetIp();
+		//2017/06/12 localStorage ipアドー廃棄　by　zy　END
+	}
+}
+//唯一flag 防止多次执行，紧急处理用，下次release重新考虑
+var funcFlag = false;
+//2017/03/17 お釣りプリンター機能　by zy END
+//2017/06/12 localStorage ipアドー廃棄　by　zy　BEGIN
+function afterGetIp(){
+	var ip = $("input[id$=hidLocalIp]").val();
+	if ("jinya_order_setIp" in window.localStorage) {
+		var localIp = window.localStorage["jinya_order_setIp"];
+		if (localIp != undefined && localIp != "") ip = localIp;
+		$("input[id$=hidLocalIp]").val(ip);
+	}
+	console.log(ip);
+	if (funcFlag) return;
+	//2017/07/03 コードレビュー by zy BEGIN
+	funcFlag = true;
+	//查看是否存在pos机
+	if (chkHadPosLst()) {
+		initPrintInfo();
+		//此处需要连接后台不执行后面的处理
+		return;
+	//不存在
+	//不需要判断是否执行需要执行零钱机
+	//} else if (switchFlag) {
+	} else {
+		//此情况为只有零钱机可用的情况，因为获取完ip才可能进行渲染
+		//所以此处要进行组件渲染
+		//getPrintFlag(ip);
+		afterRefreshPosNo();
+	}
+	//2017/07/03 コードレビュー by zy END
+}
+//2017/06/12 localStorage ipアドー廃棄　by　zy　END
+//オーダーエンドリの機能追加 by zy BEGIN
+var accountMessPnt,accountCommPnt;
+function afterLoadPrint(){
+	//读取回返json
+	var info = $("input[id$=requestInfo]").val();
+	if (info != "") {
+		var backInfo = JSON.parse(info);
+		accountMessPnt = $.WebPrint({
+			webComm:backInfo.status
+		});
+		accountCommPnt = $.WebPrint({
+			webComm:backInfo.print,
+			isDebug:true,
+			// ログアドレス
+			remoteSaveLog:"{!$RemoteAction.CashRollupBook.savePrintLodToDb}",
+			sendMesssage:function(e){
+				try{
+					accountCommPnt.disconnect();
+					accountMessPnt.disconnect();
+				}catch(err){
+				}
+			}
+		});
+		// 2017/07/26 ログ機能追加　by　zy BEGIN
+		accountCommPnt.baseInfo = '****現金合わせ：' + $j("input[id$=hidCurPos]").val() + 'IP：' + $("input[id$=hidLocalIp]").val() + '****';
+		// 2017/07/26 ログ機能追加　by　zy END
+		//本地の印刷設備の場合
+		if (backInfo.localDevice){
+			//ドルオプンー
+			$("#openBtn").show();
+			$("#openBtn").data("door",backInfo.content);
+		}
+		console.log(backInfo.content);
+	}
+}
+function openDoor(){
+	var content = $("#openBtn").data("door");
+	var arr = JSON.parse(content);
+	var seqArr = [];
+	for (var i = 0 ;i <arr.length ; i++) {
+		seqArr.push(JSON.stringify(arr[i]));
+	}
+	console.log(seqArr);
+	accountCommPnt.callBackSeqArr = seqArr;
+	accountCommPnt.nextStep();
+	accountMessPnt.connect();
+}
+//オーダーエンドリの機能追加 by zy END
+// 2017/06/08 現金合せ論理値自動更新できるように改善対応 BEGIN
+// 画面論理値自動更新を行うインタバル値
+var timerInterval = 1*5*1000;
+var intervalId = null;
+function _refreshLogicAmountTimer() {
+    clearTimeout(intervalId);
+    // 2017/11/29 保存処理中の場合、自動更新を行わない BEGIN
+    if (_g_issaveing) {
+        intervalId = setTimeout(_refreshLogicAmountTimer, timerInterval);
+        return;
+    }
+    // 2017/11/29 保存処理中の場合、自動更新を行わない END
+	intervalId = setTimeout(_refreshLogicAmountFun, timerInterval);
+}
+function _refreshLogicAmountFun() {
+	// 現状の売上情報IDと指定の店舗情報値により、関連の論理値自動更新を行う
+	var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+	// 2017/07/01 device config by zy BEGIN
+	/*
+	因为remoteaction添加了「その他」讲原来的字符改成json串的inner对象
+	var curPos = $("select[id$=curPos]").val();
+	if (curPos == undefined || curPos == "" || curPos == null) curPos = "";
+	*/
+	var curPos = getPosLstInfo();
+	// 既に定義する売価はプランカラ取得、画面に設定する
+	Visualforce.remoting.Manager.invokeAction(
+	"{!$RemoteAction.CashRollupBook.autoRefreshLogicInfo}", _gRsvId,branchCd,curPos, function(result, event){
+	// 2017/07/01 device config by zy END
+		if(event.type == 'exception') {
+			alert(event.message);
+		} else {
+			// 論理値を自動更新する
+			_refreshLogicAmountFunCallBackFun(result);
+			// 次の自動更新定義を行う
+			_refreshLogicAmountTimer();
+		}
+	});
+}
+function _refreshLogicAmountFunCallBackFun(r) {
+	// .text(kendo.toString(logicTotalAmout, "c") );
+	var orgSales = $j("span[id$=':rightSalesAmount']").text();
+	var orgDesp = $j("span[id$=':rightDespAmount']").text();
+	var orgPay = $j("span[id$=':rightPayAmount']").text();
+	// 売上現金
+	var newSales = kendo.toString(r.salesAmount, "c");
+	// 現金入金
+	var newDesp = kendo.toString(r.despAmount, "c");
+	// 現金出金
+	var newPay = kendo.toString(r.payAmount, "c");
+	if (orgSales != newSales || orgDesp != newDesp || orgPay != newPay) {
+		$j("span[id$=':rightSalesAmount']").text(newSales);
+		$j("span[id$=':rightDespAmount']").text(newDesp);
+		$j("span[id$=':rightPayAmount']").text(newPay);
+		// 準備金情報を取得する
+		var resFundVal = $j("[id$=':ReserveFundInput']").val();
+		// 現金有高［論理］自動計算する
+		_calLogicTotalAmount(resFundVal);
+		// 再度計算する
+		syncAmountDiffVal();		
+	}
+}
+// 現金有高［論理］自動計算する
+function _calLogicTotalAmount(resFundVal) {
+	// 売上現金
+  	var rightSalesAmount = kendoParseFloat($j("span[id$=':rightSalesAmount']").text());
+  	// 現金入金
+  	var rightDespAmount = kendoParseFloat($j("span[id$=':rightDespAmount']").text());
+  	// 現金出金
+  	var rightPayAmount = kendoParseFloat($j("span[id$=':rightPayAmount']").text());
+  	// 現金有高[論理]	= 準備金 + 売上現金 + 現金入金 - 現金出金
+  	var amout1 = commUtils.mathNumAdd(resFundVal, rightSalesAmount);
+  	var amout2 = commUtils.mathNumSub(rightDespAmount, rightPayAmount);
+  	var logicTotalAmout = commUtils.mathNumAdd(amout1, amout2);
+  	$j("span[id$=':cashAmountLogicCal']").text(kendo.toString(logicTotalAmout, "c") );
+}
+// 2017/06/08 現金合せ論理値自動更新できるように改善対応 END
+// 2017/07/02 変更ポース後対応　by　zy BEGIN
+function afterRefreshPosNo(){
+	//更改POSリスト
+	changeSelectValue();
+	bindLeftEvent();
+	bindSendList();
+	// 2017/07/11 bugfix，レーポット履歴ボタン　by　zy BEGIN
+	// 現金合わせレポートリンクIDを追加する
+	var repId = "{!JSENCODE(reportId)}";
+	var repNm = "{!JSENCODE(reportNm)}";
+	if (repId != "") {
+		// レポート遷移用リンクを追加する
+		var $blockTitle = $j("[id$=':cashDataBlock']").find(".mainTitle");
+		if ($blockTitle.find("a").length == 0 ) {
+			var repUrl = "/" + repId;
+			var htmlStr = '<a href="' + repUrl + '" target="_blank" class="btn" style="text-decoration:none;padding: 4px;" title="'+repNm+'">&nbsp;<img src="/img/icon/reports16.png" style="vertical-align: middle;" class="imgstyle">&nbsp;$$_TITLE_$$</img>&nbsp;</a>';
+			var blockTitleHtmlStr = htmlStr.replace("$$_TITLE_$$",$blockTitle.text());
+			$blockTitle.html(blockTitleHtmlStr);
+		}
+	}
+	// 2017/07/11 bugfix，レーポット履歴ボタン　by　zy END
+	// 画面初期表示する場合、FOCUS設定する
+	$j("[id$=':ReserveFundInput']").data("kendoNumericTextBox").focus();
+	chkIsOpenChange();
+	//funcFlag = false;
+	afterLoadPrint();
+}
+function chkIsOpenChange(){
+	var ip = $("input[id$=hidLocalIp]").val();
+	var isSwitchFlag = $("input[id$=hidChangeSwitch]").val();
+	//零钱机入口打开
+	if (isSwitchFlag == "true") getPrintFlag(ip);
+	//关闭开关
+	//funcFlag = false;
+	//有pos机的时候处理
+	if (chkHadPosLst()) afterLoadPrint();
+}
+//刷新每一行的价格信息
+function refreshSyncDiv(that){
+	// 現金有高再計算を行う
+	var $value = that.value() == null ? 0 : that.value();
+	var $this = that.wrapper.find("input[syncdivid]");
+	var $thisId = $this.attr("id");
+	var forDivId = $this.attr("syncDivId");
+	//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+	//var forUnitPrice = 1 * $this.attr("unitPrice");
+	var unitPrice = $this.attr("unitPrice");
+	var forUnitPrice = 1;
+	if  (unitPrice != undefined) {
+		forUnitPrice = 1 * unitPrice;
+		var amoutPrice = commUtils.mathNumMulti(forUnitPrice, $value);
+		$j("#" + forDivId).text( kendo.toString(amoutPrice,"c") );
+	} else {
+		var amoutPrice = commUtils.mathNumMulti(forUnitPrice, $value);
+		$j("#" + forDivId).text( kendo.toString(amoutPrice,"0") );
+	}
+	//2017/08/09 リジェクト部の保存可能追加　by　zy END
+	
+	return amoutPrice;
+}
+//刷新给定过来的结果集
+function refreshPrice(selector){
+	// 全て再計算を行う
+	var totalAmout = 0;
+	$j(selector).each(function() {
+		var $locthis = $j(this);
+		var locForDivId = $locthis.attr("syncDivId");
+		// 如果存在集计单位则进行合计统计
+		if (!$j($locthis).is("[unitPrice]")) return true;
+		// 2016/07/11 現金合せの金額単位XML設定 by wx begin 	
+		var locAmout = kendo.parseFloat($j("#" + locForDivId).text());
+		// 2016/07/11 現金合せの金額単位XML設定 by wx end 
+		totalAmout += locAmout == null ? 0 : locAmout;
+	});
+	$j("span[id$=':cashAmountMachCal']").text(kendo.toString(totalAmout, "c") );
+	// 2017/03/01 手許有高[現物]の最新値を更新されない不具合改修 BEGIN
+	$j("input[id$=':hidCashAmountMachCal']").val(totalAmout);
+	// 2017/03/01 手許有高[現物]の最新値を更新されない不具合改修 END
+	// 差額計算				
+	syncAmountDiffVal();
+}
+// 2017/07/02 変更ポース後対応　by　zy END
+function _refreshMachineUnit(){
+	var editFlag = $("#hideEditKikaiFlag").val();
+	if (editFlag != "true") {
+		var cashAmount = $j("input[id$=hidCashAmountMachCal]").val();
+		if (cashAmount != "0") {
+			$j("div.machineClass").each(function(idx){
+				var curTd = $j(this).closest("td.colAmountTd");
+				$j("#unitDiv",curTd).css({left:curTd.width()+5});
+				$j("#parntUnit",curTd).show();
+			});
+		}
+	}
+}
+//判断pos机是否有效
+function chkHadPosLst(){
+	//pos選択リスト
+	var posLst = $j("select[id$=curPos]");
+ 	if (posLst.length > 0) return true;
+ 	//获取现在的posno
+ 	var posNo = $j("input[id$=hidCurPos]").val();
+ 	if (posNo != "" && posNo != null && posNo != undefined) return true;
+ 	return false;
+}
+// 2017/07/07 ポースリストの「その他」項目追加　by　zy BEGIN
+// 获取传到后台的数据
+function getPosLstInfo(){
+	var posNo = '';
+	//pos選択リスト
+	var posLst = $j("select[id$=curPos]");
+ 	if (posLst.length > 0) {
+ 		posNo = $j("select[id$=curPos]").val();
+ 	}
+ 	//获取现在的posno
+ 	if (posNo == "" || posNo == undefined || posNo == null) {
+ 		posNo = $j("input[id$=hidCurPos]").val();
+ 	}
+ 	var allPosStr = $j("#hidAllPosStr").val();
+ 	if (allPosStr == undefined || allPosStr == null) allPosStr = '';
+ 	posNo += ':' + allPosStr;
+ 	return posNo;
+}
+// 2017/07/07 ポースリストの「その他」項目追加　by　zy END
+//自刷新数据功能停止
+function _stopRefreshFun(){
+	clearTimeout(intervalId);
+}
+function changeSelectValue(){
+	var posNo = $j("input[id$=hidCurPos]").val();
+	var selectPosNp = $j("select[id$=curPos]").val();
+	if (selectPosNp != posNo) $j("select[id$=curPos]").val(posNo);
+}
+//画面に刷新前実行が必要
+function beforeRefreshPage(){
+	// 釣銭機のありの場合
+	if (switchFlag) {
+		// error自动连接功能清理
+		if (crgPnt.interval != undefined) clearInterval(crgPnt.interval);
+		if (crgPnt.timoutId != undefined) clearTimeout(crgPnt.timoutId);
+	}
+	//　画面は自動刷新機能が止まる
+	_stopRefreshFun();
+}
+//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+// 保存ボタンを押す
+function savePage(that){
+	// 遮挡页面
+	JINYACONNECT.blockUi();
+	// 自刷新停止
+	beforeRefreshPage();
+	// 釣銭機機能判定
+	if (switchFlag) {
+		var localIp = $("input[id$=hidLocalIp]").val();
+		if (localIp in ipMap) {
+			// 更改遮挡信息
+			changeBlockMsg(' 釣銭機精査中。。。');
+			// 设定回调函数
+			crgPnt.callBack = 'saveCashInfo()';
+			// コマンド送出
+			reSendMessage();
+			//跳出
+			return;
+		}
+	}
+	// 后台保存
+	saveCashInfo();
+}
+// 更改遮挡页面信息
+function changeBlockMsg(msg){
+	try {
+		var blockElement = $(".blockUI:visible.blockMsg h1");
+		if (blockElement.length > 0) {
+			var textContent = blockElement.get(0).textContent;
+			var blockHtml = blockElement.html();
+			blockElement.html(blockHtml.replace(textContent,msg));	
+		}
+	} catch(e) {
+		console.log(e);
+	}
+}
+//2017/08/09 リジェクト部の保存可能追加　by　zy END
+</script>
+<!-- 2017/03/17 お釣りプリンター機能　by zy BEGIN -->
+<apex:outputPanel id="changePanel">
+<script>
+	var switchFlag = {!changeSwitch};
+</script>
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/PrintJs.js')}"/>
+<apex:outputPanel rendered="{!changeSwitch}" >
+<script>
+// 入金金额
+var ipMap = new Object();
+var crgPnt = $j.WebPrint({
+	status:'',
+	//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+	callBack : '',
+	connectTimeout:5,
+	//2017/08/09 リジェクト部の保存可能追加　by　zy END
+	beforeConnect:function(){
+		$j(".icon-status").hide();
+		$j("#loading-image").show();
+		$j("#errorMsg").text('');
+		this.status = 'failed';
+	},
+	sendMesssage:function(e){
+		//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+		this.lastTime = (new Date()).getTime();
+		//2017/08/09 リジェクト部の保存可能追加　by　zy END
+		var res = decodeURIComponent(e.data);
+		if (res != 'welcome'){
+			var resObj = JSON.parse(res);
+			if (resObj.lastResponse.result == 'wait'){
+				this.status = 'failed';
+				//$j("div.machineClass").text(kendo.toString(0,"c"));
+				//$j("#cashAmountMachOnHand").text(kendo.toString(0,"c"));
+				syncAmountDiffVal();
+				this.disconnect();
+				//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+				hadCallbackFun(" ポ—ト占用中、機会有高保存しない");
+				//2017/08/09 リジェクト部の保存可能追加　by　zy END
+			} else {
+				var hadEditCheckFlag = false;
+				var total = 0;
+				$j("div.machineClass").each(function(idx){
+					var name = $j(this).attr("charge");
+					var unit = $j("span[chgname='" + name + "']").attr("unitPrice");
+					if (resObj.lastResponse[name] != undefined) {
+						//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+						// 针对于label用不进行计算的项目进行跳过
+						//var incrument = kendo.parseFloat(unit);
+						var incrument = 0;
+						if (unit != undefined) incrument = kendo.parseFloat(unit);
+						//2017/08/09 リジェクト部の保存可能追加　by　zy END
+						var qty = resObj.lastResponse[name];
+						//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+						var curTr = $j(this).closest("tr.labelRow");
+						var curTd = $j(this).closest("td.colAmountTd");
+						if ( curTr.length > 0 && ( qty != undefined && qty != null &&  (qty + "") != "")) {
+							if (qty == 0) {
+								curTr.hide();
+							} else {
+								curTr.show();	
+								$j("#unit",curTd).text(kendo.toString(qty,"0"));
+								var width = (qty+"").length * 18;
+								if (typeof qty != "number") $j("#unit",curTd).css({width:width});
+								$j("#unitDiv",curTd).css({left:curTd.width()+5});
+							}
+							return true;
+						}
+						//2017/08/09 リジェクト部の保存可能追加　by　zy END
+						if (qty == "" || qty == undefined) qty = 0;
+						//2017/06/08  格式変更　by　zy　BEGIN
+						// 2017/07/02 pos可入力情况下需要不显示枚数直接加入input里 by zy BEGIN
+						var elementId = $j(this).attr("id");
+						var inputElement = $j("input[syncDivId=" + elementId + "]");
+						if (inputElement.length > 0 && !inputElement.is("[id$=hidMashInput]")) {
+							var k_input = inputElement.data("kendoNumericTextBox");
+							k_input.value(qty);
+							inputElement.val(qty);
+							refreshSyncDiv(k_input);
+							hadEditCheckFlag = true;
+						} else {
+							var eachTotal = qty*incrument;
+							total += eachTotal;
+							$j("span[id$=cashNumsId]",this).text(kendo.toString(eachTotal,"c"));
+							$j("#unit",curTd).text(kendo.toString(qty,"0"));
+							$j("#unitDiv",curTd).css({left:curTd.width()+5});
+							$j("#parntUnit",curTd).show();
+							// saveflag的时候可存入数据库
+							if (inputElement.is("[id$=hidMashInput]") ) inputElement.val(qty);
+						}
+						// 2017/07/02 pos可入力情况下需要不显示枚数直接加入input里 by zy END
+					}
+				});
+				console.log(res);
+				this.status = 'success';
+				if (hadEditCheckFlag) {
+					refreshPrice("#machineTable .j-numberInput3 input[syncdivid]");
+				} else {
+					/*
+					if ("jinya_order_total" in window.localStorage) {
+						total = kendo.parseFloat(resObj.lastResponse["紙幣機内総金額"]) + kendo.parseFloat(resObj.lastResponse["硬貨機内総金額"]);
+					}*/
+					//2017/07/01 レビュー更新する　by　zy　BEGIN
+					$j("span[id$=':cashAmountMachCal']").text(kendo.toString(total,"c") );
+					 // 2017/03/01 手許有高[現物]の最新値を更新されない不具合改修 BEGIN
+					 $j("input[id$=':hidCashAmountMachCal']").val(total);
+					 // 2017/03/01 手許有高[現物]の最新値を更新されない不具合改修 END
+					//2017/07/01 レビュー更新する　by　zy　END
+					syncAmountDiffVal();
+				}
+				this.disconnect();
+				//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+				hadCallbackFun();
+				//2017/08/09 リジェクト部の保存可能追加　by　zy END
+			}
+		}
+	},
+	getMsgInfo(seq){
+		var objParas = [{key:'real', val:'false'}, {key: 'timeout', val: '-1'},];
+		return '{"sequence": "' + encodeURIComponent(seq) + '", ' + 
+								buildWSRequestParameter(objParas) + ', ' +
+								'"token": ""}';
+	},
+	afterClose:function(e){
+		if (this.status == 'failed'){
+			this.errorMessage = this.ERROR;
+			// 关闭原因为占用时
+			if (this.TITLE.BUSY == this.connectStatus){
+				this.errorMessage = this.WAITERRPR;
+			}
+			//更新エラー内容
+			errChange(this.errorMessage);
+			//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+			hadCallbackFun(' 接続失敗');
+			//2017/08/09 リジェクト部の保存可能追加　by　zy END
+		} else {
+			$j(".icon-status").hide();
+			$j("#re-image").show();
+		}
+	}
+});
+//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+// callback响应
+function hadCallbackFun(error){
+	// 如果配置callback信息则调用此处
+	if (crgPnt.callBack != "") {
+		if (error != "" && error != undefined) changeBlockMsg(error);
+		eval(crgPnt.callBack);
+		console.log("call save");
+		crgPnt.callBack = "";
+	}
+}
+//2017/08/09 リジェクト部の保存可能追加　by　zy END
+function errChange(errorMsg){
+	$j("#errorMsg").html(errorMsg);
+	$j("#error-image").show();
+	//调用定时器重新启动此次呼叫
+	crgPnt.autoReConnect($("#loading-image"),$("#errorMsg .recClass"),imediateConnect);
+}
+function imediateConnect(){
+	crgPnt.curSeq = '精査';
+	crgPnt.reConnectLast();
+}
+function getPrintFlag(ip){ 
+	/*
+	// 2019/09/15 Security Check BY zyz BEGIN
+	var json = '{!JSENCODE(chargeJson)}';
+	// 2019/09/15 Security Check BY zyz END
+	if (json != "") {
+		if (!ipMap.hasOwnProperty()){
+			ipMap = JSON.parse(json);
+		}
+	}
+	var localIp = window.localStorage["jinya_order_setIp"];
+	if ((ip != undefined && ipMap[ip] != undefined) || localIp != undefined) {
+		var ipRes = ipMap[ip];
+		if (ipRes == undefined) ipRes = ipMap[localIp];
+		
+		if (ipRes != undefined ){
+			hadChgUrlFlag = true;
+			crgPnt.webComm = ipRes.connect;
+			if (ipMap['fail'] != "" && ipMap['fail'] != undefined)
+				crgPnt.failTimeout = ipMap['fail'];
+			if (ipMap['timeout'] != "" && ipMap['timeout'] != undefined)
+				crgPnt.inputTimeout = ipMap['timeout'];
+			// 2017/07/17 お客様の改善要望、画面が初期化に場合、釣銭機自動「精査」　by zy BEGIN
+			//if (flag) {
+			//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+			// 过度刷新check
+			if (timeStmpCheck() ){
+				$j(".icon-status").hide();
+				$j("#re-image").show();
+			} else {
+				// 釣銭機の「精査」指令発送
+				crgPnt.callBackSeqArr = ['精査'];
+				crgPnt.nextStep();
+				//crgPnt.send(crgPnt.getMsgInfo());
+			}
+			//2017/08/09 リジェクト部の保存可能追加　by　zy END
+			// 2017/07/17 お客様の改善要望、画面が初期化に場合、釣銭機自動「精査」　by zy END
+			$("#changeMsgPanel").show();
+		}
+	}*/
+	loadMachineInfo(ip);
+	sendOrShow();
+}
+// 通过ip配置釣銭機info
+function loadMachineInfo(ip){
+	// 2019/09/15 Security Check BY zyz BEGIN
+	var json = '{!JSENCODE(chargeJson)}';
+	// 2019/09/15 Security Check BY zyz END
+	if (json != "") {
+		if (!ipMap.hasOwnProperty()){
+			ipMap = JSON.parse(json);
+		}
+	}
+	var localIp = window.localStorage["jinya_order_setIp"];
+	if ((ip != undefined && ipMap[ip] != undefined) || localIp != undefined) {
+		var ipRes = ipMap[ip];
+		if (ipRes == undefined) ipRes = ipMap[localIp];
+		
+		if (ipRes != undefined ){
+			hadChgUrlFlag = true;
+			crgPnt.webComm = ipRes.connect;
+			if (ipMap['fail'] != "" && ipMap['fail'] != undefined)
+				crgPnt.failTimeout = ipMap['fail'];
+			if (ipMap['timeout'] != "" && ipMap['timeout'] != undefined)
+				crgPnt.inputTimeout = ipMap['timeout'];
+		}
+	}
+}
+// 发送コマンド，表示アイコン
+function sendOrShow(){
+	// 此ip未在页面配置过则不需要执行此处信息
+	var localIp = $("input[id$=hidLocalIp]").val();
+	if ( !(localIp in ipMap)) return;
+	var showFlag = false;
+	// 计上日更改以后是否需要自刷新，要判断下日期
+	var curDate = kendo.parseDate($j("input[id$=':cashDataBlockBtn:salesDate']").val(),JINYACONNECT.DateFormat);
+	var curDateStr = kendo.toString(curDate , JINYACONNECT.DateFormat);
+	var toDate = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+	if ( curDateStr < toDate ) showFlag = true;
+	if (showFlag) {
+		hadCallbackFun();
+		$j(".icon-status").hide();
+		$j("#re-image").show();
+		crgPnt.curSeq = crgPnt.getMsgInfo('精査');
+	} else {
+		// 2017/07/17 お客様の改善要望、画面が初期化に場合、釣銭機自動「精査」　by zy BEGIN
+		//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+		// 过度刷新check
+		if (timeStmpCheck() ){
+			$j(".icon-status").hide();
+			$j("#re-image").show();
+		} else {
+			// 釣銭機の「精査」指令発送
+			crgPnt.callBackSeqArr = ['精査'];
+			crgPnt.nextStep();
+			//crgPnt.send(crgPnt.getMsgInfo());
+		}
+	}
+	//2017/08/09 リジェクト部の保存可能追加　by　zy END
+	// 2017/07/17 お客様の改善要望、画面が初期化に場合、釣銭機自動「精査」　by zy END
+	$("#changeMsgPanel").show();
+}
+//2017/08/09 リジェクト部の保存可能追加　by　zy BEGIN
+function timeStmpCheck(){
+	var maxDiffTime = 500;
+	if ("lastTime" in crgPnt ) {
+		var difTimestmp = (new Date()).getTime() - crgPnt.lastTime ;
+		if ( difTimestmp < maxDiffTime) return true;
+	} 
+	return false;
+}
+//精查コマンド
+function reSendMessage(){
+	// 正在处理状态,不进行处理
+	if ($j("img#loading-image").is(":visible")) return;
+	// 发生error重连时,不进行处理
+	if ($j("img#error-image").is(":visible")) {
+		sendOrShow();
+		return;
+	}
+	// 正在连接时，不进行处理
+	if (!crgPnt.isConnect()) {
+		console.log('refresh cash machine');
+		// 釣銭機の「精査」指令発送
+		sendOrShow();
+	}
+}
+//2017/08/09 リジェクト部の保存可能追加　by　zy END
+</script>
+</apex:outputPanel>
+</apex:outputPanel>
+<!-- 2017/03/17 お釣りプリンター機能　by zy END -->
+<!-- 2017/08/31 页面抓图機能　by zyz BEGIN  --> 
+<script>	
+var isMac = function() { return /macintosh|mac os x/i.test(navigator.userAgent); }();
+var _g_issaveing = false;
+function printImg(){
+	var ImgPrint =$j("#attaName").val();
+	var hostUrl = "{!JSENCODE(hostName)}/servlet/servlet.FileDownload?file=" +ImgPrint;
+	window.open(hostUrl);
+}
+// 画像SAVE
+function canvasSaveInfo(cashId){
+	// 抓图的宽度获取
+	var shopName = '';
+    // 店舗名情報取得する
+    if ($j("select[id$=':branchShopCd']").length > 0) {
+       shopName = $j("select[id$=':branchShopCd'] option:selected").text();
+    }
+    // 印刷セクションを隠しす
+    _changeImgDivStatus(false);
+    // 画像のWIDTH情報
+	var widthStr = $j(".pbHeader").width();
+    // 画像取得のセクションを指定する
+	html2canvas($j(".apexp"), {
+		onrendered: function(canvas) {
+            // 釣銭機関連処理を呼び出す
+            chkIsOpenChange();
+            afterLoadPrint();
+			// 抓图显示打印
+			var imgdata = canvas.toDataURL('image/png');
+			// 保存処理中の場合、自動更新を行わない
+			_g_issaveing = false;
+			// RemoteAction 方法存储图片到添附文件
+			Visualforce.remoting.Manager.invokeAction(
+				"{!$RemoteAction.CashRollupBook.refreshCanvasInfo}", cashId, imgdata,shopName, function(result, event){
+					if (event.type == 'exception') {
+						alert(event.message);
+						// 表示返却
+						_changeImgDivStatus(true);
+						// 画面ロック解除
+						JINYACONNECT.unblockUi();
+					} else {
+                        // 返却一覧リスト情報を展開する
+						var optionListArr = [];
+						$.each(result, function(i, option)
+						{
+						    optionListArr[i] = "<option value='" + option.v + "'>" + option.l + "</option>";
+						});
+						$("#attaName option").remove()
+						$("#attaName").append(optionListArr.join(''));
+						// 再表示する
+						_changeImgDivStatus(true);
+						// 画面ロック解除
+						JINYACONNECT.unblockUi();
+					}
+				});
+		},
+		width:widthStr
+		//heght:350
+	});
+}
+function _changeImgDivStatus(isShow) {
+    if (isShow) $j("#imgDiv").css({'display':'block'});
+    else $j("#imgDiv").css({'display':'none'});
+}
+function saveCashInfo() {
+    JINYACONNECT.blockUi();
+    // 保存処理フラグ開始設定
+    _g_issaveing = true;
+    _actSaveCashInfo();
+}
+</script>
+<!-- 2017/08/31 页面抓图機能　by zyz END -->
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

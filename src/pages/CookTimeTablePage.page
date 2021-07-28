@@ -1,0 +1,1904 @@
+<apex:page sidebar="false" controller="CookTimeTableCtrl" action="{!init}" title="料理進捗">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<!-- 2015/07/10 KeyDefine追加 -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<c:CommHeaderComp loadJsLib="false"/>
+<style>
+.j-cook-main{
+	/*height: 650px;*/
+}
+.j-cook-wrap{
+    box-sizing: content-box;
+    border-color: #d5d5d5;
+    background-color: #fff;
+    white-space: nowrap;
+    border-style: solid;
+    border-width: 1px;
+    -webkit-appearance: none;
+    -webkit-box-sizing: content-box;
+}
+.j-cook-head{
+	width: 100%;
+	height: 20px;
+	position: relative;
+	border-bottom: 1px solid #BBB;
+}
+.j-cook-content{
+	height: calc(100% - 20px);
+}
+.j-cook-cookiePanel .j-cook-content{
+	overflow: auto;
+}
+.j-cook-roomPanel .j-cook-content{
+	overflow: hidden;
+	overflow-x:scroll;
+}
+.j-cook-back{
+	background-color: #eae8e8;
+	background-image: url(textures/highlight.png);
+    background-image: none,-webkit-gradient(linear,left top,left bottom,from(rgba(255,255,255,.6)),to(rgba(255,255,255,0)));
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,0) 100%);
+    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,0) 100%);
+    background-position: 50% 50%;
+}
+.j-cook-toolBar{
+	color: #313131;
+	border-color: #c5c5c5;
+    border-style: solid;
+    border-width: 0 0 1px;
+    line-height: 30px;
+    height: 30px;
+}
+.j-cook-roomPanel{
+	overflow: hidden !important;
+}
+.j-cook-cookiePanel{
+	position: relative;
+}
+.j-cook-timewrap{
+	position: absolute;
+	top:0px;
+	height: 0px;
+}
+.j-cook-table{
+	width: 100%;
+	border-spacing: 0;
+}
+.j-cook-table tbody td{
+	position: relative;
+	min-height:30px;
+	padding: 0px;
+}
+.j-cook-roomPanel .j-cook-table{
+	table-layout: fixed;
+}
+.j-cook-cookiePanel .j-cook-content .j-cook-table tbody td{
+	overflow: hidden;
+}
+td.titleClass{
+	overflow: hidden;
+    white-space: nowrap !important;
+    width: 83px;
+    text-overflow: ellipsis;
+}
+.j-cook-roomPanel .j-cook-table tbody td{
+	border-right: 1px solid #BBB;
+	white-space: normal;
+}
+.j-cook-table tr:nth-child(odd){
+	background-color: #f1f1f1;
+}
+.j-cook-cookiePanel{
+	width: 950px;
+}
+.j-cook-cookiePanel tr{
+	position: relative;
+}
+.header{
+	height: 50px;
+}
+.time{
+	position: absolute;
+}
+.line{
+	width:0px;
+	top:0px;
+}
+.dottedClass{
+	border: 1px dotted #ececec;
+}
+.solidClass{
+	border: 1px solid #BBB;
+}
+.time.line.current{
+	border: 1px solid #00a1ff;
+	z-index: 2;
+    background: #00a1ff;
+    color: white;
+}
+#taskChgSection{
+	position:absolute;
+    border: 1px solid red;
+    display: none;
+}
+.forward.back{
+	position: absolute;
+	right:0;
+	top:0;
+	height:100%;
+	z-index:2;
+	background: white;
+}
+.forward.back span{
+	height: 100%;
+}
+.cookUrgent{
+	background: red !important;
+}
+.dragTime{
+	position: fixed;
+	top:0px;
+	height:100%;
+	border: 1px solid red;
+	display: none;
+}
+.timeSpan{
+	position: absolute;
+    top: -1px;
+    height: 20px;
+    width: 40px;
+    background: burlywood;
+    left: 1px;
+}
+.headerRow{
+	padding: 0px;
+    font-size: 12px;
+    border-right: 1px solid #BBB;
+}
+.titleTable{
+	width: 100%;
+	height: 20px;
+	border-spacing: 0;
+	border-bottom: 1px solid #BBB;
+	table-layout: fixed;
+}
+.title-item{
+	position: absolute;
+	top:0;
+	left:-20px;
+	width:20px;
+	background: {!color.titleBg};
+	color:{!color.titleColor};
+	z-index: 2;
+	white-space: pre-line;
+    text-align: center;
+	/* 2020/08/31 7341 bug fixed by zy BEGIN*/
+	overflow:hidden;
+	/* 2020/08/31 7341 bug fixed by zy END*/
+}
+.j-cook-table .cook-detail{
+	position: relative;
+	background: {!color.cookDetailBg};
+	color:{!color.cookDetailColor};
+	height: 25px;
+	margin: 2px;
+	cursor: pointer;
+}
+.j-cook-table .cook-item{
+	position: absolute;
+	width:300px;
+	top:2px;
+	margin-left: 2px;
+	background: {!color.cookBg};
+	-webkit-box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 2px 3px rgba(0,0,0,.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 2px 3px rgba(0,0,0,.05);
+}
+.cookDone{
+	background:  {!color.cookDoneBg} !important;
+	color:{!color.cookDoneColor} !important;
+}
+.cook-item.collapse{
+	height: 28px;
+}
+.collapse>.title-item{
+	left: 0px;
+	height: 25px;
+	text-align: left;
+	white-space: nowrap;
+}
+.collapse>.cook-detail{
+	display: none;
+}
+.collapse>.noDetailClass{
+	display: block;
+}
+.curDatetime{
+	float:right;
+	padding-right:2px;
+}
+/* 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN */
+.dateFormat{
+	display: none;
+}
+/* 2018/10/31 料理進捗開始（OWNER) by cxw END */
+/* 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN */
+#statusWindow{
+  position: absolute;
+  top: 0px;
+  left:0px;
+  width: 100%;
+  background: white;
+  z-index: 100;
+  border: 2px solid #ececec;
+  padding: 0px;
+  display: none;
+}
+#statusWrap{
+  padding: 0px;
+}
+#statusWrap div{
+  float: left;
+  cursor: pointer;
+  list-style: none;
+  margin-left:5px;
+  margin-bottom:5px;
+  border-radius: 5px;
+  padding-left:5px; 
+  border-top: 2px solid #ececec;
+  border-bottom: 2px solid #ececec;
+}
+.delayClass{
+  background: red;
+}
+.normalClass{
+  background: green;
+}
+#statusWrap table{
+  background: white;
+  border-right: 2px solid #ececec; 
+}
+.k-window .closeBtn{
+  font-size:30px;
+  position: absolute;
+  right: 15px;
+  top: 0px;
+  z-index: 100;
+}
+.delayClass table{
+  background: yellow !important;
+}
+.delayNotify{
+  animation: delayNotify 1s linear infinite;  
+  /* 其它浏览器兼容性前缀 */
+  -webkit-animation: delayNotify 1s linear infinite;
+  -moz-animation: delayNotify 1s linear infinite;
+  -ms-animation: delayNotify 1s linear infinite;
+  -o-animation: delayNotify 1s linear infinite;
+  color: red;
+}
+.j-button{
+  background: white;
+  font-size: 11px;
+  cursor: pointer;
+  border-color: rgb(216, 216, 216) rgb(209, 209, 209) rgb(186, 186, 186);
+  border-style: solid;
+  border-width: 1px;
+  padding: 2px 7px 3px;
+  border-radius: 4px;
+}
+/* 定义keyframe动画，命名为blink */
+@keyframes delayNotify{
+  0%{opacity: 1;}
+  100%{opacity: 0;} 
+}
+/* 添加兼容性前缀 */
+@-webkit-keyframes delayNotify {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@-moz-keyframes delayNotify {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@-ms-keyframes delayNotify {
+    0% {opacity: 1; } 
+    100% { opacity: 0;}
+}
+@-o-keyframes delayNotify {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+/* 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END */
+/* 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN */
+.cookOverClass{
+	display: none;
+}
+/* 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END */
+</style>
+<!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN -->
+<style id="otherInfo"></style>
+<!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END -->
+<!-- 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN -->
+<style id="layoutInfo"></style>
+<style id="ipadCss"></style>
+<!-- 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END -->
+<script>
+// 初期化
+$ = jQuery.noConflict();
+var timeSecond = "{!$Setup.CommDefine__c.TimerSecond__c}";
+if (timeSecond == "") timeSecond = 60;
+var timerInterval = 1*timeSecond*1000;
+// 画面定数
+var PageInfo = {
+	rightInfoRow:'<tr orderkey="_key_"><td></td></tr>',
+	leftInfoRow:'<tr orderkey="_key_"><td class="titleClass" title="_room_">_room_</td><td class="titleClass" title="_contact_">_contact_</td><td style="word-wrap: break-word;" class="allregy">_allregy_</td></tr>',
+	// 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+	itemInfoWrap:'<div class="cook-item" orderkey="_key_" beginTm="_tm_" roomid="_roomid_"><div class="title-item" title="_prod_">_prod_</div></div>',
+  	// 2019/09/15 部屋の並び順をSeq#順に by zy END
+  	// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN
+  	itemInfo:'<div class="cook-detail" minutes="_time_" detailtype="_type_" pdname="_name_" orderid="_order_" cookid="_orderkey_"><span class="title"></span><span class="name"></span></span></div>',
+  status:{
+    delay:'遅れ',
+    normal:'正常'
+  },
+  class:{
+    delay:'delayClass',
+    normal:'normalClass'
+  }
+  // 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END
+};
+// 画面Lockする
+function blockUi() {
+   $.blockUI({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0278}</h1>'
+    }); 
+    return true;
+}
+// 画面Lock解除
+function unblock() {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+// 画面load
+$(document).ready(function(){
+	bindEvent();
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+	$("[id$='gotoDate']").attr("readonly", true);
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+});
+// 初期化
+function bindEvent(){
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN 
+	_isMobileOS = kendo.support.mobileOS;
+	if (_isMobileOS) mobileHeadRmove();
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END 
+	// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+	initColor();
+	// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+	initInfo();
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	setLayoutCssInfo();
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	$(".j-cook-main").kendoSplitter({
+        orientation: "horizontal",
+        panes: [
+            { collapsible: true, size: "300px" },
+            { collapsible: false, resizable: true,size:"100%" }
+        ],
+        resize:resizeWin
+    });
+    $("#taskChgSection").kendoDraggable({
+    	dragstart: function(e) {
+    		var orgDiff = e.pageX - $(e.currentTarget).offset().left;
+    		$(e.currentTarget).data("orgdiff",orgDiff);
+    		var ht = $(".j-cook-roomPanel").height();
+    		var dragTop = $("div.j-cook-cookiePanel div.j-cook-head.j-cook-back").offset().top;
+    		$(".dragTime").show();
+    		$(".dragTime").offset({top:dragTop});
+			$(".dragTime").height(ht);
+    		unBindMouseEvent();
+    		$("#taskChgSection").addClass("dragging");
+    	},
+        drag: function(e) {
+        	var orgLeft = $(".j-cook-cookiePanel").offset().left;
+    		if (orgLeft < e.pageX) {
+	        	// 該当料理
+	        	var cookDetail = $("#taskChgSection").data("detail");
+	        	// 原位置
+	        	var orgDiff = $(e.currentTarget).data("orgdiff");
+	        	var divWrap = cookDetail.closest(".cook-item");
+	        	// 変更位置
+	        	var posLeft = e.pageX - divWrap.offset().left - orgDiff;
+	        	var leftDif = kendo.parseInt($("#hidLeftInt").val());
+				var minuteDif = kendo.parseInt($("#hidMinuteInt").val());
+				// 右侧
+	        	if (posLeft > 0) cookDetail.css({left:posLeft});
+	        	$(".dragTime").offset({left:e.pageX});
+	       		// ドルプ時刻提示
+	       		var timeleft = $(".dragTime").offset().left;
+	       		var curDt = getDateTimeByLeft(timeleft);
+	       		var time = kendo.toString(curDt,'HH:mm');
+	       		cookDetail.attr("begintm",time);
+	       		$(".dragTime .timeSpan").text(time);
+	       		if (posLeft <= 0) divWrap.attr("begintm",time);
+	        	$("#taskChgSection").offset({left:e.pageX});
+	        	// 更新位置
+	        	changeAfterDiv(cookDetail,leftDif,minuteDif);
+	        	// 情報変更
+				refreshOrderStatus(divWrap);
+			}
+        },
+        dragend: function(e) {
+        	$("#taskChgSection").hide();
+        	$(".dragTime").hide();
+        	// 料理変更
+        	updCookDetail();
+        }
+    });
+    bindScroll();
+    // 当前时刻自动滚动
+    scrollCurrent(true);
+    // 刷新時刻線
+    refreshTimeLine();
+    //　該当料理リスト取得
+    cookRemoteData();
+    // 2018/09/25 56.改善要望：料理進捗と料理リスト by cxw BEGIN
+    // 画面サイズ更新
+    resizeCookWrap();
+    // 2018/09/25 56.改善要望：料理進捗と料理リスト by cxw END
+    keydownBind();
+}
+function keydownBind(){
+	/* Window:F5 / Ctrl+R  Mac:Command+R 対応[2015/12/10 ADD] */
+	var $key = key.noConflict();
+	$key.filter = function(event){
+		// 全画面から画面更新可能
+		return true;
+	}
+	$key('command+r, ctrl+r, f5', function(e){ 
+		//　該当料理リスト取得
+    	cookRemoteData();
+		e.preventDefault();
+		return false;
+	});
+}
+function bindScroll(){
+	$(".j-cook-cookiePanel .j-cook-content").scroll(function(){
+		var scrollTop = $(this).scrollTop();
+		var scrollLeft = $(this).scrollLeft();
+		$("#taskChgSection").hide();
+		$(".j-cook-roomPanel .j-cook-content").scrollTop(scrollTop);
+		$(".j-cook-cookiePanel .j-cook-head").scrollLeft(scrollLeft);
+	});
+}
+// 当前时刻自动滚动
+function scrollCurrent(scroll){
+    $(".current").removeClass("current");
+    var current = getCurrentLine();
+    if (current.length > 0) {
+    	current.addClass("current");
+    	$(".j-cook-cookiePanel>.j-cook-head>.time").eq(current.index()).addClass("current");
+    	// 画面自動スグール指定時刻
+    	if (scroll) {
+	    	var beginELement = current.prevAll("div.solidClass").eq(1);
+	    	if (beginELement.length > 0) {
+	    		var scrollLeft = beginELement.position().left;
+	    		$(".j-cook-cookiePanel .j-cook-content").scrollLeft(scrollLeft);
+	    	}
+    	}
+    } 
+    $(".curDatetime").text(kendo.toString(new Date(),JINYACONNECT.DateTmFormat));
+}
+// 該当時刻対応タイム線
+function getCurrentLine(){
+	var timeLong = (new Date()).getTime();
+	var rows = $(".time.line").filter(function(){
+		var time = kendo.parseFloat($(this).attr("time"));
+		return time < timeLong;
+	});
+	return rows.last();
+}
+// 時間線高度更新
+function refreshTimeLine(){
+	var ht = $(".j-cook-cookiePanel .j-cook-table").height();
+	$(".time.line").height(ht - 2);
+}
+function bindMouseEnter(){
+	var cookItems = $(".cook-item:not('.cookDone') .cook-detail:not('.cookDone')").not(".bind");
+	cookItems.on("mouseenter",function(){
+		if ($(this).hasClass("cookDone")) return;
+    	var ht = $(this).height() + 2;
+    	var wd = $(this).width() + $(".forward.back").width() + 2;
+    	var off = $(this).offset();
+    	off.top = off.top - 2;
+    	off.left = off.left - 2;
+    	var orgLeft = $(".j-cook-cookiePanel").offset().left;
+    	if (orgLeft < off.left) {
+    		$("#taskChgSection").show();
+    		$("#taskChgSection").data("detail",$(this));
+    		$("#taskChgSection").css({height:ht,width:wd});
+    		$("#taskChgSection").offset(off);
+    	}
+    });
+    cookItems.on("mouseleave",function(){
+    	// セクション操作
+    	PageInfo.taskChgId = setTimeout(function(){
+    		$("#taskChgSection").hide();
+    	},200);
+    });
+    cookItems.addClass("bind");
+}
+// マウス移動セクションの対応
+function enterSection(){
+	if (PageInfo.taskChgId) clearTimeout(PageInfo.taskChgId);
+}
+// マウスセクション内クリック対応
+function chgStatus(){
+	if ($("#taskChgSection").hasClass("dragging")) cookDone();
+}
+// マウス移動セクション外
+function leaveSection(){
+	$("#taskChgSection").hide();
+}
+// 
+function unBindMouseEvent(){
+	$(".cook-detail").unbind("mouseenter");
+	$(".cook-detail").unbind("mouseleave");
+	$(".cook-detail").removeClass("bind");
+}
+// 移動位置該当料理以後一緒に変更
+function changeAfterDiv(div,firstLong,leftDif,minuteDif){
+	var beforeElement = div;
+	var orgType = div.attr("detailtype");
+	var todayDt = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+	//　該当変更料理後全部変更
+	div.nextAll().each(function(){
+		var item = $(this);
+		var curType = item.attr("detailtype");
+		var minute = item.attr("minutes");
+		var begTm = item.attr("beginTm");
+		var wd = getWidth(minute,leftDif,minuteDif);
+		var nextLeft = beforeElement.position().left;
+		if (curType != orgType) {
+			orgType = curType;
+			nextLeft += beforeElement.width();
+		}
+		if (!item.hasClass("noSetTm")) {
+			var dt = kendo.parseDate(todayDt + ' ' + begTm);
+			nextLeft = getTimeLeft(dt.getTime(),firstLong,leftDif,minuteDif);
+		}
+		item.css({left:nextLeft});
+		beforeElement = item;
+	});
+}
+// 料理データ取得
+function cookRemoteData(){
+	blockUi();
+	var spcd = $("[id$=shopDropLst]").val();
+	var busType = $("[id$=cookTypeLst]").val();
+	var minute = $("[id$=hidDefMinute]").val();
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+	var gotoDate = $("[id$=gotoDate]").val();
+	gotoDate = kendo.toString(kendo.parseDate(gotoDate, "yyyy/HH/mm"), "yyyy-HH-mm");
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+	$(".processed").removeClass("processed");
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+	// 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy BEGIN
+	var roomJson = $("[id$=hidCookRoomJson]").val();
+	if (roomJson == "") roomJson = "{}";
+	var roomMap = JSON.parse(roomJson);
+	var obj = {spcd:spcd,busType:busType,minute:minute, 
+							gotoDate: gotoDate};
+	var leadLabel = '_lead';
+	var busLabel = $("[id$=cookTypeLst] option:checked").text() + leadLabel;
+	if ((busLabel) in roomMap) {
+			var roomVal = roomMap[busLabel];
+			roomMap[leadLabel] = roomVal;
+	}
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	obj.isHorlayout = isSmallLayout();
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	obj.roominfo = roomMap; 
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+	if (getOrderEndFlg())  obj.doneflg = getOrderEndChk();
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+	remoteQueryInfo('queryCookData',obj,refreshData);
+	// remoteQueryInfo('queryCookData',{spcd:spcd,busType:busType,minute:minute, gotoDate: gotoDate},refreshData);
+	// 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy END
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+}
+// リアル 画面情報
+function refreshData(result){
+	if (result != null) {
+		$("div.cook-item").removeAttr("begintm endtm");
+		for (var i =  0 ; i < result.length ; i++) {
+			var data = result[i];
+			//  料理データあり
+			upsertMessage(data);
+		}
+		// 料理内容位置刷新
+		refreshOnScreen();
+	}
+	//
+	refreshItemOrder();
+	// 自適応
+	resizeColumn();
+	// 当前时刻自动滚动
+	scrollCurrent();
+	// mouseenterbind
+	bindMouseEnter();
+  	// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN
+  	setTimeout(refreshStatus,200);
+  	// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END
+	$("#taskChgSection").hide();
+	$("#taskChgSection").removeClass("dragging");
+	startRunning();
+	unblock();
+}
+// 更新と新規
+function upsertMessage(data){
+	var leftWrap = $(".j-cook-roomPanel .j-cook-table>tbody");
+	var rightWrap = $(".j-cook-cookiePanel .j-cook-table>tbody");
+	var orderKey = data.leadid + '_' + data.roomName;
+	var prodKey = orderKey + '_' + data.objectid + '_' + foodid + '_' + data.productId;
+	// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+	var orderId = data.orderid || "";
+	if (orderId != "") prodKey += '_' + orderId;
+	// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+	var dtTemp = $("#hidDetailTemp").val();
+	// 当日
+	var todayDt = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+	// 料理情報
+	// 取得料理明細処理
+	// 料理数量
+	var cnt = data.qty;
+	// 料理開始時刻
+	var begin = data.begTm;
+	var endtm = data.endTm;
+	// 料理所要時間
+	var time = data.minutes;
+	// 料理ブレイク
+	var foodid = data.foodid;
+	// 料理明細
+	var type = data.detailType;
+	var startDt = kendo.parseDate(todayDt + ' ' + begin).getTime();
+	var productName = dtTemp.replace(/@name/g,data.productName)
+							.replace(/@cnt/g,cnt)
+							.replace(/@minute/g,time);
+	var allergy = data.allergie;
+	if (type == undefined) type = '';
+	if (foodid == undefined) foodid = '';
+	if (allergy == undefined) allergy = '';
+	var curRows = getRowByKey(orderKey);
+	var firstDt = kendo.parseFloat($(".time.line").first().attr("time"));
+	var endDt = kendo.parseFloat($(".time.line").last().attr("time"));
+	// 該当料理時刻 モード開始時刻以後
+	if (startDt < firstDt || endDt < startDt) return;
+	
+	//　新規行
+	if (curRows.length == 0) {
+		// 部屋情報
+		var roomNm = data.roomName;
+		// お客様情報
+		var contactInfo = data.contactName;
+		// 左側
+		var left = PageInfo.leftInfoRow.replace('_key_',orderKey).replace(/_room_/g,roomNm)
+						.replace(/_contact_/g,contactInfo).replace('_allregy_',allergy);
+		leftWrap.append($(left));
+		
+		// 右側
+		var right = $(PageInfo.rightInfoRow.replace('_key_',orderKey));
+		rightWrap.append(right);
+	}
+	// 該当key対応料理進捗行
+	var rightRow = getRowByKey(orderKey).last();
+	// 右側内容対応
+	var curTd = $("td",rightRow);
+	// 注文、料理明細
+	var wrap = $("div.cook-item",curTd).filter('[orderkey="' + prodKey + '"]'),cookDetails;
+	if (wrap.length == 0) {
+  	// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN
+    var prodName = data.parentName != undefined ? data.parentName : '';
+    // 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END
+		var timeInfo = PageInfo.itemInfoWrap.replace('_tm_',begin).replace('_key_',prodKey)
+									// 2020/08/31 7341 bug fixed by zy BEGIN
+									.replace(/_prod_/g,prodName)
+									// 2020/08/31 7341 bug fixed by zy END
+									// 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+									.replace('_roomid_',data.roomId);
+									// 2019/09/15 部屋の並び順をSeq#順に by zy END
+		wrap = $(timeInfo);
+		curTd.append(wrap);
+		if (data.parentName == undefined) {
+			$(".title-item",wrap).hide();
+		}
+	} else {
+		cookDetails = $(".cook-detail",wrap);
+	}
+	// 該当処理対象
+	var itemDetail = wrap.find("[cookid='" + foodid + "']");
+	// 新規の場合
+	if (itemDetail.length == 0) {
+    	// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN
+    	var prod = data.productName != undefined ? data.productName : '';
+		var info = PageInfo.itemInfo.replace('_time_',time).replace('_orderkey_',foodid)
+          .replace('_order_',data.objectid).replace('_type_',type).replace('_name_',prod);
+    	// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END
+		itemDetail = $(info);
+    	// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+		itemDetail.data("oid",orderId);
+		// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+		wrap.append(itemDetail);
+	}
+	// 2020/11/30 9295 bug fixed by zy BEGIN
+	if ("status" in J_Info) 
+	itemDetail.removeClass(J_Info.status.join(' ').replace(J_Info.lastStatus,'selectClass'));
+	// 2020/11/30 9295 bug fixed by zy END
+	// 料理情報更新
+	itemDetail.find(".name").text(productName);
+	itemDetail.attr("begintm",begin);
+	itemDetail.attr("endtm",endtm);
+	if (data.parentName == undefined) itemDetail.addClass("noDetailClass");
+	if (data.status == 'Done') itemDetail.addClass("cookDone");
+	// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+	else {
+		itemDetail.removeClass("selectClass"),itemDetail.addClass(data.status);
+	}
+	itemDetail.attr("status",data.status);
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+	if (data.noSetTm) itemDetail.addClass("noSetTm");
+	// 該当料理存在
+	itemDetail.addClass("processed");
+	var itemTm = wrap.attr("begintm");
+	var endTm = wrap.attr("endtm");
+	if (itemTm == undefined || itemTm > begin) wrap.attr("begintm",begin);
+	if (endTm == undefined || endTm < endtm) wrap.attr("endtm",endtm);
+	// アレルギー情報更新
+	var leftRow = getRowByKey(orderKey).first();
+	$("td.allregy",leftRow).text(allergy);	
+}
+function getAllRows(){
+	var curRows = $("div.j-cook-cookiePanel table.j-cook-table>tbody>tr");
+	return curRows;
+}
+// 指定行内容刷新
+function refreshOnScreen(){
+	setTimeout(function(){
+		refreshAllOrderStatus();
+	});
+}
+function refreshAllOrderStatus(){
+	var divs = $("div.cook-item",getAllRows());
+	// リアル該当注文状態
+	refreshOrderStatus(divs);
+	setTimeout(function(){
+		refreshAllRow();
+	});
+}
+// 刷新毎行状態
+function refreshAllRow(){
+	var rows = getAllRows();
+	// 削除料理
+	rows.each(function(){
+		var curRow = $(this);
+		// 料理項目なしの場合
+		if (curRow.find("div.cook-detail").length == 0) {
+			var orderKey = curRow.attr("orderkey");
+			var leftRow = $(".j-cook-roomPanel .j-cook-table>tbody>tr").filter("[orderkey='" + orderKey + "']");
+			curRow.remove();
+			leftRow.remove();
+		}
+	});
+	rows.each(function(){
+		var curTd = $(">td",this);
+		// 該当行料理位置刷新
+		refreshRowLevel(curTd);
+		// 料理位置変更後、両側内容刷新
+		refreshRowHt(curTd);
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+		// 該当行料理位置刷新
+		if (isSmallLayout()) refreshEachRowColor(curTd);
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	});
+	// 時間線高度更新
+	refreshTimeLine();
+}
+// 更新料理位置
+function refreshRowLevel(curTd){
+	// 当日
+	var todayDt = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+	// 归零重新计算
+	var items = $("div.cook-item",curTd);
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	// 該当行料理明細
+	if (isSmallLayout()) {
+		items = items.sort(timeSortFun);
+		curTd.append(items);
+	}
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	var item = items.first();
+	var beginTm = item.attr("begintm");
+	var endTm = item.attr("endtm");
+	var begDt = kendo.parseDate(todayDt + ' ' + beginTm);
+	var endDt = kendo.parseDate(todayDt + ' ' + endTm);
+	var endTmLong = endDt.getTime();
+	// 2018/11/07 料理レベル高度エラー修正 by zy BEGIN
+	var timeObj = {beg:begDt.getTime(),end:endDt.getTime(),level:0
+					,item:item
+					};
+	// 2018/11/07 料理レベル高度エラー修正 by zy END
+	var timeArr = [timeObj];
+	items.attr("level",0);
+	items.css("top",2);
+	item.nextAll().each(function(){
+		// 2018/11/06 24時以後書式バグ対応 by zy BEGIN
+		//var dt = kendo.parseDate(todayDt + ' ' + $(this).attr("begintm"));
+		var dt = getTimeByDateTm(todayDt,$(this).attr("begintm"));
+		//var endDt = kendo.parseDate(todayDt + ' ' + $(this).attr("endtm"));
+		var endDt = getTimeByDateTm(todayDt,$(this).attr("endtm"));
+		// 2018/11/06 24時以後書式バグ対応 by zy END
+		var notArr = [];
+		// 2018/11/07 料理レベル高度エラー修正 by zy BEGIN
+		// 衝突元素
+		var collideItems = [];
+		// 2018/11/07 料理レベル高度エラー修正 by zy END
+		// 碰撞需要重新变更top
+		for (var i = 0 ; i < timeArr.length ;i++) {
+			var time = timeArr[i];
+			// 2020/08/31 7469 bug fixed by zy BEGIN
+			if (!(dt >= time.end || endDt <= time.beg) ) {
+			/*
+			// 碰撞
+			if ((dt >= time.beg && dt <= time.end) 
+				|| (endDt >= time.beg && endDt <= time.end) 
+				|| (dt <= time.beg && endDt >= time.end) ) {
+			*/
+			// 2020/08/31 7469 bug fixed by zy END
+				notArr.push(time.level);
+				// 2018/11/07 料理レベル高度エラー修正 by zy BEGIN
+				collideItems.push(time.item);
+				// 2018/11/07 料理レベル高度エラー修正 by zy END
+			}
+		}
+		var getLevelFlag = true;
+		var level = 0;
+		// 查找可选择level
+		while(getLevelFlag) {
+			if ($.inArray(level,notArr) >= 0) {
+				level ++;
+			} else {
+				getLevelFlag = false;
+			}
+		}
+		var newTop = 2;
+		if (level != 0) {
+			var orgLevel = level - 1;
+			// 2018/11/07 料理レベル高度エラー修正 by zy BEGIN
+			// var prevItem = items.filter("[level='" + orgLevel + "']").first();
+			//newTop = prevItem.position().top + prevItem.height() + 2;
+			newTop = getMaxTopItem(collideItems);
+			// 2018/11/07 料理レベル高度エラー修正 by zy END
+			var maxLevelt = level;
+			// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+			// 該当行料理明細
+			if (isSmallLayout()) {
+				// 碰撞行
+				collideItems.forEach(function(divItem){
+					// 碰撞行level
+					var itemLevel = kendo.parseInt(divItem.attr("level"));
+					// 碰撞行明细最大level
+					$(".cook-detail",divItem).each(function(){
+						var detailLevel = kendo.parseInt($(this).attr("level")) + itemLevel;
+						if (maxLevelt <= detailLevel) maxLevelt += 1;
+					});
+				})
+				level = maxLevelt;
+			}
+			// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+		}
+		// 2018/11/07 料理レベル高度エラー修正 by zy BEGIN
+		timeArr.push({beg:dt,end:endDt,level:level
+			,item:$(this)
+		});
+		// 2018/11/07 料理レベル高度エラー修正 by zy END
+		$(this).css({top:newTop}); 
+		$(this).attr("level",level);
+	});
+}
+// 画面内容自適応
+function resizeWin(){
+	if (PageInfo.resizeTimeoutId) clearTimeout(PageInfo.resizeTimeoutId);
+	PageInfo.resizeTimeoutId = setTimeout(function(){
+		refreshAllRow();
+		resizeColumn();
+		// 2018/09/25 56.改善要望：料理進捗と料理リスト by cxw BEGIN
+		// 画面サイズ更新
+		resizeCookWrap();
+		// 2018/09/25 56.改善要望：料理進捗と料理リスト by cxw END
+		// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN
+		setStatusWin();
+		// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END
+	},200);
+}
+// 自適応
+function resizeColumn(){
+	var roomPanel = $("div.j-cook-roomPanel");
+	var tilFirst = $("table.titleTable tr>td",roomPanel);
+	var cntFirst = $("table.j-cook-table tbody>tr:first>td",roomPanel);
+	tilFirst.each(function(idx){
+		var curTd = cntFirst.eq(idx);
+		if (curTd.length > 0) {
+			var bef = curTd.position().left;
+			var width = 0;
+			if (cntFirst.eq(idx + 1).length > 0) width = cntFirst.eq(idx + 1).position().left - bef;
+			else width = curTd.width();
+			if (width > 0) $(this).outerWidth(width);
+		}
+	});
+}
+// 料理位置変更後、両側内容刷新
+function refreshRowHt(curTd){
+	var curRow = curTd.closest("tr");
+	var maxHt;
+	$("div.cook-item",curTd).each(function(){
+		var maxElement = $(this);
+		var titleItem = $("div.title-item",this);
+		// 2020/08/31 7341 bug fixed by zy BEGIN
+		var titleHt = maxElement.hasClass("collapse") ? "" : maxElement.height() - 3;
+		titleItem.css("height",titleHt);
+		// 2020/08/31 7341 bug fixed by zy END
+		var ht = maxElement.position().top + maxElement.outerHeight();
+		var titleHt = titleItem.position().top + titleItem.height();
+		if (maxHt == undefined || maxHt < ht) maxHt = Math.max(ht,titleHt);
+		
+		if (maxElement.hasClass("collapse")) {
+			titleItem.width($(this).width());
+		} else {
+			titleItem.width(20);
+		}
+	});
+	maxHt += 5;
+	curTd.height(maxHt);
+	var leftRow = $(".j-cook-roomPanel .j-cook-table>tbody>tr").eq(curRow.index());
+	var leftht = leftRow.height();
+	var ht = $("td",curRow).height();
+	$("td",leftRow).height(ht);
+	// 変更後
+	var lastHt = $("td",leftRow).height();
+	if (lastHt > ht) $("td",curRow).height(lastHt);
+}
+// リアル該当注文状態
+function refreshOrderStatus(divs){
+	var leftDif = kendo.parseInt($("#hidLeftInt").val());
+	var minuteDif = kendo.parseInt($("#hidMinuteInt").val());
+	var todayDt = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+	var firstLong = kendo.parseFloat($(".time.line").first().attr("time"));
+	if (divs == undefined) divs = $("div.cook-item");
+	// 不在内容削除う
+	$("div.cook-detail",divs).not(".processed").remove();
+	divs.each(function(){
+		var curItem = $(this);
+		var begTm = curItem.attr("begintm");
+		var dt = kendo.parseDate(todayDt + ' ' + begTm);
+		// 合計時間更新です
+		totalCookTime(curItem,dt.getTime(),firstLong,leftDif,minuteDif,todayDt);
+	});
+}
+// 料理合計時間更新です
+function totalCookTime(item,beg,firstLong,l,m,todayDt){
+	// 料理明細
+	var details = $(".cook-detail",item);
+	// 最早時刻、最後時刻取得
+	// 開始時刻
+	var beginTime = item.attr("beginTm");
+	var endTime = item.attr("endtm");
+	// 完了時刻
+	var start = kendo.parseDate(todayDt + ' ' + beginTime).getTime();
+	var end = kendo.parseDate(todayDt + ' ' + endTime).getTime();
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	var rowSetup = {
+		idxArr:[],
+		getTotalLen:function(){
+			return this.idxArr.length; 
+		},
+		getIndex:function(beg,end){
+			var newRow  = {beg:beg,end:end},curIdex,idxArr = this.idxArr;
+			idxArr.forEach(function(row,idx){
+				// 当前时间如果没有碰撞
+				if (curIdex == undefined && (newRow.beg >= row.end || newRow.end <= row.beg)) {
+					if (row.end < newRow.end) row.end = newRow.end;
+					if (row.beg > newRow.beg) row.beg = newRow.beg;
+					curIdex = idx;
+				}
+			});
+			if (curIdex == undefined) {
+				curIdex = idxArr.length;
+				idxArr.push(newRow);
+			}
+			return curIdex;
+		}
+	};
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	// 位置設定
+	details.each(function(){
+		var detail = $(this);
+		var begTm = detail.attr("beginTm");
+		var minutes = kendo.parseFloat(detail.attr("minutes"));
+		// 2018/11/06 24時以後書式バグ対応 by zy BEGIN
+		//var begLong = kendo.parseDate(todayDt + ' ' + begTm).getTime();
+		var begLong = getTimeByDateTm(todayDt + ' ' + begTm);
+		// 2018/11/06 24時以後書式バグ対応 by zy END
+		if (start > begLong) start = begLong;
+		var endLong = begLong + toStmpByMinute(minutes);
+		if (end < endLong) end = endLong;
+		var left = getTimeLeft(begLong,start,l,m);
+		var wd = getWidth(minutes,l,m) - 5;
+		detail.width(wd);
+		detail.css({left:left});
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする 7324 bug fiex by zy BEGIN
+		detail.css("top","");
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする 7324 bug fiex by zy END
+		if (isSmallLayout()){
+			var idx = rowSetup.getIndex(begLong,endLong);
+			if (idx > 0) detail.css({top : (idx * 27 - 2)});
+			detail.attr("level" , idx);
+		} 
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	});
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする 7317 bug fixed by zy BEGIN
+	item.css("height","");
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする 7317 bug fixed by zy END
+	if (!item.hasClass("collapse") && isSmallLayout()){
+		item.height(rowSetup.getTotalLen() * 28);
+	}
+	// 時刻位置
+	var diffLeft = getTimeLeft(start,firstLong,l,m);
+	// 開始時刻
+	item.attr("beginTm",kendo.toString(new Date(start),'HH:mm'));
+	// 完了時刻
+	item.attr("endtm",kendo.toString(new Date(end),'HH:mm'));
+	// 該当料理時間処理
+	item.width(getTimeLeft(end,start,l,m));
+	// 料理位置設定
+	item.css({left:diffLeft});
+}
+function getRowByKey(orderKey){
+	return $(".j-cook-table tr[orderkey='" + orderKey + "']");
+}
+// 更新料理開始時刻
+function updCookDetail(){
+	blockUi();
+	// 当前料理
+	var cookDetail = $("#taskChgSection").data("detail");
+	var beginTm = cookDetail.attr("beginTm");
+	var cookid = cookDetail.attr("cookid");
+	var orderid = cookDetail.attr("orderid");
+	if (cookid == undefined) cookid = '';
+	var busType = $("[id$=cookTypeLst]").val();
+	var spcd = $("[id$=shopDropLst]").val();
+	var minute = $("[id$=hidDefMinute]").val();
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+	var gotoDate = $("[id$=gotoDate]").val();
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+	// 該当注文
+	var cookInfo = {
+		cookid:cookid,
+		orderid:orderid,
+		begTm:beginTm,
+		spcd:spcd,
+		minute:minute,
+		busType:busType,
+		// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+		gotoDate: gotoDate,
+		// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+	};
+	// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+	var oid = cookDetail.data("oid") || "";
+	if (oid != "") cookInfo.oids = [oid];
+	// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+	var divWrap = cookDetail.closest("div.cook-item");
+	divWrap.removeAttr("begintm");
+	divWrap.removeAttr("endtm");
+	// データ更新
+	remoteQueryInfo('cookTimeData',cookInfo,refreshData);
+}
+// 料理完了
+function cookDone(){
+	// 当前料理
+	var cookDetail = $("#taskChgSection").data("detail");
+	var minute = $("[id$=hidDefMinute]").val();
+	// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+	var status = cookDetail.attr("status");
+	// 店舗コード
+	var spcd = $("[id$=shopDropLst]").val();
+  // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+	// 該当注文
+	var cookInfo = {
+		cookid:cookDetail.attr("cookid"),
+		orderid:cookDetail.attr("orderid"),
+		minute:minute
+		// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+		,spcd:spcd
+		,status: J_Info.getStatus(status)
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+	};
+	// データ更新
+	remoteQueryInfo('cookDoneData',cookInfo,refreshData);
+}
+// remoteaction処理
+function remoteQueryInfo(datatype,info,callback){
+    if (info == undefined || !info) info = {};
+    stopRunning();
+    // 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.CookTimeTableCtrl.cookRemoteData}", datatype, JSON.stringify(info), function(result, event){
+        if(event.type == 'exception') {
+            console.log("-------error-------");
+            alert(event.message);
+        } else if(result != null){
+            // html encode
+            try{
+            } catch(e){}
+        }
+        if (callback != undefined) callback(result);
+    });
+}
+
+// 料理リスト画面開く
+function openCookPage(){
+	var spcd = $("[id$=shopDropLst]").val();
+	// 2019/09/15 worktile-4192 bug fix by zy BEGIN 
+	if (spcd == undefined || spcd == null) spcd = '';
+	// 2019/09/15 worktile-4192 bug fix by zy END
+	var curType = $("[id$=cookTypeLst] option:checked").text();
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+	var gotoDate = $("[id$=gotoDate]").val();
+	window.open('/apex/CookItemPage?spcd=' + spcd + '&type=' + curType + '&dt=' + gotoDate);
+	// 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+}
+// 料理内容位置刷新
+function refreshTwoWrap(){
+	var leftWrap = $(".j-cook-roomPanel .j-cook-table");
+	var rightWrap = $(".j-cook-cookiePanel .j-cook-table");
+	var lastRow = $("tr",rightWrap).last();
+	var leftLast = $("tr",leftWrap).last();
+	$("td",leftLast).first().height(lastRow.height() + 15);
+}
+// 所定の位置計算
+function getDateTimeByLeft(left){
+	var leftDif = kendo.parseInt($("#hidLeftInt").val());
+	var minuteDif = kendo.parseInt($("#hidMinuteInt").val());
+	var firstLine = $(".time.line").first();
+	var firstDt = kendo.parseFloat(firstLine.attr("time"));
+	var difLeft = left - firstLine.offset().left;
+	var dateLong = firstDt + toStmpByMinute(kendo.parseFloat(difLeft/leftDif)*minuteDif);
+	return new Date(dateLong);
+}
+// 横幅計算
+function getWidth(minute,l,m){
+	var minuteInt = kendo.parseFloat(minute/m);
+	if (minuteInt == 0) minuteInt = 1;
+	return minuteInt * l;
+}
+function toStmpByMinute(minutes){
+	return minutes * 1000 * 60;
+}
+// 時刻計算
+function getTimeLeft(end,start,l,m){
+	var minute = diffMinutes(start,end);
+	return getMinuteLeft(minute,l,m);
+}
+// 時刻（分）
+function diffMinutes(beg,end){
+	return (end - beg)/ (60 * 1000);
+}
+// 時刻位置
+function getMinuteLeft(minute,l,m){
+	return (minute/m) * l;
+}
+// 機能起動可否判断を行う
+// 清掃処理の場合、部屋の詳細情報の照会、団体の全体見える機能処理中止制御
+var canRefreshFlag = false,intervalId;
+function isCanRunning() {
+	return canRefreshFlag;
+}
+function stopRunning() {
+	canRefreshFlag = false;
+	clearTimeout(intervalId);
+}
+function startRunning() {
+	canRefreshFlag = true;
+	// Timer Define
+	clearTimeout(intervalId);
+	intervalId = setTimeout(cookRemoteData, timerInterval);
+}
+//すべて展開
+function expandAll(){
+	$("div.cook-item").removeClass("collapse");
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	if (isSmallLayout()) refreshAllOrderStatus();
+	else
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	refreshAllRow();
+	$("#collapseBtn").hide();
+	$("#expandBtn").show();
+}
+function collapseAll(){
+	$("div.cook-item").addClass("collapse");
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN
+	if (isSmallLayout()) refreshAllOrderStatus();
+	else
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+	refreshAllRow();
+	$("#collapseBtn").show();
+	$("#expandBtn").hide();
+}
+// 2018/09/25 56.改善要望：料理進捗と料理リスト by cxw BEGIN
+// 画面サイズ更新
+function resizeCookWrap(){
+	var win_height = $(window).height();
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN 
+	var header_height = $('#globalHeaderBar:visible').height();
+	var appHeader_height = $('#AppBodyHeader:visible').height();
+	var footer_height = $('div.bPageFooter.noTableFooter:visible').innerHeight();
+	// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END 
+	var body_height = win_height - (header_height + appHeader_height + footer_height);
+	var main_height = body_height - 3 - (10 * 2);
+	$('div.j-cook-main').height(main_height);
+	$('div.j-cook-main').css('overflow-x', 'hidden');
+	$('div.j-cook-main').children('div').height(main_height);
+}
+// 2018/09/25 56.改善要望：料理進捗と料理リスト by cxw END
+// 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw BEGIN
+function refreshItemOrder(){
+	var $grid = $(".j-cook-cookiePanel table.j-cook-table tbody");
+	var $items = $grid.children("tr");
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+	if (!getOrderEndChk()) $items.removeClass("cookOverClass");
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+	//　料理項目並べ
+	var $cook_noOver = $items.filter(function(){
+		var curRow = $(this);
+		var cookDoneLen = $("div.cook-detail.cookDone",curRow).length;
+		return cookDoneLen > 0 && $("div.cook-detail",curRow).length != cookDoneLen;
+	});
+	// 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+	var roomSortJson = $("input[id$=hidRoomSortJson]").val();
+	var roomArr = roomSortJson.split(',');
+	// 2019/09/15 部屋の並び順をSeq#順に by zy END
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+	var $cook_over = $items.not($cook_noOver).filter(function(){
+		var curRow = $(this);
+		var cookDoneLen = $("div.cook-detail.cookDone",curRow).length;
+		return cookDoneLen > 0 && $("div.cook-detail",curRow).length == cookDoneLen;
+	});
+	if (!getOrderEndChk()) $cook_over.addClass("cookOverClass");
+	else $cook_over.removeClass("cookOverClass");
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+	// 料理未完成の項目並べ
+	$cook_noOver.sort(sortFun);
+	// 料理済みの項目並べ
+	$cook_over.sort(sortFun);
+	function sortFun(a, b){
+		// 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+		let r1 = ($("div.cook-item",a).attr('roomid') || '')
+		let r2 = ($("div.cook-item",b).attr('roomid') || '')
+		return $.inArray(r1,roomArr) - $.inArray(r2,roomArr);
+		// 2019/09/15 部屋の並び順をSeq#順に by zy END
+		var begTm1 = getDetailBegTm(a);
+		var begTm2 = getDetailBegTm(b);
+		if(begTm1 < begTm2) return -1;
+		if(begTm1 == begTm2) return 0;
+		if(begTm2 > begTm2) return 1;
+	}
+	function getDetailBegTm(row){
+		var begTm;
+		$("div.cook-item",row).each(function(){
+			var begTime = $(this).attr("begintm");
+			if (begTm == undefined || begTm > begTime) begTm = begTime;
+		});
+		return begTm;
+	}
+	$grid.prepend($cook_noOver);
+	$grid.append($cook_over);
+	// 左側内容並べ替え
+	var $title = $(".j-cook-roomPanel table.j-cook-table tbody");
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+	$("tr.cookOverClass",$title).removeClass("cookOverClass");
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+	var sortRows = $("tr",$title).sort(function(a,b){
+		var orderKey = $(a).attr("orderkey");
+		// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+		var orderRow = $("tr[orderkey='" + orderKey + "']",$grid);
+		var begIndex = orderRow.index();
+		if (!getOrderEndChk() && orderRow.hasClass("cookOverClass")) $(a).addClass("cookover");
+		// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+		orderKey = $(b).attr("orderkey");
+		// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+		orderRow = $("tr[orderkey='" + orderKey + "']",$grid);
+		var endIndex = orderRow.index();
+		if (!getOrderEndChk() && orderRow.hasClass("cookOverClass")) $(b).addClass("cookover");
+		// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+		if (begIndex < endIndex) return -1;
+		if (begIndex = endIndex) return 0;
+		if (begIndex > endIndex) return 1;
+	});
+	$title.append(sortRows);
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+	if (sortRows.length == 1) {
+		var orderKey = sortRows.attr("orderkey");
+		var gridRows = $("tr[orderkey='" + orderKey + "']",$grid);
+		if (gridRows.length > 0 && gridRows.hasClass("cookOverClass"))  sortRows.addClass("cookOverClass");
+	}
+	else sortRows.filter(".cookover").addClass("cookOverClass").removeClass("cookover");
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+}
+// 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw END
+// 2018/11/06 24時以後書式バグ対応 by zy BEGIN
+function getTimeByDateTm(dt, tm){
+	try{
+		var processFlag = tm > '24:00';
+		if (processFlag) {
+			var ms = kendo.parseDate(dt, JINYACONNECT.DateFormat).getTime();
+			ms += parseTime(tm);
+			return new Date(ms);
+		} else return kendo.parseDate(dt + ' ' + tm, JINYACONNECT.DateTmFormat).getTime();
+	}catch(err){}
+}
+function parseTime(tm){
+	var minuteToMs = 1000 * 60;
+	var hourToMs = minuteToMs * 60;
+	var dayToMs = hourToMs * 24;
+	try{
+		var arr = tm.split(":");
+		var hour = Number(arr[0]);
+		var minute = Number(arr[1]);
+		var day = 0;
+		day += Math.floor(hour / 24);
+		hour = hour % 24;
+		return day * dayToMs + hour * hourToMs + minute * minuteToMs;
+	}catch(err){}
+	return 0;
+}
+// 2018/11/06 24時以後書式バグ対応 by zy END
+// 2018/11/07 料理レベル高度エラー修正 by zy BEGIN
+function getMaxTopItem(items){
+	var maxTop = 0;
+	if (items != undefined && items.length > 0) {
+		for (var i = 0 ; i < items.length ; i++) {
+			var item = items[i];
+			var curTop = item.position().top + item.height() + 2;
+			if (maxTop == undefined || maxTop < curTop) maxTop = curTop;
+		}
+	}
+	return maxTop;
+}
+// 2018/11/07 料理レベル高度エラー修正 by zy END
+// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN
+// 料理状態ウィンドウ開く
+function openCookStatusWin(){
+  // 料理状態内容作成
+  refreshWinCookStatus();
+  // 料理状態ウィンドウ取得
+  var split = $("#statusWindow").data("kendoWindow");
+  // 料理ウィンドウ非表示
+  if (split == undefined || split._closing) {
+  	// 料理ウィンドウ作成
+    split = $("#statusWindow").kendoWindow({
+      width:'99%',
+      height:100,
+      animation: false
+    }).data("kendoWindow");
+    // 料理ウィンドウ位置
+    split.wrapper.css({top:0,left:0});
+    // 閉じるボタン
+    split.wrapper.append($("<span onclick='closeStatusWin()' class='k-icon k-i-close closeBtn'></span>"));
+    // 料理ウィンドウ開く
+    split.open();
+    // 行分配設定
+    setStatusWin();
+  // 料理ウィンドウ閉じる
+  } else split.close();
+}
+// 料理状態内容作成
+function refreshWinCookStatus(){
+　// 料理状態ウィンドウDOM取得
+  var status_win = getCookStatusWin();
+  // 料理明細テンプレート
+  var cookItem_temp = $("#cookStatusItem").html();
+  //  正常料理集合
+  var cookDataArr = status_win.data("cook");
+  //  遅れ料理集合
+  var delayDataArr = status_win.data("delaycook");
+  // 全て料理集合
+  var allDataArr = delayDataArr.concat(cookDataArr);
+  // 料理あり
+  if (allDataArr.length > 0) {
+  	// 内容DOM
+    var status_wrap = $("#statusWrap");
+    // 内容クリア
+    status_wrap.empty();
+    // 内容追加
+    allDataArr.forEach(function(cook){
+      // 情報設定
+      var item = cookItem_temp.replace(/_room_/g,cook.room)
+                  .replace(/_contact_/g,cook.contact)
+                  .replace(/_status_/g,cook.status)
+                  .replace(/_cook_/g,cook.cook)
+                  .replace(/_key_/g,cook.key)
+                  .replace(/_class_/g,cook.class)
+                  .replace(/_item_/g,cook.cookItem);
+      status_wrap.append($(item));
+    });
+  }
+}
+// 料理ウィンドウ閉じる
+function closeStatusWin(){
+  var split = $("#statusWindow").data("kendoWindow");
+  split.close();
+}
+// 料理状態ウィンドウDOM取得
+function getCookStatusWin(){
+  // 料理状態ウィンドウDOM取得
+  var status_win = $("#statusWindow");
+  // 料理DOM不存在
+  if (status_win.length == 0) {
+    $("body").append($("<div id='statusWindow'><div id='statusWrap'></div></div>"));
+  }
+  status_win = $("#statusWindow");
+  return status_win;
+}
+// 刷新料理状態
+function refreshStatus(){
+　// 料理状態ウィンドウDOM取得
+  var status_win = getCookStatusWin();
+  // 料理情報
+  var cookTable = $("div.j-cook-cookiePanel table.j-cook-table");
+  // 部屋、お客様情報
+  var roomTable = $("div.j-cook-roomPanel table.j-cook-table");
+  // 当前時間
+  var curDt = new Date();
+  // 正常料理集合
+  var cookDataArr = [];
+  // 遅れ料理集合
+  var delayDataArr = [];
+  // 正常料理件数
+  var successCnt = 0;
+  // 遅れ料理件数
+  var delayCnt = 0;
+  // 料理行取得
+  $("tr",cookTable).each(function(){
+    var curRow = $(this);
+    var orderKey = curRow.attr("orderkey");
+    var roomRow = $("tr[orderKey='" + orderKey + "']",roomTable);
+    var roomTds = $("td",roomRow);
+    var roomNm = roomTds.first().attr("title")
+        ,contactNm = roomTds.eq(1).attr("title")
+        ,status,cook,cookItem;
+    //PageInfo.status.delay ->遅れ;
+    //PageInfo.status.normal ->正常;
+    $("div.cook-item",curRow).each(function(){
+      var cookItem = $(this);
+      var notDoneCooks = $(".cook-detail",cookItem).not(".cookDone");
+      if (notDoneCooks.length == 0) return true;
+      var cookDetail = filterCookStatus(notDoneCooks,curDt);
+      var cookName = '';
+      if ($(".title-item",cookItem).length > 0) cookName = $(".title-item",cookItem).text();
+      var cookItem = {
+        room:roomNm,
+        contact:contactNm,
+        status:cookDetail.status,
+        class :cookDetail.class,
+        cook:cookName,
+        key:cookItem.attr("orderkey"),
+        cookItem:cookDetail.name,
+      };
+      if (cookItem.status == PageInfo.status.normal) {
+        successCnt++;
+        cookDataArr.push(cookItem);
+      } else {
+        delayCnt++;
+        delayDataArr.push(cookItem);
+      }
+    });
+  });
+  // 正常件数
+  $(".j-button .normal").text(successCnt);
+  // 遅れ件数
+  $(".j-button .delay").text(delayCnt);
+  if (delayCnt > 0)  $(".j-button .delayTitle").addClass("delayNotify");
+  else $(".j-button .delayTitle").removeClass("delayNotify");
+  status_win.data("cook",cookDataArr);
+  status_win.data("delaycook",delayDataArr);
+  var split = $("#statusWindow").data("kendoWindow");
+  if (split != undefined && split._closing == false) {
+    refreshWinCookStatus();
+  }
+}
+// 正常料理取得
+function filterCookStatus(cooks,curDt){
+  var noDoneCooks = cooks.not(".cookDone");
+  var cooData = {};
+  var cookDt = kendo.toString(curDt,JINYACONNECT.DateFormat);
+  var curTime = curDt.getTime();
+  var minuteDiff = 0;
+  var isChkEnd = $("#hidCheckEnd").val() == "true";
+  var beginDt;
+  noDoneCooks.each(function(){
+    var cookItem = $(this);
+    var begTm = cookItem.attr("begintm");
+    var minute = cookItem.attr("minutes");
+    var begDt = new Date(cookDt + ' ' + begTm);
+    var begTime = begDt.getTime();
+    var endTime = begTime + kendo.parseFloat(minute);
+    // チェック終了時間
+    if ((isChkEnd &&  checkDiff(endTime,curTime,minuteDiff))
+    	// チェック開始時間
+    	|| (!isChkEnd && checkDiff(curTime,begTime,minuteDiff))){
+      var prodName = cookItem.attr("pdname");
+      cooData = {
+        name:prodName,
+        class:PageInfo.class.delay,
+        status:PageInfo.status.delay,
+      };
+      return false;
+    } else if (beginDt == undefined || beginDt > begDt){
+      beginDt = begDt;
+      cooData = {
+        name:cookItem.attr("pdname"),
+        class:PageInfo.class.normal,
+        status:PageInfo.status.normal,
+      };
+    }
+  });
+  return cooData;
+}
+// 指定差異時間チェック
+function checkDiff(cur,tm,diff){
+  if ((cur - tm) > diff) return true;
+  return false;
+}
+// 料理クリック移動
+function moveToItem(){
+  // 該当DOM
+  var curTarget = $(event.currentTarget);
+  // 指定鍵
+  var orderKey = curTarget.attr("orderkey");
+  // 該当行取得
+  var curKey = $("div.cook-item[orderkey='" + orderKey + "']");
+  // 料理情報テーブル
+  var content = $(".j-cook-cookiePanel .j-cook-content");
+  // 位置初期化
+  content.scrollLeft(0);
+  content.scrollTop(0);
+  // 料理位置
+  var pos = curKey.position();
+  var curPosLeft = pos.left - 100;
+  var curPosTop = curKey.offset().top - content.offset().top;
+  // テーブル位置スクロール
+  content.scrollTop(curPosTop);
+  content.scrollLeft(curPosLeft);
+}
+// 行分配設定
+function setStatusWin(){
+	// 該当ウィンドウ最大限の料理数
+	var curWidth = $("#statusWrap").width();
+	var itemWidth = $("#statusWrap>div:first").outerWidth();
+	if (itemWidth == 0) return;
+	itemWidth += 5;
+	var pageCnt = kendo.parseInt(curWidth/itemWidth);
+	// CSS変更
+	var cssContent = '#statusWrap > div:nth-child(' + pageCnt + 'n+1) { clear: both;}';
+	// CSS指定
+	$("#childSet").html(cssContent);
+}
+// 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END
+// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+function initColor(){
+	// カラー設定取得
+	var colorInfo = $("#hidColorInfo").val();
+	// 初期化
+	window.J_Info = {
+		statusmap:{},
+	};
+	// カラー設定あり
+	if (colorInfo != "") {
+		// カラー構文解析
+		window.J_Info  = JSON.parse(colorInfo);
+		var statusStr = [];
+		// 設定状態ラベル、カラー情報設定
+		J_Info.status.forEach(function(status){
+				var label = status,cookClass = status;
+				if (status in J_Info.label) {
+						label = J_Info.label[status];
+						cookClass = label;
+				}
+				statusStr.push('.' + label + '{background:' + J_Info.color[status]+ ' !important}');
+		});
+		$("#otherInfo").html(statusStr.join(''));
+	}
+	if ("status" in J_Info) J_Info.lastStatus = J_Info.status[J_Info.status.length - 1];
+	// 次へ状態取得
+	J_Info.getStatus = function(status){
+		// 状態位置取得
+		if (status in this.statusmap) {
+				// 状態位置
+				idx = this.statusmap[status];
+				// 次へ状態位置
+				if (idx < (this.status.length - 1)) {
+						idx ++;
+						return this.status[idx];
+				} else 
+						return this.status[0];
+		// 未設定対応
+		} else if (status == ''){
+				status = 'Done';
+		} else status = '';
+		return status;
+	}
+}
+// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+// オーダー済みフラグ
+function getOrderEndFlg(){
+    return $("#hidOrderEndFlag").val() == "true";
+}
+// 該当チェック状態
+function getOrderEndChk(){
+    if (!getOrderEndFlg()) return true;
+    return $("#orderEndChk").is(":checked");
+}
+// チェック対応
+function chgChkOrder(){
+    var chkFlg = $("#orderEndChk").is(":checked");
+    $("#orderEndChk").val(chkFlg);
+    $("input[id$=hidDoneFlg]").val(chkFlg);
+    cookRemoteData.call({init: true});
+}
+// 初期化
+function initInfo(){
+    $("#orderEndChk").prop("checked", $("#orderEndChk").val() == "true");
+}
+// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN 
+function changeLayout(){
+	var el = $("input[id$=hidLayoutType]"),val = el.val(), isHorLayout = val == "true";
+	el.val(!isHorLayout);
+	setLayoutCssInfo();
+	cookRemoteData();
+}
+function setLayoutCssInfo(){
+	if (isSmallLayout()) {
+		var styleArr = [];
+		styleArr.push('.cook-detail[row=even]{background: {!color.even};}');
+		styleArr.push('.cook-detail[row=odd]{background: {!color.odd};}');
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする 7319 bug fixed by zy BEGIN
+		styleArr.push('.j-cook-table .cook-detail{position: absolute;overflow:hidden;}');
+		// 2020/08/31 料理進捗を階段状ではなく、横並びにする 7319 bug fixed by zy END
+		
+		$("#layoutInfo").html(styleArr.join('\n'));
+	}
+	else $("#layoutInfo").html('');
+}
+function isSmallLayout(){
+	return $("input[id$=hidLayoutType]").val() == "true";
+}
+function mobileHeadRmove(){
+	var headDisplay = 'div.globalHeaderBar,div.bPageHeader,div.bPageFooter{display:none;} html, body {overflow: hidden;height: 99%;-webkit-overflow-scrolling: touch;}';
+	$("#ipadCss").html(headDisplay);
+}
+// 料理明細のカラー設定
+function refreshEachRowColor(curTd) {
+	// 行設定
+	var rowIndex = {
+		// 行Idx奇偶状態
+		idxCnt:{},
+		// 該当Idx奇偶取得
+		getIndexCnt:function(idx){
+			// 既存Idx状態
+			var cnts = this.idxCnt;
+			// 該当Idx不存在
+			if (!(idx in cnts)) cnts[idx] = 0;
+			//　奇偶変更
+			else cnts[idx] = cnts[idx] == 0 ? 1 : 0;
+			//　奇偶クラス設定
+			return cnts[idx] == 0 ? 'odd' : 'even';
+		},
+	},
+	// 該当行料理
+	divs = $("div.cook-item",curTd),
+	// 該当行料理明細
+	details = $(".cook-detail",divs).sort(timeSortFun);
+	// 該当行料理明細カラークリア
+	details.removeAttr("row");
+	// 該当行料理明細カラー設定
+	details.each(function(idx){
+		var level = kendo.parseInt($(this).attr("level")) + kendo.parseInt($(this).closest("div.cook-item").attr("level"));
+		$(this).attr("row",rowIndex.getIndexCnt(level));
+	});
+}
+function timeSortFun(a,b){
+	var begTm1 = $(a).attr("begintm");
+	var begTm2 = $(b).attr("begintm");
+	if(begTm1 < begTm2) return -1;
+	if(begTm1 == begTm2) return 0;
+	if(begTm2 > begTm2) return 1;
+}
+// 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END
+</script>
+<apex:form >
+<input type="hidden" value="{!leftDiff}" id="hidLeftInt"/>
+<input type="hidden" value="{!minuteDiff}" id="hidMinuteInt"/>
+<input type="hidden" value="{!detailInfo}" id="hidDetailTemp"/>
+<apex:inputHidden value="{!COOKINFO_MUNITES}" id="hidDefMinute"/>
+<!-- 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN -->
+<input type="hidden" value="{!isEndFlag}" id="hidCheckEnd"/>
+<!-- 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END -->
+<!-- 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy BEGIN -->
+<input type="hidden" value="{!cookRoomSetJson}" id="hidCookRoomJson"/>
+<!-- 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy END -->
+<!-- 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN -->
+<input type="hidden" value="{!roomSortJson}" id="hidRoomSortJson"/>
+<!-- 2019/09/15 部屋の並び順をSeq#順に by zy END -->
+<!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN -->
+<input type="hidden" value="{!colorInfoJson}" id="hidColorInfo"/>
+<!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END -->
+<!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN -->
+<input type="hidden" id="hidOrderEndFlag" value="{!isOrderEndFlg}"/>
+<apex:inputHidden value="{!isDoneFlg}" id="hidDoneFlg"/>
+<!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END -->
+<!-- 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN -->
+<apex:inputHidden id="hidLayoutType" value="{!isHorlayout}"/>
+<!-- 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END -->
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<div class="j-cook-wrap">
+	<div class="j-cook-toolBar j-cook-back">
+		<span style="{!if(branchShopLst.size > 0,'','display:none;')}">
+            {!$ObjectType.Room__c.Fields.BranchShopName__c.label}
+            <apex:selectlist id="shopDropLst" size="1" value="{!branchShopNm}">
+                <apex:selectoptions value="{!branchShopLst}"/>
+                <apex:actionSupport event="onchange" action="{!refreshBranchShopInfo}" status="refStatusBlock" />
+            </apex:selectlist>
+        </span>
+        <span>
+           <apex:selectlist id="modeLst" size="1" value="{!curMode}">
+               <apex:selectoptions value="{!modeLst}"/>
+               <apex:actionSupport event="onchange" action="{!chgMode}" />
+           </apex:selectlist>
+        </span>
+        <!-- 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN -->
+        <span>
+        	指定日    
+			<apex:inputField value="{!selectDate.Checkinday__c}" id="gotoDate" style="width:100px">
+				<apex:actionSupport event="onchange" action="{!gotoDate}" onsubmit="javascript:blockUi();"/>
+			</apex:inputField>
+        </span>
+        <!-- 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END -->
+        <span style="{!if(businessLst.size > 0,'','display:none;')}">
+	        <apex:selectlist id="cookTypeLst" value="{!curType}" size="1">
+	            <!-- All -->
+	            <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_005_0035}"/>
+	            <apex:selectoptions value="{!businessLst}"/>
+	            <apex:actionSupport event="onchange" action="{!chgType}" />
+	        </apex:selectlist>
+        </span>
+        <span>
+        	<input type="button" value="料理リスト" onclick="openCookPage()"/>
+        	<input type="button" id="expandBtn" value="すべて折りたたむ" onclick="collapseAll()"/>
+        	<input type="button" id="collapseBtn" style="display:none;" value="すべて展開" onclick="expandAll()"/>
+			<!-- 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy BEGIN -->
+			<input type="button" id="layoutChgBtn" value="レイアウト切替" onclick="changeLayout()"/>
+			<!-- 2020/08/31 料理進捗を階段状ではなく、横並びにする by zy END -->
+			<!-- 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN -->
+			<span class="j-button" onclick="openCookStatusWin()">進捗状態（正常：<span class="normal">0</span>件、<span class="delayTitle">遅れ：<span class="delay">0</span>件 </span> ）</span>
+			<!-- 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END -->
+			<!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN -->
+			<span style="display:{!if(isOrderEndFlg,'','none')};">
+				料理済表示
+				<input type="checkbox" id="orderEndChk" class="k-checkbox" onclick="chgChkOrder()" value="{!isDoneFlg}"/>
+				<label class="k-checkbox-label" style="margin-top:7px;" for="orderEndChk"></label>
+			</span>
+			<!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END -->
+        </span>
+        <span class="curDatetime"></span>
+	</div>
+	<div class="j-cook-main">
+		<div class="j-cook-roomPanel">
+			<table class="titleTable j-cook-back">
+				<tr>
+					<td class="headerRow">お部屋</td>
+					<td class="headerRow">お客様</td>
+					<td class="headerRow">アレルギー</td>
+				</tr>
+			</table>
+			<div class="j-cook-content">
+				<table class="j-cook-table">
+					<thead>
+						<tr>
+							<td style="width:100px;height: 0px;padding: 0px;"></td>
+							<td style="width:120px;height: 0px;padding: 0px;"></td>
+							<td style="height: 0px;padding: 0px;"></td>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+		<div class="j-cook-cookiePanel" style="overflow: hidden;">
+			<div class="j-cook-head j-cook-back" style="width:100%;overflow: hidden">
+				<apex:repeat value="{!timeLsts}" var="times">
+					<apex:repeat value="{!times}" var="time">
+						<div class="time" style="left:{!time.leftInt}px;{!if(time.showFlag,'','display:none')}">
+							{!time.timeFormat}
+						</div>
+					</apex:repeat>
+				</apex:repeat>
+			</div>
+			<div class="j-cook-content" style="width:100%;">
+				<table class="j-cook-table" style="width:{!lastLeftInt}px;">
+					<thead>
+						<tr>
+							<td style="position: relative;padding: 0px;">
+								<apex:repeat value="{!timeLsts}" var="times">
+									<apex:repeat value="{!times}" var="time">
+										<div class="time line {!if(time.showFlag,'solidClass','dottedClass')}" style="left:{!time.leftInt}px" time="{!time.timeStamp}" dt="{!time.timeFormat}"></div>
+									</apex:repeat>
+								</apex:repeat>
+							</td>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 任务用左右尖括号 -->
+<div id="taskChgSection" onmouseenter="enterSection()" onmouseleave="leaveSection()">
+	<div class="forward back">
+	</div>
+</div>
+<div class="dragTime">
+	<div class="timeSpan"></div>
+</div>
+<!-- 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy BEGIN -->
+<script type="text/x-kendo-template" id="cookStatusItem">
+  <div class="_class_" onclick="moveToItem()" orderkey="_key_">
+    <table style="border-spacing: 0;">
+      <tr>
+        <td style="width:70px;">部屋：</td>
+        <td style="width:200px;">_room_</td>
+      </tr>
+      <tr>
+        <td>お客様：</td>
+        <td>_contact_</td>
+      </tr>
+      <tr>
+        <td>状態：</td>
+        <td>_status_</td>
+      </tr>
+      <tr>
+        <td>会席：</td>
+        <td>_cook_</td>
+      </tr>
+      <tr>
+        <td>料理：</td>
+        <td>_item_</td>
+      </tr>
+    </table>
+  </div>
+</script>
+<!-- 行分配設定 -->
+<style id="childSet"></style>
+<!-- 2019/04/30 一つの会席料理を90分を基準にするモードを追加する by zy END -->
+</apex:form>
+</apex:page>

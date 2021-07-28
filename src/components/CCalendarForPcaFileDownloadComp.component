@@ -1,0 +1,21 @@
+<apex:component >
+
+<apex:attribute name="container" type="String" description="App Name Space" default="CCalendarForPcaFileDownloadComp" required="false"/>
+<apex:attribute name="datasource" type="Document[]" description="FileInfo" required="false"/>
+<div style="background: #fff;min-width: 170px;" >
+	<apex:repeat value="{!datasource}" var="doc" >
+		<table style="padding: 5px;width: 100%;table-layout: auto;border: 0px;" >
+			<tr>
+				<td style="border: none;" nowrap="nowrap">
+				{!doc.name}
+				</td>
+				<td style="width: 35px; border: none;text-align: right;">
+					<a href="/apex/PcaSyncCsvDownload?rid={!doc.id}">
+						<img title="{!doc.name}" alt="ダウンロード" src="{!URLFOR($Resource.AppImages, '/extend/download.png')}" style="height: 20px"/>
+					</a>
+				</td>
+			</tr>
+		</table>
+	</apex:repeat>
+</div>
+</apex:component>

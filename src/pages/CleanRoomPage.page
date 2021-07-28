@@ -1,0 +1,2006 @@
+<apex:page title="清掃" sidebar="false" controller="CleanRoomCtrl" action="{!init}" showheader="false" docType="html-5.0" standardStylesheets="false">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="false"/>
+
+<!-- 2016/10/25 部屋タイプは複数選択できる機能対応 BEGIN -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui"/>
+<!-- 共通CSS BEGIN -->
+<style>
+.noShowClass{
+    display: none;
+}
+.htAutoClass{
+    height: auto !important;
+}
+#setupPage{
+    width:100%;
+    font-size: 15px;
+} 
+#setupPage ul{
+    padding:0px;
+}
+#setupPage li{
+    list-style-type:none;
+    margin: 10px;
+}
+.selectLi{
+    background: #dfe1e2 !important;
+}
+table.detailTable td{
+     overflow: hidden;
+     width:50%;
+     position: relative;
+}
+table.detailTable th.headerRow{
+     text-align: center ;
+     width:50%;
+}
+.detailTable{
+    width: 100%;
+    font-size: 13px;
+}
+.titleTable{
+    width: calc(100% - 15px);
+}
+.titleTable th{
+    width: 50%;
+    text-align: center;
+}
+.grid{
+    display: inline-block;
+    width:100%
+}
+.items { 
+    margin: 0 10px 1em;
+    width: 320px;
+    -webkit-box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 2px 3px rgba(0,0,0,.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 2px 3px rgba(0,0,0,.05);
+    float:left;
+    height:500px;
+}
+.items-max {
+    max-height:500px;
+}
+.items-content{
+    overflow: auto;
+}
+.items-content-max{
+    max-height:400px;
+}
+#overLayout  {
+    background: rgba(0,0,0,.4);
+    width:100%;
+    height:100%;
+    position: fixed;
+    display:none;
+    top: 0;
+    left: 0;
+    z-index:2;
+}
+.packageProcessList{
+    text-align: center;
+    margin: 0;
+    padding: 0px 0px 0px 2px;
+    vertical-align: middle;
+    border: 0px;
+    width: 180px;
+    text-align: center;
+    text-align-last: center;
+    font-size: 14px;
+    height:30px;
+}
+tr[name="touchMove"] td{
+    color: white;
+}
+#settingWindow{
+    padding-bottom: 1em;
+    font-weight: bold;
+    color: #444;
+    display:none;
+}
+.projectEditoPanel{
+    overflow: auto;
+    max-height: 500px;
+    padding:5px;
+    box-shadow: 0 1px 2px 1px rgba(0,0,0,.08), 0 3px 6px rgba(0,0,0,.08);
+    margin-bottom: 10px;
+    line-height: 25px;
+}
+/* 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN */
+.statusPanel{
+	height: 100%;
+}
+.statusPanel .checkItem{
+    width:50%;
+    float:left;
+    position: relative;
+    background: #f8fafb;
+    border-width: 0 0 1px;
+    border-style: solid;
+    font-size: 13px;
+    text-indent: 0;
+    font-weight: 400;
+    border-color: #dfe1e2;
+    height: 40px;
+    line-height: 40px;
+}
+/* 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN */
+.noticeItem{
+    font-size: 13px;
+}
+/* 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END */
+.statusPanel .checkItem:nth-child(odd){
+    width:calc(50% - 1px);
+    border-right: 1px solid #d5d5d5;
+}
+.statusPanel label{
+    margin-left:5px;
+}
+.areaTips{
+    vertical-align: middle; 
+    font-weight: bold;
+    font-size:18px;
+    display: inherit;
+}
+.statusPanel .projectEditoPanel{
+    margin: 0px 0px 5px;
+}
+.statusPanel .title{
+    font-weight: bold;
+    color: #444;
+    font-size: 15px;
+}
+.checkItem .switch{
+    position: absolute;
+    right:5px;
+    top:25%;
+}
+#checkPanel{
+    display: none;
+    position: relative;
+}
+.button-actions{
+    width: 100%;
+}
+.mobileWrap{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left:0;
+    background: white;
+    display: none;
+}
+.j-seisou-chklist{
+    position: absolute;
+    right: 5px;
+    visibility: hidden;
+}
+/* 2018/08/02 清掃チェックリスト機能追加 by zy END */
+/* モバイル用 BEGIN */
+.ovfHiden{overflow: hidden;height: 100%;}
+.toolDiv{
+    position: relative;
+    width: 100%;
+    height: 50px;
+    line-height: 50px;
+}
+.toolDiv .k-icon{
+    font-size: 20px;
+    position:absolute;
+    right: 0;
+    top: 26%;
+    color: #777;
+}
+.toolShow{
+    position: absolute;
+    right: 0px;
+    color: #777;
+    top: 0px
+}
+.selectLi {
+    position: relative;
+}
+.selectLi .select-status:after{
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 17px;
+    right: 15px;
+    content: "\e118";
+    font-size: 1.2em;
+    text-align: center;
+    font: 16px/1 WebComponentsIcons;
+}
+#inboxActions li{
+    height:18px;
+}
+.settingWrapper{
+    display: none;
+    position: fixed;
+    top: 0px;
+    left:0px;
+    background: white;
+    width: 100%;
+    height: 100%;
+}
+/* モバイル用 END */
+/* モバイルのswitch BEGIN */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 23px;
+  top:15px;
+}
+.j-seisou-setting .switch{
+	top:5px;
+}
+.switch input {display:none;}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 19px;
+  width: 19px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(27px);
+  -ms-transform: translateX(27px);
+  transform: translateX(27px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+/* モバイルのswitch END */
+.j-seisou-selectlist{
+    text-align: center;
+    border-radius: 0;
+    margin: 0;
+    padding: 0px 0px 0px 2px;
+    vertical-align: middle;
+    border: 0px;
+    color: white;
+    width: 100%;
+    text-align: center;
+    text-align-last: center;
+    font-size: 13px;
+    height:40px;
+}
+.j-seisou-statuslabel{
+    color:white !important;
+    text-align: center;
+    display: none;
+}
+.j-seisou-wrapper{
+    border-style: solid;
+    border-width: 1px;
+    border-color: #dfe1e2;
+    display: none;
+    position: fixed;
+    font-stretch: 100%;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 17.664px;
+    bottom:0;
+    left: 0;
+    width:100%;
+    z-index:3;
+    overflow: auto;
+}
+.j-seisou-actions{
+    position: fixed;
+    bottom:5px;
+    z-index: 4;
+    height:48px;
+    left:0px;
+}
+.j-seisou-content{
+    padding:0px;
+    margin: 0px;
+}
+.j-seisou-button{
+    margin: 0;
+    border-color: #c5c5c5;
+    color: #2e2e2e;
+    padding: 2px 7px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    border-width: 1px;
+    border-style: solid;
+    background-repeat: repeat-x;
+    background-position: 0 center;
+    font: inherit;
+    line-height: 1.72em;
+    text-align: center;
+    text-decoration: none;
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    overflow: hidden;
+    -ms-flex-align: center;
+    align-items: center;
+    -ms-flex-pack: center;
+    justify-content: center; 
+    vertical-align: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    outline: 0;
+    -webkit-appearance: none;
+    background: #ff0a59fc;
+    font-size: 16px;
+    color: white;
+    height:45px;
+}
+.j-seisou-content li{
+    margin: 0;
+    border-width: 0 0 1px;
+    border-style: solid;
+    font-size: 1.2em;
+    text-indent: 0;
+    font-weight: 400;
+    padding: 1.17em .7em .39em;
+    border-color: #dfe1e2;
+    list-style-type: none;
+    background: #f8fafb;
+}
+.j-seisou-content{max-height:calc(100% - 32px)}
+.j-seisou-buton{width: 48%;border-radius: 0px;}
+.j-seisou-header{
+    width: 100%;
+    color: #fff;
+    background: #ff4350;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    padding: 0;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    border-width: 0 0 1px 0;
+    font-size: 1.2em;
+    line-height: 2.78em;
+}
+/* 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN */
+.j-seisou-footer{
+    width: 100%;
+    display: block;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height:45px;
+    line-height:45px;
+}
+/* 2018/08/02 清掃チェックリスト機能追加 by zy END */
+.j-seisou-setting{
+    padding: 0 .7em 0 !important;
+    background: #f8fafb;
+}
+.j-seisou-leftitem{
+    position: absolute;
+    left: 0;
+    top:18%;
+    height: 100%;
+    width: 50px;
+}
+.j-seisou-tite{
+    width: 100%;
+    text-align: center;
+    background: transparent;
+}
+.j-seisou-leftarrow{
+    position: absolute;
+    top: 13px;
+    left: 18px;
+    color: #fff;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-width: 0;
+    -webkit-box-shadow: inset .2rem -.2rem 0 currentcolor;
+    box-shadow: inset .2rem -.2rem 0 currentcolor;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+    vertical-align: middle;
+}
+.j-seisou-left{
+    width: 50%;
+    left:0;
+}
+.j-seisou-right{
+    width: 48%;
+    margin-right: 2px;
+    float: right;
+}
+.j-seisou-title{
+    text-align: right;
+    width: calc(100% - 150px);
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    -o-text-overflow: ellipsis;
+    white-space:nowrap;
+    height: 50px;
+    display:block;
+    position:absolute;
+    right:22px;
+    top:0px;
+    
+}
+.floorList{
+	display: none;
+}
+.ipadShow{
+	display: none;
+}
+</style>
+<!-- 共通CSS END -->
+<style>
+@media only screen (min-width: 1024px){
+}
+</style>
+<style>
+/* ipad */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+.items{ 
+    width: calc(100% / 2 - 20px);
+}
+.detailTable{
+    width: 100%;
+    font-size: 16px;
+}
+.j-seisou-statuslabel{
+    width:auto
+}
+.detailTable tr{height:50px;}
+.j-seisou-selectlist{display: none;}
+.j-seisou-statuslabel{display:block;}
+.ipadShow{display: block;}
+.titleTable{width: calc(100% - 5px);}
+html, body {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+/* 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN */
+/* 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN */
+.mobileWrap .checkItem,.mobileWrap .noticeItem{
+/* 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END */
+    font-size: 1.2em;
+    height: 50px;
+    line-height: 50px;
+}
+.mobileWrap .j-seisou-checkset{
+    border-color: #c5c5c5;
+    color: white;
+    border-radius: 0px;
+    width:100%;
+    font-size: 18px;
+    height:100%;
+    line-height:50px;
+    background: #ff4350;
+    text-align:center;
+}
+/* 2018/08/02 清掃チェックリスト機能追加 by zy END */
+}
+</style>
+<style>
+/* iPad Portrait 
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+.items{ width: 350px; background: green;}
+.j-seisou-selectlist{display: none;}
+.j-seisou-statuslabel{display:block;}
+}*/
+</style>
+<style type="text/css">
+@media only screen and (min-device-width: 360px) and (max-device-width: 640px) {
+.items{ width: calc(100% - 20px);height:100%;position: absolute;top:70px;left:0px;}
+.detailTable tr{height:50px;}
+.j-seisou-content{max-height: 330px;overflow: auto;}
+.j-seisou-selectlist{display: none;}
+.j-seisou-statuslabel{display:block;}
+.floorList{
+    float: right;
+    width:100px;
+    display: block;
+    font-size: 16px;
+}
+/* 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN */
+.mobileWrap .checkItem,.mobileWrap .noticeItem{
+/* 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END */
+    width: 100% !important;
+    font-size: 1.2em;
+    border-right:0 !important;
+    height: 50px;
+    line-height: 50px;
+}
+.mobileWrap .j-seisou-checkset{
+    border-color: #c5c5c5;
+    color: white;
+    border-radius: 0px;
+    width:100%;
+    font-size: 18px;
+    height:100%;
+    background: #ff4350;
+    text-align:center;
+}
+.blockUI.blockMsg.blockPage h1{font-size: 10px;}
+.areaName{display:none;}
+.titleTable{width: calc(100% - 5px);}
+}
+</style>
+<style type="text/css">
+@media only screen and (min-device-width: 360px) and (max-device-width: 640px) and (orientation: portrait) {
+.items{ width: calc(100% - 20px);height:100%;position: absolute;top:78px;left:0px;}
+.detailTable tr{height:50px;}
+.j-seisou-selectlist{display: none;}
+.j-seisou-statuslabel{display:block;}
+}
+</style>
+<script>
+$=jQuery.noConflict();
+beenFocused = true;
+// 自動刷新時間
+// 2019/09/15 Security Check BY zyz BEGIN
+var timerInterval = 1*{!JSENCODE(TEXT($Setup.CommDefine__c.ps__TimerSecond__c))}*1000;
+// 2019/09/15 Security Check BY zyz END
+// モバイルフラグ
+var _isMobileOS;
+//　設定情報
+var settingInfo = {};
+var moveClass="rightClass";
+// 清掃進捗明細リスト
+var cleanLevels = [],
+    // 対象外フロアリスト
+    floorData = [],
+    // モバイル用店舗選択リスト
+    shopDatas = [],
+    // モバイル用部屋タイプ選択リスト
+    roomTypeDatas = [],
+    // モバイル用フロア選択リスト
+    floorDropDown = [],
+    // 編集フラグ「ロール」
+    isEditFlag = false,
+    // 不更新フラグ
+    canRefreshFlag = true,
+    // 画面表示数選択リスト定数
+    itemSizeDatas = [{value:"01",text:"自動"},{value:"02",text:"全部"}];
+// モバイル[touch]対応
+var beginLeft,beforeColor,afterColor,forwardFlag = false,movePer,beginTop;
+$(document).ready(function(){
+    // 共通初期化
+    bindEvent();
+});
+// 共通初期化
+function bindEvent(){
+    // 端末区分
+    _isMobileOS = kendo.support.mobileOS;
+    isEditFlag = $("#hidEditFlag").val() == "true";
+    // 清掃明細
+    var cleanJson = $("#hidCleanLstJson").val();
+    cleanLevels = JSON.parse(cleanJson);
+    //　設定情報
+    var setJson = $("[id$=hidSetInfoJson]").val();
+    if (setJson != "") settingInfo = JSON.parse(setJson);
+    if (isEditFlag) {
+        var opt = $("<option/>");
+        // 一括処理選択リスト作成
+        var datas = [{text:'　',value:""}];
+        var nextOpt = opt.clone();
+        nextOpt.text("");
+        nextOpt.val("");
+        $(".packageProcessList").append(nextOpt);
+        for (var i = 0 ; i < cleanLevels.length ; i++) {
+            //datas.push({value:i + "",text:cleanLevels[i].label});
+            var level = cleanLevels[i];
+            nextOpt = opt.clone();
+            nextOpt.text(level.label);
+            nextOpt.val(i);
+            $(".packageProcessList").append(nextOpt);
+        }
+    }
+    // 無効項目
+    disableSelect();
+    // 設定関数処理
+    refreshSettingInfo();
+    // モバイル初期化
+    if (_isMobileOS) bindMobile();
+    // 端末初期化
+    else bindDevice();
+}
+// 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN
+// チェックリスト画面
+function bindCheckWin(){
+    var wd = '630px';
+    var ht = 'auto';
+    $("#checkPanel").kendoWindow({
+        width: wd,
+        height: ht,
+        actions: ["Close"],
+        visible: false,
+        title:'チェックリスト',
+        open:function(e){
+           $("#overLayout").show();
+        },
+        close:function(e){
+           $("#overLayout").hide();
+        }
+    });
+    $("#checkPanel").show();
+}
+// 2018/08/02 清掃チェックリスト機能追加 by zy END
+//　端末初期化 
+function bindDevice(){
+    // 画面に既存フロア選択リスト内容作成
+    var floorDataArr = [];
+    $(".items[data-floorinfo]").each(function(idx){
+        var floor = $(this).attr("data-floorinfo");
+        floorDataArr.push({value:floor,text:floor});
+    });
+    // フロアリスト多選
+    $("select[id$=floorMulti]").kendoMultiSelect({
+        placeholder: "",
+        filter: "contains",
+        height: 300,
+        autoClose: false,
+        autoBind: false,
+        dataTextField: "text",
+        dataValueField: "value",
+        dataSource:floorDataArr,
+     });
+     // kendo-ui 店舗リスト
+     $("[id$=shopDropLst]").kendoDropDownList({
+     	change:function(){
+     		JINYACONNECT.blockUi();
+     		// 店舗コード更新
+     		settingInfo.spcd = this.value();
+     		// 店舗変更
+     		branchChange();
+     		// 設定画面閉じる
+     		hideKendoWin();
+     	}
+     });
+     // 部屋タイプリス作成
+     $("[id$=roomTypeLst]").kendoDropDownList();
+     // 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN
+     // チェックリスト画面
+     bindCheckWin();
+     // 2018/08/02 清掃チェックリスト機能追加 by zy END
+}
+// モバール初期化
+function bindMobile(){
+	// ロール制御
+    if (isEditFlag) {
+        // touch bind
+        var objs = document.getElementsByName("touchMove");
+        for (var i = 0 ; i < objs.length ; i++) {
+            var obj = objs[i];
+            obj.addEventListener( 'touchstart',onTouchStart,false);
+        }
+    }
+    // 設定画面
+    var wrap = $(".settingWrapper");
+    var anmiteCss = pageAnimate("translateX(" + window.screen.availWidth + "px)",0);
+    wrap.css(anmiteCss);
+    // 選択リスト画面
+    wrap = $(".j-seisou-wrapper");
+    anmiteCss = pageAnimate("translateY(" + window.screen.availHeight + "px)",0);
+    $("#inboxActions").css("max-height",window.screen.availHeight/2);
+    wrap.css(anmiteCss);
+    // 「設定画面」内容設定
+    if ("roomTypes" in settingInfo) {
+    	if (settingInfo.roomTypes != null) {
+        	$("[id$=roomTypeLst]").val(settingInfo.roomTypes[0]);
+        }
+    }
+    // 店舗選択リスト作成
+    $("[id$=shopDropLst] option").each(function(){
+        shopDatas.push({value:$(this).val(),text:$(this).text(),selected:$(this).is(":selected")});
+    });
+    // 部屋タイプ選択リスト作成
+    $("[id$=roomTypeLst] option").each(function(){
+        roomTypeDatas.push({value:$(this).val(),text:$(this).text(),selected:$(this).is(":selected")});
+    });
+    // フロアリスト
+    $(".items[data-floorinfo]").each(function(){
+        var floor = $(this).attr("data-floorinfo");
+        floorDropDown.push({value:floor,text:floor});
+    });
+    // 店舗名
+    $(".j-seisou-setting[name=spcd] .j-seisou-title").text($("[id$=shopDropLst] option:selected").text());
+    // 部屋タイプ
+    $(".j-seisou-setting[name=roomTypes] .j-seisou-title").text($("[id$=roomTypeLst] option:selected").text());
+    // 表示数
+    // var showSizeLabel = (("mobileshowsize" in settingInfo) && settingInfo.mobileshowsize == '02') ? "全部" : "自動";
+    // $(".j-seisou-setting[name=mobileshowsize] .j-seisou-title").text(showSizeLabel);
+    
+}
+// touch中対応
+function bindtouchmove(curRow){
+    if ($(curRow).hasClass("hadBindMove")) return;
+    //如果这个元素的位置内只有一个手指的话
+    if( event.targetTouches.length == 1 ){
+        var touch = event.targetTouches[ 0 ];
+        $(curRow).each(function(){
+            this.addEventListener( 'touchmove',onTouchMove,false);
+            $(this).addClass("hadBindMove");
+        });
+        beginLeft = touch.pageX ;
+        beginTop = touch.pageY ;
+        forwardFlag = false;
+        beforeColor = undefined;
+        afterColor = undefined;
+    }
+}
+// touch終了
+function bindtouchend(){
+    addConsole("bindend");
+    document.addEventListener('touchend',onTouchEnd,false);
+}
+// touch事件失効
+function removebind(){
+    $(".hadBindMove").each(function(){
+        this.removeEventListener( 'touchmove',onTouchMove);
+        $(this).removeClass("hadBindMove");
+        $(".stouchmoved",this).css("background","");
+		$(".stouchmoved",this).removeClass("stouchmoved");
+    });
+    document.removeEventListener('touchend',onTouchEnd);
+}
+// touch開始対応
+function onTouchStart(event){
+    addConsole("toustart");
+    bindtouchmove(event.currentTarget);
+}
+// toucht中対応
+function onTouchMove(event){
+     //如果这个元素的位置内只有一个手指的话
+     if( event.targetTouches.length == 1 ){
+        var touch = event.targetTouches[ 0 ];
+        var curRow = $(event.currentTarget).closest("tr");
+        var showTd = $("." + moveClass,event.currentTarget);
+        if (beforeColor == undefined && afterColor == undefined) {
+            var level = getLevelByLabel(curRow.attr("status"));
+            if (level == null) level = 0;
+            forwardFlag = beginLeft < touch.pageX;
+            var curTarget = $(event.target).closest("td.leftClass,td.rightClass");
+            // 最后级不能拖拽
+                // 最初级不能拖拽
+                    // 不同方向不能拖拽
+            if (level == (cleanLevels.length - 1) && forwardFlag 
+                    || level == 0 && !forwardFlag 
+                        || !curTarget.hasClass(moveClass)) return removebind();
+            if (forwardFlag){
+                afterColor = cleanLevels[level].color;
+                if ((level+1) == cleanLevels.length) beforeColor = 'yellow';
+                else beforeColor = cleanLevels[level+1].color;
+            } else {
+                if ((level - 1) <  0) beforeColor = cleanLevels[0].color;
+                else beforeColor = cleanLevels[level - 1].color;
+                afterColor = cleanLevels[level].color;
+            }
+            showTd.addClass("stouchmoved");
+            bindtouchend();
+        }
+        var diffTop = Math.abs(beginTop - touch.pageY);
+        if (beforeColor == undefined || afterColor == undefined || diffTop > curRow.height()) return removebind();
+        var forwardStr = forwardFlag ? 'to right' : 'to left' ;
+        var left = touch.pageX - showTd.offset().left;
+        var total = showTd.width();
+        var floatPer = kendo.parseFloat(left/total);
+        var chgLeft = Math.abs(touch.pageX - beginLeft);
+        movePer = kendo.parseFloat(chgLeft/total);
+        if (!forwardFlag) floatPer = 1 - floatPer;
+        var percent = kendo.toString(floatPer,"p0");
+        percent = percent.replace(" ","");
+        var css = "background:linear-gradient(" + forwardStr + ", " + beforeColor + " " + percent + ", " + afterColor + ' ' + percent + "," + afterColor + ")";
+        addConsole("onTouchMove:" +  css);
+        showTd.attr("style",css);
+    }
+}
+// toucht終了した
+function onTouchEnd(event){
+    if (beforeColor == undefined && afterColor == undefined ) return removebind();
+    var curRow = $(".stouchmoved").closest("tr");
+    if (movePer > 0.5) {
+    	var level = getLevelByLabel(curRow.attr("status"));
+    	var nextLevel = level;
+    	if (forwardFlag) nextLevel = nextLevel + 1;
+    	else nextLevel = nextLevel-1; 
+    	var status = cleanLevels[nextLevel];
+    	$(".j-seisou-statuslabel",curRow).text(status.label);
+	    curRow.css("background",status.color)
+	    curRow.attr("status",status.label);
+	    // 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN
+        isOpenCheckLst(curRow,level,nextLevel);
+        // 2018/08/02 清掃チェックリスト機能追加 by zy END
+	    var roomid = curRow.attr("roomid");
+	    // 保存状態
+    	ajaxUpdDetail([roomid],status.label);
+    }
+    removebind();
+}
+// 状態変更と設定状態
+function changeLevel(roomid,level){
+    var el = $("tr[roomid='" + roomid + "']");
+    var status = cleanLevels[level];
+    $(".j-seisou-statuslabel",el).text(status.label);
+    $(".j-seisou-selectlist",el).css("background",status.color);
+    $(".j-seisou-selectlist",el).val(status.label);
+    el.css("background",status.color);
+    addConsole("changelevel:" + JSON.stringify(status));
+    el.attr("status",status.label);
+}
+// ログ作成
+function addConsole(text){
+    //$("#consoleLog").prepend("<div>" + text + "</div>");
+}
+// 該当フロア非表示
+function deleteFloor(){
+    var row = $(event.target);
+    var item = row.closest(".items");
+    item.hide();
+    // モバイル
+    item.removeClass("selectedItem");
+    var floorName = item.attr("data-floorinfo");
+    if ($.inArray(floorName,floorData) < 0) floorData.push(floorName);
+    settingInfo.hideFloor = floorData;
+    // 更新フロア表示
+    refreshFloor();
+    // 保存COOKIE
+    ajaxCookieSetInfo();
+}
+// 更新フロア表示
+function refreshFloor(){
+	// モバイルの場合表示全部grid
+	$("div.grid").show();
+    // チェック情報変更
+    if (settingInfo.hideFloor == undefined && settingInfo.hideFloor == null) floorData = []; 
+    else floorData = settingInfo.hideFloor;
+    if ( floorData.length == 0) {
+        $(".items").not(":visible").show();
+    } else {
+        var floorArr = [];
+        // フロア
+        for (var i = 0 ; i < floorData.length ; i++) {
+            var dataFloor = '[data-floorinfo="' + floorData[i] + '"]';
+            floorArr.push(dataFloor);
+        }
+        if (floorArr.length > 0) {
+            var filterSector = floorArr.join(",");
+            $(".items").filter(filterSector).hide();
+            // 非表示画面
+            $(".items").filter(filterSector).removeClass("selectedItem");
+            $(".items").not(filterSector).show();
+        }
+    }
+    // モバイルの場合
+	var floorLst = $(".floorList");
+    // 是否需要初期化
+    var initFlag = $(".items.selectedItem").length == 0;
+    if (floorLst.is(":visible")) {
+    	floorLst.html("");
+   		$(".items:visible").each(function(idx){
+   			var opt = $("<option/>");
+  				opt.text($(this).attr("data-floorinfo"));
+  				floorLst.append(opt);
+   		});
+   		if (initFlag) {
+   			// 第一个显示的item
+   			var firstItem = $("div.items:visible").first();
+   			firstItem.addClass("selectedItem");
+   			firstItem.css(pageAnimate("translateX(0px)",0));
+   			// その他のフロア
+    		$("div.items").not(firstItem).css(pageAnimate("translateX(-" + window.screen.availWidth + "px)",0));
+    	}
+    }
+    // 全部フロア非表示のAREA hide
+    $("div.grid").each(function(){
+    	var visibileLen = $(this).find(".items:visible").length;
+    	if (visibileLen == 0) $(this).hide();
+    });
+    // 初期化の場合
+    if (floorLst.is(":visible")) {
+     // 只显示出一个grid
+    	var visGrid = $("div.grid:visible");
+    	if (visGrid.length > 0) {
+    		if (initFlag) $("div.grid:visible").not(":first").hide();
+    		else {
+    			var dataInfo = $(".items.selectedItem").attr("data-floorinfo");
+    			var grid = $(".items.selectedItem").closest("div.grid");
+    			$("div.grid").not(grid).hide();
+    			$(".floorList").val(dataInfo);
+    		}
+    	}
+   	}
+}
+// 選択リスト表示
+function showSetup(){
+    $("#overLayout").show();
+    var warp = $(".j-seisou-wrapper");
+    warp.show();
+    setTimeout(function(){
+        var warp = $(".j-seisou-wrapper");
+        var cssInfo = pageAnimate('translateY(0px)');
+        warp.css(cssInfo);
+    });
+    $("body,html").addClass("ovfHiden");
+}
+// 設定画面表示
+function shouSetup(){
+    stopRefresh();
+    if (_isMobileOS) {
+        var wrap = $(".settingWrapper");
+        wrap.show();
+        setTimeout(function(){
+           wrap.css(pageAnimate('translateX(0px)'));
+        },1);
+        if (floorData.length > 0) {
+            var floorMsg = [];
+            for (var i = 0 ; i < floorData.length ;i++) {
+                var floor = floorData[i];
+                floorMsg.push(floor);
+            }
+            $("#floorInfo .j-seisou-title").text(floorMsg.join('、'));
+        }
+        $("input[name=cleanShowMobile]").prop("checked",settingInfo.cleanOver);
+        $("body,html").addClass("ovfHiden");
+    } else {
+        openSettingWin();
+    }
+}
+// 打开設定画面
+function openSettingWin() {
+    var win = $("#settingWindow").data("kendoWindow");
+    if (win == undefined) {
+        win = $("#settingWindow").kendoWindow({
+             width: "630px",
+             height: "auto",
+             actions: ["Close"],
+             visible: false,
+             title:'設定',
+             open:function(e){
+                $("#overLayout").show();
+             },
+             close:function(e){
+                $("#overLayout").hide();
+             }
+        }).data("kendoWindow").center();
+        $("#settingWindow").show();
+    }
+    // floor window
+    var valueArr = [];
+    for (var i = 0 ; i < floorData.length ; i++) {
+        valueArr.push(floorData[i]);
+    }
+    var multiSect = $("select[id$=floorMulti]").data("kendoMultiSelect");
+    multiSect.value(valueArr);
+    /*
+    // 表示数
+	var divItem;
+	$(".items:visible").each(function(){
+		if (divItem == undefined) divItem = $(this);
+		else if(divItem.height() < $(this).height()) divItem = $(this);
+	});
+	var rowHt = 40;
+	if ($("tr[name=touchMove]:visible:first").length > 0) {
+		rowHt = $("tr[name=touchMove]:visible:first").outerHeight();
+	}
+	var totalHt = divItem.outerHeight() - $(".label",divItem).height();
+    var itemCnt = kendo.parseInt(totalHt/rowHt);
+    $("#projectName").val(itemCnt);
+    */
+	$("input[name=cleanShow]").prop("checked",settingInfo.cleanOver);
+    win.open();
+}
+// 設定画面閉じる
+function hideKendoWin(){
+    var win = $("#settingWindow").data("kendoWindow");
+    win.close();
+    startRefresh();
+}
+// 画面アニメ動作
+function pageAnimate(animate,time){
+    if (time == undefined) time = 200;
+    var formCss = {'transform':animate,
+                    '-webkit-transform':animate,
+                    '-moz-transform':animate,
+                    '-ms-transform':animate,};
+    var transCss = {
+        'transition':'all '+time+'ms',
+        '-webkit-transition':'all '+time+'ms',
+        '-moz-transition':'all '+time+'ms',
+        '-ms-transition':'all '+time+'ms'
+    }
+    formCss = $.extend(formCss,transCss);
+    return formCss;
+}
+// モバイル選択リスト閉じる
+function hideSetup(){
+    var warp = $(".j-seisou-wrapper");
+    var transLateY = warp.height() + 50 ;
+    var cssInfo = pageAnimate('translateY(' + transLateY + 'px)');
+    warp.css(cssInfo);
+    $("#overLayout").hide();
+    setTimeout(function(){
+        $(".j-seisou-wrapper").hide();
+    },200);
+    $("body,html").removeClass("ovfHiden");
+    $(".setting").removeClass("setting");
+    $(".j-seisou-actions").hide();
+}
+// 多選の場合「キャンセル」ボタン
+function setupCancel(){
+	if (_isMobileOS) {
+    	$(".selectLi").removeClass("selectLi");
+    	hideSetup();
+    }
+}
+// 多選の場合「確定」ボタン
+function setupDone(){
+    var callback = $("#inboxActions").data("callback");
+    if (callback) callback();
+    hideSetup();
+}
+// 店舗リスト表示
+function openShoplist(){
+	var spcd = $("[id$=shopDropLst]").val();
+    setSelected(shopDatas,spcd);
+    createList(shopDatas,mobileShopChange,false);
+    showSetup();
+    $(event.currentTarget).addClass("setting");
+}
+// 部屋タイプリスト表示
+function openRoomtypelist(){
+    setSelected(roomTypeDatas,settingInfo.roomTypes);
+    if (settingInfo.roomTypes == undefined || settingInfo.roomTypes == null) roomTypeDatas[0].selected = true;
+    createList(roomTypeDatas,settingDone,false);
+    showSetup();
+    $(event.currentTarget).addClass("setting");
+}
+// フロアリスト表示
+function openFloorlist(){
+    setSelected(floorDropDown,floorData);
+    createList(floorDropDown,floorDone,true);
+    showSetup();
+    $(event.currentTarget).addClass("setting");
+}
+// 表示選択リスト表示
+function openShowLenlist(){
+    setSelected(itemSizeDatas,settingInfo.showsize);
+    createList(itemSizeDatas,settingDone,false);
+    showSetup();
+    $(event.currentTarget).addClass("setting");
+}
+// 選択リスト中既存データ選択
+function setSelected(datas,value){
+    var hadSelect = false;
+    var isArray = typeof value == 'object';
+    for (var i = 0 ; i < datas.length ;i++) {
+        var data = datas[i];
+        if (isArray) data.selected = $.inArray(data.value,value) >= 0;
+        else data.selected = data.value == value;
+        if (data.selected) hadSelect = true;
+    }
+}
+// フロア完了
+function floorDone(){
+    floorData = [];
+    $("#inboxActions li.selectLi").each(function(){
+        floorData.push($(this).text());
+    });
+    $("#floorInfo .j-seisou-title").text(floorData.join('、'));
+    settingInfo.hideFloor = floorData.sort();
+}
+// 単選終了の場合
+function settingDone(){
+    // 単選
+    if (event.currentTarget.nodeName == "LI") {
+        $(".selectLi").removeClass("selectLi");
+        $(event.currentTarget).addClass("selectLi");
+    }
+    var selectedObj = {};
+    $(".selectLi").each(function(){
+        selectedObj[$(this).attr("value")] = true;
+    });
+    var curItem = $(".setting");
+    var title = $(".j-seisou-title",curItem);
+    $(".setting").removeClass("setting");
+    var datas = $("#inboxActions").data("datas");
+    var selectData = datas.filter(function(item){return item.value in selectedObj});
+    if (selectData.length > 0) {
+        var textArr = [];
+        for (var i = 0 ; i < selectData.length ; i++) {
+            var data = selectData[i];
+            textArr.push(data.text);
+        }
+        if (textArr.length > 0) title.text(textArr.join('、'));
+    }
+    var curName = curItem.attr("name");
+    if ("roomTypes" == curName) settingInfo[curName] = [selectData[0].value];
+    else settingInfo[curName] = selectData[0].value;
+    hideSetup();
+}
+function mobileShopChange(){
+    var selectSpcd = $(event.currentTarget).attr("value");
+    JINYACONNECT.blockUi();
+    settingInfo.spcd = selectSpcd;
+    branchChange();
+}
+// 選択リスト変更対応
+function chaneSelLevel(){
+    var sect = event.currentTarget;
+    var nextLevel = sect.selectedIndex;
+    var curRow = $(sect).closest("tr");
+    var roomId = curRow.attr("roomid");
+    // 変更状態
+    changeLevel(roomId,nextLevel);
+    // 保存状態
+    ajaxUpdDetail([roomId],cleanLevels[nextLevel].label);
+    // 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN
+    var status = curRow.attr("status");
+    isOpenCheckLst(curRow,getLevelByLabel(status),nextLevel);
+    // 2018/08/02 清掃チェックリスト機能追加 by zy END
+}
+// 一括処理
+function oneFloorProcess(val,item){
+    var roomArr = [];
+	$("tr[name='touchMove']:visible",item).each(function(){
+        changeLevel($(this).attr("roomid"),val);
+        roomArr.push($(this).attr("roomid"));
+    });
+    // 保存状態
+    ajaxUpdDetail(roomArr,cleanLevels[val].label);
+}
+// 多選と単選の項目選択の場合
+// 2018/08/13 多選項目エラー対応 by zy BEGIN
+function selectLi(){
+    //if (!muliteflag) $(".selectLi").removeClass("selectLi");
+    var li = $(event.currentTarget);
+    // 2018/08/13 多選項目エラー対応 by zy END
+    if (li.hasClass("selectLi")) li.removeClass("selectLi");
+    else li.addClass("selectLi");
+}
+// モバイル選択リスト作成
+function createList(datas,callback,mulitiflag){
+    if (mulitiflag == undefined) mulitiflag = false;
+    var ulWrap = $("#inboxActions");
+    ulWrap.empty();
+    for (var i = 0 ; i < datas.length ; i++) {
+        var data = datas[i];
+        var dataLi = $("<li value='" + data.value + "'>" + data.text + "<span class='select-status'></span></li>");
+        if (data.selected) dataLi.addClass("selectLi");
+        // 多選
+        if (mulitiflag) {
+            dataLi.bind("click",selectLi);
+        } else {
+            dataLi.bind("click",callback);
+        }
+        ulWrap.append(dataLi);
+    }
+    if (mulitiflag) {
+        ulWrap.data("callback",callback);
+        $(".j-seisou-actions").show();
+        $(".j-seisou-wrapper").css("margin-bottom","48px");
+    } else {
+        $(".j-seisou-actions").hide();
+        $(".j-seisou-wrapper").css("margin-bottom","0px");
+    }
+    ulWrap.data("datas",datas);
+}
+// 設定画面閉じる
+function closeSetWin(){
+    var curTarget = $(".settingWrapper");
+    // 手势
+    moveClass = $("#scrollSwitch").is(":checked") ? "leftClass" : "rightClass";
+    // 清掃済状態
+    settingInfo.cleanOver = $("input[name=cleanShowMobile]").is(":checked");
+    //refreshSettingInfo();
+    // 画面閉じる
+    $(".settingWrapper").css(pageAnimate("translateX(" + window.screen.availWidth + "px)"));
+    setTimeout(function(){
+        $(".settingWrapper").hide();
+    },200);
+    $("body,html").removeClass("ovfHiden");
+    // 画面刷新
+    refreshPage();
+    // 保存COOKIE
+    ajaxCookieSetInfo();
+}
+// 画面清掃明細表示数
+function changeSize(){
+    if (settingInfo.showsize == '02') {
+        $(".items").addClass("htAutoClass");
+        $(".items-max").removeClass("items-max");
+        $(".items-content-max").removeClass("items-content-max");
+    } else {
+        $(".items").removeClass("htAutoClass");
+        $(".items").addClass("items-max");
+        $(".items-content").addClass("items-content-max");
+    }
+}
+// 画面保存
+function saveKendoWin(){
+    // 部屋タイプ更新
+    var roomTypeDropDown = $("[id$=roomTypeLst]").data("kendoDropDownList");
+    if (roomTypeDropDown != undefined) {
+        if (roomTypeDropDown.value() == "") settingInfo.roomTypes = [];
+        else settingInfo.roomTypes = [roomTypeDropDown.value()];
+    }
+    // 更新フロア
+    var muliSect = $("select[id$=floorMulti]").data("kendoMultiSelect");
+    var mulitFloorArr = muliSect.value();
+    floorData = [];
+    if (mulitFloorArr.length > 0) {
+        for (var i = 0 ; i < mulitFloorArr.length ; i++) {
+            var floor = mulitFloorArr[i];
+            floorData.push(floor);
+        }
+    }
+    settingInfo.hideFloor = floorData.sort();
+    /*
+    // 表示サイズ
+	var sizeCnt = $("#projectName").val();
+	if (settingInfo.showCnt != sizeCnt) {
+		settingInfo.showCnt = sizeCnt;
+	}*/
+    // 清掃済状態
+    settingInfo.cleanOver = $("input[name=cleanShow]").is(":checked");
+    // 画面閉じる
+    hideKendoWin();
+    // 画面刷新
+    refreshPage();
+    // 保存COOKIE
+    ajaxCookieSetInfo();
+}
+// 設定関数処理
+function refreshSettingInfo(){
+    // 更新フロア
+    refreshFloor();
+    // 更新表示数
+    // changeSize();
+    // 更新清掃済状態
+    changeCleanShow()
+    // 更新部屋タイプ
+    changeRoomType();
+}
+// 更新部屋タイプ
+function changeRoomType(){
+    var roomTypeId = settingInfo.roomTypes;
+    if (roomTypeId != undefined) {
+	    // 当前显示数据部屋タイプチェック
+	    var curRows = $("tr[name='touchMove'][statusid!='']:visible");
+	    if (roomTypeId != "") {
+	        var selector = "[rtype='" + roomTypeId + "']";
+	        curRows.has(selector).show();
+	        curRows.not(selector).hide();
+	    } else {
+	        curRows.show();
+	    }
+    }
+}
+// 更新清掃済状態
+function changeCleanShow(romids){
+	// 未清掃のデータ
+	var cleanStatus = $("tr[name=touchMove][noshowflag=false][statusid!='']");
+	// 清掃済みのデータ
+	var cleanedStatus = $("tr[name=touchMove][noshowflag=true][statusid!='']");
+	// その他データ
+	var noStatus = $("tr[name=touchMove][noshowflag=true][statusid='']");
+	//　指定部屋対応
+	if (romids != undefined && romids != null && romids != "" && romids.length > 0) {
+		var roomArr = [];
+		// フィルート条件 
+		for (var i = 0 ; i < romids.length ; i++) {
+			var roomid = romids[i];
+			roomArr.push('[roomid=' + roomid + ']');
+		}
+		// 条件ありの場合
+		if (roomArr.length > 0) {
+			var roomArrSelector = roomArr.join(",");
+			cleanStatus = cleanStatus.filter(roomArrSelector);
+			cleanedStatus = cleanedStatus.filter(roomArrSelector);
+		}
+	}
+    // 清掃済の状態対応
+    if (settingInfo.cleanOver) {
+		cleanedStatus.show();
+	} else {
+		cleanedStatus.hide();
+    }
+    // 未清掃のデータ表示
+   cleanStatus.show();
+    // 清掃データなしの場合
+    noStatus.hide();
+    // 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN
+    // 清掃チェックリスト
+    refreshChkIcon();
+    // 2018/08/02 清掃チェックリスト機能追加 by zy END
+}
+// 更新清掃明細
+// 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN
+function ajaxUpdDetail(roomid,status,checklist){
+    JINYACONNECT.blockUi();
+    var spcd = $("[id$=shopDropLst]").val();
+    var data = {
+        roomids:roomid,status:status,spcd:spcd
+    };
+    if (checklist != undefined) {
+        data.checklist = checklist;
+    }
+    remoteQueryInfo('upsertCleanDetail',data,afterUpdate);
+}
+// 2018/08/02 清掃チェックリスト機能追加 by zy END
+// COOKIE更新
+function ajaxCookieSetInfo(){
+    var shopDropDown = $("[id$=shopDropLst]").data("kendoDropDownList");
+    if (shopDropDown != undefined) settingInfo.spcd = shopDropDown.value();
+    else settingInfo.spcd = $("[id$=shopDropLst]").val();
+    remoteQueryInfo('saveCookieSetinfo',settingInfo);
+}
+
+// remoteaction処理
+function remoteQueryInfo(datatype,info,callback){
+    if (info == undefined || !info) info = {};
+    // 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.CleanRoomCtrl.remoteQueryInfo}", datatype, JSON.stringify(info), function(result, event){
+        if(event.type == 'exception') {
+            console.log("-------error-------");
+            alert(event.message);
+        } else if(result != null){
+            // html encode
+            try{
+            } catch(e){}
+        }
+        if (callback != undefined) callback(result);
+    });
+}
+// 店舗変更の場合
+function branchChange(){
+    $("input[id$=hidSetInfoJson]").val(settingInfo.spcd);
+    refreshBranchShop();
+}
+// 更新部屋状態
+function refreshRoomStatus(){
+    var roomIds = [];
+    $(".items").each(function(){
+        $("tr[name=touchMove]",this).each(function(){
+            roomIds.push($(this).attr("roomid"));
+        });
+    });
+    // 2018/08/01 bug fix JINYABUG-776 by zy BEGIN
+    $(".packageProcessList").val("");
+    // 2018/08/01 bug fix JINYABUG-776 by zy END
+    remoteQueryInfo('refreshCleanDetail',{roomids:roomIds},afterRefresh);
+}
+function afterUpdate(result){
+	try{
+		if (result != null && result.length > 0) {
+			var roomArr = [];
+			for (var i = 0 ; i < result.length ; i++) {
+				var data = result[i];
+				var curRow = $("tr[roomid='" + data.roomId + "']");
+				// 部屋状態id
+				curRow.attr("statusid",data.statusId);
+				// 表示フラグ
+				curRow.attr("noshowflag",data.noShowFlag);
+				if (data.noShowFlag && (settingInfo.cleanOver != null && !settingInfo.cleanOver)) curRow.hide();
+				var level = getLevelByLabel(data.cleanStatus);
+				if (level != null) {
+					changeLevel(data.roomId,level);
+				}
+				roomArr.push(data.roomId);
+			}
+			changeCleanShow(roomArr);
+		}
+	}catch(e){}
+	JINYACONNECT.unblockUi();
+}
+// 状態更新後
+function afterRefresh(result){
+	JINYACONNECT.unblockUi();
+	try{
+		if (result != null && result.length > 0) {
+			for (var i = 0 ; i < result.length ; i++) {
+				var data = result[i];
+				var curRow = $("tr[roomid='" + data.roomId + "']");
+				var statusId = data.statusId == undefined ? "" : data.statusId;
+				// 部屋状態id
+				curRow.attr("statusid",statusId);
+				// 表示フラグ
+				curRow.attr("noshowflag",data.noShowFlag);
+				var level = getLevelByLabel(data.cleanStatus);
+				if (level != null) {
+					changeLevel(data.roomId,level);
+				}
+			}
+			// 設定関数処理
+    		refreshSettingInfo();
+		}
+	}catch(e){}
+	$("body,html").removeClass("ovfHiden");
+}
+function getLevelByLabel(status){
+    for (var i = 0 ; i < cleanLevels.length ; i++) {
+        var item = cleanLevels[i];
+        if (item.label == status)  {
+            return i;
+        }
+    }
+    return null;
+}
+// 選択リスト無効
+function disableSelect(){
+    if (!isEditFlag) {
+        $("tr[name=touchMove] select").attr("disabled","disabled");
+        $(".packageProcessList").hide();
+    }
+}
+// 停止刷新
+function stopRefresh(){
+    canRefreshFlag = false;
+}
+// 開始刷新
+function startRefresh(){
+    canRefreshFlag = true;
+}
+// 刷新画面
+function refreshPage(){
+	$("body,html").addClass("ovfHiden");
+	JINYACONNECT.blockUi();
+    refreshRoomStatus();
+}
+function changeProcess(event){
+    var curTarget = event.currentTarget;
+    if (curTarget.value != "") {
+    	var item = $(curTarget).closest(".items");
+    	// 一括処理
+    	oneFloorProcess(curTarget.value,item);
+    }
+}
+// phone フロン変更
+function areaFlorrChange(){
+	// 該当選択リスト
+	var el = event.currentTarget;
+	// 既存画面
+	var orgItem = $("div.items[style*='translateX(0px)']");
+	var selectItem = $("div.items[data-floorinfo='" + el.value + "']");
+	orgItem.closest("div.grid").hide();
+	orgItem.removeClass("selectedItem");
+	orgItem.css(pageAnimate("translateX(-" + window.screen.availWidth + "px)",0));
+	selectItem.closest("div.grid").show();
+	selectItem.addClass("selectedItem");
+	setTimeout(function(){
+		selectItem.css(pageAnimate("translateX(0)"));
+	});
+	$(".floorList").val(el.value);
+	// モパイル対応、フロア変更の場合
+	refreshChkIcon();
+}
+// 2018/08/02 チェックリスト機能追加　by zy BEGIN
+// チェックリスト表示判定
+function isOpenCheckLst(curRow,orglevel,level){
+    var status = cleanLevels[level].label;
+    // 該当ステータス
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+    var panel = getStatusPanelByRow(status,curRow);
+    // $(".statusPanel[name='" + status + "']");
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+    // 該当チェックリストあり
+    if (panel.length > 0) {
+        $("#checkPanel").data("orglevel",orglevel);
+        $("#checkPanel").data("rows",curRow);
+        $("#checkPanel").data("level",level);
+        // チェックリスト画面開く
+        getStatusById(curRow);
+        return false;
+    }
+    return true;
+}
+// 該当チェックリスト状態
+function showCheckList(){
+    var curEevent = event.currentTarget;
+    var curRow = $(curEevent).closest("tr[name='touchMove']");
+    var status = curRow.attr("status");
+    var level = getLevelByLabel(status);
+    $("#checkPanel").data("orglevel",level);
+    $("#checkPanel").data("rows",curRow);
+    $("#checkPanel").data("level",level);
+    getStatusById(curRow);
+}
+function getStatusById(curRow){
+    JINYACONNECT.blockUi();
+    var status = curRow.attr("status");
+    var statusid = curRow.attr("statusid");
+    // 該当ステータス
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+    // var panel = $(".statusPanel[name='" + status + "']");
+    var panel = getStatusPanelByRow(status,curRow);
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+    var curFields = [];
+    var level = getLevelByLabel(status);
+    $("input",panel).each(function(){
+        curFields.push($(this).attr("fileName"));
+    });
+    // 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN
+    var contactFields = [];
+    var leadFields = [];
+    $("tr.noticeItem",panel).find("[datatype=lead],[datatype=contact]").each(function(){
+        var fieldname = $(this).attr("field");
+        if (this.attributes.datatype.value == "lead") leadFields.push(fieldname);
+        else contactFields.push(fieldname);
+        $(this).closest("tr.noticeItem").hide();
+    });
+    // 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END
+    if (curFields.length > 0) {
+        var data = {
+            statusid:statusid,
+	    // 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN
+            fieldLst:curFields,
+            leadLst:leadFields,
+            contactLst:contactFields,
+	    // 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END
+        };
+	    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+        remoteQueryInfo('getChkInfo',data,afterGetData.bind({panel:panel}));
+	    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+    } else openCheckWin(curRow,level,true);
+}
+// 取得データ後
+function afterGetData(result){
+    // 画面設定初期化
+    var level = $("#checkPanel").data("level");
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+    var panel = this.panel;
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+    // 画面項目選択なし
+    $("input",panel).prop("checked",false);
+    if (result != null) {
+        var status = cleanLevels[level].label;
+        // 該当ステータス
+	    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+        // var panel = $(".statusPanel[name='" + status + "']");
+	    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+        // 該当状態設定
+        for (var i = 0 ; i < result.length ; i++) {
+            var field = result[i];
+	    // 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN
+            var element = $("input[filename=" + field.fieldNm + "]",panel);
+            if (element.length > 0) element.prop("checked",field.checked);
+            else if (("datatype" in field) && ("content" in field) && field.content != ""){
+                var element = $("tr.noticeItem").find("[datatype=" + field.datatype + "][field='" + field.fieldNm + "']");
+                if (field.fieldtype == 'DATE') field.content = kendo.toString(kendo.parseDate(field.content),JINYACONNECT.DateFormat);
+                if (field.name != undefined) {
+                    element.html($("<a href='/" + field.content + "' target='_blank'>" + changHtmlCode(field.name) + "</a>"));
+                } else element.html(changHtmlCode(field.content));
+                element.closest("tr.noticeItem").show();
+            }
+	    // 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END
+        }
+    }
+    // チェックリスト画面開く
+    openCheckWin();
+}
+// チェック画面開く
+function openCheckWin(){
+    // 設定情報
+    var level = $("#checkPanel").data("level");
+    var curRow = $("#checkPanel").data("rows");
+    // 全部チェックリスト
+    var panels = $(".statusPanel");
+    var status = cleanLevels[level].label;
+    // 該当表示リスト
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+    var panel = getStatusPanelByRow(status,curRow);
+    // panels.filter("[name='" + status + "']");
+    // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+    // チェックリスト表示
+    panel.show();
+    // 該当チェックリスト以外の非表示
+    panels.not(panel).hide();
+    var title = converTitle(cleanLevels[level].label);
+    if (_isMobileOS) {
+        $(".mobileWrap").show();
+        $(".mobileWrap").css(pageAnimate("translateX(" + window.screen.availWidth + "px)",0));
+        $(".j-seisou-body").append(panel);
+        $(".mobileWrap .projectEditoPanel").css({"max-height":"none","box-shadow":"none"});
+        $(".mobileWrap .j-seisou-tite").text(title);
+        setTimeout(function(){
+            $(".mobileWrap").css(pageAnimate("translateX(0px)",200));
+        });
+    } else {
+    var kendoWin = $("#checkPanel").data("kendoWindow");
+        kendoWin.title(title);
+        kendoWin.center();
+        kendoWin.open();
+    }
+    // 2018/08/02 チェックリストロール制御追加　by　zy　BEGIN
+    // ロール制御 
+    if (!isEditFlag) {
+    	// PC端対応
+    	$("#checkPanel .j-seisou-done").css("visibility","hidden");
+    	// モバイル対応
+    	$(".mobileWrap .j-seisou-done").css("visibility","hidden");
+    }
+    // 2018/08/02 チェックリストロール制御追加　by　zy　END
+    JINYACONNECT.unblockUi();
+}
+// TITLE 作成
+function converTitle(status){
+    return status; 
+}
+// チェック画面閉じる
+function hideCheckWin(){
+    if (_isMobileOS) {
+        $(".mobileWrap").css(pageAnimate("translateX(" + window.screen.availWidth + "px)",200));
+        $(".panelContent").append($(".mobileWrap .statusPanel"));
+        setTimeout(function(){
+            $(".mobileWrap").hide();
+        },200);
+    } else {
+        var kendoWin = $("#checkPanel").data("kendoWindow");
+        kendoWin.close();
+    }
+}
+function saveCheckWin(){
+    hideCheckWin();
+    var rows = $("#checkPanel").data("rows");
+    var level = $("#checkPanel").data("level");
+    var curLevel = kendo.parseInt(level);
+    var status = cleanLevels[curLevel].label;
+    var curPanel = $("#checkPanel .statusPanel[name='"+ status + "']");
+    // 指定状態変更
+    var nextStatus = curPanel.attr("next");
+    if (nextStatus != undefined && nextStatus != "") status = nextStatus;
+    var roomArr = [];
+    rows.each(function(){
+        var roomId = $(this).attr("roomid");
+        roomArr.push(roomId);
+    });
+    var checkList = [];
+    $("input",curPanel).each(function(){
+        var fileName = $(this).attr("fileName");
+        checkList.push({fieldNm:fileName,checked:$(this).is(":checked")});
+    });
+    ajaxUpdDetail(roomArr,status,checkList);
+}
+// 清掃チェックリスト
+function refreshChkIcon(){
+    var selectorArr = []; 
+    $(".statusPanel").each(function(){
+        // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+        // selectorArr.push('[status=' + $(this).attr("name") + ']');
+        var roomTypes = $(this).attr("roomtypes"),statusSel = '[status=' + $(this).attr("name") + ']';
+        if (roomTypes != "") 
+            roomTypes.split(',').forEach(function(typeId){
+                selectorArr.push(statusSel + '[rtype="' + typeId + '"]');
+            });
+        else selectorArr.push(statusSel);
+        // 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+    });
+    if (selectorArr.length > 0) {
+        var selectorStr = selectorArr.join(',');
+        $("tr[name=touchMove]:visible").filter(selectorStr).find(".j-seisou-chklist").css("visibility","visible");
+        $("tr[name=touchMove]:visible").not(selectorStr).find(".j-seisou-chklist").css("visibility","hidden");
+    }
+}
+// 2018/08/02 チェックリスト機能追加　by zy END
+// 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN
+function changHtmlCode(text){
+	var content = $("<div/>").html(text).get(0).textContent;
+	return content;
+}
+// 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END
+// 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN
+// 根据status和typeId取得显示panel
+function getStatusPanelByRow(status,curRow){
+    // 部屋タイプId
+    var typeId = curRow.attr("rtype") || "";
+    // 該当状態取得
+    var panels = panel = $(".statusPanel[name='" + status + "']");
+    // 該当状態の部屋タイプId取得
+    if (typeId != "" && panels.length > 0) panel = panels.filter("[roomtypes*='" + typeId + "']");
+    // 該当状態デフォルト画面取得
+    if (panel.length == 0) panel = panels.filter("[roomtypes='']");
+    return panel;
+}
+// 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END
+</script>
+</head>
+<body>
+<div id="consoleLog" style="position: fixed;top:0;background: white;max-hegiht:100px;width:200px;overflow: auto"></div>
+<apex:pageblock >
+<div id="setupPage">
+	<div class="shopName">
+		<table style="width:100%">
+			<tr>
+				<td>
+					<span style="font-size:20px;">{!curShopName}</span>
+					<span class="k-icon k-i-refresh" onclick="refreshPage()" style="font-size: 22px;position: relative;top: -4px;"></span>
+				</td>
+				<td style="width:30px;text-align: right">
+					<span class="k-icon k-i-gear" onclick="shouSetup()" style="font-size: 22px;"></span>
+				</td>
+			</tr>
+		</table>
+	</div>
+    <div>
+        <apex:repeat value="{!areaInfLst}" var="area">
+            <div class="grid">
+                <div class="areaTips">
+                	<span class="areaName">{!area.areaName}</span>
+                    <select class="floorList" onchange="areaFlorrChange()"></select>
+                </div>
+                <div class="outer-block">
+                    <apex:repeat value="{!area.floorRoomLst}" var="floor">
+                        <div class="items items-max" data-floorinfo="{!if(areaInfLst.size > 1,area.areaName + '-' + floor.floorName, floor.floorName)}">
+                            <div class="label" style="background: lightgray;">
+                                <div style="height:50px;">
+                                    <div style="width: 100%;height:10px;position: relative;">   
+                                        <span>{!floor.floorName}</span>
+                                        <span class="k-icon k-i-close-outline" onclick="deleteFloor()" style="position: absolute;right: 0px;"></span>
+                                    </div>
+                                    <!-- 2019/12/15 部屋ステータスの一括更新不要 by zy BEGIN -->
+                                    <div style="width:100%;height:40px;text-align: center;{!if(quickActionFlg,'','display:none;')}">
+                                    <!-- 2019/12/15 部屋ステータスの一括更新不要 by zy END -->
+                                        <select class="packageProcessList" onchange="changeProcess(event)">
+                                        </select>
+                                    </div>
+                                </div>
+                                <table class="titleTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="headerRow">お部屋</th>
+                                            <th class="headerRow">清掃ステータス</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="items-content items-content-max">
+                                <table class="detailTable">
+                                    <tbody>
+                                        <apex:repeat var="room" value="{!floor.roomLst}">
+											<tr name="touchMove" noshowflag="{!room.noShowFlag}" class="{!if (room.noShowFlag,'noShowClass','')}" style="background: {!room.cleanColor};" status="{!room.cleanStatus}" statusid="{!room.statusId}" roomid="{!room.sobj.id}" rtype="{!room.sobj.TypeRoomRef__c}">
+                                                <td class="leftClass">{!room.sobj.Name}
+                                                	<span class="k-icon k-i-list-unordered j-seisou-chklist" onclick="showCheckList()"></span>
+                                                </td>
+                                                <td class="rightClass">
+                                                    <div class="j-seisou-statuslabel">{!room.cleanStatus}</div>
+                                                    <select class="j-seisou-selectlist" onchange="chaneSelLevel()" style="background: {!room.cleanColor};">
+                                                        <apex:repeat value="{!statsLst}" var="status">
+                                                            <apex:outputpanel rendered="{!status == room.cleanStatus}">
+                                                                <option selected="selected">{!status}</option>
+                                                            </apex:outputpanel>
+                                                            <apex:outputpanel rendered="{!status != room.cleanStatus}">
+                                                                <option>{!status}</option>
+                                                            </apex:outputpanel>
+                                                        </apex:repeat>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </apex:repeat>
+                                    </tbody>
+                                </table>
+                            </div>
+                         </div>
+                      </apex:repeat>
+                    </div>
+                </div>
+            </apex:repeat>
+        </div>
+    </div>
+</apex:pageblock>
+<div id="overLayout" onclick="setupCancel()">
+</div>
+<div class="j-seisou-wrapper">
+ <ul id="inboxActions" class="j-seisou-content">
+ </ul>
+</div>
+<div class="j-seisou-actions" style="width:100%;background: #c5c5c5;display:none;">
+    <span class="j-seisou-button j-seisou-left" style="" onclick="setupDone()">確定</span>
+    <span class="j-seisou-button j-seisou-right" style="" onclick="setupCancel()">キャンセール</span>
+</div>
+<apex:form >
+<div class="settingWrapper">
+    <div class="j-seisou-header">
+        <div class="j-seisou-leftitem" onclick="closeSetWin()">
+            <span class="j-seisou-leftarrow"></span>
+        </div>
+        <div class="j-seisou-tite">
+            <span data-role="view-title">設定</span>
+        </div>
+    </div>
+    <ul class="j-seisou-content" style="max-height: none;">
+        <!-- 2018/08/02 チェックリストロール制御追加　by　zy　BEGIN -->
+        <li class="j-seisou-setting" style="{!if(branchShopLst.size == 0 ,'display:none;','')}" name="spcd" onclick="openShoplist()">
+        <!-- 2018/08/02 チェックリストロール制御追加　by　zy　END -->    
+            <div class="toolDiv">
+                店舗
+                <div class="j-seisou-title" style="color: #777;"></div>
+                <span class="k-icon k-i-arrow-chevron-right"></span>
+            </div>
+        </li>
+        <li class="j-seisou-setting" name="roomTypes" onclick="openRoomtypelist()">
+            <div class="toolDiv">
+                部屋タイプ
+                <div class="j-seisou-title" style="color: #777;"></div>
+                <span class="k-icon k-i-arrow-chevron-right"></span>
+            </div>
+        </li>
+        <li class="j-seisou-setting" name="hideFloor" onclick="openFloorlist()">
+            <div class="toolDiv" id="floorInfo">
+                対象外フロア
+                <div class="j-seisou-title" style="color: #777;"></div>
+                <span class="k-icon k-i-arrow-chevron-right"></span>
+            </div>
+        </li>
+        <li class="j-seisou-setting" name="cleanShow">
+            <div class="toolDiv">
+                清掃済表示
+                <div class="toolShow">
+                <label class="switch">
+                  <input type="checkbox" name="cleanShowMobile"/>
+                  <span class="slider round"></span>
+                </label>
+                </div>
+            </div>
+        </li>
+        <!--
+        <li class="j-seisou-setting ipadShow" >
+            <div class="toolDiv">
+                表示数
+                <input type="number" class="k-textbox toolShow" style="width:50px;" name="productCnt"/>
+            </div>
+        </li>
+        -->
+    </ul>
+</div>
+<apex:actionStatus onstart="javascript:JINYACONNECT.blockUi();" onstop="JINYACONNECT.unblockUi();" id="refStatusBlock"/>
+<!-- 清掃リスト -->
+<input type="hidden" value="{!cleanLstJson}" id="hidCleanLstJson"/>
+<!-- 設定情報 -->
+<apex:inputHidden value="{!settingInfoJson}" id="hidSetInfoJson"/>
+<input type="hidden" value="{!isEditFlag}" id="hidEditFlag"/>
+<apex:actionFunction name="refreshBranchShop" action="{!gotoDate}" status="refStatusBlock"/>
+    <div id="settingWindow">
+        <div class="projectEditoPanel">
+        	<!-- 2018/08/02 チェックリストロール制御追加　by　zy　BEGIN -->
+        	<apex:outputpanel rendered="{!branchShopLst.size > 0}">
+	            店舗
+	            <apex:selectlist id="shopDropLst" size="1" style="width: calc(100% - 4px);" value="{!branchShopNm}">
+	                <apex:selectoptions value="{!branchShopLst}"/>
+	            </apex:selectlist>
+            </apex:outputpanel>
+            <!-- 2018/08/02 チェックリストロール制御追加　by　zy　END -->
+            部屋タイプ
+            <apex:selectlist id="roomTypeLst" size="1" style="width: calc(100% - 4px);">
+                <!-- All -->
+                <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_005_0035}"/>
+                <apex:selectoptions value="{!roomTypeLst}"/>
+            </apex:selectlist>
+            対象外フロア
+            <select id="floorMulti" style="width: calc(100% - 4px);">
+            </select>
+            清掃済表示<input type="checkbox" name="cleanShow"/>
+        </div>
+        <button class="k-button k-button-icontext k-gantt-create" style="width:48%;float:right;font-size: 15px;" type="button" onclick="hideKendoWin()">
+            <span>キャンセル</span>
+        </button>
+        <button class="k-button k-button-icontext k-gantt-create" style="width:48%;font-size: 15px;" type="button" onclick="saveKendoWin()">
+            <span>設定</span>
+        </button>
+    </div>
+    <!-- 2018/08/02 清掃チェックリスト機能追加 by zy BEGIN -->
+    <div id="checkPanel">
+        <div class="panelContent">
+            <apex:repeat value="{!checkList}" var="panel">
+	    	    <!-- 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy BEGIN -->
+                <!-- 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy BEGIN -->
+		<div name="{!panel.status}" next="{!panel.nextStatus}" style="min-height:200px;" class="statusPanel" roomtypes="{!panel.roomtypes}">
+		<!-- 2020/06/30 清掃チェック項目を部屋タイプ毎に設定できるように by zy END -->
+                    <div class="projectEditoPanel">
+                        <div class="messagePanel">
+                            <table style="background: #f8fafb;width:100%;">
+                                <apex:repeat value="{!panel.otherLst}" var="field">
+                                <tr class="noticeItem">
+                                    <td style="width:120px;border-width: 0 0 1px;border-style: solid;text-indent: 0;font-weight: 400; border-color: #dfe1e2;white-space: nowrap;">
+                                        <apex:outputLabel value="{!field.fieldLabel}" />
+                                    </td>
+                                    <td style="border-width: 0 0 1px;border-style: solid;text-indent: 0;font-weight: 400; border-color: #dfe1e2;border-right: 1px solid #d5d5d5;" datatype="{!field.styleClass}" field='{!field.fieldName}'>
+                                    </td>
+                                </tr>
+                                </apex:repeat>
+                            </table>
+                        </div>
+			<!-- 2019/10/15 インスペ項目にお客様特記事項、部屋セット備考、予約人数を表示。 by zy END -->
+                        <apex:repeat value="{!panel.fieldlst}" var="col">
+                            <div class="checkItem">
+                                <apex:outputLabel value="{!col.fieldLabel}" />
+                                <label class="switch">
+                                  <apex:inputField value="{!roomStatus[col.fieldName]}" html-fileName="{!col.name}" 
+                                        styleClass="{!col.styleClass}" rendered="{!col.fieldName != null && col.fieldName != ''}"/>
+                                  <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </apex:repeat>
+                    </div>
+                </div>
+            </apex:repeat>
+        </div>
+        <div class="button-actions">
+            <button class="k-button" style="width:48%;float:right;font-size: 15px;" type="button" onclick="hideCheckWin()">
+                <span>キャンセル</span>
+            </button>
+            <!-- 2018/08/02 チェックリストロール制御追加　by　zy　BEGIN -->
+            <button class="k-button j-seisou-done" style="width:48%;font-size: 15px;" type="button" onclick="saveCheckWin()">
+                <span>確定</span>
+            </button>
+            <!-- 2018/08/02 チェックリストロール制御追加　by　zy　END -->
+        </div>
+    </div>
+    <div class="mobileWrap">
+    	<div class="j-seisou-header" style="position:absolute; top:0px; left:0px; height:50px; right:0px;overflow:hidden;"> 
+    		<div class="j-seisou-leftitem" style="top:10%;" onclick="hideCheckWin()">
+    			<span class="j-seisou-leftarrow"></span>
+    		</div>
+    		<div class="j-seisou-tite"></div>
+    	</div> 
+    	<div class="j-seisou-body" style="position:absolute; top:50px; bottom:50px; left:0px; right:0px; overflow:auto;">
+    	</div> 
+    	<div id="footer" style="position:absolute; bottom:0px; height:50px; left:0px; right:0px; overflow:hidden;"> 
+    		<!-- 2018/08/02 チェックリストロール制御追加　by　zy　BEGIN -->
+    		<button class="j-seisou-checkset j-seisou-done" type="button" onclick="saveCheckWin()">確定</button>
+    		<!-- 2018/08/02 チェックリストロール制御追加　by　zy　END -->
+   	 	</div>
+    </div>
+    <!-- 2018/08/02 清掃チェックリスト機能追加 by zy END -->
+</apex:form>
+</body>
+</html>
+</apex:page>

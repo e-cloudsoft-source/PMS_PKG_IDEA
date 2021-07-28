@@ -1,0 +1,111 @@
+<apex:page controller="IpSetupCtrl" action="{!initAction}"  showheader="false" sidebar="false" docType="html-5.0">
+<c:CommHeaderComp loadJsLib="false"/>
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<style>
+.login{
+	/*margin: 180px;*/
+	width: 100%;
+}
+.content{
+	border: 1px solid rgb(216,221,230);
+}
+.title{
+	background: rgb(214,0,65);
+	text-align: center;
+	color: #fff;
+    font-size: 16px;
+    height: 30px;
+    vertical-align: middle;
+}
+.input{
+	width:100%;
+	font-size: 40px;
+}
+.kbtn{
+	width: 100%;
+    font-size: 30px;
+}
+.requiredInput{
+	position: relative;
+	width: 97%;
+}
+.requiredInput .cusRepuiredClass
+{
+    background-color: #c00;
+    position: absolute;
+    left: -4px;
+    width: 3px;
+    top: 1px;
+    bottom: 1px;
+}
+</style>
+
+<script>
+/*
+$ = jQuery.noConflict();
+
+$(document).ready(function(){
+	$(document).mouseup(function(e){
+	    e.preventDefault();
+	});
+	$("input[id$=':localIp']")[0].focus();
+});
+*/
+function setup(){
+	var ip = $("input[id$=localIp]").val();
+	window.localStorage["jinya_order_setIp"] = ip;
+	// 2018/03/07 Security Check BEGIN
+	//setupFun();
+	if (ip == "") {
+	   alert("IPアドレスを入力してください。");
+	   return;
+	}
+	var backurl = "{!JSENCODE(backUrl)}";
+	window.location.href=(backurl+'?localIp='+ip);
+	// 2018/03/07 Security Check END
+}
+</script>
+<apex:form >
+
+<apex:pageMessages />
+
+	
+<table style="width: 100%">
+<tr>
+<td style="width:50px;"></td>
+<td style="text-align: center;">
+	<div class="login">
+		<div class="title">IP設定</div>
+		<div class="content">
+			<div style="text-align: center;">
+				<div >
+					<div class="k-block k-info-colored" style="font-size: 30px;text-align: left;">
+					下記IPアドレスを設定後、該当IPはドキュメント→Jinyaholdings→オーダーエントリ定義情報へ反映が必要です
+					</div>
+					<br/>
+					
+					<apex:outputPanel styleClass="requiredInput" layout="block">
+			        	<apex:outputPanel styleClass="cusRepuiredClass" layout="block"/>
+						<apex:input id="localIp" value="{!localIp}" type="auto" styleClass="input"/>
+					</apex:outputPanel>
+				</div>
+			</div>
+			<br/>
+			<div style="text-align: center;">
+				<span class="k-button k-button-icontext kbtn" onclick="setup();">設定</span>
+			</div>
+		</div>
+
+	</div>
+</td>
+<td style="width:50px;"></td>
+</tr></table>
+
+</apex:form>
+
+</apex:page>

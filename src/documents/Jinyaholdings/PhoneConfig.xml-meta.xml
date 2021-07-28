@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>日本国内電話定義情報</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>固定電話番号分割定義情報</name>
+    <public>false</public>
+</Document>

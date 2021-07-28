@@ -1,0 +1,260 @@
+<apex:page showHeader="false" standardStylesheets="false" controller="ExpoAccountMasterUndeleteCtrl" action="{!initAct}" title="ごみ箱" >
+<!---->
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/kendo.common-bootstrap.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/kendo.bootstrap.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/styles.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.default.min.css')}"/>
+
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/loader.js')}"/>
+<html>
+<head>
+<style>
+@page {
+	size: 8.27in 11.69in;
+	margin: 20px;
+}
+body {
+	font-family: Arial Unicode MS;
+	top: 0.2cm;
+	left: 0.2cm;
+}
+.k-pager-wrap>.k-link>.k-icon{
+	margin-top: 4px;
+}
+.k-active-filter, .k-state-active, .k-state-active:hover {
+	border-color: #e45200;
+	background-color: #ff6b18;
+}
+#buttonBar{
+	position: relative;
+}
+.icon-status{
+	width: 14px;
+	margin-left: 5px;
+	display:none;
+}
+.boxDiv{
+	border: 3px solid #e3e3e3;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+</style>
+</head>
+<body>
+<header id="header">
+	<c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}"/>
+</header>
+<div id="bodyDiv">
+	<div class="boxDiv">
+<apex:form >
+<table style="width:98%;height:50px;" border="0">
+	<tr>
+		<td>
+			<button type="button" class="btn bc-bl" id="save" onclick="saveDataFunction()" style="margin: 5px 0;padding: 4px 0;display: inline-block;" value="1">復元</button>
+		</td>
+	</tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" id="grid" style="width:100%;">
+	<thead>
+		<tr>
+			<!-- 一括対象-アクション -->
+			<th data-field="deleteFlg">
+				<input type="checkbox" name="allpick" style="vertical-align:middle;"/>
+				<label style="vertical-align:middle;">アクション</label>
+			</th>
+			<!-- ID -->
+			<th data-field="accId" style="display:none;">
+				ID
+			</th>
+			<!-- 名前 -->
+			<th data-field="accName">
+				名前
+			</th>
+			<!-- 削除したユーザ -->
+			<th data-field="deleteUser">
+				削除したユーザ
+			</th>
+			<!-- 削除日 -->
+			<th data-field="createDateStr">
+				削除日
+			</th>
+		</tr>
+	</thead>
+</table>
+</apex:form>
+	</div>
+</div>
+<footer id="footer">
+	<c:ExpoFooterComp />
+</footer>
+
+<script>
+// 初期化
+$(document).ready(function() {
+    // 开启监视Allpick
+    $("[name=allpick]").on("click",function(){
+        // 所有Tr子数据 的CheckBox
+        $(".itemCheck").prop("checked",$(this).prop("checked"));
+        var itemCheckFlg = $(".itemCheck").prop("checked");
+        $(".itemCheck").val(itemCheckFlg);
+    });
+    setKendoGrid();
+});
+
+function setKendoGrid(){
+	// 初期化
+   	var $grid = $("table[id='grid']");
+    var JsonStr = JSON.parse('{!JSENCODE(masterInfoJson)}');
+    var deleteTypeDs = new kendo.data.DataSource({data: JsonStr,
+			schema: {
+				model: {
+					fields: {
+						deleteFlg: { type: "boolean" },
+						accId: { type: "string" },
+						accName: { type: "string" },
+						deleteUser: { type: "string" },
+						createDateStr: { type: "string" }
+					}
+				}
+			},
+    });
+    $grid.kendoGrid({
+     	dataSource:deleteTypeDs,
+        scrollable:false,
+        filterable:true,
+		columns: [
+			// 一括対象-アクション
+            {   
+                field: "deleteFlg",
+                title: " ",
+                type:"boolean",
+                sortable: false,
+                filterable: false,
+                width: 94,
+                template:
+                        "# if (deleteFlg) { #" +
+                            '<input type="checkbox" class="itemCheck" onclick="setCheckBoxFun(this)" id="deletedId" Name="checkNm" checked="checked" value="#= deleteFlg#" />' +
+                        "# } else { #" +
+                            '<input type="checkbox" class="itemCheck" onclick="setCheckBoxFun(this)" id="deletedId" Name="checkNm" value="#= deleteFlg#" />' +
+                        "# } #",
+            },
+            // ID
+			{	field:"accId", 
+				sortable: true, 
+				filterable: true,
+				width:300,
+				hidden:true,
+				template: '<span class="itemId">#= accId#</span>'
+			},
+			// 名前
+			{	field:"accName", 
+				sortable: true, 
+				filterable: true,
+				template:'#= accName#'
+			},
+			// 削除したユーザ
+			{	field:"deleteUser",
+				sortable: true,
+				filterable: true,
+				width:300,
+				template:'#= deleteUser#'
+			},
+			// 削除日
+			{	field:"createDateStr",
+				sortable: true,
+				filterable: true,
+				width:300,
+				template:'#= createDateStr#'
+			},
+		],
+		filterable: {
+			operators: {
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				},
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: " ",
+				// および
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+		    }
+		},
+        // 排序
+        sortable:true
+     });
+}
+// 单独check响应
+function setCheckBoxFun(e) {
+    $("input[id='deletedId']",$(e)).prop("checked",$(e).prop("checked"));
+    var deleteVal = $(e).val();
+    if(deleteVal =="true") $(e).val(false);
+    else $(e).val(true);
+    // 对Allpick的CheckBox设定
+    setAllPickBoxFun();
+}
+// 对Allpick的CheckBox设定
+function setAllPickBoxFun() {
+    $("[name=allpick]").prop("checked",$("input.itemCheck").length == $("input.itemCheck:checked").length);
+}
+// 恢复按钮响应事件
+function saveDataFunction(){
+	startLoading();
+	var ids = new Array();
+    $("tr[role='row'] input[name=checkNm]:checked").each(function() {
+    	var trDelete = $(this).closest("tr");
+    	ids.push($(".itemId",trDelete).text());
+    });
+    if(ids.length > 0) {
+		Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.ExpoAccountMasterUndeleteCtrl.recovery}", ids , function (result, event) {
+				if (event.type == 'exception') {
+					alert(event.message);
+				} else {
+					window.location.reload();
+				}
+		});
+	} else {
+		alert("会計商品データは1件以上選択してください。");
+		stopLoading();
+	}
+}
+</script>
+</body>
+</html>
+</apex:page>

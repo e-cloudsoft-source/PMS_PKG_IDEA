@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Payment detail</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Payment detail</value>
+    </caseValues>
+    <fields>
+        <label>Account</label>
+        <name>AccountAcountRef__c</name>
+        <relationshipLabel>Payment detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Deposit amount</label>
+        <name>DepositAmount__c</name>
+    </fields>
+    <fields>
+        <label>Payment information</label>
+        <name>PaymentInfoRef__c</name>
+        <relationshipLabel>Payment detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Remaining money</label>
+        <name>RemainingMoney__c</name>
+    </fields>
+    <fields>
+        <label>Use amount</label>
+        <name>UsedAmount__c</name>
+    </fields>
+    <nameFieldLabel><!-- 明細番号 --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

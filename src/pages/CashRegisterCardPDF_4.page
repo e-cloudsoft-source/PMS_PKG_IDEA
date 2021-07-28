@@ -1,0 +1,505 @@
+<!-- レジカード -->
+<apex:page showHeader="false" title="{!$Label.ps__msg_012_0230}" sidebar="false" renderAs="pdf"
+    applyHtmlTag="false" applyBodyTag="false" action="{!pdf4Init}"
+    readonly="true" standardcontroller="Yadochou__c" extensions="CashRegisterCardPDF">
+
+<html>
+<head>
+ <style>
+    @page {
+        size: 6.93in 9.84in;        /* B5 portlate size */
+        /* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+        margin: 0.4cm {!if(signaTypePage && pageSignaTureFlg ,' 0cm ',' 0.4cm ')}0.4cm 0.4cm;/*0.4cm 0.4cm 0.4cm 0.4cm;*/
+        /* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+    }
+    body {
+        font-family: Arial Unicode MS;
+        top: 0cm;
+        left: 0cm;
+        color: black;
+        font-size: 0.30cm;
+        /* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+        {!if(signaTypePage && pageSignaTureFlg ,'margin:0cm;','')}
+        /* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+    }
+    .titleHeader {
+        text-align: center;
+        font-size: 100%;
+        background-color: #CCCCCC;
+    }
+    .header {
+        height:30px;
+        font-size: 100%;
+        background-color: #CCCCCC;
+    }
+    .underline {
+        list-style:none;
+        border-bottom:1px black solid;
+    }
+    .underlinesmall {
+        list-style:none;
+        border-bottom:0.5px black solid;
+    }
+    .splitline {
+        list-style:none;
+        border-top:0.5px black solid;
+    }
+    .rightline {
+        list-style:none;
+        border-right:0.5px black solid;
+    }
+    .leftline {
+        list-style:none;
+        border-left:0.5px black solid;
+    }
+    /*img {
+		max-width:80px;
+		myimg:expression(onload=function(){
+			this.style.width=(this.offsetWidth > 80)?"80px":"auto"}
+		);
+	}*/
+
+ </style>
+</head>
+<body>
+
+<!-- 一括印刷 -->
+<apex:repeat value="{!bulkAllPageList}" var="oneCard">
+	<div style="vertical-align:top ;margin-top: 4px;height:4px;{!if( oneCard.isFirstPage, '', 'page-break-before: always;')} "></div>
+<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz BEGIN  -->
+<apex:variable var="onePageNo" value="{!0}"/>	
+<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz END  -->
+<!-- border space  -->
+<apex:repeat value="{!oneCard.allPageList}" var="onePage" >
+<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz BEGIN  -->
+<apex:variable var="onePageNo" value="{!onePageNo + 1}"/>
+<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz END  -->
+    <!-- 改ページ -->
+    <!-- <div style="{!if( onePage.isFirstPage, '', 'page-break-before: always;')} ">
+    <img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 1px;"/>
+    </div> -->
+    <!-- １ページ内容を出力する -->
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+	<div style="background: white;top: 12px;display:{!if(onePage.isSignaImg && signaTypePage , 'block', 'none')}">
+		<apex:outputtext value="{!onePage.signaImg}" escape="false" />
+	</div>
+    <div style="background: white;top: 12px;display:{!if(onePage.isSignaImg && signaTypePage , 'none', 'block')}">
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+    <table style="width:99%;" cellpadding="0px" cellspacing="0px">
+        <tr>
+            <td colspan="8" height="5"><!-- コネクト印刷面（表） --></td>
+        </tr>
+        <tr>
+            <td  colspan="8">
+                <div style="height: 80px; float: right; overflow: hidden; border:1px solid #FFFFFF;">
+                    <apex:outputField value="{!reportInfo.ReportLogo__c}" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="8" style="font-size: 12px;">{!$Label.MSG_012_0103}</td>
+            <!-- <td colspan="2" style="text-align:right;">{!usedDate}</td> -->
+        </tr>
+
+    <tr height="18px">
+            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 100px;" colspan="2">{!$Label.MSG_012_0104}</td>
+            <td width="2px" rowspan="100" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 16px;width: 2px;"/></td>
+            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 100px">{!$Label.MSG_012_0105}</td>
+            <td width="2px" rowspan="100" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 16px;width: 2px;"/></td>
+            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 360px" >{!$Label.MSG_012_0106}</td>
+            
+            
+        </tr>
+        <apex:repeat value="{!onePage.onePageList}" var="g" >
+            <tr>
+                <td colspan="2" rowspan="4" style="height: 22px;" class="underlinesmall">
+	                <table border="0"  cellpadding="0px" cellspacing="0px">
+	                	<tr style="vertical-align: top;">
+	                		<td ><apex:outputtext value="{!if(g.isFirstShow, $Label.ps__msg_012_0129, '　')}" /></td>
+	                		<td colspan="2" align="right" valign="top">{!g.gender}</td>
+	                	</tr>
+	              		<tr>
+	              			<td rowspan="2" valign="top"  width="150px" height="45px" ><apex:outputLabel value="{!IF(ISBLANK(g.guestName),'', g.guestName + '<br/>')}{!g.hiragana}" escape="false"/></td>
+	              			<td align="right" valign="bottom">{!$Label.MSG_012_0115}</td>
+	              		</tr>
+	              		<!-- 
+						<tr>
+							<td height="60px" width="150px" valign="top"><apex:outputtext value="{!if(g.isFirstShow, $Label.ps__msg_012_0129, '　')}" /><br/>
+							<apex:outputLabel value="{!IF(ISBLANK(g.guestName),'', g.guestName + '<br/>')}{!g.hiragana}" escape="false"/></td>
+							<td align="right" valign="bottom">{!$Label.MSG_012_0115}</td>
+                        </tr>
+                        -->
+                        <!-- <tr>
+						</tr> -->
+					</table>
+				</td>
+                <td style ="text-align:center;">{!IF(g.age = 0 , '', g.age)}</td>
+                <td >{!$Label.MSG_012_0130}<span  style="margin-left: 2px">{!g.post}</span></td>
+            </tr>
+            <tr >
+                <td></td>
+                <td style="word-break: break-all;word-wrap:break-word;height: 17px;" rowspan="2">
+                	<span style="width:360px; display: block; white-space:nowrap; overflow: hidden;">
+                		<apex:outputLabel value="{!g.address1}{!g.address2}" />
+            		</span>
+                </td>
+            </tr>
+            <tr><td ></td></tr>
+            <tr >
+                <td class="underlinesmall" valign="bottom" style ="text-align:right;font-size: 10px;">{!g.birthDate2}</td>
+                <td class="underlinesmall" >
+                	<table style="width:100%;border: 0px;border-spacing: 0px;table-layout: fixed;" cellpadding="0px" cellspacing="0px">
+                		<tr>
+                			<td width="36%" >
+                				{!$Label.MSG_012_0131}<span style="margin-left: 2px;">{!g.phone}</span>
+                			</td>
+
+                		</tr>
+                		<tr>
+                			<td width="64%" >
+                				<div style="width: 240px;overflow: hidden;white-space: nowrap;">
+                				{!$Label.MSG_012_0132}<span style="margin-left: 2px;overflow: hidden;">{!g.email}</span>
+                				</div>
+                			</td>
+                		</tr>
+                	</table>
+                </td>
+                
+            </tr>
+        </apex:repeat>
+    </table>
+
+    <!-- space -->
+    <img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width: 2px;"/>
+
+    <!-- PDF FOOTER -->
+    <table style="width:99%;" cellpadding="0px" cellspacing="0px" border="0">
+    	<!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+        <!--<tr style="display: {!IF(ISBLANK(customizeHtml),'','none')}">-->
+        <tr style="display: {!IF(ISBLANK(oneCard.layoutCardlst.autoHtml),'','none')}">
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+        	<td >
+            <table style="width: 100%;" border="0">
+            	<colgroup style="width: 125px"/>
+            	<colgroup style="width: 460px"/>
+            	<!--  <colgroup style="width: 115px"/>
+            	<colgroup style="width: 115px"/>
+            	<colgroup style="width: 115px"/>
+            	-->
+            	<tr>
+            		<td  valign="top" >
+            			<span>{!$Label.MSG_012_0108}</span>
+            		</td>
+            		<td >{!$Label.MSG_012_0109}</td>
+            	</tr>
+            	<tr>
+            		<td  valign="top" rowspan="2">
+            			<span>{!$Label.MSG_012_0110}</span>
+            		</td>
+            		<td >{!$Label.MSG_012_0111}</td>
+            	</tr>
+            	<tr>
+
+            		<td >{!$Label.MSG_012_0112}</td>
+            	</tr>
+            </table>
+			</td>
+        </tr>
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+        <!--<tr style="display: {!IF(ISBLANK(customizeHtml),'','none')}">-->
+        <tr style="display: {!IF(ISBLANK(oneCard.layoutCardlst.autoHtml),'','none')}">
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+        	<td valign="bottom" height="30px">{!$Label.MSG_012_0113}</td>
+        </tr>
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+        <!--<tr style="display: {!IF(ISBLANK(customizeHtml),'','none')}">-->
+        <tr style="display: {!IF(ISBLANK(oneCard.layoutCardlst.autoHtml),'','none')}">
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+        	<td>{!$Label.MSG_012_0114}</td>
+        </tr>
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+        <!--<tr style="display: {!IF(ISBLANK(customizeHtml),'','none')}">-->
+        <tr style="display: {!IF(ISBLANK(oneCard.layoutCardlst.autoHtml),'','none')}">
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+        	<td>
+        		<table style="width: 100%;">
+			        <tr>
+			        	<td height="30px" style="border-bottom: solid 1px #848689;width: 90%;"></td>
+			        	<td rowspan="3" valign="bottom"><div  style="height: 38px; width: 38px; float: right; border:1px solid #000000;"></div></td>
+			        </tr>
+			        <tr>
+			        	<td height="30px" style="border-bottom: solid 1px #848689;width: 90%;"></td>
+			        </tr>
+			        <tr>
+			        	<td height="30px" style="border-bottom: solid 1px #848689;width: 90%;"></td>
+			        </tr>
+
+        		</table>
+        	</td>
+        </tr>
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+        <!--2017/08/30 XML定义显示修正 zyz BEGIN-->
+        <!--
+    	<apex:outputPanel rendered="{!!ISBLANK(customizeHtml)}">
+    	   <apex:outputtext value="{!customizeHtml}" escape="false"></apex:outputtext>
+    	</apex:outputPanel>
+    	-->
+    	<!--2017/08/30 XML定义显示修正 zyz END-->
+    	<apex:outputPanel rendered="{!!ISBLANK(oneCard.layoutCardlst.autoHtml)}">
+    		<apex:outputtext value="{!oneCard.layoutCardlst.autoHtml}" escape="false"></apex:outputtext>
+    	</apex:outputPanel>
+    	<!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+        <tr>
+        	<td height="20px" valign="bottom">
+        		<div style="background-color:#CCCCCC; height: 13px; color: #FFFFFF;"></div>
+
+        	</td>
+        </tr>
+        <tr>
+        	<td>
+        	<table >
+				<tr>
+					<td width="66px" colspan="2">
+                        <table border="0" cellpadding="0px" cellspacing="0px" width="">
+                            <tr>
+                                
+                                <td>・{!$Label.MSG_012_0120}</td>
+                                <td >{!onePage.footer4.ciTime}</td>
+                                <td width="20px"></td>
+                                <td align="right">{!$Label.MSG_012_0121}</td>
+                                <td align="right">{!onePage.footer4.coTime}</td>
+                                <!-- 2019/09/27 パラメータ切り替え WGCH BEGIN -->
+                                <td style="width: 55px;display:{!IF(isReducedTaxFlg && !planFlg, true, 'none')}"></td>
+                                <td align="right" style="display:{!IF(isReducedTaxFlg && !planFlg, true, 'none')}"><apex:outputtext value="{!$Label.ps__msg_006_0458}" rendered="{!isReducedTaxFlg}"/></td>
+                                <!-- 2019/09/27 パラメータ切り替え WGCH END -->
+                            </tr>
+                        </table>
+                    </td>
+				</tr>
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz BEGIN -->
+				<tr style="display:{!if(planFlg,'none;','')}">
+					<td>{!$Label.MSG_012_0122}</td>
+					<td>
+						<table border="0" cellpadding="0px" cellspacing="0px" width="100%">
+							<tr>
+								<td width="55%"><span style="white-space:nowrap; ">{!onePage.footer4.planName}</span></td>
+								<td align="right">{!$Label.MSG_012_0123}{!onePage.footer4.roomName}</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr style="display:{!if(planFlg,'','none;')}">
+					<td  width="66px" >・{!$Label.MSG_012_0123}</td>
+					<td>{!onePage.footer4.roomName}</td>
+				</tr>
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz END -->
+				<!-- 予約明細 -->
+				<apex:variable var="count" value="{!0}"/>
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz BEGIN -->
+				<apex:repeat value="{!onePage.estItems}" var="d1" rendered="{!!clearnessFlg}">
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz END -->
+				<tr height="20px">
+					<td>{!IF(count = 0, $Label.MSG_012_0127, '　')}</td>
+					<td>
+						<table border="0" cellpadding="0px" cellspacing="0px" width="100%">
+							<tr>
+								<td>
+									<span style="display: block; width:360px; white-space:nowrap; overflow: hidden;">{!d1.productNm}</span>
+								</td>
+								<td width="{!IF(isShowPrice, '60','0')}px" align="right">
+									<apex:outputtext value="{!currencySybmol}{0,number,{!numberFormat}}" rendered="{!AND(isShowPrice,d1.isDtShowFlg)}">
+										<apex:param value="{!d1.unitPrice}"></apex:param>
+									</apex:outputtext>
+								</td>
+								<td width="30px" align="right" style="display: {!IF(d1.isDtShowFlg, 'block;', 'none;')}">
+									<apex:outputtext value="{0,number,}">
+										<apex:param value="{!d1.unitNums}"></apex:param>
+									</apex:outputtext>
+								</td>
+								<td width="{!IF(isShowPrice, '75','135')}px" align="right">
+									<apex:outputtext value="{!currencySybmol}{0,number,{!numberFormat}}" rendered="{!AND(isShowPrice,d1.isDtShowFlg)}">
+										<apex:param value="{!d1.dTotal}"></apex:param>
+									</apex:outputtext>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<apex:variable var="count" value="{!count+1}"/>
+				</apex:repeat>
+				
+				
+			</table>
+			</td>
+        </tr>
+        <tr>
+        	<td>
+        		<table border="0">
+        			<tr>
+	        			<apex:outputText rendered="{!isShowPrice}">
+							<td colspan="2" style="width: 350px;">{!$Label.ps__msg_012_0124}<img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 40px; height: 1px;"/>
+							<apex:outputtext value="{!currencySybmol}{0,number,{!numberFormat}}">
+								<apex:param value="{!onePage.footer4.estimateTotal}"></apex:param>
+							</apex:outputtext><hr /></td>
+	        			</apex:outputText>
+	        			<apex:outputText rendered="{!!isShowPrice}">
+							<td colspan="2" style="width: 350px;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 30px;"/></td>
+	        			</apex:outputText>
+						<!-- <td>¥ 109,680</td> -->
+						<td rowspan="2" valign="bottom" align="right">{!$Label.MSG_012_0125}</td>
+						<!--//2017/04/27 署名機能追加　by zyz BEGIN-->
+						<td rowspan="2"><div style="height: 50px; width: 280px; float: right; border:1px solid #000000;" ><div style="margin-top:1px;"><apex:outputText value="{!onePage.footer4.signa.Signature__c}" escape="false" /></div></div></td>
+						<!--//2017/04/27 署名機能追加　by zyz END-->
+					</tr>
+					<tr>
+						<td width="45px">{!$Label.MSG_012_0126}</td>
+						<td>{!usedDate}</td>
+						<!-- <td>&nbsp;</td> -->
+					</tr>
+				</table>
+        	</td>
+        </tr>
+    </table>
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+    </div>
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+    <!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz BEGIN  -->
+    <!--<div style="vertical-align:top ;margin-top: 4px;height:4px;page-break-before: always;"></div>-->
+    <div style="vertical-align:top ;margin-top: 4px;height:4px;page-break-before: always;display:{!if(printFlg,if(oneCard.allPageList.size > onePageNo,'','none;'),'')}"></div>
+    <!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz END  -->
+
+</apex:repeat>
+	<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz BEGIN  -->
+	<div style="display:{!if(printFlg,'none;','')}">
+	<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz END  -->
+    <!-- 既存印刷面（裏） -->
+
+	<table style="width:92%; margin: 0.1cm 0.8cm 0.5cm 0.8cm" cellpadding="0px" cellspacing="0px">
+        <tr>
+            <td  >
+                <div style="height: 80px; float: right; overflow: hidden; border:1px solid #FFFFFF;">
+                    <apex:outputField value="{!reportInfo.ReportLogo__c}" />
+                </div>
+            </td>
+        </tr>
+	</table>
+
+	<table style="width:92%; margin: 0.1cm 0.8cm 0.8cm 0.8cm"  cellpadding="0px" cellspacing="0px">
+		<tr>
+            <td style="text-align: center; border-bottom: solid 1px #000000;width: 100%;height: 30px" colspan="2">＜客室係記入欄＞</td>
+        </tr>
+        <tr>
+        	<td height="15px" colspan="2">
+        		<!-- <hr/> -->
+        	</td>
+        </tr>
+        <tr>
+        	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+        	<td style="display:{!if(pageSignaTureFlg && signaTypePage , 'none', '')}" rowspan="29" width="35px"></td>
+        	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+        	<td>
+        		<table>
+        			<tr>
+        				<td width="300px"></td>
+        				<td style="text-align: left; border-bottom: solid 1px #000000;width: 200px;">お着き案内者</td>
+        				<td><div  style="height: 38px; width: 38px; float: right; border:1px solid #000000;font-size: 6px;valign:top;" >入力チェック</div></td>
+        			</tr>
+        		</table>
+
+        	</td>
+        </tr>
+        <tr>
+        	<td height="30px"></td>
+        </tr>
+        <tr>
+        	<td >
+        		<table>
+        			<tr>
+        				<td>料理内容　　　　　　　　　　　　最終利用日 :　　　　　　　　　　　　利用回数 : </td>
+        			</tr>
+        		</table>
+        	</td>
+        </tr>
+        <tr>
+        	<td height="32px"></td>
+        </tr>
+        <tr>
+        	<td>
+				<table  border="0">
+					<tr>
+						<td width="110" height="22px">夕食時刻</td>
+						<td  >（　　　　　　　）　　17:00 　17:30 　18:30 　19:00 　19:30 　20:00</td>
+					</tr>
+					<tr>
+						<td height="22px">アレルギー</td>
+						<td >なし・あり（　　　　　　　　　　　　　　　　　　　　　　　　）　</td>
+					</tr>
+					<tr>
+						<td height="22px">料理リクエスト</td>
+						<td >（　　　　　　　　　　　　　　　　　　　　　　　　　　　　　）</td>
+					</tr>
+					<tr>
+						<td height="22px">連泊情報</td>
+						<td >外出（掃除）　　　　　　　　　お菓子</td>
+					</tr>
+					<tr>
+						<td height="22px">お車の場合</td>
+						<td >車種　　　　　　　　　　　ナンバー</td>
+					</tr>
+					<tr>
+						<td height="22px">&nbsp;</td>
+						<td >&nbsp;</td>
+					</tr>
+					<tr>
+						<td height="22px">喫煙</td>
+						<td >あり　なし</td>
+					</tr>
+					<tr>
+						<td height="22px">その他趣向</td>
+						<td>&nbsp;</td>
+					</tr>
+				</table>
+        	</td>
+        </tr>
+        <tr>
+        	<td height="45px"></td>
+        </tr>
+        <tr>
+        	<td>
+        		<apex:outputpanel rendered="{!oneCard.extInf.memoList.size == 0 }">
+	        		<table style="width: 100%;">
+				        <tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;">メモ</td></tr>
+				        <tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+				        <tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+				        <tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+				        <tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+				        <tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+	        		</table>
+        		</apex:outputpanel>
+        		<apex:outputpanel rendered="{!oneCard.extInf.memoList.size > 0 }">
+					<table style="width: 100%;">
+						<tr><td height="28px" style="border-bottom: solid 1px #848689;width: 100%;">メモ</td></tr>
+						<apex:repeat value="{!oneCard.extInf.memoList}" var="memo" rows="10">
+					        <tr>
+					        	<td height="28px" style="border-bottom: solid 1px #848689;width: 100%;">
+					        		<div style="width: 570px; text-align: left; valign: top; whitespace: nowrap;">
+					        			<apex:outputText value="{!memo}" escape="false"/>
+					        		</div>
+					        	</td>
+					        </tr>
+					    </apex:repeat>
+					    <apex:outputpanel rendered="{!oneCard.extInf.memoList.size > 10 }">
+					    	<tr><td height="20px" style="width: 100%;">···</td></tr>
+					    </apex:outputpanel>
+	        		</table>
+				</apex:outputpanel>
+        	</td>
+        </tr>
+	</table>
+	<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz BEGIN  -->
+	</div>
+	<!-- 2019/06/15 レジカードのタイプ４には客室担当用のページが２ページ目に非表示できる機能対応 BY zyz END  -->
+	</apex:repeat>
+</body>
+</html>
+</apex:page>

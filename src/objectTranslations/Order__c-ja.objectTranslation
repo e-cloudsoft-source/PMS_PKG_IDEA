@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>注文</value>
+    </caseValues>
+    <fields>
+        <label><!-- 配送方法 --></label>
+        <name>DeliveryType__c</name>
+    </fields>
+    <fields>
+        <label><!-- APIフラグ(システム用) --></label>
+        <name>ExpoApiCancelFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Expo組織情報 --></label>
+        <name>ExpoOrgInfoRef__c</name>
+        <relationshipLabel><!-- 注文 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- キャンセル理由 --></label>
+        <name>Memo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 合計金額 --></label>
+        <name>OrderAmountIncTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 注文番号 --></label>
+        <name>OrderNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 注文ステータス --></label>
+        <name>OrderStatus__c</name>
+        <picklistValues>
+            <masterLabel>ご注文</masterLabel>
+            <translation><!-- ご注文 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>キャンセル</masterLabel>
+            <translation><!-- キャンセル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>保留</masterLabel>
+            <translation><!-- 保留 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>処理中</masterLabel>
+            <translation><!-- 処理中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>完了</masterLabel>
+            <translation><!-- 完了 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 購入者ID --></label>
+        <name>OrderUserId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 決済詳細情報 --></label>
+        <name>PayDetail__c</name>
+    </fields>
+    <fields>
+        <label><!-- 決済方式 --></label>
+        <name>PayType__c</name>
+    </fields>
+    <fields>
+        <label><!-- 注文 --></label>
+        <name>RefParOrder__c</name>
+        <relationshipLabel><!-- 注文 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>SetAmountTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 梱包毎合計金額(税込) --></label>
+        <name>SetAmount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 配送住所 --></label>
+        <name>SetDeliveryAddress__c</name>
+    </fields>
+    <fields>
+        <label><!-- 配送料 --></label>
+        <name>SetDeliveryCharge__c</name>
+    </fields>
+    <fields>
+        <help><!-- 契約可能終了日(業者用) --></help>
+        <label><!-- 配送希望日 --></label>
+        <name>SetDeliveryDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 配送希望時刻 --></label>
+        <name>SetDeliveryTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 配送先宛名 --></label>
+        <name>SetOrderTitle__c</name>
+    </fields>
+    <fields>
+        <label><!-- 実際配送日 --></label>
+        <name>SetRealDeliveryDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発送方法 --></label>
+        <name>ShippingType__c</name>
+        <picklistValues>
+            <masterLabel>一括配送</masterLabel>
+            <translation><!-- 一括配送 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>順次配送</masterLabel>
+            <translation><!-- 順次配送 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 注文 --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

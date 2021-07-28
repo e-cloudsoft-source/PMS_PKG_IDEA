@@ -1,0 +1,215 @@
+<apex:page standardcontroller="Purchase__c" extensions="PurchaseManagentInputSf1"
+standardStylesheets="true" showheader="false" sidebar="false" showChat="false" cache="true" action="{!InitView}"
+docType="html-5.0">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<apex:stylesheet value="{!URLFOR($Resource.notifyLib, 'styles/metro/notify-metro.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<script type="text/javascript" src="/soap/ajax/22.0/connection.js"></script>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.notifyLib, 'js/notify.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.notifyLib, 'styles/metro/notify-metro.js')}"/>
+
+<style>
+/* 苹果移动设备上会识别，用于保证文字大小。*/
+html { -webkit-text-size-adjust: none; }
+
+hr{
+	border:none;
+	border-top:1px solid #c7c7c7;
+	margin-top:-1px;
+}
+.spanClass{
+	font-size:13px;
+	color:#7889A5;
+}
+.dataClass{
+	font-size:15px;
+	color:#213C64 !important;
+}
+</style>
+<script>
+var $j = jQuery.noConflict();
+// PCの場合、標準画面に設定する
+if (!isSf1()) {
+    window.location.href = "/{!JSENCODE(Purchase__c.Id)}?nooverride=1";
+}
+</script>
+<!-- bluk input page -->
+<div style="width:100%;height:100%">
+	<div style="float:left;width:100%;height:100%" id="lDiv">
+		<ol style="list-style-type:none;width:95%;padding:0px;">
+			<li>
+				<!-- 種別 -->
+				<span class="spanClass">{!$Label.MSG_040_0065}</span>
+			</li>
+			<li>
+				<apex:outputText value="{!Purchase__c.PurchaseType__c}" styleClass="dataClass"/>
+				<hr/>
+			</li>
+			<li>
+				<!-- 科目 -->
+				<span class="spanClass">{!$Label.MSG_040_0066}</span>
+			</li>
+			<li>
+				<apex:outputText value="{!Purchase__c.KamokuLst__c}" styleClass="dataClass"/>
+				<hr/>
+			</li>
+			<li>
+				<!-- 仕入日 -->
+				<span class="spanClass">{!$Label.MSG_040_0056}</span>
+			</li>
+			<li Class="dataClass">
+				<apex:outputField value="{!Purchase__c.Field1__c}"/>
+				<hr/>
+			</li>
+			<li>
+				<!-- 仕入先 -->
+				<span class="spanClass">{!$Label.MSG_040_0055}</span>
+			</li>
+			<li>
+				<apex:outputText value="{!Purchase__c.Purchasesource__r.name}" styleClass="dataClass"/>
+				<hr/>
+			</li>
+			<li>
+				<!-- 税対象外 -->
+				<span class="spanClass">{!$ObjectType.Purchase__c.Fields.NoTaxFlg__c.label}</span>
+			</li>
+			<li>
+				<apex:outputField value="{!Purchase__c.NoTaxFlg__c}" styleClass="dataClass"/>
+				<hr/>
+			</li>
+			<!-- 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN -->
+			<li>
+				<!-- 税 -->
+				<span class="spanClass">{!$ObjectType.Purchase__c.Fields.TaxRate__c.label}</span>
+			</li>
+			<li>
+				<apex:outputText value="{0,number,{!numberFormat}}%" styleClass="dataClass" >
+                    <apex:param value="{!Purchase__c.TaxRateCal__c}" />
+                </apex:outputText>
+				<hr/>
+			</li>
+			<!-- 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END -->
+			<li>
+				<!--金額(税抜)-->
+				<span class="spanClass">{!$Label.MSG_040_0069}</span>
+			</li>
+			<li>
+				<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" styleClass="dataClass">
+					<apex:param value="{!Purchase__c.Denpyoukei__c}" />
+	    		</apex:outputtext>
+				<hr/>
+			</li>
+			<li>
+				<!-- 金額(税込) -->
+				<span class="spanClass">{!$Label.MSG_040_0070}</span>
+			</li>
+			<li>
+				<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" styleClass="dataClass">
+	    			<apex:param value="{!Purchase__c.DenpyoukeiIncTax__c}" />
+	    		</apex:outputtext>
+				<hr/>
+			</li>
+            <li>
+                <!-- 摘要 -->
+                <span class="spanClass" title="{!Purchase__c.Memo__c}">{!$Label.MSG_040_0068}</span>
+            </li>
+            <li Class="memoClass,dataClass">
+                <apex:outputField value="{!Purchase__c.Memo__c}"/>
+                <hr/>
+            </li>
+            <apex:outputPanel rendered="{!shopOpts.size>0}">
+            <li>
+                <!-- 店舗 -->
+                <span class="spanClass">{!$Label.MSG_040_0063}</span>
+            </li>
+            <li>
+                <apex:outputText value="{!Purchase__c.ShopInfoRef__r.name}" styleClass="dataClass"/>
+                <hr/>
+            </li>
+            </apex:outputPanel>
+            <li>
+                <!-- Button Action -->
+                <apex:outputPanel style="white-space: nowrap;">
+                    <input type="button" class="btn" name="inputBtn" style="width:33%;height:30px;" onclick="gotoEditView(false)" value="編集"/>
+                    <input type="button" class="btn" name="inputBtn" style="width:33%;height:30px;" onclick="delAction();" value="削除" />
+                    <input type="button" class="btn" name="inputBtn" style="width:33%;height:30px;" onclick="gotoEditView(true)" value="コピー"/>
+                </apex:outputPanel>
+            </li>
+            <li>
+            	<span class="spanClass">添付ファイル</span>
+            </li>
+            <li style="height:40px" >
+            	
+            	<apex:repeat value="{!fileLst}" var="file" >
+                <c:DragDropFileUploaderComp parentId="{!Purchase__c.id}" DragDropHeight="" isFirstComp="true"
+                    existFileId="{!file.fileId}" existFileNm="{!file.fileNm}" existFileUrl="{!file.fileUrl}" 
+                    linenum="0" isSF1="true"/>
+                </apex:repeat>
+            </li>
+        </ol>
+    </div>
+</div>
+<input type="hidden" value="{!Purchase__c.Id}" id="purId"/>
+<apex:remoteObjects >
+  <apex:remoteObjectModel name="ps__Purchase__c" fields="Id,Name" 
+    jsShorthand="Purchase"/>
+</apex:remoteObjects>
+<script>
+function delAction() {
+	$j("input.btn").attr("disabled", "disabled");
+    if (confirm("{!JSENCODE($Label.MSG_9103)}")) {
+        notify();
+        var purId = $j("#purId").val();
+        var pur = new SObjectModel.Purchase();
+		pur.del([purId], function(err, ids) {
+		    if (err) { 
+                notifyRemove();
+                alert(err); 
+		    } else {
+			    var sobjPrefix = "{!JSENCODE(viewPrefix)}";
+			    if (isSf1()) {
+			        sforce.one.navigateToURL("/"+sobjPrefix);
+			    } else {
+			        window.location.href = "/"+sobjPrefix;
+			    }
+		    }
+		});
+    }
+    $j("input.btn").attr("disabled", null);
+}
+// 編集処理
+function gotoEditView(isClone) {
+    var sobjPrefix = "{!JSENCODE(viewPrefix)}";
+    var url = "/";
+    if (isClone) url += sobjPrefix+"/e?cid="+$j("#purId").val();
+    else url += $j("#purId").val()+"/e";
+    if (isSf1()) {
+        sforce.one.navigateToURL(url);
+    } else {
+        window.location.href = url;
+    }
+}
+
+//删除处理
+function notify(style,ctext,img) {
+    $j.notify({
+        title: '仕入削除',
+        text: '削除中...',
+        image: "<img src='../img/loading32.gif'/>"
+    }, {
+        style: 'metro',
+        className: 'success',
+        autoHide: false,
+        //autoHideDelay: 2000,
+        clickToHide: true
+    });
+}
+function notifyRemove() {
+    $j(".notifyjs-corner").remove();
+}
+
+</script>
+
+</apex:page>

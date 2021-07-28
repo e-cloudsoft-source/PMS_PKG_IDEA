@@ -1,0 +1,188 @@
+<apex:page sidebar="false" showHeader="false" controller="RoomIndicatorInfoDayUse" action="{!init}" readonly="true">
+
+<!-- Load JsLib -->
+
+<apex:includeScript value="{!URLFOR($Resource.RoundJQ, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.RoundJQ ,'js/jquery.corner.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.RoundJQ ,'js/jquery.roundabout.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.RoundJQ ,'js/jquery.roundabout-shapes.js')}"/>
+<style>
+/* gla */
+    #gla{margin:0 auto;position:relative;height:400px;overflow:hidden;background-color: teal;}
+    #gla_box{width:600px;margin:auto;position:relative;}
+    .gla_inbox{overflow:hidden;position:relative;white-space:nowrap;}
+    .gla_inbox p{text-indent:1em;font-size:14px;width:100%;color:#FFFFFF;line-height:30px;background:#000000;}
+    .roundabout-holder{height:200px;width:500px;left:10px;}
+    .roundabout-moveable-item{display:block;height:150px;width:250px;cursor:pointer;}
+    .roundabout-in-focus{cursor:auto;}
+</style>
+<script>
+$(document).keydown(function(e) {
+    var key = e.which;
+    if (key == 27){
+        if(window.parent.childCallfn()==='undefined')
+        window.parent.parent.childCallfn(null,null,null);
+    }
+});
+
+$(function(){
+    $('.gla_inbox').corner('8px');
+    $('#gla_box>ul').roundabout({
+        minOpacity:1,
+        duration: 1000,
+        reflect: true,
+        autoplay:false,
+        autoplayDuration:5000,
+        tilt:0,
+        firstColor:'#FC3',
+        otherColor:'white',
+        shape: 'square'
+    });
+    // 指定する予約IDは予約情報を表示する
+	var leadId =  $('input[name="topLeadId"]').val();
+    $('#gla_box div[id$="'+ leadId +'"]').click();
+});
+// 指定する予約詳細画面を起動する
+function leadShow(a){
+    var $this = $(a);
+    var uncleanFlg = $this.hasClass("isCanContextMenu");
+    var p1 = $this.attr("roomId");
+    var p2 = $this.attr("leadId");
+    if(window.parent.childCallShow(p1,p2,uncleanFlg)==='undefined')
+    window.parent.parent.childCallShow(p1,p2,uncleanFlg);
+}
+// 選択する予約情報はRoomindicator画面へ反映する
+function leadTop(a){
+    var $this = $(a);
+    var p1 = $this.attr("roomId");
+    var p2 = $this.attr("leadId");
+    var p3 = $this.attr("leadName");
+    var p4 = $this.attr("startTime");
+    var p5 = $this.attr("endTime");
+    if(window.parent.childCallfn(p1,p2,p3,p4,p5)==='undefined') {
+    	window.parent.parent.childCallfn(p1,p2,p3,p4,p5);
+    }
+}
+// 行をクリックする場合、該当行の予約情報はFocusする
+function changeTopMsg(leadId){ 
+    $('#gla_box div[id$="'+ leadId +'"]').click();
+}
+
+</script>
+
+<apex:pageBlock id="roomLeads" >
+<input type="hidden" name="topLeadId" value="{!topLeadId}"/>
+    <div id="gla">
+        <div id="gla_box">
+            <ul>
+                  <apex:repeat var="data" value="{!leadInfos}">
+                        <li>
+                            <div class="gla_inbox" id="msg_{!data.s.Id}">
+                                <p>{!data.s.Name}</p>
+                                <div style="overflow:hidden">
+                                    <apex:pageBlockSection columns="1" id="dsec">
+                                        <apex:pageBlockSectionItem >
+                                        <!-- 予約番号 --> 
+                                            <apex:outputLabel value="{!$Label.ps__msg_008_0090}" />
+                                            <apex:outputText value="{!data.s.LeadIndexRef__r.Name}" />
+                                        </apex:pageBlockSectionItem>
+                                        <!-- お客様 --> 
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$Label.ps__msg_008_0091}" />
+                                            <apex:outputField value="{!data.s.Relcontact__r.Name}" />
+                                        </apex:pageBlockSectionItem>
+										<!-- ステータス --> 
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$Label.ps__msg_008_0092}" />
+                                            <apex:outputField id="bField298__c" value="{!data.s.Field298__c}"/>
+                                        </apex:pageBlockSectionItem>
+                                        
+                                        
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$ObjectType.Lead__c.Fields.EntryTime__c.Label}" />
+                                            <apex:outputPanel >
+                                            <apex:outputText value="{!data.checkinDate}" />&nbsp;
+                                            <apex:outputText value="{!data.checkinTime}" />
+                                            </apex:outputPanel>
+                                        </apex:pageBlockSectionItem>
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$ObjectType.Lead__c.Fields.Departure__c.Label}" />
+                                            <apex:outputPanel >
+                                            <apex:outputText value="{!data.checkoutDate}" />&nbsp;
+                                            <apex:outputText value="{!data.checkoutTime}" />
+                                            </apex:outputPanel>
+                                        </apex:pageBlockSectionItem>
+                                        <!-- 泊数 --> 
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$Label.ps__msg_008_0093}" />
+                                            <apex:outputText value="{!data.nights}" />
+                                        </apex:pageBlockSectionItem>
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$ObjectType.Lead__c.Fields.StayPersons__c.Label}" />
+                                            <apex:outputField value="{!data.s.StayPersons__c}"/>
+                                        </apex:pageBlockSectionItem>
+                                        <!-- 予約チャネル --> 
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="{!$Label.ps__msg_008_0094}" />
+                                            <apex:outputField id="bField2__c" value="{!data.s.Field2__c}" />
+                                        </apex:pageBlockSectionItem>
+                            			<!-- プラン --> 
+                            			<apex:pageBlockSectionItem >
+                            				<apex:outputLabel value="{!$Label.ps__msg_008_0095}" />
+                            				<apex:outputText id="bplaninfo"    value="{!data.s.Field310__r.Name}" />
+                            			</apex:pageBlockSectionItem>
+                                        
+										<!-- 特記事項 --> 
+                                        <apex:outputField id="bComment3__c"  value="{!data.s.Comment3__c}" label="{!$Label.ps__msg_008_0096}"/>
+                                    </apex:pageBlockSection>
+                                </div>
+                            </div>
+                        </li>   
+                    </apex:repeat> 
+            </ul>
+        </div>
+    </div>
+    <br/>
+
+    <div >
+        <apex:pageBlockTable value="{!leadInfos}" var="info" id="leadsTable">
+            <apex:column onclick="changeTopMsg('{!info.s.Id}')" width="94px">
+            	<!-- 選択 --> 
+                <input type="button" class="btn" roomId="{!roomId}" leadId="{!info.s.Id}" value="{!$Label.MSG_008_0097}" onclick="leadShow(this)"/>
+                <!-- トップ --> 
+                <input type="button" class="btn" roomId="{!roomId}" leadId="{!info.s.Id}" startTime="{!info.startTime}" endTime="{!info.endTime}" leadName="{!info.s.Name}" checkoutTime = "{!info.checkoutTime}" value="{!$Label.MSG_008_0098}" onclick="leadTop(this)"/>
+            </apex:column>
+            <!-- 2017/01/10 予約番号、予約名、お客様三列字段加link BEGIN by zh -->
+            <!-- 予約番号 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0090}" onclick="changeTopMsg('{!info.s.Id}')">
+            	<a target="_blank" href="/{!info.s.LeadIndexRef__c}/e">{!info.s.LeadIndexRef__r.Name}</a>
+            </apex:column>
+            <!-- 予約名 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0099}" onclick="changeTopMsg('{!info.s.Id}')">
+            	<a target="_blank" href="/{!info.s.Id}">{!info.s.name}</a>
+            </apex:column>
+            <!-- お客様 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0091}" onclick="changeTopMsg('{!info.s.Id}')">
+            	<a target="_blank" href="/{!info.s.Relcontact__r.Id}">{!info.s.Relcontact__r.name}</a>
+            </apex:column>
+            <!-- 2017/01/10 予約番号、予約名、お客様三列字段加link END by zh -->
+            <!-- ステータス --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0092}"		value="{!info.s.Field298__c}" 			onclick="changeTopMsg('{!info.s.Id}')"/>
+            <!-- 到着日 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0100}" 		value="{!info.checkinDate} {!info.checkinTime}" 	onclick="changeTopMsg('{!info.s.Id}')"/>
+            <!-- 出発日 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0101}" 		value="{!info.checkoutDate} {!info.checkoutTime}"	onclick="changeTopMsg('{!info.s.Id}')"/>
+            <!-- 泊数 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0093}" 			value="{!info.nights}" 					onclick="changeTopMsg('{!info.s.Id}')"/>
+            <!-- 予約人数 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0102}"		value="{!info.s.StayPersons__c}"		onclick="changeTopMsg('{!info.s.Id}')"/>
+            <!-- 予約チャネル	 --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0094}"	value="{!info.s.Field2__c}" 			onclick="changeTopMsg('{!info.s.Id}')"/>
+            <!-- プラン --> 
+            <apex:column headerValue="{!$Label.ps__msg_008_0095}" 		value="{!info.s.Field310__c}" 			onclick="changeTopMsg('{!info.s.Id}')"/>
+        </apex:pageBlockTable>
+    </div>
+    
+</apex:pageBlock>
+
+</apex:page>

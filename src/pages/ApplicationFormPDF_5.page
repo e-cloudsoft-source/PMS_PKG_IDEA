@@ -1,0 +1,476 @@
+<apex:page showHeader="false"  sidebar="false" renderAs="pdf"
+	readonly="true" applyHtmlTag="false" action="{!initPdf}"
+	standardcontroller="Lead__c" extensions="ApplicationFormPDFExt1">
+
+<html>
+<head>
+<title>予約確認書</title>
+<style >
+@page {
+    size: 8.27in 11.69in;   /* A4 portlate size */
+    margin: 0cm;
+}
+body {
+    font-family: Arial Unicode MS;
+    font-size:15px;
+    top: 0.2cm;
+    left: 0.2cm;
+}
+.soldBorderTd {
+	border: 1px solid #000;
+	font-size: 1.1em;
+}
+.markicon {
+	font-size: 16pt;
+}
+table {
+	width: 100%;
+	border-spacing: 0px;
+}
+table tr {
+	height: 25px;
+	vertical-align: middle;
+}
+table tr td {
+	padding: 0px;
+}
+td.centerTd {
+	text-align: center;
+
+}
+td.tdLabel {
+	font-size: 30px;
+}
+td.splitLine {
+	border-left: 1px solid #000;
+}
+
+.borderTop{
+	border-top:1px solid #000;
+}
+.borderTop2{
+	border-top:1px dotted #000;
+}
+.borderBottom{
+	border-bottom:1px solid #000;
+}
+.borderright{
+	border-right:1px dotted #000;
+}
+
+.borderRight2{
+	border-right:1px solid #000;
+}
+.borderTopRight{
+	border-right: 1px solid #000;
+	border-top:1px solid #000;
+}
+.borderTopRight2{
+	border-right: 1px dotted #000;
+	border-top:1px dotted #000;
+}
+.borderBottomRight{
+	border-right: 1px solid #000;
+	border-bottom:1px solid #000;
+}
+
+div.itemValMarkIcon{
+	border-width:1px;
+	border-style:solid;
+	height: 7px;width: 7px;
+}
+/* 2019/07/30 軽減税率機能対応 WGCH BEGIN */
+.main-table td {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+/* 2019/07/30 軽減税率機能対応 WGCH END */
+</style>
+</head>
+<body>
+<apex:pageMessages />
+<!-- データページ -->
+<apex:repeat value="{!allPageList}" var="onePage" >
+
+<div style="vertical-align:top ;margin-top: 0px;{!if( onePage.isFirstPage, '', 'page-break-before: always;')}">
+</div>
+<table style="width:100%;">
+<tr>
+<td style="width: 50%"></td>
+<td>
+	<!-- Header Html -->
+	<table style="width: 100%;margin-top:40px">
+	<tr>
+		<td style="text-align: right;"><div style="">【作成日】 {!onePage.header.creatDate}</div></td>
+	</tr>
+	</table>
+	<table style="width: 100%;table-layout: fixed;">
+		<tr>
+			<!-- お客様情報 -->
+			<td style="vertical-align:top;height: 160px;width:400px;">
+		        <table style="table-layout: fixed;">
+		        	<tr height="20px;">
+		        		<td width="85px;"></td>
+		        		<td width="220px;"></td>
+		        		<td width="95px;"></td>
+		        	</tr>
+		            <tr>
+		            	<td rowspan="3" >&nbsp;</td>
+		                <td colspan="2" height="18px;">
+							<span>{!IF(LEN(onePage.header.postNo) > 0, '〒','')} {!onePage.header.postNo}</span>
+		                </td>
+		            </tr>
+		            <tr>
+		                <td colspan="2" style="word-break: break-all;word-wrap:break-word;min-height: 54px;vertical-align:top;line-height:97%;">
+		                	<div style="width: 220px; ">
+		                    {!onePage.header.address}
+		                    </div>
+		                </td>
+		            </tr>
+		            <tr>
+		                <td colspan="1" style="vertical-align: top;height: 36px;">
+		                    <div style="width: 220px;line-height:97%; ">
+		                    {!onePage.header.customName}
+		                    </div>
+	               		</td>
+	               		<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+	               		<td style="vertical-align: bottom;"><span>{!IF(mrStr !='',mrStr , onePage.header.receiptTitle)}</span></td>
+	               		<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+	           		</tr>
+	               </table>
+			</td>
+			<td><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" width: 20px;"/></td>
+			<!-- 会社情報 -->
+			<td style="width: 300px;vertical-align: top;">
+	            <div style="float:right; width:255px;height:85px;">
+	            <apex:outputField value="{!onePage.footer.reportInfo.ReportLogo__c}" />
+	            </div>
+	            <div style="float:right; width:255px;">
+	            <table>
+	               <tr style="height: 1px;">
+	               <td style="width: 10px;"></td>
+	               <td style="width: 60px;"></td>
+	               <td style="width: 100px;"></td>
+	               <td style="width: 10px;"></td>
+	               <td style="width: 100px;"></td>
+	               </tr>
+				   <!-- 会社名 -->
+	               <tr style="height: 16px;"><td ></td>
+	               	<td colspan="4" style="font-size: 95%">{!IF(!ISBLANK(onePage.footer.PostNo) ,'〒' , '')} {!onePage.footer.PostNo}
+	               	<br/>
+	               	{!onePage.footer.Address}
+	               	</td></tr>
+	               <!-- 
+	               <tr style="height: 16px;"><td ></td><td colspan="4" style="font-size: 95%">{!onePage.footer.Address}</td></tr>
+	                -->
+	               <tr style="height: 16px;"><td ></td><td colspan="1" style="text-align: left;padding-left: 10px;">{!IF (LEN(onePage.footer.phone)=0,'' , 'TEL')}</td><td colspan="3">{!onePage.footer.phone}</td></tr>
+	               <tr style="height: 16px;"><td ></td><td colspan="1" style="text-align: left;padding-left: 10px;">{!IF (LEN(onePage.footer.fax)=0,'' , 'FAX')}</td><td colspan="3">{!onePage.footer.fax}</td></tr>
+	            </table>
+	            </div>
+			</td>
+		</tr>
+	</table>
+	<table style="width: 100%;margin-top: 10px;">
+		<tr><td class="tdLabel" style="text-align: center;">ご予約内容確認書</td></tr>
+	</table>
+
+	<table border="1" style="font-size: 90%">
+	<tr style="text-align: center;">
+		<td style="width:15%">T E L</td>
+		<td>
+				<table>
+					<tr>
+						<td style="width:230px;text-align:left;" class="borderRight2">
+							<span style="margin-left:10px;">{!onePage.header.phone}</span>
+						</td>
+						<td style="width:110px" class="borderRight2">
+							F A X
+						</td>
+						<td style="text-align:left;">
+							<span style="margin-left:10px;">{!onePage.header.fax}</span>
+						</td>
+					</tr>
+				</table>
+		</td>
+	</tr>
+	<tr style="text-align: center;">
+		<td>利 用 日</td>
+		<td>
+			<table>
+				<tr>
+					<td class="borderRight2" style="width:330px;text-align:left;">
+						<span style="margin-left:10px;">{!onePage.header.entryDateYobi}</span>から<span style="margin-left: 10px">{!onePage.header.stayDays}</span>泊
+					</td>
+					<td style="width:80px" class="borderRight2">
+						予約番号
+					</td>
+					<td style="text-align:left;">
+						<span style="margin-left:10px;">{!onePage.header.leadNo}</span>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr style="text-align: center;">
+		<td style="height:60px">企画・付帯事項</td>
+		<td>
+			<table>
+			<tr><td></td></tr>
+			</table>
+		</td>
+	</tr>
+	<tr style="text-align: center;">
+		<td style="height:50px">利 用 人 数</td>
+			<td>
+				<table>
+					<tr>
+						<td style="text-align:left;">
+							<span style="margin-left:10px;">大人　<span>{!onePage.header.adult}</span>名　（男性　<span>{!onePage.header.stayMale}</span>名・ 女性　<span>{!onePage.header.stayFemale}</span>名）</span>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<table>
+								<tr>
+									<td style="width:120px" class="borderTopRight2">
+										子供A　<span>{!onePage.header.stayChildrenA}</span>名
+									</td>
+									<td style="width:120px" class="borderTopRight2">
+										子供B　<span>{!onePage.header.stayChildrenB}</span>名
+									</td>
+									<td style="width:120px" class="borderTopRight2">
+										幼児　<span>{!onePage.header.stayChild}</span>名
+									</td>
+									<td class="borderTop2"  style="text-align:left;">
+										ﾄﾞﾗｲﾊﾞｰ･ｶﾞｲﾄﾞ･添乗員　<span>　</span>名
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="text-align: center;">
+			<td>希 望 室 数</td>
+			<td>
+				<table>
+					<tr>
+						<td style="width:40px;text-align:center;" class="borderRight2">
+							<span>{!onePage.header.usedRooms}室</span>
+						</td>
+						<td style="width:40px" class="borderRight2">
+							内 訳
+						</td>
+						<apex:repeat value="{!onePage.header.rmInfoItem}" var="hr" rows="2">
+							<td style="width:150px;text-align:left;overflow: hidden;" class="borderright">
+								<span style="margin-left:2px;">{!hr.roomNmList}</span>
+							</td>
+							<td style="width:30px;text-align:center;" class="borderRight2">
+								<span>{!hr.roomNumList}</span>
+							</td>
+						</apex:repeat>
+							<td style="width:150px;text-align:left;overflow: hidden;" class="borderright">
+								<span style="margin-left:2px;">{!onePage.header.rmInfoItem[2].roomNmList}</span>
+							</td>
+							<td style="width:30px;text-align:center;">
+								<span>{!onePage.header.rmInfoItem[2].roomNumList}</span>
+							</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="text-align: center;">
+			<td style="height:70%;"><div style="padding-bottom:100px">利 用 料 金</div></td>
+			<td>
+				<table style="table-layout: fixed;font-size:90%;">
+					<colgroup style="width:50px; text-align: right;" />
+					<colgroup style="width:360px;"/>
+					<colgroup style="width:24px; text-align: right;" />
+					<colgroup style="width:58px; text-align: right;" />
+					<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+					<colgroup style="width:50px; text-align: right; display:{!IF(isReducedTaxFlg, true, 'none')}" />
+					<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+					<colgroup style="width:62px; text-align: right;" />
+					<colgroup style="width:36px;"/>
+					<tr style="height: 24px">
+						<td class="borderBottomRight">日 付</td>
+						<td class="borderBottomRight" >内 容</td>
+						<td class="borderBottomRight" >人数</td>
+						<td class="borderBottomRight" >単 価</td>
+						<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+						<td class="borderBottomRight" style="display:{!IF(isReducedTaxFlg, true, 'none')}">消費税</td>
+						<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						<td class="borderBottomRight" >金 額</td>
+						<td class="borderBottom" >&nbsp;</td>
+					</tr>
+
+					<apex:variable var="rsCnt" value="{!0}" />
+					<apex:repeat value="{!onePage.details}" var="rs" >
+						<apex:variable var="rsCnt" value="{!rsCnt+1}" />
+						<tr style="height: 24px">
+						<td class="borderRight2">
+							<!-- 2018/01/15 予約確認書の明細欄に日付を表示したい zyz BEGIN -->
+							<!--<div style="margin-right: 2px;" align="right">{!rs.usedDate}</div>-->
+							<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+							<!-- <div style="margin-right: 2px;" > -->
+							<div style="margin-left: 2px;{!IF(rs.pBrkDNFlg, 'display:none;', '')}" align="right">
+							<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+							<apex:outputtext value="{0,date,yy/MM/dd}" >
+								<apex:param value="{!rs.useDate}"/>
+							</apex:outputtext>
+							</div>
+							<!-- 2018/01/15 予約確認書の明細欄に日付を表示したい zyz END -->
+						</td>
+						<td class="borderRight2">
+							<div style="margin-left: 2px;overflow: hidden;" align="left">{!rs.productNm}</div>
+						</td>
+
+						<td class="borderRight2">
+						<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+						<!-- <div style="margin-right: 2px;" align="right"> -->
+						<div style="margin-right: 2px;{!IF(rs.planFlg, 'display:none;', '')}" align="right">
+						<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						<apex:outputtext value="{0,number}">
+							<apex:param value="{!rs.unitNums}" />
+						</apex:outputtext>
+						</div>
+						</td>
+
+						<td class="borderRight2">
+						<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+						<!-- <div style="margin-right: 2px;" align="right"> -->
+						<div style="margin-right: 2px;{!IF(rs.planFlg, 'display:none;', '')}" align="right">
+						<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						<apex:outputtext value="{0,number}" >
+							<apex:param value="{!rs.unitPrice}" />
+						</apex:outputtext>
+						</div>
+						</td>
+
+						<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+						<td class="borderRight2" style="display:{!IF(isReducedTaxFlg, true, 'none')}">
+						<div style="margin-right: 2px;{!IF(rs.planFlg, 'display:none;', '')}" align="right">
+						<apex:outputtext value="{0,number,{!TaxNumberFormat}}" rendered="{!!ISBlank(rs.unitPrice) && NOT(rs.isPayItem)}">
+							<apex:param value="{!rs.taxRate}"></apex:param>
+						</apex:outputtext>
+						</div></td>
+						<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						
+						<td class="borderRight2">
+						<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+						<!-- <div style="margin-right: 2px;" align="right"> -->
+						<div style="margin-right: 2px;{!IF(rs.planFlg, 'display:none;', '')}" align="right">
+						<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						<apex:outputLabel value="▲ " rendered="{!AND(!rs.isNoShow, rs.isPayItem)}" style="font-size:1em"/>
+						<apex:outputtext value="{0,number}" rendered="{!!rs.isNoShow}">
+							<apex:param value="{!rs.amount}"/>
+						</apex:outputtext>
+						</div>
+						</td>
+
+						<td>&nbsp;
+						</td>
+					</tr>
+					</apex:repeat>
+					<tr style="height: 24px">
+						<td class="borderTop"></td>
+						<td class="borderTop">合 計 金 額</td>
+						<td class="borderTop"></td>
+						<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+						<td class="borderTop" style="display:{!IF(isReducedTaxFlg, true, 'none')}"></td>
+						<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						<td class="borderTopRight"></td>
+						<td class="borderTopRight" style="text-align:right;">
+							<span style="margin-right:2px;">
+								<apex:outputtext value="{0,number}" rendered="{!isShowAmountVal}">
+									<apex:param value="{!summaryInf.bathProd.amount + summaryInf.amoutQuotePriceIncTax}"/>
+								</apex:outputtext>
+							</span>
+						</td>
+						<td class="borderTop">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="text-align: center;">
+			<td>受 付 日</td>
+			<td>
+				<table>
+					<tr>
+						<td style="width:240px;text-align:left;" class="borderRight2">
+							<span style="margin-left:10px;">{!onePage.header.reservedDate}</span></td>
+						<td style="width:110px" class="borderRight2">受 付 担 当</td>
+						<td style="text-align:left;"><span style="margin-left:10px;">{!onePage.header.resContact}</span></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="text-align: center;">
+			<!-- 2019/03/31 日帰り時刻を表記 BY zyz BEGIN -->
+			<!--<td>到 着 時 間</td>-->
+			<td>{!IF(onePage.header.stayDays==0 && !isApplicationFormTimeFlg, '到 着 出 発 時 間','到 着 時 間')}</td>
+			<td>
+				<table>
+					<tr>
+						<td style="width:240px;text-align:left;" class="borderRight2">
+							<span style="margin-left:10px;">{!onePage.header.arrivalTime}<apex:outputPanel rendered="{!onePage.header.stayDays==0 && !isApplicationFormTimeFlg}"> ~ {!onePage.header.departureTime}</apex:outputPanel></span>
+						</td>
+						<!-- 2019/03/31 日帰り時刻を表記 BY zyz END -->
+						<td style="width:110px" class="borderRight2">乗 り 物</td>
+						<td style="text-align:left;"><span style="margin-left:10px;">{!onePage.header.muRiProducts}</span></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr style="text-align: center;">
+			<td style="height:90px">手 配 項 目</td>
+			<td style="vertical-align: top;text-align:left;">
+				<div style="overflow: hidden;width: 99%;margin-top: 4px;margin-left: 4px;">
+				<apex:outputLabel value="{!pComment}" escape="false" rendered="{!isCommentAutoBreakFlg}"/>
+				<apex:outputField value="{!outLeadInf.QuotationComment__c}" rendered="{!!isCommentAutoBreakFlg}"/>
+				</div>
+			</td>
+		</tr>
+		</table>
+		<!-- FOOTER -->
+		<table>
+			<tr><td>
+				<table >
+					<tr>
+						<!-- 2019/09/27 パラメータ切り替え WGCH BEGIN -->
+						<!-- <td width="10px;">&nbsp;&nbsp;</td><td rowspan="2" style="width: 280px">{!onePage.header.customName}</td><td></td> -->
+						<td width="10px;">&nbsp;&nbsp;</td><td rowspan="2" style="width: 280px">{!onePage.header.customName}</td><td style="text-align: right;font-size:9pt;"><apex:outputtext value="{!$Label.ps__msg_006_0458}" rendered="{!isReducedTaxFlg}"/></td>
+						<!-- 2019/09/27 パラメータ切り替え WGCH END -->
+					</tr>
+					<tr>
+						<td width="10px;">&nbsp;&nbsp;</td><td style="text-align: left;">{!onePage.header.receiptTitle}</td>
+					</tr>
+				</table>
+			</td></tr>
+			<tr>
+			<td style="font-size: 10pt"><span style="margin-left:50px">この度は当館へのご予約、誠にありがとうございます。</span><br/>
+				<span style="margin-left:50px">ご予約内容を記載しておりますのでご確認ください。</span><br/>
+				<span style="margin-left:50px;font-weight: bold;">「和朝食」「洋朝食」が選択可能です。※宿泊日の前日までにご連絡くださいませ。</span><br/>
+				<span style="margin-left:50px;font-weight: bold;">指定のない場合は、和朝食でご準備致します。</span><br/>
+				<span style="margin-left:50px">ご来館当日、宮島の浅橋に車でお出迎えしておりますので、宮島ロフェリー乗場より</span><br/>
+				<span style="margin-left:50px">乗船時間をお電話くださいませ。</span><br/>
+				<span style="margin-left:420px">錦水館 TL</span>
+			</td>
+			</tr>
+	</table>
+
+
+</td>
+<td style="width: 50%;"></td>
+</tr>
+</table>
+
+
+
+</apex:repeat>
+
+</body>
+</html>
+</apex:page>

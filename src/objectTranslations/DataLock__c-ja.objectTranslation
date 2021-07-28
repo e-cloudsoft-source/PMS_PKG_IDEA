@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>データロック</value>
+    </caseValues>
+    <fields>
+        <label><!-- 機能名 --></label>
+        <name>AppName__c</name>
+    </fields>
+    <fields>
+        <label><!-- ロックキー --></label>
+        <name>DataLockKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- ユーザ --></label>
+        <name>LockByRef__c</name>
+        <relationshipLabel><!-- データロック --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- ロック時間 --></label>
+        <name>LockTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- データロック --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 時間番号 --></label>
+        <name>TimeStmp__c</name>
+    </fields>
+</CustomObjectTranslation>

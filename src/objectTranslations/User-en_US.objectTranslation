@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <label><!-- 会計ロック --></label>
+        <name>AccountLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計ロック解除 --></label>
+        <name>AccountUnLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- AsteriskExtension --></label>
+        <name>AsteriskExtension__c</name>
+    </fields>
+    <fields>
+        <label><!-- AsteriskPassword --></label>
+        <name>AsteriskPassword__c</name>
+    </fields>
+    <fields>
+        <label>Office entering time points adjust</label>
+        <name>BeginTimeCalMethodType__c</name>
+        <picklistValues>
+            <masterLabel>切り上げ</masterLabel>
+            <translation><!-- 切り上げ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>切り捨て</masterLabel>
+            <translation><!-- 切り捨て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>四捨五入</masterLabel>
+            <translation><!-- 四捨五入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Office entering time in hours</label>
+        <name>BeginTimeUnit__c</name>
+        <picklistValues>
+            <masterLabel>10分</masterLabel>
+            <translation><!-- 10分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15分</masterLabel>
+            <translation><!-- 15分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>1分</masterLabel>
+            <translation><!-- 1分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20分</masterLabel>
+            <translation><!-- 20分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>30分</masterLabel>
+            <translation><!-- 30分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5分</masterLabel>
+            <translation><!-- 5分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>60分</masterLabel>
+            <translation><!-- 60分 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 一画面に切替できるイアウトNoを指定可能、複数レイアウトを利用したい場合、カンマで複数レイアウトNoを一括設定可能
+例：レイアウトNo：01,02,03　→レイアウト01,02,03を一画面に選択、切替できる、デフォルトレイアウトNo：01
+デフォルトレイアウトNoを指定したい場合、レイアウトNoの後ろに、「:1」を指定すると、デフォルトレイアウトNoを指定可能
+例：複数レイアウト、レイアウトNo.02はデフォルトレイアウトの場合、下記様に定義可能
+-&gt;01,02:1,03 --></help>
+        <label><!-- 一画面のレイアウトNo --></label>
+        <name>BookingFlexAppLayoutNo__c</name>
+    </fields>
+    <fields>
+        <help>CTI dial in number will be stored, When calling to a CTI number , display WIN  in CTI</help>
+        <label><!-- CTIDNO --></label>
+        <name>CTIDNO__c</name>
+    </fields>
+    <fields>
+        <label>Office leaving time points adjust</label>
+        <name>CalMethodType__c</name>
+        <picklistValues>
+            <masterLabel>切り上げ</masterLabel>
+            <translation><!-- 切り上げ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>切り捨て</masterLabel>
+            <translation><!-- 切り捨て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>四捨五入</masterLabel>
+            <translation><!-- 四捨五入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- デイフォル店舗コード --></label>
+        <name>DefaultShopCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- Display Name --></label>
+        <name>Display_Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- Display user photo in Discussion forum --></label>
+        <name>Display_user_photo__c</name>
+    </fields>
+    <fields>
+        <label>Employee number</label>
+        <name>EmployeeCode__c</name>
+    </fields>
+    <fields>
+        <label>Employee status</label>
+        <name>EmploymentStatus__c</name>
+        <picklistValues>
+            <masterLabel>アルバイト</masterLabel>
+            <translation><!-- アルバイト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>パート</masterLabel>
+            <translation><!-- パート --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>社員</masterLabel>
+            <translation><!-- 社員 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- IsAlarmPopup --></label>
+        <name>IsAlarmPopup__c</name>
+    </fields>
+    <fields>
+        <help><!-- 自動車ナンバー情報が入るとき、CTIウィンドウのポップアップ対象外する、しない制御
+FALSE:ポップアップ対象（デフォルト値）
+TRUE:ポップアップ対象外 --></help>
+        <label><!-- 自動車ナンバーのポップアップ対象外 --></label>
+        <name>IsNotCallCarInformation__c</name>
+    </fields>
+    <fields>
+        <help><!-- 電話が入るとき、CTIウィンドウのポップアップ対象外する、しない制御
+FALSE:ポップアップ対象（デフォルト値）
+TRUE:ポップアップ対象外 --></help>
+        <label><!-- 電話のポップアップ対象外 --></label>
+        <name>IsNotCallPhoneInformation__c</name>
+    </fields>
+    <fields>
+        <help><!-- IOT情報が来るとき、音声通知対象外する、しない制御 
+FALSE:通知対象（デフォルト値） 
+TRUE:通知対象外 --></help>
+        <label><!-- IOT音声通知対象外 --></label>
+        <name>IsNotNotifyIotInfomation__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会員種別 --></label>
+        <name>MemberType__c</name>
+    </fields>
+    <fields>
+        <help><!-- 清掃ページに清掃ステータスを変更可／不可フラグ
+TRUE:清掃ページに清掃ステータスを変更不可 
+FALSE:清掃ページに清掃ステータスを変更可 --></help>
+        <label><!-- 清掃編集不可 --></label>
+        <name>NoEditCleanStatusFlg__c</name>
+    </fields>
+    <fields>
+        <label>Outside time points adjust process</label>
+        <name>OutRestCalMethodType__c</name>
+        <picklistValues>
+            <masterLabel>切り上げ</masterLabel>
+            <translation><!-- 切り上げ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>切り捨て</masterLabel>
+            <translation><!-- 切り捨て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>四捨五入</masterLabel>
+            <translation><!-- 四捨五入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Outside time in hours</label>
+        <name>OutRestTimeUnit__c</name>
+        <picklistValues>
+            <masterLabel>10分</masterLabel>
+            <translation><!-- 10分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15分</masterLabel>
+            <translation><!-- 15分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>1分</masterLabel>
+            <translation><!-- 1分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20分</masterLabel>
+            <translation><!-- 20分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>30分</masterLabel>
+            <translation><!-- 30分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5分</masterLabel>
+            <translation><!-- 5分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>60分</masterLabel>
+            <translation><!-- 60分 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 有給休暇 --></label>
+        <name>PaidHolidays__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機能読みモードリスト --></label>
+        <name>ReadOnlyLst__c</name>
+    </fields>
+    <fields>
+        <label>Enter time points adjust</label>
+        <name>RestCalMethodType__c</name>
+        <picklistValues>
+            <masterLabel>切り上げ</masterLabel>
+            <translation><!-- 切り上げ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>切り捨て</masterLabel>
+            <translation><!-- 切り捨て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>四捨五入</masterLabel>
+            <translation><!-- 四捨五入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 「勤怠作業時間が6時間以上でかつ休憩時間は０分ときは、無条件に休憩時間をマイナス1.0とする」対象するがどうか、チエックすると、対象外 --></help>
+        <label><!-- 休憩時間マイナス対象外 --></label>
+        <name>RestMinuteIsMinusFlg__c</name>
+    </fields>
+    <fields>
+        <label>Enter time in hours</label>
+        <name>RestTimeUnit__c</name>
+        <picklistValues>
+            <masterLabel>10分</masterLabel>
+            <translation><!-- 10分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15分</masterLabel>
+            <translation><!-- 15分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>1分</masterLabel>
+            <translation><!-- 1分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20分</masterLabel>
+            <translation><!-- 20分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>30分</masterLabel>
+            <translation><!-- 30分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5分</masterLabel>
+            <translation><!-- 5分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>60分</masterLabel>
+            <translation><!-- 60分 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help>従業員所属店舗の店舗コードを指定可能、複数店舗を兼務の場合、カンマで複数店舗コードを一括設定可能
+例：複数店舗兼務：01,02,03　→店舗01,02,03兼務になる、デイフォル所属店舗：01
+デイフォル所属店舗を指定したい場合、店舗コードの後ろに、「:1」を指定すると、デイフォル店舗を指定可能
+例：複数店舗兼務、店舗02はデイフォル所属店舗の場合、下記様に定義可能
+-&gt;01,02:1,03</help>
+        <label>Shop code</label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <help>全員のスタッフ情報を編集可・不可制御フラグ
+全員のスタッフ情報を編集可：TRUE（デイフォル値）
+全員のスタッフ情報を編集不可：FALSE、
+　　FALSEの場合、ユーザのロール設定により、スタッフ編集制御を行う
+　　ロール設定なしー?全員編集可
+　　ロール設定ありー?本人と下位ユーザの情報を編集可</help>
+        <label><!-- スタッフのすべて変更 --></label>
+        <name>StaffScheduleAllEdit__c</name>
+    </fields>
+    <fields>
+        <label><!-- スタッフの表示対象外 --></label>
+        <name>StaffScheduleNoshow__c</name>
+    </fields>
+    <fields>
+        <help><!-- Jinyaconnectアプリケーションの店舗ロゴファイルのID/URL 情報を格納する --></help>
+        <label><!-- SyncShopLogo --></label>
+        <name>SyncShopLogo__c</name>
+    </fields>
+    <fields>
+        <help><!-- Jinyaconnectアプリケーションの店舗名情報を格納する --></help>
+        <label><!-- SyncShopName --></label>
+        <name>SyncShopName__c</name>
+    </fields>
+    <fields>
+        <label>Office leaving time in hours</label>
+        <name>TimeUnit__c</name>
+        <picklistValues>
+            <masterLabel>10分</masterLabel>
+            <translation><!-- 10分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15分</masterLabel>
+            <translation><!-- 15分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>1分</masterLabel>
+            <translation><!-- 1分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20分</masterLabel>
+            <translation><!-- 20分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>30分</masterLabel>
+            <translation><!-- 30分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5分</masterLabel>
+            <translation><!-- 5分 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>60分</masterLabel>
+            <translation><!-- 60分 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- isCallInformationEnabled --></label>
+        <name>isCallInformationEnabled__c</name>
+    </fields>
+    <fields>
+        <label><!-- online_status --></label>
+        <name>online_status__c</name>
+    </fields>
+    <fields>
+        <label><!-- userPhotourl --></label>
+        <name>userPhotourl__c</name>
+    </fields>
+</CustomObjectTranslation>

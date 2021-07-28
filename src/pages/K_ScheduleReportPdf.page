@@ -1,0 +1,722 @@
+<!-- 予定表Pdf renderAs="pdf"-->
+<apex:page controller="K_ScheduleReportPdf" sidebar="false" showHeader="false" readOnly="true" 
+title="{!$Label.ps__msg_041_0001}" action="{!init}" 
+applyHtmlTag="false" applyBodyTag="false"
+renderAs="pdf">
+<html>
+<head>
+<style>
+@page {
+    size: {!pageWidth}px;
+    margin: 10px;
+}
+body {
+	font-family: Arial Unicode MS;
+}
+tr.odd{
+	background-color:#f5f5f5;
+}
+/*
+table{
+	width: 100%;
+	margin: 0;
+    border-spacing: 0;
+    empty-cells: show;
+    border-width: 0;
+    outline: 0;
+   	border-collapse: collapse;
+}
+*/
+/*2017/10/10 WGCH BEGIN */
+div.groupHeaderCls {
+    display:block; 
+    word-break:keep-all;/* 改行せず */
+    white-space:nowrap;/* 改行せず */
+    overflow:hidden;/* 内容自動隠す */
+    text-overflow:ellipsis;/* 隠される場合、...表示する */
+}
+/*2017/10/10 WGCH END */
+</style>
+</head>
+<body>
+<apex:pageMessages />
+
+
+
+	<!-- 详细数据Table -->
+	<table border="1" style="text-align:left;font-size:80%;width: 100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;">
+		<thead>
+			<tr style="background-color: #CCCCCC;">
+				<!-- Api==>>Label -->
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<apex:variable var="apiNo" value="{!0}"/>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+				<apex:repeat value="{!leadApiLst}" var="api">
+					<!-- 2019/06/28 ユーザ側で非表示にした項目対応 WGCH BEGIN -->
+					<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH BEGIN -->
+					<!--
+					<th style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition && apiNo == 0, '', 'none;')}"><span>{!$Label.MSG_041_0015}</span></th>
+					<!-- 顧客明細 --
+					<th style="display:{!IF(isShowGuestInfo && apiNo == isShowFoodPosition && apiNo == 0, '', 'none;')}"><span>{!guestTitle}</span></th>
+					-->
+					<apex:repeat value="{!api.bfLst}" var="idx">
+						<th style="display:{!IF(isShowFoodInfo && idx == CONST_COL_FOOD, '', 'none;')}"><span>{!$Label.ps__msg_041_0015}</span></th>
+						<th style="display:{!IF(isShowGuestInfo && idx == CONST_COL_GUEST, '', 'none;')}"><span>{!guestTitle}</span></th>
+					</apex:repeat>
+					<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH END -->
+					<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+					<th><apex:outputText value="{!leadApiLabelMap[api.leadApiStrBf]}" /></th>
+					<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+					<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH BEGIN -->
+					<!-- 
+					<apex:variable var="apiNo" value="{!apiNo + 1}"/>
+					<th style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition, '', 'none;')}"><span>{!$Label.ps__msg_041_0015}</span></th>
+					<!-- 顧客明細 --
+					<th style="display:{!IF(isShowGuestInfo && apiNo == isShowFoodPosition, '', 'none;')}"><span>{!guestTitle}</span></th>
+					-->
+					<apex:repeat value="{!api.afLst}" var="idx">
+						<th style="display:{!IF(isShowFoodInfo && idx == CONST_COL_FOOD, '', 'none;')}"><span>{!$Label.ps__msg_041_0015}</span></th>
+						<th style="display:{!IF(isShowGuestInfo && idx == CONST_COL_GUEST, '', 'none;')}"><span>{!guestTitle}</span></th>
+					</apex:repeat>
+					<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH END -->
+					<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+				</apex:repeat>
+				<!-- 料理 -->
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<!-- <th style="display:{!IF(isShowFoodInfo, '', 'none;')}"><span>{!$Label.MSG_041_0015}</span></th> -->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+				<!-- 顧客明細 -->
+				<!-- <th style="display:{!IF(isShowGuestInfo, '', 'none;')}"><span>{!guestTitle}</span></th> -->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END -->
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+			</tr>
+		</thead>	
+		<tbody>
+			<!-- 背景色切换 -->
+			<apex:variable var="bgColor" value="odd"/>
+			<!-- 2017/10/10 WGCH BEGIN -->
+			<apex:variable var="detailSize" value="{!IF(isShowFoodInfo, 1, 0)}"/>
+			<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+			<apex:variable var="contactList" value="{!IF(isShowGuestInfo, 1, 0)}"/>
+			<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END -->
+			<!-- All Output Data -->
+			<apex:repeat value="{!keyDateLst}" var="keyDate">
+			<tr style="background-color: #e3e3e3;{!If(termDtFlg, '', 'display:none;')}">
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+				<td colspan="{!leadApiLst.Size + detailSize + contactList}">{!$Label.MSG_041_0017}:
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END -->
+				<apex:outputtext value="{0,date,{!DateFormat}}" style="margin-right: 2px;">
+					<apex:param value="{!keyDate}"></apex:param>
+				</apex:outputtext>
+				</td>
+			</tr>
+			<!-- 2017/10/27 GROUP功能对应 WGCH BEGIN -->
+			<!-- <apex:repeat value="{!dataAllMap[keyDate]}" var="oneSetPage"> -->
+			<!-- 2017/10/10 WGCH END -->
+			<!-- Max 1000 Lines Data -->
+			<apex:repeat value="{!dataAllMap[keyDate]}" var="ldInfo">
+			<apex:repeat value="{!ldInfo.titleKeyLst}" var="titleKey">
+			<apex:repeat value="{!ldInfo.titleValMap[titleKey]}" var="titleVal">
+			<tr style="background-color: #e3e3e3;{!If(groupAbleFlg, '', 'display:none;')}">
+				<!-- 予約番号 -->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+				<td colspan="{!leadApiLst.Size + detailSize + contactList}"><div class="groupHeaderCls" style="display:inline-block">　　　{!$Label.MSG_041_0054}:
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END -->
+				{!RIGHT(titleKey ,17)}{!titleVal}
+				</div>
+				</td>
+			</tr>
+			</apex:repeat>
+			<apex:repeat value="{!ldInfo.titleItmMap[titleKey]}" var="lead" rendered="{!IF(!expandFlg || !groupAbleFlg, true, false)}">
+			<!-- 2017/10/27 GROUP功能对应 WGCH END -->
+			<apex:variable var="bgColor" value="{!IF(bgColor == 'odd', '', 'odd')}"/>
+			<tr class="{!bgColor}" style="{!colorJsonMap[lead.varlead.Id]['created']}">
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<apex:variable var="apiNo" value="{!0}"/>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+				<apex:repeat value="{!leadApiLst}" var="api">
+				<!-- 2019/06/28 ユーザ側で非表示にした項目対応 WGCH BEGIN -->
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH BEGIN -->
+				<!-- 
+				<!-- 料理详细Table --
+				<td style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition && apiNo == 0, '', 'none;')}">
+					<apex:outputPanel rendered="{!isShowFoodInfo && lead.detailList.size > 0 && apiNo == isShowFoodPosition && apiNo == 0}">
+					<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+						<colgroup>
+							<col/>
+							<col style="width:46px"/>
+						</colgroup>
+						<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN --
+						<thead class="k-grid-header" style="display: {!IF(isNoShowFoodHeader, 'none', '')}">
+						<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END --
+							<tr style="background-color: #e3e3e3;">
+								<!-- 料理 --
+								<th class="k-header" ><span style="margin-left: 2px;">{!$Label.MSG_041_0015}</span></th>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN --
+								<th class="k-header" style="width: 100px;display:{!IF(opColIsShowFlg, '', 'none;')}"><span style="margin-left: 2px;">{!opLabel}</span></th>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END --
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN --
+								<th class="k-header" style="width:75px;display:{!IF(unitpriceColShow, '', 'none;')}"><span style="margin-left: 2px;">{!$Label.MSG_041_0071}</span></th>
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END --
+								<!-- 数量 --
+								<th class="k-header" style="width:60px;"><span >{!$Label.ps__msg_041_0016}</span></th>
+							</tr>
+						</thead>
+						<tbody>
+							<apex:repeat value="{!lead.detailList}" var="fdInf">
+							<tr style="background-color:#e6e6fa">
+								<td> <apex:outputText value="{!fdInf.productName}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN --
+								<td style="display:{!IF(opColIsShowFlg, '', 'none;')}"> <apex:outputText value="{!fdInf.productOpName}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END --
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN --
+								<td style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <apex:outputText value="{!fdInf.unitprice}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END --
+								<!-- 2017/10/10 WGCH BEGIN --
+								<td style="width:60px;text-align: right;{!If(termDtFlg, '', fdInf.style)}">
+								<!-- 2017/10/10 WGCH END --
+									<apex:outputText value="{!fdInf.amount}" style="margin-right: 2px;"/>
+								</td>
+							</tr>
+							</apex:repeat>
+						</tbody>
+					</table>
+					</apex:outputPanel>
+				</td>
+				-->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+				<!-- 顧客情報Table -->
+				<!--
+				<td style="display:{!IF(isShowGuestInfo && apiNo == isShowFoodPosition && apiNo == 0, '', 'none;')}">
+					<apex:outputPanel rendered="{!isShowGuestInfo && lead.contactList.size > 0}">
+					<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+						<colgroup>
+							<col style="width:270px"/>
+						</colgroup>
+						<tbody>
+							<apex:repeat value="{!lead.contactList}" var="conInf">
+							<tr style="background-color:#e6e6fa">
+								<td>
+								<apex:outputText value="{!conInf.contactName}" style="margin-left: 2px;"/> <br/>
+								<apex:outputText value="{!conInf.contactApiInfo}" escape="false" style="margin-right: 2px;"/>
+								</td>
+							</tr>
+							</apex:repeat>
+						</tbody>
+					</table>
+					</apex:outputPanel>
+				</td>
+				-->
+				<apex:repeat value="{!api.bfLst}" var="idx">
+					<!-- 料理详细Table -->
+					<td style="display:{!IF(isShowFoodInfo && idx == CONST_COL_FOOD, '', 'none;')}">
+						<apex:outputPanel rendered="{!isShowFoodInfo && lead.detailList.size > 0}">
+						<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+							<colgroup>
+								<col/>
+								<col style="width:46px"/>
+							</colgroup>
+							<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN -->
+							<thead class="k-grid-header" style="display: {!IF(isNoShowFoodHeader, 'none', '')}">
+							<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END -->
+								<tr style="background-color: #e3e3e3;">
+									<!-- 料理 -->
+									<th class="k-header" ><span style="margin-left: 2px;">{!$Label.MSG_041_0015}</span></th>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN -->
+									<th class="k-header" style="width: 100px;display:{!IF(opColIsShowFlg, '', 'none;')}"><span style="margin-left: 2px;">{!opLabel}</span></th>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END -->
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+									<th class="k-header" style="width:75px;display:{!IF(unitpriceColShow, '', 'none;')}"><span style="margin-left: 2px;">{!$Label.MSG_041_0071}</span></th>
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+									<!-- 数量 -->
+									<th class="k-header" style="width:60px;"><span >{!$Label.ps__msg_041_0016}</span></th>
+								</tr>
+							</thead>
+							<tbody>
+								<apex:repeat value="{!lead.detailList}" var="fdInf">
+								<tr style="background-color:#e6e6fa">
+									<td> <apex:outputText value="{!fdInf.productName}" style="margin-left: 2px;"/> </td>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN -->
+									<td style="display:{!IF(opColIsShowFlg, '', 'none;')}"> <apex:outputText value="{!fdInf.productOpName}" style="margin-left: 2px;"/> </td>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END -->
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+									<td style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <apex:outputText value="{!fdInf.unitprice}" style="margin-left: 2px;"/> </td>
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+									<!-- 2017/10/10 WGCH BEGIN -->
+									<td style="width:60px;text-align: right;{!If(termDtFlg, '', fdInf.style)}">
+									<!-- 2017/10/10 WGCH END -->
+										<apex:outputText value="{!fdInf.amount}" style="margin-right: 2px;"/>
+									</td>
+								</tr>
+								</apex:repeat>
+							</tbody>
+						</table>
+						</apex:outputPanel>
+					</td>
+					<!-- 顧客情報Table -->
+					<td style="display:{!IF(isShowGuestInfo && idx == CONST_COL_GUEST, '', 'none;')}">
+						<apex:outputPanel rendered="{!isShowGuestInfo && lead.contactList.size > 0}">
+						<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+							<colgroup>
+								<col style="width:270px"/>
+							</colgroup>
+							<tbody>
+								<apex:repeat value="{!lead.contactList}" var="conInf">
+								<tr style="background-color:#e6e6fa">
+									<td>
+									<apex:outputText value="{!conInf.contactName}" style="margin-left: 2px;"/> <br/>
+									<apex:outputText value="{!conInf.contactApiInfo}" escape="false" style="margin-right: 2px;"/>
+									</td>
+								</tr>
+								</apex:repeat>
+							</tbody>
+						</table>
+						</apex:outputPanel>
+					</td>
+				</apex:repeat>
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH END -->
+				<!-- 2019/06/28 ユーザ側で非表示にした項目対応 WGCH END -->
+				<td style="{!colorJsonMap[lead.varlead.Id][api.leadApiStrAf]}">
+					<apex:variable var="fieldApi" value="{!api.leadApiStrBf}"/>
+					<apex:outputField value="{!lead.varlead[fieldApi]}"/>
+				</td>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<!-- </apex:repeat> -->
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH BEGIN -->
+				<!-- 
+				<apex:variable var="apiNo" value="{!apiNo + 1}"/>
+				<!-- 料理详细Table --
+				<td style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition, '', 'none;')}">
+					<apex:outputPanel rendered="{!isShowFoodInfo && lead.detailList.size > 0 && apiNo == isShowFoodPosition}">
+					<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+						<colgroup>
+							<col/>
+							<col style="width:46px"/>
+						</colgroup>
+						<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN --
+						<thead class="k-grid-header" style="display: {!IF(isNoShowFoodHeader, 'none', '')}">
+						<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END --
+							<tr style="background-color: #e3e3e3;">
+								<!-- 料理 --
+								<th class="k-header" ><span style="margin-left: 2px;">{!$Label.MSG_041_0015}</span></th>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN --
+								<th class="k-header" style="width: 100px;display:{!IF(opColIsShowFlg, '', 'none;')}"><span style="margin-left: 2px;">{!opLabel}</span></th>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END --
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN --
+								<th class="k-header" style="width:75px;display:{!IF(unitpriceColShow, '', 'none;')}"><span style="margin-left: 2px;">{!$Label.MSG_041_0071}</span></th>
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END --
+								<!-- 数量 --
+								<th class="k-header" style="width:60px;"><span >{!$Label.ps__msg_041_0016}</span></th>
+							</tr>
+						</thead>
+						<tbody>
+							<apex:repeat value="{!lead.detailList}" var="fdInf">
+							<tr style="background-color:#e6e6fa">
+								<td> <apex:outputText value="{!fdInf.productName}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN --
+								<td style="display:{!IF(opColIsShowFlg, '', 'none;')}"> <apex:outputText value="{!fdInf.productOpName}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END --
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN --
+								<td style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <apex:outputText value="{!fdInf.unitprice}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END --
+								<!-- 2017/10/10 WGCH BEGIN --
+								<td style="width:60px;text-align: right;{!If(termDtFlg, '', fdInf.style)}">
+								<!-- 2017/10/10 WGCH END --
+									<apex:outputText value="{!fdInf.amount}" style="margin-right: 2px;"/>
+								</td>
+							</tr>
+							</apex:repeat>
+						</tbody>
+					</table>
+					</apex:outputPanel>
+				</td>
+				-->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+				<!-- 顧客情報Table -->
+				<!--
+				<td style="display:{!IF(isShowGuestInfo && apiNo == isShowFoodPosition, '', 'none;')}">
+					<apex:outputPanel rendered="{!isShowGuestInfo && lead.contactList.size > 0}">
+					<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+						<colgroup>
+							<col style="width:270px"/>
+						</colgroup>
+						<tbody>
+							<apex:repeat value="{!lead.contactList}" var="conInf">
+							<tr style="background-color:#e6e6fa">
+								<td>
+								<apex:outputText value="{!conInf.contactName}" style="margin-left: 2px;"/> <br/>
+								<apex:outputText value="{!conInf.contactApiInfo}" escape="false" style="margin-right: 2px;"/>
+								</td>
+							</tr>
+							</apex:repeat>
+						</tbody>
+					</table>
+					</apex:outputPanel>
+				</td>
+				<td style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition, '', 'none;')}">
+					<apex:outputPanel rendered="{!isShowFoodInfo && lead.detailList.size > 0 && apiNo == isShowFoodPosition}">
+					<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+						<colgroup>
+							<col/>
+							<col style="width:46px"/>
+						</colgroup>
+						<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN --
+						<thead class="k-grid-header" style="display: {!IF(isNoShowFoodHeader, 'none', '')}">
+						<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END --
+							<tr style="background-color: #e3e3e3;">
+								<!-- 料理 --
+								<th class="k-header" ><span style="margin-left: 2px;">{!$Label.MSG_041_0015}</span></th>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN --
+								<th class="k-header" style="width: 100px;display:{!IF(opColIsShowFlg, '', 'none;')}"><span style="margin-left: 2px;">{!opLabel}</span></th>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END --
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN --
+								<th class="k-header" style="width:75px;display:{!IF(unitpriceColShow, '', 'none;')}"><span style="margin-left: 2px;">{!$Label.MSG_041_0071}</span></th>
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END --
+								<!-- 数量 --
+								<th class="k-header" style="width:60px;"><span >{!$Label.ps__msg_041_0016}</span></th>
+							</tr>
+						</thead>
+						<tbody>
+							<apex:repeat value="{!lead.detailList}" var="fdInf">
+							<tr style="background-color:#e6e6fa">
+								<td> <apex:outputText value="{!fdInf.productName}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN --
+								<td style="display:{!IF(opColIsShowFlg, '', 'none;')}"> <apex:outputText value="{!fdInf.productOpName}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END --
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN --
+								<td style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <apex:outputText value="{!fdInf.unitprice}" style="margin-left: 2px;"/> </td>
+								<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END --
+								<!-- 2017/10/10 WGCH BEGIN --
+								<td style="width:60px;text-align: right;{!If(termDtFlg, '', fdInf.style)}">
+								<!-- 2017/10/10 WGCH END --
+									<apex:outputText value="{!fdInf.amount}" style="margin-right: 2px;"/>
+								</td>
+							</tr>
+							</apex:repeat>
+						</tbody>
+					</table>
+					</apex:outputPanel>
+				</td>
+				-->
+				<apex:repeat value="{!api.afLst}" var="idx">
+					<!-- 料理详细Table -->
+					<td style="display:{!IF(isShowFoodInfo && idx == CONST_COL_FOOD, '', 'none;')}">
+						<apex:outputPanel rendered="{!isShowFoodInfo && lead.detailList.size > 0}">
+						<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+							<colgroup>
+								<col/>
+								<col style="width:46px"/>
+							</colgroup>
+							<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN -->
+							<thead class="k-grid-header" style="display: {!IF(isNoShowFoodHeader, 'none', '')}">
+							<!-- 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END -->
+								<tr style="background-color: #e3e3e3;">
+									<!-- 料理 -->
+									<th class="k-header" ><span style="margin-left: 2px;">{!$Label.MSG_041_0015}</span></th>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN -->
+									<th class="k-header" style="width: 100px;display:{!IF(opColIsShowFlg, '', 'none;')}"><span style="margin-left: 2px;">{!opLabel}</span></th>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END -->
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+									<th class="k-header" style="width:75px;display:{!IF(unitpriceColShow, '', 'none;')}"><span style="margin-left: 2px;">{!$Label.MSG_041_0071}</span></th>
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+									<!-- 数量 -->
+									<th class="k-header" style="width:60px;"><span >{!$Label.ps__msg_041_0016}</span></th>
+								</tr>
+							</thead>
+							<tbody>
+								<apex:repeat value="{!lead.detailList}" var="fdInf">
+								<tr style="background-color:#e6e6fa">
+									<td> <apex:outputText value="{!fdInf.productName}" style="margin-left: 2px;"/> </td>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN -->
+									<td style="display:{!IF(opColIsShowFlg, '', 'none;')}"> <apex:outputText value="{!fdInf.productOpName}" style="margin-left: 2px;"/> </td>
+									<!-- 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END -->
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+									<td style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <apex:outputText value="{!fdInf.unitprice}" style="margin-left: 2px;"/> </td>
+									<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+									<!-- 2017/10/10 WGCH BEGIN -->
+									<td style="width:60px;text-align: right;{!If(termDtFlg, '', fdInf.style)}">
+									<!-- 2017/10/10 WGCH END -->
+										<apex:outputText value="{!fdInf.amount}" style="margin-right: 2px;"/>
+									</td>
+								</tr>
+								</apex:repeat>
+							</tbody>
+						</table>
+						</apex:outputPanel>
+					</td>
+					<!-- 顧客情報Table -->
+					<td style="display:{!IF(isShowGuestInfo && idx == CONST_COL_GUEST, '', 'none;')}">
+						<apex:outputPanel rendered="{!isShowGuestInfo && lead.contactList.size > 0}">
+						<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+							<colgroup>
+								<col style="width:270px"/>
+							</colgroup>
+							<tbody>
+								<apex:repeat value="{!lead.contactList}" var="conInf">
+								<tr style="background-color:#e6e6fa">
+									<td>
+									<apex:outputText value="{!conInf.contactName}" style="margin-left: 2px;"/> <br/>
+									<apex:outputText value="{!conInf.contactApiInfo}" escape="false" style="margin-right: 2px;"/>
+									</td>
+								</tr>
+								</apex:repeat>
+							</tbody>
+						</table>
+						</apex:outputPanel>
+					</td>
+				</apex:repeat>
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH END -->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END -->
+				</apex:repeat>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+			</tr>
+			</apex:repeat>
+			</apex:repeat>	
+			</apex:repeat>
+			<!-- 2017/10/10 WGCH BEGIN -->	
+			</apex:repeat>
+			<!-- 2017/10/10 WGCH END -->
+			<!-- 数据List -->
+			<tr style="background-color: #CCCCCC;">
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<apex:variable var="apiNo" value="{!0}"/>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+				<apex:repeat value="{!leadApiLst}" var="api">
+				<!-- 2019/06/28 ユーザ側で非表示にした項目対応 WGCH BEGIN -->
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH BEGIN -->
+				<!--
+				<td style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition && apiNo == 0, '', 'none;')}"></td>
+				<!-- 顧客明細 --
+				<td style="display:{!IF(isShowGuestInfo && apiNo == isShowFoodPosition && apiNo == 0, '', 'none;')}"></td>
+				-->
+				<apex:repeat value="{!api.bfLst}" var="idx">
+					<td style="display:{!IF(isShowFoodInfo && idx == CONST_COL_FOOD, '', 'none;')}"></td>
+					<!-- 顧客明細 -->
+					<td style="display:{!IF(isShowGuestInfo && idx == CONST_COL_GUEST, '', 'none;')}"></td>
+				</apex:repeat>
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH END -->
+				<!-- 2019/06/28 ユーザ側で非表示にした項目対応 WGCH END -->
+				<td style="text-align: right;">
+					<apex:outputPanel rendered="{!avgSumMap[api.leadApiStrBf] != -9999}">
+					<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+						<apex:param value="{!avgSumMap[api.leadApiStrBf]}"></apex:param>
+					</apex:outputtext>
+					</apex:outputPanel>
+				</td>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH BEGIN -->
+				<!--
+				<apex:variable var="apiNo" value="{!apiNo + 1}"/>
+				<td style="display:{!IF(isShowFoodInfo && apiNo == isShowFoodPosition, '', 'none;')}"></td>
+				<!-- 顧客明細 --
+				<td style="display:{!IF(isShowGuestInfo && apiNo == isShowFoodPosition, '', 'none;')}"></td>
+				-->
+				<apex:repeat value="{!api.afLst}" var="idx">
+					<td style="display:{!IF(isShowFoodInfo && idx == CONST_COL_FOOD, '', 'none;')}"></td>
+					<!-- 顧客明細 -->
+					<td style="display:{!IF(isShowGuestInfo && idx == CONST_COL_GUEST, '', 'none;')}"></td>
+				</apex:repeat>
+				<!-- 2020/02/28 同伴者情報列位置自定义改善对应 WGCH END -->
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+				</apex:repeat>
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH BEGIN -->
+				<!-- <td style="display:{!IF(isShowFoodInfo, '', 'none;')}"></td> -->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN -->
+				<!-- <td style="display:{!IF(isShowGuestInfo, '', 'none;')}"></td> -->
+				<!-- 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END -->
+				<!-- 2019/04/15 料理自定义列所在位置功能对应 WGCH END -->
+			</tr>
+		</tbody>
+	</table>
+
+    <div style="height:26px;"></div>
+	<!-- 料理集計明細情報を出力する -->
+	<table border="0">
+	<!-- 2017/10/10 WGCH BEGIN -->
+	<apex:repeat value="{!foodSumRowLstAll}" var="foodItem">
+	<!-- 2017/10/10 WGCH END -->
+	<tr><td>
+	<!-- 2017/10/10 WGCH BEGIN -->
+	<apex:outputpanel rendered="{!foodItem.foodSumRowflg}">
+	<!-- 2017/10/10 WGCH END -->
+		<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="1">
+		<thead>
+			<tr style="background-color: #CCCCCC;">
+				<!-- 昼 -->
+				<th width="60px"> <apex:outputText value="{!$ObjectType.Lead__c.Fields.Field278__c.label}" /> </th>
+				<!-- 料理 -->
+				<th> <apex:outputText value="{!$Label.ps__msg_041_0015}" /> </th>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<th style="width:75px;display:{!IF(unitpriceColShow, '', 'none;')}"><span>{!$Label.MSG_041_0071}</span></th>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+				<!-- 数量 -->
+				<th width="60px"> <apex:outputText value="{!$Label.ps__msg_041_0016}" /> </th>
+			</tr>
+		</thead>	
+		<tbody>
+			<!-- 算合计值 -->
+			<apex:variable var="summy" value="{!0}"/>
+			<!-- 背景色切换 -->
+			<apex:variable var="bgColor1" value="#f5f5f5;"/>
+			<!-- 2017/10/10 WGCH BEGIN -->
+			<apex:repeat value="{!keyDateLst}" var="keyDate">
+			<tr style="background-color: #e3e3e3;{!If(termDtFlg, '', 'display:none;')}">
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<td colspan="{!IF(unitpriceColShow, 4, 3)}">{!$Label.MSG_041_0017}:
+				<apex:outputtext value="{0,date,{!DateFormat}}" style="margin-right: 2px;">
+					<apex:param value="{!keyDate}"></apex:param>
+				</apex:outputtext>
+				</td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+			</tr>
+			<!-- 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN -->
+			<apex:repeat value="{!foodItem.opIdMap[keyDate]}" var="op">
+			<tr style="background-color: #e3e3e3;{!If(foodGroupAbleFlg, '', 'display:none;')}">
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<td colspan="{!IF(unitpriceColShow, 4, 3)}">{!$Label.MSG_041_0067} 
+				<apex:outputtext value="{!opInfoMap[op]}" style="margin-right: 2px;" />
+				</td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+			</tr>
+			<!-- 算Group合计值 -->
+			<apex:variable var="groupSummy" value="{!0}"/>
+			<apex:repeat value="{!foodItem.foodSumRowMapAll[keyDate][op]}" var="sum">
+			<!-- 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END -->
+			<!-- 2017/10/10 WGCH END -->
+			<apex:variable var="bgColor1" value="{!IF(bgColor1 == '#f5f5f5;', '', '#f5f5f5;')}"/>
+			<tr style="background-color:{!bgColor1} ">
+				<td> <apex:outputText value="{!sum.middayIcon}" style="margin-left: 2px;" escape="false"/> </td>
+				<td nowrap="nowrap" style="white-space:nowrap;"> <span>{!sum.productName}</span> </td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<td nowrap="nowrap" style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <span>{!sum.unitprice}</span> </td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+				<!-- 2017/10/10 WGCH BEGIN -->
+				<td style="text-align: right;{!If(termDtFlg, '', sum.style)}">
+				<!-- 2017/10/10 WGCH BEGIN -->
+					<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+						<apex:param value="{!sum.productSummy}"></apex:param>
+					</apex:outputtext>
+					<apex:variable var="summy" value="{!summy + sum.productSummy}"/>
+					<!-- 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN -->
+					<!-- 算Group合计值 -->
+					<apex:variable var="groupSummy" value="{!groupSummy + sum.productSummy}"/>
+					<!-- 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END -->
+				</td>
+			</tr>
+			<!-- 2017/10/10 WGCH BEGIN -->
+			<!-- 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN -->
+			</apex:repeat>
+			<tr style="background-color: #e3e3e3;{!If(foodGroupAbleFlg, '', 'display:none;')}">
+				<td></td>
+				<td></td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<td style="display:{!IF(unitpriceColShow, '', 'none;')}"></td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+				<td style="text-align: right;">
+					<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+						<apex:param value="{!groupSummy}"></apex:param>
+					</apex:outputtext>
+				</td>
+			</tr>
+			<!-- 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END -->
+			</apex:repeat>
+			<!-- 2017/10/10 WGCH END -->
+			<!-- 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN -->
+			<!-- 算Group合计值 -->
+			<apex:variable var="groupSummyDt" value="{!0}"/>
+			<apex:repeat value="{!foodItem.groupFooterDetailMap[keyDate]}" var="groupSumRow">
+				<tr style="background-color: #CCCCCC;">
+					<td></td>
+					<td nowrap="nowrap" style="white-space:nowrap;"> <span>{!groupSumRow.productName}</span> </td>
+					<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+					<td nowrap="nowrap" style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <span>{!groupSumRow.unitprice}</span> </td>
+					<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+					<td style="text-align: right;">
+						<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+							<apex:param value="{!groupSumRow.productSummy}"></apex:param>
+						</apex:outputtext>
+						<apex:variable var="groupSummyDt" value="{!groupSummyDt + groupSumRow.productSummy}"/>
+					</td>
+				</tr>
+			</apex:repeat>
+			<tr style="background-color: #CCCCCC;{!If(foodSumIsShowFlg && groupSummyDt > 0, '', 'display:none;')}" >
+				<td></td>
+				<td></td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<td style="display:{!IF(unitpriceColShow, '', 'none;')}"></td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+				<td style="text-align: right;">
+					<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+						<apex:param value="{!groupSummyDt}"></apex:param>
+					</apex:outputtext>
+				</td>
+			</tr>
+			<!-- 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END -->
+			</apex:repeat>
+			<!-- 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN -->
+			<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+			<tr style="background-color: #f5f5f5;height:3px;{!If(foodSumIsShowFlg && foodSumIsShowProdFlg, '', 'display:none;')}" ><td colspan="{!IF(unitpriceColShow, 4, 3)}" ></td></tr>
+			<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+			<apex:repeat value="{!foodItem.reportSumRowLst}" var="sumRow">
+				<tr style="background-color: #CCCCCC;">
+					<td></td>
+					<td nowrap="nowrap" style="white-space:nowrap;"> <span>{!sumRow.productName}</span> </td>
+					<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+					<td nowrap="nowrap" style="width:75px;text-align: right;display:{!IF(unitpriceColShow, '', 'none;')}"> <span>{!sumRow.unitprice}</span> </td>
+					<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+					<td style="text-align: right;">
+						<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+							<apex:param value="{!sumRow.productSummy}"></apex:param>
+						</apex:outputtext>
+					</td>
+				</tr>
+			</apex:repeat>
+			<!-- 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END -->
+			<!-- 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN -->
+			<tr style="background-color: #CCCCCC;{!If(foodSumIsShowFlg, '', 'display:none;')}" >
+			<!-- 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END -->
+				<td></td>
+				<td></td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN -->
+				<td style="display:{!IF(unitpriceColShow, '', 'none;')}"></td>
+				<!-- 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END -->
+				<td style="text-align: right;">
+					<apex:outputtext value="{0,number,{!NumberFormat}}" style="margin-right: 2px;">
+						<apex:param value="{!summy}"></apex:param>
+					</apex:outputtext>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div style="height:5px;"></div>
+	</apex:outputpanel>
+	</td></tr>
+	</apex:repeat>
+	</table>
+	<!-- 2019/05/15 予定表指定日にて、連絡事項を表示する機能対応 WGCH BEGIN -->
+	<apex:outputPanel rendered="{!($Setup.CommDefine__c.ReportKScheduleMessageIsShowFlg__c)}">
+	<div style="height:26px;"></div>
+	<table style="width:100%;margin: 0;border-spacing: 0;empty-cells: show;border-width: 0;outline: 0;border-collapse: collapse;" border="0" cellpadding="0" cellspacing="0">
+		<colgroup>
+			<col style="width:100%"/>
+		</colgroup>
+		<thead>
+			<tr style="background-color: #CCCCCC;">
+			<th>{!$Label.MSG_041_0075}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<apex:repeat value="{!messageItemInfoLst}" var="message">
+			<tr style="background-color:#e6e6fa">
+				<td>
+				<apex:outputText value="{!message.messageText}" escape="false" style="margin-left: 2px;"/>
+				</td>
+			</tr>
+			</apex:repeat>
+		</tbody>
+	</table>
+	</apex:outputPanel>
+	<!-- 2019/05/15 予定表指定日にて、連絡事項を表示する機能対応 WGCH END -->
+</body>
+</html>
+</apex:page>

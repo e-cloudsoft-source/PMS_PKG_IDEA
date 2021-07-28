@@ -1,0 +1,2356 @@
+<apex:page title="料理リスト" controller="CookTimeTableCtrl" action="{!init}" sidebar="false" showheader="true">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="false"/>
+<!-- 2016/10/25 部屋タイプは複数選択できる機能対応 BEGIN -->
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui"/>
+<!-- 共通CSS BEGIN -->
+<style>
+.noShowClass{
+    display: none!important;
+}
+.htAutoClass{
+    height: auto !important;
+}
+#setupPage{
+    width:100%;
+    font-size: 15px;
+    overflow: scroll;
+} 
+.selectLi{
+    background: #dfe1e2 !important;
+}
+.j-cook-back{
+    background-color: #eae8e8;
+    background-image: url(textures/highlight.png);
+    background-image: none,-webkit-gradient(linear,left top,left bottom,from(rgba(255,255,255,.6)),to(rgba(255,255,255,0)));
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,0) 100%);
+    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,0) 100%);
+    background-position: 50% 50%;
+}
+table.detailTable td{
+     overflow: hidden;
+     position: relative;
+}
+table.detailTable th.headerRow{
+     text-align: center ;
+     white-space: nowrap;
+}
+.detailTable{
+    width: 100%;
+    font-size: 14px;
+}
+.grid{
+    display: inline-block;
+    width:100%;
+}
+.items { 
+    margin: 0 10px 1em;
+    width: 320px;
+    -webkit-box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 2px 3px rgba(0,0,0,.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,.2), 0 2px 3px rgba(0,0,0,.05);
+    float:left;
+}
+.items-content{
+    height:100%;
+}
+tr[name="touchMove"]{
+    cursor: pointer;
+    height: 30px;
+    /* 5165 bug fix by zy BEGIN */
+    color: {!color.cookDetailColor};
+    background: {!color.cookDetailBg};
+    /* 5165 bug fix by zy END */
+}
+tr[name="touchMove"] td{
+    text-align: center;
+}
+tr[name="touchMove"] td:nth-child(2){
+    text-align: left;
+}
+tr[name="touchMove"] td:nth-child(3){
+    text-align: right;
+}
+#settingWindow{
+    padding-bottom: 1em;
+    font-weight: bold;
+    color: #444;
+    display:none;
+}
+.floorList{
+    display: none;
+}
+.items.label{
+	height:30px;
+}
+</style>
+<!-- 共通CSS END -->
+<style>
+@media only screen (min-width: 1024px){
+.shopLabel{display:none;}
+}
+</style>
+<style>
+/* ipad */
+@media only screen and (min-width : 600px) and (max-width : 1024px){
+.shopLabel{display:none;}
+tr[name="touchMove"]{height: 50px;}
+.detailTable{
+    width: 100%;
+    font-size: 16px;
+}
+.detailTable tr{height:50px;}
+.floorList{
+	width:100%;
+    margin-top: 5px;
+    height:25px;
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    padding: 0px 0px 0px 2px;
+    vertical-align: middle;
+    text-align-last: center;
+}
+/*salesforce head hide begin*/
+body.sfdcBody{
+	margin:0px;
+	padding:0px !important;
+	background: none;
+}
+#contentWrapper{
+	min-width: unset;
+}
+<apex:outputpanel rendered="{!!padHeadShow}">
+#globalHeaderBar{
+	display: none;
+}
+#AppBodyHeader{
+	display: none;
+}
+.homeTab .brdPalette{
+	border-width: 0px;
+}
+.noSidebarCell, .sidebarCell .fixed{
+	padding: 0px;
+}
+body .secondaryPalette.bPageBloc,，.homeTab .bPageBlock{
+	border-width: 0px;	
+}
+</apex:outputpanel>
+/*salesforce head hide end*/
+}
+</style>
+<style>
+/* iPad Portrait 
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: portrait) {
+.items{ width: 350px; background: green;}
+}*/
+</style>
+<style type="text/css">
+html, body {
+    height: 100%;
+    width:100%;
+    overflow: auto;
+}
+/*
+2019/01/30 料理リストUI改善 by cxw BEGIN
+@media only screen and (min-device-width: 360px) and (max-device-width: 680px) {
+@media only screen and (min-device-width: 360px) and (max-device-width: 768px) {
+*/
+@media only screen and (max-width: 600px) {
+/*salesforce head hide begin*/
+body.sfdcBody{
+	margin:0px;
+	padding:0px !important;
+	background: none;
+}
+.apexp .bPageBlock.apexDefaultPageBlock .pbBody{
+	margin: 0px;
+}
+#contentWrapper{
+	min-width: unset;
+}
+#globalHeaderBar{
+	display: none;
+}
+#AppBodyHeader, .bPageFooter, .noTableFooter{
+	display: none;
+}
+.homeTab .brdPalette{
+	border-width: 0px;
+}
+.noSidebarCell, .sidebarCell .fixed{
+	padding: 0px;
+}
+body .secondaryPalette.bPageBloc,，.homeTab .bPageBlock{
+	border-width: 0px;	
+}
+/*salesforce head hide end*/
+html, body {
+    position:fixed;
+    -webkit-overflow-scrolling: touch;
+}
+.shopLabel{display:none;}
+.items{ width:100% ;margin:0;margin-bottom:10px; border-bottom: #0080ff 2px solid;}
+.detailTable tr{height:50px;}
+.floorList{
+	width:100%;
+    margin-top: 5px;
+    height:25px;
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    padding: 0px 0px 0px 2px;
+    vertical-align: middle;
+    text-align-last: center;
+}
+.shopDropClass{
+    height:25px;
+    font-size: 16px;
+}
+.mobileSelLst{display:none;}
+}
+</style>
+<style type="text/css">
+@media only screen and (min-width: 360px) and (max-width: 768px) and (orientation: portrait) {
+.shopLabel{display:none;}
+.j-cook-back{display: none;}
+.blockUI.blockMsg.blockPage h1{font-size: 10px;}
+.shopDropClass{border: 0px;}
+.floorList{
+	width:100%;
+    margin-top: 5px;
+    height:25px;
+    display: block;
+    font-size: 16px;
+    text-align: center;
+    padding: 0px 0px 0px 2px;
+    vertical-align: middle;
+    text-align-last: center;
+}
+}
+.selectClass>td{
+    background:  {!color.cookDoneBg} !important;
+	color:{!color.cookDoneColor} !important;
+}
+.cookOverClass{
+	border-radius: 50%;
+	height: 20px;
+	width: 20px;
+	display: inline-block;
+	background:red;
+	vertical-align: top;
+}
+.shopDropClass{
+	font-size: 20px;
+	text-align: center;
+    border-radius: 0;
+    margin: 0;
+    padding: 0px 0px 0px 2px;
+    /*vertical-align: middle;*/
+    text-align: center;
+    text-align-last: center;
+    height:30px;
+}
+.titleRow{
+	height: 30px;
+}
+.titleRow>td{
+	background: {!color.titleBg};
+	color:{!color.titleColor};
+}
+.dateFormat{
+	display: none;
+}
+/*2019/01/30 料理リストUI改善 by cxw BEGIN*/
+.go-back {
+	color: white;
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    background: #9F9F9F;
+    opacity: .95;
+    font-size: 30px;
+    border-radius: 2px;
+    right: 5px;
+    bottom: 10%;
+    display: none;
+}
+/*2019/01/30 料理リストUI改善 by cxw END*/
+/* 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN*/
+.cook>div{
+    float:left;
+}
+.cook>div:first-child{
+    width: 59%
+}
+.cook>div:last-child{
+    width: 39%;
+    margin-left:10px;
+}
+#noOverGrid .k-grid-content tr.Done{
+    background:  {!color.cookDoneBg} !important;
+	color:{!color.cookDoneColor} !important;
+}
+.cookDescCls{
+    display: none;
+    float:right;
+}
+.hadDesc .cookDescCls{
+    display: unset;
+}
+.cookInputMessage,.cookInputSeq,.cookInputCnt{
+    display:none;
+    position: absolute;
+    z-index:1;
+}
+/* 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END*/
+/* 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN*/
+.cookWrap{
+    position: absolute;
+    background: lightgray;
+    padding: 5px;
+    box-shadow: 0 1px 2px 1px rgba(0,0,0,.08), 0 3px 6px rgba(0,0,0,.08);
+}
+*{
+ -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: transparent; /* For some Androids */ }
+/* 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END*/
+</style>
+<!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN -->
+<style id="otherInfo"></style>
+<!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END -->
+<script>
+$=jQuery.noConflict();
+var timerInterval = 6000;
+var PageInfo = {};
+// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+var COMMINFO = {
+    BLANK : '_blank_'
+}
+// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+// モバイルフラグ
+var _isMobileOS;
+$(document).ready(function(){
+    // 共通初期化
+    bindEvent();
+});
+// 画面Lockする
+function blockUi() {
+   $.blockUI({
+    //Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0278}</h1>'
+    }); 
+    return true;
+}
+// 画面Lock解除
+function unblock() {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+// 共通初期化
+function bindEvent(){
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+    initColor();
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    initKeyDown();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    initInfo();
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    // 端末区分
+    _isMobileOS = kendo.support.mobileOS;
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    if (isLocationFlg()) locationInfoSet();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    // 2019/01/30 料理リストUI改善 by cxw BEGIN
+    cookRemoteData.call({init: true});
+    // 2019/01/30 料理リストUI改善 by cxw END
+    // 料理時刻
+    refreshInTime();
+    // 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN
+    $("[id$=gotoDate]").attr("readonly", true);
+    $("body").data("orderMap", new Map());
+    // 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+    // 2019/1/30 返回顶部 by cxw BEGIN
+    if(_isMobileOS) goBack.call($('i.go-back').show());
+    // 2019/1/30 返回顶部 by cxw END
+}
+
+// 料理時刻
+function refreshInTime(){
+    //if (!_isMobileOS) {
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    // var busType = $("[id$=cookTypeLst]").val();
+    var busType = getBustype();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    var begLong = $("#hidBegtime").val();
+    var endLong = $("#hidEndtime").val();
+    var begTm = kendo.parseFloat(begLong);
+    var endTm = kendo.parseFloat(endLong);
+    // 当日
+    var todayDt = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+        //if (endDt <= begTm || endTm <= dt) $(this).hide();
+    $("div.items").each(function(){
+        var beginTm = $(this).attr("begintm");
+        var endTime = $(this).attr("endtm");
+        var dt = kendo.parseDate(todayDt + ' ' + beginTm).getTime();
+        var endDt = kendo.parseDate(todayDt + ' ' + endTime).getTime();
+        if ((dt >= begTm && dt <= endTm)||
+            (endTime >= begTm && endTime <= endTm))
+                $(this).show();
+        else $(this).remove();
+    });
+    //}
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    var leadArr = [];
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    // 刷新料理状態
+    $("div.items").each(function(){
+        var touchMoves = $(this).find("tr[name=touchMove]");
+        var cookLength = touchMoves.length;
+        var cookDone = touchMoves.filter(".selectClass").length;
+        if (cookDone == cookLength){
+	// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+            leadArr.push($(this).attr("leadid"));
+	    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+        	 $(this).find(".cookOverClass").removeClass("noShowClass");
+        	 $(this).attr("cook-over", "yes");
+        }else{
+        	$(this).find(".cookOverClass").addClass("noShowClass");
+        	$(this).attr("cook-over", "no");
+        }
+        var titles = $(".titleRow",this).not(".otherRow");
+        if (titles.length == 0) $(".otherRow",this).hide();
+        else $(".otherRow",this).show();
+    });
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    if (leadArr.length > 0 && getOrderEndFlg()) 
+        remoteQueryInfo('leadCookDone',{orderIds:leadArr,gotoDate:$("[id$=gotoDate]").val()});
+    if (!getOrderEndChk()) $("div.items[cook-over=yes]").hide();
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    if (_isMobileOS) refreshCookItem();
+}
+// 料理クリック初期化
+function bindTouch(){
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    if (getimeFlag()) {
+        $('tr[name="touchMove"]').not(".binded").find("td").on("click touchstart",function(){
+            var curTd = $(this);
+            if (curTd.hasClass("seqClass")){
+                cookSeq(curTd);
+            } else if (curTd.hasClass("orderClass")) {
+            	// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+            	// 合并mode下不可以进行备注变更  
+                if (getSameProductSumFlg()) openCookDesc(curTd);
+                else cookDesc(curTd);
+		// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+            } else if (curTd.hasClass("begClass")) {
+                cookDone(curTd.closest("tr[name=touchMove]"));
+            } else if (curTd.hasClass("cntClass")) {
+                cookCnt(curTd);
+            }
+        });
+	    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+        $('tr[name="touchMove"]').addClass("binded");
+	    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+        return ;
+    }
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    $('tr[name="touchMove"]').not(".binded").on("click",function(){
+        var curRow = $(this);
+        if (curRow.hasClass("selectClass")) {
+        	if (!confirm("{!$LAbel.MSG_012_0474}")) return false;
+        }
+        // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+        //curRow.toggleClass("selectClass");
+        // 2018/10/31 料理進捗開始（OWNER) by cxw END
+        cookDone(curRow);
+    });
+    $('tr[name="touchMove"]').addClass("binded");
+}
+// 料理データ取得
+function cookRemoteData(){
+     // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　BEGIN
+    //var spcd = $("[id$=shopDropLst]").val();
+    //var minute = $("[id$=hidDefMinute]").val();
+    // 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw BEGIN   
+    //var gotoDate = $("[id$=gotoDate]").val();
+    // 2018/10/15 料理進捗オブジェクトで日付変更ができるようにして頂きたいです by cxw END
+    // 料理存在フラグ
+    $(".processed").removeClass("processed");
+    // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN 
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    // var busType = $("[id$=cookTypeLst]").val();
+    //var busType = getBustype();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+     // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　END
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    blockUi();
+    // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+    // 2019/01/30 料理リストUI改善 by cxw BEGIN
+    // 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy BEGIN
+	var roomJson = $("[id$=hidCookRoomJson]").val();
+	if (roomJson == "") roomJson = "{}";
+	var roomMap = JSON.parse(roomJson);
+    // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　BEGIN
+    var obj = getObjReq();
+	//var obj = {spcd:spcd,busType:busType,minute:minute, 
+    //                       gotoDate: gotoDate};
+    // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　END
+    var leadLabel = '_lead';
+    var busLabel = $("[id$=cookTypeLst] option:checked").text() + leadLabel;
+    if ((busLabel) in roomMap) {
+        var roomVal = roomMap[busLabel];
+        roomMap[leadLabel] = roomVal;
+    }
+    obj.roominfo = roomMap; 
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    if (isCookType()) {
+        var selKitchen = $("select[id$=selKitchen]").val();
+        if (selKitchen != null && selKitchen != "") obj.ops = selKitchen;
+    } else {
+        // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+        var selOpt = $("#selLayouts option:checked");
+        var layoutId = $("#selLayouts").val();
+        var type = selOpt.attr("type");
+        if (layoutId != "") obj.layoutid = layoutId;
+        if (type != "") obj.roomtype = type;
+        // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    }
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    if (getOrderEndFlg()) obj.doneflg = getOrderEndChk();
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    obj.sumflg = getSameProductSumFlg();
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+	remoteQueryInfo('queryCookData',obj,refreshData.bind(this));
+    // remoteQueryInfo('queryCookData',{spcd:spcd,minute:minute,gotoDate:gotoDate, busType:busType},refreshData.bind(this));
+	// 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy END
+    // 2019/01/30 料理リストUI改善 by cxw END
+	// 2018/10/31 料理進捗開始（OWNER) by cxw END
+}
+// 料理完了です
+function cookDone(row){
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    updateCookContent({value:'',name:'cnt',curRow:row});
+    return;
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    // 料理id
+    var cookId = row.attr("cookid");
+    // 注文id
+    var orderId = row.attr("orderid");
+    // 店舗コード
+    var spcd = $("[id$=shopDropLst]").val();
+    // 料理ステータス
+    var cookDoneFlag = !row.hasClass("selectClass");
+    var minute = $("[id$=hidDefMinute]").val();
+    var orderSet = $("body").data("orderMap").get(row.attr("prodkey")); //$("body").data("orderMap", new Map());
+    var orderIds = [];
+    var itemId = row.data("itemid");
+    orderSet.forEach(function(idx){orderIds.push(idx);});
+    var gotoDate = $("[id$=gotoDate]").val();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    // var busType = $("[id$=cookTypeLst]").val();
+    var busType = getBustype();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    // 該当料理開始の場合、該当料理所在の時間範囲チェック
+    var $wrap = row.closest("div.items");
+    
+    // 第１次料理開始
+    // 5230 bug fix by zy BEGIN
+    if ($wrap.find(".selectClass" + (J_Info && ("status" in J_Info ) && J_Info.status.length > 0 ? J_Info.status.join(",.") : "")).length == 0) {
+    // 5230 bug fix by zy END
+    	// 時間範囲チェック
+	    if (checkBusType($wrap)){
+	    	if (!confirm('料理がスタートします、よろしいですか？')) return;
+	    }
+    }
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+    var status = row.attr("status");
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    var req = {
+        orderid:orderId,
+        cookid:cookId,
+        done:cookDoneFlag,
+        spcd:spcd,
+        minute:minute
+        // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+        ,prodId:itemId
+        ,orderids:orderIds
+        ,gotoDate:gotoDate
+        ,busType:busType
+        // 2018/10/31 料理進捗開始（OWNER) by cxw END
+        // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+        ,status: J_Info.getStatus(status)
+        // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+    };
+    blockUi();
+    // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+    var lead = row.attr("lead");
+    $("body").data("Done", lead);
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    remoteQueryInfo('cookDoneData',req,refreshData.bind({Lead: lead, Over: $wrap.attr('cook-over')}));
+}
+// リアル画面情報
+function refreshData(result){
+    if (result != null) {
+    	// 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+    	beforeRefresh();
+	    // 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+        if (isCookType()) {
+            refreshCookWin(result);
+            return;
+        }
+	    // 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+    	if (getSameProductSumFlg()) result.sort(function(a,b){var bef = a.foodid != undefined ? 1 : 0 ,aft = b.foodid != undefined ? 1 : 0 ;return bef > aft ? -1 : 1});
+        // 2018/10/31 料理進捗開始（OWNER) by cxw END
+        for (var i =  0 ; i < result.length ; i++) {
+            var data = result[i];
+            //  料理データあり
+            upsertRowByInfo(data);
+        }
+        // 新規作成料理行対応
+        bindTouch();
+    }
+    //　画面内容刷新
+    refreshPageItem();
+    // 料理時刻
+    refreshInTime();
+    // 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw BEGIN
+    // 2019/01/30 料理リストUI改善 by cxw BEGIN
+    if(checkMobileOs(this)) refreshItemOrder();
+    // 2019/01/30 料理リストUI改善 by cxw END
+    // 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw END
+    if (!_isMobileOS) startRunning();
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    // 順番刷新
+    if (getimeFlag() && !isCookType()) refreshCookSeq();
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+    unblock();
+}
+//　画面内容刷新
+function refreshPageItem(){
+	// 不在内容削除う
+	$("tr[name=touchMove]").not(".processed").remove();
+	$("div.items").each(function(){
+		var item = $(this);
+		if (item.find("tr[name=touchMove]").length == 0) item.remove();
+	});
+	// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    // 2020/11/30 9251 bug fixed by zy BEGIN
+    // var parMap = {},rowKeyMap = {};
+    // 2020/11/30 9251 bug fixed by zy END
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    var sumflg = getSameProductSumFlg();
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+    $("tr[name=touchMove]").each(function(){
+        var curRow = $(this);
+        // 料理備考
+        if (getimeFlag()) {
+            var descMap = $(this).attr("descs"),descMap = JSON.parse($(this).attr("descs") || {});
+            var cookDesc = [];
+            var blankDesc = "";
+            for (var desc in descMap) {
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+                if ((typeof desc === "string")) {
+                    if (sumflg) {
+                        var descTxt = descMap[desc];
+                        if (desc == "" ) {
+                            desc += descTxt;
+                            blankDesc = desc;
+                            continue;
+                        }
+                        else if (descTxt.indexOf(desc) < 0) desc += descTxt;
+                    } else if (desc == "") continue;
+                     // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+                    cookDesc.push(desc);
+                }
+            }
+            if (cookDesc.length > 0) {
+                $(this).addClass("hadDesc");
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+                $(".cookDescCls",this).attr("title",cookDesc.join(','));
+                // $(".cookDescCls",this).attr("title",cookDesc.join(',') + (blankDesc != "" ? "," + blankDesc : ""));
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+            } else $(this).removeClass("hadDesc");
+        }
+        // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+        var oidsMap = $(this).attr("oids"),
+                oidsMap = JSON.parse($(this).attr("oids") || {}),
+                    doneQty = 0 , showQty = 0,lastClass="selectClass",
+                        parKey = curRow.attr("parKey"),rowKey = curRow.attr("prodkey");
+        curRow.removeClass(J_Info.status.join(' ').replace(J_Info.lastStatus,'selectClass'));
+        // 多注文対応
+        for (var oid in oidsMap){
+            // 注文Id
+            if (typeof oid === "string") {
+                // 注文情報
+                var data = oidsMap[oid]
+                        ,qty = kendo.parseInt(data.qty || 0)//　料理数
+                            ,chgQty = kendo.parseInt(data.chgQty || 0); //　料理済み数量
+                // 2020/11/30 9251 bug fixed by zy BEGIN
+                /*
+                if (!(rowKey in rowKeyMap)) {
+                    rowKeyMap[rowKey] = false;
+                    $("td.begClass",curRow).text(data.begTm);
+                }
+                // 料理済みチェック
+                if (!(parKey in parMap)) {
+                    parMap[parKey] = false;
+                    $("td.begClass",curRow).text(data.begTm);
+                }*/
+                // 2020/11/30 9251 bug fixed by zy END
+                // 該当会席時間チェック
+                if (data.status == J_Info.lastStatus) {
+                    doneQty += qty;
+                    // 2020/11/30 9251 bug fixed by zy BEGIN
+                    // parMap[parKey] = true;
+                    // 2020/11/30 9251 bug fixed by zy END
+                // 料理済の集計
+                } else if (chgQty > 0) doneQty += chgQty;
+                // 料理済以外の集計
+                else if (data.status == J_Info.showStatus) showQty += qty;
+                // 多注文料理の場合、料理済みありの場合、料理時間再設定
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+                // 商品合并的case下
+                if (sumflg){
+                    var orderId = $(curRow).attr("orderid") || "";
+                    // 料理按照最初时间设定
+                    if (data.objectid == orderId) {
+                        // 2020/11/30 9345 bug fixed by zy BEGIN
+                        var orgTm = $("td.begClass",curRow).text();
+                        // 同一个订单下，最早下订单的时间为主
+                        if ((orgTm == undefined || orgTm == "" ) || orgTm > data.begTm)
+                        $("td.begClass",curRow).text(data.begTm);
+                        // 2020/11/30 9345 bug fixed by zy END
+                    }
+                } else
+                // if (parMap[parKey]) 
+                $("td.begClass",curRow).text(data.begTm);
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+                
+            }
+        }
+        curRow.data("chgQty",doneQty); 
+        // 料理済みありの場合
+        if (doneQty > 0) {
+            var total = curRow.data("cnt");
+            if (doneQty < total) {
+                $(".cntClass",this).text(doneQty + '/' + total);
+                curRow.addClass(J_Info.showStatus),curRow.attr("status",J_Info.showStatus);
+            } else {
+                curRow.addClass(lastClass),curRow.attr("status",J_Info.lastStatus);
+            }
+        } else {
+            if (showQty > 0) curRow.addClass(J_Info.showStatus),curRow.attr("status",J_Info.showStatus);
+        }
+        // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+     });
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+}
+// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+function getimeFlag(){
+    return $("#hidTimeFlag").val() == "true";
+}
+// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+// 該当料理情報更新
+function upsertRowByInfo(data){
+    var foodid = data.foodid;
+    var objectid = data.objectid;
+    var begTm = data.begTm;
+    var endTm = data.endTm;
+    var minutes = data.minutes;
+    if (foodid == undefined) foodid = '';
+    if (begTm == undefined) begTm = '';
+    var grid = $("#setupPage .grid");
+    var div = $("#cookItem").html();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    var isTimeFlag = getimeFlag();
+    var head = isTimeFlag ? $("#cookTimeHead").html() : $("#cookHead").html() ;
+    var rowTemp = isTimeFlag ? $("#curTimeRow").html() : $("#curRow").html();
+    var titleTemp = isTimeFlag ? $("#titleTimeRow").html() : $("#titleRow").html();
+    var otherRow = isTimeFlag ? $("#otherTimeRow").html() : $("#otherRow").html();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    var orderKey = data.leadid + '_' + data.roomName;
+    var wrap = $("div.items").filter("[orderkey='" + orderKey + "']");
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+    if (data.cookdes != undefined) data.cookdes = data.cookdes.replace(COMMINFO.BLANK,'');
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+    var cookSeq = data.cookseq || "";
+    var parSeq = data.parseq || cookSeq;
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    var isSumFlag = getSameProductSumFlg();
+    // 料理行追加
+    if (wrap.length == 0) {
+        var items = div.replace('_room_',data.roomName)
+	                // 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+                    .replace('_roomid_',data.roomId)
+		            // 2019/09/15 部屋の並び順をSeq#順に by zy END
+                    .replace('_contactnm_',data.contactName)
+                    .replace('_key_',orderKey)
+                    .replace('_msg_','')
+		            // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+                    .replace('_leadid_',data.leadid)
+                    .replace('_thead_',head)
+		            // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+                    .replace('_allrigy_',data.allergie);
+        wrap = $(items);
+        grid.append(wrap);
+        wrap = $("div.items").filter("[orderkey='" + orderKey + "']");
+        wrap.attr("begintm",begTm);
+        wrap.attr("endtm",endTm);
+    }
+    var tbody = $(".cookTable>tbody",wrap);
+    // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+    if($("body").data("Done") == data.leadid){
+    	tbody.empty();
+    	$("body").data("Done", "");
+    }
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    var curRow = $("tr:first",tbody);
+    // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+    //var prodKey = orderKey + '_' + objectid + '_' + foodid + '_' + data.productId;
+    var checkFlag = true;
+    //$("[id$=cookSelBox]").is(":checked");
+    var prodKey = getProdKey(orderKey,objectid,foodid,data.itemId,data.status,checkFlag);
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    if (foodid == "" && isSumFlag) curRow = $("tr[prodkey^='" + prodKey + "']",tbody).first();
+    else 
+    curRow = $("tr[prodkey='" + prodKey + "']",tbody);
+    // 2019/01/30 料理進捗bug fix by zy BEGIN
+    //其他人编辑数据key值无法对应问题修复
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    if (curRow.length == 0 && !isSumFlag) {
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+        // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+        // 再次更新的原因，能区分料理状态和数量的问题，方便加单料理状态控制
+    	// 暂时解决问题，但是如果有prodid不自动合并的case会出现问题
+    	var noStatusKey = prodKey.substring(0,prodKey.lastIndexOf('_'));
+    	var checkRow = $("tr[prodkey^='" + noStatusKey + "']",tbody);
+        // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+    	if (checkRow.length > 0) {
+    		checkRow.attr("prodkey",prodKey);
+    		curRow = checkRow;
+    	}
+    }
+    // 2019/01/30 料理進捗bug fix by zy END
+    if (curRow.length == 0) {
+        var productName = data.productName;
+        var type = data.detailType;
+        var cnt = data.qty;
+        if (type == undefined) type = '';
+        var row = rowTemp.replace('_ordername_',productName)
+                        .replace('_count_',cnt)
+                            .replace('_ordertype_',type)
+                            .replace('_order_',objectid)
+                            .replace('_begtime_',begTm)
+                            .replace('_prodkey_',prodKey)
+			                // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+                            .replace('_prodSeq_',cookSeq)
+			                // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+                            .replace('_cook_',foodid);
+        var inserRow = $("tr:last",tbody);
+        curRow = $(row);
+        // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+        curRow.attr("lead", data.leadid);
+        if (!checkFlag) {
+        	if (inserRow.length > 0) inserRow.after(curRow);
+        	else tbody.append(curRow);
+        } else {
+        // 2018/10/31 料理進捗開始（OWNER) by cxw END
+        // 非会席の場合
+        if (foodid == "") {
+			var otherPar = $("tr.otherRow",tbody);
+			if (otherPar.length == 0) {
+			// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+                let otherRowHtml = otherRow.replace('_prodSeq_',cookSeq);
+				otherPar = $(otherRowHtml);
+				// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+				var bodyLastRow = $("tr:last",tbody);
+				if (bodyLastRow.length == 0) tbody.append(otherPar);
+				else bodyLastRow.after(otherPar);
+			}
+        	curRow.addClass("noPar");
+        	inserRow = $("tr.noPar",tbody).last();
+        	if(inserRow.length == 0) {
+        		otherPar.after(curRow);
+        	} else 
+        		inserRow.after(curRow);
+        } else {
+        	var parKey = orderKey + '_' + objectid;
+        	var par = $("tr.titleRow",tbody).filter("[parkey='" + parKey + "']");
+        	var lastRow = $("tr[name=touchMove]",tbody).filter("[parkey='" + parKey + "']").last();
+        	curRow.attr("parkey",parKey);
+        	if (par.length == 0) {
+        		var title = titleTemp.replace("_parkey_",parKey)
+				                // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+                                .replace('_prodSeq_',parSeq)
+				                // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+        						.replace("_prodname_",data.parentName);
+        		par = $(title);
+        		var otherPar = $("tr.otherRow",tbody);
+        		if (otherPar.length > 0) otherPar.before(par);
+        		else tbody.append(par);
+        	}
+        	// 該当行追加
+        	if (lastRow.length == 0) par.after(curRow);
+        	else lastRow.after(curRow);
+          }
+        }
+        // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+        curRow.data("cnt",cnt);
+    } else {
+    	// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    	var cntElement = $("td.cntClass",curRow);
+	    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    	var orgCnt = kendo.parseInt(curRow.data("cnt"));
+    	orgCnt += kendo.parseInt(data.qty);
+    	cntElement.text(orgCnt);
+	    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+        /*
+        if (isTimeFlag) {
+            if (data.status == J_Info.lastStatus)
+            $("td.begClass",curRow).text(begTm);
+        }*/
+	    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    	if (foodid != "") curRow.attr("cookid",foodid);
+    	curRow.data("cnt",orgCnt);
+    }
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    if (isSumFlag) {
+        var exitOrderId = curRow.attr("orderid");
+        if (exitOrderId == undefined || exitOrderId == "") {
+            curRow.attr("orderid", objectid);
+            curRow.attr("beginTm",begTm);
+            curRow.attr("endTm",endTm);
+            curRow.attr("minutes",minutes);
+        }
+    } else {
+        curRow.attr("orderid", objectid);
+
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    /*
+    // 料理更新です
+    if (data.status == 'Done') curRow.addClass("selectClass");
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+    else {
+        curRow.removeClass("selectClass"),curRow.addClass(data.status);
+    }
+    curRow.attr("status",data.status);
+    */
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+        curRow.attr("beginTm",begTm);
+        curRow.attr("endTm",endTm);
+        curRow.attr("minutes",minutes);
+    }
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+    curRow.addClass("processed");
+    // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+    // 該当注文Id追加
+    var orderMap = $("body").data("orderMap");
+    if(!orderMap.has(prodKey)) orderMap.put(prodKey, new Set());
+    orderMap.get(prodKey).add(objectid);
+    curRow.data("itemid",data.itemId); 
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    var orderTm = wrap.attr("begintm");
+    // 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw BEGIN
+    if (orderTm == undefined || orderTm == "" || orderTm > begTm) wrap.attr("begintm",begTm);
+    // 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw END
+    orderTm = wrap.attr("endtm");
+    // 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw BEGIN
+    if (orderTm == undefined || orderTm == "" || orderTm < endTm) wrap.attr("endtm",endTm);
+    // 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw END
+    var info = wrap.attr("begintm") + '〜' + wrap.attr("endtm");
+    var orderMsg = '' + data.roomName + '(' + info + ')';
+    wrap.attr("orderMsg",orderMsg);
+    // 料理時刻
+    $(".orderTmClass",wrap).text('(' + info + ')');
+    // 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+    var oids = JSON.parse(curRow.attr("oids") || '{}');
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    if (isSumFlag) {
+        var key = data.objectid + '_' + (data.itemId || data.productId) + '_' + (data.orderid || "");
+        if (!(key in oids)) oids[key] = data;
+        else {
+            oids[key].qty = kendo.parseInt(oids[key].qty) + kendo.parseInt(data.qty);
+            oids[key].chgQty = kendo.parseInt(oids[key].chgQty) + kendo.parseInt(data.chgQty);
+        }
+    } else oids[data.orderid || ""] = data;
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+    curRow.attr("oids",JSON.stringify(oids));
+    // 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    var descMap = JSON.parse(curRow.attr("descs") || '{}'),desc = data.cookdes || "",
+        begName = '(数量:',endName = ")";
+    if (isSumFlag && (desc in descMap)) {
+       
+        if (descMap[desc] != true) {
+            var obj = descMap[desc];
+            var orgCnt = kendo.parseInt(obj.replace(begName,'').replace(endName,''));
+            if (orgCnt != null) {
+                orgCnt += kendo.parseInt(data.qty);
+                descMap[desc] = begName + orgCnt + endName;
+            }
+        }
+    } else {
+        descMap[desc] = isSumFlag ? begName + data.qty + endName : true;
+    }
+    
+    curRow.attr("descs",JSON.stringify(descMap)) ;
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+    // 2020/03/30 並び順を「料理スタート時間」にできるように by zy BEGIN
+    var accountTm = data.acctm || "";
+    if (accountTm != "") wrap.attr("acctm",accountTm);
+    // 2020/03/30 並び順を「料理スタート時間」にできるように by zy END
+}
+// 刷新画面内容
+function refreshCookItem(){
+    var divs = $("div.items");
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    if (!getOrderEndChk()) divs = divs.not("[cook-over=yes]");
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    var listValue = [];
+    // 2019/01/30 料理リストUI改善 by cxw BEGIN
+    //if (_isMobileOS.device == 'ipad') {
+    	listValue.push('<option value="">{!$Label.ps__msg_005_0035}</option>');
+    //}
+    // 2019/01/30 料理リストUI改善 by cxw END
+    divs.each(function(){
+        var item = $(this);
+        var tbody = item.find(".cookTable>tbody");
+        var curRows = $("tr[name=touchMove]",tbody);
+        var orderKey = item.attr("orderkey");
+        var orderMsg = item.attr("orderMsg");
+        listValue.push('<option value="' + orderKey + '">' + orderMsg + '</option>');
+    });
+    var orgVal = $("select.floorList").val();
+    $("select.floorList").html($(listValue.join('')));
+    if ($("select.floorList").is(":visible")) {
+        if (orgVal != undefined && orgVal != null)
+            $("select.floorList").val(orgVal);
+        areaFlorrChange();
+    }
+}
+// remoteaction処理
+function remoteQueryInfo(datatype,info,callback){
+    if (info == undefined || !info) info = {};
+    stopRunning();
+    // 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.CookTimeTableCtrl.cookRemoteData}", datatype, JSON.stringify(info), function(result, event){
+        if(event.type == 'exception') {
+            console.log("-------error-------");
+            alert(event.message);
+        } else if(result != null){
+            // html encode
+            try{
+            } catch(e){}
+        }
+        if (callback != undefined) callback(result);
+    });
+}
+function toStmpByMinute(minutes){
+    return minutes * 1000 * 60;
+}
+// 機能起動可否判断を行う
+// 清掃処理の場合、部屋の詳細情報の照会、団体の全体見える機能処理中止制御
+var canRefreshFlag = false,intervalId;
+function isCanRunning() {
+    return canRefreshFlag;
+}
+function stopRunning() {
+    canRefreshFlag = false;
+    clearTimeout(intervalId);
+}
+function startRunning() {
+    canRefreshFlag = true;
+    // Timer Define
+    clearTimeout(intervalId);
+    intervalId = setTimeout(cookRemoteData, 60*1000);
+}
+function areaFlorrChange(){
+    var selectVal = $("select.floorList").val();
+    var items = $("div.items");
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    if (!getOrderEndChk()) items = items.not("[cook-over=yes]");
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    if (selectVal == undefined || selectVal == "") {
+    	items.show();
+    } else {
+	    var curItem = items.filter("[orderkey='" + selectVal + "']");
+	    var curItems = items.not("[orderkey='" + selectVal + "']");
+	    if (curItem.length > 0) {
+	    	curItems.hide();
+	    	curItem.show();
+	    }
+    }
+}
+// 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+function getProdKey(orderKey,objectid,foodid,prodId,status,checkFlag){
+	// 会計のみ
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    var orderKey = objectid + '_';
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    if (getSameProductSumFlg()) return prodId + '_' + foodid;
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+	if (checkFlag) return orderKey + '_' + orderKey + foodid + '_' + prodId + '_' + status;
+	else return orderKey  + '_' +  orderKey + '_' +prodId + '_' + status;
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+}
+// 料理刷新前
+function beforeRefresh(){
+	// 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+	// 料理数量
+    var trRows = $("tr[name='touchMove']");
+	trRows.data("cnt",0);
+	trRows.data("orderSet",new Set());
+	// 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+    // 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+    trRows.removeAttr("oids");
+    // 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    trRows.removeAttr("descs");
+    trRows.data("chgQty",0);
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+	$("body").data("orderMap").clear();
+	// 会計商品集計の場合
+    var checkFlag = true;
+    //$("[id$=cookSelBox]").is(":checked");
+    // タイトル削除
+    if (!checkFlag) $(".titleRow").remove();
+    
+    var $items = $(".grid .items");
+    $items.attr("begintm", "");
+    $items.attr("endtm", "");
+}
+// 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw BEGIN
+function refreshItemOrder(){
+	var $grid = $("#setupPage .grid");
+	var $items = $grid.children(".items");
+	//　料理項目並べ selectClass 
+	var $cook_noOver = $items.filter(function(e) {
+		let $e = $(this)
+        // 2020/03/30 並び順を「料理スタート時間」にできるように by zy BEGIN
+		// return ($e.attr('cook-over') == 'no' && $e.find('.selectClass').length != 0)
+        return ($e.attr('cook-over') == 'no' && $e.find('.' + J_Info.status.slice(1,J_Info.status.length).join(',.').replace('Done','selectClass')).length != 0)
+        // 2020/03/30 並び順を「料理スタート時間」にできるように by zy END
+	});
+	var $cook_over = $items.filter("[cook-over='yes']");
+	
+	let timeToNumber = (t) => {
+		let arr = (t || '').split(':')
+		let index = 0;
+        let len = arr.length
+		arr.forEach((i) => {index += (parseInt(i) || 0) * Math.pow(60,len);len--;})
+		return index
+	}
+	
+	let strToAscii = (str) => {
+		let num = 0
+		for(let c of str) num += c.charCodeAt()
+		return num
+	}
+	// 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+    var roomSortJson = $("input[id$=hidRoomSortJson]").val();
+    var roomArr = roomSortJson.split(',');
+    // 2019/09/15 部屋の並び順をSeq#順に by zy END
+	let sort = (e1, e2) => {
+		// 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+        let r1 = (e1.getAttribute('roomid') || '')
+        let r2 = (e2.getAttribute('roomid') || '')
+        // 2020/02/28 並び順を「料理スタート時間」にできるように by zy BEGIN
+        if (roomSortJson != "")
+        // 2020/02/28 並び順を「料理スタート時間」にできるように by zy END
+            return $.inArray(r1,roomArr) - $.inArray(r2,roomArr);
+		// 2019/09/15 部屋の並び順をSeq#順に by zy END
+		let b1 = (e1.getAttribute('begintm') || '')
+		let b2 = (e2.getAttribute('begintm') || '')
+		if(b1 == b2){
+			b1 += strToAscii((e1.getAttribute('orderkey') || ""))
+			b2 += strToAscii((e2.getAttribute('orderkey') || ""))
+		}
+		return timeToNumber(b1) - timeToNumber(b2)
+	}
+    // 2020/03/30 並び順を「料理スタート時間」にできるように by zy BEGIN
+    var timeSortFlg = $("#hidTimeSortFlag").val() == "true";
+    let noOvertimeSort = (e1,e2) =>{
+        if (!timeSortFlg) return 0;
+        let b1 = (e1.getAttribute('begintm') || '')
+		let b2 = (e2.getAttribute('begintm') || '')
+        return timeToNumber(b1) - timeToNumber(b2);
+    };
+    let timeSort = (e1,e2) =>{
+        if (!timeSortFlg) return 0;
+        let r1 = (e1.getAttribute('acctm') || '99:99:99')
+        let r2 = (e2.getAttribute('acctm') || '99:99:99')
+        return timeToNumber(r1) - timeToNumber(r2);
+    }
+	// 料理未完成の項目並べ
+	$cook_noOver.sort(sort).sort(noOvertimeSort);
+    // 2020/03/30 並び順を「料理スタート時間」にできるように by zy END
+	// 料理済みの項目並べ
+	$cook_over.sort(sort);
+	
+	/*function sortFun(a, b){
+		var begTm1 = a.getAttribute("begintm");
+		var begTm2 = b.getAttribute("begintm");
+		console.log(`begTm1 = ${begTm1}, begTm2 = ${begTm2}`);
+		if(begTm1 < begTm2) return -1;
+		if(begTm1 == begTm2) return 0;
+		if(begTm2 > begTm2) return 1;
+	}*/
+    // 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN
+    // 2020/03/30 並び順を「料理スタート時間」にできるように by zy BEGIN
+    $grid.prepend($items.not($cook_noOver).not($cook_over).sort(sort).sort(timeSort));
+    // 2020/03/30 並び順を「料理スタート時間」にできるように by zy END
+    // 2019/09/15 部屋の並び順をSeq#順に by zy END
+    $grid.prepend($cook_noOver);
+	$grid.append($cook_over);
+}
+// 該当時刻範囲変更チェック
+function checkBusType(wrap){
+	var timeArr = [];
+	$("select[id$=cookTypeLst]>option").each(function(){
+		var value = $(this).val();
+		if (value != "") {
+			var timeSplit = value.split('~');
+			if (timeSplit.length > 1) timeArr.push({beg:timeSplit[0],end:timeSplit[1]});
+		}
+	});	
+	var orgBegtm = wrap.attr("begintm");
+	var curBegtm = kendo.toString(new Date(),'HH:mm');
+	for (var i = 0 ; i < timeArr.length; i++) {
+		var time = timeArr[i];
+		var orgFlag = orgBegtm >= time.beg && orgBegtm < time.end;
+		var newFlag = curBegtm >= time.beg && curBegtm < time.end;
+		if (orgFlag != newFlag) return true;
+	}
+	return false;
+}
+// 2019/01/30 料理リストUI改善 by cxw BEGIN
+function goBack(){
+	const height = this.height();
+	this.on('click', function(){
+		$('body, html').animate({ scrollTop: 0 }, 500)
+	})
+}
+// 2019/01/30 料理リストUI改善 by cxw END
+// 2018/10/25 料理のスタートした順番に自動で並び時間軸も現時間に移動する。 by cxw END
+// 2019/01/30 料理リストUI改善 by cxw BEGIN
+function checkMobileOs({Lead, Over,init}){
+	// デバイス
+	if (_isMobileOS && 
+		(_isMobileOS.device == 'iphone' || 
+			(_isMobileOS.device == 'android' && !_isMobileOS.tablet))) {
+				if (init) return true;
+				let $grid = $('div.grid');
+				let $el = $(`div.items[orderkey^='${Lead}']`, $grid);
+				if($el.length) {
+					if($el.attr('cook-over') != Over) return true;
+				}
+				return false;
+			}
+	return true; 
+}
+// 2019/01/30 料理リストUI改善 by cxw END
+// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+function initColor(){
+	// カラー設定取得
+    var colorInfo = $("#hidColorInfo").val();
+	// 初期化
+    window.J_Info = {
+        statusmap:{},
+    };
+	// カラー設定あり
+    if (colorInfo != "") {
+		// カラー構文解析
+        window.J_Info  = JSON.parse(colorInfo);
+        var statusStr = [];
+		// 設定状態ラベル、カラー情報設定
+        J_Info.status.forEach(function(status){
+            var label = status,cookClass = status;
+            if (status in J_Info.label) {
+                label = J_Info.label[status];
+                cookClass = label;
+            }
+            statusStr.push('.' + label + '{background:' + J_Info.color[status]+ ' !important}');
+        });
+        $("#otherInfo").html(statusStr.join(''));
+    } else J_Info.status = ['','Done'];
+    J_Info.lastStatus = J_Info.status[J_Info.status.length - 1];
+    J_Info.showStatus = J_Info.status[J_Info.status.length - 2];
+	// 次へ状態取得
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    J_Info.getStatus = function(status,enhanceFlg){
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+		// 状態位置取得
+        if (status in this.statusmap) {
+				// 状態位置
+            idx = this.statusmap[status];
+				// 次へ状態位置
+            if (idx < (this.status.length - 1)) {
+	    	// 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+                if (enhanceFlg == false) idx --;
+                else idx ++;
+		// 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+                return this.status[idx];
+            } else 
+                return this.status[0];
+		// 未設定対応
+        } else if (status == ''){
+	    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+            if (enhanceFlg != false) status = 'Done';
+	    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+        } else status = '';
+        return status;
+    }
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+    J_Info.getIndex = function(status){
+        if (status in this.statusmap)  
+            return this.statusmap[status];
+        return -1;
+    }
+    // 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+}
+// 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN
+function initCookWin(){
+    $("#cookTab").kendoTabStrip({
+        show: function(e){
+            if ($(e.item).attr("aria-controls") == "cookTable"){
+                $("#hidCookType").val("grid");
+                cookRemoteData();
+            } else {
+                $("#hidCookType").val("cook");
+                cookRemoteData();
+            }
+        }
+    });
+    return;
+    var cookWin = $("#noOverCookItemWindow").getKendoWindow();
+    if (cookWin == undefined) {
+        cookWin = $("#noOverCookItemWindow").kendoWindow({
+        	width: "660px",
+            actions: ["Minimize"],
+            title: '料理一覧',
+            maxheight:500
+        }).getKendoWindow();
+        cookWin.wrapper.offset({left:window.outerWidth - 670});
+        $("#noOverCookItemWindow").kendoTabStrip({
+            show: function(e){
+                if ($(e.item).attr("aria-controls") == "noOverGrid"){
+                    refreshCookWin();
+                } else {
+                    refreshCookWin(true)
+                }
+                console.log(e);
+            }
+        });
+    }
+}
+function refreshCookWin(result){
+    var datas = [];
+    var objMap = {};
+    var orderLogDatas = [];
+    var orderSumDatas = [];
+    result = filterTimeIn(result);
+    var orderMap = $("body").data("orderMap");
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    var cookDoneArr = [];
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    // 2020/05/30 リリース後の検収再対応 by zy BEGIN
+    var sameTranMap = {};
+    // 2020/05/30 リリース後の検収再対応 by zy END
+    result.forEach(function(cook){
+        var obj = {
+            name:cook.productName,
+            time:cook.begTm,
+            qty:cook.qty,
+            room:cook.roomName,
+            desc:cook.cookdes || "",
+            status:cook.status,
+            cookid:cook.foodid || "",
+            orderid:cook.objectid,
+            itemid:cook.itemId,
+            oid:cook.orderid,
+            prodkey: getProdKey(cook.leadid + '_' + cook.roomName,cook.objectid,cook.foodid,cook.itemId,cook.status,true)
+        }
+        // 2020/11/30 9421 bug fixed by zy BEGIN
+        obj.desc = obj.desc.replace(COMMINFO.BLANK,'');
+        // 2020/11/30 9421 bug fixed by zy END
+        if(!orderMap.has(obj.prodkey)) orderMap.put(obj.prodkey, new Set());
+        orderMap.get(obj.prodkey).add(cook.objectid);
+        // 2020/05/30 リリース後の検収再対応 by zy BEGIN
+        var sameKey = cook.objectid + '_' + cook.itemId || cook.foodid;
+        var cookQtyFlg = (cook.chgQty != undefined && cook.chgQty != "");
+        if (cookQtyFlg) {
+        // 2020/05/30 リリース後の検収再対応 by zy END
+            var chgQty = kendo.parseInt(cook.chgQty);
+            if (chgQty > 0) {
+                var curQty = kendo.parseInt(cook.qty);
+                if (chgQty != curQty) {
+                    var newObj = $.extend({},obj);
+                    newObj.qty = chgQty;
+                    newObj.status = J_Info.status[J_Info.status.length - 1];
+                    // 該当注文Id追加
+                    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+                    if (newObj.status == J_Info.lastStatus) cookDoneArr.push(newObj);
+                    else 
+                    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+                    orderLogDatas.push(newObj);
+                    obj.qty = curQty - chgQty;
+                    obj.orgFlg = true;
+                } 
+            }
+            // 2020/05/30 リリース後の検収再対応 by zy BEGIN
+            if (!(sameKey in sameTranMap)) sameTranMap[sameKey] = cookQtyFlg;
+            // 2020/05/30 リリース後の検収再対応 by zy END
+        } 
+        // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+        if (obj.status == J_Info.lastStatus) {
+            cookDoneArr.push(obj);
+            return true;
+        }
+        // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+        // 2020/05/30 リリース後の検収再対応 by zy BEGIN
+        // 注文状態後て料理数量変更なして料理数量変更しての同じ商品て
+        if (getKitchenOrderFlg() && (!cookQtyFlg && !(sameKey in sameTranMap)) && obj.status == "") return true;
+	    // 2020/05/30 リリース後の検収再対応 by zy END
+        if (obj.status != J_Info.lastStatus){
+            if (cook.productName in objMap) objMap[cook.productName] = kendo.parseInt(objMap[cook.productName]) + kendo.parseInt(obj.qty);
+            else objMap[cook.productName] = kendo.parseInt(obj.qty);
+        }
+        orderLogDatas.push(obj);
+    });
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+    if (getOrderEndChk() && cookDoneArr.length > 0) {
+        var doneLen = kendo.parseInt($("#hidCookDoneHideLen").val());
+        if (doneLen == null) doneLen = 50;
+        if (cookDoneArr.length > doneLen) cookDoneArr = cookDoneArr.slice((cookDoneArr.length - doneLen));
+        orderLogDatas = orderLogDatas.concat(cookDoneArr);
+    }
+    // 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+    for (prod in objMap) {
+        if (typeof prod == "string") {
+            orderSumDatas.push({
+                name:prod,
+                qty:objMap[prod]
+            });
+        }
+    }
+    var nosumGrid = $("#noSumGrid").getKendoGrid();
+    if (nosumGrid == undefined) {
+        $("#noSumGrid").kendoGrid({
+            dataSource:{
+                data:orderSumDatas,
+                sort: { field: "qty", dir: "desc" }
+            },
+            columns:[
+                {field:"name",title:"商品"},
+                {field:"qty",title:"数量",width:50},
+            ],
+            height:500
+        });
+    } else 
+        nosumGrid.dataSource.data(orderSumDatas);
+    var noOverGrid = $("#noOverGrid").getKendoGrid();
+    if (noOverGrid == undefined) {
+        $("#noOverGrid").kendoGrid({
+            dataSource:{
+                data:orderLogDatas,
+                sort:[
+                    { field: "status", dir: "asc" ,compare: function(a, b) {
+                        let statusBef = a.status == "Done" ? 1 : 0;
+                        let statusAft = b.status == "Done" ? 1 : 0;
+                        return statusBef - statusAft;
+                    }},
+                    { field: "time", dir: "desc" }
+                ] 
+            },
+            columns:[
+                {field:"time",title:"時刻",width:75},
+                {field:"name",title:"商品"},
+                {field:"qty",title:"数量",width:50},
+                {field:"room",title:"場所",width:100},
+                {field:"desc",title:"備考"}
+            ],
+            dataBound:function(e){
+                var curRows = $("tr",e.sender.table);
+                var otherRows = curRows.not(".Done");
+                var doneRows = curRows.filter(".Done");
+                if (otherRows.length > 0) otherRows.last().after(doneRows);
+            },
+            height:500,
+            sortable:true,
+            rowTemplate: kendo.template($("#cookTemplate").html())
+        });
+    } else 
+        noOverGrid.dataSource.data(orderLogDatas);
+    unblock();
+    return;
+}
+//レストランと厨房チェック
+function isCookType() {
+    return $("#hidCookType").val() == "cook";
+}
+// 場所の時間チェック
+function filterTimeIn(datas){
+    var busType = getBustype();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    var begLong = $("#hidBegtime").val();
+    var endLong = $("#hidEndtime").val();
+    var begTm = kendo.parseFloat(begLong);
+    var endTm = kendo.parseFloat(endLong);
+    // 当日
+    var todayDt = kendo.toString(new Date(),JINYACONNECT.DateFormat);
+    var results = [];
+    datas.forEach(function(data){
+        var beginTm = data.begTm;
+        var endTime = data.endTm;
+        var endDt = kendo.parseDate(todayDt + ' ' + endTime).getTime();
+        var dt = kendo.parseDate(todayDt + ' ' + beginTm).getTime();
+        if (checkTime(dt,endTime,begTm,endTm)) results.push(data);
+    });
+    return results;
+}
+// 指定時間範囲内チェック
+function checkTime(dt,endTime,begTm,endTm){
+    return  ((dt >= begTm && dt <= endTm)||
+            (endTime >= begTm && endTime <= endTm))
+}
+// 厨房の行のクリック対応
+function touchCook(){
+    // 該当行
+    var curRow = $(event.currentTarget);
+    // 設定行
+    var row = $("<tr/>");
+    // 料理表
+    var noOverGrid = $("#noOverGrid").getKendoGrid();
+    // 該当行対応情報
+    var data = noOverGrid.dataSource.getByUid(curRow.attr("data-uid"));
+    // 料理済みの行、クリック不能
+    if (data.status == J_Info.lastStatus) return;
+    // 料理id
+    row.attr("cookid",data.cookid);
+    // 注文id
+    row.attr("orderid",data.orderid);
+    row.attr("prodkey",data.prodkey);
+    row.data("itemid",data.itemid);
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN
+    row.attr("status",data.status);
+    // 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END
+    row.data("cnt",data.qty);
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    var oidMap = {};
+    oidMap[data.oid || ""] = data;
+    row.attr("oids",JSON.stringify(oidMap));
+    // 分割の行
+    if (data.orgFlg) updateCookContent({value:J_Info.getStatus(data.status),name:'status',curRow:row});
+    else cookDone(row);
+}
+/*
+function openCookDesc(){
+    var cookWin = $("#cookDescWindow").getKendoWindow();
+    if (cookWin == undefined) {
+        cookWin = $("#cookDescWindow").kendoWindow({
+        	width: "660px",
+            actions: ["Minimize"],
+            title: '料理情報',
+            maxheight:500
+        }).getKendoWindow();
+        $("#cookSeqDropDown").kendoDropDownList();
+        $("#cookDesc").kendoComboBox({
+            animation: false,
+            dataTextField: "name",
+            dataValueField: "id",
+        }).getKendoComboBox();
+        $("#cookCnt").kendoNumericTextBox();
+    }
+    cookWin.center();
+    cookWin.open();
+    blockUi();
+}
+function hideCookDescWin(){
+    var cookWin = $("#cookDescWindow").getKendoWindow();
+    cookWin.close();
+}*/
+function cookSeq(curTd){
+    var dropDown = $("input.cookInputSeq").getKendoDropDownList();
+    var seq = curTd.text();
+    var maxInt = curTd.closest("table.detailTable").find("tr[name=touchMove]").length;
+    var indexArr = [];
+    for (var i = 1 ; i <= maxInt; i++) indexArr.push(i);
+    if (dropDown == undefined) {
+        dropDown = $(".cookInputSeq").kendoDropDownList({
+            dataSource:{data:indexArr}
+            ,change:function(e){
+                var curRow = this.wrapper.data("curRow");
+                updateCookContent({value:this.value(),name:'seq',curRow:curRow});
+            }
+            ,close:function(){
+                this.wrapper.hide();
+            }
+        }).getKendoDropDownList();
+    } else dropDown.setDataSource(indexArr);
+    dropDown.value(seq);
+    var input = $("input.cookInputSeq");
+    dropDown.wrapper.show();
+    changePosition(curTd,dropDown.wrapper,seq);
+    dropDown.open();
+}
+// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+function cookDesc(curTd,desc){
+// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+    var tip = $(".cookInputMessage").getKendoTooltip();
+    if (tip == undefined) {
+        $(".cookInputMessage").kendoTooltip({
+            autoHide: false,
+            position: "top",
+            width:330,
+            showOn:"keypress",
+            content: function(e){
+                return e.target.val();
+            }
+        });
+        $(".cookInputMessage").unbind("keyup");
+        $(".cookInputMessage").keyup(function(){
+            var curToolTips = $(this).data("kendoTooltip");
+            if(curToolTips != null && curToolTips != undefined){
+                curToolTips.refresh();
+            } 
+            if($(this).val() != "" ){
+                curToolTips.show();
+                var toolTipsContent = curToolTips.popup.element;
+                var toolTipsWrapper = curToolTips.popup.wrapper;
+                var wrapperHeight = toolTipsContent.height() > 23 ? toolTipsContent.height() : 23; 
+                var offsetTop = $(this).offset().top - wrapperHeight -  12;
+                if(toolTipsWrapper.css("top") != offsetTop){
+                    toolTipsWrapper.css("top",offsetTop);
+                }
+            }else{
+                curToolTips.hide();
+            }
+        });
+        $(".cookInputMessage").unbind("blur");
+	    $(".cookInputMessage").blur(function(){ 
+	    	$(this).data("kendoTooltip").hide();
+            var orgValue = $(this).data("orgVal");
+            var newValue = $(this).val();
+            var curRow = $(this).data("curRow");
+            if (orgValue != newValue) updateCookContent({value:newValue,name:'dsc',curRow:curRow});
+            var curToolTips = $(this).data("kendoTooltip");
+            curToolTips.hide();
+            $(this).hide();
+	    });
+    }
+    var input = $(".cookInputMessage");
+    var orgValue = $(".cookDescCls",curTd).attr("title");
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+    if (desc) orgValue = desc;
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+    changePosition(curTd,input,orgValue);
+    input.width(curTd.width());
+    input.show();
+    input.focus();
+}
+function cookCnt(curTd){
+    var dropDown = $("input.cookInputCnt").getKendoDropDownList();
+    var curRow = curTd.closest("tr[name=touchMove]");
+    var cnt = curRow.data("cnt");
+    var maxInt = kendo.parseInt(cnt);
+    var indexArr = [];
+    var chgQty = curRow.data("chgQty") || "";
+    for (var i = 1 ; i <= maxInt; i++) indexArr.push(i);
+    if (dropDown == undefined) {
+        dropDown = $(".cookInputCnt").kendoDropDownList({
+            dataSource:{data:indexArr}
+            ,select:function(e){
+                var curRow = this.wrapper.data("curRow");
+                var currentQty = e.dataItem;
+                var orgVal = $("input.cookInputCnt").data("orgVal");
+                var total = curRow.data("cnt");
+                if (orgVal != currentQty) {
+                    var objCnt = {value:kendo.parseInt(currentQty),name:'cnt',curRow:curRow,status:J_Info.status[J_Info.status.length - 1]};
+                    updateCookContent(objCnt);
+                }
+            }
+            ,close:function(){
+                this.wrapper.hide();
+            }
+        }).getKendoDropDownList();
+    } else dropDown.setDataSource(indexArr);
+    if (chgQty == "") chgQty = curRow.data("cnt");
+    dropDown.value(chgQty);
+    var input = $("input.cookInputCnt");
+    dropDown.wrapper.show();
+    changePosition(curTd,dropDown.wrapper,cnt);
+    dropDown.open();
+}
+function changePosition(curTd,input,orgValue){
+    var pos = curTd.position();
+    input.css({top:pos.top,left:pos.left});
+    input.data("orgVal",orgValue || "");
+    input.data("curRow",curTd.closest("tr"));
+    input.val(orgValue);
+}
+function updateCookContent(obj){
+    blockUi();
+    var blank = '_blank_';
+    var curRow = obj.curRow;
+    var data = getObjReq(curRow);
+    data.name = obj.name;
+    var chgValue = obj.value;
+    var oids = [];
+    var curStatus = curRow.attr("status") || "";
+    var oidMap = JSON.parse(curRow.attr("oids") || '{}');
+    var showStatus = J_Info.showStatus, 
+        showStatus = showStatus == '' ? blank : showStatus 
+        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+        ,splitTxt = '&&' , isSumFlag = getSameProductSumFlg() && !isCookType();
+        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+    for (var oid in oidMap) {
+        if ((typeof oid === "string")) {
+	        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+            var keyId = oid,orgId= oid;
+            if (isSumFlag) {
+                var oidArr = oid.split('_');
+                keyId = oidArr[0] + '_' + oidArr[oidArr.length - 1];
+            }
+	        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+            if (data.name == 'cnt') {
+                var orgData = oidMap[oid];
+                var cookQty = kendo.parseInt(orgData.qty);
+		        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+                oid = keyId;
+		        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+                if (typeof chgValue == "string" && chgValue == "") {
+                    // 指定状態と該当状態後
+                    var status = J_Info.getStatus(curStatus);
+                    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+                    oid += splitTxt + blank + splitTxt + (status == "" ? blank : status);
+                    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+                } else
+                if (chgValue > 0){
+                    if (chgValue >= cookQty) {
+                        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+                        oid += splitTxt + cookQty + splitTxt + J_Info.lastStatus;
+                        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+                        chgValue -= cookQty;
+                    } else {
+                        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+                        oid += splitTxt + chgValue;
+                        if (orgData.status == J_Info.lastStatus) oid += splitTxt + showStatus;
+                        // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+                        chgValue -= cookQty;
+                    }
+                } else if (chgValue == 0) {
+                    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+                    oid += splitTxt + blank;
+                    if (orgData.status == J_Info.lastStatus) oid += splitTxt + showStatus;
+                    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END
+                }
+            } else if (data.name == 'dsc') {
+                oid = keyId;
+                if (("chgArr" in obj) && isSumFlag){
+                    if (!(orgId in obj.chgArr)) continue;
+                    chgValue = obj.chgArr[orgId] || blank;
+                }
+                if (chgValue == "") chgValue = blank;
+                oid += splitTxt + chgValue;
+            } else {
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+                oid = keyId;
+                oid += splitTxt + chgValue;
+                // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END 
+            }
+            oids.push(oid);
+        }
+    }
+    data.oids = oids;
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN  
+    data.sumflg = isSumFlag;
+    // 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END  
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    if (isCookType()) {
+        var selKitchen = $("select[id$=selKitchen]").val();
+        if (selKitchen != null && selKitchen != "") data.ops = selKitchen;
+    } else {
+        // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+        var selOpt = $("#selLayouts option:checked");
+        var layoutId = $("#selLayouts").val();
+        var type = selOpt.attr("type");
+        if (layoutId != "") data.layoutid = layoutId;
+        if (type != "") data.roomtype = type;
+        // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    }
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    // console.log(data);
+    // 該当料理開始の場合、該当料理所在の時間範囲チェック
+    var $wrap = curRow.closest("div.items");
+    var lead = curRow.attr("lead");
+    $("body").data("Done", lead);
+    // 2018/10/31 料理進捗開始（OWNER) by cxw END
+    remoteQueryInfo('cookChgData',data,refreshData.bind({Lead: lead, Over: $wrap.attr('cook-over')}));
+}
+function getObjReq(row){
+    // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　BEGIN
+    var cookflg = isCookType();
+    var obj = {};
+    if (row != undefined) {
+        // 料理id
+        var cookId = row.attr("cookid");
+        // 注文id
+        var orderId = row.attr("orderid");
+        var itemId = row.data("itemid");
+        var status = row.attr("status");
+        obj.orderid = orderId,obj.cookid = cookId, 
+        obj.prodId = itemId ,obj.status = status;
+    }
+    // 店舗コード
+    var spcd = $("[id$=shopDropLst]").val();
+    var gotoDate = $("[id$=gotoDate]").val();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+    var busType = getBustype();
+    // 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+    var minute = $("[id$=hidDefMinute]").val();
+    var cookflg = isCookType();
+    // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　END
+    // 該当料理開始の場合、該当料理所在の時間範囲チェック
+    return $.extend(obj,{
+        spcd:spcd,
+        minute:minute,
+        // 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN
+        gotoDate:gotoDate
+        ,busType:busType
+        // 2018/10/31 料理進捗開始（OWNER) by cxw END
+        // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　BEGIN
+        ,cookflg:isCookType()
+        // 2020/04/30 料理リストの厨房レイアウトですが、こちらにまだ注文をかけていない料理も表示されてしまっているようです　by　zy　END
+    });
+}
+// 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END
+// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy BEGIN
+// チェック場所有効
+function isLocationFlg(){
+    return $("#selLocation option").length > 0;
+}
+// 該当レイアウト刷新
+function chgLayout(){
+    // 指定レイアウト初期化
+    $("#hidlayoutId").val('');
+    // 該当場所のレイアウト情報取得
+    locationInfoSet();
+    // 選択レイアウト機能
+    cookRemoteData();
+}
+// 該当場所のレイアウト情報設定
+function locationInfoSet(){
+    // 該当場所のレイアウト情報取得
+    var layoutJson = $("#selLocation").val();
+    // レイアウト情報取得あり
+    if (layoutJson != "" && layoutJson != null) {
+        // 初期化レイアウト情報
+        var arr = JSON.parse(layoutJson);
+        if (arr.length > 0) {
+            var selArr = [];
+            arr.forEach(function(layout){
+                // 該当時間指定レイアウト
+                var checked = (("select" in layout) && layout.select) ? 'selected="selected"' : '';
+                // レイアウト追加
+                selArr.push("<option time='" + layout.time + "' type='" + layout.roomtype + "' value='" + layout.id + "' " + checked +">" + layout.name + "</option>");
+            });
+            // 全部オプション追加
+            $("#selLayouts").html(selArr.join(''));
+            var layoutId = $("#hidlayoutId").val();
+            if (layoutId != "") $("#selLayouts").val(layoutId);
+            $("#hidlayoutId").val($("#selLayouts").val());
+        }
+    }
+}
+// 場所時間取得
+function getBustype(){
+    // 場所のレストランの場合
+    if (isLocationFlg() && !isCookType()) {
+        var selOpt = $("#selLayouts option:checked");
+        var time = selOpt.attr("time");
+        var timeArr = time.split('~');
+        // 時間設定
+        var begLong = convertDatetime(kendo.toString(new Date(),'yyyy/MM/dd'),timeArr[0]).getTime();
+        var endLong = convertDatetime(kendo.toString(new Date(),'yyyy/MM/dd'),timeArr[1]).getTime();
+        $("#hidBegtime").val(begLong);
+	    $("#hidEndtime").val(endLong);
+        // 場所の時間情報
+        return time;
+    }
+    return $("[id$=cookTypeLst]").val();
+}
+// 時間フォーマット
+function convertDatetime(dt,time){
+    let timeArr = time.split(':');
+    let hours = kendo.parseInt(timeArr[0]);
+    let addDays = 0;
+    if (hours != null) {
+        // 超出２４時間対応
+        if (hours > 24) {
+            addDays = kendo.parseInt(hours/24);
+        }
+        hours = hours - 24*addDays;
+        let changeDate = kendo.parseDate(dt);
+        return new Date(changeDate.getFullYear(),changeDate.getMonth(),changeDate.getDate() + addDays,hours,timeArr[1]);
+    }
+    return null;
+}
+// 2020/02/15 同店舗内でもレストラン毎の表示を可能にする by zy END
+// 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN
+// 画面の鍵の機能対応
+function initKeyDown(){
+    $(window).keyup(function(event){
+        // ESC->キャンセル編集状態
+        if (event.keyCode == '27') {
+            // 料理数量編集中
+            var dropDown = $("input.cookInputCnt").getKendoDropDownList();
+            // 編集閉じる
+            if (dropDown != undefined) dropDown.close();
+            // 料理備考編集中
+            dropDown = $("input.cookInputMessage").getKendoTooltip();
+            // 編集閉じる
+            if (dropDown != undefined) {
+                dropDown.hide();
+                $(".cookInputMessage").hide();
+            }
+            // 料理順番編集
+            dropDown = $("input.cookInputSeq").getKendoDropDownList();
+            // 編集閉じる
+            if (dropDown != undefined) dropDown.close();
+        }
+    });
+}
+// 順番刷新
+function refreshCookSeq(){
+    $("div.items").each(function(){     
+        var wrap = $(this);
+        // 商品グループ
+        var titleRows = $(".titleRow",wrap);
+        if (titleRows.length > 0) {
+            titleRows.each(function(){
+                var rows = $(this).nextUntil("tr.titleRow");
+                rows = sortRowSeq(rows);
+                // 時間处理
+                $(this).after(rows);
+            });
+        } else {
+            var rows = $("tr[name=touchMove]",wrap);
+            rows = sortRowSeq(rows);
+            $("tbody",wrap).append(rows);
+        }
+    });
+    
+}
+// 行顺序更新
+function sortRowSeq(rows){
+    // 顺序处理
+    rows.sort(function(a,b){
+        var befSeq = kendo.parseInt($(".seqClass",a).text());
+        var aftSeq = kendo.parseInt($(".seqClass",b).text());
+        if (befSeq > aftSeq) return 1
+        else if (befSeq < aftSeq) return -1;
+        return 0;
+    });
+    // 時間处理
+    rows.sort(function(a,b){
+        var befSeq = kendo.parseInt($(".seqClass",a).text());
+        var aftSeq = kendo.parseInt($(".seqClass",b).text());
+        if (befSeq == aftSeq) {
+            var befTime = $(".begClass",a).text();
+            var aftTime = $(".begClass",b).text();
+            if (befTime > aftTime) return 1;
+            else if (befTime < aftTime) return -1;
+        }
+        return 0;
+    });
+    return rows;
+}
+// 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END
+// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN
+// オーダー済みフラグ
+function getOrderEndFlg(){
+    return $("#hidOrderEndFlag").val() == "true";
+}
+// 該当チェック状態
+function getOrderEndChk(){
+    if (!getOrderEndFlg()) return true;
+    return $("#orderEndChk").is(":checked");
+}
+// チェック対応
+function chgChkOrder(){
+    var chkFlg = $("#orderEndChk").is(":checked");
+    $("#orderEndChk").val(chkFlg);
+    $("input[id$=hidDoneFlg]").val(chkFlg);
+    cookRemoteData.call({init: true});
+}
+// 初期化
+function initInfo(){
+    $("#orderEndChk").prop("checked", $("#orderEndChk").val() == "true");
+}
+// 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END
+// 2020/05/30 リリース後の検収再対応 by zy BEGIN
+function getKitchenOrderFlg(){
+    return $("#hidKitchenOrderFlag").val() == "true";
+}
+// 2020/05/30 リリース後の検収再対応 by zy END
+// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN
+function getSameProductSumFlg(){
+    return $("#hidSaveProdFlg").val() == "true";
+}
+// 合并场合打开料理明细
+function openCookDesc(curTd){
+    // その他画面クリア
+    closeWrapDiv();
+    $(".cookInputMessage").hide();
+    // 刷新停止
+    stopRunning();
+    // 外部框架
+    var wrapDiv = $("<div class='cookWrap' style='width:279px;'/>");
+    // 処理行
+    var curRow = $(curTd).closest("tr");
+    // 料理明細
+    var oidMap = JSON.parse((curRow.attr("oids") || {}));
+    var oidLen = 0;
+    // 画面追加
+    $("#setupPage").append(wrapDiv);
+    // 料理入力行
+    var input = $("<input type='text' class='k-input descInput' style='width:97%'/>");
+    for (var oid in oidMap) {
+        if (typeof oid === 'string') {
+            var $input = input.clone();
+            var data = oidMap[oid];
+            wrapDiv.append($input);
+            // 時刻
+            wrapDiv.append($("<span style='width:50px;display: inline-block;text-align: center;'>" + data.begTm +"</span>"));
+            // 数量
+            wrapDiv.append($("<span style='width:30px;display: inline-block;text-align: center;'>" + data.qty +"</span>"));
+            var orgValue = data.cookdes || "";
+            changePosition(wrapDiv,$input,orgValue);
+            $input.attr("oid",oid);
+            $input.val(orgValue);
+            $input.width(curTd.width() - 2);
+            oidLen++;
+        }
+    }
+    if (oidLen == 0) wrapDiv.append(input.clone());
+    else if (oidLen == 1) {
+        cookDesc(curTd,$(".descInput").val());
+        closeWrapDiv();
+        return ;
+    } 
+    var curTable = curTd.closest("table");
+    var tableTop = curTable.position();
+    // 料理panel高度小于料理内容高度则满格显示
+    if (wrapDiv.height() > curTable.height()){
+        wrapDiv.css({top:tableTop.top});
+    } else {
+        var centerTop = tableTop.top + curTable.height() / 2 - wrapDiv.height()/2;
+        wrapDiv.css({top:centerTop});
+    }
+    wrapDiv.css({left:curTd.position().left - 8});
+    // changePosition(curTd,wrapDiv,'');
+    // 居中位置调整
+    wrapDiv.data("curRow",curRow);
+    wrapDiv.append('<div> <button class="k-button k-button-icontext k-gantt-create" style="width:48%;float:right;font-size: 15px;margin-right:4px;" type="button" onclick="closeWrapDiv()"><span>キャンセル</span></button></div><button class="k-button k-button-icontext k-gantt-create" style="width:47%;font-size: 15px;" type="button" onclick="updateOrderDesc()"><span>設定</span></button>');
+}
+function updateOrderDesc(){
+    var changeOrgArr = {};
+    var hadChange = false;
+    $(".descInput").each(function(){
+        var val = $(this).val();
+        var oldVal = $(this).data("orgVal");
+        if (val != oldVal) {
+            changeOrgArr[$(this).attr("oid")] = val;
+            hadChange = true;
+        }
+    });
+    if (hadChange)
+        updateCookContent({chgArr:changeOrgArr,name:'dsc',curRow:$(".cookWrap").data("curRow")});
+    closeWrapDiv();
+}
+function closeWrapDiv(){
+    $("div.cookWrap").children().remove();
+    $("div.cookWrap").remove();
+    startRunning();
+}
+// 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END 
+</script>
+<script  type="text/x-kendo-template" id="cookItem" >
+<!-- 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN -->
+<!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN -->
+<div class="items" orderkey='_key_' orderMsg='_msg_' roomid='_roomid_' leadid="_leadid_">
+<!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END -->
+<!-- 2019/09/15 部屋の並び順をSeq#順に by zy END -->
+       <div class="label" style="background: lightgray;">
+        <div style="text-align: center; font-weight: bold;height:22px;">
+            <span>_room_</span><span class="orderTmClass"></span>
+			<span class="cookOverClass noShowClass">
+     		 	<span style="display: block; color: #FFFFFF;text-align: center;line-height: 20px; font-size: 14px;">済</span>
+ 			</span>
+        </div>
+        <div style="background: white;">
+            <div style="border-bottom: 1px solid #ececec;">
+                お客様： <span> _contactnm_ </span>
+            </div>
+            <div style="border-bottom: 1px solid #ececec;">
+                アレルギー：<span>_allrigy_</span>
+            </div>
+        </div>
+       </div>
+       <table class="detailTable">
+          _thead_
+       </table>
+    <div class="items-content">
+         <table class="detailTable cookTable">
+            <tbody></tbody>
+          </table>
+      </div>
+   </div>
+</script>
+<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+<script type="text/x-kendo-template" id="cookHead">
+<thead>
+    <tr>
+        <th style="width:40px" class="headerRow">{!$ObjectType.FoodDetail__c.Fields.BreakName__c.label}</th>
+        <th class="headerRow">料理</th>
+        <th style="width:40px;text-align:right;" class="headerRow">数量</th>
+    </tr>
+</thead>
+</script>
+<script type="text/x-kendo-template" id="cookTimeHead">
+<thead>
+    <tr>
+        <th style="width:30px" class="headerRow">順</th>
+        <th class="headerRow">料理</th>
+        <th style="width:50px;" class="headerRow">時刻</th>
+        <th style="width:20px;text-align:right;" class="headerRow">数</th>
+    </tr>
+</thead>
+</script>
+<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+<script type="text/x-kendo-template" id="curRow" >
+<tr name="touchMove" prodkey="_prodkey_" orderid="_order_" cookid="_cook_">
+     <td  style="width:50px;text-align:left;">_ordertype_</td>
+     <td>_ordername_</td>
+     <!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+     <td style="width:20px" class="cntClass">_count_</td>
+     <!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+ </tr>
+</script>
+<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+<script type="text/x-kendo-template" id="curTimeRow" >
+<tr name="touchMove" prodkey="_prodkey_" orderid="_order_" cookid="_cook_">
+     <td style="width:30px;text-align:left;" class="seqClass" >_prodSeq_</td>
+     <td class="orderClass">_ordername_<span class="cookDescCls k-icon k-i-track-changes"></span></td>
+     <td style="width:50px;"class="begClass">_begtime_</td>
+     <td style="width:30px" class="cntClass" >_count_</td>
+ </tr>
+</script>
+<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+<script type="text/x-kendo-template" id="titleRow" >
+<tr class="titleRow" parkey="_parkey_">
+	<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+	<td colspan="3" style="text-align:left;">
+		_prodname_
+	</td>
+ </tr>
+</script>
+<script type="text/x-kendo-template" id="titleTimeRow" >
+<tr class="titleRow" parkey="_parkey_">
+	<td>_prodSeq_</td>
+	<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+	<td colspan="3" style="text-align:left;">
+		_prodname_
+	</td>
+ </tr>
+</script>
+<script type="text/x-kendo-template" id="otherRow" >
+<tr class="otherRow titleRow">
+	<td colspan="3" style="text-align:left;">
+		その他
+	</td>
+ </tr>
+</script>
+<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+<script type="text/x-kendo-template" id="otherTimeRow" >
+<tr class="otherRow titleRow">
+    <td>_prodSeq_</td>
+	<td colspan="3" style="text-align:left;">
+		その他
+	</td>
+ </tr>
+</script>
+<!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+<!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN -->
+<script id="cookTemplate" type="text/x-kendo-template">
+    <tr data-uid="#= uid #" class="#: status#" onclick="touchCook()" role="row">
+        <td role="gridcell">
+            #: time #
+        </td>
+        <td>
+            #: name #
+        </td>
+        <td>
+            #: qty #
+        </td>
+        <td>
+            #: room #
+        </td> 
+        <td>
+            #: desc #
+        </td>   
+    </tr>
+</script>
+<!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END -->
+</head>
+<body>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<div id="consoleLog" style="position: fixed;top:0;background: white;max-hegiht:100px;width:200px;overflow: auto"></div>
+<apex:pageblock >
+<div id="setupPage">
+    <div class="shopName">
+        <apex:form >
+            <!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy BEGIN -->
+            <input type="hidden" value="{!colorInfoJson}" id="hidColorInfo"/>
+            <!-- 2019/12/30 料理リスト機能、オーダー提供ボタン（接待側からリクエストと調理場提供ボタン） by zy END -->
+            <input type="hidden" value="{!begTmLong}" id="hidBegtime"/>
+            <input type="hidden" value="{!endTmLong}" id="hidEndtime"/>
+	        <!-- 2019/09/15 部屋の並び順をSeq#順に by zy BEGIN -->
+            <input type="hidden" value="{!roomSortJson}" id="hidRoomSortJson"/>
+	        <!-- 2019/09/15 部屋の並び順をSeq#順に by zy END -->
+            <apex:inputHidden value="{!COOKINFO_MUNITES}" id="hidDefMinute"/>
+            <!-- 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy BEGIN -->
+            <input type="hidden" value="{!cookRoomSetJson}" id="hidCookRoomJson"/>
+            <!-- 2019/09/15 料理の開始時刻を「夕食時間」に紐づくように by zy END -->
+	        <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN-->
+            <input type="hidden" value="{!locShowType}" id="hidCookType"/>
+            <input type="hidden" id="hidlayoutId"/>
+            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END-->
+            <!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+            <input type="hidden" id="hidTimeFlag" value="{!timeFlag}"/>
+            <input type="hidden" id="hidTimeSortFlag" value="{!accTimeFlag}"/>
+            <input type="hidden" id="hidCookDoneHideLen" value="{!cookDoneHideLen}"/>
+            <!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN -->
+            <input type="hidden" id="hidOrderEndFlag" value="{!isOrderEndFlg}"/>
+            <apex:inputHidden value="{!isDoneFlg}" id="hidDoneFlg"/>
+            <!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END -->
+            <!-- 2020/05/30 リリース後の検収再対応 by zy BEGIN -->
+            <input type="hidden" id="hidKitchenOrderFlag" value="{!kichenOrderOnly}"/>
+            <!-- 2020/05/30 リリース後の検収再対応 by zy END -->
+            <!-- 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy BEGIN -->
+            <input type="hidden" id="hidSaveProdFlg" value="{!isSameProductSumFlg}"/>
+            <!-- 2020/11/30 5.8.明細が分かれていても同じ料理ならひとつにまとめて表示させるように by zy END -->
+	        <input type="text" class="cookInputMessage k-input"/>
+            <input type="text" class="cookInputSeq k-input" style="width:80px;"/>
+            <input type="text" class="cookInputCnt k-input" style="width:80px;"/>
+            <!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+            <div style="width:100%">
+            	<table style="width:calc(100% - 20px)">
+					<tr>
+						<td>
+							<span style="font-size:20px;{!if(branchShopLst.size > 0,'','display:none;')}">
+								<apex:selectlist id="shopDropLst" styleClass="shopDropClass" size="1" value="{!branchShopNm}">
+				                    <apex:selectoptions value="{!branchShopLst}"/>
+				                    <apex:actionSupport event="onchange" action="{!refreshBranchShopInfo}" onsubmit="javascript:blockUi();"/>
+				                </apex:selectlist>
+							</span>
+                            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN-->
+                            <span>
+                                <apex:selectList styleClass="shopDropClass" value="{!locShowType}" size="1">
+                                    <apex:selectOption itemValue="grid" itemLabel="レストラン"/>
+                                    <apex:selectOption itemValue="cook" itemLabel="厨房"/>
+                                    <apex:actionSupport event="onchange" action="{!chgType}" onsubmit="javascript:blockUi();"/>
+                                </apex:selectList>
+                            </span>
+                            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END-->
+                            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN-->
+                            <span class="kitchenPanel" style="{!if(isRestrantFlg,'display:none','')}">
+                                <apex:selectList styleClass="shopDropClass" id="selKitchen" size="1" onchange="cookRemoteData.call({init: true})" value="{!selKitchenVal}" style="{!if(kitchenOpts.size > 0 , '' , 'display:none;')}">
+                                    <apex:selectOption itemValue="" itemLabel="All"/>                                   
+                                    <apex:selectoptions value="{!kitchenOpts}"/>
+                                </apex:selectList>
+                            </span>
+                            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END-->
+							<span class="cookTypeWrap" style="{!if(businessLst.size > 0 && deslayoutOpts.size == 0 ,'',if(isRestrantFlg,'display:none;',''))}">
+			                    <apex:selectlist id="cookTypeLst" styleClass="shopDropClass" value="{!curType}" size="1">
+			                        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_005_0035}"/>
+			                        <apex:selectoptions value="{!businessLst}"/>
+			                        <apex:actionSupport event="onchange" action="{!chgType}" onsubmit="javascript:blockUi();"/>
+			                    </apex:selectlist>
+                            </span>
+			                <!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy BEGIN -->
+                            <span class="locationWrap" style="{!if(isRestrantFlg && deslayoutOpts.size > 0,'','display:none')}">
+                                <select class="shopDropClass" id="selLocation" onchange="chgLayout()">
+                                    <apex:repeat value="{!deslayoutOpts}" var="opt">
+                                        <option value="{!opt.value}">
+                                            {!opt.label}
+                                        </option>
+                                    </apex:repeat>
+                                </select>
+                                <select class="shopDropClass" id="selLayouts" onchange="cookRemoteData()" ></select>
+                            <!-- 2020/02/28 テーブル側のレイアウトも大幅改変 by zy END -->
+			                </span>
+			                <!-- 2018/10/31 料理進捗開始（OWNER) by cxw BEGIN -->
+			                <span>
+							    <apex:inputField value="{!selectDate.Checkinday__c}" id="gotoDate" style="height: 26px; width:120px" styleClass="shopDropClass">
+							    	<apex:actionSupport event="onchange" action="{!gotoDate}" onsubmit="javascript:blockUi();"/>
+							    </apex:inputField>
+				                <!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy BEGIN -->
+                                <span style="display:{!if(isOrderEndFlg,'','none')};">
+                                    料理済表示
+                                    <input type="checkbox" id="orderEndChk" class="k-checkbox" onclick="chgChkOrder()" value="{!isDoneFlg}"/>
+                                    <label class="k-checkbox-label" style="margin-top:11px;" for="orderEndChk"></label>
+                                </span>
+				                <!-- 2020/04/15 全ての注文が提供済み場合、料理リストに該当部屋を非表示になる by zy END -->
+			                </span>
+			                <!-- 2018/10/31 料理進捗開始（OWNER) by cxw END -->
+			                <!-- 2019/01/30 料理リストUI改善 by cxw BEGIN -->
+							<span class="k-icon k-i-refresh" onclick="cookRemoteData.call({init: true})" style="font-size: 22px;position: relative;top: -4px;"></span>
+							<!-- 2019/01/30 料理リストUI改善 by cxw END -->
+						</td>
+					</tr>
+				</table>
+            </div>
+            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN-->
+            <div style="{!if(isRestrantFlg,'','display:none')}">
+            <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END-->
+	            <select class="floorList" onchange="areaFlorrChange()"></select>
+	        </div>
+        </apex:form>
+    </div>
+    <div style="margin-top: 10px;">
+        <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy BEGIN-->
+    <div id="cookTable" class="grid" style="{!if(isRestrantFlg,'','display:none')}"></div>
+    <div id="cookGrid" class="cook" style="{!if(isRestrantFlg,'display:none','')}">
+        <div id="noOverGrid"></div>
+        <div id="noSumGrid"></div>
+    </div>
+     <!-- 2020/02/28 同じ「料理リスト」タブ内で「テーブル」と「厨房」の切り替えを可能にする by zy END-->
+    </div>
+</div>
+</apex:pageblock>
+<!-- 2019/01/30 料理リストUI改善 by cxw BEGIN -->
+<i class="k-icon k-i-kpi-status-hold go-back"></i>
+<!-- 2019/01/30 料理リストUI改善 by cxw END -->
+</body>
+</html>
+</apex:page>

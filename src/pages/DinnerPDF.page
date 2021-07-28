@@ -1,0 +1,141 @@
+<apex:page showHeader="false"  sidebar="false" renderAs="pdf"
+	readonly="true" applyHtmlTag="false" action="{!initPdf}"
+	standardcontroller="AccountMaster__c" extensions="DinnerPDFCtrl" recordSetVar="abc">
+	
+	<html>
+	<head>
+		<meta charset="utf-8" />
+		<style type="text/css">
+			@page {
+				size: 11.69in 8.27in;
+				/* A4 portlate size */
+				margin: 0.4cm;
+			}
+			
+			body {
+				font-family:Arial Unicode MS;
+				top: 0cm;
+				left: 0cm;
+				color: black;
+				font-size: 0.30cm;
+				/*font-family:abc;*/
+			}
+			
+			
+			.main {
+				position:relative;
+				margin-right: 20px;
+				width : 100%;
+				overflow: hidden;
+			}
+			
+			.big-title {
+				margin-top: 30px;
+				margin-left: 15px;
+				width : 8%;
+			}
+			
+			.item {
+				margin-left: 0.5cm;
+			}
+			
+			.item>.sub-title {
+				margin-top: 10px;
+				margin-right: 0;
+				margin-bottom: 15px;
+			}
+			
+			.item>.sub-item,
+			.main {
+				clear: right;
+			}
+			
+			.item>.sub-item>ul>li {
+				margin-left: 0.26cm;
+				color: #444;
+				font-size : 0.4cm;
+			}
+			
+			.sub-item{
+				/*margin-left : 10px;*/
+			}
+			
+			.item>.sub-item>ul, .main ul[class="vertical"] {
+				list-style-type: none;
+				padding: 0;
+				margin : 0;
+			}
+			
+			
+			.item>.sub-item>ul {
+				overflow: auto;
+			}
+			
+			.big-title,
+			.item,
+			.item>.sub-title,
+			.item>.sub-item,
+			.item>.sub-item>ul>li,
+			.main ul[class="vertical"] {
+				float: right;
+			}
+			
+			.main ul[class="vertical"], .main ul[class="vertical"] *{
+				padding: 0;
+				margin : 0;
+			}
+		</style>
+	</head>
+	<body>
+	<apex:repeat value="{!fdLst}" var="item">
+		<div style="vertical-align:top ;margin-top: 10px;height:40px;{!if(item.isFirstItem, '', 'page-break-before: always;')}"></div>
+		<div class="main">
+			<div class="big-title">
+			<apex:repeat value="{!item.bigTitle.strLst}" var="item_name">
+					<ul class="vertical">
+						<apex:repeat value="{!item_name}" var="item_name2">
+							<li><span><h2>{!item_name2}</h2></span></li>
+						</apex:repeat>
+					</ul>
+				</apex:repeat>
+			</div>
+			<div style="float: right; width : 90%;">
+			<apex:repeat value="{!item.subItemsLst}" var="item_subItem">
+				<div class="item">
+				
+					<div class="sub-title" style="height : 12em;" >
+						<apex:repeat value="{!item_subItem.subTitle.strLst}" var="item_arrSubTitle1">
+						<ul class="vertical">
+							<apex:repeat value="{!item_arrSubTitle1}" var="item_arrSubTitle2">
+								<li><span><h2>{!item_arrSubTitle2}</h2></span></li>
+							</apex:repeat>
+						</ul>
+						</apex:repeat>
+					</div>
+					
+						
+						<div class="sub-item">
+							<ul>
+							<apex:repeat value="{!item_subItem.subDetailsLst}" var="item_subItem3">
+								<li>
+									<apex:repeat value="{!item_subItem3.strLst}" var="item_subItem1">
+									<ul class="vertical">
+										<apex:repeat value="{!item_subItem1}" var="item_subItem2">
+											<li>{!item_subItem2}</li>
+										</apex:repeat>
+									</ul>
+									</apex:repeat>
+								</li>
+								</apex:repeat>
+							</ul>
+						</div>
+				</div>
+			</apex:repeat>
+			</div>
+		</div>
+	</apex:repeat>
+	</body>
+
+</html>
+	
+</apex:page>

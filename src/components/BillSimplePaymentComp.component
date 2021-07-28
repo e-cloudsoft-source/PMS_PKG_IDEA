@@ -1,0 +1,200 @@
+<apex:component controller="BillSimplePaymentCtrl" allowDML="false" id="BillSimplePayment">
+
+<apex:attribute name="container" type="String" description="App Name Space" default="billSimplePayment" required="false"/>
+<apex:attribute name="callbackFun" type="String" description="App Name Space" default="" required="false"/>
+<apex:attribute name="shopCode" type="String" assignTo="{!inShopCode}" description="ShopCode" default="" required="false"/>
+
+{!InitXmlDefineInfo}
+
+<style type="text/css">
+/*
+.btnIconUrl{
+	background-position-x: inherit;
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+*/
+.k-button-icontext{
+	padding-left: 38px;
+	text-align: left;
+}
+.{!container}_payment{
+	position: relative;
+}
+.k-image {
+	position:absolute;
+    width: 24px;
+	height:24px;
+    top:2px;
+    left:10px;
+}
+#{!container} {
+	background-color: transparent;
+	background-image: none;
+	border-style: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	width:{!layoutInfo.tableWidth}px;
+}
+
+#{!container} li{
+	background-image: none;
+	background-position: 50% 50%;
+}
+.k-state-active {
+	background-color: #3f51b5;
+	background-image: none;
+	border-bottom-color: #00b0ff;
+}
+.k-tabstrip .k-content.k-state-active {
+	border-color: rgb(191,175,0);
+}
+.k-tabstrip-items .k-state-active{
+	border-color: rgb(191,175,0);
+}
+.k-state-active:hover{
+	border-color: rgb(191,175,0);
+}
+.k-state-active:blur{
+	border-color: rgb(191,175,0);
+}
+.{!container}_lodingpage{
+	width:500px;
+	height:500px;
+}
+.{!container}_body{
+	height:{!layoutInfo.tableHeight}px;
+	z-index: 5;
+	right: 0;
+	position: absolute;
+	border: 0;
+}
+.{!container}_showbtn{
+	position: absolute;
+	top: 1px;
+	right:4px;
+	height:500px;
+}
+#{!container}_contentTd{
+	position:relative;
+	top:0;
+	left:0;
+	overflow: hidden;
+	/*background: rgb(165,215,150);*/
+	/*border-left-color: blue;*/
+}
+
+</style>
+	
+<script>
+(function($){
+	var isShowTag = true;
+	var $prodJsonDs = JSON.parse("{!JSENCODE(oProdMapsJson)}");
+	var $paybuttonIconJsonDs = JSON.parse("{!JSENCODE(ButtonsIconMapJson)}");
+	var callbacks,callbackFun = "{!JSENCODE(callbackFun)}";
+	if(callbackFun != "") callbacks = eval(callbackFun);
+	$(document).ready(function() {
+		 $("#{!container}").kendoTabStrip({
+	        animation:  {
+	            open: {
+	                effects: "fadeIn"
+	            }
+	        }
+	    });
+	    $(".{!container}_showbtn").click(function(){
+	    	if(isShowTag){
+	    			$(".{!container}_showbtn").hide();
+	    			$(".{!container}_showbtn").css({right:0});
+	    			kendo.fx($("#{!container}_contentTd")).slideIn("left").reverse().then(function(){
+	    				$("#{!container}_contentTd").hide();
+	    				$(".{!container}_showbtn").show(600);
+	    			});
+	    	}else{
+		    	$("#{!container}_contentTd").show();
+		    	$(".{!container}_showbtn").hide();
+		    	$(".{!container}_showbtn").css({right:4});
+		    	kendo.fx($("#{!container}_contentTd")).slideIn("left").play().then(function(){
+		    		$(".{!container}_showbtn").show(600);
+		    	});
+	    	}
+	    	isShowTag = !isShowTag;
+	    });
+		$("button[name={!container}_kendoIconButton]").each(function(){
+			$this = $(this);
+			var imageUrl = $this.attr("imageUrl");
+			var enableFlg = $this.attr("notFoundFlg") == "true" ? false : true;
+	        if(imageUrl != ''){
+	        	$this.kendoButton({
+		             imageUrl: imageUrl,
+		             enable: enableFlg,
+		        });
+	        } else {
+	        	$this.kendoButton({
+	        		enable: enableFlg,
+	        	});
+	        }
+	        if($this.is(":hidden")) return;	
+		}).click(function(){
+			var $this = $(this);
+			var productCode = $this.attr("data-code");
+	    	var prodInfo = $prodJsonDs[productCode];
+	    	prodInfo._selfId = $this.attr("id");
+	    	if (typeof prodInfo == "undefined") {
+	    	} else {
+	    		if(callbacks) callbacks(prodInfo);
+	   		}
+		});
+		//$(".{!container}_lodingpage").hide();
+		$("#{!container}").show();
+		
+		// ボタンの商品コードにより、アイコンを表示機能対応[該当から呼び出しするので、containerのIDを変更されると、必ず外部呼び出し関数を修正が必要]
+		window.{!container}_getButtonIconUrl = function(productCode) {
+			// 商品コードにより、該当支払ボタンのURLを戻す
+			var iconUrl = $paybuttonIconJsonDs[productCode];
+			if (typeof(iconUrl) != "undefined" && iconUrl != null) return iconUrl
+			else return "";
+		}
+		
+	});
+})(jQuery);
+</script>
+	<div class="{!container}_body">
+		<div id="{!container}_contentTd" >
+			<!-- 
+			<div class="{!container}_lodingpage">
+				<img  src="{!URLFOR($Resource.loading2)}" style=""/>
+			</div>
+			 -->
+			<div id="{!container}" style="display:none;">
+				<apex:variable var="cnt" value="{!0}"/>
+				<ul>
+					<apex:repeat value="{!buttonsLstTab}" var="buttonsLst">
+			            <li class="{!IF(cnt == 0, 'k-state-active' , '')}">
+			                {!buttonsLst.label}
+			            </li>
+			            <apex:variable var="cnt" value="{!cnt+1}"/>
+		            </apex:repeat>
+		        </ul> 
+		        <apex:repeat value="{!buttonsLstTab}" var="buttonsLst">
+			        <div style="overflow: auto;height: 252px">
+			        	<!-- BUTTON GROUP -->
+						<table style="table-layout: fixed;width:100%;word-spacing: 0px;border-collapse: 0px;border-spacing: 0px;border: 1px;">
+							<apex:repeat value="{!buttonsLst.rowButtons}" var="oneRow" >
+								<tr>
+									<apex:repeat value="{!oneRow.buttons}" var="btn" >
+										<td class="btnIconUrl">
+											<button type="button" name="{!container}_kendoIconButton" id="{!container}_kendoIconButton_{!btn.prodCode}" class="{!container}_payment" data-code="{!btn.prodCode}" imageUrl="{!btn.iconUrl}" style="{!layoutInfo.btnStyle};display: {!IF(btn.isBlankBtn, 'none', 'block')};" notFoundFlg="{!btn.isNotFound}" title="{!btn.lable}">{!btn.lable}</button>
+										</td>
+									</apex:repeat>
+								</tr>
+							</apex:repeat>
+						</table> 
+			        </div>
+		        </apex:repeat>
+			</div>
+		</div>
+		<div class="{!container}_showbtn" style="width: 30px;text-align: center;">
+			<img src="{!URLFOR($Resource.AppImages, '/payicon/pay.jpeg')}" style="width:30px;"/>
+		</div>
+	</div>
+</apex:component>

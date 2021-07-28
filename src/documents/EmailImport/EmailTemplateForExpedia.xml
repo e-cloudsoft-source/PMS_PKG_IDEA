@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	概要：該当XML定義利用して、HTML書式のメール本文解析して、指定書式のメール電文へ変換する
+		 変換後の電文でSalesforceへ連携取り込みを行う
+  	********** メール本文から取り込み情報を抽出用タグ **********
+	タグ：EMAIL_TEMPLATE：該当タグに含め内容は変換後の指定書式のメール電文
+				     	【宿泊施設名】		← Salesforceの店舗名を設定する
+				     	【宿泊施設コード】	← Salesforceの店舗コードを設定する
+				     	【旅行会社名】		← 旅行会社名
+     	 				上記３つタグ内容を設定するあと、EMAIL_TEMPLATEに含めているタグの修正が不要
+	タグ：EMAIL_DATA：HTML電文から必要な連携情報を抽出ルールを定義する
+		HTML_BEG:		該当タグに定義の内容により、メール本文から該当キーワードを捜す、見つかると、該当キーワード以後の文字列を戻る
+		HTML_DETAIL:	予約詳細情報項目を抽出ルール定義
+		HTML_TAG：		該当タグに定義の内容により、メール本文から該当キーワードを捜す、見つかると、該当キーワード以後の文字列を戻る
+			type:			HTML_TAG関連拡張機能
+				moreTd:		HTML_TAGタグ定義の内容により、ヒントした項目から右側の列の文字列を戻る（skiptdタグとセットで使う)
+				vertical:	HTML_TAGタグ定義の内容により、ヒントした項目と同じ列、次行目の情報を抽出する
+				loop:		泊数の情報をを抽出の場合、該当タグを使う
+				loopDate:	到着日の情報を抽出の場合、該当タグを使う
+			skiptd:		HTML_TAGタグ定義の内容により、ヒントした項目から右側のN列の情報を抽出する
+		DETAIL_IDX:		HTML電文から抽出した予約情報は差込先のキーワードを定義する
+			type:		日付/時間(datetime)
+			template:	MIN：取得の値の中に最小値で出力する
+						MAX：取得の値の中に最大値で出力する
+						【大人】:$_$名　>>> 取得の情報値で $_$　をリプレースして、該当文字列を戻る
+						例：抽出項目情報：2 その場合、文字列：【大人】:2名 文字列を戻る
+-->
+<root>
+	<!-- は変換後の指定書式のメール電文（変更、修正不要） -->
+	<EMAIL_TEMPLATE>
+		<EMAIL_HEAD>
+			<HTML_TEM>
+			■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+			【宿泊施設名】：元湯陣屋
+			【宿泊施設コード】：01
+			【旅行会社名】：Expedia
+			■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+			====================＜$$__データ種別__$$＞====================
+			受付時間：$$__受付時間__$$
+			予約Ｎｏ：$$__予約Ｎｏ__$$
+			
+			【宿泊代表者氏名】：$$__宿泊代表者氏名__$$
+			【宿泊代表者電話番号】：$$__電話番号__$$
+			【宿泊代表者メールアドレス】：$$__メール__$$
+			【宿泊代表者住所】：$$__住所__$$
+			
+			○チェックイン日時：$$__チェックイン日時__$$
+			○泊数　　　　　　：$$__泊数__$$泊
+			○部屋数　　　　　：$$__部屋数__$$部屋
+			○部屋タイプコード：$$__部屋タイプコード__$$
+			○部屋タイプ　　　：$$__部屋タイプ__$$
+			○プランコード   ：$$__プランコード__$$
+			○プラン名　　　　：$$__プラン名__$$
+			○ご要望・ご質問　：$$__ご要望・ご質問__$$
+			○料金区分　　　　：$$__料金区分__$$
+			○支払方法　　　　：$$__支払方法__$$
+			○税サ区分　　　　：$$__税サ区分__$$
+			■料金明細■
+			-----------------------------------------------------------
+			</HTML_TEM>
+		</EMAIL_HEAD>
+		<EMAIL_DETAIL>
+			<HTML_HEAD>
+				■$_$部屋目
+			</HTML_HEAD>
+			<HTML_TEM>
+	            $$__Check-In__$$
+	            $$__大人__$$
+	            $$__小人__$$
+	            $$__20__$$円×$$__21__$$＝$$__22__$$
+	            $$__24__$$
+	            ----------------------------------------
+            </HTML_TEM>
+		</EMAIL_DETAIL>
+		<EMAIL_END>
+			<HTML_TEM>
+			【小計金額】　$$__小計金額__$$
+			【消費税】$$__消費税__$$
+			----------------------------------------
+			【合計金額】　$$__合計金額__$$
+			-----------------------------------------------------------
+			</HTML_TEM>
+		</EMAIL_END>
+	</EMAIL_TEMPLATE>
+	<!-- HTML書式から指定書式メール電文変換条件指定、これから各AGTのHTMLの書式により、定義を行う -->
+	<EMIAL_DATA>
+	  	<EMAIL_HEAD>
+	  		<HTML_BEG>Travel arrangements provided through Expedia</HTML_BEG>
+	  		<HTML_DETAIL>
+		        <HTML_TAG>New Reservation</HTML_TAG>
+		        <DETAIL_IDX>$$__データ種別__$$</DETAIL_IDX>
+		        <HTML_VALUE>新規予約メール</HTML_VALUE>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG >Reservation ID</HTML_TAG>
+		        <HTML_BEG>:</HTML_BEG>
+		        <DETAIL_IDX>$$__予約Ｎｏ__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG >Guest</HTML_TAG>
+		        <HTML_BEG>:</HTML_BEG>
+		        <DETAIL_IDX>$$__宿泊代表者氏名__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG type="vertical">Guest</HTML_TAG>
+		        <DETAIL_IDX>$$__電話番号__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG >Booked on</HTML_TAG>
+		        <HTML_BEG>:</HTML_BEG>
+		        <DETAIL_IDX type="datetime">$$__受付時間__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG  type="moreTd" skiptd="1">Room Type Name</HTML_TAG>
+		        <DETAIL_IDX>$$__部屋タイプ__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG>Room Type Code</HTML_TAG>
+		        <HTML_BEG>:</HTML_BEG>
+		        <DETAIL_IDX>$$__部屋タイプコード__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		    	<HTML_TAG>Pricing Model</HTML_TAG>
+		    	<HTML_BEG>:</HTML_BEG>
+				<HTML_FORMAT>Occupancy Based Pricing</HTML_FORMAT>
+				<HTML_VALUE>RoomRate</HTML_VALUE>
+		    	<DETAIL_IDX>$$__料金区分__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		    	<HTML_TAG>Reservation ID</HTML_TAG>
+				<HTML_VALUE>IncludingServiceAndTax</HTML_VALUE>
+		    	<DETAIL_IDX>$$__税サ区分__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    -->
+		    <!-- 
+		    <HTML_DETAIL>
+		        <HTML_TAG type="moreTd">Payment Instructions</HTML_TAG>
+		    </HTML_DETAIL>
+		     -->
+		</EMAIL_HEAD>
+		<EMAIL_DETAIL detailidx="$$__部屋数__$$">
+			<HTML_BEG>Check-In</HTML_BEG>
+			<DETAIL_IDX template="部屋料金：$$__部屋料金__$$">$$__24__$$</DETAIL_IDX>
+	        <HTML_DETAIL>
+	            <HTML_TAG type="loopDate" >Check-In</HTML_TAG>
+	            <HTML_FORMAT>([a-zA-Z]+) [\d]{2} [\d]{4}</HTML_FORMAT>
+	            <DETAIL_IDX>$$__Check-In__$$</DETAIL_IDX>
+	            <DETAIL_IDX template="MIN">$$__チェックイン日時__$$</DETAIL_IDX>
+	        </HTML_DETAIL>
+	        <!-- 
+	        <HTML_DETAIL>
+	            <HTML_TAG>Check-Out</HTML_TAG>
+	        </HTML_DETAIL>
+	         -->
+	        <HTML_DETAIL>
+	            <HTML_TAG>Adults</HTML_TAG>
+	            <DETAIL_IDX template="【大人】:$_$名">$$__大人__$$</DETAIL_IDX>
+	        </HTML_DETAIL>
+	        <!-- 
+	        <HTML_DETAIL>
+	            <HTML_TAG>Kids/Ages</HTML_TAG>
+	            <DETAIL_IDX template="小人:$_$">$$__小人__$$</DETAIL_IDX>
+	        </HTML_DETAIL>
+	         -->
+	        <HTML_DETAIL>
+	            <HTML_TAG type="loop">Room Nights</HTML_TAG>
+	            <DETAIL_IDX>25</DETAIL_IDX>
+	            <DETAIL_IDX template="MAX">$$__泊数__$$</DETAIL_IDX>
+	        </HTML_DETAIL>
+		 </EMAIL_DETAIL>
+		<EMAIL_FOOT>
+			<HTML_BEG>Travel arrangements provided through Expedia</HTML_BEG>
+		    <HTML_DETAIL>
+		        <HTML_TAG type="vertical">Special Request</HTML_TAG>
+		        <DETAIL_IDX>$$__ご要望・ご質問__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG>Daily Rate</HTML_TAG>
+		        <HTML_BEG>- </HTML_BEG>
+		        <DETAIL_IDX>$$__小計金額__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG>Rate Code</HTML_TAG>
+		        <HTML_BEG>:</HTML_BEG>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG type="moreTd">Total Cost</HTML_TAG>
+		        <DETAIL_IDX>$$__合計金額__$$</DETAIL_IDX>
+		        <DETAIL_IDX>$$__部屋料金__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		    <HTML_DETAIL>
+		        <HTML_TAG type="moreTd">Taxes</HTML_TAG>
+		        <DETAIL_IDX>$$__消費税__$$</DETAIL_IDX>
+		    </HTML_DETAIL>
+		</EMAIL_FOOT>
+	</EMIAL_DATA>
+</root>

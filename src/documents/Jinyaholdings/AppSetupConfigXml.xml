@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、タイムテーブル画面にご予約の予約ステータス毎に色を変更できる機能
+     店舗毎に色設定したい場合、
+　　　タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容のタグ「COLOR」に色値を設定すると、店舗毎に色を変更できる
+書式：
+　　　SHOPCODE:         店舗コード、支店が非存在する場合、空白のままに定義する
+　　　LEADSTATUSCOLOR:  予約ステータス色設定タグ
+　　　STATUS
+　　　　　KEY:           ご予約の予約ステータス項目の選択リスト値と必ず一致が必要
+　　　　　COLOR:         該当予約ステータス表示する場合、画面に表示するしている色
+-->
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE></SHOPCODE>
+        <LEADSTATUSCOLOR>
+            <STATUS>
+                <KEY>確定</KEY>
+                <COLOR>#F9C4E1</COLOR>
+            </STATUS>
+            <STATUS>
+                <KEY>確認中</KEY>
+                <COLOR>#FFEC8B</COLOR>
+            </STATUS>
+            <STATUS>
+                <KEY>仮予約</KEY>
+                <COLOR>#C1FFC1</COLOR>
+            </STATUS>
+            <STATUS>
+                <KEY>キャンセルまち</KEY>
+                <COLOR>#FF83FA</COLOR>
+            </STATUS>
+        </LEADSTATUSCOLOR>
+    </SHOP>
+</root>

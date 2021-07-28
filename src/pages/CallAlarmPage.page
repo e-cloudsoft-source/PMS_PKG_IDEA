@@ -1,0 +1,184 @@
+<apex:page controller="CallManagementController" sidebar="false" showHeader="false">
+    <title>Call History</title>
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}" />
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+    <script src="{!URLFOR($Resource.CallPopupWindow,'js/jBeep.js')}" type="text/javascript"></script>
+    <style>
+        #window .k-grid-header table{
+            table-layout: auto;
+        }
+        #window .k-grid-header{
+            padding-right:0px !important;
+        }
+        #window tr:nth-child(odd){ 
+            background-color:#f5f5f5
+        }
+        #callQueueTable{
+            font-size: 12px;
+            width: 100%;
+        }
+        #window .k-grid-header .k-header{
+            //padding: 0em;
+        }
+        #window{
+            font-family:"MS PGothic", "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro",Osaka, "メイリオ", Meiryo, "ＭＳ Ｐゴシック", sans-serif;
+            padding:5px;
+        }
+        #errorDiv{
+            padding: 10px;
+        }
+        #callQueueTable td{
+            border-top:1px solid transparent;
+            border-bottom:1px solid transparent;
+        }
+        .highlightCls td{
+            //box-shadow: 0 0 5px #1797c0;
+            //-webkit-box-shadow: 0 0 5px #1797c0; 
+            //-moz-box-shadow: 0 0 5px #1797c0;
+            border-top:1px solid #1797c0 !important;
+            border-bottom:1px solid #1797c0 !important ;  
+        }
+    </style>
+    <script>
+        var clearCookie = true;
+        function confirmExit(){
+            if(clearCookie){
+                //document.cookie = "isAlarmOpened=";
+                resetIsAlarmPopup();
+            }
+        }
+        
+        initAlert = (function () {
+            //alert("Opened by "+window.opener.parent.location.href);
+            document.cookie = "isAlarmOpened=true";
+            if("{!JSENCODE($currentpage.parameters.isNew)}" == "true"){
+            	try{
+	                jBeep('{!$Resource.CallPopupWindow}/js/jBeep/jBeep.wav');
+	            }catch(Exception){
+	                console.log('--Exception: ' + Exception);
+	            }
+	            
+	            var oldTitle = document.title;
+	            var msg = "**** New Call ****";
+	            var timeoutId;
+	            var blink = function() { 
+	                document.title = document.title == msg ? 'Call History' : msg;
+	                $('#callQueueTable > tbody > tr:first').toggleClass('highlightCls');
+	            };
+	            var clear = function() {
+	                clearInterval(timeoutId);
+	                document.title = oldTitle;
+	                window.onmousemove = null;
+	                $('#callQueueTable > tbody > tr:first').removeClass('highlightCls');
+	                blinkCount = 0;
+	                timeoutId = null;
+	            };
+	            return function () {
+	            if(!timeoutId) {
+	              timeoutId = setInterval(blink, 1000);
+	              window.onmousemove = clear;
+	            }
+	          };
+          }
+        }());
+        
+        window.onload = function(){
+        	initAlert();
+          	window.resizeTo($('#callQueueTable').innerWidth() + 260, "{!JSENCODE($currentpage.parameters.height)}");
+        }
+    </script>
+    
+    <body>
+        <div id="window">
+            <div id="content">
+                <div id="queue" class="k-grid k-grid-header">
+                    <table id="callQueueTable" >
+                        <thead>
+                            <tr>
+                                <th class="k-header">Call Time</th>
+                                <th class="k-header">Number</th>
+                                <th class="k-header">Name</th>
+                                <th class="k-header">Company</th>
+                                <th class="k-header">Line</th>
+                                <apex:repeat value="{!otherHeaders}" var="h">
+                                	<th class="k-header">{!h}</th>	
+                                </apex:repeat>
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                        
+                            <apex:outputPanel id="callpanel">
+                                <apex:repeat value="{!callList}" var="row" >
+                                	<apex:variable var="callInfo" value="{!row.callInfo}"/>
+                                	<apex:variable var="conFirstName" value="{!row.conFirstName}"/>
+                                	<apex:variable var="conLastName" value="{!row.conLastName}"/>
+                                    <tr id="{!callInfo.SNO__c}">
+                                        <td>
+                                            <!--<apex:outputText value="{0,date, HH':'MM':'SS)}">
+                                            <apex:param value="{!callInfo.Call_Time__c}" />
+                                            </apex:outputText> -->
+                                            <apex:outputText value="{!callInfo.Time__c}"/>
+                                        </td>
+                                
+                                        <!-- Call Number -->
+                                        <td>
+                                            <apex:outputPanel rendered="{!callInfo.isRSNP__c == false && callInfo.No_of_Matching_Customers__c != 0}">
+                                                <apex:outputText value="{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})" />
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!callInfo.isRSNP__c == false && callInfo.No_of_Matching_Customers__c == 0 }">
+                                                <apex:outputlink value="{!If(Not(callInfo.isDCD1__c),'/003/e?con10='+callInfo.SNO__c+'&name_lastcon2='+conLastName+'&name_firstcon2='+conFirstName,'/001/e?acc10='+callInfo.SNO__c+'&acc2='+callInfo.NAM__c)}"  target="_blank">{!callInfo.SNO__c} ({!callInfo.No_of_Matching_Customers__c})</apex:outputlink>
+                                            </apex:outputPanel>
+                                             <apex:outputText rendered="{!(callInfo.isRSNP__c = true)}" value="{!callInfo.RSN_Code__c}" />
+                                        </td>
+                                
+                                        <!-- Salesforce Contact -->
+                                        <td>
+                                            <apex:outputPanel rendered="{!callInfo.Contact__c != null}">
+                                                <a href="{!baseURL}/{!callInfo.Contact__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                                    <span>{!callInfo.Contact__r.Name}</span>
+                                                </a>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!callInfo.Contact__c == null && NOT(callInfo.isDCD1__c || callInfo.isRSNP__c)}">
+                                                <apex:outputText value="{!callInfo.DT0__c}"/>
+                                            </apex:outputPanel>
+                                        </td>
+                                
+                                        <!-- Salesforce Account -->
+                                        <td>
+                                            <apex:outputPanel rendered="{!callInfo.Account__c != null}">
+                                                <a href="{!baseURL}/{!callInfo.Account__r.Id}" target="_blank" style="float:left;cursor:pointer;">
+                                                    <span>{!callInfo.Account__r.Name}</span>
+                                                </a>
+                                            </apex:outputPanel>
+                                             <apex:outputPanel rendered="{!callInfo.Account__c == null && NOt(ISBLANK(callInfo.NAM__c))}">
+                                               <apex:outputText value="{!callInfo.NAM__c}"/>
+                                            </apex:outputPanel>
+                                        </td>
+                                        
+                                        <td><apex:outputField value="{!callInfo.LNO__c}" /></td>
+                                        <apex:repeat var="col" value="{!row.otherColumns}">
+                                       		<td>
+                                    			<apex:outputlink target="_blank" rendered="{!NOT(ISBlank(col.link))}" value="{!col.link}">
+                                    			{!col.text}
+                                    			</apex:outputlink>
+                                    			<apex:outputText rendered="{!ISBlank(col.link)}" value="{!col.text}"/>
+                                    		</td>
+                                         </apex:repeat>
+                                    </tr>
+                                    
+                                </apex:repeat>
+                            </apex:outputPanel>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+    <apex:form >
+     <apex:actionRegion >
+            <apex:actionFunction name="resetIsAlarmPopup" action="{!resetIsAlarmPopup}" reRender="blankId" />
+        </apex:actionRegion>
+    </apex:form>
+</apex:page>

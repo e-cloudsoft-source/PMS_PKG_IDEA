@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+2016/08/02 Ver2.0 予約ポップ画面の予約情報入力フォームに入力項目カスタマイズ用
+　　　　　注意：該当VERSIONに、カスタマイズできる項目は「ご予約」「お客様」オブジェクトの項目のみです、ご注意ください
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		FIELDS:		店舗単位に、カスタマイズ項目定義情報	
+			SECTION:	セクションに、表示したい入力項目を定義する
+						書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+				TITLE:	セクションのタイトル定義、該当属性が定義しないと、セクション枠が非表示になる
+				COLNUM:	新規予約ウィンドウに入力の項目の表示の列数「1 OR 2」で定義可能
+		REQUIREDFIELDS:	新規予約ウインドウの入力項目のの必須属性を設定可能、該当タグに指定のAPI名は必須項目、未指定の場合、非必須になる
+					書式：項目API名 複数項目を定義できる、【項目1,項目2,項目N】方式で定義する
+					注意：定義の場合、下記注意事項を確認してください	
+						1.お客様項目は非必須になって、空白でご予約を登録する場合、「上様」はご予約に紐付く
+						2.ご予約名は非必須になって、空白でご予約を登録する場合、ご予約名は「仮予約」名で自動設定を行う
+						3.到着日と出発日は業務処理必須になるため、常に必須項目になる
+						
+		EXUTEFIELD:	新規予約ウインドウにデフォルト表示項目は外したい場合、該当項目のAPIは該当タグにタグして、該当項目は表示外すできる
+					注：画面既存項目から除外できる項目API名：
+					ひらがな：Relcontact__r.KanaName1__c
+					カタカナ：Relcontact__r.Katakana__c
+					TEL：Relcontact__r.Phone
+					予約人数：StayPersons__c
+					泊数：staysNums
+					部屋数：bookingRooms
+					セミナー：SeminarOrderFlg__c
+					エキストラベッド(E/B)：ExtraBedChk__c
+					部屋：Rroom__c
+					プラン：Field310__c
+					支払方法：Field315__c
+					予約チャンネル：Field2__c
+					セグメント：Segment__c
+					特記事項：Comment3__c
+		COLNUMSIZE: 項目の横幅サイズ定義する
+                    書式：項目ＡＰＩ名:サイズ（例：100px)
+	    		
+		補足：
+			①下記特殊キーワードで個別機能対応する
+			$_blank_$:	ウインドウに該当箇所は空白になる
+			②実際のAPIが存在しないで、機能対応するため、下記のキーワードで項目を対応する
+			staysNums:泊数
+			bookingRooms:部屋数	
+2016.09.15 追加機能
+		MITUMORIFLAG: 予約ポップ新規予約ウインドウに見積明細できるがどうか制御区分
+					TRUE:見積明細入力セクションを表示
+					FALSE:見積明細入力セクションを非表示
+2019.07.01 SHOP->DEFROOMTYPE 新規予約を入力する場合、部屋タイプごとデフォルト値設定機能
+		<DEFROOMTYPE>
+			<DEFVALUES SEQ="10105,3301">			部屋タイプSEQ値、カンマで複数定義可能
+				<DEFINE>
+					<APINAME>Field4__c</APINAME>	到着時刻(Field4__c)が15:30に定義する  
+					<DEFVALUE>15:30</DEFVALUE>
+				</DEFINE>
+			</DEFVALUES>
+		</DEFROOMTYPE>
+		注：1.実際のAPIが存在しないで、機能対応するため、下記のキーワードで項目を対応する
+			staysNums:泊数
+			bookingRooms:部屋数(予約ポップ画面のみ利用可能)
+		   2.APIの定義可能データ型：数値、テキスト、選択リスト、テキストエリア
+		   3.定義のAPI項目は新規予約ウインドウに存在が必要
+2020.05.30 SHOP->MITUMORIFLAG->BASEPLANFLAG
+		BASEPLANFLAG: 新規予約ウインドウにベースプランを一括選択機能有効・無効フラグ（予約ポップ画面のみ利用可能）
+					TRUE:新規予約ウインドウにベースプランを一括選択機能有効
+					FALSE:新規予約ウインドウにベースプランを一括選択機能無効(デフォルト値)
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<MITUMORIFLAG BASEPLANFLAG="FALSE">FALSE</MITUMORIFLAG>
+		<FIELDS>
+			<SECTION COLNUM="2">
+			<!-- お客様 -->
+			Relcontact__c
+			,refTypeOfRooms__c,
+			,Name
+			,EntryTime__c
+			,Relcontact__r.KanaName1__c
+			,Field4__c
+			,Relcontact__r.Katakana__c
+			,Departure__c
+			,Relcontact__r.Phone
+			,Field3__c
+			,StayPersons__c
+			,$_blank_$
+			,staysNums
+			,$_blank_$
+			,bookingRooms
+			</SECTION>
+			<SECTION COLNUM="1">
+			,Field310__c
+			</SECTION>
+			<SECTION COLNUM="2">
+			Field315__c
+			,$_blank_$
+			,Field2__c
+			,$_blank_$
+			,Segment__c
+			</SECTION>
+			<SECTION COLNUM="1">
+			Comment3__c
+			</SECTION>
+		</FIELDS> 
+		<!-- 必須項目対象API名 -->
+		<REQUIREDFIELDS>
+		Relcontact__c,Name,StayPersons__c,EntryTime__c,Departure__c
+		</REQUIREDFIELDS>
+		<!-- デフォルト項目は除外の項目API名 -->
+		<EXUTEFIELD>
+		<!-- Relcontact__r.KanaName1__c,Relcontact__r.Katakana__c -->
+		</EXUTEFIELD>
+		<COLNUMSIZE>
+		Relcontact__c:180px
+		,Name:180px
+		,Field310__c:450px
+		</COLNUMSIZE>
+		<!-- 2019.07.01 SHOP->DEFROOMTYPE 新規予約を入力する場合、部屋タイプごとデフォルト値設定機能
+			例： 
+			部屋タイプ（SEQが10105,3301)が新規予約の場合、到着時刻が11:00、出力時刻が13:00、泊数が０、予約タイプが日帰に設定する
+		-->
+		<!-- 
+		<DEFROOMTYPE>
+			<DEFVALUES SEQ="1,12">
+				<DEFINE>
+					<APINAME>Field4__c</APINAME>
+					<DEFVALUE>11:00</DEFVALUE>
+				</DEFINE>
+				<DEFINE>
+					<APINAME>Field3__c</APINAME>
+					<DEFVALUE>13:00</DEFVALUE>
+				</DEFINE>
+				<DEFINE>
+					<APINAME>staysNums</APINAME>
+					<DEFVALUE>0</DEFVALUE>
+				</DEFINE>
+				<DEFINE>
+					<APINAME>ReservedType__c</APINAME>
+					<DEFVALUE>日帰り</DEFVALUE>
+				</DEFINE>
+			</DEFVALUES>
+		</DEFROOMTYPE>
+		 -->
+	</SHOP>
+</root>

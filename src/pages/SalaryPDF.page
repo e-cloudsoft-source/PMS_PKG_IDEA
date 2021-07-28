@@ -1,0 +1,290 @@
+<apex:page controller="SalaryPdfCTRL" showHeader="false"
+    applyHtmlTag="false" applyBodyTag="false"
+    sidebar="false" renderAs="pdf" readonly="true">
+<!--  Entry Css style sheet file to resource file -->
+<html>
+ <head>
+  <style>
+   @page {
+    /* size: 8.27in 11.69in;    A4 portlate size */
+    size: 6.93in 9.84in;  /* B5 portlate size */
+    margin: 10px;
+   }
+   body {
+   font-family: Arial Unicode MS;
+   }
+  </style>
+ </head>
+ <body>
+<div align="center"><span style="font-size:18pt;">給  与  支  払  明  細  書</span></div>
+<hr size="2" color="#000000"/>
+<table style="width: 100%" cellpadding="0px" cellspacing="0px">
+<tr style="vertical-align: top;">
+<td>
+<br/>
+<span style="font-size:16pt;">{!companyName}</span>
+<br/>
+<span style="font-size:16pt;">{!selectedDepartment}</span>
+<br/>
+<span style="font-size:16pt;">{!selectedUserName}　殿</span>
+<br/>
+<span style="font-size:16pt;">{!calYear}年 {!calMonth}月分給与明細</span>
+<br/>
+<br/>
+</td>
+</tr>
+
+</table>
+
+<table border="0"  cellspacing="0" cellpadding="0" width="40%" >
+    <tr>
+        <td style="width: 0.1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+    </tr>
+    <tr height="20px">
+        <td style="width: 0.1cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td rowspan="2" style="width: 1.7cm;text-align: center;border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;font-size: 0.35cm;">勤労日数</td>
+        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;">自</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center"> {!calMonth}</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;">月</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center">{!calStartDay}</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.3cm;">日</td>
+        <td rowspan="2" style="border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center">{!calDayCount}</td>
+        <td rowspan="2" style="border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.4cm;">日</td>
+    </tr>
+    <tr height="20px">
+        <td></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;">至</td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center"> {!calMonth}</td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;">月</td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center">{!calEndDay}</td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.3cm;">日</td>
+    </tr>
+
+</table>
+
+ 
+<table border="0"  cellspacing="0" cellpadding="0" width="100%">
+    <tr>
+        <td style="width: 0.5cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+    </tr>
+
+    <tr height="20px">
+        <td rowspan="4" style="text-align: center;border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;font-size: 0.35cm;">支<br />給</td>
+        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">基本給</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">管理職手当</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">役付手当</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">通勤手当</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">残業手当</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="right"><apex:outputText style="align:right;" value="{!BaseSalary}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="right"><apex:outputText style="align:right;" value="{!ManagementAllowance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="right"><apex:outputText style="align:right;" value="{!TitleAllowance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="right"><apex:outputText style="align:right;" value="{!TravelAllowance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="right"><apex:outputText style="align:right;" value="{!OvertimeAllowance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.30cm;height:0.6cm;"></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">深夜手当</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">早出手当</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">課税合計</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">非課税合計</td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.3cm;" align="center">総支給額合計</td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"  align="right"><apex:outputText value="{!MidnightAllowance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!EarlyShiftAllowance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!TaxationSum}" /></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!NoTaxationSum}" /></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;" align="right"><apex:outputText value="{!PaymentsSum}" /></td>
+    </tr>
+    
+    <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 20px;"/></td></tr>
+    
+    <tr height="20px">
+        <td rowspan="6" style="text-align: center;border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;">控<br />除</td>
+        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">健康保険</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">雇用保険</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">介護保険</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">厚生年金</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">課税対象額</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">所得税</td>
+        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">住民税</td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!HealthInsurance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!EmploymentInsurance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!CareInsurance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!WelfarePension}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!TaxationTargetSum}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!IncomeTax}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;" align="right"><apex:outputText value="{!ResidentTax}" /></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">賞与</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">寮費</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">食事代</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">光熱費</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">仮払い</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!Bonus}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!BoardingFees}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!MealCharges}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!UtilityCosts}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!TemporaryAdvance}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;"></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">控除額合計</td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;" align="right"><apex:outputText value="{!DeductionSum}" /></td>
+    </tr>
+    
+    <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 20px;"/></td></tr>
+    
+    <tr height="20px">
+        <td rowspan="4" style="text-align: center;border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;">勤<br />怠</td>
+        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">要勤務日数</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">出勤日数</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">欠勤日数</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">勤務時間数</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.3cm;" align="center">有休消化日数</td>
+        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">有休残日数</td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!WorkDays}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!RealWorkDays}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!NotWorkDays}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!WorkHours}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!UseRestDays}" /></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;" align="right"><apex:outputText value="{!RemainRestDays}" /></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center">残業時間</td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!OvertimeHours}" /></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;"></td>
+    </tr>
+    
+    <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 20px;"/></td></tr>
+    
+    <tr height="20px">
+        <td rowspan="2" style="text-align: center;border-top:2px solid #3E6697;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;">合<br />計</td>
+        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.3cm;" align="center">累積課税合計</td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.32cm;" align="center">差引支給額</td>
+    </tr>
+    <tr height="20px">
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="right"><apex:outputText value="{!AccumulationTaxationSum}" /></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;" align="right"><apex:outputText value="{!NetPayments}" /></td>
+    </tr>
+</table>
+<table>
+<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 20px;"/></td></tr>
+</table>
+
+<table border="0" cellspacing="0" bordercolor="black" width="100px" align="right">
+    <tr height="50px">
+        <td style="text-align:center;border-top:1px solid #3E6697;border-bottom:1px solid #3E6697;border-left:1px solid #3E6697;width: 0.5cm;font-size: 0.35cm;">係<br />印</td>
+        <td style="border-top:1px solid #3E6697;border-bottom:1px solid #3E6697;border-left:1px dashed #3E6697;border-right:1px solid #3E6697;width: 1.3cm;"></td>
+        <td style="width: 1.3cm;"></td>
+    </tr>
+</table>
+</body>
+</html>
+</apex:page>

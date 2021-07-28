@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Room inventory mangement</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Room inventory mangement</value>
+    </caseValues>
+    <fields>
+        <label><!-- 調整残室数JSON(リアルAGT) --></label>
+        <name>AGTChangeRoomsJSON__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋タイプID_日付 --></help>
+        <label><!-- 管理キー --></label>
+        <name>ManagerKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売室数 --></label>
+        <name>MaxRoomsCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 設定販売室数 --></label>
+        <name>MaxSettingRooms__c</name>
+    </fields>
+    <fields>
+        <label>Inventory number</label>
+        <name>QtyOfStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- 残室数 --></label>
+        <name>RemainingCount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプコード --></label>
+        <name>RoomTypeCodeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>RoomTypeNameCal__c</name>
+    </fields>
+    <fields>
+        <label>Room type</label>
+        <name>RoomTypeRef__c</name>
+        <relationshipLabel>Room Inventory</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 販売状態 --></label>
+        <name>SalesStatusLst__c</name>
+        <picklistValues>
+            <masterLabel>1</masterLabel>
+            <translation><!-- 1 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2</masterLabel>
+            <translation><!-- 2 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 個別設定フラグ --></label>
+        <name>SettingFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCodeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 調整日付 --></label>
+        <name>StockChangeDateCal__c</name>
+    </fields>
+    <fields>
+        <label>Inventory date</label>
+        <name>StockDate__c</name>
+    </fields>
+    <nameFieldLabel>Room inventory name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Cash adjustment</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Cash adjustment</value>
+    </caseValues>
+    <fields>
+        <label><!-- AutoUpdateFlg(System) --></label>
+        <name>AutoUpdateFlg__c</name>
+    </fields>
+    <fields>
+        <label>Cash deposit</label>
+        <name>CaseDeposit__c</name>
+    </fields>
+    <fields>
+        <label>Cash withdrawal</label>
+        <name>CasePayment__c</name>
+    </fields>
+    <fields>
+        <label>Cash [Actual]</label>
+        <name>CashAmountAct__c</name>
+    </fields>
+    <fields>
+        <label>Cash [Logical]</label>
+        <name>CashAmountLogic__c</name>
+    </fields>
+    <fields>
+        <label>Sales currency</label>
+        <name>CashSales__c</name>
+    </fields>
+    <fields>
+        <label>Balance (50)</label>
+        <name>FiftyCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（50） --></label>
+        <name>FiftyMachNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (5)</label>
+        <name>FiveCashNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (500)</label>
+        <name>FiveHundredCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（500） --></label>
+        <name>FiveHundredMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（5） --></label>
+        <name>FiveMachNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (5000)</label>
+        <name>FiveThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（5千） --></label>
+        <name>FiveThousandMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label>Last update by</label>
+        <name>LastModifiedByUser__c</name>
+    </fields>
+    <fields>
+        <label>Last update date</label>
+        <name>LastModifiedDate__c</name>
+    </fields>
+    <fields>
+        <label>Balance (1)</label>
+        <name>OneCashNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (100)</label>
+        <name>OneHundredCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（100） --></label>
+        <name>OneHundredMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（1） --></label>
+        <name>OneMachNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (1000)</label>
+        <name>OneThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（1千） --></label>
+        <name>OneThousandMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label>Reserve fund</label>
+        <name>ReserveFund__c</name>
+    </fields>
+    <fields>
+        <label>Sales update date</label>
+        <name>RsvAccountRef__c</name>
+        <relationshipLabel><!-- 現金合せ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Sales date</label>
+        <name>SalesDateCal__c</name>
+    </fields>
+    <fields>
+        <label>Key</label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label>Shop information</label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 現金合せ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Balance (10)</label>
+        <name>TenCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（10） --></label>
+        <name>TenMachNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (10000)</label>
+        <name>TenThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（1万） --></label>
+        <name>TenThousandMachNums__c</name>
+    </fields>
+    <fields>
+        <label>Balance (2000)</label>
+        <name>TwoThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（2千） --></label>
+        <name>TwoThousandMachNums__c</name>
+    </fields>
+    <nameFieldLabel>Number</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

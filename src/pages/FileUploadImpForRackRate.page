@@ -1,0 +1,214 @@
+<!-- ファイル取込 -->
+<apex:page controller="FileUploadImpForRackRateTable" title="{!$Label.ps__msg_003_0001}" sidebar="false" tabstyle="RaceRateFileUploadTab__tab">
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+
+<!-- ラックレート取込 -->   <!-- Upload RaceRate Table CSV -->
+<apex:sectionHeader subtitle="{!$Label.ps__msg_003_0002}" title="{!$Label.ps__msg_003_0013}"/>
+
+    <apex:pageMessage summary="{!result.strErrorMessage}" severity="error" strength="1"
+        rendered="{!result.isHasErrMsg}" escape="false"/>
+    <apex:pageMessage summary="{!result.InfoMessage}" severity="info" strength="1"
+        rendered="{!result.isHasInfoMsg}" escape="false"/>
+
+    <!-- アップロード機能 -->
+    <apex:form id="header" >
+    <!-- 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN -->
+	<div id="tabstrip">
+		<ul>
+			<li class="{!IF(isTab1,'k-state-active','')}" style="{!IF(rackRatePlanFlg,'','display:none;')}"><!-- ラックレート -->ラックレート</li>
+	       	<li class="{!IF(isTab2,'k-state-active','')}" style="{!IF(rackRatePlanFlg,'','display:none;')}"><!-- ラックレート（プラン） -->ラックレート（プラン）</li>
+		</ul>
+		<!-- 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END -->
+        <apex:actionFunction action="{!processCsvFile}" name="uploadFun_1"/>
+        <!-- 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN -->
+        <apex:actionFunction action="{!processCsvFilePlan}" name="uploadFun_3" rendered="false"/>
+        <!-- 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN -->
+        <apex:actionFunction action="{!processCsvFilePlanTier}" name="uploadFun_4"/>
+        <!-- 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END -->
+        
+        <div>
+        <!-- 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END -->
+    	<!-- ラックレート -->
+    	<!-- 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN -->
+        <apex:pageBlock mode="Edit" title="{!$Label.ps__msg_003_0003}" id="titleId">
+        <apex:pageBlockSection columns="1" id="pageBlockCheckId">
+        <input type="checkbox"  onclick="checkboxEvent(this)" id="isCheckId" tabIndex ="{!tabIndex}"><!-- ラックレート（プラン別）アップロード -->{!$Label.MSG_003_0003_2}</input>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection columns="1" id="blockSectionId">
+		<!-- 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END -->
+			
+			<li><!-- 新規作成：CSV作成用Excelテンプレートファイルを -->{!$Label.MSG_003_0004}<a href="/servlet/servlet.FileDownload?file={!strTemplateId}"><!-- ダウンロードする -->{!$Label.MSG_003_0005}</a></li>
+			<apex:outputPanel rendered="{!!ISNULL(lastDoc)}">
+            <li style="margin-top: 10px"><!-- 既存編集：最新作成したCSVファイル「 -->{!$Label.MSG_003_0006}{!lastDoc.Name}<!-- 」を -->{!$Label.MSG_003_0007}<a href="/servlet/servlet.FileDownload?file={!lastDoc.Id}"><!-- ダウンロードする -->{!$Label.MSG_003_0005}</a></li>
+            <li style="margin-top: 16px"><!-- 既にアップロード済みラックレートファイルリストを -->{!$Label.MSG_003_0008}<a href="/015?fcf={!LEFT(strDocFolderId,15)}" target="_blank"><!-- 表示 -->{!$Label.MSG_003_0009}</a></li>
+            </apex:outputPanel>
+            <apex:pageBlockSectionItem >
+                <apex:inputFile value="{!filehand.fileBody}" filename="{!filehand.fileName}" id="file_File_1" size="100"  style="margin-top: 16px"/>
+                <!-- 取込開始 -->
+                <input type="button" value="{!$Label.MSG_003_0010}" id="saBtn_1" class="btn"  style="margin-top: 16px"/>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        <!-- 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN -->
+        <apex:pageBlockSection columns="1" id="blockSectionPlanId">
+			<li>{!$Label.MSG_003_0004}<a href="/servlet/servlet.FileDownload?file={!strBasePlanTempId}"><!-- ダウンロードする -->{!$Label.MSG_003_0005}</a></li>
+			<apex:outputPanel rendered="{!!ISNULL(lastBasePlanDoc)}">
+            <li style="margin-top: 10px"><!-- 既存編集：最新作成したCSVファイル「 -->{!$Label.MSG_003_0006}{!lastBasePlanDoc.Name}<!-- 」を -->{!$Label.MSG_003_0007}<a href="/servlet/servlet.FileDownload?file={!lastBasePlanDoc.Id}"><!-- ダウンロードする -->{!$Label.MSG_003_0005}</a></li>
+            <li style="margin-top: 16px">既にアップロード済みラックレート（プラン）ファイルリストを<a href="/015?fcf={!LEFT(strDocFolderId,15)}" target="_blank"><!-- 表示 -->{!$Label.MSG_003_0009}</a></li>
+            </apex:outputPanel>
+            <apex:pageBlockSectionItem >
+                <apex:inputFile value="{!filehand.fileBody}" filename="{!filehand.fileName}" id="file_File_4" size="100"  style="margin-top: 16px"/>
+                <!-- 取込開始 -->
+                <input type="button" value="{!$Label.MSG_003_0010}" id="saBtn_4" class="btn"  style="margin-top: 16px"/>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        <!-- 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END -->
+        </apex:pageBlock>
+        <!-- 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN -->
+        </div>
+    	<div style="display:none">
+    	<!-- ラックレート -->
+        <apex:pageBlock mode="Edit" title="ラックレート（プラン）" rendered="{!rackRatePlanFlg}">
+        <apex:pageBlockSection columns="1" >
+			
+			<li>{!$Label.MSG_003_0004}<a href="/servlet/servlet.FileDownload?file={!strPlanTemplateId}"><!-- ダウンロードする -->{!$Label.MSG_003_0005}</a></li>
+			<apex:outputPanel rendered="{!!ISNULL(lastPlanDoc)}">
+            <li style="margin-top: 10px"><!-- 既存編集：最新作成したCSVファイル「 -->{!$Label.MSG_003_0006}{!lastPlanDoc.Name}<!-- 」を -->{!$Label.MSG_003_0007}<a href="/servlet/servlet.FileDownload?file={!lastPlanDoc.Id}"><!-- ダウンロードする -->{!$Label.MSG_003_0005}</a></li>
+            <li style="margin-top: 16px">既にアップロード済みラックレート（プラン）ファイルリストを<a href="/015?fcf={!LEFT(strDocFolderId,15)}" target="_blank"><!-- 表示 -->{!$Label.MSG_003_0009}</a></li>
+            </apex:outputPanel>
+            <apex:pageBlockSectionItem >
+                <apex:inputFile value="{!filehand.fileBody}" filename="{!filehand.fileName}" id="file_File_3" size="100"  style="margin-top: 16px"/>
+                <!-- 取込開始 -->
+                <input type="button" value="{!$Label.MSG_003_0010}" id="saBtn_3" class="btn"  style="margin-top: 16px"/>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        </apex:pageBlock>
+        </div>
+    </div>
+    <!-- 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END -->
+    </apex:form>
+    
+
+    <!-- アップロード機能 -->
+    <apex:form id="PriceBook" rendered="false">
+        <apex:actionFunction action="{!processCsvFile}" name="uploadFun_2" />
+    	
+    	<!-- ラックレート -->
+        <apex:pageBlock mode="Edit" title="{!$Label.ps__msg_003_0003}">
+        <apex:pageBlockSection columns="1" >
+            <apex:pageMessage summary="" 
+                    severity="info" strength="1"  escape="false"/>
+                        
+            <apex:pageBlockSectionItem >
+                <apex:inputFile value="{!filehand.fileBody}" filename="{!filehand.fileName}" id="file_File_2" size="100"/>
+                <!-- 取込開始 -->
+                <input type="button" value="{!$Label.MSG_003_0010}" id="saBtn_2" class="btn"></input>
+            </apex:pageBlockSectionItem>
+        </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    
+<script>
+    // Jquey Init
+    $j = jQuery.noConflict();
+	$j(document).ready(function () {
+        bindEvent();
+        // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN
+        checkboxInit();
+        // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END
+    });
+    
+    <!-- Juqery Function Begin -->
+    function bindEvent() {
+    	// 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN
+    	var rackRatePlanFlg = "{!rackRatePlanFlg}";
+    	if(rackRatePlanFlg == "true"){
+		    $j("#tabstrip").kendoTabStrip({
+		        animation:  {
+		            open: {
+		                effects: "fadeIn"
+		            }
+		        }
+		    });
+	    }
+	    // 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END
+        // Csv Upload Process
+        	// 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN
+            // $j("#saBtn_1, #saBtn_2").click(function(){
+            // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN
+            // $j("#saBtn_1, #saBtn_2, #saBtn_3").click(function(){
+            $j("#saBtn_1, #saBtn_2, #saBtn_3, #saBtn_4").click(function(){
+            // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END
+            // 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END
+                var fileNameVal = "";
+                if (this.id == "saBtn_1") fileNameVal = $j("input[name$=':file_File_1:inputFile:file']").val();
+                else if (this.id == "saBtn_2") fileNameVal = $j("input[name$=':file_File_2:inputFile:file']").val();
+                // 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN
+                else if (this.id == "saBtn_3") fileNameVal = $j("input[name$=':file_File_3:inputFile:file']").val();
+                // 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END
+                // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN
+                else if (this.id == "saBtn_4") fileNameVal = $j("input[name$=':file_File_4:inputFile:file']").val();
+                // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END
+                if (fileNameVal == '') {
+                	//対象ファイルが存在しません。
+                    alert("{!$Label.MSG_003_0011}");
+                    return false;
+                }
+                blockUi();
+                // Upload File To Server
+                if (this.id == "saBtn_1") uploadFun_1();
+                else if (this.id == "saBtn_2") uploadFun_2();
+                // 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz BEGIN
+                //else if (this.id == "saBtn_3") uploadFun_3();
+                // 2020/05/30 販売で部屋タイプを設定に改善対応 BY zyz END
+                // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN
+                else if (this.id == "saBtn_4") uploadFun_4();
+                // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END
+            });
+    }
+    // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz BEGIN
+    // checkbox初始化状态
+    function checkboxInit(){
+    	var checkInt = $("input[id='isCheckId']").attr("tabIndex");
+        // 共通定義により、表示対象内容を切替する 
+    	var isRackRatePlanTierFlg = {!(rackRatePlanTierFlg)};
+        // 通常のラックレートアップロード画面を初期表示設定
+    	if(!isRackRatePlanTierFlg) {
+    		$("[id$=':pageBlockCheckId']").css({'display':'none'});
+            $("input[id='isCheckId']").prop("checked",false);
+    	}else if(checkInt == "3"){
+    		$("input[id='isCheckId']").prop("checked",true);	
+    	}
+        checkboxEvent();
+    }
+    // checkbox响应
+	function checkboxEvent(){
+		var isCheck = $("input[id='isCheckId']").prop("checked");
+		if(isCheck) {
+			$("div[id$=':blockSectionId']").css({'display':'none'});
+			$("div[id$=':blockSectionPlanId']").css({'display':''});
+			$("[id$=':titleId']").parent().find(".mainTitle").text("{!$Label.MSG_003_0003_1}");
+		} else {
+			$("div[id$=':blockSectionId']").css({'display':''});
+			$("div[id$=':blockSectionPlanId']").css({'display':'none'});
+			$("[id$=':titleId']").parent().find(".mainTitle").text("{!$Label.ps__msg_003_0003}");
+		}
+	}
+    // 2021/04/18 ラックレート設定ベースプラン金額 BY zyz END
+    // 画面Lockする
+    function blockUi() {
+        $j.blockUI({
+        //Processing...
+             message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_003_0012}</h1>'
+        }); 
+        return true;
+    }
+    // 画面Lock解除
+    function unblock() {
+        $j.unblockUI({ fadeOut: 200 }); 
+    }
+</script>
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

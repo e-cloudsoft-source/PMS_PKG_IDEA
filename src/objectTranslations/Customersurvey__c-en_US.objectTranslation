@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Questionary</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Questionary</value>
+    </caseValues>
+    <fields>
+        <label>6-1) Geographical conditions</label>
+        <name>Areat__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>6-3) Facilities</label>
+        <name>Buildingt__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>1-1) Channels</label>
+        <name>Channel__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>インターネットを見て</masterLabel>
+            <translation><!-- インターネットを見て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>パンフレットを見て</masterLabel>
+            <translation><!-- パンフレットを見て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>新聞・雑誌を見て</masterLabel>
+            <translation><!-- 新聞・雑誌を見て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>旅行会社を経由して</masterLabel>
+            <translation><!-- 旅行会社を経由して --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>6-2) Lodging rates</label>
+        <name>Charget__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Staying day</label>
+        <name>Checkinday__c</name>
+    </fields>
+    <fields>
+        <label>4-3) Cleaning</label>
+        <name>Cleanr__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Frequency</label>
+        <name>Countt__c</name>
+        <picklistValues>
+            <masterLabel>初めて</masterLabel>
+            <translation><!-- 初めて --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>２回目</masterLabel>
+            <translation><!-- ２回目 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>３回以上</masterLabel>
+            <translation><!-- ３回以上 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help>If the Direct mails (DM) is allowed put a check mark</help>
+        <label><!-- DM --></label>
+        <name>DMt__c</name>
+    </fields>
+    <fields>
+        <label>History</label>
+        <name>Field10__c</name>
+        <picklistValues>
+            <masterLabel>初めて</masterLabel>
+            <translation><!-- 初めて --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>２回以上</masterLabel>
+            <translation><!-- ２回以上 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Use of last time</label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label>Others</label>
+        <name>Field12__c</name>
+    </fields>
+    <fields>
+        <label>About the room</label>
+        <name>Field13__c</name>
+    </fields>
+    <fields>
+        <label>About the food</label>
+        <name>Field14__c</name>
+    </fields>
+    <fields>
+        <label>Guest service</label>
+        <name>Field15__c</name>
+    </fields>
+    <fields>
+        <label>About the open bath</label>
+        <name>Field16__c</name>
+    </fields>
+    <fields>
+        <label>Overall impression</label>
+        <name>Field17__c</name>
+    </fields>
+    <fields>
+        <label>Your Impression</label>
+        <name>Field18__c</name>
+    </fields>
+    <fields>
+        <label>Room</label>
+        <name>Field21__c</name>
+        <relationshipLabel>Questionnaire</relationshipLabel>
+    </fields>
+    <fields>
+        <label>2)Others</label>
+        <name>Field22__c</name>
+    </fields>
+    <fields>
+        <label><!-- Keyword3 --></label>
+        <name>Field23__c</name>
+        <relationshipLabel>Questionnaire</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Your pen name</label>
+        <name>Field24__c</name>
+    </fields>
+    <fields>
+        <help>Upload  photos</help>
+        <label>Guest Voice</label>
+        <name>Field25__c</name>
+    </fields>
+    <fields>
+        <label>Questionnaire written by</label>
+        <name>Field26__c</name>
+        <relationshipLabel>Questionnaire (questionnaire written by)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Name</label>
+        <name>Field27__c</name>
+    </fields>
+    <fields>
+        <label>For rooms</label>
+        <name>Field2__c</name>
+        <relationshipLabel>Questionnaire</relationshipLabel>
+    </fields>
+    <fields>
+        <help>Link to the usual Guest survey</help>
+        <label>Questionnaire sheet</label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label>Classification</label>
+        <name>Field4__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>グループ</masterLabel>
+            <translation><!-- グループ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>夫婦</masterLabel>
+            <translation><!-- 夫婦 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>家族連れ</masterLabel>
+            <translation><!-- 家族連れ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接待</masterLabel>
+            <translation><!-- 接待 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Room</label>
+        <name>Field5__c</name>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良い</masterLabel>
+            <translation><!-- 良い --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良くない</masterLabel>
+            <translation><!-- 良くない --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>非常に良い</masterLabel>
+            <translation><!-- 非常に良い --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Food</label>
+        <name>Field6__c</name>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良い</masterLabel>
+            <translation><!-- 良い --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良くない</masterLabel>
+            <translation><!-- 良くない --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>非常に良い</masterLabel>
+            <translation><!-- 非常に良い --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Visitors</label>
+        <name>Field7__c</name>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良い</masterLabel>
+            <translation><!-- 良い --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良くない</masterLabel>
+            <translation><!-- 良くない --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>非常に良い</masterLabel>
+            <translation><!-- 非常に良い --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>OpenBath</label>
+        <name>Field8__c</name>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良い</masterLabel>
+            <translation><!-- 良い --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良くない</masterLabel>
+            <translation><!-- 良くない --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>非常に良い</masterLabel>
+            <translation><!-- 非常に良い --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Overall impression</label>
+        <name>Field9__c</name>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良い</masterLabel>
+            <translation><!-- 良い --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>良くない</masterLabel>
+            <translation><!-- 良くない --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>非常に良い</masterLabel>
+            <translation><!-- 非常に良い --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>3-2)Front office</label>
+        <name>Frontt__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Keyword4 --></label>
+        <name>Keyword4__c</name>
+        <relationshipLabel>Questionnaire (Keyword4)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Keyword5 --></label>
+        <name>Keyword5__c</name>
+        <relationshipLabel>Questionnaire (Keyword5)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Keyword6 --></label>
+        <name>Keyword6__c</name>
+        <relationshipLabel>Questionnaire (Keyword6)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Keyword8-1 --></label>
+        <name>Keyword8_1__c</name>
+        <relationshipLabel>Questionnaire (Keyword8-1)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Keyword8-2 --></label>
+        <name>Keyword8_2__c</name>
+        <relationshipLabel>Questionnaire (Keyword8-2)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Keyword8-3 --></label>
+        <name>Keyword8_3__c</name>
+        <relationshipLabel>Questionnaire (Keyword8-3)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>5-2)Food taste</label>
+        <name>Mealt__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>1)Others</label>
+        <name>MeiOther__c</name>
+    </fields>
+    <fields>
+        <label>MaterialName</label>
+        <name>Meibaitai__c</name>
+        <picklistValues>
+            <masterLabel>「幸せを呼ぶパワースポットはここだ！」</masterLabel>
+            <translation><!-- 「幸せを呼ぶパワースポットはここだ！」 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>るるぶフリーロマンスカー</masterLabel>
+            <translation><!-- るるぶフリーロマンスカー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>トラベルポーター「和の宿」</masterLabel>
+            <translation><!-- トラベルポーター「和の宿」 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>旅サライ</masterLabel>
+            <translation><!-- 旅サライ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>旅色（ネットマガジン）</masterLabel>
+            <translation><!-- 旅色（ネットマガジン） --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>陣屋オリジナルパンフレット</masterLabel>
+            <translation><!-- 陣屋オリジナルパンフレット --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help>SiteList</help>
+        <label>Site name</label>
+        <name>Meisite__c</name>
+        <picklistValues>
+            <masterLabel>AGT[JTB]</masterLabel>
+            <translation><!-- AGT[JTB] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[KNT]</masterLabel>
+            <translation><!-- AGT[KNT] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[ぐるなび]</masterLabel>
+            <translation><!-- AGT[ぐるなび] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[じゃらん]</masterLabel>
+            <translation><!-- AGT[じゃらん] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[やど日本]</masterLabel>
+            <translation><!-- AGT[やど日本] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[らくだ倶楽部]</masterLabel>
+            <translation><!-- AGT[らくだ倶楽部] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[トクー]</masterLabel>
+            <translation><!-- AGT[トクー] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[小田急トラベル]</masterLabel>
+            <translation><!-- AGT[小田急トラベル] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[楽天]</masterLabel>
+            <translation><!-- AGT[楽天] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>AGT[相鉄観光]</masterLabel>
+            <translation><!-- AGT[相鉄観光] --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>自社サイト</masterLabel>
+            <translation><!-- 自社サイト --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Memorialword1 --></label>
+        <name>Memorial__c</name>
+        <relationshipLabel>Questionnaire (Memorialword[1])</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Memorialword2 --></label>
+        <name>Memorialword2__c</name>
+        <relationshipLabel>Questionnaire (Memorialword[2])</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Memorialword3 --></label>
+        <name>Memorialword3__c</name>
+        <relationshipLabel>Questionnaire (Memorialword[3])</relationshipLabel>
+    </fields>
+    <fields>
+        <label>3-1)Telephone Support</label>
+        <name>Phonet__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>5-3)Amount</label>
+        <name>Pricet__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>2-1)Purpose</label>
+        <name>Purpose__c</name>
+        <picklistValues>
+            <masterLabel>お祝い</masterLabel>
+            <translation><!-- お祝い --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>仕事</masterLabel>
+            <translation><!-- 仕事 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>友人同士で観光</masterLabel>
+            <translation><!-- 友人同士で観光 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>家族旅行</masterLabel>
+            <translation><!-- 家族旅行 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Reservation</label>
+        <name>Reserved__c</name>
+        <relationshipLabel>Questionnaire</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Room</label>
+        <name>Roomname__c</name>
+    </fields>
+    <fields>
+        <label>4-1)Room facility</label>
+        <name>Roomt__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>4-2)Rooms bedding goods</label>
+        <name>Roomy__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>5-1)Service</label>
+        <name>Servicet__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>3-3)OverallSupport</label>
+        <name>Totalt__c</name>
+        <picklistValues>
+            <masterLabel>不満</masterLabel>
+            <translation><!-- 不満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>満足</masterLabel>
+            <translation><!-- 満足 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Voiceword1 --></label>
+        <name>Voiceword1__c</name>
+        <relationshipLabel>Guestsurvey (Voiceword1)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Voiceword2 --></label>
+        <name>Voiceword2__c</name>
+        <relationshipLabel>Guestsurvey (Voiceword2)</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Voiceword3 --></label>
+        <name>Voiceword3__c</name>
+        <relationshipLabel>Guestsurvey (Voiceword3)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Reviews [1]</label>
+        <name>X1__c</name>
+    </fields>
+    <fields>
+        <label>Reviews [2]</label>
+        <name>X2__c</name>
+    </fields>
+    <fields>
+        <label>3-1) Supplement</label>
+        <name>X3_1__c</name>
+    </fields>
+    <fields>
+        <label>3-2) Supplement</label>
+        <name>X3_2__c</name>
+    </fields>
+    <fields>
+        <label>3-3) Supplement</label>
+        <name>X3_3__c</name>
+    </fields>
+    <fields>
+        <label>Reviews [3]</label>
+        <name>X3__c</name>
+    </fields>
+    <fields>
+        <label>4-1) Supplement</label>
+        <name>X4_1__c</name>
+    </fields>
+    <fields>
+        <label>4-2) Supplement</label>
+        <name>X4_2__c</name>
+    </fields>
+    <fields>
+        <label>4-2) Supplement</label>
+        <name>X4_3__c</name>
+    </fields>
+    <fields>
+        <label>4)Comments</label>
+        <name>X4__c</name>
+    </fields>
+    <fields>
+        <label>5-1) Supplement</label>
+        <name>X5_1__c</name>
+    </fields>
+    <fields>
+        <label>5-1) Supplement</label>
+        <name>X5_2__c</name>
+    </fields>
+    <fields>
+        <label>5-2)Food taste</label>
+        <name>X5_3__c</name>
+    </fields>
+    <fields>
+        <label>6-1) Supplement</label>
+        <name>X6_1__c</name>
+    </fields>
+    <fields>
+        <label>6-2) Supplement</label>
+        <name>X6_2__c</name>
+    </fields>
+    <fields>
+        <label>6-3) Supplement</label>
+        <name>X6_3__c</name>
+    </fields>
+    <fields>
+        <label>8-3) Comments</label>
+        <name>X8_2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 8-3)コメント --></label>
+        <name>X8_3__c</name>
+    </fields>
+    <fields>
+        <label>Guest</label>
+        <name>anquete__c</name>
+        <relationshipLabel>Questionnaire</relationshipLabel>
+    </fields>
+    <fields>
+        <label>3) Comments</label>
+        <name>comment3__c</name>
+    </fields>
+    <fields>
+        <label>5) Comments</label>
+        <name>comment5__c</name>
+    </fields>
+    <fields>
+        <label>8-1) Comments</label>
+        <name>comment6__c</name>
+    </fields>
+    <fields>
+        <label>8-2) Comments</label>
+        <name>comment8__c</name>
+    </fields>
+    <fields>
+        <label>Type</label>
+        <name>typeofpaper__c</name>
+        <picklistValues>
+            <masterLabel>お客様の声</masterLabel>
+            <translation><!-- お客様の声 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>口コミ</masterLabel>
+            <translation><!-- 口コミ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>宿泊の方</masterLabel>
+            <translation><!-- 宿泊の方 --></translation>
+        </picklistValues>
+    </fields>
+    <nameFieldLabel><!-- INQ# --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+    <webLinks>
+        <label>Questionnaire</label>
+        <name>QuestionnaireBtn</name>
+    </webLinks>
+</CustomObjectTranslation>

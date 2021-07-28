@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、清掃機能関連パラメータの定義
+     店舗別設定したい場合
+　　　タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容を修正する
+	SHOP:				店舗別支払メディア情報定義可能
+		SHOPCODE:		店舗コード
+		COMPLETESTATUS:	該当ステータスを設定される場合、該当部屋の清掃済、お客様側に使える状態になる（カンマで複数ステータスを指定可能）
+		COLORCONFIG：	各ステータスの背景色を指定する
+			STATUS：		各ステータス名を設定
+				COLOR：	該当ステータスの背景色
+		CHATERCONFIG：	該当部屋は指定ステータスに変更される場合、指定のグループにChatterポスト機能の設定
+			STATUS：		各ステータス名を設定（カンマで複数ステータスを指定可能）
+			GROUP：		チャターグループ名
+			MESSAGE：	チャターグループへポストするメッセージ内容
+				@room： 		部屋名
+				@status：	清掃ステータス
+		CHECKCONFIG:	清掃ステータスの変更により、チェックリスト項目を指定する
+			CHECKLIST:	チェックリストページの関連定義(重複定義可能）
+				STATUS:		チェックリストページを表示するのステータス、清掃ステータスが該当ステータス場合、チェックリストページを表示する
+				NEXTSTATUS:	チェックリストの「確定」ボタンをクリック後、清掃ステータスが該当ステータスに変更する(定義省略可能)
+				FIELDS:		チェックリストページに表示する項目のAPI（部屋状態管理オブジェクトの項目APIを定義可能）
+							注意、項目データ型が「チェックボックス」のみ定義してください
+2019.10.30 インスペ項目に表示したいメッセージをカスタム用タグ新規追加
+				MESSAGE:    お客様とご予約関連項目をカスタマイズ可能、複数項目を定義可能、複数定義場合、１項目１行目を複数列をインスペページの上に表示される
+							お客様項目を表示したい場合、contact.xxxapiで定義する
+							ご予約項目を表示したい場合、lead.xxxapiで定義する
+			下記例：インスペ項目にお客様特記事項、部屋セット備考(カスタマイズ項目)、予約人数を表示すること設定例
+			<MESSAGE>
+				lead.Comment3__c,lead.Field392__c,lead.StayPersons__c
+			</MESSAGE>
+2019/11/30.清掃各ステータス状況を表示タグ属性追加
+		COLORCONFIG ->STATUS->ROOMINDICATOR属性タグ新規追加
+			TRUE：該当清掃ステータスはルームインジケータ画面に表示する
+			FALSE：該当清掃ステータスはルームインジケータ画面に表示しない（デフォルト値）
+		注：該当「ROOMINDICATOR=TRUE」が設定されているステータスの名称は「未清掃」の場合、
+		　　該当定義したステータスの色はルームインジケータ既存の未清掃の表示色を上書きする、該当ステータス定義した色をルームインジケータに表示する
+2019/12/30.部屋ステータスの一括更新可・不可切り替えフラグ　
+		QUICKACTION タグ新規追加
+			TRUE：部屋ステータスの一括更新可
+			FALSE：部屋ステータスの一括更新不可（デフォルト値）
+2020/06/30.清掃チェック項目を部屋タイプ毎に設定できる機能
+		CHECKCONFIG->CHECKLIST->FIELDS->ROOMTYPESEQ属性タグ新規追加
+			ROOMTYPESEQ：部屋タイプ#Seq値、カンマで複数定義可能
+			例：部屋タイプSEQが100,101の清掃チェック項目はA,B,C
+			　　部屋タイプSEQが200,201の清掃チェック項目はE,F,G
+			　　その以外の場合、清掃項目はA,E,G
+			<FIELDS>A,E,G</FIELDS>	 
+			<FIELDS ROOMTYPESEQ="100,101">A,B,C</FIELDS>
+			<FIELDS ROOMTYPESEQ="200,201">E,F,G</FIELDS>
+-->
+<SHOP>
+	<SHOPCODE></SHOPCODE>
+	<COMPLETESTATUS>インスペ完</COMPLETESTATUS>
+	<!-- 部屋ステータスの一括更新可・不可切り替えフラグ -->
+	<QUICKACTION>FALSE</QUICKACTION>
+	<!-- 各清掃ステータスの色定義 -->
+	<COLORCONFIG>
+		<STATUS COLOR="darkcyan" ROOMINDICATOR="FALSE">未清掃</STATUS>
+		<STATUS COLOR="#00ccff" ROOMINDICATOR="FALSE">清掃中</STATUS>
+		<STATUS COLOR="darkgreen" ROOMINDICATOR="FALSE">清掃完了インスペ未完</STATUS>
+		<STATUS COLOR="royalblue" ROOMINDICATOR="FALSE">インスペ中</STATUS>
+		<STATUS COLOR="gray" ROOMINDICATOR="FALSE">インスペ完</STATUS>
+	</COLORCONFIG>
+	
+	<!-- 清掃データは指定ステータスに変更される場合、指定メッセージで指定チャターグループへポストの定義 
+		1チャターグループは１メッセージのみ指定可能
+	-->
+	<CHATERCONFIG>
+		<STATUS GROUP="XXXXXXX1" MESSAGE="部屋 @room は @status">清掃完了インスペ未完</STATUS>
+		<STATUS GROUP="XXXXXXX2" MESSAGE="部屋 @room は @status">インスペ完</STATUS>
+	</CHATERCONFIG>
+	
+	<!-- 清掃ステータスの変更により、指定のチェックリスト項目指定する
+		部屋状態管理オブジェクトの項目APIを定義可能 
+		注意、項目データ型が「チェックボックス」のみ定義してください
+	-->
+	<!-- 
+	<CHECKCONFIG>
+		<CHECKLIST>
+			<STATUS>インスペ中</STATUS>
+			<NEXTSTATUS>インスペ完</NEXTSTATUS>
+			<FIELDS>
+				CheckItem1__c,CheckItem2__c,CheckItem3__c,CheckItem4__c,CheckItem5__c
+				,CheckItem6__c,CheckItem7__c,CheckItem8__c,CheckItem9__c,CheckItem10__c
+				,CheckItem11__c,CheckItem12__c,CheckItem13__c,CheckItem14__c,CheckItem15__c
+				,CheckItem16__c,CheckItem17__c,CheckItem18__c,CheckItem19__c,CheckItem20__c
+				,CheckItem21__c,CheckItem22__c,CheckItem23__c,CheckItem24__c,CheckItem25__c
+				,CheckItem26__c,CheckItem27__c,CheckItem28__c,CheckItem29__c,CheckItem30__c
+				,CheckItem31__c,CheckItem32__c,CheckItem33__c
+			</FIELDS>
+			<FIELDS ROOMTYPESEQ="200,201">
+				CheckItem1__c,CheckItem2__c,CheckItem3__c,CheckItem4__c,CheckItem5__c
+			</FIELDS>
+			<MESSAGE>
+				lead.Comment3__c,lead.Field392__c,lead.StayPersons__c
+			</MESSAGE>
+		</CHECKLIST>
+	</CHECKCONFIG>
+	 -->
+</SHOP>  
+</root>

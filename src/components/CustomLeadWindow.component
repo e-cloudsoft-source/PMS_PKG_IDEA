@@ -1,0 +1,3729 @@
+<apex:component controller="BookingLeadWindow" id="CustomLead" allowDML="true">
+{!InitXmlNode}
+<apex:attribute name="ShopCode" description="shopCode" assignTo="{!xmlShopCode}" type="String" required="false" default=""/>
+<!-- JSで単価金額計算ロジック -->
+<c:CommProductFeeCalJsComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<script>
+if (typeof JINYACONNECT === "undefined") {
+  JINYACONNECT = {};
+}
+if (typeof JINYACONNECT.CUSTOM === "undefined") {
+  JINYACONNECT.CUSTOM = {};
+} 
+// clear the one row info
+JINYACONNECT.CUSTOM.clearItemIdArr = new Array(':hidProductId',':hidProductNm',
+     ':productName',':price',':orderNums',
+     ':amoutPriceExcTax',':amoutPriceIncTax',':hidSyncInfo',':amoutPriceExcTax',':amoutPriceIncTax',
+     ':hidAmoutPriceIncTax',':hidAmoutPriceExcTax',':hidPlandetail',':hidHadRoomFlag',
+     // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+     ':hidPlanBrkInfoId', ':hidgOptionInfoJson', ':hidIsSetOptionFlg', ':hidKey', ':nwOrderNums', ':hidOptionNo',':hidOptionTotal',':hidShowDetailFlg',
+     // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+     // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+     ':hidBTaxAccMstId',':hidBTaxToPlanRowIndex',
+     // 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+     ':oldOrderNums',
+     // 2020/07/30 BUG-FIX-#7106 WGCH END
+     // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+     // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+     // 支払種別未清空Bug修订
+     ':hidPaymentType',
+     // 2019/07/30 軽減税率機能対応 WGCH END
+     // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+     ':hidBasePlanNum',':hidEstGuestType',
+     // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+     ':taxRateType', ':hidTaxRateType', ':serviceRate', ':hidServiceRate', ':specialTax', ':hidSpecialTax', ':hidActionType');
+
+</script>
+<style>
+.requiredBlockClass{
+  background-color: #c00;
+    position: absolute;
+    width: 3px;
+    left:-4px;
+    height:18px;
+    bottom: 1px;
+}
+.smallTitle{
+  font-size:10px;
+}
+/* 2017/03/01 お客様項目タイプ対応　by　zy　BEGIN*/
+span.dateInput span.dateFormat{
+  display:none;
+}
+/* 2017/03/01 お客様項目タイプ対応　by　zy　END*/
+</style>
+<!-- 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN -->
+<c:CustomBathTaxAutoSet />
+<script>
+// HTML索引值初期设定
+// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+ACTCUSTOM.TAGINITFUN("[id$=BookEstTable] tbody tr.tranDetailRow", "hidProductId", "rowindex", "hidBTaxAccMstId", "hidBTaxToPlanRowIndex", "orderNums", "clearProduct", "hidgOptionInfoJson", "autoGetProductInfo", "refreshOrder", "checkAddTranItem", "oldOrderNums");
+// 2020/07/30 BUG-FIX-#7106 WGCH END
+</script>
+<!-- 2020/07/30 入湯税の自動入力機能について改善 zyz END -->
+<apex:form id="createForm">
+<div class="bd" style="height:550px;overflow: auto;" >
+  <apex:inputHidden value="{!sobjectMap['Lead__c'].SalesOfficeInfoRef__c}" id="hidTravelId"/><!-- Hidden:旅行会社 -->
+    <apex:inputHidden value="{!startDays}" id="hidStartDays"/><!-- Hidden:到着日 -->
+    <apex:inputHidden value="{!staysNums}" id="hidStaysNums" rendered="{!!isHaveStartDays}"/><!-- Hidden:部屋タイプID -->
+    <apex:inputHidden value="{!bookingRooms}" id="hidBookingRooms" rendered="{!!isHaveBookingRooms}"/><!-- Hidden:部屋タイプID -->
+    <apex:inputHidden value="{!sobjectMap['Lead__c'].StayPersons__c}" id="hidStayPerson" rendered="{!!isHaveStayPerson}"/>
+    <apex:inputHidden value="{!sobjectMap['Lead__c'].refTypeOfRooms__c}" id="hidRefTypeOfRooms" rendered="{!oldVersionFlag}"/>
+    <!-- 2019/06/14 4.2.予約ポップからベースプランを選択した状態で新規予約作成をすると、予約見積明細に該当のプランが登録された状態で予約を取ることができますが、 by zy BEGIN -->
+    <apex:inputHidden value="{!basePlanId}" id="hidBasePlanId"/>
+    <input type="hidden" id="hidBaseAccId"/>
+    <!-- 2019/06/14 4.2.予約ポップからベースプランを選択した状態で新規予約作成をすると、予約見積明細に該当のプランが登録された状態で予約を取ることができますが、 by zy END -->
+    <!--2017/03/01 お客様項目タイプ対応　by　zy　BEGIN -->
+    <input type="hidden" id="hidContactType" value="{!contactFieldType}" />
+    <!--2017/03/01 お客様項目タイプ対応　by　zy　END -->
+    <input type="hidden"  id="hidCurRackRatePrice" /> <!-- 画面から指定している室料 -->
+    <!-- 2020/04/03 予約ポップでラックレートのテーブルを複数持つ機能 BY zyz BEGIN	 -->
+    <apex:inputHidden value="{!sobjectMap['Lead__c'].GuestType__c}" id="hidGuestType"/>
+    <!-- 2020/04/03 予約ポップでラックレートのテーブルを複数持つ機能 BY zyz END	 -->
+    <apex:pageBlock id="createPageBlock">
+        <!-- Message Panel Block -->        
+        <apex:outputPanel id="CustomLeadMessagePanel">
+          <apex:pageMessages id="inputFormMsg"/>
+          <div class="message errorM3" id="inputFormErrorMsg" role="alert" style="display:none;">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+              <tbody>
+                <tr valign="top">
+                  <td><img alt="ERROR" class="msgIcon" src="/s.gif" title="ERROR"/></td>
+                  <td class="messageCell">
+                    <div class="messageText">
+                      <span style="color:#cc0000"><h4>{!$Label.CONST_003_0132}:</h4></span>{!$Label.MSG_003_0105}<br/>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <apex:inputHidden value="{!customLeadbookingCreateOK}" id="hidDataCreateOK"/><!-- Hidden:Data Create IS OK -->
+            <!-- 2016/12/07 予約ポップ新規後一画面へ遷移 BEGIN by zh -->
+        <input type="hidden" id="IndexId" value="{!indexId}" />
+        <!-- 2016/12/07 予約ポップ新規後一画面へ遷移 END by zh -->
+            <!-- 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 -->
+            <input type="hidden" id="defStaysNums" value="{!defStaysNums}" />
+        </apex:outputPanel>
+        <!-- 2016/07/11 新規予約ポップ画面のセット BEGIN --> 
+        <apex:repeat value="{!pageLst}" var="p"> 
+            <apex:pageBlockSection columns="{!p.columnsInt}" id="createPageBlockSection" title="{!p.title}" showHeader="{!p.isHeadShowFlag}">
+                <apex:repeat value="{!p.fieldLst}" var="fieldNm"> 
+                    <apex:pageBlockSectionItem rendered="{!fieldTypeMap[fieldNm] == 'custom'}" dataStyleClass="{!fieldNm}">
+                        <apex:outputLabel value="{!fieldLabelMap[fieldNm]}"/><!-- {!fieldLabelMap[fieldNm]} -->
+                        <apex:inputField value="{!sobjectMap[fieldObjectMap[fieldNm]][pathToFieldMap[fieldNm]]}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}"  html-element="lead_{!fieldNm}" style="{!if(fieldNm == 'Name' && oldVersionFlag, 'width:200px', if(!ISBLANK(styleMap[fieldNm]) , styleMap[fieldNm], if(p.columnsInt>1,'max-width:150px;','')))}" required="{!fieldRequiredMap[fieldNm]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!fieldTypeMap[fieldNm] == 'boolean'}" dataStyleClass="{!fieldNm}">
+                        <apex:outputLabel value="{!fieldLabelMap[fieldNm]}"/><!-- {!fieldLabelMap[fieldNm]} -->
+                      <apex:inputCheckbox value="{!sobjectMap[fieldObjectMap[fieldNm]][pathToFieldMap[fieldNm]]}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" html-element="lead_{!fieldNm}" required="{!fieldRequiredMap[fieldNm]}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!fieldTypeMap[fieldNm] == 'blank'}">
+                      <apex:outputLabel value=""/>
+                    </apex:pageBlockSectionItem>
+                    <!-- お客様 -->
+                    <apex:pageBlockSectionItem id="relcontactItem" helpText="{!$ObjectType.Contact.Fields.Name1__c.InlineHelpText}" rendered="{!fieldTypeMap[fieldNm] == 'Relcontact'}">
+                        <!-- お客様 -->
+                        <apex:outputLabel value="{!$Label.ps__msg_003_0057}"/>
+                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                          <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                          <span class="lookupInput">
+                          <apex:inputText id="relcontact" label="お客様" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" value="{!contactName}" html-placeholder="{!$Label.ps__inf_0002}" html-element="lead_{!fieldNm}"  style="{!if(oldVersionFlag, 'width:200px;', if(!ISBLANK(styleMap[fieldNm]) , styleMap[fieldNm], if(p.columnsInt>1,'width:200px;','width:450px;')))}" maxlength="80" >
+                          <apex:inputHidden value="{!sobjectMap['Lead__c'].Relcontact__c}" id="relcontact_lkid" html-element="lead_{!fieldNm}" />
+                          <apex:inputHidden id="relcontact_lkold" html-element="lead_{!fieldNm}" />       <!-- PopupWin利用 -->
+                          <input type="hidden" id="relcontact_lkid_org" html-element="lead_{!fieldNm}" />    <!-- JS判断用 -->
+                          <!-- 2019/04/30 予約ポップの在庫設定(AGT)の変更機能 BY zyz BEGIN -->
+                          <c:AutoCompleteComp objectname="Contact" 
+                              additionalfield="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Name1__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c"
+                              autocomplete_textbox="{!$Component.relcontact}" 
+                              showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,Description"
+                              maxLenFilter="Description:16"
+                              showFieldSeparator=", "
+                              addFilter="IsDelete__c!=true"
+                              jslibnew="true"
+                          />
+                          <!-- 2019/04/30 予約ポップの在庫設定(AGT)の変更機能 BY zyz END -->
+                          </apex:inputText>
+                          <!-- お客様選択 -->
+                          <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+                           onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+                           onfocus="this.className = 'lookupIconOn';"
+                           onblur="this.className = 'lookupIcon';"
+                           class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px"
+                           name="accountPopup" /> 
+                           </span>
+                        </apex:outputPanel>
+                  </apex:pageBlockSectionItem>
+                  <!-- 部屋タイプ -->
+                <apex:pageBlockSectionItem id="refTypeOfRoomsItem" rendered="{!fieldTypeMap[fieldNm] == 'refTypeOfRooms'}" dataStyleClass="{!fieldNm}" >
+                    <apex:outputLabel value="{!$Label.ps__msg_003_0046}"/>
+                     <apex:outputPanel styleClass="requiredInput" layout="block">
+                      <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!oldVersionFlag&&fieldRequiredMap[fieldNm]}"/>
+                      <apex:outputText id="refTypeOfRooms" value="" html-element="lead_{!fieldNm}" rendered="{!oldVersionFlag}"/>
+                      <apex:inputField value="{!sobjectMap['Lead__c'].refTypeOfRooms__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" html-element="lead_{!fieldNm}" style="{!styleMap[fieldNm]}" rendered="{!!oldVersionFlag}" />
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                    <!-- $到着日 -->
+                    <apex:pageBlockSectionItem id="entryDateItem" rendered="{!fieldTypeMap[fieldNm] == 'EntryTime'}">
+                        <apex:outputLabel value="{!$Label.ps__msg_003_0059}"/>
+                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                        <apex:outputText value="" html-element="lead_{!fieldNm}" rendered="{!oldVersionFlag}"/>
+                          <apex:inputField value="{!startTable.Checkinday__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" html-element="lead_{!fieldNm}" style="{!styleMap[fieldNm]}" onchange="JINYACONNECT.CUSTOM.setDepartureDateAuto('entryDt')"  rendered="{!!oldVersionFlag}"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                  <!-- $出発日 -->
+                    <apex:pageBlockSectionItem id="departureDateItem" rendered="{!fieldTypeMap[fieldNm] == 'Departure'}">
+                        <apex:outputLabel value="{!$Label.ps__msg_003_0061}"/>
+                        <apex:outputPanel styleClass="requiredInput" layout="block">
+                        <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                        <apex:outputText value="" html-element="lead_{!fieldNm}" rendered="{!oldVersionFlag}"/>
+                          <apex:inputField label="出発日" value="{!endTable.Checkinday__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" html-element="lead_{!fieldNm}" onchange="JINYACONNECT.CUSTOM.setDepartureDateAuto('departDt')" style="{!styleMap[fieldNm]}" rendered="{!!oldVersionFlag}"/>
+                      </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <!--2017/02/28 新版本対応　by zy BEGIN-->
+                    <!-- セミナー -->
+                <apex:pageBlockSectionItem rendered="{!fieldTypeMap[fieldNm] == 'SeminarOrderFlg'}">
+                  <apex:outputLabel value="{!$ObjectType.Lead__c.Fields.SeminarOrderFlg__c.label}" rendered="{!isHaveSeminar}"/>
+                  <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <apex:inputField id="seminarOrderFlg" value="{!sobjectMap['Lead__c'].SeminarOrderFlg__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" rendered="{!isHaveSeminar}"/>
+                    <apex:outputLabel value="" rendered="{!!isHaveSeminar}"/>
+                  </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <!-- エキストラベッド -->
+                <apex:pageBlockSectionItem rendered="{!fieldTypeMap[fieldNm] == 'ExtraBedChk'}" >
+                    <apex:outputLabel value="{!$ObjectType.Lead__c.Fields.ExtraBedChk__c.label}"  rendered="{!isHaveEbInfo}"/>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                      <apex:inputField id="extrabedFlg" value="{!sobjectMap['Lead__c'].ExtraBedChk__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" rendered="{!isHaveEbInfo}"/>
+                      <apex:outputLabel value=""  rendered="{!!isHaveEbInfo}"/>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <!--2017/02/28 新版本対応　by zy END-->
+                    <!-- 泊数 -->
+                    <apex:pageBlockSectionItem id="staysNumsItem" rendered="{!fieldTypeMap[fieldNm] == 'staysNums'}">
+                        <apex:outputLabel value="{!$Label.ps__msg_003_0064}"/>
+                        <apex:inputText id="staysNums" value="{!staysNums}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" onchange="JINYACONNECT.CUSTOM.setDepartureDateAuto('stays')" style="{!styleMap[fieldNm]}" required="{!fieldRequiredMap[fieldNm]}"/>
+                    </apex:pageBlockSectionItem>
+                    <!-- 部屋数 -->
+                    <apex:pageBlockSectionItem id="bookingRoomsItem" rendered="{!fieldTypeMap[fieldNm] == 'bookingRooms'}">
+                        <apex:outputLabel value="{!$Label.ps__msg_003_0065}"/>
+                         <apex:outputPanel styleClass="requiredInput" layout="block">
+                          <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                          <apex:inputText id="bookingRooms" value="{!bookingRooms}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" style="{!styleMap[fieldNm]}" required="{!fieldRequiredMap[fieldNm]}" />
+                       </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <!-- 部屋  --> 
+                    <apex:pageblockSectionItem id="broom" helpText="{!$ObjectType.Lead__c.Fields.Rroom__c.inlineHelpText}" rendered="{!isHaveRoom && fieldTypeMap[fieldNm] == 'Rroom'}">
+                      <apex:outputlabel value="{!$ObjectType.Lead__c.Fields.Rroom__c.label}" />
+                      <apex:outputPanel styleClass="lookupInput" style="vertical-align:top">
+                          <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                        <span class="lookupInput">
+                            <apex:inputText value="{!roomName}" id="name" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" style="background-color:#E0E0E0;{!styleMap[fieldNm]}" html-element="lead_{!fieldNm}" disabled="true" />
+                            <apex:inputHidden value="{!sobjectMap['Lead__c'].Rroom__c}" id="id" html-element="lead_{!fieldNm}"  />
+                            <!-- 部屋クリア -->
+                            <!-- クリア -->
+                <a class="headerSearchClearButton" href="javascript: void(0);" onclick="JINYACONNECT.CUSTOM.ClearRoom()"
+                title="{!$Label.MSG_003_0066}" style="vertical-align:top;margin-top: 0px" />
+                            <!-- 部屋選択 -->
+                            <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+                             onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+                             onfocus="this.className = 'lookupIconOn';"
+                             onblur="this.className = 'lookupIcon';"
+                             class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px"
+                             name="roomPopup" />
+                        </span>
+                      </apex:outputPanel>
+                    </apex:pageblockSectionItem>
+                    <!-- プラン -->
+                <apex:pageBlockSectionItem id="planItem" rendered="{!fieldTypeMap[fieldNm] == 'Field310' && !isPlanDetailFlag}" labelStyle="vertical-align: middle;" >
+                    <apex:outputLabel value="{!$Label.ps__msg_003_0067}"/>
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+                <!-- 
+                <apex:outputPanel styleClass="requiredBlock" layout="block" rendered=""/> -->
+                  <span>
+                  <!-- 2016/12/21 连接plan页面替换标准页面  begin by wx-->
+                        <!--<apex:inputField id="plan" value="{!sobjectMap['Lead__c'].Field310__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" html-element="lead_{!fieldNm}"  html-placeholder="{!$Label.ps__inf_0002}" style="{!if(oldVersionFlag, 'width:180px;', styleMap[fieldNm])}" >-->
+                        <apex:inputText value="{!planName}" id="plan" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" html-element="lead_{!fieldNm}"  html-placeholder="{!$Label.ps__inf_0002}" style="{!if(oldVersionFlag, 'width:180px;', styleMap[fieldNm])}" />
+                        <apex:inputHidden value="{!sobjectMap['Lead__c'].Field310__c}" id="plan_lkid" html-element="lead_{!fieldNm}"  />
+                        <!-- 2016/12/21 连接plan页面替换标准页面  end by wx-->
+                            <span class="requiredBlockClass" style="{!if(fieldRequiredMap[fieldNm],'','display:none')}"></span>
+                            <!-- 2019/04/30 予約ポップの在庫設定(AGT)の変更機能 BY zyz BEGIN -->
+                            <c:AutoCompleteComp objectname="Plan__c"
+                                jslibnew="true"
+                                additionalfield="{!$Setup.CommDefine__c.AppNS__c}PlanNo__c,{!$Setup.CommDefine__c.AppNS__c}PackageCode__c"
+                                autocomplete_textbox="{!$Component.plan}" addFilter="IsClosed__c=false" callbackFunction="JINYACONNECT.CUSTOM.planRest"  soslExtend="false"/>
+                            <!-- 2019/04/30 予約ポップの在庫設定(AGT)の変更機能 BY zyz END -->
+                            <!-- 2016/12/21 连接plan页面替换标准页面  begin by wx-->
+                    <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+                            onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+                            onfocus="this.className = 'lookupIconOn';"
+                            onblur="this.className = 'lookupIcon';"
+                            class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+                            name="planPopup" />
+                          <!-- 2016/12/21 连接plan页面替换标准页面  end by wx -->
+                          <!-- プラン詳細 -->
+                          <img src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}" style="cursor: pointer; width: 18px; height: 18px;vertical-align: middle;"
+                                    onclick="JINYACONNECT.CUSTOM.openMiniPlanSetup(this);" id="planCustomeBtn" title="{!$Label.MSG_003_0068}" colnumsize="{!p.columnsInt}"/>
+                        <!-- 2016/12/21 连接plan页面替换标准页面  begin by wx-->
+                        <!--</apex:inputField>-->
+                        <!-- 2016/12/21 连接plan页面替换标准页面  end by wx-->
+                        </span>
+                    <apex:inputHidden value="{!sobjectMap['Lead__c'].PlanDetailSyncInfo__c}" id="nl_hidPlanDetailInfo"/>
+                   </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <!-- 支払方法 -->
+                <apex:pageBlockSectionItem id="paymentTypeItem" rendered="{!fieldTypeMap[fieldNm] == 'Field315'}">
+                   <apex:outputLabel value="{!$Label.ps__msg_003_0069}"/>
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                      <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                      <apex:selectList value="{!sobjectMap['Lead__c'].Field315__c}" styleClass="{!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" multiselect="false" size="1" id="paymentType" html-element="lead_{!fieldNm}" required="{!fieldRequiredMap[fieldNm]}" style="{!styleMap[fieldNm]}">
+                          <apex:selectOptions value="{!paymentTypeLst}"/>
+                      </apex:selectList>
+                   </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                
+                <apex:pageBlockSectionItem rendered="{!fieldTypeMap[fieldNm] == 'Comment3'}">
+                   <apex:outputLabel value="{!$ObjectType.Lead__c.Fields.Comment3__c.label}"/>
+                   <apex:outputPanel styleClass="requiredInput" layout="block"> 
+                    <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!fieldRequiredMap[fieldNm]}"/>
+                      <!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz BEGIN -->
+                      <c:CommentHelperComp commentId="comment3" commentFlg="true"/>
+                      <!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz END -->
+                      <apex:inputTextarea value="{!sobjectMap['Lead__c'].Comment3__c}" id="comment3" html-element="lead_{!fieldNm}" richtext="false" rows="4" cols="160" styleClass="ckeditorClass {!if(fieldRequiredMap[fieldNm],'repuiredClass','')}" />
+                  </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                 </apex:repeat> 
+             <!-- 2016/07/11 新規予約ポップ画面のセット END -->
+            </apex:pageBlockSection>
+        </apex:repeat>
+    </apex:pageBlock>
+    <apex:outputpanel id="detailPageBlock" rendered="{!isPlanDetailFlag}">
+    <!-- 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix BEGIN -->
+    <apex:inputHidden value="{!curRows}" id="hidCurRows"/>
+    <!-- 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix END -->
+	<!-- 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN -->
+	<apex:inputHidden value="{!addRowsMan}" id="hidaddRowsMan"/>
+	<!-- 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END -->
+    <apex:pageBlock >
+      <apex:actionFunction name="addTranItemFun" action="{!addBookingItem}"
+      status="refStatusBlock" reRender="detailPageBlock"  oncomplete="JINYACONNECT.CUSTOM.detailBindEvent();autoFocus();" />
+        <table style="border-spacing: 0px;border-collapse: 0px;table-layout: fixed;width:100%">
+      <tr>
+        <td style="white-space: nowrap;">
+					<!-- 2020/01/30 行追加ボタン機能対応 BY zyz BEGIN -->
+					<!-- 行追加  -->
+            <input class="btn" value="{!$Label.MSG_011_0052}" type="button" onclick="refreshOrder(true);checkAddTranItem()" style="width: 100px;" />
+    				<!-- 2020/01/30 行追加ボタン機能対応 BY zyz END -->
+					<!-- 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN -->
+    				<input class="btn" value="プラン" type="button" onclick="openPlanWinFun();" style="width: 100px;display:{!IF(isBasePlanFlag,'','none;')}" />
+    				<!-- 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END -->
+          </td>
+              <!-- 2020/01/30 行追加ボタン機能対応 BY zyz BEGIN -->
+              <td style="width:75.5%; text-align: right;vertical-align: middle;text-align: right;">
+              <!-- 2020/01/30 行追加ボタン機能対応 BY zyz END -->
+                  <table style="width: 100%; border-spacing: 0px;border-collapse: 0px; font-size: 16px;font-weight: bold;table-layout: fixed;text-align: right;">
+                    <tr>
+                      <td style="height: 24px;">
+                        <!-- ご利用金額(税込)： -->
+                        <span>{!$Label.MSG_006_0250}</span>
+                      </td>
+                      <td style="width: 110px">
+                        <input type="hidden" class="detailClass" id="totalAmountExcTax" />
+                          <apex:outputPanel style="margin-right: 2px;" id="usedAmount">
+                    <span id="usedAmountBlock" ></span>   
+                          </apex:outputPanel>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="height: 24px;">
+                        <!-- ご請求金額(税込)： -->
+                        <span>{!$Label.MSG_006_0259}</span>
+                      </td>
+                      <td style="width: 110px">
+                          <apex:outputPanel style="margin-right: 2px;" id="reqAmount">
+                    <span id="reqAmountBlock"></span>   
+                          </apex:outputPanel>
+                      </td>
+                    </tr>
+                    
+                  </table>
+          </td>
+        </tr>
+      </table>
+        <apex:pageBlockTable value="{!oBookEstLst}" var="t" id="BookEstTable" columnsWidth="1%,3%,37%,10%,10%,9%,7%,7%,7%,9%" rowClasses="tranDetailRow">
+        <apex:column width="1%">
+        <!-- 移動 -->
+          <!-- 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix BEGIN -->
+           <div title="{!$Label.MSG_011_0050}"  class="pointIndex {!t.addRowStr}" rowIndex = "{!t.index}">
+          <!-- 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix END -->
+              <img title="" class="pointImg" alt="" src="{!URLFOR($Resource.AppImages, 'extend/blur.png')}" />  
+                  <apex:inputHidden value="{!t.sobj.RowNo__c}" id="hidRowNo" /> 
+                  <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN -->
+                  <apex:inputHidden value="{!t.sobj.OptionNo__c}" id="hidOptionNo" />
+                  <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH END -->
+                  
+          </div>
+        </apex:column>
+        
+        <!-- アクション -->
+        <apex:column headerValue="{!$Label.ps__msg_011_0061}" footerClass="totalRowCenCell" width="3%">
+          <!-- クリア -->
+          <input type="button" title="{!$Label.MSG_011_0062}" value="{!$Label.MSG_011_0062}" id="clearProduct" rowIndex="{!t.index}" />
+        </apex:column>
+    
+        <!-- 商品コード -->
+        <!-- 商品 -->
+            <apex:column headerValue="{!$Label.ps__msg_011_0063}">
+                <span class="lookupInput">
+                <!-- 
+                    <input type="text" value="{!t.productNm}" id=":BookEstTable:{!t.index}:productName"
+                        readonly="readonly" style="background-color:#f1f1f1; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')});" /> -->
+                    <table style="width: 100%;border-spacing: 0;border: 0; padding: 0">
+                    <tr>
+                    <td style="border-bottom:0px;padding: 0px;">
+                    <apex:inputText value="{!t.productNm}" id="productName" maxlength="80" style="width:99%;" html-rowIndex="{!t.index}"/>
+                    </td>
+                    <td style="width: 44px; border-bottom:0px;padding: 0px 0px 0px 2px">
+                    <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+                    onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+                    onfocus="this.className = 'lookupIconOn';"
+                    onblur="this.className = 'lookupIcon';"
+                    class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+                    name="productPopup"
+                    rowIndex = "{!t.index}" />
+                  
+                  <!-- 単価用ボタン -->
+                  <!-- 展開 -->
+                    <img title="{!$Label.MSG_011_0064}" src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}"
+                        style="cursor: pointer;display: true; width: 18px; height: 18px; visibility:{!IF(t.isPlanProduct,'visible','hidden')}"
+                        id="showDetailEvent{!t.index}" onclick="showDetailFun(this)" openStatus="false"
+                        rowIndex = "{!t.index}" />
+            </td></tr></table>
+            </span>
+            <apex:inputHidden value="{!t.sobj.PlanDetailSyncInfo__c}" id="hidSyncInfo" />
+                  <!-- 関連情報を一時保持するため、別の変数を定義する -->
+                    
+                  <!-- 2018/07/27 宿泊税計算 WGCH BEGIN -->
+                  <!-- <apex:inputHidden value="{!t.sobj.refAccountMaster__c}" id="hidProductId" /> -->
+                  <!-- 2019/04/30 増税仮対応 WGCH BEGIN -->
+                  <!-- <apex:inputHidden value="{!t.sobj.refAccountMaster__c}" id="hidProductId" html-rowNo="{!t.rowNo}" /> -->
+                  <apex:inputHidden value="{!t.sobj.refAccountMaster__c}" id="hidProductId" html-rowNo="{!t.rowNo}" html-rowindex="{!t.index}" />
+                  <!-- 2019/04/30 増税仮対応 WGCH END -->
+                  <!-- 2018/07/27 宿泊税計算 WGCH END -->
+                  <apex:inputHidden value="{!t.orgProductNm}" id="hidProductNm" />
+                  <!-- 関連情報を一時保持するため、別の変数を定義する -->
+                  <apex:inputHidden value="{!t.sobj.ActionType__c}" id="hidActionType" />
+            <!-- 支払種別 -->
+            <apex:inputHidden value="{!t.sobj.PaymentType__c}" id="hidPaymentType" />
+            <!-- 金額（税込み) -->
+            <apex:inputHidden value="{!t.amoutIncTax}" id="hidAmoutPriceIncTax" html-rowIndex="{!t.index}"/>
+            <!-- 金額（税抜き） -->
+            <apex:inputHidden value="{!t.amoutExcTax}" id="hidAmoutPriceExcTax" />
+            <!-- 単価定義区分 -->
+            <input type="hidden" value="{!t.sobj.UnitPriceDefKbCal__c}" id=":tran1Table:{!t.index}:hidUnitPriceKbn" />
+            <!-- 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN -->
+            <!-- 2016/11/21 行追加后課税商品计算错误 BEGIN by zh -->
+            <apex:inputHidden id="hidPlandetail" value="{!t.initPlanInfo}"/>
+            <!-- 2016/11/21 行追加后課税商品计算错误 END by zh -->
+            <input type="hidden" id=":BookEstTable:{!t.index}:hidPlandetail" value="{!t.initPlanInfo}"/>
+            <!-- 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END -->
+            <input type="hidden" id=":BookEstTable:{!t.index}:hidHadRoomFlag" value=""/>
+            <!-- 2018/07/27 宿泊税計算 WGCH BEGIN -->
+            <input type="hidden" id=":BookEstTable:{!t.index}:hidPDetailId" value=""/>
+            <!-- 2018/07/27 宿泊税計算 WGCH END -->
+					  <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+					  <input type="hidden" id=":BookEstTable:{!t.index}:hidPlanBrkInfoId" value=""/>
+					  <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+					  <!-- 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN -->
+					  <!-- 第一笔Plan对应的入汤税商品Id -->
+					  <apex:inputHidden value="{!t.bTaxAccMstId}" id="hidBTaxAccMstId" />
+					  <!-- 入汤税商品对应关联PLANROWNO -->
+					  <apex:inputHidden value="{!t.bTaxToPlanRowIndex}" id="hidBTaxToPlanRowIndex" />
+					  <!-- 2020/07/30 BUG-FIX-#7106 WGCH BEGIN -->
+					  <!-- optionOld数量 -->
+					  <apex:inputHidden value="{!t.oldOrderNums}" id="oldOrderNums" />
+					  <!-- 2020/07/30 BUG-FIX-#7106 WGCH END -->
+					  <!-- 2020/07/30 入湯税の自動入力機能について改善 zyz END -->
+            <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN -->
+            <!-- 放大镜option设定 -->
+            <apex:inputHidden value="{!t.gOptionInfoJson}" id="hidgOptionInfoJson" />
+            <!-- option设定过标识符FLG -->
+            <apex:inputHidden value="{!t.isSetOptionFlg}" id="hidIsSetOptionFlg" />
+            <!-- optionModeKey -->
+            <apex:inputHidden value="{!t.key}" id="hidKey" />
+            <!-- optionMode数量 -->
+            <apex:inputHidden value="{!t.nwOrderNums}" id="nwOrderNums" />
+            <!-- optionMode展开过 -->
+            <apex:inputHidden value="{!t.showDetailFlg}" id="hidShowDetailFlg" />
+            <apex:inputHidden value="{!t.sobj.OptionTotal__c}" id="hidOptionTotal" />
+            <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH END -->
+            <!-- 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN -->
+					  <apex:inputHidden value="{!t.sobj.SysSelBasePlanNums__c}" id="hidBasePlanNum" />
+            <apex:inputHidden value="{!t.sobj.GuestType__c}" id="hidEstGuestType" />
+					  <!-- 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END -->
+            </apex:column>
+    
+        <!-- 単価-->
+            <apex:column headerValue="{!$Label.ps__msg_006_0404}" >
+                <!-- <apex:inputField value="{!t.sobj.UnitPrice__c}" id="price" style="width:80px"/> -->
+                <apex:inputText value="{!t.unitPrice}" id="price"  style="width:40px"/>
+            </apex:column>
+    
+        <!-- 数量-->
+            <apex:column headerValue="{!$Label.ps__msg_006_0405}" >
+                <apex:inputText value="{!t.prodNums}" id="orderNums" maxlength="8" style="width:30px"/>
+            </apex:column>
+    
+        <!-- 合計金額(税抜)-->
+            <apex:column headerValue="{!$Label.ps__msg_006_0258}" width="5%"
+              style="text-align: right; background-color: #FFEBCD;" headerClass="smallTitle">
+          <apex:outputText value="{0,number,{!numberFormat}}"  id="amoutPriceExcTax">
+          <apex:param value="{!t.amoutExcTax}" />
+          </apex:outputText>
+            </apex:column>
+    
+        <!-- 消費税 -->
+            <apex:column headerValue="{!$Label.ps__msg_006_0406}" style="text-align: right; " width="7%">
+          <!-- <apex:outputField value="{!t.sobj.TaxRate__c}" id="taxRateType"/> -->
+          <apex:outputText value="{0,number, {!TaxNumberFormat}}" id="taxRateType">
+                <apex:param value="{!t.sobj.TaxRate__c/100}" />
+                </apex:outputText>
+          <apex:inputHidden value="{!t.sobj.TaxRate__c}" id="hidTaxRateType" />
+            </apex:column>
+            <!-- サービス料 -->
+            <apex:column headerValue="{!$Label.ps__msg_006_0407}" style="text-align: right; " headerClass="smallTitle"  width="5%" >
+          <apex:outputText value="{0,number, {!TaxNumberFormat}}" id="serviceRate">
+            <apex:param value="{!t.sobj.ServiceRate__c/100}" />
+                </apex:outputText>
+          <apex:inputHidden value="{!t.sobj.ServiceRate__c}" id="hidServiceRate" />
+            </apex:column>
+            <!-- 特別税 -->
+            <apex:column headerValue="{!$Label.ps__msg_006_0408}" style="text-align: right; " width="7%">
+    
+                <apex:outputText value="{0,number,{!numberFormat}}" id="specialTax">
+                    <apex:param value="{!t.specialTax}" />
+                </apex:outputText>
+          <apex:inputHidden value="{!t.sobj.SpecialTax__c}" id="hidSpecialTax" />
+            </apex:column>
+            <!-- 合計金額(税込) -->
+            <apex:column headerValue="{!$Label.ps__msg_006_0257}" style="text-align: right; background-color: #FFEBCD;" headerClass="smallTitle"  width="6%"
+              footerClass="totalRowNumCell">
+          <apex:outputText value="{0,number,{!numberFormat}}"  id="amoutPriceIncTax" >
+            <apex:param value="{!t.amoutIncTax}" />
+          </apex:outputText>
+            </apex:column>
+      </apex:pageBlockTable>
+    </apex:pageBlock>
+    </apex:outputpanel>
+    </div>
+    <div class="ft" style="font-size: 10px;">
+    <apex:outputPanel layout="block">
+        <div style="text-align: right;" >
+          <input type="reset" value="reset" id="formresetbtn" style="display: none;"/>
+            <!-- 保存 -->
+           <input type="button" value="{!$Label.MSG_003_0072}" class="btn disBtn" style="width: 100px"  onclick="if (JINYACONNECT.CUSTOM.CheckRoomsNumber()) {JINYACONNECT.CUSTOM.doBeforeSave();}"/>
+           <apex:actionFunction name="saveLeadFun" oncomplete="JINYACONNECT.CUSTOM.CallBack();" 
+                            action="{!bookingLeadCreate}"   reRender="CustomLeadMessagePanel,detailPageBlock"  />
+            <!-- キャンセル -->
+          <input type="button" value="{!$Label.MSG_003_0073}" id="cancelBtn" class="btn disBtn" style="width: 100px"/>
+        </div>
+    </apex:outputPanel>
+  </div>
+</apex:form> 
+
+<apex:outputpanel rendered="{!isPlanDetailFlag}">
+<script>
+
+JINYACONNECT.CUSTOM.detailBindEvent = function(){
+    // Clear Button
+    $j("input[id='clearProduct']").unbind("click");
+    $j("input[id='clearProduct']").click(function() {
+        var groupindex = $(this).attr("rowindex");
+        // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+		// 联动清空处理第一次Plan行对应的入汤税商品
+		ACTCUSTOM.PROBATHTAXROWFUN(groupindex, ACTCUSTOM.TPYE.CLEAR);
+        // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+        // 2019/04/30 増税仮対応 WGCH BEGIN
+        var productId = $j("input:hidden[id$=':" + groupindex + ":hidProductId']").val();
+        // 2019/04/30 増税仮対応 WGCH END
+        dispExtendImg("hidden", groupindex); // 展開imgを非表示にする
+        // 2019/04/15 ベネフィットホテル様より改善要望 by zy BEGIN
+        // 同じ行クリア
+        if(("lastIndex" in window) && window.lastIndex == kendo.parseInt(groupindex)) {
+          delete window.productId;
+          delete window.lastIndex;
+        }
+        // 2019/04/15 ベネフィットホテル様より改善要望 by zy END
+        for (var i = 0; i < JINYACONNECT.CUSTOM.clearItemIdArr.length; i++){
+            clearObj = $j("[id$=':BookEstTable:" + groupindex + JINYACONNECT.CUSTOM.clearItemIdArr[i] + "']");
+            if (clearObj.is(":checkbox")) {
+                clearObj.removeAttr('checked');
+            } else if (clearObj.is("select")) {
+                clearObj.get(0).selectedIndex = 0;
+            } else if (clearObj.is("span")) {
+                clearObj.text("");
+            } else {
+                clearObj.val("");
+            }
+        }
+        setupCalSumAmountPrice();
+        // 2019/04/30 増税仮対応 WGCH BEGIN
+        // 增税商品-自动设定
+        autoSetTaxIncProductFun(CUST_CLICKMODE_CLEAR, productId);
+        // 2019/04/30 増税仮対応 WGCH END
+    });
+    $j("img[name='productPopup']").unbind("click");
+    $j("img[name='productPopup']").click(function() {
+        var groupindex = $j(this).attr("rowindex");
+	       // 2019/04/15 ベネフィットホテル様より改善要望 by zy BEGIN
+        // 2019/09/15 Security Check BY zyz BEGIN
+        var bookingEstFlag = "{!JSENCODE(TEXT($Setup.CommDefine__c.ps__ProductSearchLayoutKbn__c))}";
+        // 2019/09/15 Security Check BY zyz END
+        if (bookingEstFlag == "1") return openProductWin(groupindex);
+	       // 2019/04/15 ベネフィットホテル様より改善要望 by zy END
+        // 引き渡し値を設定して、選択画面を開く
+        ctrlNm = $j("input:text[id$=':" + groupindex + ":productName']").get(0);
+        ctrlId = $j("input:hidden[id$=':" + groupindex + ":hidProductId']").get(0);
+        ctrlHidNm = $j("input:hidden[id$=':" + groupindex + ":hidProductNm']").get(0);
+        ctrlPriceId = $j("[id$=':" + groupindex + ":price']").get(0);
+        ctrlOrderNumId = $j("[id$=':" + groupindex + ":orderNums']").get(0);
+        ctrlTaxRate = $j("span[id$=':" + groupindex + ":taxRateType']").get(0);
+        ctrlHidTaxRate = $j("input:hidden[id$=':" + groupindex + ":hidTaxRateType']").get(0);
+        ctrlServiceTaxRate = $j("span[id$=':" + groupindex + ":serviceRate']").get(0);
+        ctrlHidServiceTaxRate = $j("input:hidden[id$=':" + groupindex + ":hidServiceRate']").get(0);
+        ctrlSpecialTax = $j("span[id$=':" + groupindex + ":specialTax']").get(0);
+        ctrlHidSpecialTax = $j("input:hidden[id$=':" + groupindex + ":hidSpecialTax']").get(0);
+        ctrlHidActionType = $j("input:hidden[id$=':" + groupindex + ":hidActionType']").get(0);
+        ctrlHidPaymentType = $j("input:hidden[id$=':" + groupindex + ":hidPaymentType']").get(0);
+        ctrlHidPlanDetail = $j("input:hidden[id$=':" + groupindex + ":hidPlandetail']").get(0);
+        ctrlHidHadRoomFlag = $j("input:hidden[id$=':" + groupindex + ":hidHadRoomFlag']").get(0);
+      // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+      ctrHidSyncInfo = $j("input:hidden[id$=':" + groupindex + ":hidSyncInfo']").get(0);
+      // 2018/07/27 宿泊税計算 WGCH BEGIN
+      ctrlHidPDetailId = $j("input:hidden[id$=':" + groupindex + ":hidPDetailId']").get(0);
+      // 2018/07/27 宿泊税計算 WGCH END
+	    // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+        ctrlHidPlanBrkInfoId = $j("input:hidden[id$=':" + groupindex + ":hidPlanBrkInfoId']").get(0);
+        // 2019/07/30 軽減税率機能対応 WGCH END
+        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+        // エステなど商品数据集合JSON
+        ctrlHidgOptionInfoJson = $j("input:hidden[id$=':" + groupindex + ":hidgOptionInfoJson']").get(0);
+        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+        //var openUrl = "/apex/ProductSearch?idx=" + groupindex + "&par=true";
+        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+        // var openUrl = "/apex/ProductSearch?idx=" + groupindex + "&par=true&sync=true";
+        var openUrl = "/apex/ProductSearch?idx=" + groupindex + "&par=true&sync=true&op=true";
+        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+        // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+        // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+        objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+            ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType,ctrlHidPaymentType,ctrlHidPlanDetail,ctrlHidHadRoomFlag
+            // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+            ,ctrHidSyncInfo
+            // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+            );
+        // 2018/07/27 宿泊税計算 WGCH BEGIN
+        objs.push(ctrlHidPDetailId);
+        // 2018/07/27 宿泊税計算 WGCH END
+        // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+        objs.push(ctrlHidPlanBrkInfoId);
+        // 2019/07/30 軽減税率機能対応 WGCH END
+        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+        objs.push(ctrlHidgOptionInfoJson);
+        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+        commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupCallback(groupindex));
+    });
+    // 商品金額関連項目監視設定
+    $j("input[id$=':orderNums']").unbind("change");
+  $j("input[id$=':orderNums']").on('change', function(e){
+    $this =$j(this);
+    if (kendo.parseFloat($this.val()) == null) $this.val("0");
+    var rowIndex = $this.closest('tr').children().first().children().first().attr("rowindex");
+    // 2020/07/30 入湯税の自動入力機能について改善 WGCH BEGIN
+	// 处理设定第一次Plan行对应的入汤税商品
+	ACTCUSTOM.PROBATHTAXROWFUN(rowIndex, ACTCUSTOM.TPYE.NUMS);
+	// 2020/07/30 入湯税の自動入力機能について改善 WGCH END
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+		if(OPTION_MODE_ON){
+			// 当前设定的数量
+			// 2020/07/30 BUG-FIX-#7099 WGCH BEGIN
+			$this = $j("input:text[id$=':" + rowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']");
+			// 2020/07/30 BUG-FIX-#7099 WGCH END
+			var _rowNums = kendo.parseFloat($this.val());
+			if(_rowNums == null) _rowNums = 0;
+			// 当前行Key
+			var key = getPlanKeyFun(rowIndex);
+			// 获取当前行的数据集合
+			var result = _resultMap.get(key);
+			// option设定过标识符FLG
+			var _hidIsSetOptionFlg = $j("input[id$=':" + rowIndex + ":hidIsSetOptionFlg']");
+			var hidIsSetOptionFlg = _hidIsSetOptionFlg.val();
+			// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+			if(result && result.hasOptionMstFlg) $j("input[id$=':" + rowIndex + ":oldOrderNums']").val($this.val());
+			// 2020/07/30 BUG-FIX-#7106 WGCH END
+			// 未设定过, 当前数量超出极限值
+			// 2020/05/29 bug fixed 6466 WGCH BEGIN
+			if(result && result.hasOptionMstFlg && (hidIsSetOptionFlg == "false" || hidIsSetOptionFlg == "" ) && _rowNums > result.numMin){
+			// 2020/05/29 bug fixed 6466 WGCH END
+				// 当前设定最小极限值
+				$this.val(result.numMin);
+				// 当前设定已设定标识符
+				_hidIsSetOptionFlg.val("true");
+				// optionMode对应的数量
+				var opToNumMap = new Map();
+				// optionModeKey数组
+				var opKeyArr = new Array();
+				var hidKeyMax = result.gNumToKeyMap[result.numMax+1];
+				// 解析optionMode
+				for(var i = result.numMin+1; i < (_rowNums+1); i++){
+					// if(!result.gNumToKeyMap[i]) continue;
+					var hidKey = result.gNumToKeyMap[i];
+					if(i > result.numMax) hidKey = hidKeyMax;
+					// 当前option对应数量集计
+					if(!opToNumMap.containsKey(hidKey)){
+						// optionModeKey数组集计
+						opKeyArr.push(hidKey);
+						// optionMode对应的数量集计
+						opToNumMap.set(hidKey, 0);
+					}
+					var nums = opToNumMap.get(hidKey) + 1;
+					opToNumMap.set(hidKey, nums);
+				}
+				// option设定关联主No
+				$j("input[id$='" + rowIndex + ":hidOptionNo']").val(rowIndex);
+				// 设定当前解析optionMode明细
+				for(var i = 0; i < opKeyArr.length; i++){
+					// optionModeKey
+					var hidKey = opKeyArr[i];
+					if(!result.gKeyItemMap[hidKey]) continue;
+					// 空白行Arr
+					var $blankArr = getBlankArr();
+					// 存在有效的空白行
+					if($blankArr.length > 0){
+						// 重置rowIndex
+						result.rowIndex = $blankArr[0];
+						// option设定过标识符FLG
+						$j("input[id$='" + result.rowIndex + ":hidIsSetOptionFlg']").val("true");
+						// option设定过标识符Key
+						$j("input[id$='" + result.rowIndex + ":hidKey']").val(hidKey);
+						// option设定当前对应的数量
+						$j("input[id$='" + result.rowIndex + ":nwOrderNums']").val(opToNumMap.get(hidKey));
+						// option设定关联主No
+						$j("input[id$='" + result.rowIndex + ":hidOptionNo']").val($j("input[id$='" + rowIndex + ":hidRowNo']").val());
+						
+						// 触发调用数据设定
+						autoGetProductInfo(result);
+					} else {
+						_addArr._optionNoArr.push(rowIndex);
+						_addArr._itemArr.push(result);
+						_addArr._hidKeyArr.push(hidKey);
+						_addArr._nwOrderNumsArr.push(opToNumMap.get(hidKey));
+					}
+				}
+				if(_addArr._itemArr.length > 0){
+					// 行号处理
+					refreshOrder(true);
+					checkAddTranItem();
+				}
+			}
+		}
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+    setupCalAmoutPrice(rowIndex, false);  
+  });
+    // 会計商品AutoComplete[1桁以上]
+    $j("input[id$=':productName']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.BookingLeadWindow.getArrayProductDetailItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($.map(result, function (item) {
+                      item.id = item.productId;
+                      item.value = item.prodcutName + "("+item.prodcutCode+")";
+                      return item;
+                    }));
+                } // End else
+                //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+                ffElment = YAHOO.force.com.myDialog.firstElement;
+              YAHOO.force.com.myDialog.firstElement=null;
+              //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+            });
+        },
+        focus: function (event, ui) {
+        var groupindex = $j(this).attr("rowIndex");
+        $j(this).closest("tr.tranDetailRow").addClass("disabled");
+        ui.item.rowIndex = groupindex;
+          // 2019/04/30 増税仮対応 WGCH BEGIN
+          // autoGetProductInfo(ui.item);
+          autoGetProductInfo(ui.item, CUST_AUTOGETPRODUCTMODE_RETURN);
+          // 2019/04/30 増税仮対応 WGCH END
+            return false;
+        },
+        select: function (event, ui) {
+        var groupindex = $j(this).attr("rowIndex");
+        ui.item.rowIndex = groupindex;
+            autoGetProductInfo(ui.item);
+            $j(this).closest("tr.tranDetailRow").removeClass("disabled");
+             //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+            if (ffElment != null){
+          YAHOO.force.com.myDialog.firstElement=ffElment;
+          ffElment = null;
+        }
+            //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+            // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+            // 触发追加入汤税行
+            ACTCUSTOM.BATHTAXAUTOSETFUN(groupindex, ui.item.bTaxAccMstItem);
+            // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+            return false;
+        },
+    });
+    $j("input[id$=':price']").unbind("change");
+    $j("input[id$=':price']").on("change",function(){
+      $this =$j(this);
+    if (kendo.parseFloat($this.val()) == null) $this.val("0");
+    var rowIndex = $this.closest('tr').children().first().children().first().attr("rowindex");
+    setupCalAmoutPrice(rowIndex, false);  
+    });
+    // Drop Acton
+  $j("[id$=BookEstTable]").kendoDraggable({
+    //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+    filter:'.pointIndex:not(.disabled)',
+    //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+    hint: function(e) {
+      dragLeadElement = $j(e).parents("tr.tranDetailRow");
+      var cloneELment = dragLeadElement.clone();
+      return cloneELment;
+    },
+    dragstart: draggableOnDragStart,
+    dragend: draggableOnDragEnd
+  });
+  $j("[id$=BookEstTable] tbody tr.tranDetailRow").kendoDropTarget({
+    drop: droptargetOnDrop
+  });
+  $j("tr.tranDetailRow").each(function(){
+    var $this = $j(this);
+    var price = $this.find("input[id$=price]").val();
+    if (price != ""){
+      var curRowIdx = $j("input[id$=clearProduct]",$this).attr("rowindex");
+      setupCalAmoutPrice(curRowIdx, false);
+    }
+  });
+  switchPriceStatus();
+  //2017/01/16 行追加共通化　by　zy BEGIN
+  lastBookingDetail();
+  //2017/01/16 行追加共通化　by　zy END
+}
+// ポップ商品選択後の自動処理
+function popupCallback(groupindex) {
+  return function () {
+    // 2018/07/27 宿泊税計算 WGCH BEGIN
+    // 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy BEGIN
+    //planItemPriceMap.set(getPlanKeyFun(groupindex), JSON.parse( $j("input[id$='" + groupindex + ":hidPDetailId']").val() ) );
+		// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+		var syncInfo = rackRateSyncInfo( $j("input[id$='" + groupindex + ":hidPDetailId']").val() ,groupindex);
+		// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    planItemPriceMap.set(getPlanKeyFun(groupindex),  syncInfo);
+    // 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy END
+		// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+		var pdProductItem = JSON.parse( $j("input[id$='" + groupindex + ":hidPlanBrkInfoId']").val() );
+		// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+		if(!commUtils.isEmpty(pdProductItem)) _planItemMap.set(getPlanKeyFun(groupindex), getPdProductItem(pdProductItem,groupindex));
+		// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+		// 2019/07/30 軽減税率機能対応 WGCH END
+    // 2018/07/27 宿泊税計算 WGCH END
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+	if(OPTION_MODE_ON){
+		// 重置行
+		optionInit(groupindex);
+		// エステなど商品数据集JSON
+		var hidgOptionInfoJson = $j("input:hidden[id$=':" + groupindex + ":hidgOptionInfoJson']").val();
+		if(hidgOptionInfoJson && hidgOptionInfoJson != ""){
+			var result = JSON.parse(hidgOptionInfoJson);
+			// 如果有PLAN明细加到MAP里
+			if(!commUtils.isEmpty(result.pdProductItem)) _planItemMap.set(getPlanKeyFun(groupindex), result.pdProductItem);
+			// optionModeKey
+	   		var hidKey = result.gNumToKeyMap["1"];
+	   		if(hidKey) $j("input[id$='" + groupindex + ":hidKey']").val(hidKey);
+	   		if(result.gKeyItemKeyLst){
+				var isHeaderAdd = true;
+				for(var m = 0; m < result.gKeyItemKeyLst.length; m++){
+					var key = result.gKeyItemKeyLst[m];
+					var itemArr = result.gKeyItemMap[key];
+					if(itemArr){
+						//TODO : 此处需要option的tier还是直接区分需要处理
+						var gRaceRatePrice = getTierPrice(groupindex);
+						for(var i = 0; i < itemArr.length; i++){
+							var item = itemArr[i];
+							if(item.actionType == _CONST_PRICE_ROOM_TYPE){
+								// TODO: 只有一个室料的情况
+								if(!item.isUnitPriceZero) continue;
+								// 重置Tier值
+								item.unitPrice = commUtils.mathNumSub(gRaceRatePrice, item.diffUnitSum);
+								if(isHeaderAdd){
+									result.unitPrice = commUtils.mathNumAdd(result.unitPrice, gRaceRatePrice);
+									$j("input:text[id$=':" + groupindex + ":price']").val(result.unitPrice);
+									isHeaderAdd = false;
+								}
+								break;
+							}
+						}
+					}
+				}
+			}
+	   		// 重置BrkLst
+	   		if(isReducedTaxFlg){
+	   			if(result.gKeyItemMap[hidKey]) _planItemMap.set(getPlanKeyFun(groupindex), result.gKeyItemMap[hidKey]);
+	   		} else if(result.gPlanItemPriceLstMap[hidKey]) planItemPriceMap.set(getPlanKeyFun(groupindex), result.gPlanItemPriceLstMap[hidKey]);
+	   		_resultMap.set(getPlanKeyFun(groupindex), jQuery.extend(true, {}, result));
+		}
+	}
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+    showProduInfoToView(groupindex);
+    //2017/01/16 行追加共通化　by　zy BEGIN
+    $j("input[id$='" + groupindex + ":productName']").blur();
+    //2017/01/16 行追加共通化　by　zy BEGIN
+    // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+    // ポップ商品選択後の入湯税自動処理
+    ACTCUSTOM.POPUPCALLBACKFUN(groupindex);
+    // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+  }
+}
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+var OPTION_MODE = "{!JSENCODE(OPTION_MODE)}";
+var OPTION_MODE_ON = (OPTION_MODE == "1") && {!isReducedTaxFlg};
+var _resultMap = new Map();
+var _addArr = { 
+	_optionNoArr : new Array(),
+	_itemArr : new Array(),
+	_hidKeyArr : new Array(),
+	_nwOrderNumsArr : new Array()
+}
+function getBlankArr(){
+	 // 获取明细所有行
+	var $trRowAll = $j("[id$=BookEstTable] tbody tr.tranDetailRow");
+	// 空白行Arr
+	var $blankArr = new Array();
+	$trRowAll.each(function(){
+		var $hidProductId = $j(this).find('[id$=hidProductId]');
+		if($hidProductId.val() != ''){
+			// 当前行-RowNo
+			var rowIndex = $hidProductId.attr("rowindex") * 1;
+		} else {
+			// 当前行-RowNo
+			var rowIndex = $hidProductId.attr("rowindex") * 1;
+			$blankArr.push(rowIndex);
+		}
+	});
+	return $blankArr;
+}
+// 重置行
+function optionInit(groupindex){
+	if(OPTION_MODE_ON) return;
+	$j("input:hidden[id$=':" + groupindex + ":hidIsSetOptionFlg']").val("false");
+	$j("input:hidden[id$=':" + groupindex + ":hidKey']").val("");
+	// 2020/05/29 bug fixed 6446 WGCH BEGIN
+	$j("input:hidden[id$=':" + groupindex + ":nwOrderNums']").val("1");
+	// 2020/05/29 bug fixed 6446 WGCH END
+	$j("input[id$=':" + groupindex + ":hidSyncInfo']").val("");
+	$j("input[id$=':" + groupindex + ":hidOptionTotal']").val("");
+}
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+function popupChildCallback(groupIndex) {
+  return function() {
+    _autoGetSetupSyncInfo(groupIndex)
+    // 2018/07/27 宿泊税計算 WGCH BEGIN
+    setupCalAmoutPrice(groupIndex, false);
+    // 2018/07/27 宿泊税計算 WGCH END
+  }
+}
+// 2019/04/30 増税仮対応 WGCH BEGIN
+// function showProduInfoToView(groupindex) {
+function showProduInfoToView(groupindex, mode) {
+// 2019/04/30 増税仮対応 WGCH END
+  // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+  var syncInfo = '';
+  // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+  // プラン設定の切り替え
+  var actType = $j("input:hidden[id$=':" + groupindex + ":hidActionType']").val();
+    if(actType == "{!ACTTYPE_PLAN}"){
+        dispExtendImg("visible", groupindex);
+        var hidRoomFlag = $j("input[id$=':" + groupindex + ":hidHadRoomFlag'").val();
+    if (hidRoomFlag  == "true" ) {
+			// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+			// var roomPrice = $j("#hidCurRackRatePrice").val(); 
+			var roomPrice = getTierPrice(groupindex);
+			// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+      var detailPrice = $j("input[id$=':"+ groupindex + ":price']").val();
+      // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+      //if (roomPrice){
+      // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+      // if (kendo.parseFloat(roomPrice) > 0) {
+      var hasOptionMstFlg = false;
+      if(OPTION_MODE_ON){
+      	// 当前PLAN数据集合
+      	var gResult = _resultMap.get(getPlanKeyFun(groupindex));
+      	// 判断Plan明细内是否有OPTION商品
+      	if(gResult) hasOptionMstFlg = gResult.hasOptionMstFlg;
+      }
+      // OPTION商品功能打开 && 含有OPTION商品跳出处理, 我的Logic那边有处理, 防止重复设定
+      if (!hasOptionMstFlg && kendo.parseFloat(roomPrice) > 0) {
+      // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+      // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+        //ラックレート　判断
+        var summartPrice = commUtils.mathNumAdd(roomPrice,detailPrice);
+        $j("input[id$=':"+ groupindex + ":price']").val(summartPrice);
+        // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+        syncInfo = $j("input:hidden[id$=':" + groupindex + ":hidSyncInfo']").val();
+        if (syncInfo != "") syncInfo = syncInfo.replace('_price_',roomPrice);
+        // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+      }
+    }
+  } else{ 
+        dispExtendImg("hidden", groupindex);
+    }
+    // 元の設定情報をクリアを行う
+    // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+    // $j("input:hidden[id$=':" + groupindex + ":hidSyncInfo']").val("");
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+    if(!orderNumsFlg) $j("input:hidden[id$=':" + groupindex + ":hidSyncInfo']").val(syncInfo);
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    // 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+    // 宿泊税は０の場合、空白に設定を行う
+    //2016/10/26 設定エラー　BEGIN
+    var specialTax = $j("input[id$=':" + groupindex + ":hidSpecialTax']").val();
+    if (1 * specialTax == 0) $j("span[id$=':" + groupindex + ":specialTax']").text("0");
+    
+    //var curDiv = $j("table[id$=BookEstTable] tr.tranDetailRow").eq(groupindex).find("div.pointIndex");
+  //var rowIndex = curDiv.attr("rowindex");
+    // 2019/04/30 増税仮対応 WGCH BEGIN
+    // setupCalAmoutPrice(groupindex, true);  
+    setupCalAmoutPrice(groupindex, true, mode);
+    // 2019/04/30 増税仮対応 WGCH END
+    // ステータス切替
+    switchPriceStatus();
+}
+function droptargetOnDrop(e) {
+  $j(e.dropTarget).before($j(dragLeadElement));
+}
+// 見積書順位調整JS
+function draggableOnDragStart(e) {
+  $j(dragLeadElement).hide();
+  var imgFun = $j(dragLeadElement).find('img[id^=showDetailEvent]');        
+  if(imgFun.attr("openStatus")=="true"){
+      showDetailFun(imgFun);
+  }
+}
+function draggableOnDragEnd(e) {
+  var draggable = $j('table').data("kendoDraggable");
+  $j(dragLeadElement).show();
+    refreshOrder(false);
+    //2017/01/16 行追加共通化　by　zy BEGIN
+  $j(".lastBlurRow").unbind("blur");
+  $j(".lastBlurRow").removeClass("lastBlurRow");
+  setTimeout(function(){
+    lastBookingDetail();
+  },300);
+  //2017/01/16 行追加共通化　by　zy END
+}
+function refreshOrder(isComputeBlankFlag){
+  var rowIndex = 0;
+  var nowProdArr = new Array();
+  $j("[id$=BookEstTable] tbody tr.tranDetailRow").each(function(){
+    if(isComputeBlankFlag){
+      if($j(this).find('[id$=hidProductId]').val() !=''){
+        $j(this).find('[id$=hidRowNo]').val(rowIndex);
+        rowIndex++;
+      }else 
+        nowProdArr.push(this);
+    } else {
+      $j(this).find('[id$=hidRowNo]').val(rowIndex);
+      rowIndex++;
+    }
+  });
+  if(isComputeBlankFlag && nowProdArr.length > 0){
+    for (var i = 0; i < nowProdArr.length;i++) {
+      $j(nowProdArr[i]).find('[id$=hidRowNo]').val(rowIndex);
+      rowIndex++;
+    }
+  }
+}
+// 最新商品情報を取得する
+// 2019/04/30 増税仮対応 WGCH BEGIN
+// function autoGetProductInfo(result) {
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+function autoGetProductInfo(res, mode) {
+	// 防止地址共存
+	var result = jQuery.extend(true, {}, res);
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+// 2019/04/30 増税仮対応 WGCH END
+  // 存在の商品情報は画面へ反映する
+  var groupindex = result.rowIndex;
+  var taxValLabel = (　result.tax == "" ? "0%" : result.tax + "%");
+  var serviceLabel = (　result.serviceRate == "" ? "0%" : result.serviceRate + "%");
+     
+  $j("input:text[id$=':" + groupindex + ":productName']").val(result.prodcutName);
+  $j("input:hidden[id$=':" + groupindex + ":hidProductId']").val(result.productId);
+  $j("input:hidden[id$=':" + groupindex + ":hidProductNm']").val(result.prodcutName);
+  $j("input:text[id$=':" + groupindex + ":price']").val(result.unitPrice);
+  $j("input:text[id$=':" + groupindex + ":orderNums']").val(1);
+  $j("span[id$=':" + groupindex + ":taxRateType']").text(taxValLabel);
+  $j("input:hidden[id$=':" + groupindex + ":hidTaxRateType']").val(result.tax);
+  $j("span[id$=':" + groupindex + ":serviceRate']").text(serviceLabel);
+  $j("input:hidden[id$=':" + groupindex + ":hidServiceRate']").val(result.serviceRate);
+  $j("span[id$=':" + groupindex + ":specialTax']").text(result.specialTax);
+  $j("input:hidden[id$=':" + groupindex + ":hidSpecialTax']").val(result.specialTax);
+  $j("input:hidden[id$=':" + groupindex + ":hidActionType']").val(result.actionType);
+  // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+  $j("input:hidden[id$=':" + groupindex + ":hidPlandetail']").val(result.unitPriceExcTax);
+  // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END
+  // 2016/08/30 BEGIN
+  $j("input:hidden[id$=':" + groupindex + ":hidHadRoomFlag']").val(result.hadRoomFlag);
+  // 2016/08/30 END
+  // 2018/07/27 宿泊税計算 WGCH BEGIN
+  // 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy BEGIN
+  //planItemPriceMap.set(getPlanKeyFun(groupindex), result.planItemPriceLst);
+	// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+	var syncInfo = rackRateSyncInfo(result.planItemPriceLst,groupindex);
+	// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+  planItemPriceMap.set(getPlanKeyFun(groupindex),  syncInfo);
+  // 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy END
+  //planItemPriceMap.set(getPlanKeyFun(groupindex), result.planItemPriceLst);
+    // 2018/07/27 宿泊税計算 WGCH END
+    // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+    // 支付种别
+    $j("input:hidden[id$=':" + groupindex + ":hidPaymentType']").val(result.paymentType);
+    // 如果有PLAN明细加到MAP里
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+    if(!commUtils.isEmpty(result.pdProductItem)) _planItemMap.set(getPlanKeyFun(groupindex), getPdProductItem(result.pdProductItem,groupindex));
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    // 2019/07/30 軽減税率機能対応 WGCH END
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+    // option设定过的标识符FLG
+    var hidIsSetOptionFlg = $j("input[id$='" + groupindex + ":hidIsSetOptionFlg']").val();
+    if(OPTION_MODE_ON){
+	   	if(result.hasOptionMstFlg){
+	   		// optionModeKey
+	   		var hidKey = $j("input[id$='" + groupindex + ":hidKey']").val();
+	   		if(hidIsSetOptionFlg == "true"){
+	   			// 重置数量
+	   			var nwOrderNums = $j("input[id$='" + groupindex + ":nwOrderNums']").val();
+	   			$j("input:text[id$=':" + groupindex + ":orderNums']").val(nwOrderNums);
+	   		} else{
+	   			hidKey = result.gNumToKeyMap["1"];
+	   			// 2020/05/29 bug fixed 6422 by zy BEGIN
+	   			// 动态获取Tier值
+	   			// 2020/05/29 bug fixed 6446 WGCH BEGIN
+	   			var wkRaceRatePrice = orderNumsFlg && !commUtils.isUndefined(result.raceRatePrice) ? result.raceRatePrice : getTierPrice(groupindex);
+	   			// 2020/05/29 bug fixed 6446 WGCH END
+	   			// 2020/05/29 bug fixed 6422 by zy END
+	   			// 2020/05/29 bug fixed 6446 WGCH BEGIN
+	   			if(!commUtils.isUndefined(wkRaceRatePrice)){
+	   			// 2020/05/29 bug fixed 6446 WGCH END
+	   				var isHeaderAdd = true;
+	   				for(var m = 0; m < result.gKeyItemKeyLst.length; m++){
+	   					var key = result.gKeyItemKeyLst[m];
+	   					var itemArr = result.gKeyItemMap[key];
+	   					if(itemArr){
+	   						for(var i = 0; i < itemArr.length; i++){
+	   							var item = itemArr[i];
+	   							if(item.actionType == _CONST_PRICE_ROOM_TYPE){
+	   								// TODO: 只有一个室料的情况
+	   								if(!item.isUnitPriceZero) continue;
+	   								// 重置Tier值
+	   								item.unitPrice = commUtils.mathNumSub(wkRaceRatePrice, item.diffUnitSum);
+	   								// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+	   								// Plan单价只加一次, 防止重复设定
+	   								if(isHeaderAdd && !orderNumsFlg){
+	   								// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+	   									result.unitPrice = commUtils.mathNumAdd(result.unitPrice, wkRaceRatePrice);
+	   									$j("input:text[id$=':" + groupindex + ":price']").val(result.unitPrice);
+	   									isHeaderAdd = false;
+	   								}
+	   								break;
+	   							}
+	   						}
+	   					}
+	   				}
+	   			}
+	   		}
+	   		if(hidKey) $j("input[id$='" + groupindex + ":hidKey']").val(hidKey);
+	   		// 重置BrkLst
+	   		if(isReducedTaxFlg){
+	   			if(result.gKeyItemMap[hidKey]) _planItemMap.set(getPlanKeyFun(groupindex), result.gKeyItemMap[hidKey]);
+        	} else if(result.gPlanItemPriceLstMap[hidKey]) planItemPriceMap.set(getPlanKeyFun(groupindex), result.gPlanItemPriceLstMap[hidKey]);
+	   		_resultMap.set(getPlanKeyFun(groupindex), jQuery.extend(true, {}, result));
+	   	}
+    }
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+    // 2020/07/30 BUG-FIX-#7099 WGCH BEGIN
+    // if(orderNumsFlg){
+    if(orderNumsFlg || result.planSyncInf){
+    // 2020/07/30 BUG-FIX-#7102 WGCH END
+		//　数量設定
+		var prodNums = result.prodNum || 0;
+		if(hidIsSetOptionFlg != "true"){
+			$j("input:hidden[id$=':" + groupindex + ":hidSyncInfo']").val(result.planSyncInf);
+			$j("input:text[id$=':" + groupindex + ":orderNums']").val(prodNums);
+			$j("input:text[id$=':" + groupindex + ":orderNums']").change();
+		}
+		$j("input:hidden[id$=':" + groupindex + ":hidBasePlanNum']").val(prodNums);
+    } else $j("input:hidden[id$=':" + groupindex + ":hidBasePlanNum']").val(0);
+    $j("input:hidden[id$=':" + groupindex + ":hidEstGuestType']").val(result.guestType || "");
+   	// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+  // 2019/04/30 増税仮対応 WGCH BEGIN
+  // showProduInfoToView(groupindex);
+  showProduInfoToView(groupindex, mode);
+  // 2019/04/30 増税仮対応 WGCH END
+}
+function _autoGetSetupSyncInfo(groupIndex) {
+  var planSyncInf = "";
+  var sumVal = 0;
+  var isHaveShituliaoFlag = false;
+  //$("[class='"+ childcls +"']").each(function(idx){
+  $j("input[id^='"+groupIndex+"_prodName_']").each(function(idx){
+    var rowidx = $j(this).attr("rowidx");
+    var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+    var hidProdId = groupIndex + "_prodid_" + rowidx;
+    var hidProdNm = groupIndex + "_prodName_" + rowidx;
+    var unitPrice = groupIndex + "_prodPrice_" + rowidx;
+    //sumVal += 1 * unitPrice;
+    //sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+    var unitPrice = $j("#"+unitPrice).val().replaceAll(",","");
+    if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+    // 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+    planSyncInf += $j("#"+hidFieldId).val() + ':' + unitPrice + ':' + $j("#"+hidProdId).val()+ ':' + $j("#"+hidProdNm).val() +';';
+    sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+    
+    var actionType = $j("#"+groupIndex+"_workHidActType_" + rowidx).val();
+    $j(this).closest("tr").find("td>input.showDetailEvent" + groupIndex + "_child").attr("data-actiontype",actionType);
+    // 2018/07/27 宿泊税計算 WGCH BEGIN
+    planItemTypeMap.set((groupIndex + "_t_" + $j("#"+hidFieldId).val()), actionType);
+    // 2018/07/27 宿泊税計算 WGCH END
+    if(actionType == _CONST_PRICE_ROOM_TYPE) 
+      isHaveShituliaoFlag = true;
+    
+  });
+  var summaryPriceId = groupIndex + "_summary";
+  var summaryPriceInputFlag = $j("#"+summaryPriceId).is('input');
+        // 合計値でプランの単価に反映する
+    if(isHaveShituliaoFlag){
+      if(summaryPriceInputFlag){
+        $j("#"+summaryPriceId).val(sumVal);
+      }else{
+        $j("#"+summaryPriceId).replaceWith('<input type="text" id="' + summaryPriceId + '" style="text-align:right;" value="' + commUtils.numFormat(sumVal) + '" />');
+      $j("#"+summaryPriceId).unbind("keydown");
+      $j("#"+summaryPriceId).on('keydown', function(e){
+              $j(this).data("olddata",$j(this).val().replaceAll(",",""));
+            });
+            // 2018/07/27 宿泊税計算 WGCH BEGIN
+            $j("#"+summaryPriceId).focus(function(){
+              $j(this).data("olddata",$j(this).val().replaceAll(",",""));
+            });
+            // 2018/07/27 宿泊税計算 WGCH END
+      $j("#"+summaryPriceId).unbind("keyup");
+      $j("#"+summaryPriceId).keyup(function(e){
+        //if((e.keyCode<48 || e.keyCode>57) && e.keyCode!=46 && e.keyCode != 8 ) return;
+        var price = $j(this).val().replaceAll(",","");
+        if(price == $j(this).data("olddata")) return;
+        setTimeout(function(){
+          __reComputeShitulyou(groupIndex,summaryPriceId);
+          //var curDiv = $j("table[id$=BookEstTable] tr.tranDetailRow").eq(groupIndex).find("div.pointIndex");
+          //var rowIndex = curDiv.attr("rowindex");
+          setupCalAmoutPrice(groupIndex,false);
+        },300);
+        
+      });
+      } 
+    }else if(summaryPriceInputFlag) 
+        $j("#"+summaryPriceId).replaceWith('<span id="' + summaryPriceId + '" style="float:right;margin-right: 3px">' + commUtils.numFormat(sumVal) +'</span>');
+    else $j("#"+summaryPriceId).text(commUtils.numFormat(sumVal));
+  
+  $j("input[id$=':" + groupIndex + ":hidSyncInfo']").val(planSyncInf);
+  return planSyncInf;
+}
+function __reComputeShitulyou(groupIndex,summaryPriceId){
+  var otherPrice = 0;
+  var ExcTaxPrice = 0;
+  var childcls = "showDetailEvent" + groupIndex + "_child";
+  var planSyncInf = "";
+  //var hadShitulyouElement = $j("input[id^='" + groupIndex + "_workHidActType_'][value='" + _CONST_PRICE_ROOM_TYPE + "']:eq(0)");
+  // 合計値計算を行う
+  $j("[class='"+ childcls +"']:not([data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "'])").each(function(idx){
+    var rowidx = $j(this).attr("rowindex");
+    var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+    var hidProdId = groupIndex + "_prodid_" + rowidx;
+    var hidProdNm = groupIndex + "_prodName_" + rowidx;
+    
+    var unitPrice = $j(this).val().replaceAll(",","");
+    if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+    // 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+    planSyncInf += $j("#"+hidFieldId).val() + ':' + unitPrice + ':' + $j("#"+hidProdId).val()+ ':' + $j("#"+hidProdNm).val() +';';
+    otherPrice = commUtils.mathNumAdd(otherPrice,unitPrice);
+        // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+        if($j(this).attr("taxflg") != 1) {
+          ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+        }
+  }); 
+  var firstShituLyoElement;
+  $j("[class='"+ childcls +"'][data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "']").each(function(idx){
+    var unitPrice = $j(this).val().replaceAll(",","");
+    if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+    if(!firstShituLyoElement){ 
+      firstShituLyoElement = $j(this);
+      return true;
+    }
+    var rowidx = $j(this).attr("rowindex");
+    var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+    var hidProdId = groupIndex + "_prodid_" + rowidx;
+    var hidProdNm = groupIndex + "_prodName_" + rowidx;
+    var unitPrice = $j(this).val().replaceAll(",","");
+    // 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+    planSyncInf += $j("#"+hidFieldId).val() + ':' + unitPrice + ':' + $j("#"+hidProdId).val()+ ':' + $j("#"+hidProdNm).val() +';';
+    otherPrice = commUtils.mathNumAdd(otherPrice,unitPrice);
+        // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+        if($j(this).attr("taxflg") != 1) {
+          ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+        }
+  }); 
+    var summaryElement = $j("#" + summaryPriceId);
+    var summaryPrice = summaryElement.val().replaceAll(",","");
+    if(summaryPrice == "" || !summaryPrice || isNaN(parseFloat(summaryPrice)) ) summaryPrice = 0;
+  var changePrice = commUtils.mathNumSub(parseFloat(summaryPrice), otherPrice); 
+  firstShituLyoElement.val(changePrice);
+  var hidFieldId = groupIndex + "_" + firstShituLyoElement.attr("rowIndex");
+  ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,changePrice);
+  $j("input:hidden[id$=':" + parentRowIndex + ":hidPlandetail']").val(ExcTaxPrice);
+  
+  var rowidx = firstShituLyoElement.attr("rowindex");
+  var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+  var hidProdId = groupIndex + "_prodid_" + rowidx;
+  var hidProdNm = groupIndex + "_prodName_" + rowidx;
+  // 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+  planSyncInf += $j("#"+hidFieldId).val() + ':' + changePrice + ':' + $j("#"+hidProdId).val()+ ':' + $j("#"+hidProdNm).val() +';';
+  $j("input[id$=':" + groupIndex + ":hidSyncInfo']").val(planSyncInf);
+  
+  var parentRowIndex = firstShituLyoElement.attr("parentindex");
+  $j("input[id$=':"+ parentRowIndex + ":price']").val(summaryPrice);
+}
+// プランの明細情報リスト格納する
+// 2019/04/30 増税仮対応 WGCH BEGIN
+// function autoGetChildProductInfo(result) {
+function autoGetChildProductInfo(result, mode) {
+// 2019/04/30 増税仮対応 WGCH END
+//console.debug(result);
+  var rowIndex = result.rowIndex;  
+  var groupIndex = result.groupIndex;
+    $j("#"+groupIndex+"_prodName_"+rowIndex).val(result.prodcutName);
+    $j("#"+groupIndex+"_prodid_" + rowIndex).val(result.productId);
+    $j("#"+groupIndex+"_workHidActType_" + rowIndex).val(result.actionType);
+    // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+    // 2019/10/15 PLAN明细换商品修正対応 WGCH BEGIN
+    // 消费税
+    //$j("#"+groupIndex+"_workHidTaxRate_"+rowIndex).val(result.tax);
+    // サビース料
+    // $j("#"+groupIndex+"_workHidServiceTaxRate_"+rowIndex).val(result.serviceRate);
+    // 2019/10/15 PLAN明细换商品修正対応 WGCH END
+    // 2019/07/30 軽減税率機能対応 WGCH END
+    _autoGetSetupSyncInfo(groupIndex);
+    //$("input[id$=':" + parentRowIndex + ":hidSyncInfo']").val(planSyncInf);
+    // 2018/07/27 宿泊税計算 WGCH BEGIN
+    // 2019/04/30 増税仮対応 WGCH BEGIN
+    // setupCalAmoutPrice(groupIndex,false);
+    setupCalAmoutPrice(groupIndex,false,mode);
+    // 2019/04/30 増税仮対応 WGCH END
+    // 2018/07/27 宿泊税計算 WGCH END
+}
+
+var _CONST_ADDITEM_TEMPLATE = 
+    "<tr ><td colspan='$colspan$'>" +
+      "<input type='hidden' id='$groupIndex$_workHidItem' />"+
+            "<table style='width:60%;' class='list' border='0' cellpadding='0' cellspacing='0'>" +
+              "<tHead class='rich-table-thead'>" +
+                  "<tr class='headerRow' nowrap='nowrap'>" +
+      //商品名
+                      "<th class='headerRow' nowrap='nowrap' style='width:70%'>{!$Label.MSG_011_0048}</th>" +
+                    //単価
+                      "<th class='headerRow' nowrap='nowrap' style='width:30%'>{!$Label.MSG_011_0049}</th></tr>" +
+
+                 "</tHead>" +
+                 "<tBody>" +
+                 "$tBodyContent$" +
+           "</tBody>" +
+           //合計
+           "<tFoot><tr><td style='text-align: right;'><span style='margin-right:3px'>{!$Label.MSG_011_0071}：</span></td><td style='text-align:right;'><span id='$summaryPriceId$' style='float:right;margin-right: 3px'></span></td></tr>"+
+             "</tFoot> " +
+        "</table></td>" +
+      "</tr>";
+var _CONST_ADDITEM_DTEAIL_IMG_TEMPLATE = 
+      "<img onmouseover='this.className = \"lookupIconOn\";this.className = \"lookupIconOn\";'" +
+        "onmouseout='this.className = \"lookupIcon\";this.className = \"lookupIcon\";'" +
+        "onfocus='this.className = \"lookupIconOn\";' onblur='this.className = \"lookupIcon\";'" +
+        "class='lookupIcon' src='/s.gif' style='cursor: pointer;'" +
+        "name='childrenProductPopup' onclick='javascript:openChildProdutWin(\"$groupIndex$\",\"$rowidx$\")'/>";
+var _CONST_ADDITEM_DTEAIL_TEMPLATE = 
+        "<tr><td style='background-color: #FFEBCD;'>" + 
+          "<input type='text'style='width:180px' value='$productName$' id='$groupIndex$_prodName_$rowidx$' rowidx='$rowidx$' parentIndex='$groupIndex$' />" +
+          _CONST_ADDITEM_DTEAIL_IMG_TEMPLATE +
+	        // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+	        "<input type='hidden' id='$groupIndex$_workHidTaxRate_$rowidx$' value='$taxRate$' />" +
+	        "<input type='hidden' id='$groupIndex$_workHidServiceTaxRate_$rowidx$' value='$serviceTaxRate$' />" +
+	        // 2019/07/30 軽減税率機能対応 WGCH END
+	        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+	        "<input type='hidden' id='$groupIndex$_optionAccMstFlg_$rowidx$' value='$optionAccMstFlg$' />" +
+	        // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+          "<input type='hidden' value='$productId$' id='$groupIndex$_prodid_$rowidx$' />" +
+          "<input type='hidden' value='$sobjId$' id='$groupIndex$_sobjId_$rowidx$' />"+
+          "<input type='hidden' id='$groupIndex$_workHidActType_$rowidx$' value='$actType$' />" +
+          "<input type='hidden' value='$planDetail$' id='$groupIndex$_hidPlandetail_$rowidx$' /></td>"+
+          "<td style='background-color: #FFEBCD;text-align: right;'>" +
+          //"<input type='text' style='text-align:right;' id='$groupIndex$_price_$rowidx$' class='$childclsItemClass$' value='$memoryPrice$' rowidx='$rowidx$' /></td></tr>";
+      "<input type='text' style='text-align:right;' parentIndex='$groupIndex$' id='$groupIndex$_prodPrice_$rowidx$' rowIndex='$rowidx$' class='$childclsItemClass$' value='$memoryPrice$' taxflg='&prodtaxflg&' data-actiontype='$actType$'/></td></tr>";
+          
+function showDetailFun(obj) {
+    if ($j(obj).attr("openStatus") == "false") {
+    $j(obj).attr("openStatus","true");
+    //折りたたむ
+    $j(obj).attr("title","{!$Label.MSG_011_0066}");
+    $j(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}");
+    // Javasceipr Remotingでデータを取得する
+    var groupIndex = $j(obj).attr("rowIndex");
+    var ctrlId = $j("input:hidden[id$=':" + groupIndex + ":hidProductId']").get(0);
+    var childcls = ($j(obj).attr("id")) + "_child";
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+		$j("input:hidden[id$=':" + groupIndex + ":hidBasePlanNum']").val(0);
+		// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    hashMap.Clear();
+    var syncInfo = $j("input[id$=':" + groupIndex + ":hidSyncInfo']").val();
+    if (syncInfo != "" && syncInfo.length > 1) {
+      syncInfo = syncInfo.substring(0, syncInfo.length-1);
+      var synInfoArr = syncInfo.split(";");
+      for (i = 0; i < synInfoArr.length; i++){
+        var setupInfArr = synInfoArr[i].split(":");
+        var sobjId = setupInfArr[0];
+        var mapKey1 = groupIndex + "_p_" + sobjId;    // 設定明細の価額
+        var mapKey2 = groupIndex + "_i_" + sobjId;    // 設定明細の会計商品ID
+        var mapKey3 = groupIndex + "_n_" + sobjId;    // 設定明細の会計商品名
+        hashMap.Put(mapKey1, setupInfArr[1]);
+        if (setupInfArr.length > 2) hashMap.Put(mapKey2, setupInfArr[2]); // 会計商品ID
+        if (setupInfArr.length > 3) hashMap.Put(mapKey3, setupInfArr[3]); // 会計商品名
+      }
+    }
+		// 2020/05/29 bug fixed 6422 by zy BEGIN
+		// var tierRatePrice = $j("#hidCurRackRatePrice").val();
+		var tierRatePrice = getTierPrice(groupIndex);
+		// 2020/05/29 bug fixed 6422 by zy END
+JINYACONNECT.CUSTOM.blockUi();
+    Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.BookingLeadWindow.getAccountMstLstByPlan}',
+            ctrlId.value,tierRatePrice,
+            function(result, event){
+JINYACONNECT.CUSTOM.unblock();
+                if (event.status) {
+                    if(result== null || result.length == 0){
+      //データ詳細がありません。
+                        $j(obj).parents("tr.tranDetailRow").after("<tr><td colspan='10' style='margin-right: 200px;' >{!$Label.MSG_011_0067}</td></tr>");
+                    }else{
+                      // プラン明細設定情報を格納用
+                      var planSyncInf = '';
+                      
+            var tabStrHead = _CONST_ADDITEM_TEMPLATE.replaceAll("$colspan$", 10)
+                                .replaceAll("$groupIndex$",groupIndex);
+                    var tabStrBody = "";
+
+                    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+                    $j("input[id$='" + groupIndex + ":hidShowDetailFlg']").val(true);
+                	var key = getPlanKeyFun(groupIndex);
+                	// 当前Plan数据
+                	var gResult = _resultMap.get(key);
+                	// 当前optionModeKey
+                	var hidKey = $j("input[id$='" + groupIndex + ":hidKey']").val();
+                	// OPTION商品ID集合
+                	var opModeIdArr = [];
+                	// OPTION商品数据集合
+                	var opModeItemMap = new Map();
+                	if(gResult && gResult.gKeyItemMap[hidKey]){
+                		var opLst = gResult.gKeyItemMap[hidKey];
+                		for(var m = 0; m < opLst.length; m++){
+							var pd = opLst[m];
+							opModeIdArr.push(pd.pdId);
+							opModeItemMap.set(pd.pdId, pd);
+						}
+                	}
+                	// 重置Plan展开行号
+                	var idx = 0;
+                	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+                    for (var i=0; i<result.length; i++) {
+                      // メモーに既存場合、メモーの設定情報から、単価を設定する
+                      //var mapKey = groupIndex + "_" + result[i].sobjId;
+                      
+              var mapKey1 = groupIndex + "_p_" + result[i].sobjId;    // 設定明細の価額
+              var mapKey2 = groupIndex + "_i_" + result[i].sobjId;    // 設定明細の会計商品ID
+              var mapKey3 = groupIndex + "_n_" + result[i].sobjId;    // 設定明細の会計商品名
+              
+                      var memoryPrice = hashMap.Contains(mapKey1) ? hashMap.Get(mapKey1) : result[i].prodPrice;
+                      var productId = hashMap.Contains(mapKey2) ? hashMap.Get(mapKey2) : result[i].prodId;
+                      var productNm = hashMap.Contains(mapKey3) ? hashMap.Get(mapKey3) : result[i].prodName;
+                      
+                      // 2018/07/27 宿泊税計算 WGCH BEGIN
+                      var mapKey4 = groupIndex + "_t_" + result[i].sobjId;    // 設定明細の会計商品Type
+                      var actionType = planItemTypeMap.get(mapKey4) ? planItemTypeMap.get(mapKey4) : result[i].actionType;
+                      // 2018/07/27 宿泊税計算 WGCH END
+                      
+                      // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+                      if(OPTION_MODE_ON && gResult && gResult.hasOptionMstFlg){
+                      	// 不满足条件数据跳出
+                      	if(hidKey != "" && opModeIdArr.indexOf(result[i].sobjId) == -1) continue;
+                      	// 重置明细单价
+                      	else if(!hashMap.Contains(mapKey1) && opModeItemMap.get(result[i].sobjId)) memoryPrice = opModeItemMap.get(result[i].sobjId).unitPrice;
+                      }
+                      // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+              var prodtaxflg = '';
+                      if(result[i].prodTaxRate !=null && result[i].prodTaxRate !='') prodtaxflg = '1';
+                  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+                  // tabStrBody += _CONST_ADDITEM_DTEAIL_TEMPLATE.replaceAll("$rowidx$",i)
+                  tabStrBody += _CONST_ADDITEM_DTEAIL_TEMPLATE.replaceAll("$rowidx$", (OPTION_MODE_ON ? idx : i))
+                  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+                          .replaceAll("$groupIndex$",groupIndex)
+                          .replaceAll("$productName$",commUtils.escapeQuotes(productNm))
+                          .replaceAll("$productId$",productId)
+                          .replaceAll("$sobjId$",result[i].sobjId)
+                          .replaceAll("$childclsItemClass$",childcls)
+                          // 2018/07/27 宿泊税計算 WGCH BEGIN
+                          //.replaceAll("$actType$",result[i].actionType)
+                          .replaceAll("$actType$",actionType)
+                          // 2018/07/27 宿泊税計算 WGCH END
+     											// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+     											.replaceAll("$taxRate$",result[i].prodTaxRate)
+     											.replaceAll("$serviceTaxRate$",result[i].prodServiceRate)
+     											// 2019/07/30 軽減税率機能対応 WGCH END
+                          // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+                          // 当前明细是否为OPTION商品
+                          .replaceAll("$optionAccMstFlg$",result[i].optionAccMstFlg)
+                          // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+                          .replaceAll("$memoryPrice$",memoryPrice)
+                          .replaceAll("&prodtaxflg&",prodtaxflg)
+                          .replaceAll("&planDetail&",result[i].planDetail);
+              
+                      // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+                      idx++;
+                      // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+                      //planSyncInf += result[i].sobjId + ':' + memoryPrice.replaceAll(",","") + ':' + result[i].prodId + ':' + result[i].prodName + ';';
+                    }
+                    //$(obj).parent().parent().parent().after(tabStrHead + tabStrBody + tabStrFoot);
+                    var summaryPriceId = groupIndex + "_summary";
+            $j(obj).parents("tr.tranDetailRow").after(tabStrHead.replaceAll("$tBodyContent$",tabStrBody).replace("$summaryPriceId$",summaryPriceId));
+                    // 連携用情報、HIDDEN項目に格納する
+                    //$("input[id$=':" + groupIndex + ":hidSyncInfo']").val(planSyncInf);
+
+                    // 単価合計値計算して、プランの単価へ反映する
+                    // Event Binding
+                    //old value input
+                    $j("[class='"+ childcls +"']").unbind("keydown");
+                    $j("[class='"+ childcls +"']").on('keydown', function(e){
+                      $j(this).data("olddata",$j(this).val().replaceAll(",",""));
+                    });
+                    // 2018/07/27 宿泊税計算 WGCH BEGIN
+                    $j("[class='"+ childcls +"']").focus(function(){
+                      $j(this).data("olddata",$j(this).val().replaceAll(",",""));
+                    });
+                    // 2018/07/27 宿泊税計算 WGCH END
+                    $j("[class='"+ childcls +"']").unbind("keyup");
+                    $j("[class='"+ childcls +"']").on('keyup', function(e){
+                      var price = $j(this).val().replaceAll(",","");
+                      var oldValue = $j(this).data("olddata");
+                      if(oldValue == price)return;
+                      var parentRowIndex = $j(this).attr("parentIndex");
+              setTimeout(function(){
+                __reComputePrice(childcls,parentRowIndex);
+                //var curDiv = $j("table[id$=BookEstTable] tr.tranDetailRow").eq(groupIndex).find("div.pointIndex");
+                //var rowIndex = curDiv.attr("rowindex");
+                setupCalAmoutPrice(groupIndex,false);
+              },500);
+                    });
+                    $j("[class='"+ childcls +"']").unbind("blur");
+                    $j("[class='"+ childcls +"']").on('blur', function(e){
+                  var price = $j(this).val().replaceAll(",","");
+                      if (!$j.isNumeric(price)) price = "0";
+                      $j(this).val(commUtils.numFormat(price));
+                });
+            
+            // 入力の商品コードで、商品自動設定を行う
+            // 作成した項目は自動商品コードのAutoComplete機能を追加する
+            $j("input[id^='"+groupIndex+"_prodName_']").autocomplete({
+                  minLength: 1,
+                  source: function (request, response) {
+                      Visualforce.remoting.Manager.invokeAction(
+                          "{!$RemoteAction.BookingLeadWindow.getArrayProductItemInfoNoPlan}", request.term, function(result, event){
+                          if (event.type == 'exception') {
+                              alert(event.message);
+                          } else {
+                              response($.map(result, function (item) {
+                                item.id = item.productId;
+                                item.value = item.prodcutName + "("+item.prodcutCode+")";
+                                return item;
+                              }));
+                          } // End else
+                      });
+                  },
+                  focus: function (event, ui) {
+                    var rowidx = $j(this).attr("rowidx");
+                  ui.item.rowIndex = rowidx;
+                  ui.item.groupIndex = $j(this).attr("parentIndex");
+                    // 2019/04/30 増税仮対応 WGCH BEGIN
+                    // autoGetChildProductInfo(ui.item);
+                    autoGetChildProductInfo(ui.item, CUST_AUTOGETPRODUCTMODE_RETURN);
+                    // 2019/04/30 増税仮対応 WGCH END
+                      return false;
+                  },
+                  select: function (event, ui) {
+                  var rowidx = $j(this).attr("rowidx");
+                  ui.item.rowIndex = rowidx;
+                  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+                  // 重置行
+                  optionInit(rowidx);
+                  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+                  ui.item.groupIndex = $j(this).attr("parentIndex");
+                      autoGetChildProductInfo(ui.item);
+					            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+					            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+					            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+                      return false;
+                  },
+              });
+             _autoGetSetupSyncInfo(groupIndex);
+             __reComputePrice(childcls,groupIndex);
+             //var curDiv = $j("table[id$=BookEstTable] tr.tranDetailRow").eq(groupIndex).find("div.pointIndex");
+             //var rowIndex = curDiv.attr("rowindex");
+             setupCalAmoutPrice(groupIndex, true);  
+            // $("input[id^='"+groupIndex+"_prodName_']").autocomplete END
+
+                    }
+
+                } else if (event.type === 'exception') {
+        //データ詳細がありません。
+                    $j(obj).parents("tr.tranDetailRow").after("<tr><td colspan='10' style='margin-left: 200px;' >{!$Label.MSG_011_0067}</td></tr>");
+                } else {
+                //データ詳細がありません。
+                    $j(obj).parents("tr.tranDetailRow").after("<tr><td colspan='10' style='margin-left: 200px;' >{!$Label.MSG_011_0067}</td></tr>");
+
+                }
+            },
+            {escape: true}
+        );
+    //$(obj).parent().parent().parent().after("<tr><td colspan='10' style='margin-left: 200px;' ><table><tr><td>444</td><td>555</td><td>666</td></tr></table> </td></tr> ");
+    } else {
+        $j(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}");
+        $j(obj).attr("openStatus","false");
+  //展開
+        $j(obj).attr("title","{!$Label.MSG_011_0064}");
+
+        $j(obj).parents("tr.tranDetailRow").next().remove();
+    }
+}
+function __reComputePrice(childcls,parentRowIndex){
+  var sumVal = 0;
+  // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+    var ExcTaxPrice = 0;
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END
+  var planSyncInf = '';
+    // 合計値計算を行う
+    $j("[class='"+ childcls +"']").each(function(idx){
+    var unitPrice = $j(this).val().replaceAll(",","");
+    if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+    sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+        if($j(this).attr("taxflg") != 1) {
+          ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+        }
+  });
+  $j("input:hidden[id$=':" + parentRowIndex + ":hidPlandetail']").val(ExcTaxPrice);
+  
+    // 同期情報を取得する
+    _autoGetSetupSyncInfo(parentRowIndex);
+    // 合計値でプランの単価に反映する
+    $j("input[id$=':"+ parentRowIndex + ":price']").val(sumVal);
+}
+function openChildProdutWin(groupIndex,rowIndex) {
+    var dumyField = $j("#"+groupIndex+"_workHidItem").get(0);
+    // 引き渡し値を設定して、選択画面を開く
+    ctrlNm = $j("#"+groupIndex+"_prodName_"+rowIndex).get(0);
+    ctrlId = $j("#"+groupIndex+"_prodid_" + rowIndex).get(0);
+    ctrlHidNm = dumyField;
+    ctrlPriceId = dumyField;
+    ctrlOrderNumId = dumyField;
+    ctrlTaxRate = dumyField;
+    ctrlHidTaxRate = dumyField;
+    ctrlServiceTaxRate = dumyField;
+    ctrlHidServiceTaxRate = dumyField;
+    // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+    if(isReducedTaxFlg){
+    	var taxRateField = $j("#"+groupIndex+"_workHidTaxRate_"+rowIndex).get(0);
+    	ctrlTaxRate = taxRateField;
+    	ctrlHidTaxRate = taxRateField;
+    	var serviceTaxRateField = $j("#"+groupIndex+"_workHidServiceTaxRate_"+rowIndex).get(0);
+    	ctrlServiceTaxRate = serviceTaxRateField;
+    	ctrlHidServiceTaxRate = serviceTaxRateField;
+    }
+    // 2019/07/30 軽減税率機能対応 WGCH END
+    ctrlSpecialTax = dumyField;
+    ctrlHidSpecialTax = dumyField;
+    ctrlHidActionType = $j("#"+groupIndex+"_workHidActType_" + rowIndex).get(0);
+    //ctrlHidPlanDetail = $j("#"+groupIndex+"_workHidActType_" + rowIndex).get(0);//ctrlHidPlanDetail
+    var openUrl = "/apex/ProductSearch?np=1";
+    // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+  objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+    ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType);
+  commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupChildCallback(groupIndex));
+}
+
+// 会計明細の単価入力制御
+function switchPriceStatus() {
+  $j("[id^='showDetailEvent']").each(function(idx) {
+    var rowIndex = $j(this).attr("rowIndex");
+    if ($j(this).css("visibility") == "hidden") {
+      $j("input[id$=':" + rowIndex + ":price']").attr('readonly', false);
+      $j("input[id$=':" + rowIndex + ":price']").css('background-color', '');
+    } else {
+      $j("input[id$=':" + rowIndex + ":price']").attr('readonly', true);
+      $j("input[id$=':" + rowIndex + ":price']").css('background-color', '#DCDCDC');
+    }
+  });
+}
+// 展開imgの表示・非表示を制御する
+function dispExtendImg(flg, groupindex){ // flg : visible | hidden
+  var idx = groupindex;
+  var $obj = $j("#showDetailEvent" + idx);
+    $obj.attr("style", "cursor: pointer;display: true; width: 18px; height: 18px; visibility:" + flg);
+    if($obj.attr("openStatus") == "true"){
+        $obj.attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}")
+          .attr("openStatus","false")
+          //展開
+          .attr("title","{!$Label.MSG_011_0064}");
+        $obj.parents("tr.tranDetailRow").next().remove();
+    }
+    switchPriceStatus();
+}
+// 2020/07/30 BUG-FIX-#7099 WGCH BEGIN
+var isAddTranItemFunFlg = true;
+// 2020/07/30 BUG-FIX-#7099 WGCH END
+function checkAddTranItem(){
+  if (!JINYACONNECT.CUSTOM.checkIfHadRequiredItem()) return false;
+	// 2020/07/30 BUG-FIX-#7099 WGCH BEGIN
+	if(!isAddTranItemFunFlg) return;
+	isAddTranItemFunFlg = false;
+	// 2020/07/30 BUG-FIX-#7099 WGCH END
+  addTranItemFun();
+}
+// 明細情報行情報変更すると
+// 明細金額リアルタイム計算
+// 2019/04/30 増税仮対応 WGCH BEGIN
+// function setupCalAmoutPrice(rowIndex, isFromCallBackFun) {
+function setupCalAmoutPrice(rowIndex, isFromCallBackFun, mode) {
+// 2019/04/30 増税仮対応 WGCH END
+ 
+	// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+	updatePlanItemMapFun(rowIndex);
+	// 2019/07/30 軽減税率機能対応 WGCH END
+  // 指定の会計明細情報がCOPON存在する場合
+    // 処理種別は「前受金・支払」の場合、減算を行う
+    // 税込み、税抜き金額
+    // 単価
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+    var hidPlandetail = $j("input:hidden[id$=':" + rowIndex + ":hidPlandetail']").val();
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END
+    var unitPrice = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":price']").val());
+    if (unitPrice == null) unitPrice = 0;
+    // 消費税率
+    var tax = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidTaxRateType']").val());
+    if (tax == null) tax = 0;
+    // サビース料率
+    var service = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidServiceRate']").val());
+    if (service == null) service = 0;
+    // 数量
+    var nums = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":orderNums']").val());
+    if (nums == null) nums = 0;
+    // 特別税
+    var numSepcTax = kendo.parseFloat($j("input[id$=':" + rowIndex + ":hidSpecialTax']").val());
+    if (numSepcTax == null) numSepcTax = 0;
+    // 単価定義区分
+    var unitPriceKbn = $j("input:hidden[id$=':" + rowIndex + ":hidUnitPriceKbn']").val();
+    // 関連金額を計算する
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+    var amountIncTax;
+    var amountExcTax;
+    if(hidPlandetail > 0 ) {
+      var unitPriceIncTax = commUtils.mathNumSub(unitPrice, hidPlandetail);
+      var res = JINYACONNECT.PRODUCT.PROCESS(unitPriceIncTax, nums, tax, service, unitPriceKbn);
+      var resPriceIncTax = res.priceIncTax;
+      var resPriceExcTax = res.priceExcTax;
+      var resExc = JINYACONNECT.PRODUCT.PROCESS(hidPlandetail, nums, 0, service, unitPriceKbn);
+    amountIncTax = commUtils.mathNumAdd(resPriceIncTax , resExc.priceIncTax );
+    amountIncTax = commUtils.mathNumAdd(amountIncTax, numSepcTax);
+    amountExcTax = resPriceExcTax + resExc.priceExcTax;
+      	// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+      	if(isReducedTaxFlg){
+  			// 获取最新的数据集合
+    		var resInfo = getResInfoFun(rowIndex, res);
+    		// 重置RES
+    		res = resInfo.res;
+    		// 重置合計金額
+    		amountIncTax = res.priceIncTax;
+    		// 重置合計金額(税抜)
+    		amountExcTax = res.priceExcTax;
+    		// 重置特别税
+    		numSepcTax = resInfo.numSepcTax;
+    		// 重置合計金額
+    		amountIncTax = commUtils.mathNumAdd(amountIncTax, numSepcTax);
+    	}
+    	// 2019/07/30 軽減税率機能対応 WGCH END
+    }else {
+      var res = JINYACONNECT.PRODUCT.PROCESS(unitPrice, nums, tax, service, unitPriceKbn);
+    	// 2020/03/30 BUGFIX WGCH BEGIN
+    	// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+    	if(isReducedTaxFlg){
+    		// 获取最新的数据集合
+    		var resInfo = getResInfoFun(rowIndex, res, unitPrice, nums, tax, service, numSepcTax, unitPriceKbn);
+    		// 重置RES
+    		res = resInfo.res;
+    		// 重置特别税
+    		numSepcTax = resInfo.numSepcTax;
+    	}
+    	// 2019/07/30 軽減税率機能対応 WGCH END
+    	// 2020/03/30 BUGFIX WGCH END
+    // 合計金額計算を行う
+    amountIncTax = commUtils.mathNumAdd(res.priceIncTax , numSepcTax);
+    amountExcTax = res.priceExcTax;
+    	// 2020/03/30 BUGFIX WGCH BEGIN
+    	/*
+    	// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+    	if(isReducedTaxFlg){
+    		// 获取最新的数据集合
+    		var resInfo = getResInfoFun(rowIndex, res, unitPrice, nums, tax, service, numSepcTax, unitPriceKbn);
+    		// 重置RES
+    		res = resInfo.res;
+    		// 重置特别税
+    		numSepcTax = resInfo.numSepcTax;
+    	}
+    	// 2019/07/30 軽減税率機能対応 WGCH END
+    	*/
+    	// 2020/03/30 BUGFIX WGCH END
+    }
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END
+  // 支払情報の場合、単価は自動残りの請求金額で設定を行う
+  var actionType = $j("input:hidden[id$=':" + rowIndex + ":hidActionType']").val()    // 商品処理種別
+  if (actionType == "{!JSENCODE(ACTTYPE_AR)}" || actionType == "{!JSENCODE(ACTTYPE_PAY)}") {
+    // 支払種別は「COPON】の場合、クーポン利用の返金「manasCoponFlg」を選べる場合、支払金額はマイナス計算を行う
+    // 支払情報は０の場合、元の支払金額+残り金額で自動設定を行う
+    // 残りの請求金額から設定する
+    if (amountIncTax == 0 && isFromCallBackFun) {
+      // 残りの請求金額から設定する
+      var reqAmount = $j("#reqAmountBlock").text();
+      reqAmount = reqAmount.replace(kendo.getCulture().numberFormat.currency.symbol,"");
+      var payAmount = kendo.parseFloat(reqAmount);
+      // 該当メデイアに支払金額が存在する場合、自動設定を行わない
+      var orgPayAmount = kendo.parseFloat($j("span[id$=':" + rowIndex + ":amoutPriceIncTax']").text());
+      // 2015/11/03 BugFix BEGIN
+      var payType = $j("input:hidden[id$=':" + rowIndex + ":hidPaymentType']").val();
+      // 2015/11/03 BugFix END
+      // 未請求金額はマナスの場合、現在の金額はそのまま
+      if (payAmount <= 0) {
+          if(!isRefundItem(payType))
+          payAmount = orgPayAmount;
+        else
+          payAmount = Math.abs(payAmount);
+      } else {
+        // 未支払金額が存在する場合、元の支払金額は０の場合、自動全額を支払
+        // 既に金額が存在する場合、そのまま
+        if (orgPayAmount != null && orgPayAmount > 0) {
+          payAmount = orgPayAmount;
+        }else if(isRefundItem(payType)){
+          payAmount = orgPayAmount;
+        }
+      }
+      var _loctotalPayed = payAmount;
+      if (_loctotalPayed == null) _loctotalPayed = 0;
+      $j("input:text[id$=':" + rowIndex + ":price']").val(_loctotalPayed);
+      $j("input:text[id$=':" + rowIndex + ":orderNums']").val("1");
+      amountIncTax = amountExcTax = _loctotalPayed;
+    }
+  }
+
+    // 2018/07/27 宿泊税計算 WGCH BEGIN
+    // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+    if(!isReducedTaxFlg){
+	    if(actionType == _CONST_PRICE_ROOM_TYPE && hotelData.hotelTaxDefInstance[thisRoomSpcd] != undefined){
+	    	var res = JINYACONNECT.PRODUCT.PROCESS(unitPrice, nums, tax, service, unitPriceKbn);
+	    	var newNumSepcTax = commUtils.mathNumMulti(commUtils.getHotelTaxFun(res.unitPriceIncServiceExcTax, hotelData.hotelTaxDefInstance[thisRoomSpcd]), nums);
+	    	$j("input[id$=':" + rowIndex + ":hidSpecialTax']").val(newNumSepcTax);
+	    	$j("span[id$=':" + rowIndex + ":specialTax']").text(newNumSepcTax);
+	    	amountIncTax = commUtils.mathNumAdd(commUtils.mathNumSub(amountIncTax, numSepcTax), newNumSepcTax);
+	    } else if(actionType == "{!ACTTYPE_PLAN}" && hotelData.hotelTaxDefInstance[thisRoomSpcd] != undefined){
+	    	var planItemPriceLst = [], newNumSepcTax = 0;
+	    	// 判断plan是否展开过
+	    	var _PlanBrkDn = $j("td>input.showDetailEvent" + rowIndex + "_child");
+	    	if(_PlanBrkDn.length == 0){ // Plan未展开的情况
+		    	if(!planItemPriceMap.get(getPlanKeyFun(rowIndex))){
+		    		hotelData.planItemPriceMap[$j("#hidPlanAccId").val()].forEach(function(e){
+		    			$j.each( e ,function(key, val){  
+			    			planItemPriceLst.push(val);  
+			    		});
+		    		});
+		    	} else planItemPriceLst = planItemPriceMap.get(getPlanKeyFun(rowIndex));
+		    	// 2020/03/30 BUGFIX WGCH BEGIN
+		    	planItemPriceLst = planItemPriceLst ? planItemPriceLst : [];
+		    	// 2020/03/30 BUGFIX WGCH END
+	    		for(var i = 0; i < planItemPriceLst.length; i++){
+	    			var res = JINYACONNECT.PRODUCT.PROCESS(planItemPriceLst[i] * 1, 1, tax, service, unitPriceKbn);
+	    			newNumSepcTax = commUtils.mathNumAdd(newNumSepcTax, commUtils.mathNumMulti(commUtils.getHotelTaxFun(res.unitPriceIncServiceExcTax, hotelData.hotelTaxDefInstance[thisRoomSpcd]), nums));
+	    		}
+	    	} else { // Plan展开的情况
+	    		var childcls = "showDetailEvent" + rowIndex + "_child";
+	     		$j("[class='"+ childcls +"'][data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "']").each(function(){
+	    			var price = $j(this).val().replaceAll(",","");
+	    			if(price == "" || !price || isNaN(parseFloat(price)) ) price = 0;
+	    			planItemPriceLst.push(price);
+	    			var res = JINYACONNECT.PRODUCT.PROCESS(price, 1, tax, service, unitPriceKbn)
+	    			newNumSepcTax = commUtils.mathNumAdd(newNumSepcTax, commUtils.mathNumMulti(commUtils.getHotelTaxFun(res.unitPriceIncServiceExcTax, hotelData.hotelTaxDefInstance[thisRoomSpcd]), nums));
+	    		});
+	    		planItemPriceMap.set(getPlanKeyFun(rowIndex), planItemPriceLst);
+	    	}
+	    	$j("input[id$=':" + rowIndex + ":hidSpecialTax']").val(newNumSepcTax);
+	    	$j("span[id$=':" + rowIndex + ":specialTax']").text(newNumSepcTax);
+	    	amountIncTax = commUtils.mathNumAdd(commUtils.mathNumSub(amountIncTax, numSepcTax), newNumSepcTax);
+	    // 2019/03/29 JINYABUG-1528 bug fix by zy BEGIN
+	    /*
+	    // 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy BEGIN
+	    } else if(actionType == "{!ACTTYPE_PLAN}") {
+	    	// 判断plan是否展开过
+	    	var _PlanBrkDn = $j("td>input.showDetailEvent" + rowIndex + "_child");
+	    	var price = res.unitPrice;
+	    	if(_PlanBrkDn.length == 0){ // Plan未展开的情况
+		    	var planItemPriceLst = planItemPriceMap.get(getPlanKeyFun(rowIndex));
+		    	var price = kendo.parseInt($j("input:text[id$=':" + rowIndex + ":price']").val());
+		    	if (price == null) price = 0;
+	    		for(var i = 0; i < planItemPriceLst.length; i++){
+	    			var res = JINYACONNECT.PRODUCT.PROCESS(planItemPriceLst[i] * 1, 1, tax, service, unitPriceKbn);
+	    			amountIncTax = commUtils.mathNumAdd(amountIncTax, res.unitPriceIncTax , nums);
+	    			amountExcTax = commUtils.mathNumAdd(amountExcTax, res.unitPriceIncServiceExcTax , nums);
+	    			price = commUtils.mathNumAdd(price, res.unitPriceIncTax , nums);
+	    		}
+	    		$j("input:text[id$=':" + rowIndex + ":price']").val(price);
+	    	}
+	    // 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy END
+	    */
+	    // 2019/03/29 JINYABUG-1528 bug fix by zy END
+	    }
+	}
+	// 2019/07/30 軽減税率機能対応 WGCH END
+    // 2018/07/27 宿泊税計算 WGCH END
+  // 請求書に非表示制御フラグ
+  
+    $j("span[id$=':" + rowIndex + ":amoutPriceIncTax']").text(kendo.toString(amountIncTax, "c")); // 金額（税込み）
+    $j("input[id$=':" + rowIndex + ":hidAmoutPriceIncTax']").val(amountIncTax); // 金額（税込み） 
+    $j("span[id$=':" + rowIndex + ":amoutPriceExcTax']").text(kendo.toString(amountExcTax, "c")); // 金額（税抜き） 
+    $j("input[id$=':" + rowIndex + ":hidAmoutPriceExcTax']").val(amountExcTax); // 金額（税抜き） 
+    // 合計金額を計算を行う
+    // 関連金額計算を行う
+    //if(!false)
+    setupCalSumAmountPrice();
+    // 2019/04/30 増税仮対応 WGCH BEGIN
+    // 增税商品-自动设定
+    if(mode != CUST_AUTOGETPRODUCTMODE_RETURN && tax > 0){
+      autoSetTaxIncProductFun();
+    }
+    // 2019/04/30 増税仮対応 WGCH END
+}
+// 明細情報から請求金額と利用金額自動計算を行う
+function setupCalSumAmountPrice() {
+    // 画面明細から総金額利用金額と請求金額を計算を行う
+    var totalUsed = 0;    // 利用金額
+    var totalPayed = 0;   // 支払金額
+    
+     // 値引きの支払情報格納行
+    var discountPayArr = new Array();
+    // Coponの支払情報格納行
+    var coponPayArr = new Array();  
+    // 普通の支払情報
+    var normalPayArr = new Array();
+    // 全て有効な利用金額を集計を行う
+    //$("input[id$=':hidAmoutPriceIncTax']").each(function() {
+    var hidAmountPriceArr = $j("input:hidden[id$=':hidAmoutPriceIncTax']");
+    var hidActionTypeArr =  $j("input:hidden[id$=':hidActionType']");
+    var hidPaymentTypeArr = $j("input:hidden[id$=':hidPaymentType']");
+    var hidAmountPriceExcTaxArr = $j("input[id$='hidAmoutPriceExcTax']"); 
+  var totalAmountExcTax = 0;
+    for (i = 0; i < hidAmountPriceArr.length; i++) {
+      //$this = $(this);
+      $this = $j(hidAmountPriceArr[i]);
+      var _locRowIndex = $this.attr("rowIndex");
+      // 該当行目の計算MARK
+      var actionType = hidActionTypeArr[i].value;
+      // 支払情報
+      if (actionType == "{!JSENCODE(ACTTYPE_AR)}" || actionType == "{!JSENCODE(ACTTYPE_PAY)}") {
+        //totalPayed = commUtils.mathNumAdd(totalPayed, $this.val());
+        // 商品処理種別は「支払」の場合
+        if (actionType == "{!JSENCODE(ACTTYPE_PAY)}") {
+          var payType = hidPaymentTypeArr[i].value;
+          
+          var payMediaLabel = getPayMeidaLabel(payType);
+          if (payMediaLabel == "{!JSENCODE(MEDIA_TYPE_DISCOUNT)}") {
+            discountPayArr.push($this);
+          } else if (payMediaLabel == "{!JSENCODE(MEDIA_TYPE_COPON)}") {
+          coponPayArr.push($this);
+          } else {
+            // 値引き、クーポン支払情報以外の場合
+            normalPayArr.push($this);
+          }
+        } else {
+          // 前受付金の場合
+          normalPayArr.push($this);
+        }
+      }
+      // 利用情報
+      else {
+        totalAmountExcTax = commUtils.mathNumAdd(totalAmountExcTax, hidAmountPriceExcTaxArr.eq(i).val());
+        totalUsed = commUtils.mathNumAdd(totalUsed, $this.val());
+      }
+    }
+    $j("#totalAmountExcTax").val(totalAmountExcTax);
+    // 利用総金額
+    var remaindPayMoney = totalUsed;
+//console.debug('remaindPayMoney:::' + remaindPayMoney);
+    // 値引き支払情報存在する場合
+    $j.each(discountPayArr, function(i) {     
+      // 支払金額残り場合
+      if (remaindPayMoney > 0) {
+      //console.debug(.val());
+      var $this = discountPayArr[i];
+      var _locRowIndex = $this.attr("rowIndex");
+      // 預かり金額
+      var recivePrice = $this.val();
+      // 該当行値引き金額は全体支払
+      if (remaindPayMoney >= recivePrice) {
+        totalPayed = commUtils.mathNumAdd(totalPayed, recivePrice);
+        // 預かり金額：値引き金額、支払金額：値引き金額、お釣り金額：０円（値引き返金なし）
+        //setPaymentInfo(_locRowIndex, recivePrice, recivePrice, 0);
+      } 
+      // 値引き金額は利用金額により、大きくの場合、返金なし
+      else {
+        totalPayed = commUtils.mathNumAdd(totalPayed, remaindPayMoney);
+        // 預かり金額：値引き金額、支払金額：残り利用金額、お釣り金額：０円（値引き返金なし）
+        //setPaymentInfo(_locRowIndex, recivePrice, remaindPayMoney, 0);
+      }
+      // 残り未支払金額再計算を行う
+      remaindPayMoney = commUtils.mathNumSub(remaindPayMoney, recivePrice);
+      // 値引き超える金額は返金しない設定
+      if (remaindPayMoney < 0) remaindPayMoney = 0;
+//console.debug('discountPayArr:::' + remaindPayMoney);
+    }
+  });   
+  if (coponPayArr.length > 0) {
+    var coponManasFlg = $j("input[id$=':manasCoponFlg']").prop("checked");
+    $j.each(coponPayArr, function(i) {     
+      var $this = coponPayArr[i];
+      var _locRowIndex = $this.attr("rowIndex");
+      // 預かり金額
+      var recivePrice = $this.val();
+      // 預かり金額は未支払い金額は超える場合、お釣り存在場合
+      if (remaindPayMoney < recivePrice) {
+        var locRemaindPay = remaindPayMoney < 0 ? 0 : remaindPayMoney; 
+        recivePrice = coponManasFlg ? recivePrice : locRemaindPay;
+      }
+      totalPayed = commUtils.mathNumAdd(totalPayed, recivePrice);
+      remaindPayMoney = commUtils.mathNumSub(remaindPayMoney, recivePrice);
+    });
+  }
+    $j.each(normalPayArr, function(i) {    
+    var $this = normalPayArr[i];
+    var _locRowIndex = $this.attr("rowIndex");
+    // 預かり金額
+    var recivePrice = $this.val();
+    // 2015/06/25 返金の場合、入力の金額は減算を行う
+    var paytype = $j("input:hidden[id$=':" + _locRowIndex +":hidPaymentType']").val();
+    if (isRefundItem(paytype) && recivePrice > 0) recivePrice = -recivePrice;
+    
+    totalPayed = commUtils.mathNumAdd(totalPayed, recivePrice);
+    // 残り未支払金額計算
+    remaindPayMoney = commUtils.mathNumSub(remaindPayMoney, recivePrice);
+  }); 
+    // 該当金額から計算を行う
+    $j("#usedAmountBlock").text(kendo.toString(totalUsed, "c"));
+    // 2015/12/24 入金確認自動チェック制御機能の追加 BEGIN
+    var requestMoney = commUtils.mathNumSub(totalUsed, totalPayed);
+    $j("#reqAmountBlock").text(kendo.toString(requestMoney, "c"));// 請求金額
+    
+    var isAccountPaidFlg = "{!isAccountPaidFlg}";
+    var handRquestFlg = $j("input[id$=':inp_handReq_paymentFlg']").val(); // 手動で入金確認の場合
+    if (isAccountPaidFlg == "true" && handRquestFlg != "1" && (totalUsed != 0 || requestMoney != 0)) {
+      $payFlg = $j("input[id$=':inp_paymentFlg']");
+      $payDate = $j("input[id$=':inp_receiptDate']");
+      if (requestMoney == 0) {
+        if ($payFlg.length > 0) {
+          $payFlg.prop('checked',true);
+        }
+        if ($payDate.length > 0) {
+          $payDate.val(kendo.toString(new Date(), JINYACONNECT.DateFormat));
+        }
+      }
+      else {
+        if ($payFlg.length > 0) {
+          $payFlg.prop('checked',false);
+        }
+        if ($payDate.length > 0) {
+          $payDate.val("");
+        }
+      }
+    }
+    // 2015/12/24 入金確認自動チェック制御機能の追加 END
+}
+
+
+<!--支払種別から支払メディア種別取得 -->
+function getPayMeidaLabel(payType) {
+  // 支払メデイア関連情報を取得する
+  var _paymentCovnertMap = JSON.parse("{!JSENCODE(payTypeConvertJson)}");
+  // 支払種別ー支払メディアへ変換用オブジェクト
+  if (_paymentCovnertMap.hasOwnProperty(payType)) {
+    return _paymentCovnertMap[payType];
+  } else {
+    return "";
+  }
+}
+
+<!--　該当支払情報は返金するがどうかチェック -->
+function isRefundItem(paytype) {
+  // 返金比較用キー
+  var _refundKeyArr = JSON.parse("{!JSENCODE(refundItemString)}");
+  return (paytype.length > 0 && _refundKeyArr.indexOf(paytype) >= 0);
+}
+// -------------------
+// 利用金額、お釣り金額設定
+// rowIdx:明細行数
+// reciveAmount:預かり金額
+// usedAmount:利用金額
+// -------------------
+function setPaymentInfo (rowIdx, reciveAmount, usedAmount, surplus) {
+  // 預かり金額
+  // 利用金額
+  $j("input:hidden[id$=':" + rowIdx + ":hidUsedAmount']").val(usedAmount);
+  // お釣り金額
+  $j("input:hidden[id$=':" + rowIdx + ":hidChangeAmout']").val(surplus);
+} 
+</script>
+</apex:outputpanel>
+<script>
+var detailEventFlag = {!isPlanDetailFlag};
+(function($){
+    function comPadZero(value, length){
+        return new Array(length - ('' + value).length + 1).join('0') + value;
+    }
+    
+    function comDateFormat(date, format){
+      return kendo.toString(date, format );
+    }
+    function comPadZero(value, length){
+        return new Array(length - ('' + value).length + 1).join('0') + value;
+    }
+    // 予約名自動設定機能
+    function autoSetupLeadName() {
+      var leadELement = $("input[element=lead_Name]");
+      var contactName = $("input[id$=':relcontact']").val();
+      if (leadELement.length > 0) {
+        var leadName = leadELement.val();
+        if (leadName == "" && contactName != "") {
+              leadELement.val(contactName);
+          }
+      }
+        
+        
+    }
+    // function syncSelectInfo (val, id) {
+    //     var key = "select[id$=':" + id + "']";
+    //     var objs = $(key);
+    //     if (objs.length > 1) {
+    //         for (i =0; i < objs.length; i++) {
+    //             $(objs[i]).val(val);
+    //         }
+    //     }
+    // }
+    
+    // 日付書式処理
+    // function dateFormatFun(obj) {
+    //     var inputDt = Date.parse(obj.value);
+    //     if (inputDt == null) return;
+    //     obj.value = inputDt.toString(JINYACONNECT.DateFormat);
+    // }
+    
+    // AutoComplete項目選べるリストクリックする処理
+    function clearAutoCompletePanel() {
+        $(".ui-autocomplete").hide();
+        $(".ui-autocomplete").empty();
+    }
+    // 室料計算用Method
+    function calRoomRateFun() {
+        // 現状の画面はラックレートするがどうかチェックする
+		  // var tierRatePrice = getTierPrice(groupindex);
+        var rackRateVal = $("#hidCurRackRatePrice").val();
+        if (rackRateVal == null || rackRateVal.length == 0) return null;
+        else return rackRateVal;
+        if ($("#hidIsRateRateFlg").val() == "true") {
+            var roomPrice = $("#hidRackratePrice").val();  // ボタンに記載する金額を取得する
+            var planPrice = $("#hidPlanPrice").val();  // 選択するプラン金額を格納する
+            return commUtils.mathNumSub(roomPrice, planPrice);// 室料のみプラン設定画面へ引き渡す
+        } else {
+            // ラックレートじゃない場合、室料は自動設定を行わない
+            //return 0;
+            return null;
+        }
+    }
+    // 2015/10/28 プラン明細表示のRESET
+    JINYACONNECT.CUSTOM.planRest = function(){
+        // 前に設定するプラン商品と金額情報をクリアする
+        var planItem = $("#planCustomeBtn").data("jinyaPlanExtend");
+        if (planItem != undefined) planItem.reset();
+    }
+    //初始化
+    JINYACONNECT.CUSTOM.bindEvent = function(){
+      //予約人数
+      var leadPerson = $("input[element='lead_StayPersons__c']");
+      if (leadPerson.length > 0) leadPerson.val(JS_StayPersons);
+    //var $planElement = $("input[id$=plan]").parents(".requiredInput");
+      //$planElement.replaceWith('<span>' + $planElement.html() + '</span>');
+    
+      // Bind Event Clear
+      $("#cancelBtn").unbind("click");
+      $("#cancelBtn").click(function(e){
+        //2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix BEGIN
+        // 2016/11/22 plan明细窗口不关闭 fix BEGIN by zh
+        clearBookingItem();
+        $j(".rowStr").closest("tr.dataRow").remove();
+        //2017/01/16 行追加共通化　by　zy BEGIN
+        lastBookingDetail();
+        //2017/01/16 行追加共通化　by　zy END
+        $j("input[id$=hidCurRows]").val("");
+        // 2016/11/22 plan明细窗口不关闭 fix END by zh
+        // お客様関連情報をクリアする
+        $("#relcontact_lkid_org").val("");
+        $("input[id$=':relcontact_lkid']").val("");
+        $("input[id$=':relcontact_lkold']").val("");
+        $("input[id$=':relcontact_lkid_org']").val("");
+        // 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix END
+        // 2020/07/30 7117 bug fixed by zy BEGIN 
+        if (("ACTCUSTOM" in window) && ("OBJ" in ACTCUSTOM))
+          ACTCUSTOM.OBJ.ADDROWCALLBACKRES = null;
+        // 2020/07/30 7117 bug fixed by zy END
+        $("#formresetbtn").click();
+        // room rate 清空 
+        $j("#hidCurRackRatePrice").val(''); 
+          // 入力画面クリアする
+          YAHOO.force.com.hideMe();
+      });
+      //お客様
+      $("img[name='accountPopup']").unbind("click");
+      $("img[name='roomPopup']").unbind("click");
+      
+      // 2013/10/07 一括予約入力項目統一するため、部屋割り当てるを削除する
+      // 2013/10/18 回復する
+      $("img[name='roomPopup']").click(function() {
+          if (!JINYACONNECT.CUSTOM.CheckRoomsNumber()) return false;
+          // 引き渡し値を設定して、選択画面を開く
+          var ctrRoomELement = $("input:text[id$=':broom:name']");
+          var ctrRoomId = $("input:hidden[id$=':broom:id']");
+          if (ctrRoomELement.length > 0)
+            ctrlNm = ctrRoomELement.get(0);
+          if (ctrRoomId.length > 0)
+            ctrlId = ctrRoomId.get(0);
+          //2017/03/01 部屋クリック機能場合下bug fix by zy BEGIN
+          JINYACONNECT.CUSTOM.process();
+          //JINYACONNECT.CUSTOM.doBeforeSave();
+          //2017/03/01 部屋クリック機能場合下bug fix by zy END
+          ctrlDt = $("input:hidden[id$=':hidStartDays']").val();
+          ctrlDt = comDateFormat(new Date(ctrlDt), JINYACONNECT.DateFormat);
+          // 出発日取得
+          var departDt = $("[element^=lead_Departure__c]");
+          ctlDeapartDt = departDt[0].tagName == "SPAN" ? departDt.text() : departDt.val();
+          ctlDeapartDt =  comDateFormat(new Date(ctlDeapartDt), JINYACONNECT.DateFormat);
+          var roomTypeElement = $("input[element='lead_refTypeOfRooms__c']");
+          var pidStr = '';
+          if (roomTypeElement.length > 0 ) {
+            var typeElementName = roomTypeElement.attr("name");
+            pidStr = 'pidx=' + $("input[name='" + typeElementName +"_lkid']").val();
+          } else {
+        pidStr = 'pidx=' + $("input:hidden[id$=':hidRefTypeOfRooms']").val();
+          }
+          var openUrl = "/apex/RoomSelector?" + pidStr + "&pdt=" + ctrlDt + "&pde=" +ctlDeapartDt ;
+          // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+          objs = new Array(ctrlNm, ctrlId);
+          commUtils.popup(openUrl, "roomSelector", objs);
+      });
+        
+      $("input[id$=':relcontact']").unbind("blur");
+      $("[id$=':relcontact']").unbind("focus");
+      //予約名
+      $("input[element=lead_Name]").unbind("focus");
+      // お客様情報を選択する
+      $("img[name='accountPopup']").click(function() {
+          var lkfmVal = $("form[id$=':createForm']").attr("id");
+          var lknmVal= $("input[id$=':relcontact']").attr("id");
+          var lktpVal ="003";
+          // 2017/08/08 SFのJavascriptからパラメータ指定ENCODE化対応 by zh BEGIN
+          var lksrchVal =  encodeURIComponent($("input[id$=':relcontact']").val());
+          // 2017/08/08 SFのJavascriptからパラメータ指定ENCODE化対応 by zh END
+          var url = "/_ui/common/data/LookupPage?lkfm=" + lkfmVal + "&lknm=" +lknmVal + "&lktp=" + lktpVal; 
+          openLookup(url, 670, '1', "&lksrch=" + lksrchVal);
+          // 2021/03/31 予約ポップやルームインジケータから予約作成する際に郵便番号検索が使えるようにして欲しい by zy BEGIN
+          if ("jinyaZipCodeSearceBind" in window) {
+            jinyaZipCodeSearceBind(curPopupWindow);
+          }
+          // 2021/03/31 予約ポップやルームインジケータから予約作成する際に郵便番号検索が使えるようにして欲しい by zy END
+      });
+      // お客名はクリアする場合、自動的にIDをクリアする
+      $("input[id$=':relcontact']").blur(function() {
+          if ($(this).val() == "") {
+              $("input[id$=':relcontact_lkid']").val("");
+              $("input[id$=':relcontact_lkold']").val("");
+              $("#relcontact_lkid_org").val("");
+              $("input[element='lead_Relcontact__r.Katakana__c']").val("");
+              $("input[element='lead_Relcontact__r.KanaName1__c']").val("");
+              $("input[element='lead_Relcontact__r.Phone']").val("");
+              $("input[element=lead_Name]").val("");
+          }
+      });
+      // 顧客変更する場合、顧客情報を自動取得、基本情報を画面に設定する　
+      $("[id$=':relcontact']").on('blur', function(){
+          var $this = $(this);
+          // 設定内容が存在する場合
+          if ($this.val() != "") {
+             // Content Changed
+             if ($("#relcontact_lkid_org").val().substring(0,15) != $("input[id$=':relcontact_lkid']").val().substring(0,15)) {
+                 // お客様情報のID情報を格納する
+                 $("#relcontact_lkid_org").val($("input[id$=':relcontact_lkid']").val());
+                 // 顧客情報を更新する
+                 var contactId = $("input[id$=':relcontact_lkid']").val();
+                 var contactName = $this.val();
+                 autoSetContactMessage(contactId,contactName);
+             }
+             // 予約名自動設定を行う
+             autoSetupLeadName();
+          };
+      });
+     
+      // 2015/10/30 DatePicker Event Remove
+      $("span.dateInput>input").each(function(i, e){
+        $(e).attr('onFocus',null);                        
+    });
+      
+    
+    // 2015/10/30 DatePicker Position Fix
+    $("span.dateInput>input").focus(function (e) {
+      var currentTarget = $(e.target);
+      var dateInputElement = currentTarget.parent(".dateInput");
+      if (dateInputElement.hasClass("dateOnlyInput")) {
+        DatePicker.pickDate(true, currentTarget.attr('id'), false);
+      } else {
+        DatePicker.pickDate(true, currentTarget.attr('id'), true);
+      }
+        var scrollTop = currentTarget.parents(".bd").scrollTop()
+        var datePickerTop = parseInt($('.datePicker').css('top'),10);
+        if(!isNaN(datePickerTop)){
+            $('.datePicker').css('top', (datePickerTop - scrollTop) + 'px');
+        }                               
+    });
+     /**/
+      
+      // お客名にて、自動予約名に設定を行う
+      $("input[element=lead_Name]").focus(function() {
+          autoSetupLeadName();
+      });
+      
+      //2016/12/21 连接plan页面替换标准页面  begin by wx 
+      $j("img[name='planPopup']").unbind("click");
+      $j("img[name='planPopup']").click(function() {        
+        ctrllId = $j("input:hidden[id$=':planItem:plan_lkid']").get(0);      
+          ctrllNm = $j("input:text[id$=':planItem:plan']").get(0);
+          objs = new Array(ctrllId, ctrllNm);
+          commUtils.popup("/apex/PlanSearch" ,"PlanSearch",objs, null, null, popupplanCallback());
+          //JINYACONNECT.CUSTOM.planRest();
+      });     
+      //$j("a:[id$='planItem:plan_lkwgt']")[0].style="display: none;";
+      //2016/12/21 连接plan页面替换标准页面  end by wx 
+      
+      // プランを切り替えする場合、関連のプラン明細・非表示制御追加
+      //2016/12/21 连接plan页面替换标准页面  begin by wx 
+      //$("input[id$=':plan']").unbind("change");
+      //$("input[id$=':plan']").change(function (){
+      $("input[id$=':planItem:plan']").unbind("change");
+      $("input[id$=':planItem:plan']").change(function () {
+      $j("input:hidden[id$=':planItem:plan_lkid']").val("");
+      //2016/12/21 连接plan页面替换标准页面  end by wx 
+          // 2015/10/28 プラン明細表示のRESET
+          JINYACONNECT.CUSTOM.planRest();
+      })
+      
+      $("#planCustomeBtn").unbind("jinyaPlanExtend");
+      $("#planCustomeBtn").jinyaPlanExtend({
+          selectorRoot : $("#planCustomeBtn").parent().parent().parent().parent(),
+          //2016/12/21 连接plan页面替换标准页面  begin by wx
+          planInputField : $("input[id$=':planItem:plan_lkid']"),
+          //planInputField : $("input[id$=':planItem:id']"),
+          //2016/12/21 连接plan页面替换标准页面 end by wx
+          colspanNum : (1*$("#planCustomeBtn").attr("colnumsize")*2),
+          planSetupSyncField : $("input[id$=':nl_hidPlanDetailInfo']"),
+          startfun : JINYACONNECT.CUSTOM.blockUi,
+          endfun : JINYACONNECT.CUSTOM.unblock,
+          actionOpenImg : "{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}",
+          actionCloseImg: "{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}",
+          raceRateCalFunction : calRoomRateFun,
+          remotePlanQuery  : "{!$RemoteAction.BookingLeadWindow.getPlanDetailListById}",
+          remoteProdQuery  : "{!$RemoteAction.BookingLeadWindow.getArrayProductItemInfo}",
+          labels : {NOFOUND:"{!JSENCODE($Label.ps__msg_006_0235)}",PRODUCTNM:"{!JSENCODE($Label.ps__msg_006_0212)}",UNITPRICE:"{!JSENCODE($Label.ps__msg_006_0213)}",SUMMARY:"{!JSENCODE($Label.ps__msg_006_0402)}"}
+        ,afterExpland:JINYACONNECT.CUSTOM.setupCalAmoutPrice
+      });
+		// 2020/06/15 予約ポップのデフォルト字段エラー修正 by zy BEGIN
+		$j("#formresetbtn").unbind('click');
+		// レセット昨日対応
+		$j("#formresetbtn").bind("click",function(){
+			// 該当予約新規画面の選択項目、デフォルト値再設定
+			$j(this).closest("form").find("select").each(function(){
+				// 選択項目フィルター
+				$j("option",this).prop('selected', function() {
+					return this.defaultSelected;
+				});
+			});
+		});
+		// 2020/06/15 予約ポップのデフォルト字段エラー修正 by zy END
+      // 2019/04/15 ベネフィットホテル様より改善要望 by zy BEGIN
+      initProductWin();
+      // 2019/04/15 ベネフィットホテル様より改善要望 by zy END
+      if (detailEventFlag)
+        JINYACONNECT.CUSTOM.detailBindEvent()
+    }
+    
+    // Check部屋数
+    JINYACONNECT.CUSTOM.CheckRoomsNumber = function(){
+      
+      var roomELement = $("input:text[id$=':broom:name']");
+      if (roomELement.length <= 0 ) {
+        return true;
+      }
+      if ($("input:text[id$=':broom:name']").length == 0 ||
+          ($("input:text[id$=':broom:name']").length > 0 &&
+           $("input:text[id$=':broom:name']").val() == "")) return true;
+      var rooms = $("input:text[id$=':bookingRooms']").val();
+      if (rooms > 1) {
+          //部屋数は複数場合、部屋設定することができません。
+          alert('{!$Label.ps__msg_003_0018}');
+          JINYACONNECT.CUSTOM.unblock();
+          return false;
+      }
+      return true;
+    }
+    //2017/03/01 部屋クリック機能場合下bug fix by zy BEGIN
+    JINYACONNECT.CUSTOM.process = function() {
+      var hideItem = $("input[id$=hidStartDays]");
+        
+    var entryDt = $("[element^=lead_EntryTime__c]");
+    if (entryDt.length > 0) { 
+      var dateValue = entryDt[0].tagName == "SPAN" ? entryDt.text() : entryDt.val();
+      hideItem.val(dateValue);
+    }
+    }
+    //2017/03/01 部屋クリック機能場合下bug fix by zy END
+
+    // 保存前処理
+    JINYACONNECT.CUSTOM.doBeforeSave = function() {
+    
+        if (!JINYACONNECT.CUSTOM.CheckRoomsNumber()) return false;
+        
+        if (!JINYACONNECT.CUSTOM.checkIfHadRequiredItem()) return false;
+        //2017/03/01 部屋クリック機能場合下bug fix by zy BEGIN
+        JINYACONNECT.CUSTOM.process();
+        /*
+        var hideItem = $("input[id$=hidStartDays]");
+        
+    var entryDt = $("[element^=lead_EntryTime__c]");
+    if (entryDt.length > 0) { 
+      var dateValue = entryDt[0].tagName == "SPAN" ? entryDt.text() : entryDt.val();
+      hideItem.val(dateValue);
+    }*/
+    //2017/03/01 部屋クリック機能場合下bug fix by zy END
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+    $j("[id$=BookEstTable] tbody tr.tranDetailRow").each(function(){
+      // plan明细是否展开过
+      var isPlanNumFlg = kendo.parseInt($j("input[id$=hidBasePlanNum]",this).val());
+      if (isPlanNumFlg == null || isPlanNumFlg != 0){
+      	var rowIndex = $j("input[id$='clearProduct']",this).attr("rowindex");
+      	var gResult = _resultMap.get(getPlanKeyFun(rowIndex));
+      	if(!(OPTION_MODE_ON && gResult && gResult.hasOptionMstFlg)){
+      		$j("input[id$=hidSyncInfo]",this).val("");
+      	}
+      }
+    });
+    // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    if (detailEventFlag) refreshOrder(true);
+        clearAutoCompletePanel();
+        JINYACONNECT.CUSTOM.blockUi();
+        // 2019/06/14 4.2.予約ポップからベースプランを選択した状態で新規予約作成をすると、予約見積明細に該当のプランが登録された状態で予約を取ることができますが、 by zy BEGIN
+        refreshBasePlan();
+        // 2019/06/14 4.2.予約ポップからベースプランを選択した状態で新規予約作成をすると、予約見積明細に該当のプランが登録された状態で予約を取ることができますが、 by zy END
+        saveLeadFun();
+        return true;
+    }
+    // プラン設定機能
+    JINYACONNECT.CUSTOM.openMiniPlanSetup = function(item) {
+        // プラン明細を展開する 
+        var planItem = $("#planCustomeBtn").data("jinyaPlanExtend");
+        if (planItem != undefined) planItem.switchStatus();
+    }
+    JINYACONNECT.CUSTOM.ClearRoom = function() {
+      var ctrRoomELement = $("input:text[id$=':broom:name']");
+        var ctrRoomId = $("input:hidden[id$=':broom:id']");
+        commUtils.clearValue(ctrRoomId.attr("id"),ctrRoomELement.attr("id"));
+    }
+    JINYACONNECT.CUSTOM.CallBack = function() {
+        var createResult = $("input[id$=':hidDataCreateOK']").val();
+        // 2016/12/07 予約ポップ新規後一画面へ遷移 BEGIN by zh
+    var strId = $("input[id$='IndexId']").val();  
+    // 2016/12/07 予約ポップ新規後一画面へ遷移 END by zh  
+        if (createResult.toLowerCase() == "true") {
+          var detailEventFlag = {!isPlanDetailFlag};
+        if (detailEventFlag) clearBookingItem();
+            bookingCreateCallBack();
+            // 2016/12/07 予約ポップ新規後一画面へ遷移 BEGIN by zh
+            gotoBookingFlexApp(strId);
+            // 2016/12/07 予約ポップ新規後一画面へ遷移 END by zh
+            //JINYACONNECT.CUSTOM.detailBindEvent();
+        } else {
+          JINYACONNECT.CUSTOM.unblock();
+        }
+        JINYACONNECT.CUSTOM.detailBindEvent();
+    } 
+     // 画面Lockする
+    JINYACONNECT.CUSTOM.blockUi = function() {
+        $.blockUI({
+            //Processing...
+             message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.ps__msg_003_0099}</h1>'
+        });
+        return true;
+    }
+    // 画面Lock解除
+    JINYACONNECT.CUSTOM.unblock = function() {
+        $.unblockUI({ fadeOut: 200 }); 
+    }
+    JINYACONNECT.CUSTOM.setDepartureDateAuto = function (changeType){
+      var entryDt = $("[element^=lead_EntryTime__c]");
+      var staysElement = {!!isHaveStartDays} ? $("input[id$=hidStaysNums]") : $("input[id$=staysNums]");
+      var departDt = $("[element^=lead_Departure__c]");
+      var starts; 
+        var stays;
+        var endDate;
+        var hadDepartflag = false;
+      var hadStaysflag = false;
+      var hadEntryflag = false;
+      if (changeType == 'entryDt'){
+        starts = entryDt[0].tagName == "SPAN" ? entryDt.text() : entryDt.val();
+        stays = staysElement.val();
+        if (departDt.length > 0 && starts != '') {
+          endDate = departDt[0].tagName == "SPAN" ? departDt.text() : departDt.val();
+          if ( endDate == ''){
+            var departDtStr = comDateFormat(new Date((kendo.parseDate(starts,JINYACONNECT.DateFormat)).getTime() + stays*24*60*60*1000), JINYACONNECT.DateFormat);
+            departDt[0].tagName == "SPAN" ? departDt.text(departDtStr) : departDt.val(departDtStr);
+          } else {
+            var days = ((kendo.parseDate(endDate,JINYACONNECT.DateFormat)).getTime() - (kendo.parseDate(starts,JINYACONNECT.DateFormat)).getTime())/(24*60*60*1000)
+            if (days < 0 ) {
+              var departDtStr = comDateFormat(new Date((kendo.parseDate(starts,JINYACONNECT.DateFormat)).getTime() + stays*24*60*60*1000), JINYACONNECT.DateFormat);
+              departDt[0].tagName == "SPAN" ? departDt.text(departDtStr) : departDt.val(departDtStr);
+            } else staysElement.val(days);
+          }
+        }
+      }else if (changeType == 'departDt'){
+        endDate = departDt[0].tagName == "SPAN" ? departDt.text() : departDt.val();
+        stays = staysElement.val();
+        if (entryDt.length > 0 && endDate != '') {
+          starts = entryDt[0].tagName == "SPAN" ? entryDt.text() : entryDt.val();
+          if(starts == ''){
+            var entryDtStr = comDateFormat(new Date((kendo.parseDate(endDate,JINYACONNECT.DateFormat)).getTime() - stays*24*60*60*1000), JINYACONNECT.DateFormat);
+            entryDt[0].tagName == "SPAN" ? entryDt.text(entryDtStr) : entryDt.val(entryDtStr);
+          }else{
+            var days = ((kendo.parseDate(endDate,JINYACONNECT.DateFormat)).getTime() - (kendo.parseDate(starts,JINYACONNECT.DateFormat)).getTime())/(24*60*60*1000);
+            if (days < 0 ) {
+              var departDtStr = comDateFormat(new Date((kendo.parseDate(starts,JINYACONNECT.DateFormat)).getTime() + stays*24*60*60*1000), JINYACONNECT.DateFormat);
+              departDt[0].tagName == "SPAN" ? departDt.text(departDtStr) : departDt.val(departDtStr);
+            } else staysElement.val(days);
+          }
+        }
+      }else if (changeType == 'stays'){
+        stays = staysElement.val();
+        if (entryDt.length > 0) {
+          starts = entryDt[0].tagName == "SPAN" ? entryDt.text() : entryDt.val();
+        }
+        if (departDt.length > 0) {
+          endDate = departDt[0].tagName == "SPAN" ? departDt.text() : departDt.val();
+        }
+        if(starts != null && starts != ''){
+          var departDtStr = comDateFormat(new Date((kendo.parseDate(starts,JINYACONNECT.DateFormat)).getTime() + stays*24*60*60*1000), JINYACONNECT.DateFormat);
+          departDt[0].tagName == "SPAN" ? departDt.text(departDtStr) : departDt.val(departDtStr);
+        } else if (endDate != null && starts != ''){
+          var entryDtStr = comDateFormat(new Date((kendo.parseDate(endDate,JINYACONNECT.DateFormat)).getTime() - stays*24*60*60*1000), JINYACONNECT.DateFormat);
+          entryDt[0].tagName == "SPAN" ? entryDt.text(entryDtStr) : entryDt.val(entryDtStr);
+        }
+      }
+        
+    }
+    JINYACONNECT.CUSTOM.checkIfHadRequiredItem = function (){
+       // CKEDITOR情報は実勢の項目にコピーする
+        CKEDITOR.jinya.copyValue($, "ckeditorClass");
+      var checkFlag = false;
+    $j(".repuiredClass").each(function(){
+      $this = $j(this);
+      if(($this[0].tagName == "INPUT" && $this[0].type != "checkbox") || $this[0].tagName == "SELECT" || $this[0].tagName == "TEXTAREA" ){
+        if($j(this).val()  == "") {
+          checkFlag = true;
+          // 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix BEGIN  
+          //return false;
+          // 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix END  
+        }
+      }else if($this[0].tagName == "SPAN"){
+        if ($j(this).text() == ""){
+          checkFlag = true;
+          // 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix BEGIN
+          //return false;
+          // 2016/10/24 点击行追加→点击cancel→再次打开新规窗口→見積明細恢复初始行数 fix END  
+        }
+      }
+    });
+    if (checkFlag) {
+      $j("#inputFormErrorMsg").show();
+      $j("#myPanel div.bd").scrollTop(0);
+      return false;
+    }else
+      $j("#inputFormErrorMsg").hide();
+    return true;
+  }
+  JINYACONNECT.CUSTOM.setupCalAmoutPrice = function(rowIndex,isFromCallBackFun){
+    setupCalAmoutPrice(rowIndex, isFromCallBackFun)
+  }
+  //var JS_StayPersons = 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingMansDef__c,0)} + 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingFemailsDef__c,0)} + 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingChildrenDef__c,0)};
+    JINYACONNECT.CUSTOM.bindEvent();
+})(jQuery);
+var currRowIndex = 0,dragLeadElement;
+/** 書式処理 */
+var currency = kendo.culture().numberFormat.currency;
+var _CONST_PRICE_ROOM_TYPE = '室料';      // 室料のKeyWord定義する
+currency.decimals = JINYACONNECT.NumberPointLen;
+currency.symbol = JINYACONNECT.CurrencySybmol;
+currency.pattern = ["$-n","$n"];
+var errorMap = new Object();
+
+//2016/12/21 连接plan页面替换标准页面  begin by wx
+function popupplanCallback() {
+  return function () {
+    JINYACONNECT.CUSTOM.planRest();
+  }
+}
+//2016/12/21 连接plan页面替换标准页面  end by wx
+function SetDefaultValue(Obj){
+  // 2017/08/28　ディフェンダー設定不正バグ修正 by zy BEGIN
+  //$("input[element]").val("");
+  // 2017/08/28　ディフェンダー設定不正バグ修正 by zy END
+    for (var p in CKEDITOR.instances ){
+      var commentCk = CKEDITOR.instances[p];
+      if (commentCk.name.indexOf('createPageBlockSection') >= 0) {
+          commentCk.setData('');
+          break;
+        }
+    }
+    // 2018/05/15 お客様残留エラー修正 by zy BEGIN
+    $j("#relcontact_lkid_org").val("");
+    // 2018/05/15 お客様残留エラー修正 by zy END
+    JINYACONNECT.CUSTOM.planRest();
+    // 2017/06/12 MulitiSelect Clear Bug Fix BEGIN
+    multiSelectRest();
+    // 2017/06/12 MulitiSelect Clear Bug Fix END
+    $("input[id$=':hidDataCreateOK']").val("");
+    var staysElement = {!!isHaveStartDays} ? $("input[id$=hidStaysNums]") : $("input[id$=staysNums]");
+    // 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 BEGIN
+    //staysElement.val("1");
+    staysElement.val($("#defStaysNums").val());
+    // 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 END
+    var StaysNumsElement = {!!isHaveBookingRooms} ? $("input[id$=hidBookingRooms]") : $("input[id$=bookingRooms]");
+    StaysNumsElement.val("1");
+    var StaysPersonElement = {!!isHaveStayPerson} ? $("input[id$=hidStayPerson]") : $("input[element$=StayPersons__c]");
+    for(var p in Obj){
+      if(typeof(Obj[p]) == "function"){   
+        try {
+          if (!errorMap[p])
+          eval(p);
+        } catch (e) {
+          errorMap[p] = "";
+            console.log(e.message);
+        }
+      }else{ 
+        if(p.indexOf("bookingRooms") >= 0)StaysNumsElement.val(Obj[p]);
+        else if (p.indexOf("StayPersons__c") >= 0) StaysPersonElement.val(Obj[p]);
+        else{
+          var elementObj = $(p);
+          if (elementObj.length > 0) {
+            if(elementObj[0].tagName == "SPAN") elementObj.text(Obj[p]);
+            else elementObj.val(Obj[p]);
+          }
+          
+        }
+      } 
+    }
+    JINYACONNECT.CUSTOM.setDepartureDateAuto('stays');
+}
+function clearBookingItem(){
+  // Error Message Panel Clear[Attention: Error Class IDはSF設定依存]
+    var showDiv = $j("div.errorM3:visible");
+  if (showDiv.length > 0 ) showDiv.hide();
+    clearAutoCompletePanel();
+    if (detailEventFlag){
+      //$j("#inputFormErrorMsg").hide();
+      $j("tr.tranDetailRow").each(function(){
+        var $this = $j(this);
+        var curDiv = $j("div.pointIndex",$this);
+      var rowIndex = curDiv.attr("rowindex");
+        dispExtendImg("hidden", rowIndex);
+        for (var i = 0; i < JINYACONNECT.CUSTOM.clearItemIdArr.length; i++){
+              clearObj = $j("[id$=':BookEstTable:" + rowIndex + JINYACONNECT.CUSTOM.clearItemIdArr[i] + "']");
+              if (clearObj.is(":checkbox")) {
+                  clearObj.removeAttr('checked');
+              } else if (clearObj.is("select")) {
+                  clearObj.get(0).selectedIndex = 0;
+              } else if (clearObj.is("span")) {
+                  clearObj.text("");
+              } else {
+                clearObj.get(0).defaultValue = '';
+                  clearObj.val("");
+              }
+          }
+      });
+      //$j("tr.tranDetailRow img[id^=showDetailEvent]").hide();
+      $j("tr.tranDetailRow").hide();
+      setupCalSumAmountPrice();
+    }
+    // 2019/04/15 ベネフィットホテル様より改善要望 by zy BEGIN
+    clearProdWin();
+    // 2019/04/15 ベネフィットホテル様より改善要望 by zy END
+}
+// 2016/12/07 予約ポップ新規後一画面へ遷移 BEGIN by zh
+  function gotoBookingFlexApp(strId){
+    var gotoBookingFlexAppFlg = {!RoomTypeGotoBookingFlexApp};
+    var GotoBookingFlexAppConfirm = {!RoomTypeGotoBookingFlexAppConfirm};
+    if(gotoBookingFlexAppFlg) {
+      // 2017/02/08 一画面へ新規開く対応 BEGIN
+			// 2019/09/15 Security Check BY zyz BEGIN
+			//window.location.href = '/apex/BookingApp?id=' + strId + '&spcd=' + '{!JSENCODE(xmlShopCode)}';
+			// 2019/09/15 Security Check BY zyz END
+			var _openUrl = '/apex/BookingApp?id=' + strId + '&spcd=' + '{!JSENCODE(ShopCode)}';
+      window.open(_openUrl,"_blank");
+      // 2017/02/08 一画面へ新規開く対応 END
+    }else{
+      if(GotoBookingFlexAppConfirm){
+        //一括予約画面へ遷移しますか？
+        if(!confirm("{!$Label.ps__msg_003_0112}")) return;
+        // 2017/02/08 一画面へ新規開く対応 BEGIN
+				// 2019/09/15 Security Check BY zyz BEGIN
+				//window.location.href = '/apex/BookingApp?id=' + strId + '&spcd=' + '{!JSENCODE(xmlShopCode)}';
+				// 2019/09/15 Security Check BY zyz END
+				var _openUrl = '/apex/BookingApp?id=' + strId + '&spcd=' + '{!JSENCODE(ShopCode)}';
+        window.open(_openUrl,"_blank");
+        // 2017/02/08 一画面へ新規開く対応 END
+      }
+    }
+  }
+// 2016/12/07 予約ポップ新規後一画面へ遷移 END by zh
+//2017/03/01 お客様項目タイプ対応　by　zy　BEGIN
+var contactFieldToPath = null;
+function autoSetContactMessage(contactId,contactName){
+  if (contactFieldToPath == null) {
+    var mapContactPingField = $j("input[id$=hidContactType]").val();
+    var mapContactPingFieldLst = mapContactPingField.split(',');
+    var contactFieldToPath = new Object();
+    for (var i = 0; i < mapContactPingFieldLst.length ; i++) {
+      if(mapContactPingFieldLst[i] == "" || mapContactPingFieldLst[i] == null) continue;
+      var mapContactPingFieldSobj = mapContactPingFieldLst[i].split(':');
+      contactFieldToPath[mapContactPingFieldSobj[0]] = mapContactPingFieldSobj[1];
+    }
+  }
+   JINYACONNECT.CUSTOM.blockUi();
+     // 既に定義する売価はプランカラ取得、画面に設定する
+     Visualforce.remoting.Manager.invokeAction(
+     "{!$RemoteAction.BookingLeadWindow.refreshContcatInfo}", contactId,contactName, function(result, event){
+         if(event.type == 'exception') {
+             alert(event.message);
+         } else { 
+             // 取得するお客様情報を画面に設定する
+             var Obj = result.contact;
+             var beforePix = "{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+             $("[element^=lead_Relcontact__r]").each(function(){
+                var element = $(this).attr("element");
+                var path = element.replace('lead_Relcontact__r.','');
+                if(Obj[path] != undefined || Obj[beforePix + path] != undefined){ 
+                  //2017/03/01 ps__ bug fix by zy BEGIN
+                  var elementVal = Obj[path] != undefined ? Obj[path] : Obj[beforePix + path];
+                  var pathType = contactFieldToPath[path] != undefined ? contactFieldToPath[path] : contactFieldToPath[beforePix + path];
+                  if(pathType != undefined) {
+                  // お客様自定义关联的日期型字段
+                    if (pathType == "Date") {
+                  $(this).val(kendo.toString(new Date(elementVal),JINYACONNECT.DateFormat));
+                      // お客様自定义关联的datetime型字段
+                    } else if (pathType == "DateTime") {
+                  $(this).val(kendo.toString(new Date(elementVal),JINYACONNECT.DateTmFormat));
+                    // お客様自定义关联的checkbox型字段
+                    } else if(pathType == "Boolean"){
+                      //2017/03/01 ps__ bug fix by zy END
+                      //チェック
+                      if(elementVal){
+                  $(this).prop("checked",true);
+                      //チェックなし
+                      } else {
+                  $(this).prop("checked",false);
+                      }
+                      }else $(this).val(elementVal);;
+                  } else {
+                        if(path.toLowerCase().indexOf('Id'.toLowerCase()) >= 0 && (elementVal.length == 15 || elementVal.length == 18)) return true;
+                    $(this).val(elementVal);
+                  }
+                }
+             });
+         }
+         // 画面解除する
+         JINYACONNECT.CUSTOM.unblock();
+     });
+}
+// 2016/12/15 自動設定お客様情報 END
+//2017/01/16 行追加共通化　by　zy BEGIN
+function lastBookingDetail(){
+  var lastSector = "input[id$=useDate],input[id$=productName],input[id$=price],input[id$=orderNums],input[id$=specialTax]";
+  //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+  $j(lastSector,"tr.tranDetailRow:last").unbind("focus");
+  $j(lastSector,"tr.tranDetailRow:last").on("focus",function(){
+    $j(".pointIndex").addClass("disabled");
+  });
+   //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+  $j(lastSector,"tr.tranDetailRow:last").unbind("blur");
+  $j(lastSector,"tr.tranDetailRow:last").on("blur",function(e){
+    if($j(this).closest("tr.tranDetailRow").hasClass("disabled")) return;
+    //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+      $j(".pointIndex").removeClass("disabled");
+      //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+      //2017/01/18 排除扩展子明细行取得index值 by zy BEGIN
+      //var rowIdx = $j(this).closest("tr.tranDetailRow").index() ;
+      var rowIdx = $j("tr.tranDetailRow").index($j(this).closest("tr.tranDetailRow"));
+      //2017/01/18 排除扩展子明细行取得index值 by zy END
+    
+    if(!chkValidate(rowIdx)) return ;
+    if (!JINYACONNECT.CUSTOM.checkIfHadRequiredItem()) {
+      //阻止tab功能继续执行
+      $j("input:not(:hidden),select,textarea","[id$=createPageBlock] .dataCol.first:first").focus();
+      return false;
+    }
+    refreshOrder(true);
+    //返回后焦点
+    curFocusUUid = (rowIdx + 1) + ':productName';
+    //去掉其他项目绑定行追加功能
+    $j(lastSector,"tr.tranDetailRow:last").unbind("blur");
+    addTranItemFun();
+  }).addClass("lastBlurRow");
+  //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+  $j("input.disBtn,input[id$=clearProduct]").unbind("mouseenter");
+  $j("input.disBtn,input[id$=clearProduct]").on("mouseenter",function(){
+    blurDisabled = true;
+  });
+  $j("input.disBtn,input[id$=clearProduct]").unbind("mouseleave");
+  $j("input.disBtn,input[id$=clearProduct]").on("mouseleave",function(){
+    blurDisabled = false;
+  });
+  //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+}
+
+var curFocusUUid;
+//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+var blurDisabled = false;
+var ffElment = null
+//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+function autoFocus(){
+  if (curFocusUUid != undefined){
+    $j("[id$='" + curFocusUUid + "']").focus();
+    curFocusUUid = undefined;
+  }
+  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+  // 行追加为加载数据复原处理
+	if(OPTION_MODE_ON){
+	    var _optionNoArr = new Array(),
+	    	_itemArr = new Array(),
+	    	_hidKeyArr = new Array(),
+	    	_nwOrderNumsArr = new Array();
+	    for(var i = 0; i < _addArr._itemArr.length; i++){
+	    	var optionNo = _addArr._optionNoArr[i];
+	    	var result = _addArr._itemArr[i];
+	    	var hidKey = _addArr._hidKeyArr[i];
+	    	var nwOrderNums = _addArr._nwOrderNumsArr[i];
+	    	// 空白行Arr
+			var $blankArr = getBlankArr();
+			// 存在有效的空白行
+			if($blankArr.length > 0){
+				// 重置rowIndex
+				result.rowIndex = $blankArr[0];
+				// option设定过标识符FLG
+				$j("input[id$='" + result.rowIndex + ":hidIsSetOptionFlg']").val("true");
+				// option设定过标识符Key
+				$j("input[id$='" + result.rowIndex + ":hidKey']").val(hidKey);
+				// option设定当前对应的数量
+				$j("input[id$='" + result.rowIndex + ":nwOrderNums']").val(nwOrderNums);
+				// option设定关联主No
+				$j("input[id$='" + result.rowIndex + ":hidOptionNo']").val(optionNo);
+				// 触发调用数据设定
+				autoGetProductInfo(result);
+			} else {
+				_optionNoArr.push(optionNo);
+				_itemArr.push(result);
+				_hidKeyArr.push(hidKey);
+				_nwOrderNumsArr.push(nwOrderNums);
+			}
+		}
+		_addArr._itemArr = _itemArr;
+		_addArr._hidKeyArr = _hidKeyArr;
+		_addArr._nwOrderNumsArr = _nwOrderNumsArr;
+	}
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+  // 2019/04/15 ベネフィットホテル様より改善要望 by zy BEGIN
+  if ("addRowCallBack" in window) addRowCallBack();
+  // 2019/04/15 ベネフィットホテル様より改善要望 by zy END
+  // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+  // 行追加补充入汤税行
+  ACTCUSTOM.BATHTAXAUTOSETFUN(null, ACTCUSTOM.OBJ.ADDROWCALLBACKRES, true);
+  // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+  // 2020/07/30 BUG-FIX-#7099 WGCH BEGIN
+  isAddTranItemFunFlg = true;
+  // 2020/07/30 BUG-FIX-#7099 WGCH END
+}
+function chkValidate(rowIdx){
+  //2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+  if (blurDisabled) return false;
+  //2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+  var lastSector = "input[id$=useDate],input[id$=productName],input[id$=price],input[id$=orderNums],input[id$=specialTax]";
+  var chkflag = true;
+  $j(lastSector,"tr.tranDetailRow:eq(" + rowIdx + ")").each(function(){
+    if($(this).val() == "") {
+      chkflag = false;
+      //break;
+      return false;
+    }
+  });
+  return chkflag;
+}
+//2017/01/16 行追加共通化　by　zy END
+// 2017/06/12 MulitiSelect Clear Bug Fix BEGIN
+function multiSelectRest(){
+  var selectOptins = $j("select[id$='_selected'][multiple='multiple'] option","[id$='createForm']");
+  if(selectOptins.length > 0){
+    selectOptins.each(function(){
+      this.selected = true;
+    });
+    $j("select[multiple='multiple']:not([id$='_selected'],[id$='_unselected'])","[id$='createForm']").each(function(){
+      var elementId = $j(this).attr("id");
+      MultiSelectPicklist.handleMSPUnSelect(elementId);
+    });
+  }
+}
+// 2017/06/12 MulitiSelect Clear Bug Fix END
+// 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy BEGIN
+// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+function rackRateSyncInfo(syncInfo,groupindex){
+// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+  if (syncInfo) {
+    // 2019/03/29 JINYABUG-1527 bug fix by zy BEGIN
+    if (typeof syncInfo === "string")syncInfo = JSON.parse(syncInfo);
+    // 2019/03/29 JINYABUG-1527 bug fix by zy END
+    // 2020/05/29 bug fixed 6422 by zy BEGIN
+		// var tierRatePrice = $j("#hidCurRackRatePrice").val();
+		var tierRatePrice = getTierPrice(groupindex);
+		// 2020/05/29 bug fixed 6422 by zy END
+    var tierPrice = kendo.parseInt(tierRatePrice);
+    if (tierPrice == null) tierPrice = 0; 
+    if (syncInfo.length > 0 && syncInfo[0] == 0) syncInfo[0] += tierPrice;
+  }
+  return syncInfo
+}
+// 2018/12/15 予約ポップから連泊作成の場合の見積もり料金が変わらない by zy END
+// 2019/03/29 JINYABUG-1527 bug fix by zy BEGIN
+// ウィンドウ開くの場合料金設定
+function initBaseplanCall(groupIndex,rate){
+  planItemPriceMap.set(getPlanKeyFun(groupIndex), [rate]);
+  // 2019/07/30 軽減税率機能対応 WGCH BEGIN
+  if(isReducedTaxFlg) setPlanBrkInfo(rate,groupIndex);
+  // 2019/07/30 軽減税率機能対応 WGCH END
+  // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+  var gRes  = hotelData.gOptionMapInfo[$j("#hidPlanAccId").val()];
+  // 触发追加入汤税行
+  ACTCUSTOM.BATHTAXAUTOSETFUN(groupIndex, gRes.bTaxAccMstItem);
+  var leadPerson = $j("input[element='lead_StayPersons__c']");
+  // 设定第一次当前Plan行对应的入汤税商品Id
+  var hidBTaxAccMstId = $j("input[id$=':" + groupIndex + ":" + ACTCUSTOM.TAG.HIDBTAXACCMSTID + "']").val();
+  // 当前入汤税商品INPUT
+  var $hidBTaxAccMstId = $j("[id$=':" + ACTCUSTOM.TAG.HIDPRODUCTID + "'][value='" + hidBTaxAccMstId + "']");
+  if($hidBTaxAccMstId.length <= 0) return;
+  var nameArray = $hidBTaxAccMstId.attr("id").split(":");
+  var currRowIndex = nameArray[nameArray.length - 2];
+  var hidProductId = $j("[id$=':" + currRowIndex + ":hidProductId']").val();
+  if (leadPerson.length > 0 && hidProductId !="" ) {
+  	$j("[id$=':" + currRowIndex + ":orderNums']").val(leadPerson.val());
+  	$j("input:text[id$=':" + currRowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']").change();
+  }
+  // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+}
+// 2019/03/29 JINYABUG-1527 bug fix by zy END
+// 2019/04/15 ベネフィットホテル様より改善要望 by zy BEGIN
+// 初期化会計画面
+function initProductWin(){
+  // 2019/09/15 Security Check BY zyz BEGIN
+  var bookingEstFlag = "{!JSENCODE(TEXT($Setup.CommDefine__c.ps__ProductSearchLayoutKbn__c))}";
+  // 2019/09/15 Security Check BY zyz END
+  if (bookingEstFlag != "1") return;
+  // 既存会計商品画面
+  var searchWin = $j("#producdSearchWindow");
+  // 新規会計商品画面
+  if (searchWin.length == 0) {
+    searchWin = $j("<div id='producdSearchWindow'/>");
+    $j("body").append(searchWin);
+  }
+  // KENDOUI初期化
+  if (searchWin.data("kendoWindow") == undefined) {
+    var src = '/apex/AccountMasterInput?spcd={!JSENCODE(ShopCode)}&callback=window.parent.ProdcutSet';
+    var orgWd = window.localStorage.J_SEARCH_WIN_WD;
+    var orgHt = window.localStorage.J_SEARCH_WIN_HT;
+    var posTop = window.localStorage.J_SEARCH_WIN_TOP;
+    var posLeft = window.localStorage.J_SEARCH_WIN_LEFT;
+    if (orgWd == undefined) orgWd = 540;
+    if (orgHt == undefined) orgHt = 550;
+    searchWin.kendoWindow({
+        visible: false,
+        content: src,
+        iframe: true,
+        width: orgWd,
+        height : orgHt,
+        title : '商品選択',
+        actions: ["close"],
+        autoFocus: false,
+        dragstart:function(){
+          var off = this.wrapper.offset();
+          this.wrapper.css("position","absolute");
+          this.wrapper.offset(off);
+        },
+        // 画面位置保持
+        dragend:function(){
+          var offset = this.wrapper.offset();
+          this.wrapper.css("position","fixed");
+          this.wrapper.offset(offset);
+          var pos = this.wrapper.get(0).getClientRects()[0];
+          window.localStorage.J_SEARCH_WIN_TOP = pos.top;
+          window.localStorage.J_SEARCH_WIN_LEFT = pos.left;
+        },
+        // 画面サイズ保持
+        resize:function(){
+          window.localStorage.J_SEARCH_WIN_WD = this.wrapper.width();
+          window.localStorage.J_SEARCH_WIN_HT = this.wrapper.height();
+        }
+    });
+    searchWin.data("kendoWindow")._shouldFocus = function(){};
+    var wrapWindow = $j("#producdSearchWindow").closest("div.k-window");
+    wrapWindow.find(".k-i-close").bind("click",function(){
+      closeProductWin();
+    });
+    $j("#producdSearchWindow").data("kendoWindow").center();
+    var cssObj = {"position":"fixed","left":"60%"};
+    if(posTop != undefined) cssObj.top = kendo.parseFloat(posTop);
+    if(posLeft != undefined) cssObj.left = kendo.parseFloat(posLeft);
+    // 画面様式設定
+    wrapWindow.css(cssObj);
+  }
+}
+function clearProdWin(){
+  if ("lastIndex" in window) delete window.lastIndex;
+  if ("productId" in window) delete window.productId;
+  closeProductWin();
+}
+function closeProductWin(){
+  // 2019/09/15 Security Check BY zyz BEGIN
+  var bookingEstFlag = "{!JSENCODE(TEXT($Setup.CommDefine__c.ps__ProductSearchLayoutKbn__c))}";
+  // 2019/09/15 Security Check BY zyz END
+  if (bookingEstFlag != "1") return;
+  var searchWin = $j("#producdSearchWindow").data("kendoWindow");
+  searchWin.close();
+  // 特殊処理、ポップ画面対応
+  // 既存の特別税のリスト内容刷新
+  if (searchWin) searchWin.refresh();
+}
+function openProductWin(index){
+  var kendoWin = $j("#producdSearchWindow").data("kendoWindow");
+  //kendoWin.index = index;
+  if (kendoWin._closing == undefined || kendoWin._closing == true) kendoWin.open();
+}
+// 選択会計CALLBACK
+function ProdcutSet(rest) {
+  var data = $.extend({},rest);
+  if (data.rowIndex != undefined) {
+    // 設定内容一時保持
+    window.productId = data.productId;
+    window.lastIndex = data.rowIndex;
+    // 商品自動情報計算
+    autoGetProductInfo(data);
+    // 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+    // 触发追加入汤税行
+    ACTCUSTOM.BATHTAXAUTOSETFUN(data.rowIndex, data.bTaxAccMstItem);
+    // 2020/07/30 入湯税の自動入力機能について改善 zyz END
+    // 選中入力行
+    $j("tr.tranDetailRow").has(".pointIndex[rowindex='" + data.rowIndex + "']").focus();
+  } else {
+    getNextRow(data);
+  }
+}
+// 会計設定行取得
+function getNextRow(data){
+  // 処理行
+  var dataRows = $j("tr.tranDetailRow");
+  // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+  /*
+  // 非空行
+  var noBlankRows = dataRows.has("[id$=hidProductId][value][value!='']");
+  // 空行
+  var blankRows = dataRows.not(noBlankRows);
+  */
+  var blankRows = getBlankRows(dataRows);
+  // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+  // 行追加
+  if (blankRows.length == 0) {
+    // 行追加後処理
+    return addRowCallBack = function(){
+      // 既存処理削除
+      delete window.addRowCallBack;
+      // 会計商品再処理
+      ProdcutSet(data);
+    },checkAddTranItem();
+  }
+  // 前回設定会計商品
+  var preProdId,preProdIdx;
+  // 前回会計商品
+  if ("productId" in window) preProdId = window.productId;
+  // 前回行
+  if ("lastIndex" in window) preProdIdx = window.lastIndex;
+  // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+  // 同じ会計商品数量追加
+  // if ( preProdId == data.productId) {
+  if ( preProdId == data.productId && !orderNumsFlg) {
+  // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+    var prodNums = $j("input:text[id$=':" + window.lastIndex + ":orderNums']");
+    // 数量
+    var nums = kendo.parseFloat(prodNums.val());
+    // 初期化
+    if (nums == null) nums = 0;
+    nums++;
+    prodNums.val(nums);
+    return prodNums.change.call(prodNums);
+  }
+  // 空白行会計設定
+  if (blankRows.length > 0) {
+    data.rowIndex = blankRows.first().find(".pointIndex ").attr("rowindex");
+    return ProdcutSet(data);
+  }
+}
+// 2019/04/15 ベネフィットホテル様より改善要望 by zy END
+// 2019/04/30 増税仮対応 WGCH BEGIN
+// 标识符-不自动进入増税处理函数
+var CUST_AUTOGETPRODUCTMODE_RETURN = 'RETUEN';
+// 标识符-clearOnclick
+var CUST_CLICKMODE_CLEAR = 'CLEAR';
+// 2019/09/15 Security Check BY zyz BEGIN
+// 增税商品数据集
+var taxIncInfo = '{!JSENCODE(taxIncMstItemJson)}';
+// 2019/09/15 Security Check BY zyz END
+// 増税处理函数
+function autoSetTaxIncProductFun(click_mode, productId){
+  // 增税商品数据集转成sobj
+  var taxIncMstDs = $j.parseJSON(taxIncInfo);
+  if(taxIncMstDs == undefined) return;
+  // 不存在有效的增税商品 跳出处理
+  if(taxIncMstDs.taxIncMst  == undefined || taxIncMstDs.taxIncMstId == "") return;
+  // clear 增税商品时跳出处理
+  if(click_mode == CUST_CLICKMODE_CLEAR && productId == taxIncMstDs.taxIncMstId) return;
+  // 获取当前指定日
+  var queryDate = getQueryDate();
+  // 当前指定日 < 定义開始日 || 当前指定日 > 終了日 跳出处理
+  if(queryDate < taxIncMstDs.startDate || queryDate > taxIncMstDs.endDate) return;
+  // 获取指定的增税商品Input
+  var $taxIncMstInput = $j("[id$=hidProductId][value][value = '" + taxIncMstDs.taxIncMstId  + "']");
+  // 有效处理行Array(消费税 > 0)
+  var nowProdArr = new Array();
+  // 获取明细所有行
+  var $trRowAll = $j("[id$=BookEstTable] tbody tr.tranDetailRow");
+  $trRowAll.each(function(){
+    var $hidProductId = $j(this).find('[id$=hidProductId]');
+    if($hidProductId.val() !=''){
+      // 当前行-RowNo
+      var rowIndex = $hidProductId.attr("rowindex") * 1;
+      // 2019/05/31 消費税の端数計算は見積書と一致しなかった、対応 WGCH BEGIN
+      var hidProductId = $j("[id$=':" + rowIndex + ":hidProductId']").val();
+      if(taxIncMstDs.filterMstIdSet.indexOf(hidProductId) >= 0 ) return true;
+      // 数量
+      var nums = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":orderNums']").val());
+      if (nums == null) nums = 0;
+      if(nums <= 0) return true;
+      // 2019/05/31 消費税の端数計算は見積書と一致しなかった、対応 WGCH END
+      // 当前行-消費税率
+      var tax = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidTaxRateType']").val());
+      if (tax == null) tax = 0;
+      // 集计消费税 > 0 的Tr
+      if(tax > 0) nowProdArr.push(this);
+    }
+  });
+  // 处理有效行
+  if(nowProdArr.length > 0){
+    var wkRowIndex, // 最终增税商品RowNo
+      wkPriceTax = 0; // 最终增税商品单价(数量固定1)
+    for (var i = 0; i < nowProdArr.length;i++) {
+      // 当前行-RowNo
+      var rowIndex = $j(nowProdArr[i]).find('[id$=hidProductId]').attr("rowindex") * 1;
+      // 当前行-消費税率
+      var tax = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidTaxRateType']").val());
+      if (tax == null) tax = 0;
+      // 当前行-金額（税込み）
+      var amountIncTax = kendo.parseFloat($j("input[id$=':" + rowIndex + ":hidAmoutPriceIncTax']").val());
+      if (amountIncTax == null) amountIncTax = 0;
+      // 当前行-金額（税抜き）
+      var amountExcTax = kendo.parseFloat($j("input[id$=':" + rowIndex + ":hidAmoutPriceExcTax']").val());
+      if (amountExcTax == null) amountExcTax = 0;
+      // 当前行-特別税
+      var numSepcTax = kendo.parseFloat($j("input[id$=':" + rowIndex + ":hidSpecialTax']").val());
+      if (numSepcTax == null) numSepcTax = 0;
+      /*
+      * commUtils.mathNumSub(A, B) => A - B
+      * commUtils.mathNumAdd(A, B) => A + B
+      * commUtils.mathNumDiv(A, B) => A / B
+      * commUtils.mathNumMulti(A, B) => A * B
+      算法公式:
+        增税金额 = 增税率 / 商品-消费税率 * 商品-消费税金额
+      */
+      // 当前行-商品-消费税金额 => 当前行-金額（税込み）-(减) 当前行-金額（税抜き）-(减) 当前行-特別税
+      var priceTax = commUtils.mathNumSub( commUtils.mathNumSub(amountIncTax, amountExcTax), numSepcTax);
+      // 增税金额 = 增税率 / 商品-消费税率 * 商品-消费税金额
+      if(tax > 0){ // 虽然此tax一定大于0，防御处理
+        // taxIncMstDs.taxIncRate => 增税率
+        wkPriceTax = commUtils.mathNumAdd( wkPriceTax, commUtils.mathNumMulti( commUtils.mathNumDiv(taxIncMstDs.taxIncRate, tax), priceTax));
+      } 
+    }
+    // 如果已存在增税商品, 把新的增税商品-RowNo 替换成 当前存在的增税商品-RowNo*防止多笔增税商品
+    if( $taxIncMstInput.length > 0) wkRowIndex = $taxIncMstInput.eq(0).attr("rowindex");
+    else{
+      // 処理行
+      var dataRows = $j("tr.tranDetailRow");
+	   // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+	   /*
+      // 非空行
+      var noBlankRows = dataRows.has("[id$=hidProductId][value][value!='']");
+      // 空行
+      var blankRows = dataRows.not(noBlankRows);
+	  */
+	  var blankRows = getBlankRows(dataRows);
+	  // 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+      if(blankRows.length > 0) wkRowIndex = blankRows.eq(0).find('[id$=hidProductId]').attr("rowindex") * 1;
+      else {
+        // 行号处理
+        refreshOrder(true);
+        checkAddTranItem();
+        return;
+      }
+    }
+    // 最终增税商品单价(数量固定1) 小数点处理
+    // 2019/05/31 消費税の端数計算は見積書と一致しなかった、対応 WGCH BEGIN
+    // wkPriceTax = commUtils.mathRound(wkPriceTax, JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+    wkPriceTax = commUtils.mathRound(wkPriceTax, JINYACONNECT.PRODUCT.CAL.POINT_LEN, taxIncMstDs.pointRoundModeStr);
+    // 2019/05/31 消費税の端数計算は見積書と一致しなかった、対応 WGCH END
+    // 数据集-克隆处理-防止地址共存【true: 深度克隆; false: 浅度克隆(def) 】
+    _thisTaxIncMstDs = $j.extend(true, {}, taxIncMstDs);
+    // 最终增税商品RowNo赋值
+    _thisTaxIncMstDs.taxIncMst.rowIndex = wkRowIndex;
+    // 最终增税商品单价(数量固定1)赋值
+    _thisTaxIncMstDs.taxIncMst.unitPrice = wkPriceTax;
+    // 最终增税商品单价 > 0 时再处理追加或更新 增税商品
+    if(wkPriceTax > 0) autoGetProductInfo(_thisTaxIncMstDs.taxIncMst, CUST_AUTOGETPRODUCTMODE_RETURN);
+    // 如果当前行存在增税商品数据=>clear当前行数据
+    else if($j("[id$='" + wkRowIndex + ":hidProductId'][value][value = '" + _thisTaxIncMstDs.taxIncMstId  + "']").length > 0){
+      // 当前没增税金额时, 清空增税商品行
+      $j("[id$='clearProduct'][rowindex='" + wkRowIndex +"']").click();
+    }
+  } else if( $taxIncMstInput.length > 0){
+    // 当前没有处理行时, 清空增税商品行
+    var wkRowIndex =  $taxIncMstInput.eq(0).attr("rowindex");
+    $j("[id$='clearProduct'][rowindex='" + wkRowIndex +"']").click();
+  }
+}
+function getQueryDate(){
+  return $("input[id$=hidStartDays]").val();
+}
+// 2019/04/30 増税仮対応 WGCH END
+// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+var isReducedTaxFlg = {!isReducedTaxFlg}, // 軽減税率機能FLG
+	_planItemMap = new Map(), // 选中所有PLAN对应的PLAN明细MAP
+	CUST_TABLE = "table[id$=':BookEstTable']", // 明细行TableID
+	ACTTYPE_PLAN = "{!JSENCODE(ACTTYPE_PLAN)}"; // プラン
+/*
+* 获取カスタムメタデータ型:宿泊税定义信息
+*/
+function getHotelTaxInfoFun(){
+	var _hotelTaxData = hotelData.hotelTaxDefInstance[thisRoomSpcd];
+	return {
+		data : _hotelTaxData, // 宿泊税定义信息
+		isEffectiveFlg : _hotelTaxData != undefined // 判断是否有效的宿泊税数据集
+		// 2019/10/02 PlanHeader算法切换对应 WGCH BEGIN
+		,planBrkToHeaderCalFlg : {!planBrkToHeaderCalFlg}
+		// 2019/10/02 PlanHeader算法切换对应 WGCH END
+	}
+}
+function setPlanBrkInfo(rate,groupIndex){
+	var _dataArr = hotelData.planBrkInfoMap[$j("#hidPlanAccId").val()];
+	if(commUtils.isUndefined(_dataArr)) return;
+	var newPlanItemLst = new Array(),
+		_row = getRowInfoFun(0);
+	for(var i = 0, len = _dataArr.length; i < len; i++){
+		// 当前明细数据集
+		var _pd = _dataArr[i];
+		if(rate && _pd.actionType == _CONST_PRICE_ROOM_TYPE){
+			_pd.unitPrice = rate;
+			rate = null; // 目的只是设定到第一个上
+		}
+		// PUSH最新的数据集
+		newPlanItemLst.push(commUtils.setData(0, _pd.unitPrice, _pd.tax, _pd.serviceRate, _row.nums, _pd.specialTax, _pd.unitPriceKbn, _pd.productId, _pd.actionType, true));
+	}
+	var planKey = getPlanKeyFun(_row.rowIndex);
+	// 更新最新的PLAN明细数据集
+	_planItemMap.set(planKey, newPlanItemLst);
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+	if(OPTION_MODE_ON){
+    // 2020/05/29 bug fixed 6422 by zy BEGIN
+    //TODO : 此处需要option的tier还是直接区分需要处理    
+    var gRaceRatePrice = getTierPrice(groupIndex);
+    // 2020/05/29 bug fixed 6422 by zy END
+    // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		var res  = hotelData.gOptionMapInfo[$j("#hidPlanAccId").val()];
+		if(!res || !res.hasOptionMstFlg) return;
+		var result = jQuery.extend(true, {}, res);
+		// 如果有PLAN明细加到MAP里
+		if(!commUtils.isEmpty(result.pdProductItem)) _planItemMap.set(planKey, result.pdProductItem);
+		// optionModeKey
+	 	var hidKey = result.gNumToKeyMap["1"];
+		if(hidKey) $j("input[id$='" + _row.rowIndex + ":hidKey']").val(hidKey);
+		if(result.gKeyItemKeyLst){
+			var isHeaderAdd = true;
+			for(var m = 0; m < result.gKeyItemKeyLst.length; m++){
+				var key = result.gKeyItemKeyLst[m];
+				var itemArr = result.gKeyItemMap[key];
+				if(itemArr){
+					for(var i = 0; i < itemArr.length; i++){
+						var item = itemArr[i];
+						if(item.actionType == _CONST_PRICE_ROOM_TYPE){
+							// TODO: 只有一个室料的情况
+							if(!item.isUnitPriceZero) continue;
+							// 重置Tier值
+							item.unitPrice = commUtils.mathNumSub(gRaceRatePrice, item.diffUnitSum);
+							if(isHeaderAdd){
+								result.unitPrice = commUtils.mathNumAdd(result.unitPrice, gRaceRatePrice);
+								$j("input:text[id$=':" + _row.rowIndex + ":price']").val(result.unitPrice);
+								isHeaderAdd = false;
+							}
+							break;
+						}
+					}
+				}
+			}
+		}
+		_resultMap.set(planKey, jQuery.extend(true, {}, result));
+		// 重置BrkLst
+		if(isReducedTaxFlg){
+			if(result.gKeyItemMap[hidKey]) _planItemMap.set(planKey, result.gKeyItemMap[hidKey]);
+	 	} else if(result.gPlanItemPriceLstMap[hidKey]) planItemPriceMap.set(planKey, result.gPlanItemPriceLstMap[hidKey]);
+	}
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+}
+// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+function getPdProductItem(pdProductItem,groupIndex){
+// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+	for(var i = 0, len = pdProductItem.length; i < len; i++){
+		// 当前明细数据集
+		var _pd = pdProductItem[i];
+		if(_pd.actionType == _CONST_PRICE_ROOM_TYPE){
+			// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+			// 2020/05/29 bug fixed 6447 WGCH BEGIN
+			if(!orderNumsFlg && _pd.unitPrice == 0) _pd.unitPrice = (_pd.unitPrice * 1) + (rackRateSyncInfo([_pd.unitPrice],groupIndex) * 1)
+			// 2020/05/29 bug fixed 6447 WGCH END
+			// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+			break; // 目的只是设定到第一个上
+		}
+	}
+	return pdProductItem;
+}
+/*
+* 获取当前行数据集
+*/
+function getRowInfoFun(rowIndex){
+	// 单价
+	var unitPrice = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":price']").val());
+	if (unitPrice == null) unitPrice = 0;
+	// 消費税率
+	var tax = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidTaxRateType']").val());
+	if (tax == null) tax = 0;
+	// サビース料率
+	var service = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidServiceRate']").val());
+	if (service == null) service = 0;
+	// 数量
+	var nums = kendo.parseFloat($j("input:text[id$=':" + rowIndex + ":orderNums']").val());
+	if (nums == null) nums = 0;
+	// 特別税
+	var numSepcTax = kendo.parseFloat($j("input[id$=':" + rowIndex + ":hidSpecialTax']").val());
+	if (numSepcTax == null) numSepcTax = 0;
+	// 単価定義区分
+	var unitPriceKbn = $j("input:hidden[id$=':" + rowIndex + ":hidUnitPriceKbn']").val();
+	// 商品ID
+	var productId = $j("input:hidden[id$=':" + rowIndex + ":hidProductId']").val();
+	// 商品処理種別
+	var actionType = $j("input:hidden[id$=':" + rowIndex + ":hidActionType']").val();
+	// 支付种别
+	var payType = $j("input:hidden[id$=':" + rowIndex + ":hidPaymentType']").val();
+	// プラン明細課税、非課税混在合計金額計算
+	var hidPlandetail = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidPlandetail']").val());
+	if (hidPlandetail == null) hidPlandetail = 0;
+	// 金額（税抜き）
+	var amountExcTax = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidAmoutPriceExcTax']").val());
+	if (amountExcTax == null) amountExcTax = 0;
+	// 金額（税込み） 
+	var amoutPriceIncTax = kendo.parseFloat($j("input:hidden[id$=':" + rowIndex + ":hidAmoutPriceIncTax']").val());
+	if (amoutPriceIncTax == null) amoutPriceIncTax = 0;
+	return commUtils.setData(rowIndex, unitPrice, tax, service, nums, numSepcTax, unitPriceKbn, productId, actionType, false, payType, hidPlandetail, amountExcTax, amoutPriceIncTax);
+}
+/*
+* 初期重置RES处理
+*/
+function getResInfoFun(rowIndex, res){
+	var hasNumSepcTaxSum = 0, // 合計金額(税抜) 列 含有的宿泊税
+		newNumSepcTaxSum = 0, // 特別税        列 显示的宿泊税
+		_newRes = $j.extend(true, {}, res), // 防止地址共存
+		_row = getRowInfoFun(rowIndex), // 获取当前行数据集
+		_hotelTax = getHotelTaxInfoFun(); // 获取カスタムメタデータ型:宿泊税定义信息
+	// 宿泊税有效, 处理种别是室料
+	if(_hotelTax.isEffectiveFlg && _row.actionType == _CONST_PRICE_ROOM_TYPE){
+		// 获取宿泊税计算后数据集
+		var _res = commUtils.getSepcTaxInfoFun(res, _row, _hotelTax.data);
+		_newRes = _res.res; // 最终的RES「置换」
+		hasNumSepcTaxSum = _res.hasNumSepcTaxSum; // 合計金額(税抜) 列 含有的宿泊税「赋值」
+		newNumSepcTaxSum = _res.newNumSepcTaxSum; // 特別税        列 显示的宿泊税「赋值」
+	// 处理种别是PLAN
+	} else if(_row.actionType == ACTTYPE_PLAN){
+		var _data = commUtils.getPlanResInfoFun(_planItemMap.get(getPlanKeyFun(rowIndex)), _row, _hotelTax, isReducedTaxFlg);
+		// TODO: 目前之后处理只用的这里个变量「只置换了这两个变量」* 进来了就说明功能已经打开的
+		_newRes.priceIncTax = _data.priceIncTaxSum; // 最新值设定「合計金額」
+		_newRes.priceExcTax = _data.priceExcTaxSum; // 最新值设定「合計金額(税抜)」
+		hasNumSepcTaxSum = _data.hasNumSepcTaxSum; // 合計金額(税抜) 列 含有的宿泊税「赋值」
+		newNumSepcTaxSum = _data.newNumSepcTaxSum; // 特別税        列 显示的宿泊税「赋值」
+	}
+	// 设置特别税列数据
+	if(_hotelTax.isEffectiveFlg){
+		$j("input[id$=':" + rowIndex + ":hidSpecialTax']").val(newNumSepcTaxSum); // 最新的特别税「隐藏域赋值」
+		$j("span[id$=':" + rowIndex + ":specialTax']").text(newNumSepcTaxSum); // 最新的特别税「显示域赋值」
+		_row.specialTax = newNumSepcTaxSum; // 最新的特别税「赋值」
+	}
+	return {
+		res : _newRes,
+		numSepcTax : _row.specialTax
+	};
+}
+/*
+* PLAN明细数据更新处理
+*/
+function updatePlanItemMapFun(rowIndex){
+	var _row = getRowInfoFun(rowIndex); // 获取当前PLAN行数据集
+	if(_row.actionType != ACTTYPE_PLAN) return;
+	var planKey = getPlanKeyFun(rowIndex), // 获取当前PLAN的KEY
+		_planItemLst = _planItemMap.get(planKey); // 当前PLAN明细ARR
+	if(commUtils.isUndefined(_planItemLst)) return;
+	var wkLen = _planItemLst.length; // PLAN明细数量
+	if(wkLen == 0) return;
+	// 最新的当前PLAN明细ARR
+	var newPlanItemLst = new Array();
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+	var planSyncInf = "";
+	var roomTotal = 0;
+	var optionTotal = 0;
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+	for(var i = 0; i < wkLen; i++){
+		// 当前明细数据集
+		var _data, // 当前行的数据集
+			_pd = $j.extend(true, {}, _planItemLst[i]);
+		// 当前明细的会計商品ID「最新的防止变更会计商品，不能直接用_pd.productId」
+		var $productId = $j("#"+rowIndex+"_prodid_"+i);
+		if($productId.length > 0){
+			productId = $productId.val();
+			// 单价
+			var unitPrice = kendo.parseFloat($j("#"+rowIndex+"_prodPrice_"+i).val());
+			if(unitPrice == null) unitPrice = 0;
+			// 消费税
+			var tax = kendo.parseFloat($j("#"+rowIndex+"_workHidTaxRate_"+i).val());
+			if(tax == null) tax = 0;
+			// サビース料
+			var serviceRate = kendo.parseFloat($j("#"+rowIndex+"_workHidServiceTaxRate_"+i).val());
+			if(serviceRate == null) serviceRate = 0;
+			// 商品処理種別
+			var actionType = $j("#"+rowIndex+"_workHidActType_"+i).val();
+			// 当前行设置最新的数据集
+			_data = commUtils.setData(_row.rowIndex, unitPrice, tax, serviceRate, _row.nums, _pd.specialTax, _row.unitPriceKbn, productId, actionType, true);
+			// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+			// Plan明细Id
+			_data["pdId"] = $j("#"+rowIndex+"_sobjId_"+i).val();
+			// 商品名
+			_data["prodcutName"] = $j("#"+rowIndex+"_prodName_"+i).val();
+			// option商品FLG
+			_data["optionAccMstFlg"] = $j("#"+rowIndex+"_optionAccMstFlg_"+i).val();
+			// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		} else{
+			_data = commUtils.setData(_row.rowIndex, _pd.unitPrice, _pd.tax, _pd.serviceRate, _row.nums, _pd.specialTax, _row.unitPriceKbn, _pd.productId, _pd.actionType, true);
+			// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+			_data["pdId"] = _pd.pdId;
+			_data["prodcutName"] = _pd.prodcutName;
+			_data["optionAccMstFlg"] = _pd.optionAccMstFlg;
+			// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		}
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+		// Plan明细Id, Plan明细单价, Plan明细商品Id, Plan明细商品Name
+		// 2020/05/29 bug fixed 6446 WGCH BEGIN
+		if(!commUtils.isUndefined(_data.pdId) && !commUtils.isUndefined(_data.unitPrice) && !commUtils.isUndefined(_data.productId) && !commUtils.isUndefined(_data.prodcutName)) planSyncInf += _data.pdId + ':' + _data.unitPrice + ':' + _data.productId + ':' + _data.prodcutName +';';
+		// 2020/05/29 bug fixed 6446 WGCH END
+		if(_data.actionType == _CONST_PRICE_ROOM_TYPE) roomTotal = commUtils.mathNumAdd(roomTotal,  _data.unitPrice);
+		if(_data.optionAccMstFlg && _data.optionAccMstFlg != "false") optionTotal = commUtils.mathNumAdd(optionTotal,  _data.unitPrice);
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		// PUSH最新的数据集
+		newPlanItemLst.push(_data);
+	}
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+	// 当前Plan数据
+	var gResult = _resultMap.get(getPlanKeyFun(rowIndex));
+	if(OPTION_MODE_ON && gResult && gResult.hasOptionMstFlg){
+		var hidShowDetailFlg = $j("input[id$='" + rowIndex + ":hidShowDetailFlg']").val();
+		// 按照第一天的算
+		// 2020/05/29 bug fixed 6427 WGCH BEGIN
+		if((hidShowDetailFlg && hidShowDetailFlg == "true") || !gResult.isUnitPriceZero) $j("input[id$=':" + rowIndex + ":hidOptionTotal']").val("");
+		// 2020/05/29 bug fixed 6427 WGCH END
+		else $j("input[id$=':" + rowIndex + ":hidOptionTotal']").val(optionTotal);
+		if(planSyncInf != "") $j("input[id$=':" + rowIndex + ":hidSyncInfo']").val(planSyncInf);
+	} else{
+		 $j("input[id$=':" + rowIndex + ":hidOptionTotal']").val("");
+	}
+	// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+	// 更新最新的PLAN明细数据集
+	_planItemMap.set(planKey, newPlanItemLst);
+}
+// 2019/07/30 軽減税率機能対応 WGCH END
+// 2019/06/14 4.2.予約ポップからベースプランを選択した状態で新規予約作成をすると、予約見積明細に該当のプランが登録された状態で予約を取ることができますが、 by zy BEGIN
+function refreshBasePlan(){
+var basePlanId = $("#hidBaseAccId").val();
+  if (basePlanId != "" && basePlanId != null) {
+    var hadPlanFlg = false;
+    $j("input[id$=hidProductId]").each(function(){
+      var prodId = $j(this).val();
+      var check = prodId != "" && prodId.includes(basePlanId);
+      if (check) {
+        hadPlanFlg = true;
+        return false;
+      }
+    });
+    if (!hadPlanFlg) $("input[id$=':hidBasePlanId']").val("");
+  }
+}
+// 2019/06/14 4.2.予約ポップからベースプランを選択した状態で新規予約作成をすると、予約見積明細に該当のプランが登録された状態で予約を取ることができますが、 by zy END
+// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH BEGIN
+function getQueryEntryDate(){
+	var entryDt = $("[element^=lead_EntryTime__c]");
+	return entryDt[0].tagName == "SPAN" ? entryDt.text() : entryDt.val();
+}
+function getRoomTypeId(){
+	var roomTypeElement = $("input[element='lead_refTypeOfRooms__c']");
+	var pidStr = '';
+	if (roomTypeElement.length > 0 ) {
+		var typeElementName = roomTypeElement.attr("name");
+		return $("input[name='" + typeElementName +"_lkid']").val();
+	} else {
+		return $("input:hidden[id$=':hidRefTypeOfRooms']").val();
+	}
+}
+function openPlanWinFun(){
+  if (!JINYACONNECT.CUSTOM.checkIfHadRequiredItem()) return false;
+	// 既存会計商品画面
+	var searchWin = $j("#openPlanWindow");
+	// 新規会計商品画面
+	if (searchWin.length == 0) {
+		searchWin = $j("<div id='openPlanWindow' / >");
+		$j("body").append(searchWin);
+  }
+  // 2020/04/30 BY zyz BEGIN
+  var roomTypeId = getRoomTypeId();
+  var queryDate = getQueryEntryDate();
+  var guestType = $("[id$=hidGuestType]").val() || "";
+  var src = '/apex/BasePlanSetupView?callback=window.parent.ProdcutPlanSet&roomType=' + roomTypeId + '&queryDate=' + queryDate + '&guestType=' + guestType;
+	// KENDOUI初期化
+	if (searchWin.data("kendoWindow") == undefined) {
+		window.setFocusOnLoad = function (){};
+		// 2020/04/30 BY zyz END
+		var orgWd = window.localStorage.J_SEARCH_WIN_WD;
+		var orgHt = window.localStorage.J_SEARCH_WIN_HT;
+		var posTop = window.localStorage.J_SEARCH_WIN_TOP;
+		var posLeft = window.localStorage.J_SEARCH_WIN_LEFT;
+		if (orgWd == undefined) orgWd = 540;
+		if (orgHt == undefined) orgHt = 550;
+		searchWin.kendoWindow({
+			visible: false,
+			content: src,
+			iframe: true,
+			width: 760,
+			height : 550,
+			title : 'ベースプラン商品選択',
+			actions: ["close"],
+			autoFocus: false,
+			dragstart:function(){
+				var off = this.wrapper.offset();
+				this.wrapper.css("position","absolute");
+				this.wrapper.offset(off);
+			},
+			// 画面位置保持
+			dragend:function(){
+				var offset = this.wrapper.offset();
+				this.wrapper.css("position","fixed");
+				this.wrapper.offset(offset);
+				var pos = this.wrapper.get(0).getClientRects()[0];
+				window.localStorage.J_SEARCH_WIN_TOP = pos.top;
+				window.localStorage.J_SEARCH_WIN_LEFT = pos.left;
+			},
+			// 画面サイズ保持
+			resize:function(){
+				window.localStorage.J_SEARCH_WIN_WD = this.wrapper.width();
+				window.localStorage.J_SEARCH_WIN_HT = this.wrapper.height();
+			}
+		});
+		searchWin.data("kendoWindow")._shouldFocus = function(){};
+		var wrapWindow = searchWin.closest("div.k-window");
+		wrapWindow.find(".k-i-close").bind("click",function(){
+			closeProductWin();
+		});
+		searchWin.data("kendoWindow").center();
+		var cssObj = {"position":"fixed","left":"34%"};
+		cssObj.top = kendo.parseFloat("80");
+		// 画面様式設定
+		wrapWindow.css(cssObj);
+	} else {
+    var openPlan = $j("#openPlanWindow").getKendoWindow();
+    openPlan.element.children().remove();
+    openPlan.options.content.url = src;
+    openPlan.refresh();
+	}
+	var kendoWin = searchWin.data("kendoWindow");
+	kendoWin.open();
+}
+var orderNumsFlg = false;
+var orderAddRow = {};
+// 選択会計CALLBACK
+// 2020/07/30 BUG-FIX-#7105 WGCH BEGIN
+// function ProdcutPlanSet(restLst) {
+function ProdcutPlanSet(restLst, addRowSize) {
+// 2020/07/30 BUG-FIX-#7105 WGCH END
+	orderNumsFlg = true;
+	// 空白行数取得
+	var blankRows = getBlankRows();
+	// 2020/06/01 bug fix BY zyz BEGIN
+	var serachWin = $j("#openPlanWindow").data("kendoWindow");
+	serachWin.close();
+	// 2020/06/01 bug fix BY zyz END
+	// 行追加の場合
+	// 2020/07/30 BUG-FIX-#7105 WGCH BEGIN
+	// if (blankRows.length < dataRowSize) {
+	if(commUtils.isUndefined(addRowSize)) addRowSize = 0;
+	var dataRowSize = restLst.length + addRowSize;
+	if (blankRows.length < dataRowSize) {
+	// 2020/07/30 BUG-FIX-#7105 WGCH END
+		if (!JINYACONNECT.CUSTOM.checkIfHadRequiredItem()) return false;
+		// 関数クリア
+		if ("addRowCallBack" in window) delete window.addRowCallBack;
+		// 行追加後、処理対応
+		window.addRowCallBack = function(){
+			// 2020/07/30 7105 bug fixed by zy BEGIN
+			// 执行后清除会影响处理中定义的行追加函数
+			delete window.addRowCallBack;
+			ProdcutPlanSet(restLst);
+			// 2020/07/30 7105 bug fixed by zy END
+		}
+		// 2020/07/30 BUG-FIX-#7105 WGCH BEGIN
+		// $j("input[id$=hidaddRowsMan]").val(restLst.length);
+		$j("input[id$=hidaddRowsMan]").val(dataRowSize);
+		// 2020/07/30 BUG-FIX-#7105 WGCH END
+		// 行追加開始
+		addTranItemFun();
+		return;
+	}
+	for (var i = 0; i < restLst.length;i++) {
+		var rest = restLst[i];
+		var data = $j.extend({},rest);
+		if (data.rowIndex != undefined) {
+			window.productId = data.productId;
+			window.lastIndex = data.rowIndex;
+			autoGetProductInfo(data);
+			// 2020/07/30 入湯税の自動入力機能について改善 zyz BEGIN
+			// 触发追加入汤税行
+			ACTCUSTOM.BATHTAXAUTOSETFUN(data.rowIndex, data.bTaxAccMstItem);
+			// 2020/07/30 入湯税の自動入力機能について改善 zyz END
+			$j("input[id$=productName]").eq(data.rowIndex).focus();
+		} else {
+			getNextRow(data);
+		}
+	}
+	orderNumsFlg = false;
+	
+}
+// 空行取得
+function getBlankRows(dataRows){
+	// 処理行
+	if (dataRows == undefined) dataRows = $j("tr.tranDetailRow");
+	// 非空行
+	var noBlankRows = dataRows.has("[id$=hidProductId][value][value!='']");
+	// 空行
+	var blankRows = dataRows.not(noBlankRows);
+	return blankRows;
+}
+function getTierPrice(index,optionFlg){
+  var roomPrice = $j("#hidCurRackRatePrice").val(); 
+  if ("J_RACK_TIER_MAP" in window) {
+    var person = getPersonInt();
+    var accId = $j("input:hidden[id$=':" + index + ":hidProductId']").val();
+    var planKey = accId + '_' + person;
+    if (planKey in J_RACK_TIER_MAP) roomPrice = J_RACK_TIER_MAP[planKey];
+    else if (person in J_RACK_TIER_MAP) roomPrice = J_RACK_TIER_MAP[person];
+  }
+  return roomPrice;
+}
+function getPersonInt(){
+	var StaysPersonElement = {!!isHaveStayPerson} ? $("input[id$=hidStayPerson]") : $("input[element$=StayPersons__c]");
+	return StaysPersonElement.val();
+}
+// 2020/04/30 複数のプランとそれぞれのプランの人数を選択し機能対応 WGCH END
+</script>
+
+</apex:component>

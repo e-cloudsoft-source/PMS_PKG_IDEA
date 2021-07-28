@@ -1,0 +1,32 @@
+<apex:page showHeader="{!!isMobile && !isFromSite}" standardStylesheets="{!!isFromSite}" sidebar="false" controller="ExpoUiApiCtrl" action="{!initAct}" title="ホーム" cache="false" >
+     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            html { overflow-x:hidden; overflow-y:auto; }
+        </style>
+    </head>
+
+    <script>
+        window.addEventListener("message", receiveMessage, false);
+        function receiveMessage(event)
+        { 
+            var iframe = document.getElementById("jinya_frame");
+            iframe.height = event.data;
+        }
+    </script>
+    <apex:outputPanel rendered="{!isFromSite}" >
+    <header id="header">
+        <c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}" isIncJpMsg="false"/>
+    </header>
+    </apex:outputPanel>
+    <div id="bodyDiv"  style="{!IF(isFromSite, '', 'marsgin: 0px;')}">
+    <!-- <iframe id="jinya_frame" width="100%" scrolling="no" src="https://s3.ap-northeast-1.amazonaws.com/jinya-expo-rdev/app/item_list.html#!/?userId={!userid}"/> -->
+    <iframe id="jinya_frame" width="100%" scrolling="yes" 
+    src="{!domainUrl}/app/item_list.html#!/?userId={!userid}&subOrgId={!suborgId}"/>
+    </div>
+    <apex:outputPanel rendered="{!isFromSite}" >
+    <footer id="footer">
+        <c:ExpoFooterComp />
+    </footer>
+    </apex:outputPanel>
+</apex:page>

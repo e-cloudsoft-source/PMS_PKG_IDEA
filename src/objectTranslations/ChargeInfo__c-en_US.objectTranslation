@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Rebate</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Rebate</value>
+    </caseValues>
+    <fields>
+        <label>Company&apos;s name (customer)</label>
+        <name>AccountRef__c</name>
+        <relationshipLabel><!-- 手数料 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 旅行会社の手数料情報を登録のとき、「AGT」を設定
+カードの手数料情報を登録のとき、「カード」を設定 --></help>
+        <label>Category 1</label>
+        <name>CategoryMain__c</name>
+    </fields>
+    <fields>
+        <label>Category 2</label>
+        <name>CategorySub__c</name>
+    </fields>
+    <fields>
+        <label>Fee payment</label>
+        <name>PayChargeFlg__c</name>
+    </fields>
+    <fields>
+        <label>Sales commission/card charges</label>
+        <name>SalesRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- #Seq --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label>AGT name/Card</label>
+        <name>ShortName__c</name>
+    </fields>
+    <nameFieldLabel><!-- 番号 --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

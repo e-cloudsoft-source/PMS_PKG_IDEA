@@ -1,0 +1,1 @@
+<apex:page standardcontroller="AccountAcount__c" extensions="BillInputSwitchCtrl" action="{!redirect}" />

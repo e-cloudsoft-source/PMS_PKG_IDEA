@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+    2014/05/13 給与明細VFページをアクセス権限を持っているユーザを定義する
+    書式:
+		USERNAME: 	ユーザ名
+-->
+
+	<ACCESSUSER>
+		<USERNAME>rmorimoto@jinya-hd.com</USERNAME>
+	</ACCESSUSER>
+</root>

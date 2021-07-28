@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Sales record</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Sales record</value>
+    </caseValues>
+    <fields>
+        <label>Place</label>
+        <name>AccessAddr__c</name>
+    </fields>
+    <fields>
+        <label>Visiting date</label>
+        <name>AccessDate__c</name>
+    </fields>
+    <fields>
+        <label>Visiting time</label>
+        <name>AccessTime__c</name>
+        <picklistValues>
+            <masterLabel>06:00</masterLabel>
+            <translation><!-- 06:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>06:30</masterLabel>
+            <translation><!-- 06:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>07:00</masterLabel>
+            <translation><!-- 07:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>07:30</masterLabel>
+            <translation><!-- 07:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>08:00</masterLabel>
+            <translation><!-- 08:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>08:30</masterLabel>
+            <translation><!-- 08:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>09:00</masterLabel>
+            <translation><!-- 09:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>09:30</masterLabel>
+            <translation><!-- 09:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10:00</masterLabel>
+            <translation><!-- 10:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10:30</masterLabel>
+            <translation><!-- 10:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:00</masterLabel>
+            <translation><!-- 11:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:30</masterLabel>
+            <translation><!-- 11:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:00</masterLabel>
+            <translation><!-- 12:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:30</masterLabel>
+            <translation><!-- 12:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:00</masterLabel>
+            <translation><!-- 13:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:30</masterLabel>
+            <translation><!-- 13:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14:00</masterLabel>
+            <translation><!-- 14:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14:30</masterLabel>
+            <translation><!-- 14:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15:00</masterLabel>
+            <translation><!-- 15:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15:30</masterLabel>
+            <translation><!-- 15:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:00</masterLabel>
+            <translation><!-- 16:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:30</masterLabel>
+            <translation><!-- 16:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:00</masterLabel>
+            <translation><!-- 17:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:30</masterLabel>
+            <translation><!-- 17:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:00</masterLabel>
+            <translation><!-- 18:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:30</masterLabel>
+            <translation><!-- 18:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19:00</masterLabel>
+            <translation><!-- 19:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19:30</masterLabel>
+            <translation><!-- 19:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20:00</masterLabel>
+            <translation><!-- 20:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20:30</masterLabel>
+            <translation><!-- 20:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21:00</masterLabel>
+            <translation><!-- 21:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21:30</masterLabel>
+            <translation><!-- 21:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>22:00</masterLabel>
+            <translation><!-- 22:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>22:30</masterLabel>
+            <translation><!-- 22:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>23:00</masterLabel>
+            <translation><!-- 23:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>23:30</masterLabel>
+            <translation><!-- 23:30 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Campaign</label>
+        <name>Campaign__c</name>
+        <picklistValues>
+            <masterLabel>2013/10/12発行招待券（レストラン割引30%OFF）</masterLabel>
+            <translation><!-- 2013/10/12発行招待券（レストラン割引30%OFF） --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2013/10/初旬発送DM（忘年会のお知らせ）</masterLabel>
+            <translation><!-- 2013/10/初旬発送DM（忘年会のお知らせ） --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Complete plan date</label>
+        <name>CloseDate__c</name>
+    </fields>
+    <fields>
+        <label>Travel companions</label>
+        <name>Companion__c</name>
+        <picklistValues>
+            <masterLabel>なし</masterLabel>
+            <translation><!-- なし --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Group name</label>
+        <name>GroupName__c</name>
+    </fields>
+    <fields>
+        <label>Lead source (Bridal)</label>
+        <name>LeadSourceBridal__c</name>
+        <picklistValues>
+            <masterLabel>再来館</masterLabel>
+            <translation><!-- 再来館 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>来館</masterLabel>
+            <translation><!-- 来館 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>見学予約</masterLabel>
+            <translation><!-- 見学予約 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>資料請求</masterLabel>
+            <translation><!-- 資料請求 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>追客</masterLabel>
+            <translation><!-- 追客 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Lead source</label>
+        <name>LeadSource__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>セミナー</masterLabel>
+            <translation><!-- セミナー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>パートナー</masterLabel>
+            <translation><!-- パートナー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>口コミ</masterLabel>
+            <translation><!-- 口コミ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>固定客</masterLabel>
+            <translation><!-- 固定客 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>外部セミナー</masterLabel>
+            <translation><!-- 外部セミナー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>展示会</masterLabel>
+            <translation><!-- 展示会 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>広告</masterLabel>
+            <translation><!-- 広告 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>広報活動</masterLabel>
+            <translation><!-- 広報活動 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>紹介(外部)</masterLabel>
+            <translation><!-- 紹介(外部) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>紹介(従業員)</masterLabel>
+            <translation><!-- 紹介(従業員) --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Loss reason</label>
+        <name>LostReason__c</name>
+    </fields>
+    <fields>
+        <label>Detail</label>
+        <name>Memo2__c</name>
+    </fields>
+    <fields>
+        <label>Others</label>
+        <name>Memo3__c</name>
+    </fields>
+    <fields>
+        <label>Sales route</label>
+        <name>Memo__c</name>
+    </fields>
+    <fields>
+        <label>Next step</label>
+        <name>NextStep__c</name>
+    </fields>
+    <fields>
+        <label>Confirmation (%)</label>
+        <name>Probability__c</name>
+    </fields>
+    <fields>
+        <label>Guest</label>
+        <name>SalesAccountRef__c</name>
+        <relationshipLabel>Sales records</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Guest</label>
+        <name>SalesContactRef__c</name>
+        <relationshipLabel>Sales records</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Sales section</label>
+        <name>SalesDivision__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>パーティー</masterLabel>
+            <translation><!-- パーティー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>忘年会</masterLabel>
+            <translation><!-- 忘年会 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接待</masterLabel>
+            <translation><!-- 接待 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>新年会</masterLabel>
+            <translation><!-- 新年会 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>法事</masterLabel>
+            <translation><!-- 法事 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Sales forecast</label>
+        <name>SalesExpectation__c</name>
+    </fields>
+    <fields>
+        <label>Sales record name</label>
+        <name>SalesLogNmae__c</name>
+    </fields>
+    <fields>
+        <label>Phase</label>
+        <name>StageName__c</name>
+        <picklistValues>
+            <masterLabel>コンタクト</masterLabel>
+            <translation><!-- コンタクト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ニーズの評価</masterLabel>
+            <translation><!-- ニーズの評価 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ロスト</masterLabel>
+            <translation><!-- ロスト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予算/決定者の確認</masterLabel>
+            <translation><!-- 予算/決定者の確認 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>価格交渉</masterLabel>
+            <translation><!-- 価格交渉 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>商談成立</masterLabel>
+            <translation><!-- 商談成立 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>提案</masterLabel>
+            <translation><!-- 提案 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>提案書/見積書の作成</masterLabel>
+            <translation><!-- 提案書/見積書の作成 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>最終交渉</masterLabel>
+            <translation><!-- 最終交渉 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>評価</masterLabel>
+            <translation><!-- 評価 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Total cost</label>
+        <name>SummaryCost__c</name>
+    </fields>
+    <fields>
+        <label>Section</label>
+        <name>Type__c</name>
+        <picklistValues>
+            <masterLabel>新規ビジネス</masterLabel>
+            <translation><!-- 新規ビジネス --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>既存ビジネス</masterLabel>
+            <translation><!-- 既存ビジネス --></translation>
+        </picklistValues>
+    </fields>
+    <nameFieldLabel>Sales Record No.</nameFieldLabel>
+    <recordTypes>
+        <label><!-- ブライダル --></label>
+        <name>BridalRecType</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- 法人 --></label>
+        <name>CompanyRecType</name>
+    </recordTypes>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

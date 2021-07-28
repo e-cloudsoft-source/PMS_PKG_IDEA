@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>予約確認メール【キャンセル】</name>
+    <style>none</style>
+    <subject>元湯陣屋　【キャンセル.{!LeadIndex__c.Name}】 {!LeadIndex__c.EntryDate__c}</subject>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

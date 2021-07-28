@@ -1,0 +1,253 @@
+<apex:page standardController="BookingTimeTable__c" extensions="BookingTimeTable"
+ sidebar="false" rendered="true" title="タイムテーブル" id="page">
+
+<style type="text/css">
+    html { width: 1620px; }
+    .pbButton {visibility:hidden;}
+    .ui-selecting{background:#F60;}
+    .ui-selected{background:#F60;}
+</style>
+
+<!-- Load jQuery -->
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<!-- Load YUI -->
+<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+
+
+<script>
+var $j = jQuery.noConflict();
+
+/***************************
+*        YAHOO Dialog      *
+***************************/
+var dialogId;
+// Create a namespace for our custom functions
+YAHOO.namespace("force.com");
+
+// Function called when we want to show the dialog                                                                                              // Function called when we want to show the dialog
+YAHOO.force.com.showMe = function(roomno, roomId, entry, depart) {
+    document.getElementById("myPanel").style.display = "block";
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bentry}').textContent = entry;             // Display Entry Time
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bdepart}').textContent = depart;           // Display Departure Time
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bentryh}').value = entry;                  // InputHidden Entry Time
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bdeparth}').value = depart;                // InputHidden Departure Time
+    document.getElementById('{!$Component.page.dform.dblock.dsec.broom}').value = roomno;                   // Set Room Name
+    $j("input[id$='dblock:dsec:broom_lkid']").val(roomId);
+    $j("input[id$='dblock:dsec:broom_lkold']").val(roomno);
+    
+    YAHOO.force.com.myDialog.show();
+}
+// Function called when we want to hide the dialog
+YAHOO.force.com.hideMe = function() {
+    YAHOO.force.com.myDialog.hide();
+}
+
+// Function called when the DOM is ready to create the dialog,
+// render the dialog into the document body, add our dialog skin
+// css to the body tag, and wire up the buttons on our dialog
+YAHOO.force.com.init = function() {
+    document.body.className = document.body.className + " yui-skin-sam";
+    YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+        "myPanel",                                                                                          // The id of our dialog container
+        {
+            width       : 300,                                                                              // You can play with this until it's right
+            visible     : false,                                                                            // Should be invisible when rendered
+            draggable   : true,                                                                             // Make the dialog draggable
+            close       : false,                                                                            // Don't include a close title button
+            modal       : true,                                                                             // Make it modal
+            fixedCenter : true,                                                                             // Keep centered if window is scrolled
+            zindex      : 4,                                                                                // Make sure it's on top of everything
+                                                                                                            // This line adds the appear/vanish fade effect
+            effect : {
+                effect:YAHOO.widget.ContainerEffect.FADE,
+                duration:0.05
+            }
+        }
+    );
+                                                                                                            // Render the dialog to the document.body level of the DOM
+    YAHOO.force.com.myDialog.render(document.body);
+}
+                                                                                                            // Add the init method to the window.load event
+YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+
+
+function bindEvent() {
+    // 開始時間／終了時間／ルーム行目
+    var begintime, endtime, roomno, roomId;
+    var firstPointTime = null;
+    // 選択単位数(10分単位) /開始のIndexNo
+    var selectedamount, startno;
+    
+    var currTime;
+    var stopFlg = false;
+    // RoomType Timer Selector
+    $j("td.oneHourPanel").parent().bind("mousedown", function(e){e.metaKey = true;}).selectable({
+        //filter: "not(.roomNmTd)",
+        selected: function(event, ui){
+            selectedamount++;
+            //selectedamount = ($j(ui.selected).attr("colspan") != undefined) ? (1 * $j(ui.selected).attr("colspan")) : selectedamount+1;
+            if(selectedamount == 1){
+                roomNoHtmlId = "input:hidden[id='roomNm_" + $j(ui.selected).attr("rowIndex") + "']";
+                roomIdHtmlId = "input:hidden[id='roomId_" + $j(ui.selected).attr("rowIndex") + "']";
+                roomno = $j(roomNoHtmlId).val();
+                roomId = $j(roomIdHtmlId).val();
+                begintime = $j(ui.selected).attr("colTime");
+                startno = $j("td.oneHourPanel").index($j(ui.selected));
+            }
+        },
+        selecting: function(event, ui) {
+            if ($j(ui.selecting).attr("colspan") != undefined) stopFlg = true;
+//$j("#outputPanel").text($j(ui.selecting).attr("colspan"))    ;        
+            currTime = $j(ui.selecting).attr("colTime");
+            if (firstPointTime == null) {
+                firstPointTime = currTime; 
+            }
+        },
+        unselected: function (event, ui) {
+            $j(ui.unselected).addClass('ui-selected');
+        },
+        start: function(event, ui) {
+            selectedamount = 0;
+        },
+        stop: function(event, ui) {
+            //alert('STOP:' + stopFlg);
+            if (stopFlg || currTime == undefined) {
+                alert("時間設定不正、再確認ください。");
+                // 選択内容を自動取消する
+                cancelselected();
+                return;
+            }
+            if(selectedamount > 0){
+                //var mytime = new Date("1/1/1 " + currTime);
+                var dateFormat = new DateFormat("yyyy-MM-dd HH:mm");
+                var mytime = dateFormat.parse(currTime  > firstPointTime ? currTime : firstPointTime);
+                //alert(currTime);
+                //alert(firstPointTime);
+                endtime = new Date(mytime.getTime() + 1000 * 60 * 10);
+                endtime = dateFormat.format(endtime);
+                
+                //endtime = (endtime.getHours() < 10 ? "0" : "") + endtime.getHours()  + ":" + ((endtime.getMinutes() < 10) ? "0" : "") + endtime.getMinutes();
+                //mytime = new Date(begintime);
+                //hhmmBeginTime = (mytime.getHours() < 10 ? "0" : "") + mytime.getHours()  + ":" + ((mytime.getMinutes() < 10) ? "0" : "") + mytime.getMinutes();
+                event.preventDefault();
+                //alert("begintime:" + begintime + "\nendtime:" + endtime + "\nroomNO.:" + roomno);
+                window.setTimeout(YAHOO.force.com.showMe(roomno,roomId,begintime,endtime), 100);
+            }
+        }
+    });
+    $j("td.roomNmTd").selectable({ disabled: true });
+    $j("div.timeAssignedTd").selectable({ disabled: true });
+    // Cancel Selected
+    function cancelselected(){
+        $j("td.oneHourPanel").removeClass("ui-selected");
+        $j("td.roomNmTd").removeClass("ui-selected");
+        $j(".roomNmLinkCls").removeClass("ui-selected");
+        /*
+        if(startno >= 0 && selectedamount > 0){
+            var selector = $j("td.oneHourPanel");
+            for(var i = startno; i < startno + selectedamount; i ++){
+                selector.eq(i).removeClass("ui-selected");
+            }
+        }*/
+        // Window Info Clear
+        document.getElementById('{!$Component.page.dform.dblock.dsec.bname}').value = '';
+        document.getElementById('{!$Component.page.dform.dblock.dsec.bcontact}').value = '';
+        document.getElementById('{!$Component.page.dform.dblock.dsec.seminarOrderFlg}').value = '';
+        document.getElementById('{!$Component.page.dform.dblock.dsec.broom}').value = '';
+        $j("input[id$='dblock:dsec:broom_lkid']").val("");
+        $j("input[id$='dblock:dsec:broom_lkold']").val("");
+        document.getElementById('{!$Component.page.dform.dblock.dsec.bpersons}').value = '2';
+        document.getElementById('{!$Component.page.dform.dblock.dsec.bplan}').value = '';
+        document.getElementById('{!$Component.page.dform.dblock.dsec.bsegment}').value = '';
+        YAHOO.force.com.myDialog.hide();
+        stopFlg = false;
+        firstPointTime = null;
+    }
+
+    // Cancel Button
+    $j("#cancelBtn").click(function(){
+        cancelselected();
+    });
+    // 入力項目Readlonly[2013/02/15 ADD]
+    $j("input[id$=':gotoDate']").attr('readonly', true);
+}
+
+$j(document).ready(function() {
+    bindEvent();
+});
+</script>
+
+
+<apex:pageBlock id="block" title="時" >
+<apex:pageMessages />
+
+<table width="98%" style="border:solid 1px #777; background:#FFF; border-radius: 5px;" id="table" class="detailList" cellspacing="0px" cellpadding="0px">
+    <tr>
+        <td>
+            <apex:outputLabel value="お部屋" styleClass="label" style="margin-left:2px; vertical-align: middle;width:100px;height:20px; font-size:16px; text-align:center; overflow:hidden;"/>
+        </td>
+        <apex:repeat value="{!Hours}" var="intHour">
+        <td colspan="6"><div style="color:#555; width:60px; margin-left:2px; vertical-align: middle;float:left; vertical-align: middle;">
+            <apex:outputLabel value="{!intHour}:00" styleClass="label"/></div></td>
+        </apex:repeat>
+    </tr>
+    
+    <apex:variable var="count" value="{!0}"/>
+    <apex:repeat value="{!Room}" var="r">
+    <tr>
+        <td class="roomNmTd" style="margin-left:2px; vertical-align: middle;border-top:solid 1px #777;border-right:solid 1px #777;font-size:14px; ">
+        <a href="javascript:void(0)" class="roomNmLinkCls" style="margin-left: 2px" onclick="window.open('/{!r.id}')" target="_blank" id="{!r.id}" onblur="LookupHoverDetail.getHover('{!r.id}').hide();" onfocus="LookupHoverDetail.getHover('{!r.id}', '/{!r.id}/m?retURL=%2F{!r.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!r.id}').hide();" onmouseover="LookupHoverDetail.getHover('{!r.id}', '/{!r.id}/m?retURL=%2F{!r.id}&isAjaxRequest=1').show();">       
+        {!r.name}
+        </a>
+        <input type="hidden" id="roomId_{!CEILING(count)}" value="{!r.id}" />
+        <input type="hidden" id="roomNm_{!CEILING(count)}" value="{!r.name}" />
+        <apex:variable var="count" value="{!count+1}"/>
+        </td>
+
+        <apex:outputText value="{!roomBookingMap[r.Id].tdHtml}" escape="false"/>
+        
+    </tr>
+    </apex:repeat>
+
+</table>
+</apex:pageBlock>
+
+<div id="myPanel" style="display: none; width: 500px; height: 175px;" >
+  <div class="hd">
+    <apex:outputText value="新規予約" />
+  </div>
+  <div class="bd">
+      <apex:form id="dform">
+        <apex:pageBlock id="dblock">
+          <apex:pageBlockSection columns="1" id="dsec">
+            <apex:outputField id="bentry"   value="{!bookingform.Field4__c}"></apex:outputField>
+            <apex:outputField id="bdepart"  value="{!bookingform.Field3__c}"></apex:outputField>
+
+            <apex:inputField id="bname"    value="{!bookingform.name}" required="true"/>
+            <apex:inputField id="bcontact" value="{!bookingform.Relcontact__c}" required="true"/>
+            <apex:inputField id="broom"    value="{!bookingform.Rroom__c}" />
+            <apex:inputField id="bpersons" value="{!bookingform.StayPersons__c}" />
+            <apex:inputField id="seminarOrderFlg"    value="{!bookingform.SeminarOrderFlg__c}"/>
+            <apex:inputField id="bplan"    value="{!bookingform.Field310__c}" />
+            <apex:inputField id="bsegment" value="{!bookingform.Field2__c}" />
+            <apex:inputHidden id="bentryh"  value="{!bookingform.Field4__c}"></apex:inputHidden>
+            <apex:inputHidden id="bdeparth" value="{!bookingform.Field3__c}"></apex:inputHidden>
+          </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:actionFunction name="bookingCreateFunction" action="{!bookingCreate}" rerender="block,dform" oncomplete="YAHOO.force.com.hideMe();bindEvent();"  />
+        <div style="text-align: right;" >
+          <input type="button" value="保存"  onclick="bookingCreateFunction();" class="btn" />
+          <input type="button" value="キャンセル" id="cancelBtn" class="btn" />
+        </div>
+      </apex:form>
+  </div>
+</div>
+
+</apex:page>

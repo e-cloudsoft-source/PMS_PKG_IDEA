@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+	This xml file exist in Jinyaholdings folder of Documents tab for adding customize the screen height, width and fields display.
+
+Screens Tag 	:  Parent Tag for all the screens
+Screen Tag  	:  Parent tag for the screen
+Active Tag  	:  The possible values for this tag are true or false. 
+				   If the value for active is true, read the screen details. If the value for active is false, don’t read the screen details.
+Width Tag   	:  Screen width
+Height			:  Screen Height
+
+
+field tag: 			this defined field is displayed with adding one cloumn if show is true in screen, 
+					this field do not display if show is false. also this fields is displayed in a seqence defined.
+				
+labelAPIName tag: 		as the detail type below:
+					type1: Custom object API name.Custom item API name:display column name
+            		type2: Custom object API name.Custom item Lookup data type(pointer).Custom item API name:display column name
+					type3: Custom object API name.Name : this define is key name and displayed as hyper link:display column name
+
+DefaultLayout tag: 	this layout is defined as the SFDC standard layout and the endpoint of this link pointer(APIName type3) is SFDC standard layout,
+					also custom obect name and "-" is default recordtype layout that displayed when incoming call number is not found, if incoming call number is found in Contact,
+					this record type layout is displayed with a current record of this defined custom object of the latest checkin day&amptime booking data.
+
+PageLayout tag:		this layout is defined as the visualforcepage name and the end point of this link pointer(APIName type3) is displayed in this page 
+                    as a new record if incoming call number is not found, on the contrary, if found, this page is displayed with a current record of this defined custom object
+					of the latest checkin day&amptime booking data.
+
+2016/12/30 ADD		ご予約の新規予約リンクから指定ページ（ルームインジケータ、予約ポップ、タイムテーブル）へ遷移できる機能対応
+					ルームインジケータ:	RoomIndicatorInfo
+					タイムテーブル:	RoomScheduleReport
+					予約ポップ:		RoomTypeInventory
+					例：CTIの新規予約リンクはルームインジケータ画面に遷移を定義したい場合
+					注：DefaultLayoutとPageLayoutは同時に定義できません
+					<field show="true">
+						<PageLayout>Roomindicator</PageLayout>
+						<labelAPIName>Lead__c.Name:ご予約</labelAPIName>
+						<latestCheckInDate>Contact-reservetg85__r.EntryTime__c</latestCheckInDate>
+						<latestCheckInTime>Contact-reservetg85__r.Field4__c</latestCheckInTime>
+						<filters>ReservedStatus__c not in ('NO SHOW','キャンセル','削除')</filters>
+					</field>
+ -->
+<screens>
+	<screen name="callinfostickywindow">
+		<active>true</active>
+		<description>
+			Sticky window will be attached to beneath of each standard and custom screens. 
+			This screen contains the details related to calls received for Contacts and Accounts.
+			Tis screen will open whenever new call received.
+		</description>
+		<width>750</width>  <!-- This can be  optional.-->
+		<fields>	
+			<field show="false">
+				<labelAPIName>Contact.Usage_Count__c:ご利用回数</labelAPIName>
+			</field>
+			<field show="true">
+				<DefaultLayout>ps__Lead__c-BookingRecType</DefaultLayout>
+				<!--例：新規予約リンクはルームインジケータ画面に遷移したい場合、下記情報を定義して、
+					注：DefaultLayoutとPageLayoutは同時に定義できません
+				<PageLayout>RoomIndicatorInfo</PageLayout>
+				 -->
+				<labelAPIName>Lead__c.Name:ご予約</labelAPIName>
+				<latestCheckInDate>Contact-reservetg85__r.EntryTime__c</latestCheckInDate>
+				<latestCheckInTime>Contact-reservetg85__r.Field4__c</latestCheckInTime>
+				<filters>ReservedStatus__c not in ('NO SHOW','キャンセル','削除')</filters>
+			</field>
+			<field show="true">
+				<PageLayout>BookingApp</PageLayout>
+				<labelAPIName>LeadIndex__c.Name:一括予約</labelAPIName>
+				<latestCheckInDate>Contact-IndexContactRef__r.EntryDate__c</latestCheckInDate>
+				<latestCheckInTime>Contact-IndexContactRef__r.EntryTime__c</latestCheckInTime>
+				<filters>StatusLst__c in ('通常')</filters>
+				  
+			</field>
+		</fields>
+	</screen>
+	<screen name="alarmpopupwindow">
+		<active>true</active>
+		<description>
+			Alarm popup window is a popup screen. This screen will open when a new call received for an account or contact.
+		</description>
+		<fields>	
+			<field show="false">
+				<labelAPIName>Contact.Usage_Count__c:ご利用回数</labelAPIName>
+			</field>
+			<field show="true">
+				<DefaultLayout>ps__Lead__c-BookingRecType</DefaultLayout>
+				<labelAPIName>Lead__c.Name:ご予約</labelAPIName>
+				<latestCheckInDate>Contact-reservetg85__r.EntryTime__c</latestCheckInDate>
+				<latestCheckInTime>Contact-reservetg85__r.Field4__c</latestCheckInTime>
+				<filters>ReservedStatus__c not in ('NO SHOW','キャンセル','削除')</filters>
+			</field>
+			<field show="true">
+				<PageLayout>BookingApp</PageLayout>
+				<labelAPIName>LeadIndex__c.Name:一括予約</labelAPIName>
+				<latestCheckInDate>Contact-IndexContactRef__r.EntryDate__c</latestCheckInDate>
+				<latestCheckInTime>Contact-IndexContactRef__r.EntryTime__c</latestCheckInTime>
+				<filters>StatusLst__c in ('通常')</filters>
+			</field>
+		</fields>
+	 </screen>
+</screens>

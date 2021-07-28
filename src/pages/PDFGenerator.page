@@ -1,0 +1,98 @@
+<apex:page standardController="Contact" extensions="CustomerRank" sidebar="false" showHeader="false">
+    
+    <style type="text/css">   
+        @page {
+          size: 8.27in 11.69in;  /* A4 width and height */
+        }
+     </style>
+      
+     
+  <html>
+  <a href="javascript:window.print()"><img src="{!$resource.printicon}" /></a>
+   <head>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+      var data1 = new google.visualization.DataTable();
+                          
+        data1.addColumn('string', 'Check in Day');
+        data1.addColumn('number', 'Usage Charge');
+     
+      var i = 0; 
+      
+      <apex:repeat value="{!GraphValues}" var="v"> 
+         data1.addRows({!RowSize});
+         data1.setValue(i, 0, '{!v.Field148__c}');
+         data1.setValue(i, 1, {!v.Field147__c});
+         i = i+1; 
+     </apex:repeat> 
+       
+        var chart1 = new google.visualization.ColumnChart(document.getElementById('chart_div1'));
+        chart1.draw(data1, {width: 500, height: 400, title: 'Usage History',
+                          vAxis: {title: 'Usage Charge', titleTextStyle: {color: 'Green'}},
+                          hAxis: {title: 'Check in Day', titleTextStyle: {color: 'Green'}}
+                          
+                         });
+      }
+    </script>
+  </head>
+  <body>    
+         
+      <div style="font-family:Arial Unicode MS;">
+            
+       <center><label>お客様カルテ</label></center>
+      <div align="right"><label style="font-size:8pt;">予約No. &nbsp;&nbsp;&nbsp;&nbsp;</label></div>
+        
+      <hr/>
+       <center>                               
+           <table width="600">
+              <tr>
+                   <td width="150">&nbsp;</td>
+                   <td width="450">&nbsp;</td>  
+              </tr>
+              <tr align="left">
+                   <td><label>お客様名</label></td> 
+                   <td><apex:outputText value="{!ConRec.Name}"/></td>  
+              </tr>
+              <tr align="left">
+                   <td><label>ご利用回数</label></td> 
+                   <td><apex:outputText value="{!TotalUsageCount}"/></td>  
+              </tr>
+              <tr align="left">
+                   <td><label>ご利用金額</label></td> 
+                   <td><apex:outputText value="{!TotalUsageCharge}"/></td>  
+              </tr>
+              <tr align="left">
+                   <td><label>直近のご利用日</label></td> 
+                   <td><apex:outputText value="{!NearestUsageDay}"/></td>  
+              </tr>
+              <tr align="left">
+                   <td><label>特徴</label></td> 
+                   <td><apex:outputText value="{!ConRec.Field1__c}"/></td>  
+              </tr>
+              <tr align="left">
+                   <td><label>家族構成</label></td> 
+                   <td><apex:outputText value="{!ReportsToName}"/></td>  
+              </tr>
+              <tr align="left">
+                   <td><label>アレルギー</label></td> 
+                   <td>
+                       <apex:outputText value="{!ConRec.DetailedAllergy__c}"/>&nbsp;&nbsp;&nbsp;
+                       <label>有</label>&nbsp;&nbsp;
+                       <apex:outputField value="{!ConRec1.Allergy__c}" />&nbsp;&nbsp;&nbsp;
+                       <label>無</label>&nbsp;&nbsp;
+                       <apex:outputField value="{!ConRec2.Allergy__c}" /><br/>
+                       (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)                       
+                   </td>  
+              </tr>
+              
+           </table>           
+       </center> 
+      </div>
+            
+    <div id="chart_div1" style="width:60%;" align="center" ></div>    
+  </body>
+</html>    
+</apex:page>

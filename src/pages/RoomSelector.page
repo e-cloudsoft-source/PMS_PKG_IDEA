@@ -1,0 +1,100 @@
+<!-- 部屋選択 -->
+<apex:page title="{!$Label.ps__msg_003_0103}" controller="RoomSelector" sidebar="false" showHeader="false"
+    tabStyle="Room__c" action="{!init}">
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+
+<script type="text/javascript">
+$=jQuery.noConflict();
+jQuery(document).ready(function($) {
+    // Insert And UPDの場合、最新情報から親画面へ設定を行う
+    $("a[id$=':selectLink']").click(function() {
+        var currRowIndex = $(this).closest("tr")[0].rowIndex - 1;
+        var outId = $("input:hidden[id$=':" + currRowIndex + ":id']").val();
+        var outNm = $("input:hidden[id$=':" + currRowIndex + ":name']").val();
+        selectItem($, outId, outNm);
+    })
+});
+
+function selectItem($, idVal, nameVal) {
+    if(opener){
+        if(typeof(window.opener.document)=='unknown' || typeof(window.opener.document) == 'undefined' ){
+            // Opener Window Is Closed
+            top.window.close();
+        }else{
+            objs = new Array(nameVal, idVal);
+            commUtils.popupSetter(objs);
+            window.opener.focus();
+            top.window.close();
+        }
+    }else{
+        // Opener Window Is Closed
+        top.window.close();
+    }
+}
+</script>
+
+<apex:form id="searchUserInfo" >
+<apex:pageblock >
+    <!-- 検索条件 -->
+    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_003_0104}" >
+        <apex:outputPanel id="condtionPanel" >
+        <span class="lookupInput">
+        <!--　部屋番号 -->
+        <apex:pageblockSectionItem >
+        	<!-- 部屋 -->
+            <apex:outputlabel value="{!$Label.ps__msg_003_0100}" />
+            <apex:inputText value="{!c_roomNm}" id="productName" />
+        </apex:pageblockSectionItem>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <!-- 検索 -->
+        <apex:commandButton action="{!queryInfo}" value="{!$Label.ps__msg_003_0101}" id="theEditButton"/>
+        </span>
+        </apex:outputPanel>
+    </apex:pageBlockSection>
+</apex:pageblock>
+</apex:form>
+
+<apex:form id="rsultForm" >
+<!-- 部屋 -->
+<apex:pageblock title="{!$Label.ps__msg_003_0100}" id="roomInfo" >
+    <apex:pageBlockTable value="{!roomLst}" var="var" styleClass="list" width="100%">
+        <apex:column >
+			<apex:facet name="header"><!-- 選択 -->{!$Label.ps__msg_003_0102}</apex:facet>
+			<apex:outputLink value="#" id="selectLink">
+			<apex:outputField value="{!var.Name}" />
+			</apex:outputLink>
+			<apex:inputHidden value="{!var.id}" id="id"/>
+			<apex:inputHidden value="{!var.name}" id="name"/>
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.Rnumber__c.label}">
+            <apex:outputField value="{!var.Rnumber__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.CapacityHaku__c.label}">
+            <apex:outputField value="{!var.CapacityHaku__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.Capacity__c.label}">
+            <apex:outputField value="{!var.Capacity__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.Field10__c.label}">
+            <apex:outputField value="{!var.Field10__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.X3H__c.label}">
+            <apex:outputField value="{!var.X3H__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.X3Hyoru__c.label}">
+            <apex:outputField value="{!var.X3Hyoru__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.Field7__c.label}">
+            <apex:outputField value="{!var.Field7__c}" />
+        </apex:column>
+        <apex:column headerValue="{!$ObjectType.Room__c.Fields.LAN__c.label}">
+            <apex:outputField value="{!var.LAN__c}" />
+        </apex:column>
+    </apex:pageBlockTable>
+</apex:pageblock>
+</apex:form>
+
+</apex:page>

@@ -1,0 +1,1140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>会計商品</value>
+    </caseValues>
+    <fields>
+        <label><!-- 商品処理種別 --></label>
+        <name>ActionType__c</name>
+        <picklistValues>
+            <masterLabel>サービス料</masterLabel>
+            <translation><!-- サービス料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>プラン</masterLabel>
+            <translation><!-- プラン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>前受付金</masterLabel>
+            <translation><!-- 前受付金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>夕食</masterLabel>
+            <translation><!-- 夕食 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>室料</masterLabel>
+            <translation><!-- 室料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>支払</masterLabel>
+            <translation><!-- 支払 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>朝食</masterLabel>
+            <translation><!-- 朝食 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>非表示</masterLabel>
+            <translation><!-- 非表示 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 含有アレルギー物質 --></label>
+        <name>Allergy__c</name>
+        <picklistValues>
+            <masterLabel>あわび</masterLabel>
+            <translation><!-- あわび --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>いか</masterLabel>
+            <translation><!-- いか --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>いくら</masterLabel>
+            <translation><!-- いくら --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>えび</masterLabel>
+            <translation><!-- えび --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>かに</masterLabel>
+            <translation><!-- かに --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>くるみ</masterLabel>
+            <translation><!-- くるみ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ごま</masterLabel>
+            <translation><!-- ごま --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>さけ</masterLabel>
+            <translation><!-- さけ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>さば</masterLabel>
+            <translation><!-- さば --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>そば</masterLabel>
+            <translation><!-- そば --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>まつたけ</masterLabel>
+            <translation><!-- まつたけ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>もも</masterLabel>
+            <translation><!-- もも --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>やまいも</masterLabel>
+            <translation><!-- やまいも --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>りんご</masterLabel>
+            <translation><!-- りんご --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>オレンジ</masterLabel>
+            <translation><!-- オレンジ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>カシューナッツ</masterLabel>
+            <translation><!-- カシューナッツ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>キウイフルーツ</masterLabel>
+            <translation><!-- キウイフルーツ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ゼラチン</masterLabel>
+            <translation><!-- ゼラチン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>バナナ</masterLabel>
+            <translation><!-- バナナ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>乳</masterLabel>
+            <translation><!-- 乳 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>卵</masterLabel>
+            <translation><!-- 卵 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>大豆</masterLabel>
+            <translation><!-- 大豆 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>小麦</masterLabel>
+            <translation><!-- 小麦 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>牛肉</masterLabel>
+            <translation><!-- 牛肉 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>落花生</masterLabel>
+            <translation><!-- 落花生 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>豚肉</masterLabel>
+            <translation><!-- 豚肉 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>鶏肉</masterLabel>
+            <translation><!-- 鶏肉 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ベースプラン --></label>
+        <name>BasePlanFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- バッチ処理区分 --></label>
+        <name>BatchProcessStatusDiv__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賞味期限 --></label>
+        <name>BestDateInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品写真 --></label>
+        <name>BigImage__c</name>
+    </fields>
+    <fields>
+        <label><!-- カロリー --></label>
+        <name>Calorie__c</name>
+    </fields>
+    <fields>
+        <label><!-- 炭水化物 --></label>
+        <name>Carbohydrate__c</name>
+    </fields>
+    <fields>
+        <label><!-- カード契約会社 --></label>
+        <name>CardAccountRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- カテゴリサブ --></label>
+        <name>CategorySub__c</name>
+        <picklistValues>
+            <masterLabel>ITその他</masterLabel>
+            <translation><!-- ITその他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>PMS</masterLabel>
+            <translation><!-- PMS --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>POSレジ</masterLabel>
+            <translation><!-- POSレジ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>おみやげ品</masterLabel>
+            <translation><!-- おみやげ品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ちらし・パンフ製作</masterLabel>
+            <translation><!-- ちらし・パンフ製作 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>アメニティ類</masterLabel>
+            <translation><!-- アメニティ類 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>インカム</masterLabel>
+            <translation><!-- インカム --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>オプション・サービス</masterLabel>
+            <translation><!-- オプション・サービス --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>クリーニング・清掃</masterLabel>
+            <translation><!-- クリーニング・清掃 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>サイトコントローラー</masterLabel>
+            <translation><!-- サイトコントローラー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>サービスその他</masterLabel>
+            <translation><!-- サービスその他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ハラール</masterLabel>
+            <translation><!-- ハラール --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ビール</masterLabel>
+            <translation><!-- ビール --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ブッキングエンジン</masterLabel>
+            <translation><!-- ブッキングエンジン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ホームページ制作</masterLabel>
+            <translation><!-- ホームページ制作 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>マネージャー</masterLabel>
+            <translation><!-- マネージャー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ワイン</masterLabel>
+            <translation><!-- ワイン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約担当</masterLabel>
+            <translation><!-- 予約担当 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>人材その他</masterLabel>
+            <translation><!-- 人材その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>人材派遣</masterLabel>
+            <translation><!-- 人材派遣 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>保険</masterLabel>
+            <translation><!-- 保険 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>備品おみやげ品</masterLabel>
+            <translation><!-- 備品おみやげ品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>備品その他</masterLabel>
+            <translation><!-- 備品その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>写真・動画撮影</masterLabel>
+            <translation><!-- 写真・動画撮影 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>加工・出汁系</masterLabel>
+            <translation><!-- 加工・出汁系 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>半加工品</masterLabel>
+            <translation><!-- 半加工品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>厨房関連設備</masterLabel>
+            <translation><!-- 厨房関連設備 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>各種業務代行</masterLabel>
+            <translation><!-- 各種業務代行 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>士業・コンサルタント</masterLabel>
+            <translation><!-- 士業・コンサルタント --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>完成品</masterLabel>
+            <translation><!-- 完成品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>害虫駆除</masterLabel>
+            <translation><!-- 害虫駆除 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>家具・調度</masterLabel>
+            <translation><!-- 家具・調度 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>建築・リフォーム</masterLabel>
+            <translation><!-- 建築・リフォーム --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接客担当</masterLabel>
+            <translation><!-- 接客担当 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>教育・サポート</masterLabel>
+            <translation><!-- 教育・サポート --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>施設クリーニング関連</masterLabel>
+            <translation><!-- 施設クリーニング関連 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>日本酒</masterLabel>
+            <translation><!-- 日本酒 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>清掃担当</masterLabel>
+            <translation><!-- 清掃担当 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>温泉関連設備</masterLabel>
+            <translation><!-- 温泉関連設備 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>焼酎</masterLabel>
+            <translation><!-- 焼酎 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>珍味</masterLabel>
+            <translation><!-- 珍味 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>素材</masterLabel>
+            <translation><!-- 素材 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>肉類</masterLabel>
+            <translation><!-- 肉類 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>設備保全・修繕</masterLabel>
+            <translation><!-- 設備保全・修繕 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>調理人</masterLabel>
+            <translation><!-- 調理人 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>財務会計</masterLabel>
+            <translation><!-- 財務会計 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通訳・翻訳</masterLabel>
+            <translation><!-- 通訳・翻訳 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>野菜類</masterLabel>
+            <translation><!-- 野菜類 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>防災・電気関連設備</masterLabel>
+            <translation><!-- 防災・電気関連設備 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>陣屋コネクトライセンス</masterLabel>
+            <translation><!-- 陣屋コネクトライセンス --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>電気製品</masterLabel>
+            <translation><!-- 電気製品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>食器</masterLabel>
+            <translation><!-- 食器 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>食材その他</masterLabel>
+            <translation><!-- 食材その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>飲料おみやげ品</masterLabel>
+            <translation><!-- 飲料おみやげ品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>飲料その他</masterLabel>
+            <translation><!-- 飲料その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>魚介類</masterLabel>
+            <translation><!-- 魚介類 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- カテゴリ --></label>
+        <name>Category__c</name>
+        <picklistValues>
+            <masterLabel>IT</masterLabel>
+            <translation><!-- IT --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>サービス</masterLabel>
+            <translation><!-- サービス --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>人材</masterLabel>
+            <translation><!-- 人材 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>備品</masterLabel>
+            <translation><!-- 備品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>食材</masterLabel>
+            <translation><!-- 食材 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>飲料</masterLabel>
+            <translation><!-- 飲料 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>Certificate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手数料(%) --></label>
+        <name>Charge__c</name>
+    </fields>
+    <fields>
+        <help><!-- 商品コード桁数が4桁のときは、１を返す --></help>
+        <label><!-- $商品コード桁数 --></label>
+        <name>CodeNumbers__c</name>
+    </fields>
+    <fields>
+        <label><!-- 社名 --></label>
+        <name>CompnayName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 内容量 --></label>
+        <name>Content__c</name>
+    </fields>
+    <fields>
+        <label><!-- $料理数量 --></label>
+        <name>CookCount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理時間（分） --></label>
+        <name>CookTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- #DP --></label>
+        <name>DPChange__c</name>
+        <relationshipLabel><!-- 会計商品 (#DP) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 配達及びコンタクト --></label>
+        <name>DeliveryType__c</name>
+        <picklistValues>
+            <masterLabel>ルート配送</masterLabel>
+            <translation><!-- ルート配送 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>取りに行く</masterLabel>
+            <translation><!-- 取りに行く --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>宅配便</masterLabel>
+            <translation><!-- 宅配便 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ■商品情報 --></label>
+        <name>Descript__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品説明 --></label>
+        <name>Description__c</name>
+    </fields>
+    <fields>
+        <label><!-- 割引/割増率 --></label>
+        <name>DiscountRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- キャンペーン方式 --></label>
+        <name>DiscountType__c</name>
+        <picklistValues>
+            <masterLabel>値引</masterLabel>
+            <translation><!-- 値引 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>割引</masterLabel>
+            <translation><!-- 割引 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- EXPOに公開したい場合、該当公開開始予定日を設定してください --></help>
+        <label><!-- EXPO開示開始日 --></label>
+        <name>DisplayDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>EXPODeleteCal__c</name>
+    </fields>
+    <fields>
+        <help><!-- 宴会手配書に表示する商品の順番で数字を入力してください --></help>
+        <label><!-- 見積項目# --></label>
+        <name>EstimateFieldNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 出品区分 --></label>
+        <name>ExhibitType__c</name>
+        <picklistValues>
+            <masterLabel>出品</masterLabel>
+            <translation><!-- 出品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>探している</masterLabel>
+            <translation><!-- 探している --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 地域情報コード --></label>
+        <name>ExpoAreaMstCode__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 詳細画面の「地域情報」ボタンで設定してください --></help>
+        <label><!-- 地域情報 --></label>
+        <name>ExpoAreaMstLab__c</name>
+        <picklistValues>
+            <masterLabel>未設定</masterLabel>
+            <translation><!-- 未設定 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Expo削除したユーザ --></label>
+        <name>ExpoDeleteUser__c</name>
+    </fields>
+    <fields>
+        <help><!-- カテゴリが人材の場合、人材属性情報を入力してください --></help>
+        <label><!-- 人材属性情報 --></label>
+        <name>ExpoHrInfoRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Expo組織情報 --></label>
+        <name>ExpoOrgInfoRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 在庫数情報管理 --></help>
+        <label><!-- Expo在庫数 --></label>
+        <name>ExpoStockCount__c</name>
+    </fields>
+    <fields>
+        <help><!-- カテゴリが人材の場合、業者を入力してください --></help>
+        <label><!-- 人材業者 --></label>
+        <name>ExpoWorkerRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 小計割引／割増 --></label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label><!-- ﾌﾘｰ宣言 --></label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋 --></label>
+        <name>Field12__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 同一メニューで単価の異なるマスタをつなげるため、たとえば、朝食の単価¥2,000、¥3,000の切り替えのため --></help>
+        <label><!-- $会計マスタ --></label>
+        <name>Field13_del__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- お料理 --></label>
+        <name>Field2__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 商品コード --></label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label><!-- リンクＤＰコード --></label>
+        <name>Field4__c</name>
+        <relationshipLabel><!-- 会計商品 (リンクＤＰコード) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 単価 --></label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label><!-- ｻﾌﾞ単価 --></label>
+        <name>Field6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 原価 --></label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価2 --></label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label><!-- ｾｯﾄ宣言 --></label>
+        <name>Field9__c</name>
+    </fields>
+    <fields>
+        <help><!-- 集計先変更定義 --></help>
+        <label><!-- #GP --></label>
+        <name>GPChange__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 税ステータスが非課税のとき、原価/売価、課税は、原価/売価（税抜) --></help>
+        <label><!-- $原価率 --></label>
+        <name>Genkaritsu__c</name>
+    </fields>
+    <fields>
+        <label><!-- おすすめ --></label>
+        <name>GoodFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 非公開 --></label>
+        <name>IsClosed__c</name>
+    </fields>
+    <fields>
+        <label><!-- JANコード --></label>
+        <name>JanCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- KD表示文字背景色 --></label>
+        <name>KD__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計科目 --></label>
+        <name>KanjoKamokuRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 期間限定 --></label>
+        <name>LimitedFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 脂質 --></label>
+        <name>Lipid__c</name>
+    </fields>
+    <fields>
+        <label><!-- メーカー名 --></label>
+        <name>Maker__c</name>
+    </fields>
+    <fields>
+        <label><!-- 原材料 --></label>
+        <name>Material__c</name>
+    </fields>
+    <fields>
+        <label><!-- 原材料名 --></label>
+        <name>Materials__c</name>
+        <picklistValues>
+            <masterLabel>イースト</masterLabel>
+            <translation><!-- イースト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ショートニング（大豆油、乳化剤）</masterLabel>
+            <translation><!-- ショートニング（大豆油、乳化剤） --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>卵</masterLabel>
+            <translation><!-- 卵 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>小麦粉</masterLabel>
+            <translation><!-- 小麦粉 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>糖類</masterLabel>
+            <translation><!-- 糖類 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>脱脂粉乳</masterLabel>
+            <translation><!-- 脱脂粉乳 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>食塩</masterLabel>
+            <translation><!-- 食塩 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 献立情報 --></label>
+        <name>MealInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- OES用ﾒﾆｭｰ --></label>
+        <name>OES__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計OP --></label>
+        <name>OP__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 原産国名 --></label>
+        <name>Origin__c</name>
+    </fields>
+    <fields>
+        <label><!-- 業務委託 --></label>
+        <name>OutsourceFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- PLUｺｰﾄﾞ --></label>
+        <name>PLU__c</name>
+    </fields>
+    <fields>
+        <help><!-- 期限を設定し（30日など）、計上日から設定した期限まで入金消込されない場合、警告メッセージを送信する --></help>
+        <label><!-- 入金期限日数 --></label>
+        <name>PayLimitDays__c</name>
+    </fields>
+    <fields>
+        <label><!-- 利用できる決済方法 --></label>
+        <name>PayType__c</name>
+        <picklistValues>
+            <masterLabel>カード</masterLabel>
+            <translation><!-- カード --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>代引</masterLabel>
+            <translation><!-- 代引 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>売掛</masterLabel>
+            <translation><!-- 売掛 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>振込（事前入金）</masterLabel>
+            <translation><!-- 振込（事前入金） --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 支払種別 --></label>
+        <name>PaymentType__c</name>
+        <picklistValues>
+            <masterLabel>カード</masterLabel>
+            <translation><!-- カード --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>カード返金</masterLabel>
+            <translation><!-- カード返金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>クーポン</masterLabel>
+            <translation><!-- クーポン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約金</masterLabel>
+            <translation><!-- 予約金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>値引</masterLabel>
+            <translation><!-- 値引 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>割増</masterLabel>
+            <translation><!-- 割増 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>割引</masterLabel>
+            <translation><!-- 割引 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>売掛金</masterLabel>
+            <translation><!-- 売掛金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>現金</masterLabel>
+            <translation><!-- 現金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>現金返金</masterLabel>
+            <translation><!-- 現金返金 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- プラン連携フラグ --></label>
+        <name>PlanAutoSyncChk__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン(入湯税)（システム用） --></label>
+        <name>PlanBathTaxAccMstRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 商品名称（英） --></label>
+        <name>ProductEnName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 新品/中古 --></help>
+        <label><!-- 商品状態 --></label>
+        <name>ProductStatus__c</name>
+        <picklistValues>
+            <masterLabel>中古</masterLabel>
+            <translation><!-- 中古 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>新品</masterLabel>
+            <translation><!-- 新品 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 利用不可 --></label>
+        <name>ProductSubCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売価-原価、税ステータスありなら、売価/1.05-原価 --></help>
+        <label><!-- $粗利益 --></label>
+        <name>Profit__c</name>
+    </fields>
+    <fields>
+        <label><!-- たんぱく質 --></label>
+        <name>Protein__c</name>
+    </fields>
+    <fields>
+        <label><!-- 個人最大購買数 --></label>
+        <name>PurchaseMaxNum__c</name>
+    </fields>
+    <fields>
+        <label><!-- 適正在庫 --></label>
+        <name>ReasonableStock__c</name>
+    </fields>
+    <fields>
+        <label><!-- レンタルフラグ --></label>
+        <name>RentalFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定期購入価格値引 --></label>
+        <name>RepeatDiscountPrice__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定期購入価額割引 --></label>
+        <name>RepeatDiscountRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定期購入 --></label>
+        <name>RepeaterFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- セットメニューのインデックス番号、セットメニュー群は最大50個まで --></help>
+        <label><!-- SCP(5) --></label>
+        <name>SCP_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売状態 --></label>
+        <name>SalesStatus__c</name>
+        <picklistValues>
+            <masterLabel>停止中</masterLabel>
+            <translation><!-- 停止中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>販売中</masterLabel>
+            <translation><!-- 販売中 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 会計明細の$単価(税抜) --></help>
+        <label><!-- $単価(税抜) --></label>
+        <name>SalesnoneTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料(%) --></label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 棚 --></label>
+        <name>Shelves__c</name>
+        <picklistValues>
+            <masterLabel>棚01</masterLabel>
+            <translation><!-- 棚01 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>棚02</masterLabel>
+            <translation><!-- 棚02 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>棚03</masterLabel>
+            <translation><!-- 棚03 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- ご注文から出荷までの所要時間の目安です --></help>
+        <label><!-- 発送可能日 --></label>
+        <name>ShippingDays__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 商品簡易説明 --></label>
+        <name>SpDescription__c</name>
+    </fields>
+    <fields>
+        <label><!-- 注意事項 --></label>
+        <name>SpecialMemo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 特別税 --></label>
+        <name>SpecialTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 人材名前 --></label>
+        <name>StaffName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売単位 --></label>
+        <name>StockUnit__c</name>
+        <picklistValues>
+            <masterLabel>g</masterLabel>
+            <translation><!-- g --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>kg</masterLabel>
+            <translation><!-- kg --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ケース</masterLabel>
+            <translation><!-- ケース --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ダース</masterLabel>
+            <translation><!-- ダース --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>個</masterLabel>
+            <translation><!-- 個 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>本</masterLabel>
+            <translation><!-- 本 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>枚</masterLabel>
+            <translation><!-- 枚 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>瓶</masterLabel>
+            <translation><!-- 瓶 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>箱</masterLabel>
+            <translation><!-- 箱 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 0: 課税 99:非課税 --></help>
+        <label><!-- 税ｽﾃｰﾀｽ --></label>
+        <name>StsTaxfee__c</name>
+    </fields>
+    <fields>
+        <label><!-- $単価(税込) --></label>
+        <name>TankaIncTaxCal__c</name>
+    </fields>
+    <fields>
+        <help><!-- 画面、レポートなど使わない、システム内部利用項目 --></help>
+        <label><!-- 単価(税抜)（システム用） --></label>
+        <name>TankawithoutTaxSys__c</name>
+    </fields>
+    <fields>
+        <help><!-- 原価¥0のとき、設定 --></help>
+        <label><!-- 原価率目標値 --></label>
+        <name>TargetCost__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>TaxRateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkAddress__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkCondition__c</name>
+    </fields>
+    <fields>
+        <label><!-- 人材仕事内容 --></label>
+        <name>WorkContent__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkContractFile__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkContractMaxTerm__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkContractMixTerm__c</name>
+    </fields>
+    <fields>
+        <help><!-- 契約可能開始日(業者用) --></help>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkContractStartDt__c</name>
+    </fields>
+    <fields>
+        <help><!-- 契約可能終了日(業者用) --></help>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkContractStartEt__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkContract__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkMinTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(廃止) --></label>
+        <name>WorkPayType__c</name>
+        <picklistValues>
+            <masterLabel>日給</masterLabel>
+            <translation><!-- 日給 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>時給</masterLabel>
+            <translation><!-- 時給 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 人材役割 --></label>
+        <name>WorkRole__c</name>
+    </fields>
+    <fields>
+        <label><!-- 人材単価単位 --></label>
+        <name>WorkUnitPriceType__c</name>
+        <picklistValues>
+            <masterLabel>一式</masterLabel>
+            <translation><!-- 一式 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>日</masterLabel>
+            <translation><!-- 日 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>月</masterLabel>
+            <translation><!-- 月 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 名称1(ｶﾅ) --></label>
+        <name>X1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称3(漢2) --></label>
+        <name>X3_2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称4(漢3) --></label>
+        <name>X4_3__c</name>
+    </fields>
+    <fields>
+        <help><!-- セットメニューに金額の内訳をセットする対象かどうかチェックを入れてください --></help>
+        <label><!-- セット --></label>
+        <name>detail13__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税マスタ --></label>
+        <name>jmstRef__c</name>
+        <relationshipLabel><!-- 会計商品 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $商品コード --></label>
+        <name>nextitemcode__c</name>
+    </fields>
+    <fields>
+        <label><!-- $粗利益率 --></label>
+        <name>proftPer__c</name>
+    </fields>
+    <validationRules>
+        <errorMessage><!-- 商品処理種別は「プラン」場合、商品コードを変更できません --></errorMessage>
+        <name>R_Field3_ChangeValidate</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- 商品処理種別は「プラン」場合、商品名、単価、リンクＤＰコード、#GP、サービス料(%)、消費税マスタ、ベースプラン、プラン(入湯税)（システム用）を変更できません --></errorMessage>
+        <name>R_Field_ChangeValidate</name>
+    </validationRules>
+    <validationRules>
+        <errorMessage><!-- 商品処理種別は「プラン」場合、店舗情報を変更できません --></errorMessage>
+        <name>R_ShopInfoRef_ChangeValidate</name>
+    </validationRules>
+    <webLinks>
+        <label><!-- AccountBarPrint --></label>
+        <name>AccountBarPrint</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- AreaSetupBtn --></label>
+        <name>AreaSetupBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- DinnerPdfPrintBtn --></label>
+        <name>DinnerPdfPrintBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- DinnerSetup --></label>
+        <name>DinnerSetup</name>
+    </webLinks>
+</CustomObjectTranslation>

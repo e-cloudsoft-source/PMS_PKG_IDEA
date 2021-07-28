@@ -1,0 +1,116 @@
+<apex:page controller="ExpoForgotpwdCtrl" showHeader="false" standardStylesheets="false" title="パスワードを忘れた" cache="false" >
+<!-- css -->
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/forgotpwd.css')}" />
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/loader.js')}"/>
+<style type="text/css">
+/* loader */
+#blockCream{
+	width:100%;
+	height:100%;
+	position: fixed;
+	background: #737373;
+}
+#loader-bg{
+	display: none;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background: #737373;
+	z-index: 1;
+}
+#loader{
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 200px;
+	height: 200px;
+	margin-top: -100px;
+	margin-left: -100px;
+	text-align: center;
+	color: #fff;
+	z-index: 2;
+	font-size: 62.5%;
+}
+#loader img{
+	width: 44px;
+	height: 44px;
+}
+#loader P{
+	text-align: center;
+	font-size: 0.8125rem;
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+}
+@media (max-width: 1100px){
+	#loader {
+		font-size: 0.75rem;
+	}
+}
+</style>
+<div id="wrap1">
+	<div id="main">
+		<div id="wrapper">
+			<div id="logo_wrapper" class="standard_logo_wrapper mb24">
+				<h1 style="height: 100%; display: table-cell; vertical-align: bottom;">
+					<apex:image url="{!URLFOR(LogoUrl)}" />
+				</h1>
+			</div>
+			<h2 id="header" class="mb12">パスワードをお忘れですか?</h2>
+			<div id="content">
+				<p class="mb16">ログインに問題がありますか?</p>
+				<div class="message">
+					<ul>
+						<li class="mb8">ユーザ名はメールアドレス形式です。</li>
+						<li class="mb8">パスワードは大文字と小文字を区別します。</li>
+						<li><a id="sandbox-login" href="{!URLFOR($Page.ExpoLogin)}">ログイン</a></li>
+					</ul>
+				</div>
+				<p class="username">パスワードをリセットするには、ユーザ名を入力してください。</p>
+				<input type="hidden" name="locale" value="jp" />
+				<div class="verifyform">
+					<label for="un" class="label">ユーザ名</label>
+					<input type="text" name="user[username]" id="username" value="" class="input wide mb12 mt8 username" tabindex="1" maxlength="255" placeholder="例：name@yourcompany.com" />
+					<apex:form id="hidChkForm">
+						<apex:inputHidden value="{!username}" id="hidUsername"/>
+						<apex:inputHidden value="{!userNotExistFlg}" id="hidUserNotExistFlg"/>
+						<div class="fieldError" id="usernameError" style="display: none;"><div class="errorContainer">入力内容と一致するユーザ名が見つかりません。ユーザ名が username@company.com などのメールアドレスであることを確認してください。</div></div>
+						<apex:actionFunction action="{!userNameCheck}" name="userNameCheckFun" rerender="hidChkForm" oncomplete="stopLoading();"/>
+						<apex:actionFunction action="{!updateData}" name="updateDataFun" rerender="hidChkForm" oncomplete="saveCompleteFun()"/>
+					</apex:form>
+					<input type="button" id="continue" class="secondary button fiftyfifty mb16" value="キャンセル" onclick="javascript:window.location.href = '{!URLFOR($Page.ExpoLogin)}'" />
+					<input type="button" id="next" class="button primary fiftyfifty right focus" value="次へ" onclick="saveCheckFun()" />
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	// 必填项Css
+	function setTextEmptyFun(wkThis){
+		var val = wkThis.val();
+		if(val == "") wkThis.addClass("textEmpty");
+		else {
+			wkThis.removeClass("textEmpty");
+			if($("input[id='username']").val() != $("input[id$=':hidUsername']").val()) $("div.fieldError").hide();
+		}
+	}
+	
+	function saveCheckFun(){
+		setTextEmptyFun($("input[id='username']"));
+		if($("input.textEmpty").length > 0 || $("div.fieldError").is(':visible')){
+			return;
+		}
+		startLoading();
+		$("input[id$=':hidUsername']").val( $("input[id='username']").val() );
+		updateDataFun();
+	}
+	function saveCompleteFun(){
+		if($("input[id$=':hidUserNotExistFlg']").val() == "true") window.location.href = '{!URLFOR($Page.ExpoConfirm)}';
+		else $("div.fieldError").show();
+		stopLoading();
+	}
+</script>
+</apex:page>

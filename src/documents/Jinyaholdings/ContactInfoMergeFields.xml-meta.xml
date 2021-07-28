@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>マージする場合、加算処理モードの項目情報を定義する</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>お客様マージ項目定義</name>
+    <public>false</public>
+</Document>

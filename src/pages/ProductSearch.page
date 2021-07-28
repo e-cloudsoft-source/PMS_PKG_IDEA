@@ -1,0 +1,451 @@
+<!-- 商品選択 -->
+<apex:page title="{!$Label.ps__msg_009_0031}" controller="ProductSearch_Ctrl" sidebar="false" showHeader="false"
+    tabStyle="AccountMaster__c" action="{!init}">
+
+<c:CommHeaderComp />
+<style>
+td.numRight{
+    text-align: right;
+}
+/* 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN */
+span.k-loading.k-complete{
+	display:none;
+}
+/* 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END */
+</style>  
+<script type="text/javascript">
+$=jQuery.noConflict();
+
+var gPointLen = JINYACONNECT.NumberPointLen;
+var gTaxPointLen = JINYACONNECT.TaxNumberPointLen;
+
+jQuery(document).ready(function($) {
+	// 自動設定を行う 
+    if ("{!isUpd}" == "true") {
+		var outId = $("input:hidden[id$=':InfoForm:id']").val();
+		var outNm = $("input:hidden[id$=':InfoForm:name']").val();
+		var outPrice = $("input:hidden[id$=':InfoForm:price']").val();
+		if ("{!isBasePriceFlg}" == "true") outPrice = $("input[id='updbaseprice']").val();
+		outPrice = commUtils.deleteRightZero(outPrice, gPointLen);
+		var outTaxRate = $("input:hidden[id$=':InfoForm:taxRate']").val();
+		outTaxRate = commUtils.deleteRightZero(outTaxRate, gTaxPointLen);
+		var outServiceTaxRate = $("input:hidden[id$=':InfoForm:serviceRate']").val();
+		var outSpecialTax = $("input:hidden[id$=':InfoForm:specialTax']").val();
+		outSpecialTax = commUtils.deleteRightZero(outSpecialTax, gPointLen);
+		var outActionType = $("input:hidden[id$=':InfoForm:actionType']").val();
+		var outPaymentType = $("input:hidden[id$=':InfoForm:paymentType']").val();
+		var outDetailPrice = $("input:hidden[id$=':InfoForm:initPrice']").val();
+		var outRoomFlag = $("input:hidden[id$=':InfoForm:hadRoomFlag']").val();
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+		// 2021/01/12 #9612 bug fix BY zyz BEGIN
+		// var gOptionInfoJson = $("input:hidden[id$='gOptionInfoJson']").val();
+		var gOptionInfoJson = $("input:hidden[id$=':InfoForm:hadgOptionInfoJson']").val();
+		// 2021/01/12 #9612 bug fix BY zyz END
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		// 2018/10/24 見積明細自動計算機能対応 WGCH BEGIN
+		// 2018/07/27 宿泊税計算 WGCH BEGIN
+		// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+		/*
+		selectItem($, outId, outNm, outPrice, outTaxRate,outServiceTaxRate,outSpecialTax,outActionType, outPaymentType,outDetailPrice,outRoomFlag
+		,null,"[]"
+		);
+		*/
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+		/*
+		selectItem($, outId, outNm, outPrice, outTaxRate,outServiceTaxRate,outSpecialTax,outActionType, outPaymentType,outDetailPrice,outRoomFlag
+		,null,"[]","[]", (accMstLstData[productIds] || '[]')
+		);
+		*/
+		// 2021/01/12 #9612 bug fix BY zyz BEGIN
+		/*
+		selectItem($, outId, outNm, outPrice, outTaxRate,outServiceTaxRate,outSpecialTax,outActionType, outPaymentType,outDetailPrice,outRoomFlag
+		,null,"[]","[]", gOptionInfoJson, (accMstLstData[productIds] || '[]')
+		);
+		*/
+		selectItem($, outId, outNm, outPrice, outTaxRate,outServiceTaxRate,outSpecialTax,outActionType, outPaymentType,outDetailPrice,outRoomFlag
+		,null,"[]","[]", gOptionInfoJson
+		);
+		// 2021/01/12 #9612 bug fix BY zyz END
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		// 2019/07/30 軽減税率機能対応 WGCH END
+		// 2018/07/27 宿泊税計算 WGCH END
+		// 2018/10/24 見積明細自動計算機能対応 WGCH END
+    }
+});
+function bindEvent() {
+	// Insert And UPDの場合、最新情報から親画面へ設定を行う
+	$("a[id$=':selectLink']").click(function() {
+		/*
+		var currRowIndex = $(this).closest("tr")[0].rowIndex - 1;
+		var outId = $("input:hidden[id$=':" + currRowIndex + ":id']").val();
+		var outNm = $("input:hidden[id$=':" + currRowIndex + ":name']").val();
+		var outPrice = $("input:hidden[id$=':" + currRowIndex + ":price']").val();
+		var outTaxRate = $("input:hidden[id$=':" + currRowIndex + ":taxRate']").val();
+		var outServiceTaxRate = $("input:hidden[id$=':" + currRowIndex + ":serviceRate']").val();
+		var outSpecialTax = $("input:hidden[id$=':" + currRowIndex + ":specialTax']").val();
+		var outActionType = $("input:hidden[id$=':" + currRowIndex + ":actionType']").val();
+		*/
+		var rooter = $(this).parent();
+		
+		var outId = rooter.find("[id='id']").val();
+		var outNm = rooter.find("[id='name']").val();
+		var outPrice = rooter.find("[id='price']").val();
+		outPrice = commUtils.deleteRightZero(outPrice, gPointLen);
+		var outTaxRate = rooter.find("[id='taxRate']").val();
+		outTaxRate = commUtils.deleteRightZero(outTaxRate, gTaxPointLen);
+		var outServiceTaxRate = rooter.find("[id='serviceRate']").val();
+		var outSpecialTax = rooter.find("[id='specialTax']").val();
+		outSpecialTax = commUtils.deleteRightZero(outSpecialTax, gPointLen);
+		var outActionType = rooter.find("[id='actionType']").val();
+		var outPaymentType = rooter.find("[id='paymentType']").val();
+		var outPlanDetailRate = rooter.find("[id='planDetailPrice']").val();
+		var outRoomFlag = rooter.find("[id='roomFlag']").val();
+		// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+		var syncInfo = rooter.find("[id='hidSyncInfo']").val();
+		// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+		// 2018/10/24 見積明細自動計算機能対応 WGCH BEGIN
+		// 2018/07/27 宿泊税計算 WGCH BEGIN
+		var pDetailId = rooter.find("[id='pDetailId']").val();
+		// 2018/07/27 宿泊税計算 WGCH END
+		// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+		var planBrkInfoMap = JSON.parse($("[id='planBrkInfoMapJson']").val());
+		var planBrkInfo = planBrkInfoMap[outId];
+		if(planBrkInfo == undefined) planBrkInfo = []; 
+		planBrkInfoJson = JSON.stringify(planBrkInfo);
+		// 2019/07/30 軽減税率機能対応 WGCH END
+		// 2018/10/24 見積明細自動計算機能対応 WGCH END
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+		var gOptionInfoJson = rooter.find("[id='gOptionInfoJson']").val();
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		selectItem($, outId, outNm, outPrice, outTaxRate,outServiceTaxRate,outSpecialTax, outActionType, outPaymentType,outPlanDetailRate,outRoomFlag
+		// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+		,syncInfo
+		// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+		// 2018/10/24 見積明細自動計算機能対応 WGCH BEGIN
+		// 2018/07/27 宿泊税計算 WGCH BEGIN
+		,pDetailId
+		// 2018/07/27 宿泊税計算 WGCH END
+		// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+		,planBrkInfoJson
+		// 2019/07/30 軽減税率機能対応 WGCH END
+		// 2018/10/24 見積明細自動計算機能対応 WGCH END
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+		,gOptionInfoJson
+		// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+		);
+	});
+	// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+	var $tabStripElement = $("#accWin").getKendoTabStrip();
+	if($tabStripElement == undefined){
+	    $("#accWin").kendoTabStrip({
+	        activate:function(e){
+	        	onselectAcc(e);
+	        },
+	    });
+	    // 第一次绑定事件
+		onselectAcc("");
+	}
+	// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+}
+// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+function onselectAcc(e){
+	if(e == ""){
+		var masStr = $("input:hidden[id$=hidaccMasterStr]").val();
+		if(masStr == "Viewed") $("div[id$=accWin-1]").html($("[id$=resultForm]"));
+		// else if(masStr == "Referenced") $("div[id$=accWin-2]").html($("[id$=resultForm]"));
+		else if(masStr == "All") $("div[id$=accWin-3]").html($("[id$=resultForm]"));
+	}else{
+      	var tabId = e.item["id"];
+      	if(tabId == "accWin_Viewed"){
+      		$("input:hidden[id$=hidaccMasterStr]").val("Viewed");
+      		accountMasterItemFun();
+      		$("div[id$=accWin-1]").html($("[id$=resultForm]"));
+      	/*}else if(tabId == "accWin_Referenced"){
+      		$("input:hidden[id$=hidaccMasterStr]").val("Referenced");
+      		accountMasterItemFun();
+      		$("div[id$=accWin-2]").html($("[id$=resultForm]"));*/
+      	}else if(tabId == "accWin_All"){
+      		$("input:hidden[id$=hidaccMasterStr]").val("All");
+      		accountMasterItemFun();
+      		$("div[id$=accWin-2]").html($("[id$=resultForm]"));
+      	}
+	}
+}
+// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+function selectItem($, idVal, nameVal, priceVal, taxVal, serviceVal, specialVal, actionType, outPaymentType,outPlanDetailRate,outRoomFlag
+// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+,syncInfo
+// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+// 2018/10/24 見積明細自動計算機能対応 WGCH BEGIN
+// 2018/07/27 宿泊税計算 WGCH BEGIN
+,pDetailId
+// 2018/07/27 宿泊税計算 WGCH END
+// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+,planBrkInfoJson
+// 2019/07/30 軽減税率機能対応 WGCH END
+// 2018/10/24 見積明細自動計算機能対応 WGCH END
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+,gOptionInfoJson
+// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+) {
+	// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+	var ua = navigator.userAgent.toLocaleLowerCase();
+	// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+    if(opener){
+        if(typeof(window.opener.document)=='unknown' || typeof(window.opener.document) == 'undefined' ){ 
+            // Opener Window Is Closed
+            top.window.close();
+        }else{
+            var taxValLabel = (　taxVal == "" ? "0%" : taxVal + "%");
+            var serviceLabel = (　serviceVal == "" ? "0%" : serviceVal + "%");
+            specialVal = (specialVal == "" ? "0" : specialVal);
+			objs = new Array(nameVal, idVal, nameVal, priceVal, 1, taxValLabel, taxVal, serviceLabel, serviceVal, specialVal,specialVal, actionType, outPaymentType,outPlanDetailRate,outRoomFlag);
+			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+			if ("accMasterView" in window) accMasterView(idVal);
+			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+			// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN
+			objs.push(syncInfo);
+			// 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END
+			// 2018/10/24 見積明細自動計算機能対応 WGCH BEGIN
+			// 2018/07/27 宿泊税計算 WGCH BEGIN
+			objs.push(pDetailId);
+			// 2018/07/27 宿泊税計算 WGCH END
+			// 2019/07/30 軽減税率機能対応 WGCH BEGIN
+			objs.push(planBrkInfoJson);
+			// 2019/07/30 軽減税率機能対応 WGCH END
+			// 2018/10/24 見積明細自動計算機能対応 WGCH END
+			// 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
+			objs.push(gOptionInfoJson);
+			// 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
+			commUtils.popupSetter(objs);
+			window.opener.focus();
+			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+			setTimeout(function(){top.window.close();},500);
+			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+        } 
+    }else{ 
+        // Opener Window Is Closed
+        top.window.close();
+    }
+}
+/*
+// 画面Lockする
+function blockUi() {
+    $.blockUI({
+        baseZ: 60000,
+        //Processing...
+        message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_009_0017}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $.unblockUI({ fadeOut: 200 }); 
+}*/
+</script>   
+
+<apex:form id="searchUserInfo" >
+ <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+<input type="hidden" value="{!planBrkInfoMapJson}" id="planBrkInfoMapJson"/>
+<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+<!-- 会計商品 -->
+<apex:pageblock title="{!$Label.ps__msg_009_0018}">
+	<apex:pageMessages />
+    <apex:pageBlockButtons location="bottom">
+        <!-- 検索  -->
+        <apex:commandButton action="{!queryInfo}" style="width:100px" value="{!$Label.ps__msg_009_0019}" id="theEditButton"/>
+        <!-- 新規 -->
+        <apex:commandButton action="{!insertInit}" style="width:100px" value="{!$Label.ps__msg_009_0020}" id="theInsButton"/>
+    </apex:pageBlockButtons>
+    <!-- 検索条件 -->
+    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_009_0021}" >
+        <apex:outputPanel id="condtionPanel" >
+        <span class="lookupInput">
+        <!--　商品名 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$Label.ps__msg_009_0022}" />
+            <apex:inputText value="{!c_productNm}" id="productName" style="width:200px"/>
+        </apex:pageblockSectionItem>
+        <!-- 2017/10/17 商品情報店舗別を検索を行う BEGIN -->
+        <!--　店舗情報 -->
+        <apex:pageblockSectionItem rendered="{!shopAccountSetupFlg && branchShopLst.size > 0}">
+            <apex:outputlabel value="{!$ObjectType.AccountMaster__c.Fields.ShopInfoRef__c.label}" style="margin-left: 10px"/>
+            <apex:selectList value="{!branchShopNm}" multiselect="false" size="1">
+				<apex:selectOption itemValue="" itemLabel="ALL"/>
+				<apex:selectOptions value="{!branchShopLst}"/>
+			</apex:selectList>
+        </apex:pageblockSectionItem>
+        <!-- 2017/10/17 商品情報店舗別を検索を行う END -->
+        <!-- カテゴリ -->
+        <apex:pageblockSectionItem >
+			<apex:outputlabel value="{!$Label.ps__msg_009_0023}" style="margin-left: 10px" />
+			<apex:selectList value="{!c_dpId}" multiselect="false" size="1">
+				<apex:selectOption itemValue="" itemLabel=""/>
+				<apex:selectOptions value="{!dpOptionLst}"/>
+			</apex:selectList>
+        </apex:pageblockSectionItem>
+        <!-- 部門 -->
+        <apex:pageblockSectionItem >
+        	<apex:outputlabel value="{!$Label.ps__msg_009_0024}" style="margin-left: 10px" />
+			<apex:selectList value="{!c_gpId}" multiselect="false" size="1">
+				<apex:selectOption itemValue="" itemLabel=""/>
+				<apex:selectOptions value="{!gpOptionLst}"/>
+			</apex:selectList>
+        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+
+    </apex:pageBlockSection>
+</apex:pageblock>
+</apex:form>
+<!-- 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<apex:form id="resultAcc" rendered="{!isSel && splitFlg}">
+<apex:inputHidden value="{!accMasterStr}" id="hidaccMasterStr" />
+<apex:actionFunction name="accountMasterItemFun" action="{!accountMasterItem}" status="JINYACONNECT_LOADINGSTATUS" reRender="userInfoList" oncomplete=""/>
+<div id="accWin" style="width: 100%;" class="divFont">
+	<ul>
+		<li id="accWin_Viewed" class="{!IF(accMasterStr == 'Viewed','k-state-active','')}">最近参照した商品</li>
+		<!--<li id="accWin_Referenced" class="{!IF(accMasterStr == 'Referenced','k-state-active','')}">最近使った商品</li>-->
+		<li id="accWin_All" class="{!IF(accMasterStr == 'All','k-state-active','')}">商品</li>
+	</ul>
+<div class="accViewed"></div>
+<!--<div class="accReferenced"></div>-->
+<div class="accAll"></div>
+</div>
+</apex:form>
+<!-- 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<apex:form id="resultForm" >
+<!-- 商品 -->
+<apex:pageblock title="{!$Label.ps__msg_009_0025}" id="userInfoList" rendered="{!isSel}">
+<script>
+$(document).ready(function($) {
+	bindEvent();
+});
+</script>
+
+	<apex:pageBlockButtons >
+		<apex:outputpanel style="float: right;" id="changePanel">
+		<!-- of -->    <!-- items -->
+          <apex:outputLabel value="{!pageCtrl.StartRsNo} - {!pageCtrl.EndRsNo} {!$Label.ps__msg_009_0029} {!pageCtrl.TotalRs} {!$Label.ps__msg_009_0030}"/>
+          <apex:commandLink action="{!firstPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 10px">
+          		<span class="k-icon k-i-seek-w"></span>
+          </apex:commandLink>
+          <apex:commandLink action="{!previousPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-w"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!nextPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-e"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!lastPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-seek-e"></span>
+          </apex:commandLink> 
+    	</apex:outputpanel>
+    </apex:pageBlockButtons>
+    
+    <apex:pageBlockTable value="{!oProductLst}" var="var" styleClass="list" width="100%" id="rstable">
+        <apex:column >
+              <apex:facet name="header"></apex:facet>
+              <apex:outputLink value="#" id="selectLink"><!-- 選択 -->{!$Label.ps__msg_009_0026}</apex:outputLink>
+
+              <input type="hidden" value="{!var.id}" id="id"/>
+              <input type="hidden" value="{!var['name']}" id="name"/>
+              <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN -->
+              <input type="hidden" value="{!IF(isBasePriceFlg,var['Field7__c'],(var['Field5__c'] + planHeaderSumMap[var['Id']]))}" id="price"/>
+              <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH END -->
+              <input type="hidden" value="{!var['TaxRateCal__c']}" id="taxRate" />
+		      <input type="hidden" value="{!var['ServiceRate__c']}" id="serviceRate"/>
+		      <input type="hidden" value="{!var['SpecialTax__c']}" id="specialTax"/>
+		      <input type="hidden" value="{!var['ActionType__c']}" id="actionType"/>
+		      <input type="hidden" value="{!var['PaymentType__c']}" id="paymentType"/>
+		      <input type="hidden" value="{!planMap[var.id].initPrice}" id="planDetailPrice"/>
+		      <input type="hidden" value="{!planMap[var.id].hadRoomflag}" id="roomFlag"/>
+		      <!-- 2018/10/24 見積明細自動計算機能対応 WGCH BEGIN -->
+		      <!-- 2018/07/27 宿泊税計算 WGCH BEGIN -->
+		      <input type="hidden" value="{!pDetailMapInfo[var.id]}" id="pDetailId"/>
+		      <!-- 2018/07/27 宿泊税計算 WGCH END -->
+		      <!-- 2018/10/24 見積明細自動計算機能対応 WGCH END -->
+        	  <!-- 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY BEGIN -->
+		      <input type="hidden" value="{!planMap[var.id].syncInfo}" id="hidSyncInfo"/>
+		      <!-- 2018/05/11 ラックレート設定の自動なしの場合故障修正 by ZY END -->
+		      <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN -->
+		      <input type="hidden" value="{!gOptionMapInfo[var.id]}" id="gOptionInfoJson"/>
+		      <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH END -->
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- カテゴリ -->{!$Label.ps__msg_009_0023}</apex:facet>
+              <apex:outputField value="{!var['Field4__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- 部門 -->{!$Label.ps__msg_009_0024}</apex:facet>
+              <apex:outputField value="{!var['GPChange__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header">{!$ObjectType.AccountMaster__c.Fields['Field3__c'].label}</apex:facet>
+              <apex:outputField value="{!var['Field3__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header">{!$ObjectType.AccountMaster__c.Fields['Name'].label}</apex:facet>
+              <apex:outputField value="{!var['Name']}" />
+        </apex:column>
+        <apex:column styleClass="numRight">
+              <apex:facet name="header">{!IF(isBasePriceFlg,$ObjectType.AccountMaster__c.Fields['Field7__c'].label,$ObjectType.AccountMaster__c.Fields['Field5__c'].label)}</apex:facet>
+             <!-- <apex:outputField value="{!var['Field5__c']}" /> -->
+             <!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN -->
+              <apex:outputText value="{0,number,{!numberFormat}}" id="priceLabel">
+				<apex:param value="{!IF(isBasePriceFlg,var['Field7__c'], (var['Field5__c'] + planHeaderSumMap[var['Id']]))}" />
+			</apex:outputText>
+			<!-- 2020/05/29 エステなど商品を追加したプラン機能 WGCH END -->
+        </apex:column>
+    </apex:pageBlockTable>
+
+</apex:pageblock>
+</apex:form>
+
+<!-- 登録画面BLOCK -->
+<apex:form id="InfoForm">
+<apex:pageblock id="accMstNewPage" rendered="{!isIns}">
+	<apex:pageMessages />
+    <apex:pageBlockButtons location="bottom">
+        <!-- 保存  -->
+        <apex:commandButton value="{!$Label.ps__msg_009_0027}" style="width:100px" action="{!insertData}" status="JINYACONNECT_LOADINGSTATUS" id="save"/>
+        <!-- キャンセル -->
+        <apex:commandButton value="{!$Label.ps__msg_009_0028}" style="width:100px" action="{!cancelAct}" status="JINYACONNECT_LOADINGSTATUS"  id="cancel" immediate="true"/>
+    </apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1" >
+		<!-- 2017/10/17 商品情報店舗別を検索を行う BEGIN -->
+		<apex:inputField value="{!newAccMst.ShopInfoRef__c}" rendered="{!shopAccountSetupFlg && branchShopLst.size > 0}"/>
+		<!-- 2017/10/17 商品情報店舗別を検索を行う END -->
+		<apex:inputField value="{!newAccMst.Name}" required="true" />
+		<!-- 2018/10/04 原価入力できる追加 WSQ -->
+		<apex:inputField value="{!newAccMst.Field7__c}" rendered="{!isBasePriceFlg}"/>
+		<apex:inputField value="{!newAccMst.Field5__c}" />
+		<apex:inputField value="{!newAccMst.jmstRef__c}" />
+		<apex:inputField value="{!newAccMst.ServiceRate__c}" />
+		<apex:inputField value="{!newAccMst.SpecialTax__c}" />
+	</apex:pageBlockSection>
+
+</apex:pageblock>
+<apex:outputPanel id="updInfo" rendered="{!isUpd}">
+     <apex:inputHidden value="{!newAccMst.Id}" id="id"/>
+     <apex:inputHidden value="{!newAccMst.Name}" id="name"/>
+     <apex:inputHidden value="{!newAccMst.Field5__c}" id="price"/> <!-- 単価(税金含め) -->
+     <input type="hidden" value="{!newAccMst.Field7__c}" id="updbaseprice"/>
+     <apex:inputHidden value="{!newAccMst.TaxRateCal__c}" id="taxRate"/>
+     <apex:inputHidden value="{!newAccMst.ServiceRate__c}" id="serviceRate"/>
+     <apex:inputHidden value="{!newAccMst.SpecialTax__c}" id="specialTax"/>
+     <apex:inputHidden value="{!newAccMst.ActionType__c}" id="actionType"/> <!-- 商品処理種別 -->
+     <apex:inputHidden value="{!newAccMst.PaymentType__c}" id="paymentType"/> <!-- 支払種別 -->
+     <apex:inputHidden value="{!planMap[newAccMst.Id].initPrice}" id="initPrice"/> <!-- 支払種別 -->
+     <apex:inputHidden value="{!planMap[newAccMst.Id].hadRoomflag}" id="hadRoomFlag"/> <!-- 支払種別 -->
+     <!-- 2021/01/12 #9612 bug fix BY zyz BEGIN -->
+     <apex:inputHidden value="{!gOptionMapInfo[newAccMst.Id]}" id="hadgOptionInfoJson"/>
+     <!-- 2021/01/12 #9612 bug fix BY zyz END -->
+</apex:outputPanel>
+</apex:form>  
+ 
+</apex:page>

@@ -1,0 +1,599 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Profit and Loss budjet</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Profit and Loss budjet</value>
+    </caseValues>
+    <fields>
+        <help><!-- 今年度の料理売上 - 前年度の料理売上 --></help>
+        <label><!-- #A07_料理_合計（実績_前年比） --></label>
+        <name>A07PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の料理売上 - 前年度の料理売上) / 前年度の料理売上 --></help>
+        <label><!-- #A07_料理_合計（実績_前年比％） --></label>
+        <name>A07PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の飲料売上 - 前年度の飲料売上 --></help>
+        <label><!-- #A16_飲料_合計（実績_前年比） --></label>
+        <name>A16PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の飲料売上 - 前年度の飲料売上) / 前年度の飲料売上 --></help>
+        <label><!-- #A16_飲料_合計（実績_前年比％） --></label>
+        <name>A16PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の室料売上 - 前年度の室料売上 --></help>
+        <label><!-- #A26_室料_合計（実績_前年比） --></label>
+        <name>A26PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の室料売上 - 前年度の室料売上) / 前年度の室料売上 --></help>
+        <label><!-- #A26_室料_合計（実績_前年比％） --></label>
+        <name>A26PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の旅館外注売上- 前年度の旅館外注売上 --></help>
+        <label><!-- #A35_旅館外注_合計（実績_前年比） --></label>
+        <name>A35PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の旅館外注売上 - 前年度の旅館外注売上) / 前年度の旅館外注売上 --></help>
+        <label><!-- #A35_旅館外注_合計（実績_前年比％） --></label>
+        <name>A35PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のブライダル外注売上 - 前年度のブライダル外注売上 --></help>
+        <label><!-- #A47_ブライダル外注_合計（実績_前年比） --></label>
+        <name>A47PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度のブライダル外注売上 - 前年度のブライダル外注売上) / 前年度のブライダル外注売上 --></help>
+        <label><!-- #A47_ブライダル外注_合計（実績_前年比％） --></label>
+        <name>A47PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のブライダル自社販売売上 - 前年度のブライダル自社販売売上 --></help>
+        <label><!-- #A55_ブライダル自社販売_合計（実績_前年比） --></label>
+        <name>A55PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度のブライダル自社販売売上 - 前年度のブライダル自社販売売上) / 前年度のブライダル自社販売売上 --></help>
+        <label><!-- #A55_ブライダル自社販売_合計（実績_前年比％） --></label>
+        <name>A55PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の売店売上 - 前年度の売店売上 --></help>
+        <label><!-- #A64_売店_合計（実績_前年比） --></label>
+        <name>A64PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の売店売上 - 前年度の売店売上) / 前年度の売店売上 --></help>
+        <label><!-- #A64_売店_合計（実績_前年比％） --></label>
+        <name>A64PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の売上合計 - 前年度の売上合計 --></help>
+        <label><!-- #A75_売上合計（実績_前年比） --></label>
+        <name>A75PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の売上合計 - 前年度の売上合計) / 前年度の売上合計 --></help>
+        <label><!-- #A75_売上合計（実績_前年比％） --></label>
+        <name>A75PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の期首棚卸合計 - 前年度の期首棚卸合計 --></help>
+        <label><!-- #B06_期首棚卸高_合計（実績_前年比） --></label>
+        <name>B06PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の期首棚卸合計 - 前年度の期首棚卸合計) / 前年度の期首棚卸合計 --></help>
+        <label><!-- #B06_期首棚卸高_合計（実績_前年比％） --></label>
+        <name>B06PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の仕入合計 - 前年度の仕入合計 --></help>
+        <label><!-- #B14_仕入高_合計（実績_前年比） --></label>
+        <name>B14PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の仕入合計 - 前年度の仕入合計) / 前年度の仕入合計 --></help>
+        <label><!-- #B14_仕入高_合計（実績_前年比％） --></label>
+        <name>B14PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の期末棚卸合計 - 前年度の期末棚卸合計 --></help>
+        <label><!-- #B20_期末棚卸高_合計（実績_前年比） --></label>
+        <name>B20PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の期末棚卸合計 - 前年度の期末棚卸合計) / 前年度の期末棚卸合計 --></help>
+        <label><!-- #B20_期末棚卸高_合計（実績_前年比％） --></label>
+        <name>B20PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の売上原価合計 - 前年度の売上原価合計 --></help>
+        <label><!-- #B28_原価_合計（実績_前年比） --></label>
+        <name>B28PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の原価合計 - 前年度の原価合計) / 前年度の原価合計 --></help>
+        <label><!-- #B28_原価_合計（実績_前年比％） --></label>
+        <name>B28PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の料理原価率 - 前年度の料理原価率 --></help>
+        <label><!-- #B29_原価率_料理（実績_前年比） --></label>
+        <name>B29PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の売店原価率 - 前年度の売店原価率 --></help>
+        <label><!-- #B32_原価率_売店（実績_前年比） --></label>
+        <name>B32PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の飲料原価率 - 前年度の飲料原価率 --></help>
+        <label><!-- #B35_原価率_飲料（実績_前年比） --></label>
+        <name>B35PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の室料原価率 - 前年度の室料原価率 --></help>
+        <label><!-- #B38_原価率_室料（実績_前年比） --></label>
+        <name>B38PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の旅館外注原価率 - 前年度の旅館外注原価率 --></help>
+        <label><!-- #B39_原価率_旅館外注（実績_前年比） --></label>
+        <name>B39PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のブライダル外注原価率 - 前年度のブライダル外注原価率 --></help>
+        <label><!-- #B40_原価率_ブライダル外注（実績_前年比） --></label>
+        <name>B40PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のブライダル自社販売原価率 - 前年度のブライダル自社販売原価率 --></help>
+        <label><!-- #B41_原価率_ブライダル自社販売（実績_前年比） --></label>
+        <name>B41PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の原価率合計 - 前年度の原価率合計 --></help>
+        <label><!-- #B42_原価率_合計（実績_前年比） --></label>
+        <name>B42PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の電気使用量[kWh] - 前年度の電気使用量[kWh] --></help>
+        <label><!-- #C01_電気 [kWh]（実績_前年比） --></label>
+        <name>C01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の電気使用量[kWh] - 前年度の電気使用量[kWh]) / 前年度の電気使用量[kWh] --></help>
+        <label><!-- #C01_電気 [kWh]（実績_前年比％） --></label>
+        <name>C01PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のプロパンガス使用量[m3] - 前年度のプロパンガス使用量[m3] --></help>
+        <label><!-- #C02_プロパンガス [m3]（実績_前年比） --></label>
+        <name>C02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度のプロパンガス使用量[m3] - 前年度のプロパンガス使用量[m3]) / 前年度のプロパンガス使用量[m3] --></help>
+        <label><!-- #C02_プロパンガス [m3]（実績_前年比％） --></label>
+        <name>C02PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の灯油使用量[L] - 前年度の灯油使用量[L] --></help>
+        <label><!-- #C03_灯油 [L]（実績_前年比） --></label>
+        <name>C03PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の灯油使用量[L] - 前年度の灯油使用量[L]) / 前年度の灯油使用量[L] --></help>
+        <label><!-- #C03_灯油 [L]（実績_前年比％） --></label>
+        <name>C03PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の水道使用量[m3] - 前年度の水道使用量[m3] --></help>
+        <label><!-- #C04_水道 [m3]（実績_前年比） --></label>
+        <name>C04PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の水道使用量[m3] - 前年度の水道使用量[m3]) / 前年度の水道使用量[m3] --></help>
+        <label><!-- #C04_水道 [m3]（実績_前年比％） --></label>
+        <name>C04PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の雇用形態別人件費合計 - 前年度の雇用形態別人件費合計 --></help>
+        <label><!-- #D15_人件費_雇用形態別_合計（実績_前年比） --></label>
+        <name>D15PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の雇用形態別人件費率 - 前年度の雇用形態別人件費率 --></help>
+        <label><!-- #D16_人件費_雇用形態別_人件費率（実績_前年比） --></label>
+        <name>D16PL_A__c</name>
+    </fields>
+    <fields>
+        <label><!-- 日付（年月[損益名]）（今年度） --></label>
+        <name>DateThis__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予算（今年度） --></label>
+        <name>EstimateThis__c</name>
+        <relationshipLabel><!-- 損益予算 (予算) --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 今年度の役員報酬 - 前年度の役員報酬 --></help>
+        <label><!-- #F01_役員報酬（実績_前年比） --></label>
+        <name>F01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の給与手当 - 前年度の給与手当 --></help>
+        <label><!-- #F02_給与手当（実績_前年比） --></label>
+        <name>F02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の雑給 - 前年度の雑給 --></help>
+        <label><!-- #F03_雑給（実績_前年比） --></label>
+        <name>F03PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の賞与引当金 - 前年度の賞与引当金 --></help>
+        <label><!-- #F04_賞与引当金（実績_前年比） --></label>
+        <name>F04PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の退職金引当金 - 前年度の退職金引当金 --></help>
+        <label><!-- #F05_退職金引当金（実績_前年比） --></label>
+        <name>F05PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の法定福利費 - 前年度の法定福利費 --></help>
+        <label><!-- #F06_法定福利費（実績_前年比） --></label>
+        <name>F06PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の福利厚生費 - 前年度の福利厚生費 --></help>
+        <label><!-- #F07_福利厚生費（実績_前年比） --></label>
+        <name>F07PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の旅費交通費 - 前年度の旅費交通費 --></help>
+        <label><!-- #F08_旅費交通費（実績_前年比） --></label>
+        <name>F08PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の通信費 - 前年度の通信費 --></help>
+        <label><!-- #F09_通信費（実績_前年比） --></label>
+        <name>F09PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の接待交際費 - 前年度の接待交際費 --></help>
+        <label><!-- #F10_接待交際費（実績_前年比） --></label>
+        <name>F10PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の減価償却費 - 前年度の減価償却費 --></help>
+        <label><!-- #F11_減価償却費（実績_前年比） --></label>
+        <name>F11PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のブライダル開業償却費 - 前年度のブライダル開業償却費 --></help>
+        <label><!-- #F12_ブライダル開業償却費（実績_前年比） --></label>
+        <name>F12PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の販売手数料（エージェント） - 前年度の販売手数料（エージェント） --></help>
+        <label><!-- #F13_販売手数料（エージェント）（実績_前年比） --></label>
+        <name>F13PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の販売手数料（カード） - 前年度の販売手数料（カード） --></help>
+        <label><!-- #F14_販売手数料（カード）（実績_前年比） --></label>
+        <name>F14PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の保険料 - 前年度の保険料 --></help>
+        <label><!-- #F15_保険料（実績_前年比） --></label>
+        <name>F15PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の修繕費 - 前年度の修繕費 --></help>
+        <label><!-- #F16_修繕費（実績_前年比） --></label>
+        <name>F16PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の消耗品費 - 前年度の消耗品費 --></help>
+        <label><!-- #F17_消耗品費（実績_前年比） --></label>
+        <name>F17PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の支払手数料 - 前年度の支払手数料 --></help>
+        <label><!-- #F18_支払手数料（実績_前年比） --></label>
+        <name>F18PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の広告宣伝費（ブライダル） - 前年度の広告宣伝費（ブライダル） --></help>
+        <label><!-- #F19_広告宣伝費（ブライダル）（実績_前年比） --></label>
+        <name>F19PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の広告宣伝費（旅館） - 前年度の広告宣伝費（旅館） --></help>
+        <label><!-- #F20_広告宣伝費（旅館）（実績_前年比） --></label>
+        <name>F20PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の販促物制作費 - 前年度の販促物制作費 --></help>
+        <label><!-- #F21_販促物制作費（実績_前年比） --></label>
+        <name>F21PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の食器購入費 - 前年度の食器購入費 --></help>
+        <label><!-- #F22_食器購入費（実績_前年比） --></label>
+        <name>F22PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の租税公課 - 前年度の租税公課 --></help>
+        <label><!-- #F23_租税公課（実績_前年比） --></label>
+        <name>F23PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の諸会費 - 前年度の諸会費 --></help>
+        <label><!-- #F24_諸会費（実績_前年比） --></label>
+        <name>F24PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の研究研修費 - 前年度の研究研修費 --></help>
+        <label><!-- #F25_研究研修費（実績_前年比） --></label>
+        <name>F25PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の家賃 - 前年度の家賃 --></help>
+        <label><!-- #F26_家賃（実績_前年比） --></label>
+        <name>F26PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の地代 - 前年度の地代 --></help>
+        <label><!-- #F27_地代（実績_前年比） --></label>
+        <name>F27PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の駐車料等 - 前年度の駐車料等 --></help>
+        <label><!-- #F28_駐車料等（実績_前年比） --></label>
+        <name>F28PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のリース料 - 前年度のリース料 --></help>
+        <label><!-- #F29_リース料（実績_前年比） --></label>
+        <name>F29PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の電力料 - 前年度の電力料 --></help>
+        <label><!-- #F30_電力料（実績_前年比） --></label>
+        <name>F30PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のガス代 - 前年度のガス代 --></help>
+        <label><!-- #F31_ガス代（実績_前年比） --></label>
+        <name>F31PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の水道料 - 前年度の水道料 --></help>
+        <label><!-- #F32_水道料（実績_前年比） --></label>
+        <name>F32PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の清掃作業費 - 前年度の清掃作業費 --></help>
+        <label><!-- #F33_清掃作業費（実績_前年比） --></label>
+        <name>F33PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の植木手入費 - 前年度の植木手入費 --></help>
+        <label><!-- #F34_植木手入費（実績_前年比） --></label>
+        <name>F34PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のクリーニング費 - 前年度のクリーニング費 --></help>
+        <label><!-- #F35_クリーニング費（実績_前年比） --></label>
+        <name>F35PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の新聞図書費 - 前年度の新聞図書費 --></help>
+        <label><!-- #F36_新聞図書費（実績_前年比） --></label>
+        <name>F36PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の寄付金 - 前年度の寄付金 --></help>
+        <label><!-- #F37_寄付金（実績_前年比） --></label>
+        <name>F37PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の会議費 - 前年度の会議費 --></help>
+        <label><!-- #F38_会議費（実績_前年比） --></label>
+        <name>F38PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の管理諸費 - 前年度の管理諸費 --></help>
+        <label><!-- #F39_管理諸費（実績_前年比） --></label>
+        <name>F39PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の権利金等償却費 - 前年度の権利金等償却費 --></help>
+        <label><!-- #F40_権利金等償却費（実績_前年比） --></label>
+        <name>F40PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の車両関係費 - 前年度の車両関係費 --></help>
+        <label><!-- #F41_車両関係費（実績_前年比） --></label>
+        <name>F41PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の燃料費 - 前年度の燃料費 --></help>
+        <label><!-- #F42_燃料費（実績_前年比） --></label>
+        <name>F42PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の振込手数料等 - 前年度の振込手数料等 --></help>
+        <label><!-- #F43_振込手数料等（実績_前年比） --></label>
+        <name>F43PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の料飲経費 - 前年度の料飲経費 --></help>
+        <label><!-- #F44_料飲経費（実績_前年比） --></label>
+        <name>F44PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の雑費 - 前年度の雑費 --></help>
+        <label><!-- #F45_雑費（実績_前年比） --></label>
+        <name>F45PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の販売管理費合計 - 前年度の販売管理費合計 --></help>
+        <label><!-- #F47_販売管理費_合計（実績_前年比） --></label>
+        <name>F47PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- (今年度の販売管理費合計 - 前年度の販売管理費合計) / 前年度の販売管理費合計 --></help>
+        <label><!-- #F47_販売管理費_合計（実績_前年比％） --></label>
+        <name>F47PL_B__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の販管費率 - 前年度の販管費率 --></help>
+        <label><!-- #G01_販管費率（実績_前年比） --></label>
+        <name>G01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の売上総利益（粗利） - 前年度の売上総利益（粗利） --></help>
+        <label><!-- #H01_売上総利益（粗利）（実績_前年比） --></label>
+        <name>H01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の粗利率 - 前年度の粗利率 --></help>
+        <label><!-- #H02_粗利率（実績_前年比） --></label>
+        <name>H02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のGOP - 前年度のGOP --></help>
+        <label><!-- #J01_営業粗利益（GOP）（実績_前年比） --></label>
+        <name>J01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度のGOP率 - 前年度のGOP率 --></help>
+        <label><!-- #J02_GOP率（実績_前年比） --></label>
+        <name>J02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の営業利益 - 前年度の営業利益 --></help>
+        <label><!-- #K01_営業利益（実績_前年比） --></label>
+        <name>K01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の営業利益率 - 前年度の営業利益率 --></help>
+        <label><!-- #K02_営業利益率（実績_前年比） --></label>
+        <name>K02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の収益 - 前年度の収益 --></help>
+        <label><!-- #L01_収益（実績_前年比） --></label>
+        <name>L01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の費用 - 前年度の費用 --></help>
+        <label><!-- #L02_費用（実績_前年比） --></label>
+        <name>L02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の損益 - 前年度の損益 --></help>
+        <label><!-- #L03_損益（実績_前年比） --></label>
+        <name>L03PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の経常利益 - 前年度の経常利益 --></help>
+        <label><!-- #M01_経常利益（実績_前年比） --></label>
+        <name>M01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の経常利益率 - 前年度の経常利益率 --></help>
+        <label><!-- #M02_経常利益率（実績_前年比） --></label>
+        <name>M02PL_A__c</name>
+    </fields>
+    <fields>
+        <label>Month</label>
+        <name>MonthThis__c</name>
+    </fields>
+    <fields>
+        <label><!-- 損益（前年度） --></label>
+        <name>PLLast__c</name>
+        <relationshipLabel><!-- 損益予算 (損益) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 損益（今年度） --></label>
+        <name>PLThis__c</name>
+        <relationshipLabel><!-- 損益予算 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 年度 --></label>
+        <name>ThisYear__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の客室部門の宿泊部門の人数 - 前年度の客室部門の宿泊部門の人数 --></help>
+        <label><!-- #V06_客室部門_宿泊部門_人数（実績_前年比） --></label>
+        <name>V06PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の客室部門の宿泊部門の売上 - 前年度の客室部門の宿泊部門の売上 --></help>
+        <label><!-- #V07_客室部門_宿泊部門_売上（実績_前年比） --></label>
+        <name>V07PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の客室部門の宿泊部門の客室稼働率 - 前年度の客室部門の宿泊部門の客室稼働率 --></help>
+        <label><!-- #V08_客室部門_宿泊部門_客室稼働率（実績_前年比） --></label>
+        <name>V08PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の客室部門の宿泊部門のADR - 前年度の客室部門の宿泊部門のADR --></help>
+        <label><!-- #V09_客室部門_宿泊部門_ADR（実績_前年比） --></label>
+        <name>V09PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の客室部門の宿泊部門のRevPER - 前年度の客室部門の宿泊部門のRevPER --></help>
+        <label><!-- #V10_客室部門_宿泊部門_RevPER（実績_前年比） --></label>
+        <name>V10PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の客室部門の客室稼働率合計 - 前年度の客室部門の客室稼働率合計 --></help>
+        <label><!-- #V12_客室部門_合計_客室稼働率（実績_前年比） --></label>
+        <name>V12PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の料飲部門の人数 - 前年度の料飲部門の人数 --></help>
+        <label><!-- #W01_料飲部門_人数（実績_前年比） --></label>
+        <name>W01PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の料飲部門の売上 - 前年度の料飲部門の売上 --></help>
+        <label><!-- #W02_料飲部門_売上（実績_前年比） --></label>
+        <name>W02PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の料飲部門の料理客単価 - 前年度の料飲部門の料理客単価 --></help>
+        <label><!-- #W03_料飲部門_料理客単価（実績_前年比） --></label>
+        <name>W03PL_A__c</name>
+    </fields>
+    <fields>
+        <help><!-- 今年度の料飲部門のドリンク客単価 - 前年度の料飲部門のドリンク客単価 --></help>
+        <label><!-- #W04_料飲部門_ドリンク客単価（実績_前年比） --></label>
+        <name>W04PL_A__c</name>
+    </fields>
+    <fields>
+        <label><!-- #W05_料飲部門_客単価（実績_前年比） --></label>
+        <name>W05PL_A__c</name>
+    </fields>
+    <nameFieldLabel>Profit and Loss budjet#</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

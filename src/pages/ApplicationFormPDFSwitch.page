@@ -1,0 +1,1 @@
+<apex:page standardcontroller="Lead__c" extensions="ApplicationFormPDFSwitch" action="{!redirect}" />

@@ -1,0 +1,4549 @@
+<!-- スタッフ -->
+<apex:page controller="StaffTaskCtrl" action="{!init}" sidebar="false" title="タスク">
+<meta name="viewport" content="width=1960;initial-scale=0.5;user-scalable=yes;"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+<c:CommHeaderComp kendo2019="true"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.stickytableheaders.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<!-- 2014/11/25 六曜計算追加 -->
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qreki.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qrekiHelp.js')}" /> <!-- 和暦LIBのサポート関数 -->
+<!-- 2015/07/10 KeyDefine追加 -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+
+<!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN -->
+<apex:stylesheet value="{!URLFOR($Resource.multiselectlib, 'css/jquery.multiselect.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.multiselectlib, 'js/jquery.multiselect.min.js')}"/>
+<!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH END -->
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/cultures/kendo.culture.ja-JP.min.js')}"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<style>
+body{
+	height:100%;
+}
+div.bodyDiv{
+	min-height:800px;
+}
+.leftPanel{
+    white-space:nowrap;
+    width:80px;
+}
+#leftBody{
+	border: 2px solid #ececec;
+	position: absolute;
+	border-right:none;
+	overflow: hidden;
+}
+#rightBody{
+	position:absolute;
+	border: 2px solid #ececec;
+	border-left: none;
+	//overflow-y: scroll;
+}
+#titleLine{
+	position: fixed;
+	border: 1px solid orange;
+	z-index:4;
+	display: none;
+	height:100%;
+}
+#timeMsg {
+	position: absolute;
+    top: 0px;
+    height:28px;
+    border: 1px solid orange;
+    white-space: nowrap;
+    background: lightblue;
+}
+.staff{
+	position: relative;
+	height:25px;
+	width:100%;
+	white-space: nowrap;
+	border-bottom: 1px solid #ececec;
+}
+div.timeline{
+	position: absolute;
+	width: 0px;
+	height:100%;
+	border:2px solid #ececec;
+	top:0px;
+	border-left: none;
+}
+div.timeline.solid{
+	border: 1px dotted #ececec; 
+}
+div.task{
+	top:1px;
+	left:1px;
+	position: absolute;
+	height:22px;
+	background: {!taskColor};
+	z-index:2;
+	overflow: hidden;
+	color: white;
+}
+#selection{
+	position:absolute;
+    z-index:3;
+    background-color: #5B9BE0;
+     opacity: .8;
+}
+#newEventWrap{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+    z-index: 3;
+    background: rgba(000,000,000,0.3);
+}
+div.bd{
+    overflow: auto;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-style: solid;
+    border-width: 0 1px;
+    border-color: #808080;
+    margin: 0 -1px;
+}
+div.ft{
+	text-align: right;
+    border-top: solid 1px #808080;
+    padding: 5px 10px;
+    font-size: 77%;
+    background-color: #f2f2f2;
+}
+#taskChgSection{
+	position:absolute;
+	z-index: 5;
+    height: 21px;
+    border: 1px solid orange;
+    display: none;
+}
+#taskChgSection div{
+	background: white;
+	width:22px;
+	height:21px;
+	opacity: 0.9;
+}
+.onSelectLine{
+	background: rgba(255,228,181,0.3);
+}
+tr.headerRow{
+	background:#f2f3f3;
+	position: relative;
+}
+th.headerRow{
+	border-bottom: 1px solid #e0e3e5 !important;
+}
+div.headtitle{
+	font-size:10px;
+	position: absolute;
+	height:100%;
+	top:0;
+	border-left:1px solid #ececec;
+	border-right:1px solid #ececec;
+	text-align: center;
+    line-height: 24px;
+}
+.rich-table-thead tr{
+	line-height:15px;
+}
+.taskTemp{
+	height:26px;
+}
+div.k-widget.k-window{
+	/* 5159 bug fix by zy BEGIN */
+	/* position: fixed;*/
+	/* 5159 bug fix by zy END */
+	z-index:10005
+}
+tr.notRoleCol >td:nth-last-child(1),tr.notRoleCol >td:nth-child(1) ,tr.notRoleCol >td:nth-child(2){
+	background:rgb(242,243,243);
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+.onDragEnter{
+	border:1px solid red;
+	border-color: red !important;
+}
+.noAssignTaskTemple{
+	background:#ececec ;
+	width:330px;
+	height:auto;
+	display:none;
+}
+/* 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN */
+.ui-state-default{
+	overflow:hidden;
+	/*width:225px;*/
+	background-image: none;
+	border-color: #c5c5c5;
+	background-color: #EEEEEE;
+	color: #2e2e2e;
+	vertical-align: middle;
+	font-weight: normal;
+	margin-left: 2px;
+	   height: 24px;
+}
+label.ui-corner-all.ui-state-hover{
+	border: 1px solid #bcb4b0;
+	background: #C7C1BD url(images/ui-bg_glass_100_fdf5ce_1x400.png) 50% 50% repeat-x;
+	font-weight: normal;
+	color: #2e2e2e;
+}
+.ui-widget {
+	font-family:'MS UI Gothic','MS PGothic','Hiragino Kaku Gothic Pro','Osaka','Arial','Helvetica',sans-serif;
+	font-size: 13px;
+}
+.ui-multiselect-checkboxes li{
+	font-size: 13px;
+}   
+.ui-state-default .ui-icon {
+	background-image: url({!URLFOR($Resource.kendoFiles, 'css/ui-lightness/images/ui-icons_222222_256x240.png')});
+}
+.ui-state-hover{
+	border: 1px solid #bcb4b0;
+	background: #C7C1BD url(images/ui-bg_glass_100_fdf5ce_1x400.png) 50% 50% repeat-x;
+	font-weight: normal;
+	color: #2e2e2e;
+}
+ul li, ol li{
+	margin-left: 0.5em;
+}
+.spanIco{
+	width: 20px;
+	display: block;
+	display: inline-block;
+}
+.spanText{
+	/*width: 200px;*/
+	display: block;
+	display: inline-block;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	text-indent: .33em;
+	/* 2020/08/30 BUG-FIX-#7467-浏览器缩放问题改善 WGCH BEGIN */
+	width: calc(100% - 20px) !important;
+	/* 2020/08/30 BUG-FIX-#7467-浏览器缩放问题改善 WGCH END */
+}
+input.k-textbox {
+	height: 24px;
+}
+.k-dropdown-wrap .k-input {
+	height: 22px;
+	padding:0px;
+	margin-top: 0px;
+}
+/* 2018/03/23 部署は複数選択できる機能対応 BY WGCH END */
+/* 2018/03/28 title直接更新機能追加　BY zy BEGIN */
+#titlePanel{
+	z-index:3;
+	display: none;
+	position: absolute;
+	background: white;
+}
+#titlePanel input{
+	color: white;
+	 /* Firefox */
+	width: -moz-calc(100% - 6px);
+	/* WebKit */
+	width: -webkit-calc(100% - 6px);
+	/* Opera */
+	width: -o-calc(100% - 6px);
+	/* Standard */
+	width: calc(100% - 6px);
+	background: {!taskColor};
+}
+.imgPosition{
+	position: absolute;
+    right: -2px;
+    top: -20px;
+}
+#translateBack{
+	position: fixed;
+	width:100%;
+	height:100%;
+	z-index:2;
+	top:0;
+	left:0;
+	display: none;
+}
+/* 2018/03/28 title直接更新機能追加　BY zy END */
+#MoreTabs_List{
+	z-index:3;
+}
+/* 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN */
+.taskScreen{
+	z-index: 10004;
+    border: none;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.6;
+    cursor: wait;
+    position: fixed;
+    display:none;
+}
+.taskContPanel{
+	z-index: 10005;
+	position: fixed;
+	left: 30%;
+	top:30%;
+	background: rgb(255,255,255);
+	display:none;
+}
+#deleteTaskPanel{
+	z-index: 10005;
+	position: fixed;
+	left: 30%;
+	top:40%;
+	background: rgb(255,255,255);
+	display:none;
+}
+.datePicker{
+	z-index:10006;
+    position: absolute;
+}
+/* 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END */
+/* 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN */
+.taskName{
+	color: white !important;
+	overflow: hidden;
+	position: absolute;
+	top:-1px;
+	/*task tips bug fix*/
+	height:20px;
+}
+.forward{
+	position: relative;
+	z-index:1;
+}
+/* 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END */
+/* 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN */
+.filtered{
+	display: none;
+}
+#selGroup{
+	float:left;
+	border: none;
+}
+#selGroup>span.k-button{
+	float:left;
+}
+#selGroup>span.k-button {
+    border-radius: 0
+}
+#selGroup .k-button:first-child{
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px
+}
+#selGroup .k-button:last-child{
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px
+}
+#selGroup .k-button:first-child:last-child{
+    border-radius: 4px
+}
+.k-button.k-state-active{
+    color: #fff;
+    background-color: #f35800;
+    border-color: #f85a00;
+    background-image: url(textures/highlight.png);
+    background-image: none,-webkit-gradient(linear,left top,left bottom,from(rgba(255,255,255,.2)),to(rgba(255,255,255,0)));
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.2) 0,rgba(255,255,255,0) 100%);
+    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.2) 0,rgba(255,255,255,0) 100%);
+    -webkit-box-shadow: none;
+    box-shadow: none
+}
+.templateInput{
+	width: 99%;
+    height: 18px;
+    position: relative;
+    top: -5px;
+}
+/* 2019/06/30 マルチタスク、キーワード検索機能 by zy END */
+/* 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN */
+.buttonSection{
+	margin:4px;
+	width: calc(100% - 8px);
+	text-align: right;
+}
+.blockUI.blockOverlay,.blockUI.blockMsg{
+	z-index:10010 !important;
+}
+#actionTaskWin{
+	display: none;
+}
+.task.lock{
+	border: 3px solid orange;
+	height: 18px;
+	font-size: .9em;
+	border-right: 1px solid orange;
+}
+td.dataCell.leftPanelItem .k-icon{
+	display:none;
+	position:absolute;
+	top:2px;
+	right:0;
+	font-size: 20px;
+	cursor: pointer;
+}
+/* 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END */
+/* 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN */
+#filterType span:nth-child(2),#filterType.onclick span:nth-child(1){
+	display: none;
+}
+#filterType.onclick span:nth-child(2){
+	display: block;
+}
+/* 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END */
+</style>
+<script>
+$j=jQuery.noConflict();
+// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+kendo.culture("ja-JP");
+// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+var minHeight,maxHeight,timeLines;
+var getTimeleft;
+var curType = '';
+var isDragging = false;
+var childWin,childWindowTimeout,curRow;
+var TASK_TYPE = {DAY:'ONEDAY-10',WEEK:'ONEWEEK',MONTH:'31DAYS',MINUTES:'ONEDAY-30'};
+ var timerInterval = 1*{!JSENCODE(TEXT($Setup.CommDefine__c.ps__TimerSecond__c))}*1000;
+// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy BEGIN
+var notReadOnlyFlg = {!notReadOnlyFlg}
+// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy END
+var mode = {
+	'ONEDAY-10':{
+		daySync:6*24,
+		maxLeft:7,
+		hadTime:true,
+		colspan:6,
+		begin:5,
+		eachTime:60*24/6*24,
+	},
+	'ONEWEEK':{
+		daySync:6,
+		maxLeft:17,
+		hadTime:true,
+		colspan:1,
+		eachTime:60*24/6,
+	},
+	'31DAYS':{
+		daySync:4,
+		maxLeft:27,
+		hadTime:true,
+		colspan:1,
+		eachTime:60*24/4,
+	},
+	'ONEDAY-30':{
+		daySync:2*24,
+		maxLeft:17,
+		hadTime:true,
+		colspan:2,
+		eachTime:60*24/(2*24),
+		begin:5,
+	},
+	initmode:function(mode){
+		delete this.type;
+		delete this.daySync;
+		delete this.maxLeft;
+		delete this.hadTime;
+		delete this.colspan;
+		delete this.begin;
+		delete this.eachTime;
+		if (mode in this) {
+			this.type = mode;
+			this.daySync = this[mode].daySync; 
+			this.maxLeft = this[mode].maxLeft; 
+			this.hadTime = this[mode].hadTime;
+			this.colspan = this[mode].colspan;
+			this.eachTime = 60*24/this.daySync;
+			if ("begin" in this[mode]) this.begin = this[mode].begin;
+		}
+	}
+}
+// 2019/05/15 タスク管理でルームインジケーターの様に前日当日翌日のボタンを設置する事は可能でしょうか。
+//  また7で表示させた際に4時間ごとの時間の区切りになりますが、1時間ごとの表示にすることは叶いませんでしょうか by zy BEGIN
+var otherSetting = "{!JSENCODE(otherSetting)}";
+if (otherSetting != "") mode = $j.extend(true,mode,JSON.parse(otherSetting));
+// 2019/05/15 タスク管理でルームインジケーターの様に前日当日翌日のボタンを設置する事は可能でしょうか。
+//  また7で表示させた際に4時間ごとの時間の区切りになりますが、1時間ごとの表示にすることは叶いませんでしょうか by zy END
+var summaryInfoDef = JSON.parse("{!JSENCODE(JsonSummaryInfo)}");
+$j(document).ready(function() {
+	// F5刷新
+	bindF5Refresh();
+	// 只绑定一次
+	bindFirstEvnet();
+	// 绑定响应
+	bindEvent();
+});
+// 只绑定一次
+function bindFirstEvnet(){
+	// 只初始化一次
+	bindTaskForward();
+	// 每次都初始化
+    bindDragType();
+    var refreshTimeRow;
+    // 页面滚动
+    $j(window).scroll(function(){
+    	$j("#taskChgSection").hide();
+    	curType = '';
+    	// 刷新当前行
+    	if (refreshTimeRow) clearTimeout(refreshTimeRow);
+    	refreshTimeRow = setTimeout(function(){
+			TaskTool.immediaRefresh($j("td.staff:onscreen"),true);
+			// 5159 bug fix by zy BEGIN
+			refrehWindowPos();
+			// 5159 bug fix by zy END
+    	},50);
+    });
+    
+    // 窗体size变更
+    $j(window).resize(function(){
+    	$j("#taskChgSection").hide();
+    	curType = '';
+    	refreshBody();
+    });
+    // 自动刷新功能
+    setInterval(refreshMessage,timerInterval);
+    // 支店情報が存在する場合「選択リストUI処理」
+	$j(".j-dropDownList").css({ fontSize: 13, height:24, padding:0}).kendoDropDownList();
+}
+// 事件绑定（每次）
+function bindEvent(){
+	//--------------------------
+    // 六曜計算(和暦計算表示制御共通関数呼び出し)
+    //--------------------------
+    if({!isShowQreqki})
+        QREKI.jinya.bindInstance($j, "qrekispan", "dtval");
+    // 可更改所有数据权限设定
+    if({!$User.StaffScheduleAllEdit__c}) {
+    	$j("tr.notRoleCol").addClass("edit");
+    }
+	// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy BEGIN
+	if (!notReadOnlyFlg) {
+		$j("#dTable>tbody>tr.user-row.edit,#dTable>tbody>tr.user-row:not('.notRoleCol')").addClass("notRoleCol").removeClass("edit");
+	}
+	// 2019/07/31 20190527.04.タイムテーブル、ルームインジケータ、マルチタスク機能編集モードと読み込み専用モード対応必要 by zy END
+    // 予約情報の自動集計
+    summaryLeadInfoXml();
+    refreshRowTitle();
+    var viewMode = $j("#hidViewMode").val();
+    mode.initmode(viewMode);
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをか県土うぃんどwた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+	// 有一部分设定需要提前在取得数据之前所以要在开始执行之前进行处理
+	setDepartCdDropDownFun();
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+    // 绘制表格
+    drawStaffDiv();
+    // 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	if (!getTaskMode()) madNoAssignTaskWin();
+	else madNoUserTaskWin();
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+    $j("#taskChgSection").hide();
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+    // 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN
+    // setDepartCdDropDownFun();
+    // 2018/03/23 部署は複数選択できる機能対応 BY WGCH END
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+    // 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN
+    initFilterPanel();
+	// 2019/06/30 マルチタスク、キーワード検索機能 by zy END
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+	var kendoWin = $j("#actionTaskWin").getKendoWindow();
+	if (kendoWin != undefined) {
+		if (kendoWin._closing != undefined && kendoWin._closing == false) {
+			kendoWin.close();
+		}
+	}
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+	// 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy BEGIN
+	initUserGroup();
+	// 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy END
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	initTempInfo();
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+}  
+// Ctrl+R 刷新页面
+function bindF5Refresh(){
+	/* Window:F5 / Ctrl+R  Mac:Command+R 対応[2015/07/10 ADD] BEGIN */
+	var $key = key.noConflict();
+	$key.filter = function(event){
+		// 全画面から画面更新可能
+		return true;
+	}
+	$key('command+r, ctrl+r, f5', function(e){ 
+		JINYACONNECT.blockUi();
+		// 刷新当前行
+		TaskTool.immediaRefresh($j("td.staff:onscreen"));
+		// 刷新head集计内容
+		refreshMessage();
+		// 滚动仍然可以重新刷新行
+		TaskTool.hadProcessed = {};
+		var curLst = [];
+		// 默认继续刷新不在屏幕内的数据
+		$j("td.staff").not(":onscreen").each(function(){
+			curLst.push($j(this).attr("staffid"));
+		});
+		TaskTool.data = curLst;
+		e.preventDefault();
+		return false;
+	});
+	/* Window:F5 / Ctrl+R  Mac:Command+R 対応[2015/07/10 ADD] END */
+}
+function refreshMessage(){
+    	//if(savingLockFlag) return;
+        var startDtStr = $j("#hidStartDate").val();
+        var endDtStr = $j("#hidEndDate").val();
+        var userIds = new Array();
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		if (getTaskMode()) {
+			var grid = grid = $j("#userGrid").getKendoGrid();
+			if (grid == undefined) {
+				$j("div.task",this).each(function(){
+					var userId = $j(this).attr("userid");
+					if (userId != undefined && userId != "") userIds.push(userId);
+				});
+			} else {
+				grid.dataSource.data().forEach(function(data){
+					if (data.value != "") userIds.push(data.value);
+				});
+			}
+		} else
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+        $j("td.staff").each(function(){
+            var userId = $j(this).attr("staffid");
+            userIds.push(userId);
+        });
+        // 既に定義する売価はプランカラ取得、画面に設定する
+        Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.StaffTaskCtrl.refreshTimeMessage}", startDtStr,endDtStr,userIds.toString(), function(result, event){
+            if(event.type == 'exception') {
+            	console.log("-------error-------");
+              //  alert(event.message);
+            } else if(result != null){
+                var updateArr = new Array();
+                // 日単位の勤怠時間合計値を設定する
+                var dtimeCol = $j("#dTable td.dailyWorkTime");
+                for (i=0;i<dtimeCol.length;i++) {
+                	var key = dtimeCol[i].getAttribute("data-time");
+                	var val = result.dayliTimeSumMap[key];
+                	if (typeof(val) == "undefined") {
+                		var isSetTextFlg = dtimeCol[i].getAttribute("data-isclose");
+                		if (isSetTextFlg == "true") $j(dtimeCol[i]).text("");
+                		else $j(dtimeCol[i]).text("0");
+                	}
+                	else  $j(dtimeCol[i]).text(val);
+                }
+                // 勤怠時間合計値
+                $j("#dTable span.allWorkDaysCount").each(function() {
+                	$j(this).text( result.allWorkDaysCount);
+                });
+            }
+        });
+        // 集計情報を更新を行う
+        summaryLeadInfoXml();
+    }
+// 适应名字长度
+function refreshRowTitle(){
+	var maxWidth = getColumnWidth($j("#dTable tbody tr").find("td:first.dataCell"));
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+	if (getTaskMode()) $j("#dTable thead tr").find("th:first").outerWidth(maxWidth - 50);
+	else 
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy end
+	$j("#dTable thead tr").find("th:first").width(maxWidth);
+	$j("#dTable thead tr").find("th:first[colspan]").each(function(){
+		$j("div",this).width($j(this).width());
+	});
+	$j("#dTable tbody tr").find("td:first").width(maxWidth);
+	$j("#dTable thead tr").find("th:last").width(maxWidth);
+	$j("#dTable tbody tr").find("td:last").width(maxWidth);
+}
+function getColumnWidth(cols){
+	var maxWidth = 0;
+	var maxTextLen = 0;
+	var maxText = '';
+	cols.each(function(){
+		// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+		if (getTaskMode()) {
+			let textLen = this.textContent.length;
+			if (maxTextLen < textLen) {
+				maxTextLen = textLen;
+				maxText = this.textContent;
+			}
+			return true;
+		}
+		// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+		var curWidth = $j(this).children().width() + 20; 
+		if (maxWidth == 0) maxWidth = curWidth; 
+		if (maxWidth < curWidth) maxWidth = curWidth;
+	});
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+	if (getTaskMode()) {
+		var maxText = JSON.stringify(maxText).replaceAll(/(?:\\[rnt])+/g, "");
+		var curDiv = $j("<div/>");
+		$j("body").append(curDiv);
+		curDiv.html('<span>' + maxText + '</span>');
+		var width = curDiv.find('span:first').width();
+		curDiv.remove();
+		return width;
+	}
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+	return maxWidth;
+}
+// 予約の集計情報を取得する
+function summaryLeadInfoXml() {
+    // 画面から表示の開始日と終了日を取得する
+    var startDate = $j("#hidStartDate").val();
+    var endDate =  $j("#hidEndDate").val();
+    // 店舗コード
+    var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+    var hidSummaryShopCd = $j("#hidSummaryShopCode").val();
+    if (hidSummaryShopCd.length > 0) branchCd = hidSummaryShopCd;
+    // 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.StaffTaskCtrl.summaryTitleInfoByXml}",branchCd, startDate,endDate, "{!JSENCODE(JsonSummaryInfo)}", function(result, event){
+        if(event.type == 'exception') {
+            alert(event.message);
+        } else {
+            $j("thead").each(function(){
+            	var totalMessage = new Object(),titleArr = new Array();	
+            	$j(this).find("._summaryCell").each(function(){
+            		var key = this.getAttribute("data-id");
+            		var title = key.split("_")[0];
+                    if(totalMessage[title + "_lead"] == undefined){
+                    	totalMessage[title + "_lead"] = 0;
+                    	totalMessage[title + "_people"] = 0;
+                    	titleArr.push(title);
+                    }
+                    //2015/10/30 予約の集計　休館
+                 if (result.result[key] != undefined) {
+                     var message = result.result[key];
+                     this.innerHTML = message;
+                     var messageArray = message.replace(")","").split("(");
+                     var perPeopleCount = messageArray[1];
+                     var perLeadCount = messageArray[0];
+                     if( parseInt(perLeadCount) == 0 && $j(this).data("status") == 'rest') return true;
+                     totalMessage[title + "_lead"] += parseInt(perLeadCount);
+                     totalMessage[title + "_people"] += parseInt(perPeopleCount);
+                        //予約数:
+                        //人数:
+                     message = "{!$Label.MSG_035_0130} " + perLeadCount + ",{!$Label.MSG_035_0131}" + perPeopleCount;
+                     this.title = message;
+                     $j(this).bind("mouseenter",function(){
+                     	// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw BEGIN
+                     	var spcd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+                     	//openTips(this,'leads',$j(this).data("leadids"));
+                     	openTips(this,'leads',$j(this).data("leadids"), spcd);
+                     	// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw END
+                     });
+                     $j(this).bind("mouseleave",function(){
+                         //closeTip();
+                     });
+                     $j(this).data("leadids",result.leadIds[key]);
+                 } else {
+                     $j(this).unbind("mouseenter");
+                     if($j(this).data("status") == 'rest') this.innerHTML="";
+                     else this.innerHTML="0(0)";
+                 }
+            	});
+             for(var i = 0 ; i < titleArr.length;i++){
+             	var title = titleArr[i];
+             	var message = totalMessage[title + "_lead"] + "(" + totalMessage[title + "_people"] + ")";
+             	// 2016/12/13 集計情報TITLE包含空格 fix BEGIN by zh 
+             	$j("span[class='" + title + "_totalSummaryInfo']").text(message);
+             	// 2016/12/13 集計情報TITLE包含空格 fix END by zh 
+             }
+             //$j("span[class*='_totalSummaryInfo']").css("position","absolute");
+            });
+        }
+    });
+    //　指定期間の集計情報を画面に反映を行う
+}
+// 制作窗体
+function madNoAssignTaskWin(){
+	// 2018/02/23 Security Check BEGIN
+	$j("#taskTemplates").empty();
+	if ($j("[id$=repeadTask] input[name=hidTask]").length == 0) {
+		var win = $j("div.noAssignTaskTemple").data("kendoWindow");
+		if (win != undefined) win.close();
+		return;
+	}
+	// 2018/02/23 Security Check END
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+	var wW = document.documentElement.clientWidth;
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+	// 2018/02/23 Security Check BEGIN
+	$j("[id$=repeadTask] input[name=hidTask]").each(function(){
+		var content = changHtmlCode(this.value);
+		$j("#taskTemplates").append($j(content));
+	});
+	// 2018/02/23 Security Check END
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	$j(".assignTaskClass").show();
+	$j(".assignUserClass").hide();
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	var win = $j("div.noAssignTaskTemple").data("kendoWindow");
+	if (win == undefined) {
+		// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy BEGIN
+		var maxHt = window.innerHeight - 200;
+		// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy END
+		// 2019/03/15 JINYABUG-1451 bug fix by zy BEGIN
+		var cssObj = {
+			// 5159 bug fix by zy BEGIN
+	       		// position:'fixed',
+			// 5159 bug fix by zy END
+				top: 120,
+	  			left: wW - 330
+		}
+		if (_isMobileOS) {
+			cssObj.left = "unset";
+			cssObj.right = 10;
+		}
+		// 2019/03/15 JINYABUG-1451 bug fix by zy END
+		$j("div.noAssignTaskTemple").show();
+		win = $j("div.noAssignTaskTemple").kendoWindow({
+	       	width: "330px",
+	       	// 2016/03/10 高さ自動調整機能対応 BEGIN
+	       	// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy BEGIN
+			maxHeight: maxHt,
+			// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy END
+	       	// 2016/03/10 高さ自動調整機能対応　END
+	           actions: ["Minimize"],//,"plus"
+	           //未割り当予約
+	           title: "タスク"
+	       // 2019/03/15 JINYABUG-1451 bug fix by zy BEGIN
+	        /*
+	       }).closest(".k-window").css({
+	       		position:'fixed',
+				top: 120,
+	  			left: wW - 330
+		   });*/
+		   // 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+			,dragend:function(){
+				this.wrapper.data("cssobj",this.wrapper.position());
+			}
+			// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+		   }).closest(".k-window").css(cssObj);
+		   // 2019/03/15 JINYABUG-1451 bug fix by zy END
+		   // 5159 bug fix by zy BEGIN
+		   $j("div.noAssignTaskTemple").getKendoWindow().wrapper.data("cssobj",cssObj);
+		   // 5159 bug fix by zy END
+		//$j("div.noAssignTaskTemple").data("kendoWindow").minimize();
+	} else {
+		win.open();
+	}
+	// 2019/03/15 JINYABUG-1451 bug fix by zy BEGIN
+	if (!_isMobileOS) { 
+		bindTemplate($j("div.taskTemp:not([bind])"));
+	}
+	// 2019/03/15 JINYABUG-1451 bug fix by zy END
+	// 2018/10/30 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN
+	var selectVal = $j("body").data("filterStr");
+	if (selectVal != undefined && selectVal != "") filterTemplates(selectVal);
+	// 2018/10/30 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END
+}
+// 未分配任务事件绑定
+function bindNoAssignTask(){
+	var noAssignTask = $j("div.noAssignTaskTemple").closest(".k-window");
+	noAssignTask.bind("mouseenter",function(){
+			$j(this).addClass("onDragEnter");
+	});
+	noAssignTask.bind("mouseleave",function(){
+			$j(this).removeClass("onDragEnter");
+	});
+}
+// 未分配任务绑定事件解除
+function unbindNoAssignTask(){
+	var noAssignTask = $j("div.noAssignTaskTemple").closest(".k-window");
+	noAssignTask.unbind("mouseenter");
+	noAssignTask.unbind("mouseleave");
+}
+// 拖拽模板绑定
+function bindTemplate(templates){
+	var dragElement;
+	templates.kendoDraggable({
+		hint:function(element,e){
+			// drag bug fix by zy BEGIN
+			dragElement = $j(element).clone().css("white-space","nowrap");
+			// drag bug fix by zy END
+			return dragElement;
+		},
+        dragstart: function(e) {
+        	curType = 'dragTemp';
+        	correctPosition(this.hint,e.pageX,e.pageY);
+        },
+        drag: function(e) {
+        	$j(".onDrop").removeClass("onDrop");
+        	if ($j(e.target).hasClass("group")) {
+        		$j(e.target).addClass("onDrop");
+			} else {
+        		var begin = dragElement.attr("begin");
+        		var lineIndex = 0;
+				// 获取当前时间轴
+				lineIndex = getTimeIndex(e.pageX).first().index();
+				var dateStemp;
+				// 调整开始时间
+        		if (begin != undefined) {
+        			var curDate = timeLines.eq(lineIndex).attr("date");
+        			lineIndex = getNearTime(curDate,begin);
+        			dateStemp = (new Date(curDate + ' ' + begin)).getTime();
+        		}
+   				showTimeLine(lineIndex,dateStemp);
+   				showCurRow(e.pageY);
+			}
+	    },
+        dragend: function(e) {
+        	$j("#titleLine").hide();
+        	var curTimeLine = timeLines.filter(".onSelectLine");
+        	if (curTimeLine.length == 0) {
+        		$j(".onSelectLine").removeClass("onSelectLine");
+        		return;
+        	}
+        	$j("#taskChgSection").hide();
+        	$j("div.task.onfocus").removeClass("onfocus");
+        	curType = "";
+        	var line = $j("td.onSelectLine");
+        	var rowIndex = line.closest("tr").index();
+			var name = dragElement.text();
+			var start = curTimeLine.index();
+			var background = dragElement.attr("background");
+			// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける） by cxw BEGIN
+			var groupName = dragElement.attr("group");
+			// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける） by cxw END
+			$j(".onSelectLine").removeClass("onSelectLine");
+			if (rowIndex < 0 ) return;
+			// 模板跟当前模式不同
+			var end = -1;
+			var orgTask = {rowId:line.attr("staffid"),name:dragElement.text(),style:'background:' + background};
+			// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける） by cxw BEGIN
+			orgTask.groupName = groupName;
+			// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける） by cxw END
+			var task = {name:name,begin:start,row:rowIndex,background:background};
+			var row = kendo.parseFloat(dragElement.attr("row"));
+			if (row > 0) {
+				var begTmLong = kendo.parseFloat((curTimeLine.attr("time")));
+				var curDt = new Date(begTmLong);
+				curDt.addMinutes(row);
+				end = getNearTime(kendo.toString(curDt,'yyyy/MM/dd'),kendo.toString(curDt,'HH:mm'));
+				orgTask.groupEndLabel = kendo.toString(curDt,'yyyy/MM/dd');
+				orgTask.endLabel = kendo.toString(curDt,'HH:mm');
+			} else {
+				end = start + 1;
+				if (timeLines.length < end ) end = timeLines.length;
+				task.end = end;
+			}
+			setTaskDate(orgTask,task,true);
+			// 指定时刻设定
+			var beginTime = dragElement.attr("begin");
+			if (beginTime != undefined) orgTask.beginLabel = beginTime;
+			var endTime = dragElement.attr("end");
+			if (endTime != undefined) orgTask.endLabel = endTime;
+			// 如果结束时刻小于开始时刻，则追加一天
+			// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+			if (endTime <= beginTime) { 
+			// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+				var endDt = new Date(orgTask.groupBeginLabel);
+				endDt.addDays(1);
+				orgTask.groupEndLabel = kendo.toString(endDt,'yyyy/MM/dd');
+			}
+			// 2019/10/15 マスタタスク、タスクテンプレートの文言を行動の任意の項目に自動で記入できるように改善対応 by zy BEGIN
+			var field = dragElement.attr("field");
+			if (field != undefined) orgTask.nameField = field;
+			// 2019/10/15 マスタタスク、タスクテンプレートの文言を行動の任意の項目に自動で記入できるように改善対応 by zy END
+			// 2019/12/30 タスクがカレンダーに表示させるか、表示させない切替対応 by zy BEGIN
+			var calendarFlg = dragElement.attr("cal");
+			if (calendarFlg == "false") orgTask.calFlg = calendarFlg == 'true';
+			// 2019/12/30 タスクがカレンダーに表示させるか、表示させない切替対応 by zy END
+			// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+			var dailyFlag = dragElement.attr("daily");
+			if (dailyFlag != undefined) {
+				var week = dragElement.attr("week");
+				showDailyPanel(orgTask,week);
+			} else {
+				// 更新task
+				ajaxUpdateEvent(orgTask);
+				dragElement.hide();
+			}
+			// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+        }
+    });
+    templates.attr("bind","mouse");
+}
+// 加载task响应
+function bindTask(tasks){
+	// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN
+	var bothFlag = $j("#hidBothUpdFlag").val() == "true";
+	// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+	tasks = tasks.not(".lock");
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+	$j(tasks).unbind("mouseenter");
+	$j(tasks).bind("mouseenter",function(){
+		//if (curType == 'down' || curType == 'dragFront' || curType == 'dragBack' || curType == 'mousedown' || curType == 'dragTemp') 
+		if (curType != '' && curType.toLocaleLowerCase().indexOf('task') < 0) return;
+		curType = 'taskIn';
+		$j("div.task.onEnter").removeClass("onEnter");
+		$j(this).addClass("onEnter");
+		var offset = $j(this).offset();
+		var curRow = $j(this).closest(".staff");
+		var taskTop = offset.top;
+		var curWd = $j(this).width();
+		// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+		$j("#taskChgSection").removeClass("canDrag");
+		if (!$j(this).hasClass("cantUpdClass")) $j("#taskChgSection").addClass("canDrag");
+		// 2020/10/31 担当者を複数設定できるように by zy END
+		showTaskSection(curWd,offset);
+		$j("#taskChgSection").attr('title',$j(this).attr("title"));
+		// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN
+		// 件名と編集機能ON
+		if (bothFlag) {
+			// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+			var taskId = $j(this).attr("id");
+			var task = exitTask.getTaskById(taskId);
+			// 編集URL
+			var url = '/' + (task.upd == true ? task.urlId : task.id) + '?isdtp=nv';
+			// 2020/10/31 担当者を複数設定できるように by zy END
+			// クリック画面設定
+			$j("#taskChgSection .taskName").attr("href",'javascript:openTask("' + url + '")');
+			// 表示位置設定
+			if (curWd < 50) $j("#taskChgSection .taskName").css("left",21);
+			else $j("#taskChgSection .taskName").css({left:-1,});
+			$j("#taskChgSection .taskName").width(curWd);
+			$j("#taskChgSection .taskName").text($j(this).text());
+		}
+		// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END
+	});
+	// 重複制御
+	$j(tasks).attr("bind","mouse");
+}
+// task双击时间绑定
+function bindTaskDbl(tasks){
+	$j(tasks).unbind("dblclick");
+	$j(tasks).bind("dblclick",function(){
+		var taskId = $j(this).attr("id");
+		var task = exitTask.getTaskById(taskId);
+		if (task == undefined) return;
+	    showEditTaskPanel(task);
+	});
+	$j(tasks).attr("bind","mouse");
+}
+// 显示task边框
+function showTaskSection(width,offset){
+	var justLeft = 0;
+	if (offset != undefined) {
+		justLeft = offset.left;
+		$j("#taskChgSection>div").show();
+		$j("#taskChgSection").show();
+	}
+	if (width < 50) {
+		var frontIcon = $j("#taskChgSection .front");
+		var backIcon = $j("#taskChgSection .back");
+		if (justLeft > frontIcon.width() ) {
+			justLeft = justLeft - frontIcon.width();
+			width += frontIcon.width();
+		// 如果在起始位置则不显示
+		} else {
+			frontIcon.hide();
+			backIcon.hide();
+		}
+		width += backIcon.width();
+	} else {
+		if ( !$j("#taskChgSection .front").is(":visible") ) $j("#taskChgSection .front").show();
+		if ( !$j("#taskChgSection .back").is(":visible") ) $j("#taskChgSection .back").show();
+	}
+	if (offset != undefined) {
+		$j("#taskChgSection").css({height:'25px;',width:width});
+		$j("#taskChgSection").offset({left:justLeft,top:offset.top});
+	} else {
+		var curLeft = $j("div.task.onfocus").offset().left;
+		$j("#taskChgSection").css({width:width});
+		$j("#taskChgSection").offset({left:curLeft});
+	}
+	// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+	if ($j("div.task.onEnter").hasClass("cantUpdClass")) $j("#taskChgSection>div").hide();
+	// 2020/10/31 担当者を複数設定できるように by zy END
+}
+// 绑定两侧移动事件
+function bindTaskForward(){
+	var task = {};
+	$j("#taskChgSection div.forward").kendoDraggable({
+		hint:function(element,e){
+			if($j(element).hasClass("front")){
+				curType = 'dragFront';
+			} else {
+				curType = 'dragBack';
+			}
+			$j("div.task.onEnter").addClass("onfocus");
+			$j("div.task.onEnter").removeClass("onEnter");
+		},
+        dragstart: function(e) {
+        	var taskDiv = $j("div.task.onfocus");
+			var curTask = exitTask.getTaskById(taskDiv.attr("id"));
+			task.id = curTask.id;
+			task.begin = curTask.begin;
+			task.end =  curTask.end
+        },
+        drag: function(e) {
+			var width = 0;
+			var beginIndex = 0;
+			if (curType == 'dragFront') {
+				var times = getTimeIndex(e.pageX);
+				beginIndex = times.first().index();
+				if (beginIndex < 0) return false;
+				// 不能超过原来的
+				if ((beginIndex + 1) > task.end) return false;
+				task.begin = beginIndex;
+				width = getWidth(beginIndex,task.end);
+			} else {
+				beginIndex = getTimeIndex(e.pageX).last().index();
+				// 不能超过原来的
+				if ((task.begin + 1) > beginIndex) return false;
+				task.end = beginIndex;
+				width = getWidth(task.begin,beginIndex);
+			}
+			// 外边框
+			showTaskSection(width);
+			// 时间轴
+		 	showTimeLine(beginIndex);
+			var left = timeLines.eq(task.begin).offset().left;
+			if (curType == 'dragFront') {
+				$j("#taskChgSection").css({left:left - 8});
+			}
+			$j("#taskChgSection").css({width:width});
+			$j("div.task.onfocus").css({width:width});
+			$j("div.task.onfocus").offset({left:left});
+	    },
+        dragend: function(e) {
+        	var curTimeLine = timeLines.filter(".onSelectLine");
+        	$j("#titleLine").hide();
+        	$j("#taskChgSection").hide();
+        	curTimeLine.removeClass("onSelectLine");
+        	$j("div.task.onfocus").removeClass("onfocus");
+        	var orgTask = exitTask.getTaskById(task.id);
+        	if (orgTask.begin == task.begin && orgTask.end == task.end) {
+        		curType = "";
+        		return false;
+        	}
+			var curTask = orgTask.org;
+			setTaskDate(orgTask.org,task,true);
+			// 不更新name
+			delete curTask.name;
+			ajaxUpdateEvent(curTask);
+        }
+    });
+    $j("#taskChgSection").unbind("mouseenter");
+    $j("#taskChgSection").bind("mouseenter",function(){
+    	if (curType == "taskIn") {
+	    	curType="onTask";
+    	}
+    });
+    $j("#taskChgSection").unbind("mouseleave");
+    $j("#taskChgSection").bind("mouseleave",function(){
+    	if (curType == 'onTask' ) {
+			curType = '';
+			$j("#taskChgSection").hide();
+		}
+    });
+}
+// remote更新task
+function ajaxUpdateEvent(task){
+	var selector = '[staffid="'+ task.rowId + '"]';
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	if ( task.orgId != undefined && task.orgId != "") selector += ',' + '[staffid="'+ task.orgId + '"]';
+	setRowField(task);
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	var taskObj = JSON.stringify(task);
+	JINYACONNECT.blockUi();
+	// 锁屏以后再解锁功能
+	curType = "";
+	// 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.StaffTaskCtrl.updateEvent}", taskObj , function(result, event){
+        if(event.type == 'exception') {
+            alert(event.message);
+            // 2018/07/02 定期のタスクエラー処理対応　JINYABUG-670 by　zy BEGIN 
+            $j("div.taskContPanel").css("z-index",10005);
+        } else {
+        	if ($j(".taskScreen").is(":visible")) {
+        		$j("div.taskContPanel").css("z-index",10005);
+        		panelHide();
+        	}
+        	// 2018/07/02 定期のタスクエラー処理対応　JINYABUG-670 by　zy END
+        }
+		// 2020/01/08 bug 5382 fixed by zy BEGIN
+		if (getTaskMode()) {
+			var curRows = $j("#dTable td.staff").filter(selector);
+			if (curRows.length == 0) curRows = $j("#dTable td.staff").filter("[staffid='']");
+			TaskTool.immediaRefresh(curRows);
+		} else
+		// 2020/01/08 bug 5382 fixed by zy END
+        // 刷新当前行
+        TaskTool.immediaRefresh($j("#dTable td.staff").filter(selector));
+    });
+}
+function removeTask(task){
+	var selector = '[staffid="'+ task.rowId + '"]';
+	var ajaReq = '';
+	if (task.id != undefined && task.id != "")
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+	ajaReq = JSON.stringify({taskid:task.id,delSameFlag:task.delSameFlag});
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+	JINYACONNECT.blockUi();
+	// 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.StaffTaskCtrl.removeTasks}", ajaReq , function(result, event){
+        if(event.type == 'exception') {
+            alert(event.message);
+        }
+        // 刷新当前行
+        TaskTool.immediaRefresh($j("#dTable td.staff").filter(selector));
+    });
+}
+// 拖拽目标在鼠标附近
+function correctPosition(that,pageX,pageY){
+	var position = that.position();
+	var difX = pageX - position.left;
+	var difY = pageY - position.top;
+	var row = that.attr("row");
+	// drag red border not show bug fixed by zy BEGIN
+	position.top += 20;
+	that.position(position);
+	// drag red border not show bug fixed by zy END
+	// 宽度设定
+	that.css({'margin-left':difX,'margin-top':difY});
+}
+// 根据横轴取得选中行
+function getRowLineIndex(pagey){
+	var curIndex = -1;
+	var scrollTop = $j(window).scrollTop();
+	// drag to diable place bug fixed by zy BEGIN
+	var begHeadTop = $j("thead:visible:first").offset().top;
+	var endHeadTop = begHeadTop + $j("thead:visible:first").height();
+	if (pagey >= begHeadTop && endHeadTop >= pagey) return curIndex;
+	// drag to diable place bug fixed by zy END
+	$j("td.staff").each(function(){
+		var rect = this.getBoundingClientRect();
+		if (rect.top + rect.height + scrollTop > pagey && rect.top + scrollTop < pagey) {
+			curIndex = $j(this).closest("tr").index();
+			return false;
+		}
+	});
+	return curIndex;
+}
+// 任务标签
+var taskDivTemplate = $j("<div class='task'/>");
+// task处理用
+// 分行、显示、查询等功能
+var exitTask = {
+	init:function(){
+		this.datasource.datas = [];
+		this.exitArr = {};
+	},
+	datasource:{
+		datas:[],
+	},
+	// 既存值，用于行数计算
+	exitArr:{},
+	// 获取当前行
+	getRow:function (row,start,end) {
+		var rowIndex = 0;
+		var exitMap = this.exitArr;
+		//查询此行是否存在数据
+		if (row in exitMap) {
+			var obj = exitMap[row];
+			rowIndex = this.checkRow(obj,[],start,end,rowIndex,true);
+		// 不存在则初始化
+		} else exitMap[row] = {};
+	    return rowIndex;
+	},
+	checkRow(map,arr,start,end,rowIndex,flag){
+		//查询此行存在数据则遍历开始至结尾数字是否有重合并返回最终数字
+		var curIndex = 0;
+		for (var i = start; i < end; i++){
+			// 存在数组
+        	if (i in map) {
+        		var array = map[i];
+        		if (flag) {
+        			arr = arr.concat(array);
+        			curIndex = checkNoAssign(array);
+        			if (rowIndex < curIndex) rowIndex = curIndex;
+        		} else if ($j.inArray(rowIndex,array) >= 0){
+        			rowIndex++;
+        			break;
+        		}
+        	}
+	    }
+	    // 循环结束未找到合适位置，再次进行循环
+	    if (($j.inArray(rowIndex,arr) >= 0)) return rowIndex = this.checkRow(map,arr,start,end,rowIndex);
+	    return rowIndex;
+	},
+	setTask:function(data){
+		var task = this.getTaskById(data.id);
+		if ( task == undefined ){
+			// 存入datasource
+			this.datasource.datas.push(data);
+		} else this.refreshTaskById(data);
+		// 押入判断列表
+		this.setExitArr(data);
+	},
+	// 刷新task值
+	refreshTaskById:function(data){
+		var idx = this.findTaskIdx(data.id);
+		this.datasource.datas[idx] = data;
+	},
+	setExitArr:function(data){
+		if (!(data.row in this.exitArr)) this.exitArr[data.row] = {};
+		var obj = this.exitArr[data.row];
+		//遍历数字区间，将取得数押入数组
+		for (var i = data.begin ; i < data.end; i++){
+    		if ( i in obj) obj[i].push(data.index);
+    		else obj[i] = [data.index];
+    		obj[i] = obj[i].sort();
+	    }
+	},
+	findTaskIdx:function(id) {
+		if(id != "") return this.datasource.datas.findIndex(function(e){return e.id == id });
+		return -1;
+	},
+	getTaskById:function(id){
+		if(id != "") return this.datasource.datas.filter(function(e){return e.id == id })[0];
+	},
+	getTasksByRow:function(row){
+		return this.datasource.datas.filter(function(e){return e.row == row });
+	},
+	getTaskLength:function(){
+		return this.datasource.datas.length;
+	},
+	// 删除过去占位
+	removeTaskById:function(id) {
+		var task = this.getTaskById(id);
+		if (task == undefined) return;
+		var chkArr = this.exitArr[task.row];
+		for (var i = task.begin; i <= task.end; i++) {
+			var curRowArr = chkArr[i];
+			var curIndex;
+			if ( curRowArr != undefined ) {
+				curIndex = $j.inArray(task.index,curRowArr);
+				if (curIndex >= 0 ) curRowArr.splice(curIndex,1);
+			}
+		}
+	},
+	// 删除整行
+	removeTaskByRow:function(rowId){
+		// 取得当前行
+		var curRow = $j("td[staffid='" + rowId + "']");
+		// 高度还原
+		curRow.find("div.task").each(function(){
+			var taskId = $j(this).attr("id");
+			exitTask.removeTaskById(taskId);
+		});
+	}
+};
+// 转换
+function changeTaskTo(staffid,time,id){
+	var task = exitTask.getTaskById(id);
+	var orgTask = task.org;
+	task.begin = time;
+	setTaskDate(orgTask,task);
+	orgTask.orgId  = task.rowId;
+	orgTask.rowId = staffid;
+	// 去掉结束时间
+	delete orgTask.endLabel;
+	delete orgTask.groupEndLabel;
+	// 更新task
+	ajaxUpdateEvent(orgTask);
+}
+// 变更后task的开始、结束位置日期转换
+function setTaskDate(orgTask,task){
+	// task结束时间被调整以外场合
+	if (curType != 'dragBack') {
+		var begTmLong = kendo.parseFloat((timeLines.eq(task.begin).attr("time")));
+		orgTask.groupBeginLabel = kendo.toString(new Date(begTmLong),'yyyy/MM/dd');
+		if (mode.hadTime) orgTask.beginLabel =  kendo.toString(new Date(begTmLong),'HH:mm');
+	}
+	if ('end' in task) {
+		// task开始时间被调整以外场合
+		if (curType != 'dragFront') {
+			var endTmLong = kendo.parseFloat((timeLines.eq(task.end).attr("time")));
+			orgTask.groupEndLabel = kendo.toString(new Date(endTmLong),'yyyy/MM/dd');
+			if (mode.hadTime) orgTask.endLabel = kendo.toString(new Date(endTmLong),'HH:mm');
+		}
+	}
+}
+// 渲染task
+function renderTask(task){
+	var row = $j("td.staff").eq(task.row);
+	task.index = exitTask.getRow(task.row,task.begin,task.end);//task.index;
+	var top = task.index * 25 + 1;
+	// 获取距离外部父级left值
+	var left = timeLines.eq(task.begin).offset().left;
+	var width = getWidth(task.begin,task.end);
+	if (width <= 0 ) return;
+	changeRowHeight(row,top);
+	// task添加
+	var cloneTask = $j("#" + task.id);
+	if (cloneTask.length == 0) {
+		cloneTask = taskDivTemplate.clone();
+		cloneTask.attr("id",task.id);
+		// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN
+		var groupName = "";
+		if("groupName" in task.org) groupName = task.org.groupName;
+		cloneTask.attr("group", groupName); 
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		if (getTaskMode()) cloneTask.attr("userid", task.userId); 
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+		// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END
+		if ("style" in task ) cloneTask.attr("style",task.style);
+	}
+	cloneTask.text(task.name);
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+	if (task.lock) {
+		cloneTask.addClass("lock");
+		width -= 3;
+	} else cloneTask.removeClass("lock");
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+	cloneTask.attr("title",createTaskMsg(task));
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+	if (task.key != undefined) cloneTask.attr("searchKey",task.key);
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+	// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+	if (task.upd) cloneTask.addClass("cantUpdClass");
+	// 2020/10/31 担当者を複数設定できるように by zy END
+	// 坐标位置
+	cloneTask = cloneTask.css({top:top,width:width});
+	row.append(cloneTask);
+	cloneTask.offset({left:left+2});
+	// 存入task对象中
+ 	exitTask.setTask(task);
+}
+// 显示当前timeline
+function showTimeLine(lineIndex,timeStmp){
+	if (lineIndex < 0) return;
+	//删除被选择line class
+   	timeLines.filter(".onSelectLine").removeClass("onSelectLine");
+	var curTimeline = timeLines.eq(lineIndex);
+	curTimeline.addClass("onSelectLine");
+	var curTimeLeft = curTimeline.offset().left;
+	curTimeLeft -= $j(window).scrollLeft();
+	var cutTimeTop = $j("div.headtitle").first().offset().top;
+	// 隐藏的时候显示出来
+	if (!$j("#titleLine").is(":visible")) $j("#titleLine").show();
+	$j("#titleLine").css({left:curTimeLeft});
+	$j("#titleLine").offset({top:cutTimeTop});
+	var curTimeStmp = curTimeline.attr("time");
+	if ( timeStmp != undefined ) curTimeStmp = timeStmp;
+	$j("#timeMsg").text(kendo.toString(new Date(kendo.parseFloat(curTimeStmp)),JINYACONNECT.DateTmFormat));
+	return curTimeline;
+}
+// 显示当前横轴
+function showCurRow(position){
+	$j("td.staff").removeClass("onSelectLine");
+	var rowIndex = getRowLineIndex(position);
+	if (rowIndex >= 0 && checkRole($j("td.staff").eq(rowIndex))) {
+		$j("td.staff").eq(rowIndex).addClass("onSelectLine");
+	}
+}
+// 高度变更
+function changeRowHeight(row,top){
+	var curHeight = row.height();
+	var orgHeight = row.attr("orgHeight");
+	if(orgHeight == undefined) orgHeight = 21;
+	var chgHeight = 15 + top + 2;
+	// 当前行宽度
+	if (orgHeight < chgHeight) {
+		row.addClass("heightChgClass");
+		row.attr("orgHeight",chgHeight);
+	}
+}
+// 绘制表格
+function drawStaffDiv(){
+	// 日付線設定
+	setTimeLine();
+	// 刷新列表
+	refreshBody();
+	// タスク取得
+	getTaskDatas();
+	// 拖拽行
+	bindRightRowDrag();
+}
+// タスク取得
+function getTaskDatas(){
+	var curLst　= [];
+	$j("td.staff").each(function(){
+		curLst.push($j(this).attr("staffid"));
+	});
+	exitTask.init();
+	TaskTool.init();
+	TaskTool.datas = curLst;
+	TaskTool.start();
+}
+
+// 日付線設定
+function setTimeLine(){
+	var columns = $j("#dTable tr:first th");
+	var rightBody = $j("#times");
+	var timeLine = "<div class='timeline' time='_time_' date='_date_'/>";
+	var rightPartCols = columns.slice(2);
+	var daySync = mode.daySync;
+	var viewMode = $j("#hidViewMode").val();
+	mode[viewMode].eachTime = 60*24/daySync;
+	var lastDate;
+	rightPartCols.each(function(){
+		var curDate = $j(this).data("date");
+		// 最后一日timeline作成
+		if (curDate == undefined) {
+			var time = timeLine.replace('_date_',kendo.toString(lastDate,'yyyy/MM/dd'));
+			var eachDate = new Date(lastDate);
+			var curDt = eachDate.addMinutes(mode.eachTime);
+			var curDiv = $j(time.replace('_time_',eachDate.getTime()));
+			rightBody.append(curDiv);
+			curDiv.addClass("lastLine");
+			return false;
+		}
+		// 每一天
+		var eachDate = new Date(curDate);
+		if ("begin" in mode) {
+			eachDate.setHours(mode.begin);
+			delete mode.begin;
+		}
+		var time = timeLine.replace('_date_',curDate);
+		var curDiv = $j(time.replace('_time_',eachDate.getTime()));
+		rightBody.append(curDiv);
+		lastDate = eachDate;
+		var titles = $j("div.headtitle[date='" + kendo.toString(eachDate,'yyyy/MM/dd') + "']");
+		for ( var i = 1 ; i < titles.length * mode.colspan; i++) {
+			lastDate = lastDate.addMinutes(mode.eachTime);
+			var curTimeStmp = lastDate.getTime();
+			var curTime = time.replace('_time_',curTimeStmp);
+			var timeDiv = $j(curTime);
+			if (mode.colspan == 1 || i%mode.colspan != 0) timeDiv.addClass("solid");
+			rightBody.append(timeDiv);
+		}
+		
+	});
+	timeLines = $j("div.timeline");
+	timeLines.height($j("#dTable tbody").height()-3);
+}
+//画面拖拽功能
+function bindRightRowDrag(){
+	$j("#dTable>tbody>tr.user-row.edit,#dTable>tbody>tr.user-row:not('.notRoleCol')").find("td.staff").bind("mousedown",function(event){
+		if (curType != undefined && curType != "" && curType != "taskIn") return;
+		if (!checkRole(this)) {
+			alert("{!JSENCODE($Label.MSG_022_0003)}");
+			unbindWindow();
+			return;
+		}
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		if (getTaskMode()) return;
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+		isDragging = true;
+    	$j("#selection").show();
+    	// 设定当前操作状态
+    	curType = 'down';
+    	// 横轴时间
+		var timeLine = getTimeIndex(event.pageX).first();
+		showTimeLine(timeLine.index());
+		// 纵轴分配人
+		var curRow = $j(this).closest("tr");
+		var rowHeight = curRow.height();
+		$j(this).addClass("onSelectLine");
+		$j("#selection").css({width:0,height:rowHeight});
+		$j("#selection").offset({left:timeLine.offset().left,top:curRow.offset().top});
+		bindWindow();
+    });
+}
+// 解除鼠标移动事件
+function unbindWindow(){
+	curType = "";
+	isDragging = false;
+	$j("#titleLine").hide();
+	$j(".onSelectLine").removeClass("onSelectLine");
+	$j(window).unbind("mousemove");
+	$j(window).unbind("mouseup");
+}
+// 绑定鼠标移动事件
+function bindWindow(){
+	var hadmoveFlag = false;
+	// 边界值设定
+	var maxLeft = timeLines.last().offset().left;
+	$j(window).mousemove(function(event) {
+		if (isDragging) {
+			// 固定不动
+			var secLeft = $j("#selection").offset().left;
+			var leftVal = event.pageX;
+			if ( leftVal < secLeft ) leftVal = secLeft;
+			else if ( leftVal > maxLeft ) leftVal = maxLeft;
+       		var sectionWidth = Math.abs( leftVal - secLeft );
+       		$j("#selection").css({width:sectionWidth});
+       		hadmoveFlag = sectionWidth > 0;
+		}
+	}).mouseup(function(event) {
+		if (!hadmoveFlag) {
+			hadmoveFlag = false;
+			unbindWindow();
+			return ;
+		}
+		hadmoveFlag = false;
+		if (curType == 'down') {
+		    var wasDragging = isDragging;
+		    $j("div.taskMessage").text('新規タスク');
+		    var start = timeLines.filter(".onSelectLine").index();
+		    var over = getTimeIndex(event.pageX).last().index();
+			var begin = $j("td.onSelectLine").closest("tr").index();
+		    if (wasDragging) {
+		    	var task = { begin:start,
+							end:over,
+							row:begin};
+		    	$j("#curTaskName").val("");
+		    	showTaskPanel(task);
+		    }
+		    unbindWindow();
+	    }
+	});
+}
+// 显示正常模式
+function showEditTaskPanel(task){
+	// 2018/03/28 title直接更新機能追加　BY zy BEGIN
+	var titleChg = {!isTitleChg};
+    if (titleChg) {
+    	showTitlePanel(task);
+    }
+    else {
+    // 2018/03/28 title直接更新機能追加　BY zy END
+		var url = '/' + task.id + '?isdtp=nv';
+		window.open(url,'title','width=800,height=700');
+	}
+}
+// 显示task
+function showTaskPanel(task){
+	var url = '/00U/e?isdtp=nv';
+	var curDiv = $j("td.staff").eq(task.row);
+	var userid = curDiv.attr("staffid");
+	if (task.id != undefined) url += '&id=' + task.id;
+	else {
+		var begTmLong = kendo.parseFloat((timeLines.eq(task.begin).attr("time")));
+		var endTmLong = kendo.parseFloat((timeLines.eq(task.end).attr("time")));
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		if (!getTaskMode() && userid != undefined && userid != ""){ 
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+			url += '&evt1=' + curDiv.attr("name");
+			url += '&evt1_lkid=' + userid.substring(0,15);
+		}
+		url += '&StartDateTime=' + kendo.toString(new Date(begTmLong),'yyyy/MM/dd');
+		url += '&StartDateTime_time=' + kendo.toString(new Date(begTmLong),'HH:mm');
+		url += '&EndDateTime=' + kendo.toString(new Date(endTmLong),'yyyy/MM/dd');
+		url += '&EndDateTime_time=' + kendo.toString(new Date(endTmLong),'HH:mm');
+		url += '&EndDateTime_time=' + kendo.toString(new Date(endTmLong),'HH:mm');
+		url += '&evt5=' + $j("#hidEventTitle").val();
+	}
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	if (J_NEW_TEMP_MAP != "") {
+		for (var i in J_NEW_TEMP_MAP) {
+			if ("rowField" in J_NEW_TEMP_MAP) {
+				url += '&'+ J_NEW_TEMP_MAP['rowField'] + '=' + userid;
+			} else 
+			url += '&'+ i + '=' + J_NEW_TEMP_MAP[i];
+		}
+	}
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	url += '&retURL={!URLFOR('/apex/StaffReturn')}';
+	childWin = window.open(url,'title','width=800,height=700');
+	curRow = task.row;
+	childWindowTimeout = setInterval(function(){
+		// 针对关闭
+		if (childWin != undefined && childWin.window == null) {
+			clearBlock();
+		}
+	},200);
+	JINYACONNECT.blockUi();
+	$j("#taskChgSection").hide();
+	$j("#selection").hide();
+}
+// 双击响应显示task
+function taskShow(el){
+	var taskId = $j("div.task.onEnter").attr("id");
+	var task = exitTask.getTaskById(taskId);
+	if (task == undefined) return;
+	// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+	if (task.upd) return;
+	// 2020/10/31 担当者を複数設定できるように by zy END
+    // showTaskPanel(task);
+    // 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN
+    var bothFlag = $j("#hidBothUpdFlag").val() == "true";
+    if (bothFlag) {
+    	showTitlePanel(task);
+	    var taskNm = $j("#taskChgSection .taskName");
+		taskNm.addClass("openEditTitle");
+    	return;
+    }
+    // 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END
+    showEditTaskPanel(task);
+}
+// task信息作成
+function createTaskMsg(task){
+	var msg = '';
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	if (getTaskMode()) msg += '{!$Label.ps__msg_035_0125} :' + task.lockname + '\n';
+	else
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	msg += '{!$ObjectType.Event.Fields.Subject.label} : ' + task.org.name + '\n';
+	msg += '{!$ObjectType.Event.Fields.StartDateTime.label} : ' + task.org.groupBeginLabel + ' ' + task.org.beginLabel + '\n';
+	msg += '{!$ObjectType.Event.Fields.EndDateTime.label} : ' + task.org.groupEndLabel + ' ' + task.org.endLabel;
+	return msg;
+}
+// 解除屏幕锁定
+function clearBlock(){
+	childWin = undefined;
+	clearInterval(childWindowTimeout);
+	TaskTool.immediaRefresh($j("td.staff").eq(curRow));
+	curRow = undefined;
+}
+// 单个任务拖拽绑定
+function bindDragType(){
+	var task;
+	var elementClone;
+	//任务拖拽事件响应
+	$j("#taskChgSection").kendoDraggable({
+    	hint: function(e) {
+    		var taskDiv = $j("div.task.onEnter");
+    		task = exitTask.getTaskById(taskDiv.attr("id"));
+    		elementClone = taskDiv.clone();
+    		elementClone.removeAttr("id");
+    		return elementClone;
+	    },
+        dragstart: function(e) {
+			// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+			var taskDiv = $j("div.task.onEnter");
+			if (!$j("#taskChgSection").hasClass("canDrag")) {
+				e.preventDefault();
+				return false;
+			}
+			// 2020/10/31 担当者を複数設定できるように by zy END
+        	curType = 'drag';
+        	correctPosition(this.hint,e.pageX,e.pageY);
+        	$j("#titleLine").show();
+        	bindNoAssignTask();
+        },
+        drag: function(e) {
+			var lineIndex = getTimeIndex(e.pageX).first().index();
+			// 最后时间段回避
+			if ($j(".onDragEnter").length > 0 ) {
+				$j("#titleLine").hide();
+				return ;
+			}
+			showTimeLine(lineIndex);
+			showCurRow(e.pageY);
+	    },
+        dragend: function(e) {
+        	if ($j("div.onDragEnter").length > 0 ) {
+        		// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+        		var taskDiv = $j("#" + task.id);
+        		var sameKey = taskDiv.attr("searchkey");
+        		if (sameKey != undefined) {
+        			$j("#deleteTaskPanel").data("task",task);
+        			showSameTaskPanel();
+        		} else {
+        			taskDiv.remove();
+        			task.delSameFlag = false;
+        			removeTask(task);
+        		}
+        		// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+        		$j("div.onDragEnter").removeClass("onDragEnter");
+        	} else {
+	        	var lineIndex = timeLines.filter(".onSelectLine").index();
+	        	if ($j("td.staff.onSelectLine").length > 0 ) {
+		        	var staffid = $j("td.staff.onSelectLine").attr("staffid");
+		        	if (staffid != undefined && lineIndex >= 0) {
+		        		$j("#" + task.id).remove();
+		        		changeTaskTo(staffid,lineIndex,task.id);
+		        	}
+	        	}
+        	}
+        	curType = '';
+        	unbindNoAssignTask();
+        	elementClone.hide();
+        	$j(".onSelectLine").removeClass("onSelectLine");
+        	$j("#titleLine").hide();
+        	$j("#taskChgSection").hide();
+        }
+    });
+}
+var refreshBodyId;
+// 刷新显示内容的layout
+function refreshBody(){
+	if (refreshBodyId) clearTimeout(refreshBodyId);
+	refreshBodyId = setTimeout(function(){
+		// 高度变更
+		$j("td.heightChgClass").each(function(){
+			var orgHeight = $j(this).attr("orgHeight");
+			$j(this).height(orgHeight);
+			$j(this).removeAttr("orgHeight");
+			$j(this).removeClass("heightChgClass");
+		});
+		// 刷新time列表
+		var columns = $j("#dTable tr:first th").slice(2);
+		refreshTimeLine(columns);
+		if (!$j("#dTable").hasClass("stickyed")) {
+			$j("#dTable").stickyTableHeaders();
+			$j("#dTable").addClass("stickyed");
+		}
+		var lastRow = $j("#dTable thead.tableFloatingHeaderOriginal tr:last").get(0).getBoundingClientRect();
+	    minHeight = lastRow.top + lastRow.height;
+		maxHeight = document.documentElement.clientHeight; // - $j("#dTable").position().top
+		// 刷新任务时间轴
+		refreshTasks();
+	},50);
+}
+//刷新时间轴
+function refreshTimeLine(columns){
+	var lastTitles = $j(".rich-table-thead tr:last td.headerRow");
+	var curTop = $j("#dTable tbody:first").offset().top;
+	columns.each(function(idx){
+		var curDate = $j(this).data("date");
+		if (curDate == undefined) return true;
+		var times = timeLines.filter("[date='" + curDate + "']").not(".lastLine");
+		var pos = $j(this).offset();
+		if (times.length > 1) {
+			var eachLeft = $j(this).outerWidth()/times.length;
+			var elementLeft;
+			times.each(function(idx){
+				if (elementLeft == undefined) elementLeft = pos.left;
+				var posLeft = elementLeft + eachLeft * idx;
+				$j(this).offset({left:posLeft,top:curTop});
+			});
+		} else {
+			var curTime = timeLines.eq(idx);
+			curTime.offset({left:pos.left,top:curTop});
+		}
+	});
+	// 最后时间轴添加
+	var lastLeft = columns.last().offset().left;
+	timeLines.filter(".lastLine").offset({left:lastLeft,top:curTop});
+	// title显示
+	var showHead,hideHead,beforeIndex = 0;
+	// 第一次处理
+	if (!$j("#dTable").hasClass("stickyed")) {
+		$j("#dTable .rich-table-thead .tbodyDiv").show();
+		showHead = $j("#dTable .rich-table-thead.tableFloatingHeader div.headtitle");
+	} else {
+		showHead = $j("#dTable .rich-table-thead.tableFloatingHeaderOriginal div.headtitle");
+		//hideHead = $j("#dTable .rich-table-thead.tableFloatingHeader div.headtitle");
+	}
+	showHead.each(function(idx){
+		var curwidth = 0;
+		var afterLeft = 0;
+		var beforeLeft = timeLines.eq(beforeIndex).offset().left;
+		var nextIndex = beforeIndex + mode.colspan;
+		if (timeLines.length > nextIndex) {
+			afterLeft = timeLines.eq(nextIndex).offset().left;
+		} 
+		//else curwidth = colWidth - (colLeft - timeLines.eq(0).offset().left);
+		if (curwidth == 0) curwidth = afterLeft - beforeLeft;
+		// 当前显示的宽度 位置设置
+		$j(this).css({width:curwidth});
+		$j(this).offset({left:beforeLeft});
+		// 隐藏的同步
+		if (hideHead != undefined) {
+			hideHead.eq(idx).css({width:curwidth});
+			hideHead.eq(idx).offset({left:beforeLeft});
+		}
+		beforeIndex = nextIndex;
+	});
+	// 时间轴高度刷新
+	timeLines.height($j("#dTable tbody").height()-3);
+}
+// 更新页面上所有task宽度和位置
+function refreshTasks() {
+	$j("div.task").each(function(){
+		var taskId = $j(this).attr("id");
+		var task = exitTask.getTaskById(taskId);
+		if (task == undefined || task.begin == undefined) return true;
+		var offsetLeft = timeLines.eq(task.begin).offset().left;
+		$j(this).offset({left:offsetLeft + 2});
+		$j(this).css({width:getWidth(task.begin,task.end)});
+	});
+}
+function getWidth(begin,end){
+	var over = Math.max(begin,end);
+	var start = Math.min(begin,end);
+	if (over >= timeLines.length ) over = timeLines.length - 1;
+	var width = timeLines.eq(over).position().left - timeLines.eq(start).position().left;
+	return width - 3;
+}
+// 查找未分配index
+function checkNoAssign(arr,index){
+	var row = 0;
+	if (index != undefined) row = index;
+	var chkFlag = false;
+	if (arr.length == 0) return row;
+	// 最快的从头检索到结尾
+	for (row; row <= arr.length ; row++) {
+		if($j.inArray(row,arr) < 0) {
+			chkFlag = true;
+			break;
+		}
+	}
+	if (!chkFlag) row++;
+	return row;
+}
+// innerclass转task
+function changeDataToTask(data){
+	var begin = getNearTime(data.groupBeginLabel,data.beginLabel);
+	var end = getNearTime(data.groupEndLabel,data.endLabel,true);
+	// 如果查询日期超过范围则不进行处理
+	if (begin == -1 && end == -1 || (begin == 0 && end == 0)) return;
+	if (begin == end) end += 1;
+	if (begin >= 0 && end == -1) {
+		var curDt = $j("th.headerRow[data-date]").last().data("date");
+		var beginGrp = timeLines.filter("[date='" + curDt + "']");
+		end = beginGrp.last().index();
+	} else if (begin == -1 && end > 0) begin = 0;
+	var row = $j("#dTable tbody>tr").has("td[staffid='" + data.rowId + "']").index();
+	// 2020/01/08 5381 bug fix by zy BEGIN
+	if (getTaskMode() && row < 0){
+		// 【その他】属于的纵轴处于staffid=’‘的位置
+		row = $j("#dTable tbody>tr").has("td[staffid='']").index();
+	}
+	// 2020/01/08 5381 bug fix by zy END
+	// change code
+	data.name = changHtmlCode(data.name);
+	var obj = {name:data.name,
+		begin:begin,
+		end:end,
+		row:row,
+		rowId:data.rowId,
+		org:data,
+		// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+		id:data.id,
+		key:data.searchKey};
+		// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+	if ("style" in data) obj.style = data.style;
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+	obj.lock = data.isLockFlg;
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	if (getTaskMode()){
+		obj.userId = data.userId;
+		if ("lockname" in data) obj.lockname = data.lockname;
+		if ("departname" in data) obj.departname = data.departname;
+		delete data.lockname;
+		delete data.departname;
+	}
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+	if (data.cantupd) {
+		obj.id += '_' + data.rowId;
+		obj.urlId = data.id;
+		obj.upd = data.cantupd;
+	}
+	// 2020/10/31 担当者を複数設定できるように by zy END
+	return obj;
+}
+// 获取最近的时间
+function getNearTime(date,time,endFlag){
+	var index = -1;
+	var dateStemp = (new Date(date + ' ' + time)).getTime();
+	// 包含情况下
+	if (dateStemp < timeLines.first().attr("time")) return 0;
+	if (dateStemp > timeLines.last().attr("time")) return timeLines.last().index();
+	// 有对应时刻直接设定
+	var justTime = timeLines.filter("[time=" + dateStemp + "]");
+	if (justTime.length > 0) index = justTime.index();
+	else {
+		// 检索起始位置
+		var beginIndex = timeLines.filter("[date='" + date + "']").first().index();
+		// 当前mode下跨度
+		var eachTimeStmp = mode.eachTime*60*1000;
+		// 查找匹配时间
+		timeLines.slice(beginIndex).each(function(){
+			var timeStmp = $j(this).attr("time");
+			// 当前时间，找起点:目标时刻-现在时刻,找终点:现在时刻-目标时刻
+			var difTime = endFlag ? (timeStmp - dateStemp) : (dateStemp - timeStmp);
+			if (difTime > 0 && difTime < eachTimeStmp) {
+				index = $j(this).index();
+				return false;
+			}
+		});
+	}
+	return index
+}
+// task工具
+var TaskTool = {
+	processed:false,
+	// 一次处理数
+	proLen:5,
+	// 发送数据（顺序）
+	datas:[],
+	hadProcessed:{},
+	init:function(){
+		if ( this.timeoutId ) clearTimeout(this.timeoutId);
+		this.processed = false;
+		this.datas = [];
+		this.hadProcessed = {};
+	},
+	// 取得开始
+	start:function(rows,unlockFlag){
+		var curLst = [];
+		if (rows != undefined) {
+			curLst = rows;
+		// 第二次处理
+		} else if ( this.processed ) {
+			$j("td.staff:onscreen").each(function(){
+				curLst.push($j(this).attr("staffid"));
+				this.hadProcessed[staffid] = '';
+			});
+		// 第一次处理
+		} else if (this.datas.length > 0){
+			curLst = this.datas.slice(0,this.proLen);
+			for (var i = 0 ; i < curLst.length; i++) {
+				var staffid = curLst[i];
+				$j("td.staff[staffid='" + staffid + "']").addClass("processed");
+				this.hadProcessed[staffid] = '';
+			}
+		}
+		// 根据行取得task
+		if (curLst.length > 0) this.getTasks(curLst,unlockFlag);
+	},
+	// 根据行取得task
+	getTasks:function(curLst,unlockFlag){
+		var beg = $j("#hidStartDate").val();
+		var end = $j("#hidEndDate").val();
+		var obj = this.getReq(curLst,beg,end);
+		// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN
+		var filterStr = $j("body").data("filterStr");
+		if (filterStr == undefined) filterStr = "";
+		var spcd = getShopCode();
+		obj.filterTips = filterStr;
+		obj.spcd = spcd;
+		// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		obj.taskid = getUserGroupId();
+		if (getTaskMode()){
+			obj.eventIds = getDepartCode();
+		}
+		setRowField(obj);
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+		var req = JSON.stringify(obj);
+		Visualforce.remoting.Manager.invokeAction(
+	    	this.refreshUrl,req, function(result, event){
+	    	if ( result != undefined ) {
+	    		setTasks(result,curLst);
+	    		if ( !TaskTool.processed) TaskTool.deleteData();
+	    		else if ( !TaskTool.processed && TaskTool.datas.length == 0 ) TaskTool.processed = true;
+	    	}
+	    	if (unlockFlag) JINYACONNECT.unblockUi();
+	    	// 没数据的是一分钟
+	    	var refrehsTime = timerInterval;
+	    	// 有数据的时候1秒
+	    	if ( TaskTool.datas.length > 0 ) refrehsTime = 200;
+	    	TaskTool.timeoutId = setTimeout(function(){TaskTool.start();},refrehsTime);
+	    });
+	},
+	immediaRefresh(rows,firstFlag){
+		if ( TaskTool.timeoutId != undefined ) clearTimeout(TaskTool.timeoutId);
+		var curLst = [];
+		rows.each(function(){
+			var staffid = $j(this).attr("staffid");
+			// 滚动的时候不把已经取得的数据再取得一遍
+			if (firstFlag) { 
+				if ( TaskTool.hadProcessed != undefined && (staffid in TaskTool.hadProcessed)) return true;
+				else TaskTool.hadProcessed[staffid] = '';
+			}
+			// 删除当前行
+			exitTask.removeTaskByRow(staffid);
+			curLst.push(staffid);
+		});
+		this.start(curLst,true);
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		if (!getTaskMode()) refreshOpts();
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	},
+	deleteData:function(len){
+		var curLen = this.proLen;
+		if (len != undefined) curLen = len;
+		this.datas.splice(0,curLen);
+	},
+	refreshUrl:"{!$RemoteAction.StaffTaskCtrl.getTasks}",
+	getReq:function(arr,beg,end){
+		return {userLst:arr,begDate:beg,endDate:end};
+	}
+}
+// data转换成数据
+function setTasks(taskArr,curLst){
+	var rows = {};
+	var taskLst = [];
+	var taskSet = {};
+	if (curLst.length > 0) {
+		for (var i = 0 ; i < curLst.length ; i++) {
+			var curRowId = curLst[i];
+			$j("[staffid='" + curRowId + "'] div.task").each(function(){
+ 				var taskId = $j(this).attr("id");
+ 				if (taskId in taskSet) return true;
+ 				taskSet[taskId] = '';
+ 				taskLst.push(taskId);
+ 			});
+		}
+	}
+	// 2020/10/31 担当者を複数設定できるように by zy BEGIN
+	var newArr = [];
+	taskArr.forEach(function(task){
+		newArr.push(task);
+		if (task.userids && task.userids != "") {
+			var arr = task.userids.split(',');
+			if (arr.length > 0) {
+				arr.forEach(function(userid){
+					var cloneTask = $j.extend({},task);
+					cloneTask.rowId = userid;
+					cloneTask.cantupd = true;
+					newArr.push(cloneTask);
+				});
+			}
+		}
+	});
+	taskArr = newArr;
+	// 2020/10/31 担当者を複数設定できるように by zy END
+	// 按行去掉设定
+	for (var i = 0 ; i < taskArr.length ; i++) {
+ 		var task = changeDataToTask(taskArr[i]);
+ 		if (task == undefined) continue;
+ 		if (!(task.rowId in rows)) {
+ 			rows[task.rowId] = [];
+ 			exitTask.exitArr[task.row] = {};
+ 		}
+ 		rows[task.rowId].push(task);
+ 	}
+ 	// 更新每行task
+ 	for (var rowId in rows) {
+ 		if (typeof rowId == "string") {
+ 			var tasks = rows[rowId];
+ 			if (tasks != undefined && tasks.length > 0) {
+	 			for (var i = 0 ; i < tasks.length ; i++) {
+	 				var task = tasks[i];
+	 				// 显示task
+ 					renderTask(task);
+ 					if (taskLst.length > 0) {
+ 						var idx = $j.inArray(task.id,taskLst);
+ 						if (idx >= 0) taskLst.splice(idx,1);
+ 					}
+	 			}
+ 			}
+ 		}
+ 	}
+ 	if (taskLst.length > 0) {
+ 		for(var i = 0 ; i < taskLst.length ; i++) {
+ 			var taskId = taskLst[i];
+ 			var removeTask = $j("#" + taskId);
+ 			if (removeTask.length > 0) {
+ 				removeTask.remove();
+ 			}
+ 		}
+ 	}
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+	if ($j(".filterBtn").length > 0) {
+		var rowArr = [];
+		curLst.forEach(function(rowId){
+			rowArr.push('[staffid="' + rowId + '"]');
+		}); 
+		if (rowArr.length > 0) {
+			var rows = $j("tr.user-row").has(rowArr.join(','));
+			reFilter(rows); 
+		} 
+	}
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+ 	// 更新timeline高度
+	refreshBody();
+ 	// 绑定task事件
+ 	bindTask($j("#dTable>tbody>tr.user-row.edit,#dTable>tbody>tr.user-row:not('.notRoleCol')").find("div.task:not([bind])"));
+ 	// 2018/04/09 ロール設定機能追加　by ZY BEGIN
+ 	//bindTaskDbl($j("#dTable tbody tr.user-row div.task:not([bind]"));
+ 	// 2018/04/09 ロール設定機能追加　by ZY END
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+ 	bindLockTask();
+ 	refreshActionDs(curLst);
+	// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+}
+function getTimeIndex(pageX){
+	getTimeleft = pageX;
+	var times = $j("div.timeline:gettimeindex");
+	return times;
+}
+function checkRole(el){
+	var curRow = $j(el).closest("tr");
+	if (curRow.hasClass("notRoleCol") && !curRow.hasClass("edit")) return false;
+	return true;
+}
+// 窗口内的行
+jQuery.expr.filters.onscreen = function(el) {
+  var rect = el.getBoundingClientRect();
+  // return (rect.top + rect.height) > minHeight && (rect.top + rect.height) < maxHeight;
+  return (rect.top + rect.height) > minHeight && (rect.top + rect.height) < maxHeight 
+  			|| maxHeight > rect.top && (rect.top + rect.height) > maxHeight;
+};
+// 根据index查到
+jQuery.expr.filters.gettimeindex = function(el) {
+  var rect = el.getBoundingClientRect();
+  var difLeft = 0;
+  difLeft = Math.abs(rect.x + window.scrollX - getTimeleft);
+  if (mode.maxLeft >= Math.floor(difLeft)) {
+  	return true;
+  }
+  return false;
+};
+function changHtmlCode(text){
+	var content = $j("<div/>").html(text).get(0).textContent;
+	return content;
+}
+// 2018/04/04 部署は複数選択できるIpad优化 BY WGCH BEGIN
+var _isMobileOS = kendo.support.mobileOS;
+function setSelectValFun(){
+	if(!_isMobileOS) return;
+	var _multiDepartCds = $j("input[id$=':multiDepartCds']");
+	var _departCd = $j("select[id$=':departCd']");
+	var orgValArr = _multiDepartCds.val().split(",");
+	var selectValArr = _departCd.val();
+	// 当前选择的ValArr里去掉old数据
+	orgValArr.forEach(function(e){
+		if(e == "") $j("option[value='']", _departCd).removeAttr("selected");
+		selectValArr.remove(e);
+	});
+	// 选中和old相同的情况
+	if(selectValArr.length == 0){
+		_departCd.val(orgValArr);
+		return;
+	}
+	// 当前选择的ValArr里还有All的情况
+	else if(selectValArr.indexOf("") != -1) $j("option[value!='']", _departCd).removeAttr("selected");
+	// 自动All
+	else if(_departCd.val().length == $j("option[value!='']", _departCd).length){
+		$j("option[value='']", _departCd).attr("selected","selected");
+		$j("option[value!='']", _departCd).removeAttr("selected");
+	}
+	// 赋值
+	_multiDepartCds.val(_departCd.val().toString());
+	// 选择有变更的时候再刷新
+	if(orgValArr.toString() != _multiDepartCds.val()) refreshNewInfo();
+}
+// 2018/04/04 部署は複数選択できるIpad优化 BY WGCH END
+// 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN
+function setDepartCdDropDownFun(){
+	// 2018/04/04 部署は複数選択できるIpad优化 BY WGCH BEGIN
+	if(_isMobileOS) return;
+	// 2018/04/04 部署は複数選択できるIpad优化 BY WGCH END
+	var departCdDropDown = $j("select[id$=':departCd']").css({ fontSize: 13, height:24, padding:0}).multiselect({ 
+		selectedList: 4,
+		header: false,
+		click: function(event, ui){
+			$this= $j(this);
+			$thisLable= event.currentTarget.parentElement;
+			$allLable= $j("select[id$=':departCd']").multiselect("widget").find("ul.ui-multiselect-checkboxes li");
+			if(ui.checked) $j($thisLable).addClass("k-state-selected").className= "ui-corner-all ui-state-hover k-state-selected";
+			else $thisLable.className= "ui-corner-all ui-state-hover";
+			// All Selected
+			if (ui.value == "") {
+				$this.multiselect("uncheckAll");
+				$this.val("");
+				$this.multiselect("widget").find("input")[0].checked= true;
+				if($allLable.children("label").hasClass("k-state-selected")) $allLable.children("label").removeClass("k-state-selected"); 
+				$allLable.children("label:first").addClass("k-state-selected");
+				$this.multiselect("close");
+			} else {
+				var length = $this.multiselect("widget").find("input:checked").length;
+				if (length == 0) {
+					$this.multiselect("widget").find("input")[0].checked= true;
+					$allLable.children("label:first").addClass("k-state-selected");
+				} else {
+					$this.multiselect("widget").find("input")[0].checked= false;
+					if($allLable.children("label:first").hasClass("k-state-selected")) $allLable.children("label:first").removeClass("k-state-selected");
+				}
+			}	
+		},
+		beforeopen: function(){
+			$departCdSelectIdWidget = $j("select[id$=':departCd']").multiselect("widget")
+			$allChecked= $departCdSelectIdWidget.find("input")[0].checked;
+			$allLable= $departCdSelectIdWidget.children("ul").children("li").children("label:first");
+			if($allChecked) $allLable.addClass("k-state-selected");
+			else if(!$allChecked && $allLable.hasClass("k-state-selected")) $allLable.removeClass("k-state-selected");
+		},
+		open: function(){
+			$this = $j(this);
+			var orgVal = getDepartCdNameVals($this);
+			$this.attr("orgVal", orgVal);
+		},
+		close: function(){
+			$this = $j(this);
+			var orgVal = $this.attr("orgVal");
+			var selectVal = getDepartCdNameVals($this);
+			if (orgVal != selectVal) {
+				$j("input[id$=':multiDepartCds']").val(selectVal);
+				refreshNewInfo();
+			//  2017/02/13 页面自动刷新功能 by wx begin	
+			}else{
+				//startRunning();
+			//  2017/02/13 页面自动刷新功能 by wx end	
+			}
+		},
+	});
+	$departCdDropDown=$j(departCdDropDown);
+	$departCdDropDown.multiselect("widget").css("width","auto");
+	var departCdDropDownWidth = $departCdDropDown.multiselect("widget").width() + 26;
+	$departCdDropDown.multiselect({minWidth:departCdDropDownWidth});
+	$j("button.ui-multiselect span").eq(0).addClass("spanIco");
+	$j("button.ui-multiselect span").eq(1).addClass("spanText").css("width",departCdDropDownWidth - 26);
+	// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN
+	var departCdDropDown = $j("select[id$=':proejctSel']").css({ fontSize: 13, height:24, padding:0}).multiselect({ 
+		selectedList: 4,
+		header: false,
+		click: function(event, ui){
+			$this= $j(this);
+			$thisLable= event.currentTarget.parentElement;
+			$allLable= $j("select[id$=':proejctSel']").multiselect("widget").find("ul.ui-multiselect-checkboxes li");
+			if(ui.checked) $j($thisLable).addClass("k-state-selected").className= "ui-corner-all ui-state-hover k-state-selected";
+			else $thisLable.className= "ui-corner-all ui-state-hover";
+			// All Selected
+			if (ui.value == "") {
+				$this.multiselect("uncheckAll");
+				$this.val("");
+				$this.multiselect("widget").find("input")[0].checked= true;
+				if($allLable.children("label").hasClass("k-state-selected")) $allLable.children("label").removeClass("k-state-selected"); 
+				$allLable.children("label:first").addClass("k-state-selected");
+				$this.multiselect("close");
+			} else {
+				var length = $this.multiselect("widget").find("input:checked").length;
+				if (length == 0) {
+					$this.multiselect("widget").find("input")[0].checked= true;
+					$allLable.children("label:first").addClass("k-state-selected");
+				} else {
+					$this.multiselect("widget").find("input")[0].checked= false;
+					if($allLable.children("label:first").hasClass("k-state-selected")) $allLable.children("label:first").removeClass("k-state-selected");
+				}
+			}	
+		},
+		beforeopen: function(){
+			$departCdSelectIdWidget = $j("select[id$=':proejctSel']").multiselect("widget")
+			$allChecked= $departCdSelectIdWidget.find("input")[0].checked;
+			$allLable= $departCdSelectIdWidget.children("ul").children("li").children("label:first");
+			if($allChecked) $allLable.addClass("k-state-selected");
+			else if(!$allChecked && $allLable.hasClass("k-state-selected")) $allLable.removeClass("k-state-selected");
+		},
+		open: function(){
+			$this = $j(this);
+			var orgVal = getDepartCdNameVals($this);
+			$this.attr("orgVal", orgVal);
+		},
+		close: function(){
+			$this = $j(this);
+			var orgVal = $this.attr("orgVal");
+			var selectVal = getDepartCdNameVals($this);
+			if (orgVal != selectVal) {
+				$j("body").data("filterStr", selectVal);
+				// 2019/12/30 5288 bug fix by zy BEGIN
+				$j("input[id$=hidFilterTips]").val(selectVal);
+				// 2019/12/30 5288 bug fix by zy END
+				// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN
+				filterTemplates(selectVal);
+				filterItem();
+				// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END
+				// 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN
+				// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+				// 画面フィルタークリア
+				// removeAllClear();
+				// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+				// 2019/06/30 マルチタスク、キーワード検索機能 by zy END
+			}
+		},
+	});
+	$departCdDropDown=$j(departCdDropDown);
+	$departCdDropDown.multiselect("widget").css("width","auto");
+	var departCdDropDownWidth = $departCdDropDown.multiselect("widget").width() + 26;
+	$departCdDropDown.multiselect({minWidth:departCdDropDownWidth});
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+	initMulitSel($departCdDropDown,$j("input[id$=hidFilterTips]").val());
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+	$j("span",$departCdDropDown.next()).eq(0).addClass("spanIco");
+	$j("span",$departCdDropDown.next()).eq(1).addClass("spanText").css("width",departCdDropDownWidth - 26);
+	// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END
+}
+function getDepartCdNameVals($this) {
+	return ($this.val() == null ? "" : $this.val().join(","));
+}
+// 自動Focus設定を行う
+function autoFocusContent(orgEleId) {
+	if (orgEleId != null) {
+		var $target = $j("[id$=':"+orgEleId+"']");
+		if ($target.data("kendoDropDownList")) {
+			$target.data("kendoDropDownList").wrapper.blur();
+		} else {
+			$target.blur();
+		}
+	}
+}
+// 2018/03/23 部署は複数選択できる機能対応 BY WGCH END
+// 2018/03/28 title直接更新機能追加　BY zy BEGIN
+//保存 title
+var editUpdId;
+function editTitle() {
+	editUpdId = setTimeout(function(){
+		hideAndSaveUpd();
+	},200);
+	// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN
+	removeOpenLock();
+	// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END
+}
+function hideAndSaveUpd(){
+	if (editUpdId) clearTimeout(editUpdId);
+	var titlePanel = $j("#titlePanel");
+	if (!titlePanel.is(":visible")) return;
+	var taskId = titlePanel.data("taskid");
+	if (taskId != undefined && taskId != "") {
+		var taskRowId = titlePanel.data("rowid");
+		var taskSubject = $j("input",titlePanel).val();
+		if (taskSubject.trim() != "") {
+			var oldValue = titlePanel.data("oldvalue");
+			if (oldValue != taskSubject) ajaxUpdateEvent({name:taskSubject,id:taskId,rowId:taskRowId});
+		}
+	}
+	closePanel();
+}
+// 取消编辑
+function cancelTitleEdit() {
+	closePanel();
+	var taskEle = $j("div.task.onEnter");
+	if (taskEle.length > 0) {
+		var offset = taskEle.offset();
+		var curWd = taskEle.width();
+		showTaskSection(curWd,offset);
+	}
+	// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN
+	removeOpenLock();
+	// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END
+}
+// 关闭窗口
+function closePanel() {
+	$j("#titlePanel").hide();
+	$j("#translateBack").hide();
+	$j("div.noAssignTaskTemple").closest(".k-window").css("z-index",10003);
+	// 2018/07/02 定期のタスクエラー処理対応　JINYABUG-670 by　zy BEGIN
+	$j("div.noAssignTaskTemple").closest(".k-window").css("z-index",999);
+	// 2018/07/02 定期のタスクエラー処理対応　JINYABUG-670 by　zy END
+}
+// 窗体显示
+function showTitlePanel(task) {
+	var titlePanel = $j("#titlePanel");
+	var inputPanel = $j("input",titlePanel);
+	var section = $j("#taskChgSection");
+	var sectionPos = section.position();
+	var fontSize = $j("div.onEnter").css("font-size");
+	titlePanel.show();
+	$j("#translateBack").show();
+	section.hide();
+	$j("div.noAssignTaskTemple").closest(".k-window").css("z-index",1);
+	titlePanel.css({left:sectionPos.left - 2,top:sectionPos.top - 4});
+	var backColor = 'background: {!JSENCODE(taskColor)};';
+	if (task.style != undefined && task.style != "") backColor = task.style;
+	inputPanel.attr("style",backColor);
+	inputPanel.css("font-size",fontSize);
+	inputPanel.val(task.name);
+	inputPanel.focus();
+	titlePanel.width(section.outerWidth() + 2);
+	titlePanel.height(section.outerHeight() + 2);
+	inputPanel.height(titlePanel.height());
+	titlePanel.data("taskid",task.id);
+	titlePanel.data("rowid",task.rowId);
+	titlePanel.data("oldvalue",task.name);
+}
+// 回车保存
+function enterToSave(e){
+	if (e.keyCode == 13) {
+		editTitle();
+	} else if (e.keyCode == 27){
+		cancelTitleEdit();
+	}
+}
+// 2018/03/28 title直接更新機能追加　BY zy END
+// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+function showDailyPanel(task,weekInt){
+	$j("input[id$=sch_startDate]").val(task.groupBeginLabel);
+	$j("input[id$=sch_endDate]").val(task.groupEndLabel);
+	$j("input[name=weekOpts]").prop("checked",false);
+	if (weekInt == undefined) {
+		// 曜日
+	    var weekday = kendo.parseDate(task.groupBeginLabel,JINYACONNECT.DateFormat).toString("dddd");
+	    $j("#" + weekday).prop("checked",true);
+    }
+	$j("#schedule").data("task",task);
+	panelShow();
+}
+function saveTaskRepeat(){
+	var curTask = $j("#schedule").data("task");
+	var weekOptArr = [];
+	var weekTotal = 0;
+	$j("input[name=weekOpts]:checked").each(function(){
+		weekOptArr.push($j(this).val());
+		weekTotal += kendo.parseInt($j(this).attr("recweek"));
+	});
+	if (weekOptArr.length == 0) {
+       //曜日を選択してください
+	   alert("{!$Label.MSG_003_0015}");
+	   return false;
+	}
+	curTask.weekTotal = weekTotal;
+	curTask.weekOpts = weekOptArr.join(',');
+	curTask.repeatDateBeg = $j("input[id$=sch_startDate]").val();
+	curTask.repeatDateEnd = $j("input[id$=sch_endDate]").val();
+	// 2018/07/02 定期のタスクエラー処理対応　JINYABUG-670 by　zy BEGIN
+	$j("div.taskContPanel").css("z-index",999);
+	// 2018/07/02 定期のタスクエラー処理対応　JINYABUG-670 by　zy END
+	// 更新task
+	ajaxUpdateEvent(curTask);
+}
+function panelShow(){
+	$j(".taskScreen").show();
+	$j(".taskContPanel").show();
+	/*
+	var windowTop = $j(window).scrollTop();
+	var windowLeft = $j(window).scrollLeft();
+	$j(window).data("position",{top:windowTop,left:windowLeft});
+	$j(window).scrollTop(0);
+	$j(window).scrollLeft(0);
+	*/
+}
+function panelHide(){
+	$j(".taskScreen").hide();
+	$j(".taskContPanel").hide();
+	/*
+	var positionObj = $j(window).data("position");
+	if (positionObj != undefined) {
+		$j(window).scrollTop(positionObj.top);
+		$j(window).scrollLeft(positionObj.left);
+	}*/
+}
+function showSameTaskPanel(){
+	$j(".taskScreen").show();
+	$j("#deleteTaskPanel").show();
+	var task = $j("#deleteTaskPanel").data("task");
+	$j("#deleteTaskPanel div.hd").text(task.name);
+}
+function hideSameTaskPanel(){
+	$j(".taskScreen").hide();
+	$j("#deleteTaskPanel").hide();
+	$j("#deleteTaskPanel div.hd").text("");
+}
+function removeAfterTask(deleteFlag){
+	var task = $j("#deleteTaskPanel").data("task");
+	task.delSameFlag = deleteFlag;
+	removeTask(task);
+	hideSameTaskPanel();
+}
+// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN
+// 未分配のタスク内容更新
+function filterTemplates(selectVal){
+	if (getTaskMode()){
+		var userRows = $j("tr.user-row");
+		if(selectVal == '') {
+			userRows.show();
+		} else {
+			var groupArr = selectVal.split(",");
+			var filterArr = [];
+			for (var i = 0 ; i < groupArr.length ; i++) {
+				var filterStr = groupArr[i];
+				if (filterStr != '') {
+					if (filterStr == "{!JSENCODE(otherValue)}") filterArr.push("[staffid='']");
+					else filterArr.push('[info*="groupCode\":\"' + filterStr + '\""]');
+				}
+			}
+			if (filterArr.length > 0) {
+				var filterRows = userRows.has(filterArr.join(','));
+				if (filterRows.length > 0) userRows.not(filterRows).hide();
+			}
+		}
+		return;
+	}
+	var tempTasks = $j("#taskTemplates").children();
+	var win = $j("div.noAssignTaskTemple").data("kendoWindow");
+	if(selectVal == '') {
+		if (tempTasks.length > 0) {
+			tempTasks.show();
+			if (win) win.open();
+		} else if (getTaskMode()) {
+			if (win) win.open();
+		}
+	} else{
+		var groupArr = selectVal.split(",");
+		var filterArr = [];
+		for (var i = 0 ; i < groupArr.length ; i++) {
+			var filterStr = groupArr[i];
+			if (filterStr != '') {
+				if (filterStr == "{!JSENCODE(otherValue)}") filterArr.push(":not([group])");
+				else filterArr.push('[group="' + filterStr + '"]');
+			}
+		}
+		if (filterArr.length > 0) {
+			var showTasks = tempTasks.filter(filterArr.join(','));
+			showTasks.show();
+			tempTasks.not(filterArr.join(',')).hide();
+			if (win) {
+				if (showTasks.length == 0) win.close();
+				else if (win) win.open();
+			}
+		}
+	}
+}
+// 画面内容刷新
+function filterItem(){
+	var screenRows = $j("td.staff:onscreen");
+	if (screenRows.length == 0) screenRows = $j("td.staff");
+	JINYACONNECT.blockUi();
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの不具合解消 by zy BEGIN
+	refreshNotScreenRow();
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの不具合解消 by zy END
+	// 刷新当前行
+	// TaskTool.immediaRefresh($j("td.staff:onscreen"));
+	TaskTool.immediaRefresh(screenRows);
+}
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの不具合解消 by zy BEGIN
+// 刷新画面以外行内容
+function refreshNotScreenRow(){
+	// 滚动仍然可以重新刷新行
+	TaskTool.hadProcessed = {};
+	var curLst = [];
+	// 默认继续刷新不在屏幕内的数据
+	$j("td.staff").not(":onscreen").each(function(){
+		curLst.push($j(this).attr("staffid"));
+	});
+	TaskTool.data = curLst;
+}
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの不具合解消 by zy END
+function getShopCode(){
+	// 店舗コード
+    var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+    return branchCd;
+}
+
+// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END
+// プロジェックトフィルート改善対応
+function refreshOpts(){
+	var startDtStr = $j("#hidStartDate").val();
+    var endDtStr = $j("#hidEndDate").val();
+    var userIds = new Array();
+    $j("td.staff").each(function(){
+        var userId = $j(this).attr("staffid");
+        userIds.push(userId);
+    });
+	var ajaReq = {
+		spcd:getShopCode(),
+		userLst:userIds,
+		begDate:startDtStr,
+		endDate:endDtStr,
+	};
+	var req = JSON.stringify(ajaReq);
+	Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.StaffTaskCtrl.getProjectOpts}", req , function(result, event){
+        if(event.type == 'exception') {
+           // alert(event.message);
+        } else {
+        	if (result.length > 0) {
+        		var select = $j("[id$=proejctSel]");
+        		var changeFlag = false;
+        		for (var i = 0 ; i < result.length; i++) {
+        			var data = result[i];
+        			var optionVal = data.value;
+        			var selectOpt = select.find("[value='" + optionVal + "']");
+        			if (selectOpt.length > 0) {
+        				var label = selectOpt.text();
+        				if (label != data.label) {
+        					selectOpt.text(data.label);
+        					changeFlag = true;
+        				}
+        			} else {
+        				select.append($j("<option value='" + optionVal + "'>" + data.label + "</option>"));
+        				changeFlag = true;
+        			}
+        		}
+        		if (changeFlag) {
+        			var projectSet = $j("[id$=proejctSel]");
+        			var checkInput = projectSet.multiselect('getChecked');
+					if (checkInput.length > 0) {
+						var arr = [];
+						checkInput.each(function(){
+							arr.push($j(this).val());
+						});
+						projectSet.val(arr);
+					}
+        			projectSet.multiselect('refresh');
+        		}
+        	}
+        }
+    });
+}
+function setSelectFilterValFun(){
+	if(!_isMobileOS) return;
+	// 上一次过滤数据
+	var projects = $j("body").data("filterStr");
+	var projectSel = $j("select[id$=':proejctSel']");
+	var orgValArr = [""];
+	// 前次内容
+	if (projects) orgValArr = projects.split(",");
+	// 前次内容与现在值融合
+	var newValArr = orgValArr.concat(projectSel);
+	// 两次内容有不一致的情况
+	if (newValArr.length != orgValArr.length) {
+		var nexValueArr = projectSel.val();
+		var allValueIndex = $j.inArray("",nexValueArr);
+		// 前次内容没有[All]选项，此次有选择[All]
+		if ($j.inArray("",orgValArr) < 0 && allValueIndex >= 0) {
+			// 只选中All
+			projectSel.val([""]);
+		// 選択リスト中「All」含むの場合
+		} else if (nexValueArr.length > 1 && allValueIndex >= 0) {
+			nexValueArr.splice(allValueIndex,1);
+			projectSel.val(nexValueArr);
+		}
+		var newFilterVal = projectSel.val().join(',');
+		// 赋值
+		$j("body").data("filterStr",newFilterVal);
+		filterTemplates(newFilterVal);
+		filterItem();
+	}
+
+}
+// 2019/02/15 入力指定日チェック追加　by zy BEGIN
+// 入力日付保持
+function saveInputDate(){
+	var target = $j(event.currentTarget);
+	var inputDate = kendo.parseDate(target.val());
+	if (inputDate != null) target.attr("orgValue", kendo.toString(inputDate,JINYACONNECT.DateFormat));
+}
+// チェック入力日付
+function checkInputDate(){
+	var target = $j("input[id$=queryDate]");
+	var inputDate = kendo.parseDate(target.val());
+	if (inputDate == null) inputDate = target.attr("orgValue");
+	var dateStr = kendo.toString(inputDate,JINYACONNECT.DateFormat);
+	target.val(dateStr);
+}
+// 2019/02/15 入力指定日チェック追加　by zy END
+// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN
+// 標準編集画面開く機能
+function openTask(url){
+	// ダプルクリックチェック制御
+	setTimeout(function(){
+		// 該当表示タスク
+		var taskNm = $j("#taskChgSection .taskName");
+		// ダプルクリックなし
+		if (!taskNm.hasClass("openEditTitle")) {
+			window.open(url,"title","width=800,height=700");
+		}
+	},400);
+}
+// ダプルクリックロック解除
+function removeOpenLock(){
+	// タスクの画面
+	var taskNm = $j("#taskChgSection .taskName");
+	// ロック解除
+	taskNm.removeClass("openEditTitle");
+}
+// 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END
+// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN
+// ロック画面表示
+function openTaskGrid(){
+	var kendoWin = $j("#actionTaskWin").data("kendoWindow");
+	if (kendoWin == undefined) {
+		kendoWin = $j("#actionTaskWin").kendoWindow({
+	       	title: "一括ロック",
+	       	width:850,
+	       	height:450,
+		}).getKendoWindow();
+		kendoWin.center();
+		kendoWin.wrapper.css({top:120});
+	}
+	// ウィンドウ表示
+	kendoWin.open();
+	var kendoGrid = $j("#actionTaskGrid").getKendoGrid();
+	if (kendoGrid == undefined) {
+		kendoGrid = $j("#actionTaskGrid").kendoGrid({
+			dataSource:{
+				transport: {
+					read:function(options){
+						var ds = getTaskDs();
+						options.success(ds);
+					}
+				},
+				schema:{
+			        model:{
+			            fields: {
+			                lock: { type: "boolean" }
+		              	}
+		          	}
+		      	}
+			},
+			columns: [
+				{
+					headerTemplate:'<input type="checkbox" onclick="selAll()" id="check-all" />',
+					width:30,
+					template:'<input type="checkbox" staff="#:userid#" name="checkTask" onclick="selOne()" value="#:id#"/>',
+				},
+                {
+                	field:"lock",
+					width:40,
+					title:" ",
+					filterable:false,
+					attributes: {
+						style: "text-align: center; "
+					},
+                	template:'#if(lock){#<i class="k-icon k-i-lock" title="ロック中"/>#} else {# <i class="k-icon k-i-unlock"  title="未ロック"/> #}#',
+                },
+                {
+                    field: "name",
+                    title: "タスク名",
+                    template:"<a href='/#:id#' target='_blank'>#:name#</a>",
+                },
+                {
+                    field: "begtm",
+                    title: "開始時間",
+                    width: 150,
+                },
+                {
+                    field: "endtm",
+                    title: "終了時間",
+                    width: 150,
+                },
+            ],
+            dataBound:refreshSelAll,
+            resizable:true,
+            sortable: true,
+            filterable: {
+            	operators: {
+					string: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値で始まる
+						startswith: "{!$Label.MSG_041_0035}",
+						// 指定の値を含む
+						Contains: "{!$Label.MSG_041_0036}",
+						// 指定の値を含まない
+						doesnotcontain: "{!$Label.MSG_041_0037}",
+						// 指定の値で終わる
+						endswith: "{!$Label.MSG_041_0038}",
+					},
+					number: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値より以上
+						gte: "{!$Label.MSG_041_0043}",
+						// 指定の値より大きい
+						gt: "{!$Label.MSG_041_0044}",
+						// 指定の値より以下
+						lte: "{!$Label.MSG_041_0045}",
+						// 指定の値より小さい
+						lt: "{!$Label.MSG_041_0046}",
+					}
+				},
+			    messages: {
+			      isTrue: "ロックあり",
+			      isFalse: "ロックなし",
+			      info: " ",
+			      // および
+			      and: "{!$Label.MSG_041_0039}",
+			      // または
+			      or: "{!$Label.MSG_041_0040}",
+			      // フィルター
+			      filter: "{!$Label.MSG_040_0103}",
+			      // クリア
+			      clear: "{!$Label.MSG_040_0106}",
+			    }
+			  },
+            height:"calc(100% - 35px)",
+            columnResize:function(e){
+            	var kendoWin = $j("#actionTaskWin").getKendoWindow();
+            	kendoWin.wrapper.width(this.content.children("table").width() + 35);
+            }
+		}).getKendoGrid();
+	}
+	kendoGrid.dataSource.filter([]);
+	// 刷新タスク内容
+	refreshActionDs();
+}
+// 刷新タスク内容
+function refreshActionDs(curLst){
+	var kendoWin = $j("#actionTaskWin").getKendoWindow();
+	if (kendoWin != undefined && 
+			curLst != undefined && 
+				$j.inArray(kendoWin.userId,curLst) < 0) return;
+
+		if (kendoWin) {
+			if (kendoWin._closing == false) {
+				var kendoGrid = $j("#actionTaskGrid").data("kendoGrid");
+				if (kendoGrid) {
+				kendoGrid._requestStart();
+					kendoGrid.dataSource.read();
+				}
+			}
+		}
+}
+// ページの表示担当者のタスク取得
+function getTaskDs(){
+	var tasks = [];
+	var taskMap = new Map(exitTask.datasource.datas.map(i => [i.id,i]));
+	var curRows = $j("td.staff:visible");
+	var userMap = {};
+	curRows.each(function(){
+		var curRow = $j(this);
+        var userId = curRow.attr("staffid");
+        var userNm = curRow.attr("name");
+        userMap[userId] = userNm;
+    });
+    // JINYABUG-1966 bug fix by zy BEGIN
+	$j("div.task:visible",curRows).each(function(){
+	// JINYABUG-1966 bug fix by zy END
+		var taskId = $j(this).attr("id");
+		if (taskMap.has(taskId)) {
+			var task = taskMap.get(taskId);
+			var obj = {
+				name:task.name,
+				id:task.id,
+				user:userMap[task.rowId],
+				userid:task.rowId,
+				lock:task.lock,
+				begtm:task.org.groupBeginLabel + ' ' + task.org.beginLabel,
+				endtm:task.org.groupEndLabel + ' ' + task.org.endLabel,
+			};
+			tasks.push(obj);
+		}
+	});
+	return tasks;
+}
+function getUserMap(){
+	var userMap = {};
+	$j("td.staff:visible").each(function(){
+        var userId = $j(this).attr("staffid");
+        var userNm = $j(this).attr("name");
+        userMap[userId] = userNm;
+    });
+    return userMap;
+}
+function bindLockTask(){
+	var allTask = $j("div.task");
+	var lockTask = allTask.filter(".lock");
+	if (lockTask.length > 0) {
+		lockTask.unbind("mouseenter");
+		lockTask.unbind("mousedown");
+		lockTask.bind("mousedown",function(){
+			event.preventDefault();
+			event.stopImmediatePropagation();
+		})
+	}
+	var curRows = $j("tr.user-row");
+	var noDataRows = curRows.filter(function(){
+		return $j("div.task",this).length == 0;
+	});
+	var lockRows = curRows.not(noDataRows).filter(function(){
+		return $j("div.task",this).length == $j("div.task.lock",this).length;
+	});
+	curRows.find(".k-i-unlock,.k-i-lock").hide();
+	lockRows.find(".k-i-lock").show();
+	curRows.not(noDataRows).not(lockRows).find(".k-i-unlock").show();
+}
+// ロックデータ、ウィンドウ表示
+function openUserLock(){
+	var curTarget = $j(event.currentTarget);
+	var curTd = curTarget.closest("td");
+	var userElement = curTd.find("[data-userid]");
+	var filter = {};
+	var titleTips = '一括ロック';
+	var userId;
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	if (getTaskMode()) {
+		var rowId = curTd.closest("tr").find("td[staffid]").attr("staffid");
+		filter = {
+			filters: [{field: "userid", operator: "eq", value: rowId}], 
+		logic: "and"}
+		titleTips = 'グループ： '+ rowId + '　 '
+				 + $j("#hidStartDate").val() + '〜' + $j("#hidEndDate").val();
+		userId = rowId;
+	} else 
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	if (userElement.length > 0) {
+		var userId = userElement.attr("data-userid");
+		var userMap = getUserMap();
+		filter = {
+			filters: [{field: "user", operator: "eq", value: userMap[userId]}], 
+		logic: "and"}
+		titleTips = '担当者： '+ userMap[userId] + '　 '
+				 + $j("#hidStartDate").val() + '〜' + $j("#hidEndDate").val();
+		userId = userId;
+	}
+	openTaskGrid();
+	var kendoWin = $j("#actionTaskWin").getKendoWindow();
+	var kendoGrid = $j("#actionTaskGrid").data("kendoGrid");
+	if (kendoGrid) {
+		kendoGrid.dataSource.filter(filter);
+	}
+	if (kendoWin != undefined) {
+		kendoWin.userId = userId;
+		kendoWin.title(titleTips);
+	}
+}
+// 選択該当データ
+function selOne(){
+	var target = $j(event.currentTarget);
+	// 刷新当前の選択状態
+	refreshSelAll();
+}
+// 全て選択機能
+function selAll(){
+	var target = $j(event.currentTarget);
+	$j("input[name=checkTask]").prop("checked",target.is(":checked"));
+}
+// 刷新当前の選択状態
+function refreshSelAll(){
+	// 全て選択リスト
+	var allChks = $j("input[name=checkTask]");
+	// 選択項目の全部選択チェック
+	var selAllFlg = allChks.length > 0 && allChks.length == allChks.filter(":checked").length;
+	// 全て選択状態設定
+	$j("#check-all").prop("checked",selAllFlg);
+}
+// ロック機能
+function lockSelTask(){
+	// 2019/07/15 JINYABUG-1943 bug fixed by zy BEGIN
+	var events = getSelEvents();
+	if (events.length <= 0) {
+		alert('タスクを選択してください。');
+		return;
+	}
+	// 2019/07/15 JINYABUG-1943 bug fixed by zy END
+	var data = {
+		eventIds:events
+	}
+	JINYACONNECT.blockUi();
+	// 刷新ロックとロック解除の担当者のタスク状態
+	var callback = refreshStaffs.bind({rows:getStaffEvents()});
+	remoteCenter('lockEvent',JSON.stringify(data),callback,true);
+}
+// ロック解除機能
+function unLockSelTask(){
+	// 2019/07/15 JINYABUG-1943 bug fixed by zy BEGIN
+	var events = getSelEvents();
+	if (events.length <= 0) {
+		alert('タスクを選択してください。');
+		return;
+	}
+	// 2019/07/15 JINYABUG-1943 bug fixed by zy END
+	var data = {
+		eventIds:events
+	}
+	JINYACONNECT.blockUi();
+	// 刷新ロックとロック解除の担当者のタスク状態
+	var callback = refreshStaffs.bind({rows:getStaffEvents()});
+	remoteCenter('unLockEvent',JSON.stringify(data),callback,true);
+}
+// 刷新ロックとロック解除の担当者のタスク状態
+function refreshStaffs(result){
+	let {rows} = this;
+	var selectorArr = [];
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+	var exitMap = {};
+	// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	// 指定担当者取得
+	var rowselecter = rows.forEach(function(rowId){
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		if (!(rowId in exitMap)) {
+			exitMap[rowId] = true;
+			selectorArr.push('[staffid="'+ rowId + '"]');
+		}
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	});
+	// 刷新指定担当者タスク
+	if (selectorArr.length > 0) {
+		var curRows = $j("td.staff").filter(selectorArr.join(','));
+		$j("div.task[bind]",curRows).removeAttr("bind");
+		TaskTool.immediaRefresh(curRows);
+	}
+	// ロック画面閉じる
+	var kendoWin = $j("#actionTaskWin").getKendoWindow();
+	if (kendoWin) kendoWin.close();
+}
+// 選択タスクId取得
+function getSelEvents(){
+	var eventIds = [];
+	$j("input[name=checkTask]:checked").each(function(){
+		eventIds.push($j(this).val());
+	});
+	return eventIds;
+}
+// ロック画面選択スッタフ取得
+function getStaffEvents(){
+	var eventIds = [];
+	$j("input[name=checkTask]:checked").each(function(){
+		eventIds.push($j(this).attr("staff"));
+	});
+	return eventIds;
+}
+/*
+* 連携中心
+* type: 連携指定方法
+* data: 連携用データ（JSON対象）
+* callback: 連携成功後、起動機能
+* noblock: 画面ロックフラグ（true：不ロック）
+*/
+function remoteCenter(type,data,callback,noblock){
+	// 画面ロックフラグ
+	if (!noblock) JINYACONNECT.blockUi();
+	Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.StaffTaskCtrl.remoteCenter}", type,data , function(result, event){
+        if(event.type == 'exception') {
+           // alert(event.message);
+        } else {
+        }
+        if (callback) callback(result);
+        if (!noblock) JINYACONNECT.unblockUi();
+    });
+}
+// 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END
+// 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN
+// 画面フィルター機能対応
+function filterTask(){
+	// ESC鍵対応
+	if (event.keyCode == 27) {
+		// 該当フィルター内容クリア
+		$j("#filterInput").val("");
+	// Enter鍵対応
+	} else if (event.keyCode == 13) {
+		// 指定内容フィルター
+		filterTaskDone(true);
+		$j("#filterInput").val("");
+		// 内容変更画面高度刷新
+		refreshTimeLineHt();
+	}
+}
+// 内容変更画面高度刷新
+function refreshTimeLineHt(){
+	// 时间轴高度刷新
+	timeLines.height($j("#dTable tbody").height()-3);
+}
+// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+// 変更フィルタータイプ
+function changeFilterType(){
+	// 該当ボタン
+	var $tar = $j(event.currentTarget);
+	$tar.toggleClass("onclick");
+	if ($j(".filterBtn").length > 1) reFilter();
+	// 画面設定保持
+	var data = {
+		viewMode : $j("#hidViewMode").val(),
+		orFlg : getFilterType(),
+		// 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy BEGIN
+		userGroupId:getUserGroupId()
+		// 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy END
+	};
+	remoteCenter('saveSettingInfo',JSON.stringify(data));
+}
+// フィルタータイプ取得
+function getFilterType(){
+	return $j("#filterType span:visible").text() == "or";
+}
+// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+// 指定内容フィルター
+function filterTaskDone(createTag,filterInput,selType,curRows){
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END	
+	// 指定内容なし
+	if (filterInput == undefined) filterInput = $j("#filterInput").val();
+	// 指定タイプなし
+	if (selType == undefined) selType = $j(".k-button.k-state-active").attr("name");
+	// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+	var isOrFlg = getFilterType();
+	// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+	if (filterInput != "") {
+		// 未フィルターのユーザー
+		// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+		if (curRows == undefined) curRows = $j("tr.user-row");
+		// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		var taskMode = getTaskMode();
+		// タスクの場合
+		if (selType == 'task' || taskMode) {
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+			var fitlerRows = curRows.filter('.departFilter,.userFilter');
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			if (!isOrFlg && fitlerRows.length > 0) curRows = fitlerRows;
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+			var tasks = exitTask.datasource.datas.filter(function(task){
+				// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+				if (taskMode) {
+					if (selType == 'task' ) return task.name && task.name.toLowerCase().indexOf(filterInput.toLowerCase()) >= 0;
+					if (selType == 'depart') return task.departname && task.departname.toLowerCase().indexOf(filterInput.toLowerCase()) >= 0;
+					if (selType == 'user') return task.lockname.toLowerCase().indexOf(filterInput.toLowerCase()) >= 0;
+				}
+				// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+				return task.name.toLowerCase().indexOf(filterInput.toLowerCase()) >= 0;
+			});
+			var taskArr = [];
+			tasks.forEach(function(task){
+				taskArr.push('[id=' + task.id + ']');
+			});
+			// 未フィルター機能
+			$j("div.task",curRows).not(taskArr.join(',')).addClass("filtered");
+			// タスク該当ユーザータスク全部フィルター非表示対応
+			var filterRows = $j("tr.user-row").filter(function(){
+				// 全部フィルターチェック
+				return $j("div.task",this).length == $j("div.task.filtered",this).length;
+			});
+			$j("div.task.filtered",filterRows).removeClass("filtered");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			// filterRows.addClass("filtered");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+			curRows.not(filterRows).addClass("taskFilter");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			if (isOrFlg) {
+				filterRows.not('.departFilter,.userFilter').addClass("filtered");
+				curRows.not(filterRows).not('.departFilter,.userFilter').addClass("filtered");
+				curRows.filter(".taskFilter.filtered").removeClass("filtered");
+			} else {
+				filterRows.addClass("filtered");
+			}
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+		// 部署の場合
+		} else if (selType == 'depart') {
+			var fitlerRows = curRows.filter('.taskFilter,.userFilter');
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			if (!isOrFlg && fitlerRows.length > 0) curRows = fitlerRows;
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+			var departRows = curRows.has('td.leftPanelItem.departElement [title*="' + filterInput + '"]').addClass("departFilter");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			if (isOrFlg) {
+				curRows.not(departRows).not('.taskFilter,.userFilter').addClass("filtered");
+				curRows.filter(".departFilter").removeClass("filtered");
+			} else curRows.not(departRows).addClass("filtered");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+			// if (curRows.filter(".nextFiltered.filtered").length > 0) curRows.filter(".nextFiltered.filtered").removeClass("nextFiltered filtered");
+		// 氏名 の場合
+		} else if (selType == 'user') {
+			var fitlerRows = curRows.filter('.taskFilter,.departFilter');
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			if (!isOrFlg && fitlerRows.length > 0) curRows = fitlerRows;
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+			var userRows = curRows.has("td.leftPanelItem:not(.departElement) :contains('" + filterInput + "')").addClass("userFilter");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN
+			if (isOrFlg) {
+				curRows.not(userRows).not('.taskFilter,.departFilter').addClass("filtered");
+				curRows.filter(".userFilter").removeClass("filtered");
+			} else curRows.not(userRows).addClass("filtered");
+			// 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END
+			// if (curRows.filter(".nextFiltered.filtered").length > 0) curRows.filter(".nextFiltered.filtered").not(userRows).addClass("filtered");
+		}
+		// 既存フィルターボタン作成
+		if (createTag) addFilterTag(selType,filterInput);
+	}
+}
+// 既存フィルターボタン作成
+function addFilterTag(type,val){
+	var temp = '<span class="k-button filterBtn" type="_type_" val="_value_" onclick="deleteFilter()">_value_<span class="k-icon k-i-close"></span></span>';
+	var filterVal = $j("#filterInput").val();
+	$j("#filterBody").append($j(temp.replace(/_value_/g,val).replace('_type_',type)));
+}
+// 指定既存フィルター削除
+function deleteFilter(){
+	$j(event.currentTarget).remove();
+	// 当前フィルター順再執行
+	reFilter();
+}
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+// 当前フィルター順再執行
+function reFilter(curRows){
+	// 画面フィルタークリア
+	filterClear(curRows);
+	// // 画面フィルタークリア
+	$j(".filterBtn").each(function(){
+		filterTaskDone(false,$j(this).attr("val"),$j(this).attr("type"),curRows);
+	});
+	refreshBody();
+	// refreshTimeLineHt();
+}
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+// 画面フィルタークリア
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+function filterClear(curRows){
+	var rows = curRows == undefined ? $j("tr.user-row") : curRows;
+	$j("div.task",rows).removeClass("filtered");
+	// $j("tr.user-row").removeClass("filtered departFilter userFilter taskFilter");
+	rows.removeClass("filtered departFilter userFilter taskFilter");
+}
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+// フィルタータイプ選択対応
+function changeBtn(){
+	// 当前選中クリア
+	$j(".k-state-active").removeClass("k-state-active");
+	// 選中指定ボタン
+	$j(event.currentTarget).addClass("k-state-active");
+}
+// テンプレートフィルター執行
+function onTaskTempFilter(){
+	if("filterTaskId" in window) clearTimeout(window.filterTaskId);
+	if (event && event.keyCode == 27) {
+		$j(event.currentTarget).val("");
+		templateClear();
+		return;
+	}
+	window.filterTaskId = setTimeout(function(){
+		templateClear();
+		var input = $j("input[name=filterTemp]").val();
+		$j("div.taskTemp").not(':contains(' + input + ')').addClass("filtered");
+	},200);
+}
+// テンプレートフィルタークリア
+function templateClear(){
+	$j("div.taskTemp").removeClass("filtered");
+}
+function removeAllClear(){
+	$j(".filterBtn").remove();
+	reFilter();
+}
+function initFilterPanel(){
+	var filterFlg = $j("#hidFilterFlg").val();
+	if (filterFlg == "true") {
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		$j("#filterWrap,[name=filterTemp],#userGridFilter").show();
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	} else {
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+		$j("#filterWrap,[name=filterTemp],#userGridFilter").hide();
+		// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+	}
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+	var fitlerTxt = $j(".noAssignTaskTemple .templateInput").val();
+	if (fitlerTxt != undefined && fitlerTxt != "") onTaskTempFilter();
+	// removeAllClear();
+	// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+}
+// 2019/06/30 マルチタスク、キーワード検索機能 by zy END
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN
+function initMulitSel(muliteSel,values){
+	// ツール　と　選択部署　あり
+	if (muliteSel.length > 0) {
+		values = values || "";
+		var departArr = values.split(',');
+		if (departArr.length > 0) {
+			var selector = [];
+			// 5298 bug fix by zy BEGIN
+			var filterValArr = [];
+			// 5298 bug fix by zy END
+			departArr.forEach(function(depart){
+				// 5298 bug fix by zy BEGIN
+				if (depart != "") {
+					selector.push("option[value='" + depart + "']");
+					filterValArr.push(depart);
+				}
+				// 5298 bug fix by zy END
+			});
+			if (selector.length > 0) { 
+				var $el = muliteSel.find(selector.join(','));
+				if($el.length) $el.attr("selected",true);
+				else muliteSel.find('option[value=""]').attr("selected",true); 
+			} else {
+				muliteSel.find('option[value=""]').attr("selected",true);
+			}
+			// 5298 bug fix by zy BEGIN
+			if (filterValArr.length == 0) filterValArr = [""];
+			muliteSel.val(filterValArr);
+			// 5298 bug fix by zy END
+			muliteSel.multiselect('refresh');
+			var muliteVal = muliteSel.val(),selStr = muliteVal == null ?  "" : muliteVal.join(',');
+			// 設定フィルター機能対応
+			if (selStr != "") setFilterMulit(selStr);
+		}
+	}
+}
+// 設定フィルター機能対応
+function setFilterMulit(selectVal){
+	// フィルター内容指定
+	$j("body").data("filterStr", selectVal);
+	// 未分配のタスク内容更新
+	filterTemplates(selectVal);
+}
+// 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END
+// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+function initTempInfo(){
+	var tempInfo = $j("#hidTempInfo").val();
+	window.J_NEW_TEMP_MAP = {};
+	if (tempInfo != "") {
+		J_NEW_TEMP_MAP = JSON.parse(tempInfo);
+	}
+}
+function getTaskMode(){
+	var taskMode = $j("#hidTaskModeFlg").val();
+	return taskMode == "true";
+}
+function setRowField(obj){
+	obj.isUserFlg = getTaskMode();
+	obj.spcd = getShopCode();
+}
+function madNoUserTaskWin(){
+	$j(".assignTaskClass").hide();
+	$j(".assignUserClass").show();
+	var win = $j("div.noAssignTaskTemple").data("kendoWindow");
+	if (win == undefined) {
+		var wW = document.documentElement.clientWidth;
+		// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy BEGIN
+		var maxHt = window.innerHeight - 200;
+		// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy END
+		// 2019/03/15 JINYABUG-1451 bug fix by zy BEGIN
+		var cssObj = {
+			// 5159 bug fixed by zy BEGIN
+	       		// position:'fixed',
+			// 5159 bug fixed by zy END
+				top: 120,
+	  			left: wW - 330
+		}
+		if (_isMobileOS) {
+			cssObj.left = "unset";
+			cssObj.right = 10;
+		}
+		// 2019/03/15 JINYABUG-1451 bug fix by zy END
+		$j("div.noAssignTaskTemple").show();
+		win = $j("div.noAssignTaskTemple").kendoWindow({
+	       	width: "330px",
+	       	// 2016/03/10 高さ自動調整機能対応 BEGIN
+	       	// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy BEGIN
+			maxHeight: maxHt,
+			// 2019/03/15 マルチタスクのタスクバーの縦スクロールを必要 by zy END
+	       	// 2016/03/10 高さ自動調整機能対応　END
+			actions: ["Minimize"],//,"plus"
+			//タスク
+			title: "タスク"
+			// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+			,dragend:function(){
+				this.wrapper.data("cssobj",this.wrapper.position());
+			}
+			// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+		// 2019/03/15 JINYABUG-1451 bug fix by zy BEGIN
+		}).closest(".k-window").css(cssObj);
+		// 2019/03/15 JINYABUG-1451 bug fix by zy END
+		$j("div.noAssignTaskTemple").getKendoWindow().wrapper.data("cssobj",cssObj);
+	} else { 
+		win.open();
+	}
+	var grid = $j("#userGrid").getKendoGrid();
+	if (grid == undefined) {
+		$j("#userGrid").kendoGrid({
+			dataSource:{
+				transport: {
+					read:function(options){
+						var data = {
+							spcd:getShopCode(),
+							sqlWhere:getSQL(),
+						};
+						var departs = getDepartCode();
+						var fitler = $j("#userFilter").val();
+						// 取得件数限定
+						if (fitler == "" && departs.length == 0) data.field = ' limit 500';
+						else data.filterTips = fitler;
+						if (departs.length > 0) data.eventIds = departs;
+						var userGroupId = getUserGroupId();
+						if (userGroupId != "") data.taskid = userGroupId;
+						remoteCenter('getUserLst',JSON.stringify(data),afterGetMulti.bind({opt:options}),true);
+					}
+				}
+			},
+			columns: [
+                {
+                    field: "name",
+                    title: "ユーザー",
+                    template:"<a userId='#:value#' href='/#:value#' target='_blank'>#:text#</a>",
+                },{
+                    field: "depart",
+                    title: "部署",
+					width:100
+                }
+            ]
+		});
+		var dragElement;
+		$j("#userGrid").getKendoGrid().table.kendoDraggable({
+			filter: "tbody > tr",
+			group: "gridGroup",
+			hint: function(e) {
+				dragElement = $j('<div class="k-grid k-widget"><table style="margin-left:15px;" class="hint-table"><tbody><tr>' + e.html() + '</tr></tbody></table></div>');
+				return dragElement;
+			},
+			dragstart: function(e) {
+				curType = 'dragTemp';
+				correctPosition(this.hint,e.pageX,e.pageY);
+			},
+			drag: function(e) {
+				$j(".onDrop").removeClass("onDrop");
+				if ($j(e.target).hasClass("group")) {
+					$j(e.target).addClass("onDrop");
+				} else if($j(".dragEnter").length > 0){
+					$j("td.staff.onSelectLine").removeClass("onSelectLine");
+				} else {
+					var lineIndex = 0;
+					// 获取当前时间轴
+					lineIndex = getTimeIndex(e.pageX).first().index();
+					var dateStemp;
+					showTimeLine(lineIndex,dateStemp);
+					showCurRow(e.pageY);
+				}
+			},
+			dragend: function(e) {
+				$j("#titleLine").hide();
+				var curTimeLine = timeLines.filter(".onSelectLine");
+				if (curTimeLine.length == 0) {
+					$j(".onSelectLine").removeClass("onSelectLine");
+					return;
+				}
+				$j("#taskChgSection").hide();
+				$j("div.task.onfocus").removeClass("onfocus");
+				curType = "";
+				var line = $j("td.onSelectLine");
+				var rowIndex = line.closest("tr").index();
+				var start = curTimeLine.index();
+				$j(".onSelectLine").removeClass("onSelectLine");
+				if (rowIndex < 0 ) return;
+				// 指定参数設定
+				changeTaskMode(dragElement,line);
+				var userId = dragElement.find("a[userId]").attr("userId");
+				// 模板跟当前模式不同
+				var end = start + 1;
+				var orgTask = {rowId:line.attr("staffid"),userId:userId};
+				var task = {begin:start,row:rowIndex};
+				var row = kendo.parseFloat(dragElement.attr("row"));
+				if (row > 0) {
+					var begTmLong = kendo.parseFloat((curTimeLine.attr("time")));
+					var curDt = new Date(begTmLong);
+					curDt.addMinutes(row);
+					end = getNearTime(kendo.toString(curDt,'yyyy/MM/dd'),kendo.toString(curDt,'HH:mm'));
+					orgTask.groupEndLabel = kendo.toString(curDt,'yyyy/MM/dd');
+					orgTask.endLabel = kendo.toString(curDt,'HH:mm');
+				} else {
+					end = start + 1;
+					if (timeLines.length < end ) end = timeLines.length;
+					task.end = end;
+				}
+				var calendarFlg = dragElement.attr("cal");
+				if (calendarFlg == "false") orgTask.calFlg = calendarFlg == 'true';
+				setTaskDate(orgTask,task,true);
+				dragInfoSetting(dragElement,orgTask);
+			}
+		});
+	}
+	$j("#userGrid").getKendoGrid().dataSource.read();
+}
+function userFilterStar(fitlerTxt){
+	var kendoGrid = $j("#userGrid").getKendoGrid();
+	if (kendoGrid == undefined) return;
+	kendoGrid._requestStart();
+	// 入力中対応
+	if ("J_USER_FILTER_TXT" in window) clearTimeout(J_USER_FILTER_TXT);
+	window.J_USER_FILTER_TXT = setTimeout(() => {
+		if (fitlerTxt == undefined) fitlerTxt = $j("#userGridFilter").val();
+		var fitlers = {};
+		var filterArr = fitlerTxt.split(' ');
+		filterArr.concat(fitlerTxt.split(' '));
+		var filterTextArr = [];
+		filterArr.forEach(function(filte){
+			if (filte != "") {
+				filterTextArr.push({ field: "text", operator: "contains", value: filte });
+				filterTextArr.push({ field: "depart", operator: "contains", value: filte });
+			}
+		});
+		if (filterTextArr.length > 0) fitlers = {
+			filters:filterTextArr,
+			logic:"or"
+		}
+		kendoGrid.dataSource.filter(fitlers);
+	}, 300);
+}
+function getDepartCode(){
+	var departs = [];
+	var departCodes = $j("input[id$=':multiDepartCds']").val();
+	if (departCodes != "") {
+		departs = departCodes.split(',');
+		var idx = $j.inArray("",departs);
+		if (idx >= 0) departs.splice(idx,1);
+	}
+	return departs;
+}
+// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END		
+</script>
+<apex:actionStatus onstart="javascript:JINYACONNECT.blockUi();" onstop="javascript:JINYACONNECT.unblockUi();" id="refStatusBlock"/>
+<apex:sectionHeader title="Task" subtitle="タスク"/>
+<!-- 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN -->
+<div id="filterWrap">
+	<apex:pageBlock >
+		<div id="filterBody">
+		    <div class="k-widget k-button-group" id="selGroup" tabindex="0" >
+				<span class="k-button k-button-icon" onclick="changeBtn()" name="user" >
+					氏名 
+				</span>
+				<span class="k-button k-button-icon" onclick="changeBtn()" name="depart" >
+					部署
+				</span>
+				<span class="k-button k-button-icon k-state-active" onclick="changeBtn()" name="task">
+					件名
+				</span>
+			<!-- 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy BEGIN -->
+			<span class="k-button k-button-icon {!if(isOrFlg,'','onclick')}" onclick="changeFilterType()" id="filterType">
+				<span>or</span>
+				<span>and</span>
+			</span>
+			<!-- 2019/09/15 キーワード検索機能ですがAND検索になっていますのでORの検索もできればいい by zy END -->
+			</div>
+			<input type="text" class="k-input" style="width:550px;height:18px;" id="filterInput" placeholder="「氏名、部署、件名」を選択し、検索キーワードを入力して[Enter]キーを押下してください" onkeydown="filterTask()" />
+		</div>
+	</apex:pageBlock>
+</div>
+<!-- 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN -->
+<!-- のスタッフ -->
+<apex:pageBlock title="{!thisYear}/{!thisMonth}タスク" id="contents">
+<!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN -->
+<apex:form id="search" rendered="{!!blackFlag}">
+	<!-- 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy BEGIN-->
+	<apex:inputHidden id="hidUserGroupId" value="{!userGroupId}"/>
+	<!-- 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy END-->
+	<apex:actionFunction name="refreshNewInfo" action="{!refreshNewInfo}" rerender="dispForm" status="refStatusBlock" oncomplete="bindEvent();"/>
+<!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH END -->
+	<!-- 支店機能 -->
+    <apex:outputLabel >
+        <apex:selectList size="1" value="{!branchShopNm}" styleClass="j-dropDownList"  rendered="{!branchShopLst.size > 0}" id="branchShopCd">
+	    	<!-- All -->
+	        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_035_0124}"/>
+	        <apex:selectOptions value="{!branchShopLst}" />
+	        <apex:actionSupport event="onchange" action="{!changeBranchShop}" rerender="dispForm,depart,repeadTask,project,filterPanel" status="refStatusBlock" oncomplete="bindEvent();"/>
+	    </apex:selectList>
+    </apex:outputLabel>
+    <apex:outputLabel id="depart">
+	     <!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN -->
+	     <!-- 2018/04/04 部署は複数選択できるIpad优化 BY WGCH BEGIN -->
+	     <apex:selectList size="1" value="{!departCd}" id="departCd" rendered="{!departCodeLst.size > 0}" onblur="setSelectValFun()" style="margin-left: 10px" html-multiple="multiple">
+	     <!-- 2018/04/04 部署は複数選択できるIpad优化 BY WGCH END -->
+	     <!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH END -->
+           <!-- All -->
+           <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_035_0124}"/>
+           <apex:selectOptions value="{!departCodeLst}" />
+           <!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN -->
+           <apex:actionSupport event="onchange" action="{!refreshNewInfo}" rerender="dispForm" status="refStatusBlock" oncomplete="bindEvent();"  rendered="false"/>
+           <!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH END -->
+       </apex:selectList>
+       <!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH BEGIN -->
+       <apex:inputHidden value="{!multiDepartCds}" id="multiDepartCds"/>
+       <!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH END -->
+    </apex:outputLabel>
+    <!-- 2019/05/15 タスク管理でルームインジケーターの様に前日当日翌日のボタンを設置する事は可能でしょうか。
+	また7で表示させた際に4時間ごとの時間の区切りになりますが、1時間ごとの表示にすることは叶いませんでしょうか by zy BEGIN -->
+    <apex:outputLabel id="dateActionBtns">
+    <!-- 前日 -->		
+    <apex:commandButton style="width:90px;" value="{!if(MONTH_MODE_FLG,$Label.ps__msg_035_0109,$Label.ps__msg_008_0004)}" action="{!toPrev}" reRender="dispForm,queryDate" status="refStatusBlock" oncomplete="bindEvent()" rendered="{!isShowHisFlg}"/>
+    <!-- 今日 -->		
+    <apex:commandButton style="width:90px;" value="{!if(MONTH_MODE_FLG,$Label.ps__msg_035_0110,$Label.ps__msg_008_0005)}" action="{!toToday}" reRender="dispForm,queryDate" status="refStatusBlock"  oncomplete="bindEvent()" rendered="{!isShowHisFlg}" />
+    <!-- 翌日 -->
+    <apex:commandButton style="width:90px;" value="{!if(MONTH_MODE_FLG,$Label.ps__msg_035_0111,$Label.ps__msg_008_0006)}" action="{!toNext}" reRender="dispForm,queryDate" status="refStatusBlock"  oncomplete="bindEvent()" rendered="{!isShowHisFlg}" />
+    </apex:outputLabel>
+    <!-- 2019/05/15 タスク管理でルームインジケーターの様に前日当日翌日のボタンを設置する事は可能でしょうか。
+	また7で表示させた際に4時間ごとの時間の区切りになりますが、1時間ごとの表示にすることは叶いませんでしょうか by zy END -->
+	<!-- 指定日  -->
+	<apex:outputLabel value="{!$Label.ps__msg_005_0036} " for="queryDate"  style="padding-top: 10px;margin-left:6px"/>
+	<!-- 2019/02/15 入力指定日チェック追加　by zy BEGIN -->
+	<apex:inputField value="{!timeTable.Checkinday__c}" id="queryDate" onmousedown="saveInputDate()"  styleClass="k-textbox" style="width:120px; padding:0px;line-height:1em;border-spacing:0px;">
+	<!-- 2019/02/15 入力指定日チェック追加　by zy END -->	
+		<apex:actionSupport event="onchange" action="{!gotoYearMonth}" onsubmit="checkInputDate()" rerender="dispForm" status="refStatusBlock" oncomplete="bindEvent()" />
+		<!-- から -->
+		<apex:outputText value="{!$Label.ps__msg_005_0037}" style="margin-left:2px;padding-top: 10px"/>
+	</apex:inputField>
+	 <apex:selectList value="{!viewMode}" size="1" styleClass="j-dropDownList" style="margin-left:2px;width:80px;" id="viewModeSel" >
+		<apex:selectOptions value="{!ViewModeList}"/>
+		<!-- 2017/02/13 页面自动刷新功能 by wx begin -->
+        <apex:actionSupport event="onchange" action="{!refreshMode}" rerender="dispForm,queryDate,dateActionBtns" status="refStatusBlock" oncomplete="bindEvent();"/>
+		<!-- 2017/02/13 页面自动刷新功能 by wx end -->
+	</apex:selectList>
+	<!-- 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw BEGIN -->
+	<apex:outputLabel id="project">
+		<!-- // 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy BEGIN -->
+		<apex:inputHidden value="{!filterTips}" id="hidFilterTips"/>
+		<!-- // 2019/08/31 マルチタスクについて、今「その他」で絞りをかけた後画面更新（Command+R）をするとプロジェクト管理が消えました。絞り込みの保持 by zy END -->
+		<apex:selectList value="{!filterTips}" size="1" styleClass="projectClass" style="margin-left:2px;width:80px;" onblur="setSelectFilterValFun()" id="proejctSel" html-multiple="multiple" rendered="{!tipsOpts.size > 0}">
+			<!-- All -->
+	        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_035_0124}"/>
+			<apex:selectOptions value="{!tipsOpts}"/>
+		</apex:selectList>
+	</apex:outputLabel>
+	<!-- 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける）by cxw END -->
+	<apex:outputLabel id="showModePanel">	
+		<apex:outputLabel value="表示形式 " for="modeSel"  style="padding-top: 10px;margin-left:6px"/>
+		<apex:selectList value="{!currentMode}" id="modeSel" styleClass="j-dropDownList" size="1" style="margin-left:2px;width:120px;" >
+			<!-- All -->
+			<apex:selectOptions value="{!userModeOpts}"/>
+			<apex:actionSupport event="onchange" action="{!refreshToolMode}" rerender="dispForm" status="refStatusBlock" oncomplete="bindEvent();"/>
+		</apex:selectList>
+	</apex:outputLabel>
+	
+</apex:form>
+<apex:form id="dispForm" rendered="{!!blackFlag}">
+<!-- 2018/03/23 部署は複数選択できる機能対応 BY WGCH END -->
+	<input type="hidden" value="{!dispHeaders[0].name}" id="hidStartDate" />
+    <input type="hidden" value="{!dispHeaders[dispHeaders.size-1].name}" id="hidEndDate" />
+	<input type="hidden" value="{!summaryShopCode}" id="hidSummaryShopCode" />
+	<input type="hidden" value="{!viewMode}" id="hidViewMode" />
+	<input type="hidden" value="{!eventTitle}" id="hidEventTitle" />
+	<!-- 用户全是 -->
+	<input type="hidden" value="{!$User.StaffScheduleAllEdit__c}" id="hidUserRoleFlag"/>
+	<input type="hidden" value="{!isShowQreqki}" id="hidQreqkiFlag" />
+	<!-- 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN -->
+	<input type="hidden" value="{!isBothUpd}" id="hidBothUpdFlag" />
+	<!-- 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy END -->
+	<input type="hidden" value="{!isShowFilterFlg}" id="hidFilterFlg"/>
+	<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN -->
+	<input type="hidden" value="{!tempJson}" id="hidTempInfo"/>
+	<input type="hidden" value="{!isUserTaskFlag}" id="hidTaskModeFlg"/> 
+	<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END -->
+    <!-- 支店機能 END-->
+	<table id="dTable" class="list datatable" border="0" cellpadding="0" cellspacing="0" style="margin-top: 5px;width:100%;table-layout: fixed;">
+	    <thead class="rich-table-thead">
+	    <tr class="headerRow" nowrap="nowrap">
+	        <th class="headerRow leftPanel" nowrap="nowrap">
+				<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN -->
+	            <apex:commandLink style="text-decoration:none;" action="{!gotoYearMonth}" rerender="dispForm" oncomplete="bindEvent()"  status="refStatusBlock" rendered="{!!isUserTaskFlag}">
+				<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END -->   
+					<!-- 氏名 -->
+	                <apex:outputText value="{!$Label.ps__msg_035_0125} {!IF(currSortField = SortFieldForUser, currSortStatusMark, '')}"/>
+	                <apex:param name="sortFieldName" value="{!SortFieldForUser}"/>
+				</apex:commandLink>
+				<apex:outputPanel rendered="{!isUserTaskFlag}">
+					タスク
+				</apex:outputPanel>
+	        </th>
+	        <th class="headerRow leftPanel" nowrap="nowrap">
+				<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN -->
+	            <apex:commandLink style="text-decoration:none;" action="{!gotoYearMonth}" rerender="dispForm" oncomplete="bindEvent()" status="refStatusBlock" rendered="{!!isUserTaskFlag}">
+				<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END -->	
+					<!-- 部署 -->
+	                <apex:outputText value="{!$Label.ps__msg_035_0126} {!IF(currSortField = SortFieldForDepart, currSortStatusMark, '')}"/>
+	                <apex:param name="sortFieldName" value="{!SortFieldForDepart}"/>
+	            </apex:commandLink>
+	        </th> 
+	        <apex:repeat var="col" value="{!dispHeaders}">
+	            <th class="headerRow" nowrap="nowrap" data-name="dateRow" data-date="{!col.name}" style="text-align:center;width:{!if(viewWidth == '',col.viewWidth,viewWidth)}; background: {!headerColorMap[col.days]}; url({!URLFOR($Resource.reportFiles, 'img/blank')});" title="{!col.holidayLab}">
+	                {!col.label}
+	            </th>
+	        </apex:repeat>
+	        <th class="headerRow leftPanel" nowrap="nowrap">
+	            <!-- 氏名 -->
+				<apex:outputText value="{!$Label.ps__msg_035_0125}" rendered="{!!isUserTaskFlag}"/>
+				<apex:outputText value="タスク" rendered="{!isUserTaskFlag}"/>
+	        </th>
+	    </tr>
+	    <!-- 六曜 -->
+	    <tr class="headerRow" nowrap="nowrap" style="display:{!IF(isShowQreqki,'','none')}">
+	        <th class="headerRow leftPanel" nowrap="nowrap" colspan="2"><!-- 六輝 -->{!$Label.MSG_035_0128}</th>
+	        <apex:repeat var="col" value="{!dispHeaders}">
+	            <td class="headerRow" nowrap="nowrap" style="text-align:center;">
+	                <span class="qrekispan" dtval="{!col.name}"></span>
+	            </td>
+	        </apex:repeat>
+	        <th class="headerRow leftPanel" nowrap="nowrap"><!-- 六輝 -->{!$Label.MSG_035_0128}</th>
+	    </tr>
+	    <!-- 営業 -->
+	    <tr style="background:#FFFACD; url({!URLFOR($Resource.reportFiles, 'img/blank')});width:38px;display:{!if(isShowBussinisHeader, 'true', 'none')}">
+	        <th class="headerRow" nowrap="nowrap" colspan="2">
+	            <span style="width:80px;"><!-- 営業 -->{!$Label.MSG_035_0129}</span>
+	        </th>
+	        
+	        <apex:repeat var="col" value="{!dispHeaders}" rendered="{!isShowBussinisHeader}">
+	            <td class="headerRow" nowrap="nowrap" style="text-align:center;overflow: hidden;white-space: nowrap;">
+	                <span style="width:36px;color: {!colorInfoMap[col.days]}" title="{!restInfoMap[col.days]}">{!restInfoMap[col.days]}</span>
+	            </td>
+	        </apex:repeat>
+	        <th class="headerRow" nowrap="nowrap">
+	            <span style="width:80px;"><!-- 営業 -->{!$Label.MSG_035_0129}</span>
+	        </th>
+	    </tr>
+	
+	   	<tr style="background:#FFFACD; url({!URLFOR($Resource.reportFiles, 'img/blank')});">
+	       	<th class="headerRow leftPanel" nowrap="nowrap" colspan="2"><!-- 勤務時間 --><span class="allWorkDaysCount"  style="float: right;">{!IF(allWorkDaysCount = 0, 0, allWorkDaysCount)}</span>{!$Label.MSG_035_0127}</th>
+	       	<!-- 
+	       	<td class="headerRow leftPanel allWorkDaysCount">{!IF(allWorkDaysCount = 0, 0, allWorkDaysCount)}</td>
+	       	 -->
+	       	<apex:repeat var="col" value="{!dispHeaders}">
+	            <td class="headerRow dailyWorkTime" nowrap="nowrap" data-time='{!col.name}' data-isclose="{!col.isCloseOrFutureDay}" style="text-align:center;" >
+	               {!if(!col.isCloseOrFutureDay || dayTimeWroksSumMap[col.name] >0, IF(dayTimeWroksSumMap[col.name] = 0, '0', dayTimeWroksSumMap[col.name]), '')}
+	            </td>
+	        </apex:repeat>
+	        <th class="headerRow" nowrap="nowrap">
+	            <span style="width:80px;"><!-- 勤務時間 -->{!$Label.MSG_035_0127}</span>
+	        </th>
+	       </tr>
+	
+	    <apex:repeat var="colHeader" value="{!summaryInfo.conditionVal}">
+	    <tr style="background:#FFFAC1; ">
+	        <th class="headerRow" nowrap="nowrap" colspan="2" style="position: relative;">
+	        	<div style="width:150px">{!colHeader} <span class="{!colHeader}_totalSummaryInfo"  style="float:right"></span></div>
+	        </th>
+	
+	        <apex:repeat var="col" value="{!dispHeaders}">
+	            <td class="headerRow" nowrap="nowrap" style="text-align:center;" >
+	            	<!-- 2015/10/30 upd 休館機能 data-status -->
+	                <span data-id="{!colHeader}_{!col.name}" taskDt="{!col.name}" data-status="{!if(col.isCloseOrFutureDay,'rest','normal')}" class="_summaryCell" >
+	                </span>
+	            </td>
+	        </apex:repeat>
+	        
+	        <th class="headerRow" nowrap="nowrap">
+	            <span style="width:80px;">{!colHeader}</span>
+	        </th>
+	    </tr>
+	    </apex:repeat>
+	    <tr class="headerRow">
+	    	<td colspan="2"></td>
+	    	<td colspan="{!dispHeaders.size}" style="padding: 0px;">
+	    		<div class='tbodyDiv' style="width:100%; background: #f2f3f3; position: relative;  height: 25px;display: none;">
+					<apex:repeat var="col" value="{!dispHeaders}">
+			           	<apex:repeat value="{!col.headTitles}" var="titles">
+			           		<div class="headtitle" date="{!col.name}">{!titles}</div>
+			           	</apex:repeat>
+			        </apex:repeat>
+				</div>
+	    	</td>
+	    	<td></td>
+	    </tr>
+	    </thead>
+	    <tbody>
+	    	<!--2019/09/22 不具合改修：マルチタスク機能、エラー『コレクションサイズ1,013が1,000の最大サイズを超えています。』の不具合改修 by zy BEGIN-->
+			<apex:repeat var="sec" value="{!userInfos}">
+        		<apex:repeat id="repeat" var="typesobj" value="{!sec.userLst}">
+        	<!--2019/09/22 不具合改修：マルチタスク機能、エラー『コレクションサイズ1,013が1,000の最大サイズを超えています。』の不具合改修 by zy END-->
+				 <apex:repeat var="row" value="{!dispRecordMap[typesobj.Id]}">
+            		<tr class="user-row {!row.roleClass}">
+                		<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+						<td class="dataCell leftPanelItem" style="white-space: nowrap;position:relative;">
+                		<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->    
+							<a href="/{!row.userId}" id="{!row.userId}_left" data-userid="{!row.userId}" onmouseout="LookupHoverDetail.getHover('{!row.userId}_left').hide();" onmouseover="LookupHoverDetail.getHover('{!row.userId}_left', '/{!row.userId}/m?retURL=%2F{!row.userId}&isAjaxRequest=1').show();">
+										{!row.userNm}{!IF(LEN(row.userPlusInf) > 0, '('+row.userPlusInf+')','')}
+                    		</a>
+							<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+							<i class="k-icon k-i-lock"  onclick="openUserLock();"/>
+							<i class="k-icon k-i-unlock" onclick="openUserLock();"/>
+							<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+						</td>
+						<td class="dataCell leftPanelItem departElement" style="white-space: nowrap;" ><div class="departElement" style="width: 80px;overflow: hidden;" title="{!typesobj.Department}">{!typesobj.Department}</div></td>
+						<td class="headerRow staff" staffid="{!typesobj.id}" name="{!row.name}" colspan="{!dispHeaders.size}"> 
+						</td>
+						<td class="dataCell leftPanelItem" >
+							<a href="/{!row.userId}" id="{!row.userId}_right" onmouseout="LookupHoverDetail.getHover('{!row.userId}_right').hide();" onmouseover="LookupHoverDetail.getHover('{!row.userId}_right', '/{!row.userId}/m?retURL=%2F{!row.userId}&isAjaxRequest=1').show();">
+								{!row.userNm}{!IF(LEN(row.userPlusInf) > 0, '('+row.userPlusInf+')','')}
+							</a>
+						</td>
+					</tr>
+					<!--2019/09/22 不具合改修：マルチタスク機能、エラー『コレクションサイズ1,013が1,000の最大サイズを超えています。』の不具合改修 by zy BEGIN-->
+					</apex:repeat>
+					<!--2019/09/22 不具合改修：マルチタスク機能、エラー『コレクションサイズ1,013が1,000の最大サイズを超えています。』の不具合改修 by zy END-->
+					<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN -->
+					</apex:repeat>
+					<apex:repeat var="typesobj" value="{!sec.eventLst}" rendered="{!isUserTaskFlag}">
+						<apex:repeat var="row" value="{!dispRecordMap[typesobj.userId]}">
+							<tr class="user-row">
+								<td class="dataCell leftPanelItem" colspan="2" style="white-space: nowrap;position:relative;">
+									{!typesobj.rowName}
+									<i class="k-icon k-i-lock"  onclick="openUserLock();"/>
+									<i class="k-icon k-i-unlock" onclick="openUserLock();"/>
+								</td>
+								<td class="headerRow staff" staffid="{!typesobj.rowId}" name="{!row.name}" info="{!typesobj.otherInfo}" colspan="{!dispHeaders.size}"> 
+								</td>
+								<td class="dataCell leftPanelItem" style="white-space: nowrap;" >
+									{!typesobj.rowName}
+								</td>
+							</tr>
+						</apex:repeat>				
+					<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END -->
+        		 </apex:repeat>
+        		</apex:repeat>
+        	</tbody>
+        <tr>
+    		<td colspan="{!dispHeaders.size + 3}" style="padding: 0px;">
+    			<div id="times"></div>
+    		</td>
+    	</tr>
+	</table>
+	<!-- 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy BEGIN -->
+	<span class="selectGroupSpan" style=" border-left: 1px solid #d5d5d5;padding-left: 10px;margin-left:20px;font-size:12px;">
+		グループ
+		<select class="usergroups" value="{!userGroupId}" style="display:none;">
+			<option></option>
+			<apex:repeat value="{!userTasks}" var="useTask">
+				<option value="{!useTask.id}" userIds="{!useTask.groupName}">{!useTask.name}</option>
+			</apex:repeat>
+		</select>
+		<span style="width:80px;margin-left:10px;">
+			<span class="k-icon k-i-file-add btnSpan" style="left: -5px;" title="新規グループ" onclick="popupNewUserGroup();"></span>
+			<span class="k-icon k-i-gear btnSpan disableClass" style="left: -10px;" title="グループ変更" onclick="popupEditUserGroup()"></span>
+			<span class="k-icon k-i-delete btnSpan disableClass" style="left: -15px;" title="削除グループ" onclick="deleteUserGroup();"></span>
+		</span>
+	</span>
+	<!-- 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy END -->
+</apex:form>
+</apex:pageBlock>
+<apex:outputpanel id="repeadTask">
+<apex:repeat value="{!taskHtml}" var="task">
+	<!-- 2018/02/23 Security Check BEGIN -->
+	<input type="hidden" value="{!HTMLENCODE(task)}" name="hidTask" />
+	<!-- 2018/02/23 Security Check END -->
+</apex:repeat>
+</apex:outputpanel>
+<div class="noAssignTaskTemple">
+	<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN -->
+	<div class="assignTaskClass">
+		<!-- 2019/06/30 マルチタスク、キーワード検索機能 by zy BEGIN -->
+		<input type="text" name="filterTemp" style="display: none" onkeydown="onTaskTempFilter()" placeholder=" テンプレート名を入力してください" class="k-input templateInput assignTaskClass"/>
+		<!-- 2019/06/30 マルチタスク、キーワード検索機能 by zy END -->
+		<div id="taskTemplates" class="assignTaskClass" style="position: relative;color:white;"></div>
+	</div>
+	<div class="assignUserClass">
+		<div class="selectPanel">
+			<input type="text" id="userGridFilter" class="k-input" style="width:98%;display:none;" onkeydown="userFilterStar()" placeholder="「氏名、部署」を検索キーワードを入力してください"/>
+		</div>
+		<div id="userGrid" class="assignUserClass" style="position:relative">
+		</div>
+	<!-- 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END -->
+	</div>
+</div>
+<div id="titleLine">
+	<span id="timeMsg"></span>
+</div>
+<div id="selection"></div>
+<!-- 任务用左右尖括号 -->
+<div id="taskChgSection" ondblclick="taskShow()">
+	<div class="forward front" style="float:left">
+		<span class="k-icon k-i-arrowhead-w" style="margin:2px;"></span>
+	</div>
+	<div class="forward back" style="float:right">
+		<span class="k-icon  k-i-arrowhead-e" style="margin:2px;"></span>
+	</div>
+	<!-- 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy BEGIN -->
+	<a class="taskName"></a>
+	<!-- 2019/04/15 登録したタスクをダブルクリックで行動にリンクする by zy EMD -->
+</div>
+<!-- 2018/03/28 title直接更新機能追加　BY zy BEGIN -->
+<div id="titlePanel">
+	<input type="text" name="titleInput" maxlength="255" onblur="editTitle()" onkeydown="enterToSave(event)"/>  
+</div>
+<div id="translateBack"></div>
+<!-- 2018/03/28 title直接更新機能追加　BY zy END -->
+<!-- 行動の詳細情報 -->
+<c:SSLookupHoverDetail />
+<!-- 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN -->
+<div class="taskScreen"></div>
+<div id="deleteTaskPanel">
+	<!-- Header -->
+	<div class="hd" style="background: linear-gradient(to bottom, rgb(255,255,255) 10%, rgb(204,204,204) 80%);height:20px;font-size: 14px;padding: 5px;">
+	</div>
+	<!-- Body -->
+  	<div class="bd" >
+  		<span class="title" style="margin-left: 30px;font-size: 14px;font-weight: bold;">タスクを削除しようとしています。</span>
+  		<div style="margin-left: 30px;">このタスクおよびすべての今後のタスクを削除しますか？選択したもののみ削除しますか？</div>
+ 	</div>
+ 	<!-- Footer -->
+	  <div class="ft" style="height:25px;">
+	  	  <input type="button" value="キャンセル" class="btn" style="width:100px;float:left;margin-left:30px;font-size:12px;" onclick="hideSameTaskPanel()"/>
+	  	  <input type="button" value="このタスクのみ削除" class="btn" style="float:right;;font-size:12px;" onclick="removeAfterTask(false)"/>
+	  	  <!-- 保存 -->
+          <input type="button" value="すべての今後のタスクを削除" class="btn" style="float:right;margin-right:10px;font-size:12px;" onclick="removeAfterTask(true)"/>
+	  </div>
+</div>
+<div class="taskContPanel">
+<div id="schedule" style="min-width: 480px;    overflow: hidden; " >
+  <!-- Header -->
+  <div class="hd" style="background: linear-gradient(to bottom, rgb(255,255,255) 10%, rgb(204,204,204) 80%);height:20px;">
+  </div>
+  
+  <apex:form >
+  <!-- Body -->
+  <div class="bd" >
+
+	  <!-- Message Panel Block -->        
+	  <apex:outputPanel id="scheduleMessagePanel">
+	    <apex:pageMessages id="inputTierFormMsg"/>
+	  </apex:outputPanel>
+
+	  <table>
+	  	<col style="width: 80px;" />
+	  	<col style="width: 90px;" />
+	  	<col style="width: 350px;" />
+	  	<tr style="vertical-align: top;">
+	  	<td colspan="2"/>
+	  	</tr>
+	  	<tr style="vertical-align: top;">
+        <!-- 頻度 -->
+	  	<td style="text-align: right;"><span style="margin-right: 10px;margin-top: 14px;">{!$Label.MSG_003_0075}</span></td>
+	  	<td>
+            <!-- 毎週 -->
+	  		<label for="repeatWeek">{!$Label.MSG_003_0076}</label> 
+	  		<input type="radio" id="repeatWeek" name="repeatDayType" value="week" checked="checked"/>
+	  		<br/>
+	  		<br/>
+	  		<!-- 
+	  		<label for="repeatMonth">毎月</label> 
+	  		<input type="radio" id="repeatMonth" name="repeatDayType"  value="month" checked="checked" onclick="switchOption(this.value)"/>
+	  		 -->
+	  	</td>
+	  	<td>
+	  	<!-- 2018/03/12 ラックレート部屋タイプ別の対応　by　zy　BEGIN -->
+  		<div style="background-color: white;position: relative;" id="weekBlock">
+  		<!-- 2018/03/12 ラックレート部屋タイプ別の対応　by　zy　END -->
+  		<table style="margin-left:0px;border-spacing: 0px;border-width: 0px;table-layout: fixed;">
+			<tr>
+			   <td>
+            <!-- 月曜 -->
+	  		<label for="Monday">{!$Label.MSG_003_0077}</label> 
+	  		   </td>
+	  		   <td>
+	  		<input type="checkbox" id="Monday" value="Monday" recweek="2" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 火曜 -->
+	  		<label for="Tuesday">{!$Label.MSG_003_0078}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Tuesday" value="Tuesday" recweek="4" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 水曜 -->
+	  		<label for="Wednesday">{!$Label.MSG_003_0079}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Wednesday" value="Wednesday" recweek="8" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 木曜 -->
+	  		<label for="Thursday">{!$Label.MSG_003_0080}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Thursday" value="Thursday" recweek="16" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 金曜 -->
+	  		<label for="Friday">{!$Label.MSG_003_0081}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Friday" value="Friday" recweek="32" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 土曜 -->
+	  		<label for="Saturday">{!$Label.MSG_003_0082}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Saturday" value="Saturday" recweek="64" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 日曜 -->
+	  		<label for="Sunday">{!$Label.MSG_003_0083}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Sunday" value="Sunday" recweek="1" name="weekOpts"/>
+  		   </td>
+			</tr>
+			<tr>
+			   <td colspan="2">
+			 <!-- に繰り返し -->{!$Label.MSG_003_0084}
+			    </td>
+			</tr>
+			</table>
+  		</div>
+  		
+  		<div style="background-color: white;display: none;" id="monthBlock">
+  		<input type="radio" id="repeatMonth1" name="repeatMonthType" 
+  			   value="month1" checked="checked" onclick="switchMonthOption(this.value)"/>
+  		<label for="dayOfMonth"><!-- 毎月 -->{!$Label.MSG_003_0085}</label> 
+  		<select id="dayOfMonth">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12">12</option>
+			<option value="13">13</option>
+			<option value="14">14</option>
+			<option value="15">15</option>
+			<option value="16">16</option>
+			<option value="17">17</option>
+			<option value="18">18</option>
+			<option value="19">19</option>
+			<option value="20">20</option>
+			<option value="21">21</option>
+			<option value="22">22</option>
+			<option value="23">23</option>
+			<option value="24">24</option>
+			<option value="25">25</option>
+			<option value="26">26</option>
+			<option value="27">27</option>
+			<option value="28">28</option>
+			<option value="29">29</option>
+			<option value="30">30</option>
+			<option value="31">31</option>
+            <!-- 最終 -->
+			<option value="99">{!$Label.MSG_003_0086}</option>
+  		</select>
+  		<label ><!-- 日 -->{!$Label.MSG_003_0087}</label> 
+  		
+		<input type="radio" id="repeatMonth2" name="repeatMonthType" 
+		       value="month2" onclick="switchMonthOption(this.value)"/>
+  		<label for="weekOfMonth"><!-- 毎月 -->{!$Label.MSG_003_0085}</label> 
+  		<select id="weekOfMonth" disabled="disabled">
+  			<option value="1"><!-- 第１ -->{!$Label.MSG_003_0088}</option>
+  			<option value="2"><!-- 第２ -->{!$Label.MSG_003_0089}</option>
+  			<option value="3"><!-- 第３ -->{!$Label.MSG_003_0090}</option>
+  			<option value="4"><!-- 第４ -->{!$Label.MSG_003_0091}</option>
+  			<option value="9"><!-- 最終 -->{!$Label.MSG_003_0086}</option>
+  		</select>
+  		<select id="dayOfWeek" disabled="disabled">
+  			<option value="Monday"><!-- 月曜 -->{!$Label.MSG_003_0077}</option>
+  			<option value="Tuesday"><!-- 火曜 -->{!$Label.MSG_003_0078}</option>
+  			<option value="Wednesday"><!-- 水曜 -->{!$Label.MSG_003_0079}</option>
+  			<option value="Thursday"><!-- 木曜 -->{!$Label.MSG_003_0080}</option>
+  			<option value="Friday"><!-- 金曜 -->{!$Label.MSG_003_0081}</option>
+  			<option value="Saturday"><!-- 土曜 -->{!$Label.MSG_003_0082}</option>
+  			<option value="Sunday"><!-- 日曜 -->{!$Label.MSG_003_0083}</option>
+  		</select>
+  		</div>
+  		</td>
+	  	</tr>
+	  	
+	  	<tr><td colspan="3" style="height: 10px">&nbsp;</td></tr>
+	  	<tr>
+	  	<td style="text-align: right;margin-right: 5px"><!-- 開始日付 -->{!$Label.MSG_003_0092}</td>
+	  	<td colspan="2">
+	  	<apex:inputField id="sch_startDate" value="{!timeTable.Checkinday__c}" style="font-size: 14px; width: 90px;"/>
+	  	</td>
+	  	</tr>
+	  	
+	  	<tr>
+	  	<td style="text-align: right;margin-right: 5px"><!-- 終了日付 -->{!$Label.MSG_003_0093}</td>
+	  	<td colspan="2">
+	  	<apex:inputField id="sch_endDate" value="{!timeTable.Checkinday__c}" style="font-size: 14px; width: 90px;"/>
+	  	</td>
+	  	</tr>
+  	</table>
+
+  </div>
+  <!-- Footer -->
+  <div class="ft" >
+    <apex:outputPanel layout="block">
+        <div style="text-align: right;" >
+          <input type="reset" value="reset" id="scheduleFormresetbtn" style="display: none;"/>
+          <!-- 保存 -->
+          <input type="button" value="{!$Label.MSG_003_0072}" 		class="btn" style="width:100px" 	onclick="saveTaskRepeat()"/>
+          <!-- キャンセル -->
+          <input type="button" value="{!$Label.MSG_003_0073}" class="btn" style="width: 100px" 	onclick="panelHide()" />
+        </div>
+    </apex:outputPanel>
+  </div>
+  </apex:form>
+  </div>
+</div>
+<!-- 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END -->
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+<div id="actionTaskWin">
+	<div id="actionTaskGrid"></div>
+	<div class="buttonSection" style="position: absolute;bottom: 4px;width: calc(100% - 26px);">
+		<span class="k-button" style="width:120px;margin-right:10px;" onclick="lockSelTask();">
+				<i class="k-icon k-i-lock"/>ロック
+		</span>
+		<span class="k-button" style="width:120px;" onclick="unLockSelTask();">
+				<i class="k-icon k-i-unlock"/>ロック解除
+		</span>
+	</div>
+</div>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<!-- 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy BEGIN -->
+<style>
+.btnSpan{
+	font-size: 19px;
+	border:1px solid #d5d5d5;
+	width: 25px;
+	height: 22px;
+	cursor: pointer;
+	position: relative;
+}
+.disableClass{
+    color: darkgray !important;
+    background: lightgray !important;
+    border-color: lightgray !important;
+}
+div.projectWindow{
+	display: block;
+    padding-bottom: 1em;
+    font-weight: bold;
+    color: #444;
+}
+.projectEditoPanel{
+	overflow: auto;
+	max-height: 500px;
+	padding:5px;
+	box-shadow: 0 1px 2px 1px rgba(0,0,0,.08), 0 3px 6px rgba(0,0,0,.08);
+	margin-bottom: 10px;
+	line-height: 25px;
+}
+.cusRepuiredClass{
+    background-color: #c00;
+    position: absolute;
+    width: 3px;
+    top: 1px;
+    bottom: 1px;
+}
+.selectGroupSpan {
+	display: none;
+	margin-left:20px;
+}
+.mainTitle .selectGroupSpan {
+	display: inline;
+}
+.requiredClass{
+	border: 1px solid red !important;
+}
+.requiredClass ::-webkit-input-placeholder { /* WebKit browsers */
+    color:    red;
+}
+.requiredClass :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color:    red;
+}
+.requiredClass ::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color:    red;
+}
+.requiredClass :-ms-input-placeholder { /* Internet Explorer 10+ */
+    color:    red;
+}
+.k-multiselect-wrap li>span.k-select{
+	width:30px;
+}
+h2.mainTitle{
+	white-space: nowrap;
+}
+table.hint-table td[role="gridcell"]{
+	white-space: nowrap
+}
+</style>
+<script>
+function getUserGroupId(){
+	return $j("input[id$=hidUserGroupId]").val();
+}
+function initUserGroup(){
+	$j(".mainTitle .selectGroupSpan").remove();
+	$j(".mainTitle").append($j("span.selectGroupSpan"));
+	var userGroupId = getUserGroupId();
+	refreshOptions(userGroupId);
+	var multiSel = $j("input.userTree").getKendoMultiSelect();
+	if (multiSel != undefined ) {
+		var orgSpcd = getShopCode();
+		if (multiSel.spcd != orgSpcd){
+			multiSel.dataSource.read();
+			multiSel.spcd = orgSpcd;
+		}
+	}
+}
+function popupNewUserGroup(){
+	var kendoWin = $j("div.projectWindow").getKendoWindow();
+	var mulitSel = $j("input.userTree").getKendoMultiSelect();
+	if (kendoWin == undefined) {
+		kendoWin = createUserGroupKendoWin();
+		mulitSel = createUserMulit();
+	} 
+	mulitSel.value([]);
+	$j("input.projectName").val("");
+	kendoWin.isNewFlg = true;
+	kendoWin.open();
+	$j(".taskScreen").show();
+}
+function popupEditUserGroup(){
+	var kendoWin = $j("div.projectWindow").getKendoWindow();
+	var mulitSel = $j("input.userTree").getKendoMultiSelect();
+	if (kendoWin == undefined) {
+		kendoWin = createUserGroupKendoWin();
+		mulitSel = createUserMulit();
+	} 
+	var sel = $j("select.usergroups option:checked");
+	if ("userGroupMap" in window) {
+		var selGroupId = $j("select.usergroups").getKendoDropDownList().value();
+		var value = [];
+		if (selGroupId in userGroupMap) value = userGroupMap[selGroupId].split(',');
+		mulitSel.value(value);
+	}
+	$j("input.projectName").val(sel.text());
+	kendoWin.isNewFlg = false;
+	kendoWin.open();
+	$j(".taskScreen").show();
+}
+function deleteUserGroup(){
+	if (confirm("削除してよろしいですか ?")) {
+		var data = {
+			taskId:getUserGroupId()
+		};
+		JINYACONNECT.blockUi();
+		remoteCenter('deleteUserGroup',JSON.stringify(data),afterSaveKendo,true);
+	}
+}
+function createUserGroupKendoWin(){
+	var kendoWin = $j("div.projectWindow").kendoWindow({
+		width: "500px",
+		actions: ["Close"],//,"plus"
+		//未割り当予約
+		title: "グループ",
+		open:function(){
+			$j(".requiredClass").removeClass("requiredClass");
+			$j("div.projectWindow input[placeholder]").attr("placeholder","");
+		},
+		close:function(){
+			$j(".taskScreen").hide();
+		}
+	}).getKendoWindow();
+	kendoWin.center();
+	return kendoWin;
+}
+function createUserMulit(){
+	// 新規プロジェックト画面に担当者選択リスト
+	var multiSel = $j("input.userTree").kendoMultiSelect({
+		dataSource:{
+			transport: {
+	    		read: function (options) {
+	    			var data = {
+						spcd:getShopCode(),
+						// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+						sqlWhere:getSQL(),
+						// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+					};
+					remoteCenter('getUserLst',JSON.stringify(data),afterGetMulti.bind({opt:options}),true);
+	    		}
+	    	},
+		},
+		placeholder: "",
+		filter: "contains",
+		height: 300,
+		autoClose: false,
+		autoBind: false,
+		dataTextField: "text",
+		dataValueField: "value",
+		select:function(e){
+			if (this.value().length > 500) {
+				alert("選択できる要員の上限を超えています");
+				e.preventDefault();
+			}
+		}
+	}).getKendoMultiSelect();
+	return multiSel;
+}
+function saveKendoWin(){
+	if (preCheck()) return;
+	var data = {
+		label:$j("input.projectName").val(),
+		userLst:$j("input.userTree").getKendoMultiSelect().value(),
+		spcd:getShopCode(),
+	};
+	var kendoWin = $j("div.projectWindow").getKendoWindow();
+	if (!kendoWin.isNewFlg) {
+		var userGroupId = $j("select.usergroups").val();
+		if (userGroupId != "") data.taskid = userGroupId;
+	}
+	JINYACONNECT.blockUi();
+	remoteCenter('saveUserGroup',JSON.stringify(data),afterSaveKendo,true);
+}
+function preCheck(){
+	var group = $j("input.projectName");
+	var groupName = group.val();
+	if (groupName == "") {
+		group.attr("placeholder","グループ名を入力してください");
+		group.addClass("requiredClass");
+		return true;
+	} else {
+		group.attr("placeholder","");
+		group.removeClass("requiredClass");
+	}
+	var multiSel = $j("input.userTree").getKendoMultiSelect();
+	var selValues = multiSel.value();
+	if (selValues.length == 0) {
+		multiSel.input.width(250);
+		multiSel.input.attr("placeholder","ユーザーを選んでください");
+		multiSel.wrapper.addClass("requiredClass");
+		return true;
+	} else {
+		multiSel.input.attr("placeholder","");
+		multiSel.wrapper.removeClass("requiredClass");
+	}
+	return false;
+}
+function afterSaveKendo(result){
+	console.log(result);
+	if (result == null) $j("input[id$=hidUserGroupId]").val("");
+	else $j("input[id$=hidUserGroupId]").val(result);
+	hideKendoWin();
+	refreshNewInfo();
+}
+function afterGetMulti(result){
+	let{opt} = this;
+	opt.success(result);
+}
+function hideKendoWin(){
+	var kendoWin = $j("div.projectWindow").getKendoWindow();
+	if (kendoWin != undefined) kendoWin.close();
+}
+function refreshOptions(userGroupId){
+	var sel = $j("select.usergroups");
+	var opts = $j("option",sel);
+	var dropDown = $j("select.usergroups").getKendoDropDownList();
+	if (opts.length > 1) {
+		sel.show();
+		window.userGroupMap = {};
+		$j("select.usergroups option").each(function(){
+			var value = $j(this).val();
+			var userIds = $j(this).attr("userIds");
+			userGroupMap[value] = userIds;
+		});
+		dropDown = $j("select.usergroups").kendoDropDownList({
+			change:function(){
+				$j("input[id$=hidUserGroupId]").val(this.value());
+				refreshNewInfo();
+			}
+		}).getKendoDropDownList();
+		dropDown.value(userGroupId);
+	} else {
+		sel.hide();
+	}
+	if (dropDown == undefined || dropDown.value() == "") $j("span.k-i-gear,span.k-i-delete",".mainTitle").addClass("disableClass");
+	else $j("span.k-i-gear,span.k-i-delete",".mainTitle").removeClass("disableClass");
+}
+// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy BEGIN
+function dragInfoSetting(dragElement,orgTask){
+	// 指定时刻设定
+	var beginTime = dragElement.attr("begin");
+	if (beginTime != undefined) orgTask.beginLabel = beginTime;
+	var endTime = dragElement.attr("end");
+	if (endTime != undefined) orgTask.endLabel = endTime;
+	var dragName = dragElement.attr("name");
+	if (dragName != undefined) orgTask.name = dragName;
+	// 如果结束时刻小于开始时刻，则追加一天
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+	if (endTime <= beginTime) { 
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+		var endDt = new Date(orgTask.groupBeginLabel);
+		endDt.addDays(1);
+		orgTask.groupEndLabel = kendo.toString(endDt,'yyyy/MM/dd');
+	}
+	// 2019/10/15 マスタタスク、タスクテンプレートの文言を行動の任意の項目に自動で記入できるように改善対応 by zy BEGIN
+	var field = dragElement.attr("field");
+	if (field != undefined) orgTask.nameField = field;
+	var color = dragElement.attr("background");
+	if (color != undefined) orgTask.style = 'background:' + color;
+	// 2019/10/15 マスタタスク、タスクテンプレートの文言を行動の任意の項目に自動で記入できるように改善対応 by zy END
+	// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける） by cxw BEGIN
+	var groupName = dragElement.attr("group");
+	orgTask.groupName = groupName;
+	// 2018/10/15 マルチタスクの改善対応(スケジュールとタスクの連動、シフトとタスクの分ける） by cxw END
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN
+	var dailyFlag = dragElement.attr("daily");
+	if (dailyFlag != undefined) {
+		var week = dragElement.attr("week");
+		showDailyPanel(orgTask,week);
+	} else {
+		// 更新task
+		ajaxUpdateEvent(orgTask);
+		dragElement.hide();
+	}
+	// 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END
+}
+function changeTaskMode(dragElement,line){
+	var info = line.attr("info");
+	if (info != "") {
+		info = JSON.parse(info);
+		if (("color" in info) && info.color != "" && info.color != null) dragElement.attr("background",info.color);
+		if (("groupCode" in info) && info.groupCode != "" && info.groupCode != null) dragElement.attr("group",info.groupCode);
+		if (("row" in info) && info.row != "" && info.row != null) dragElement.attr("row",info.row);
+		if (("tempName" in info) && info.tempName != "" && info.tempName != null) dragElement.attr("temp",info.tempName);
+		if (("beginTime" in info) && info.beginTime != "" && info.beginTime != null) dragElement.attr("begin",info.beginTime);
+		if (("endTime" in info) && info.endTime != "" && info.endTime != null) dragElement.attr("end",info.endTime);
+		if (("field" in info) && info.field != "" && info.field != null) dragElement.attr("field",info.field);
+		if (("isDaily" in info) && info.isDaily != "" && info.isDaily != null) dragElement.attr("daily",info.isDaily);
+		if (("name" in info) && info.name != "" && info.name != null) dragElement.attr("name",info.name);
+		if (("calendarFlg" in info) && !info.calendarFlg) dragElement.attr("cal",info.calendarFlg);
+	}
+}
+function getSQL(){
+	var optSelVal = $j("[id$=userLstOpt]").val();
+	return optSelVal;
+}
+function refrehWindowPos(){
+	var win = $j("div.noAssignTaskTemple").getKendoWindow();
+	if (win != undefined) {
+		var cssObj = $j.extend({},win.wrapper.data("cssobj"));
+		cssObj.top += $j(window).scrollTop();
+		cssObj.left += $j(window).scrollLeft();
+		win.wrapper.offset(cssObj);
+	}
+}
+let DatePickerShowFun = DatePicker.pickDate;
+DatePicker.pickDate = function(a, b, c, d) {
+	DatePickerShowFun.call(this,a,b,c,d);
+	var picker = DatePicker.getDatePicker(),
+		taskPanel = $j(picker.myField).closest("div.taskContPanel");
+		taskPanel.length > 0 ? (
+			calendarDiv = $j(picker.calendarDiv),
+			offsetObj = calendarDiv.offset(),
+			offsetObj.top += $j(window).scrollTop(),
+			offsetObj.left += $j(window).scrollLeft(),
+			calendarDiv.offset(offsetObj) ):b;
+		
+};
+// 2019/12/30 マルチタスク機能、タスクベースの形式に切り替えできるように   by zy END
+</script>
+<div class="projectWindow" style="display:none;">
+	<div class="projectEditoPanel">
+		グループ名 
+		<div style="position: relative;">
+			<div class="cusRepuiredClass"></div>
+			<input class="k-textbox projectName" maxlength="80" style="width: calc(100% - 4px);margin-left:4px;" />
+		</div>
+		ユーザー<span class="k-icon k-i-question helpClass" title="グループの成員設定"></span>
+		<div style="position: relative;">
+			<div class="cusRepuiredClass"></div>
+			<input style="width: calc(100% - 4px);margin-left:4px;" class="k-textbox userTree"/>
+		</div>
+		
+	</div>
+	<button class="k-button k-button-icontext k-gantt-create" style="width:48%;float:right;font-size: 15px;" type="button" onclick="hideKendoWin()">
+		<span>キャンセル</span>
+	</button>
+	<button class="k-button k-button-icontext k-gantt-create" style="width:48%;font-size: 15px;" type="button" onclick="saveKendoWin()">
+		<span>保存</span>
+	</button>
+</div>
+<!-- 2019/09/15 マルチタスクで自分専用のグループを作れるようにする(高) by zy END -->
+</apex:page>

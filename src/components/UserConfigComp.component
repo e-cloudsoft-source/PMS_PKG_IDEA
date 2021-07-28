@@ -1,0 +1,25 @@
+<apex:component controller="UserConfigCompCtrl">
+<!-- JQUERY REQUIRED -->
+<apex:attribute name="functiontype" default="KREP" type="String" description="どの機能のカスタマイズ情報FUN指定" />
+<script>
+if (typeof JINYACONNECT === "undefined") {
+    JINYACONNECT = {};
+}
+if (typeof JINYACONNECT.CONFIG === "undefined") {
+    JINYACONNECT.CONFIG = {};
+}
+(function($){
+    // save config to db
+    JINYACONNECT.CONFIG.saveKrepConfig = function(subtype,configstr,userid,spcd) {
+        Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.UserConfigCompCtrl.saveKrepConfig}", subtype,configstr,userid,spcd, function(result, event){
+	        // 異常
+	        if(event.type == 'exception') {
+	            console.info(event.message);
+	        } else {}
+	    });
+    }
+})(jQuery);
+</script>
+    
+</apex:component>

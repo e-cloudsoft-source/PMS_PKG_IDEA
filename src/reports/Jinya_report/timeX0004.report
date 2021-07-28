@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>TIME__c$Name</field>
+    </columns>
+    <columns>
+        <field>TIME__c.timeassignecQ1__r$Field2__c</field>
+    </columns>
+    <columns>
+        <field>TIME__c.timeassignecQ1__r$Field1__c</field>
+    </columns>
+    <format>Tabular</format>
+    <name>$$0004 時間割[エステ＆炭酸泉]</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>Times__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <sortColumn>TIME__c$Name</sortColumn>
+    <sortOrder>Asc</sortOrder>
+    <timeFrameFilter>
+        <dateColumn>TIME__c.timeassignecQ1__r$Field3__c</dateColumn>
+        <interval>INTERVAL_TODAY</interval>
+    </timeFrameFilter>
+</Report>

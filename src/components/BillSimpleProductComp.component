@@ -1,0 +1,291 @@
+<apex:component controller="BillSimpleProductCtrl" allowDML="false" >
+
+<apex:attribute name="container" type="String" description="App Name Space" default="billProductMenuConfig" required="false"/>
+<apex:attribute name="callbackFun" type="String" description="App Name Space" default="" required="false"/>
+<apex:attribute name="shopCode" type="String" assignTo="{!inShopCode}" description="ShopCode" default="" required="false"/>
+<!-- 2021/03/30 優化 by zy BEGIN -->
+<script>
+var {!container}_$prodJsonDs = {};
+{!container}_queryCenter('getProdInfos',JSON.stringify({spcd:"{!JSENCODE(shopCode)}"}),setProdInfoMap);
+function {!container}_queryCenter(type,data,callback) {
+    Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.BillSimpleProductCtrl.remoteCenter}", type,data, function(result, event){
+            // 異常
+            if(event.type == 'exception') {
+            } else {}
+            if (callback) callback(result,event);
+    });
+}
+function setProdInfoMap(result){
+	Object.assign({!container}_$prodJsonDs,result);
+}
+</script>
+<!-- 2021/03/30 優化 by zy END -->
+{!InitXmlDefineInfo}
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<style>
+#{!container} .product-block{
+	height: {!tableHeight}  !important;
+	overflow: auto;
+}
+#{!container}_root {
+	display:none;
+}
+#{!container}{
+	width:{!tableWidth};
+}
+</style>
+<!-- 2021/03/30 優化 by zy BEGIN -->
+<input type="hidden" value="{!oProdsLstJson}" id="hidProdLstJson"/>
+<input type="hidden" value="{!oProdMapsJson}" id="hidOProdMapsJson"/>
+<input type="hidden" value="{!inShopCode}" id="hidSpcd"/>
+<script id="prodTemplate" type="text/x-kendo-template">
+	<input type="button" class="btn k-button _disable_" value="_name_" onclick="{!container}_productCall(this)" name="{!container}_product"  data-id="{!container}_product__code_" style= "_layout_" title="_tip_" data-code="_code_" data-jancode="_jancode_" data-name="_dname_"/>
+</script>
+<!-- 2021/03/30 優化 by zy END -->
+
+<script>
+(function($){
+	// 2021/03/30 優化 by zy BEGIN
+	// var {!container}_$prodJsonDs = JSON.parse("{!JSENCODE(oProdMapsJson)}");
+	// 2021/03/30 優化 by zy END
+	var safeKeyArr = [13,16,17,18,27,32,37,38,39,40],{!container}_OLD_SELECT_TAB = 'tab_0';
+	var safeChangeFlag = false;
+	var tabStrip;
+	var btnTemplate = $("#prodTemplate").text();
+	var wrapDiv = '<div class="product-block"><div class="product-block">_content_</div></div>';
+	$(document).ready(function() {
+		tabStrip = $("#{!container}").kendoTabStrip({
+	        dataSource: [],
+	        dataTextField: "text",
+            dataContentField: "content",
+	        animation:  {
+	            open: {
+	                effects: "fadeIn",
+	                duration: 0
+	            },
+	            close:{
+	            	 duration: 2000
+	            }
+	        },
+	        activate:function(e){
+	        	var nowSelectTab = e.item.id;
+	        	if(nowSelectTab != 'tab_resultTab')
+	        		{!container}_OLD_SELECT_TAB = nowSelectTab;
+	        }
+	    }).data("kendoTabStrip"); 
+		renderProductComp();
+	    console.log('end');
+	    $("#{!container}_seachKey").keyup(function(e) {
+	    	var timer = 0;
+	    	clearTimeout (timer);
+	    	
+	    	//if(!safeflag)return;
+	    	if($.inArray(e.keyCode,safeKeyArr) > 0 && key != ''){
+		    		return;
+		    }
+		    var key = ToCDB(this.value.toUpperCase());
+			var nowSelectTab = tabStrip.select().attr("id");
+    		//var nowSelectTab = $("#{!container} li.k-state-active").attr("id");
+	    	var resultProductBlock = $("#result-block");
+    		resultProductBlock.empty();
+	    	if(key != '' ){
+	    		//key = key.toUpperCase();
+	    		// 検索する
+	    		var selectElements = $("input[name={!container}_product]").filter("[data-code*='"+key+"'],[data-name*='"+key+"']");
+	    		$("span[name='{!container}_tab_result']").text(selectElements.length);
+	    		resultProductBlock.append(selectElements.clone().attr("id","").css("margin-right","5px"));
+	    		if(nowSelectTab != "tab_resultTab"){
+	    				tabStrip.enable($("#tab_resultTab"));
+	    				$("#tab_resultTab").show();
+	    				//$("#tab_resultTab").click();
+	    				tabStrip.activateTab($("#tab_resultTab"));
+	    				//$("#{!container}_seachKey").focus();
+	    				//var textValue = $("#{!container}_seachKey").val();
+	    				//$("#{!container}_seachKey").val(textValue);
+	    		}
+	    	}else{ 
+	    		$("span[name='{!container}_tab_result']").text(0);
+   				//timer = setTimeout(function(){
+   					
+   					$("#tab_resultTab").hide();
+   					tabStrip.activateTab($("#" + {!container}_OLD_SELECT_TAB));
+   					tabStrip.disable($("#tab_resultTab"));
+   					//$("#" + {!container}_OLD_SELECT_TAB).click();
+   					//$("#{!container}_seachKey").focus();
+		    	//},200);
+    		}
+	    });
+	    //$("#{!container}").show();
+	    $("#{!container}_root").show();
+	    
+	    window.{!container}_productCall = function(that){
+	    	$this = $(that);
+			var {!container}_callbacks,{!container}_callbackFun = "{!JSENCODE(callbackFun)}";
+			// 2019/04/15 bug 修正、小写字母code失效问题 by zy BEGIN
+		   	// var prodCode = $this.data("code");
+		   	var prodCode = $this.data("id");
+		   	var preFix = '{!container}_product_';
+		   	prodCode = prodCode.replace(preFix,'');
+		   	// 2019/04/15 bug 修正、小写字母code失效问题 by zy END
+		   	// 2021/03/30 優化 by zy BEGIN
+		   	// 2021/04/31 #10869 bug fixed by zy BEGIN
+		   	if ({!container}_$prodJsonDs == null || !(prodCode in {!container}_$prodJsonDs)) {
+		   	// 2021/04/31 #10869 bug fixed by zy END
+		   		JINYACONNECT.blockUi();
+		   		{!container}_queryCenter('getProdInfos',JSON.stringify({spcd:$("#hidSpcd").val(),ip:"",prodSet:[prodCode]}),afterCallProdFun.bind({el:that}));
+		   		return;
+		   	}
+		   	// 2021/03/30 優化 by zy END
+		   	var prodInfo = {!container}_$prodJsonDs[prodCode];
+		   	if (typeof prodInfo != "undefined") {
+			   	prodInfo._selfId = $this.data("id");
+			   	prodInfo._selfClickType= "product";
+		   		if({!container}_callbackFun != "") {!container}_callbacks = eval({!container}_callbackFun);
+	   			if({!container}_callbacks){!container}_callbacks(prodInfo);
+	   			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+	   			if ("accMasterFun" in window) accMasterFun(prodInfo.productId);
+	   			// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+	  		}
+		}
+		// 2021/03/30 優化 by zy BEGIN
+		function renderProductComp(result) {
+			var prodJson = $("#hidProdLstJson").val();
+			// 2021/04/31 #11158 bug fixed by zy BEGIN
+			var prodLstJsonDs = {};
+			try {
+				prodLstJsonDs = JSON.parse(htmlDecode(prodJson));
+			} catch(e) {
+				try {
+					prodLstJsonDs = JSON.parse(prodJson);
+				} catch(e1) {
+					console.log(e1);
+				}
+			}
+			// 2021/04/31 #11158 bug fixed by zy END
+			var datas = [];
+			prodLstJsonDs.forEach(function(item){
+				var tab = {
+					text : item.label + "[" + item.prods.length + "]",
+					content: processBtnHtml(item)
+				}
+				datas.push(tab);
+			});
+			datas.push({
+				text:'',
+				content:'<div class="product-block"> <div class="result-block"  id="result-block"></div></div>	'
+			});
+			var tabStrip = $("#{!container}").getKendoTabStrip();
+			var dataSource = kendo.data.DataSource.create(datas);
+			tabStrip.setDataSource(dataSource);
+			tabStrip.select(0);
+		    var items = tabStrip.items();
+		    for (var i = 0 ; i < items.length ; i++) {
+		    	var item = items[i];
+		    	if (items.length == (i + 1)){
+		    		$(item).attr("id","tab_resultTab");
+		    		$(".k-link",items[i]).append("結果[<span name='{!container}_tab_result'>0</span>]");
+		    	} else {
+		    		if (item.id != "") {
+		    			{!container}_OLD_SELECT_TAB = "tab_" + i;
+		    		}
+		    		$(item).attr("id","tab_" + i);
+		    	}
+		    }
+		    tabStrip.disable($("#tab_resultTab"));
+		   	$("#tab_resultTab").hide();
+		   	$("input[name={!container}_product].k-state-disabled").attr("disabled",true)
+		}
+
+		function htmlDecode(val){
+			var txt = document.createElement("textarea");
+		    txt.innerHTML = val;
+		    return txt.value;
+		}
+		function processBtnHtml(item){
+			var layout = item.layoutBtnStyle;
+			var contentArr = [];
+
+			item.prods.forEach(function(prod){
+				var btnStr = btnTemplate.replace(/_name_/g,prod.name)
+								.replace(/_code_/g,ToCDB(prod.code.toUpperCase()))
+								.replace(/_layout_/g,(layout || ""))
+								.replace(/_tip_/g,prod.tips)
+								.replace(/_jancode_/g,ToCDB((prod.janCode || "").toUpperCase()))
+								.replace(/_disable_/g,prod.disabledFlg ? "k-state-disabled" : "")
+								.replace(/_dname_/g,ToCDB(prod.name.toUpperCase()));
+				contentArr.push(btnStr);
+			});
+			return wrapDiv.replace('_content_',contentArr.join(""));
+		}
+		function afterCallProdFun(result){
+			var element = this.el;
+			// 2021/04/31 #10870 bug fixed by zy BEGIN
+			if (result != null) {
+			// 2021/04/31 #10870 bug fixed by zy END
+				for (var item in result) {
+					if (typeof item === 'string') {
+						if ({!container}_$prodJsonDs == undefined) {
+							{!container}_$prodJsonDs = {};
+						}
+						{!container}_$prodJsonDs[item] = result[item];
+					}
+				}
+				if ({!container}_$prodJsonDs != undefined) {
+					var prodCode = $(element).attr("data-code");
+					if (prodCode in {!container}_$prodJsonDs) {
+						{!container}_productCall.call(this,element);
+					}
+				}
+			}
+			JINYACONNECT.unblockUi()
+		}
+		function ToCDB(str) {
+			var txt = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォャュョッ、。ー「」";
+				txt+= "　　　　　ガギグゲゴザジズゼゾダヂヅデド　　　　　バビブベボ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+				txt+= "　　　　　　　　　　　　　　　　　　　　　　　　　パピプペポ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+			// 20150628 ひらがな検索機能追加
+			var txh = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんぁぃぅぇぉゃゅょ　　　　　　";
+				txh+= "　　　　　がぎぐげござじずぜぞだぢづでど　　　　　ばびぶべぼ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+				txh+= "　　　　　　　　　　　　　　　　　　　　　　　　　ぱぴぷぺぽ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+			var han = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｬｭｮｯ､｡ｰ｢｣ﾞﾟ";
+			var tmp = "";
+			for (var i = 0; i < str.length; i++) {
+				if (str.charCodeAt(i) > 65248 && str.charCodeAt(i) < 65375) {
+					tmp += String.fromCharCode(str.charCodeAt(i) - 65248);
+				} else if (str.charCodeAt(i) > 12352 && str.charCodeAt(i) < 12543) {
+					/*tmp += String.fromCharCode(str.charCodeAt(i) - 65248);*/
+					c = str.charAt(i);
+					n = txt.indexOf(c,0);
+					if (n == -1) n = txh.indexOf(c,0);
+					if (n >= 0 && n < 60) {
+						c = han.charAt(n)
+					}else if (n >= 60 && n < 120) {
+					    c = han.charAt(n - 60) + han.charAt(60);
+					}else if (n >= 120 && n < 180) {
+					    c = han.charAt(n - 120) + han.charAt(61);
+					}
+					tmp += c;
+				} else {
+					tmp += String.fromCharCode(str.charCodeAt(i));
+				}
+			}
+			return tmp
+		}
+		// 2021/03/30 優化 by zy END
+	});
+})(jQuery);
+
+</script>
+<div class="k-widget k-header" id="{!container}_root">
+	<!-- Query Key Section -->
+	<apex:outputPanel >
+	<input type="text" style="width:98%;margin: 2px 4px 0px 4px;height: 26px;" id="{!container}_seachKey" placeholder="商品コードまたは商品名を入力してください。" class="k-textbox"/>
+	</apex:outputPanel>
+
+	<div id="{!container}" >
+	</div>
+</div>
+</apex:component>

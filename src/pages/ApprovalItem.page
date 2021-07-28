@@ -1,0 +1,578 @@
+<apex:page standardController="Approvaldocuments__c" extensions="ApprovalItemCtrl" showHeader="false"
+	sidebar="false" tabstyle="ApprovalItem__c">
+<c:CommHeaderComp loadJsLib="true"/>
+
+<c:CommProductFeeCalJsComp />
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<style>
+.ui-autocomplete { 
+	max-height: 200px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+ */
+* html .ui-autocomplete {
+	height: 200px;
+}
+.ui-autocomplete-loading { background: white url({!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}) right center no-repeat; }
+.ui-autocomplete { position: absolute; cursor: default;z-index:30 !important;}
+</style>
+<apex:form id="setupForm" >
+<apex:pageBlock >
+	<!-- 行追加 -->
+    <apex:actionFunction name="addTranItemFun" action="{!addBookingItem}" 
+    	status="refStatusBlock" reRender="BookEstTable"  oncomplete="bindEvents();autoFocus();" />
+    <apex:pageBlockButtons >
+    	<!-- 2020/01/30 行追加ボタン機能対応 BY zyz BEGIN -->
+    	<!-- 行追加 -->
+    	<input class="btn" value="{!$Label.MSG_011_0052}" type="button" onclick="refreshOrder(true);addTranItemFun();" style="width: 100px;"/>
+    	<!-- 2020/01/30 行追加ボタン機能対応 BY zyz END -->
+    	<!-- 確定 -->
+   		<apex:commandButton value="{!$Label.ps__msg_011_0053}" action="{!upsertData}" onclick="refreshOrder();" 
+   			reRender="setupForm" status="refStatusBlock" oncomplete="bindEvents()" 
+   			style="color: #ffffff; background-color: #ff0000; background-image: url({!URLFOR($Resource.reportFiles, 'img/blank')}); width: 100px"/>
+   		<!-- 閉じる -->
+   		<input class="btn" type="button" onclick="window.top.close()" value="{!$Label.MSG_011_0054}" style="width: 100px"/>
+   </apex:pageBlockButtons>
+   <apex:outputPanel layout="block" style="overflow:auto; " id="BookEstPanel" >
+   <apex:pageBlockTable value="{!AppEstItemlst}" var="t" id="BookEstTable" columnsWidth="1%,58px,38%,8%,7%,9%,7%,7%,9%" rowClasses="tranDetailRow" >
+		<!-- 移動 -->
+		<apex:column width="1%">
+			 <div title="{!$Label.MSG_011_0050}"  class="pointIndex" rowIndex = "{!t.index}">
+			 	  <img title="" class="pointImg"  alt="" src="{!URLFOR($Resource.AppImages, 'extend/blur.png')}" />  
+		          <apex:inputHidden value="{!t.sobj.RowNo__c}" id="hidRowNo" /> 
+			</div>
+		</apex:column>
+		<!-- アクション -->
+	 	<apex:column headerValue="{!$Label.ps__msg_011_0061}" footerClass="totalRowCenCell" width="3%">
+	 		<!-- クリア -->
+			<input type="button" title="{!$Label.MSG_011_0062}" value="{!$Label.MSG_011_0062}" id="clearProduct" rowIndex="{!t.index}" />
+		</apex:column>
+	 	<!-- 商品コード -->
+	 	<!-- 商品 -->
+        <apex:column headerValue="{!$Label.ps__msg_011_0063}">
+	    	<table style="width: 100%;border-spacing: 0;border: 0; padding: 0">
+	        	<tr>
+	            	<td style="border-bottom:0px;padding: 0px;">
+	               		<apex:inputText value="{!t.productNm}" id="productName" maxlength="80" style="width:99%;min-width:100px;" html-rowIndex="{!t.index}"/>
+	               	</td>
+	               	<td style="width: 44px; border-bottom:0px;padding: 0px 0px 0px 2px">
+	              		<img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+				              onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+				              onfocus="this.className = 'lookupIconOn';"
+				              onblur="this.className = 'lookupIcon';"
+				              class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+				              name="productPopup"
+				              rowIndex = "{!t.index}" />
+					</td>
+				</tr>
+			</table>
+            <!-- 関連情報を一時保持するため、別の変数を定義する -->
+            <apex:inputHidden value="{!t.itemId}" id="hidBookingItemId" />
+            <apex:inputHidden value="{!t.refAppId}" id="hidrefAppId" />
+            <apex:inputHidden value="{!t.sobj.refAccountMaster__c}" id="hidProductId" />
+            <apex:inputHidden value="{!t.orgProductNm}" id="hidProductNm" />
+            <apex:inputHidden value="{!t.sobj.UnitPriceDefKb__c}" id="hidUnitPriceDefKb" />
+            <input type="hidden" id=":BookEstTable:{!t.index}:hidBookEstId" value="{!t.sobj.Id}" bookEstId="{!t.sobj.Id}" productNm="{!t.productNm}" rowIndex="{!t.index}" />
+        </apex:column>
+		<!-- 単価-->
+        <apex:column headerValue="{!$ObjectType.ApprovalItem__c.Fields.UnitPrice__c.label}" >
+            <apex:inputText value="{!t.unitPrice}" id="price" style="width:90%;min-width:45px" onblur="setUpInvoiceNoShowFlgSubFun({!t.index});"/>
+        </apex:column>
+
+		<!-- 数量-->
+        <apex:column headerValue="{!$ObjectType.ApprovalItem__c.Fields.Amount__c.label}" >
+            <apex:inputText value="{!t.prodNums}" id="orderNums" maxlength="8" style="width:90%;min-width:30px" onblur="setUpInvoiceNoShowFlgSubFun({!t.index});"/>
+        </apex:column>
+
+		<!-- 合計金額(税抜)-->
+        <apex:column headerValue="{!$ObjectType.ApprovalItem__c.Fields.GoukeinoneTax__c.label}" width="9%"
+        	style="text-align: right; background-color: #FFEBCD;">
+			<apex:outputPanel rendered="{!!t.isValidata}"><span id=":BookEstTable:{!t.index}:amoutPriceExcTax" rowIndex="{!t.index}"></span></apex:outputPanel>
+			<apex:outputText value="{0,number,{!numberFormat}}" id="amoutPriceExcTax" rendered="{!t.isValidata}">
+			<apex:param value="{!t.amoutExcTax}" />
+			</apex:outputText>
+        </apex:column>
+
+		<!-- 消費税 -->
+        <apex:column headerValue="{!$ObjectType.ApprovalItem__c.Fields.TaxRate__c.label}" style="text-align: right; " width="7%">
+			<apex:outputText value="{0,number, {!TaxNumberFormat}}" id="taxRateType">
+            <apex:param value="{!t.sobj.TaxRate__c/100}" />
+            </apex:outputText>
+			<apex:inputHidden value="{!t.sobj.TaxRate__c}" id="hidTaxRateType" />
+        </apex:column>
+        <!-- サービス料 -->
+        <apex:column headerValue="{!$ObjectType.ApprovalItem__c.Fields.ServiceRate__c.label}" style="text-align: right; " width="7%">
+			<apex:outputField value="{!t.sobj.ServiceRate__c}" id="serviceRate"/>
+			<apex:inputHidden value="{!t.sobj.ServiceRate__c}" id="hidServiceRate" />
+        </apex:column>
+        <!-- 合計金額(税込) -->
+        <apex:column headerValue="{!$Label.ps__msg_011_0065}" style="text-align: right; background-color: #FFEBCD;"  width="9%"
+        	footerClass="totalRowNumCell">
+			<apex:outputPanel rendered="{!!t.isValidata}"><span id=":BookEstTable:{!t.index}:amoutPriceIncTax" rowIndex="{!t.index}"></span></apex:outputPanel>
+			<apex:outputText value="{0,number,{!numberFormat}}" id="amoutPriceIncTax" rendered="{!t.isValidata}">
+				<apex:param value="{!t.amoutIncTax}" />
+			</apex:outputText>
+        </apex:column>
+	</apex:pageBlockTable>
+	</apex:outputPanel>
+</apex:pageBlock>
+</apex:form>
+<script>
+$=jQuery.noConflict();
+
+var currRowIndex = 0,dragLeadElement;
+var _CONST_PRICE_ROOM_TYPE = '室料';			// 室料のKeyWord定義する
+function bindEvents() {
+    // すべて入力の全角数字は半額に変更を行う
+    $('input').change(function(){
+        var txt  = $(this).val();
+        var han = txt.replace(/[Ａ-Ｚａ-ｚ０-９]/g,function(s){return String.fromCharCode(s.charCodeAt(0)-0xFEE0)});
+        $(this).val(han);
+    });
+    // clear the one row info
+    var clearItemIdArr=new Array(':hidProductId',':hidProductNm',
+        ':productName',':price',':orderNums',
+        ':amoutPriceExcTax',':discountNum',':amoutPriceIncTax',
+        ':InvoiceNoShowFlg',':hidBookingItemId', ':hidrefAppId',
+        ':taxRateType', ':hidTaxRateType', ':serviceRate', ':hidServiceRate',':hidUnitPriceDefKb');
+    // Clear Button
+    $("input[id='clearProduct']").click(function() {
+        var groupindex = $(this).attr("rowindex");
+        for (var i = 0; i < clearItemIdArr.length; i++){
+            clearObj = $("[id$=':BookEstTable:" + groupindex + clearItemIdArr[i] + "']");
+            if (clearObj.is(":checkbox")) {
+                clearObj.removeAttr('checked');
+            } else if (clearObj.is("select")) {
+                clearObj.get(0).selectedIndex = 0;
+            } else if (clearObj.is("span")) {
+                clearObj.text("");
+            } else {
+                clearObj.val("");
+            }
+        }
+    });
+    $("img[name='productPopup']").click(function() {
+        var groupindex = $(this).attr("rowindex");
+        // 引き渡し値を設定して、選択画面を開く
+        ctrlNm = $("input:text[id$=':" + groupindex + ":productName']").get(0);
+        ctrlId = $("input:hidden[id$=':" + groupindex + ":hidProductId']").get(0);
+        ctrlHidNm = $("input:hidden[id$=':" + groupindex + ":hidProductNm']").get(0);
+        ctrlPriceId = $("[id$=':" + groupindex + ":price']").get(0);
+        ctrlOrderNumId = $("[id$=':" + groupindex + ":orderNums']").get(0);
+        ctrlTaxRate = $("span[id$=':" + groupindex + ":taxRateType']").get(0);
+        ctrlHidTaxRate = $("input:hidden[id$=':" + groupindex + ":hidTaxRateType']").get(0);
+        ctrlServiceTaxRate = $("span[id$=':" + groupindex + ":serviceRate']").get(0);
+        ctrlHidServiceTaxRate = $("input:hidden[id$=':" + groupindex + ":hidServiceRate']").get(0);
+        var openUrl = "/apex/ProductSearch?np=1&npy=1&idx=" + groupindex;
+        // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+        objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+            ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, '', '', '','','','','');
+        commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupCallback(groupindex));
+    });
+ 
+    // プランの単価入力制御
+    switchPriceStatus();
+    
+    // 会計商品AutoComplete[1桁以上]
+    $("input[id$=':productName']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.ApprovalItemCtrl.getArrayProductItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($.map(result, function (item) {
+                    	item.id = item.productId;
+                    	item.value = item.prodcutName + "("+item.prodcutCode+")";
+                    	return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+	    	var groupindex = $(this).attr("rowIndex");
+    		ui.item.rowIndex = groupindex;
+			autoGetProductInfo(ui.item);
+            return false;
+        },
+        select: function (event, ui) {
+	    	var groupindex = $(this).attr("rowIndex");
+    		ui.item.rowIndex = groupindex;
+            autoGetProductInfo(ui.item);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+            return false;
+        },
+    });
+    // 移動元
+	$("[id$=BookEstTable]").kendoDraggable({
+		// フィルター
+		filter:'.pointIndex:not(.disabled)',
+		// ドルプのアイコン
+		hint: function(e) {
+			dragLeadElement = $(e).parents("tr.tranDetailRow");
+			return dragLeadElement.clone();
+		},
+		// 機能開始
+		dragstart: draggableOnDragStart,
+		// 機能終了
+		dragend: draggableOnDragEnd
+	});
+	// 移動目標
+	$("[id$=BookEstTable] tbody tr.tranDetailRow").kendoDropTarget({
+		// 移動目標中
+		drop: droptargetOnDrop
+	});
+	//行追加共通化
+	lastBookingDetail();
+}
+// 移動目標中
+function droptargetOnDrop(e) {
+	$(e.dropTarget).before($(dragLeadElement));
+}
+// 見積書順位調整JS
+function draggableOnDragStart(e) {
+	$(dragLeadElement).hide();
+}
+function draggableOnDragEnd(e) {
+	// 移動元対象表示
+	var draggable = $('table').data("kendoDraggable");
+	$(dragLeadElement).show();
+	// 見積明細並べ替え
+    refreshOrder();
+    //2017/01/16 行追加共通化　by　zy BEGIN
+	setTimeout(function(){
+		$(".lastBlurRow").unbind("blur");
+		$(".lastBlurRow").removeClass("lastBlurRow");
+		lastBookingDetail();
+	},300);
+	//2017/01/16 行追加共通化　by　zy END
+}
+// 見積明細並べ替え
+function refreshOrder(flag){
+	var rowIndex = 0;
+	var rowArr = new Array();
+	$("[id$=BookEstTable] tbody tr.tranDetailRow").each(function(){
+		if($(this).find('[id$=productName]').val() !=''){
+			$(this).find('[id$=hidRowNo]').val(rowIndex);
+			rowIndex++;
+		} else {
+			rowArr.push(this);
+		}
+	});
+	for (var i = 0; i < rowArr.length ; i++) {
+		$(rowArr[i]).find('[id$=hidRowNo]').val(rowIndex);
+		rowIndex++;
+	}
+}
+// 最新商品情報を取得する
+function autoGetProductInfo(result) {
+	// 存在の商品情報は画面へ反映する
+	var groupindex = result.rowIndex;
+	var taxValLabel = (　result.tax == "" ? "0%" : result.tax + "%");
+	var serviceLabel = (　result.serviceRate == "" ? "0%" : result.serviceRate + "%");
+	   
+	$("input:text[id$=':" + groupindex + ":productName']").val(result.prodcutName);
+	$("input:hidden[id$=':" + groupindex + ":hidProductId']").val(result.productId);
+	$("input:hidden[id$=':" + groupindex + ":hidProductNm']").val(result.prodcutName);
+	$("input:text[id$=':" + groupindex + ":price']").val(result.unitPrice);
+	$("input:text[id$=':" + groupindex + ":orderNums']").val(1);
+	$("span[id$=':" + groupindex + ":taxRateType']").text(taxValLabel);
+	$("input:hidden[id$=':" + groupindex + ":hidTaxRateType']").val(result.tax);
+	$("span[id$=':" + groupindex + ":serviceRate']").text(serviceLabel);
+	$("input:hidden[id$=':" + groupindex + ":hidServiceRate']").val(result.serviceRate);
+	setupCalAmoutPrice(groupindex);
+}
+// 合計値計算と刷新プラン情報
+function _autoGetSetupSyncInfo(groupIndex) {
+	var planSyncInf = "";
+	var sumVal = 0;
+	var isHaveShituliaoFlag = false;
+	
+	$("input[id^='"+groupIndex+"_prodName_']").each(function(idx){
+		var rowidx = $(this).attr("rowidx");
+		var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+		var hidProdId = groupIndex + "_prodid_" + rowidx;
+		var hidProdNm = groupIndex + "_prodName_" + rowidx;
+		var unitPrice = groupIndex + "_prodPrice_" + rowidx;
+
+		var unitPrice = $("#"+unitPrice).val().replaceAll(",","");
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		// 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+		planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ':' + $("#"+hidProdId).val()+ ':' + $("#"+hidProdNm).val() +';';
+		sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+		var actionType = $("#"+groupIndex+"_workHidActType_" + rowidx).val();
+		$(this).closest("tr").find("td>input.showDetailEvent" + groupIndex + "_child").attr("data-actiontype",actionType);
+		if(actionType == _CONST_PRICE_ROOM_TYPE) 
+			isHaveShituliaoFlag = true;
+		
+	});
+	var summaryPriceId = groupIndex + "_summary";
+	var summaryPriceInputFlag = $("#"+summaryPriceId).is('input');
+    // 合計値でプランの単価に反映する
+    if(isHaveShituliaoFlag){
+   		if(summaryPriceInputFlag){
+   			$("#"+summaryPriceId).val(sumVal);
+   		}else{
+   			$("#"+summaryPriceId).replaceWith('<input type="text" id="' + summaryPriceId + '" style="text-align:right;" value="' + commUtils.numFormat(sumVal) + '" />');
+			$("#"+summaryPriceId).unbind("keydown");
+			$("#"+summaryPriceId).on('keydown', function(e){
+            	$(this).data("olddata",$(this).val().replaceAll(",",""));
+            });
+			$("#"+summaryPriceId).unbind("keyup");
+			$("#"+summaryPriceId).keyup(function(e){
+				var price = $(this).val().replaceAll(",","");
+				if(price == $(this).data("olddata")) return;
+				setTimeout(function(){__reComputeShitulyou(groupIndex,summaryPriceId);},300);
+
+			});
+     	} 
+    }else if(summaryPriceInputFlag) 
+     		$("#"+summaryPriceId).replaceWith('<span id="' + summaryPriceId + '" style="float:right;margin-right: 3px">' + commUtils.numFormat(sumVal) +'</span>');
+    else $("#"+summaryPriceId).text(commUtils.numFormat(sumVal));
+	
+	return planSyncInf;
+}
+// プラン展開の明細の変更対応
+function __reComputeShitulyou(groupIndex,summaryPriceId){
+	var otherPrice = 0;
+ 	var childcls = "showDetailEvent" + groupIndex + "_child";
+ 	var planSyncInf = "";
+ 	
+ 	// 合計値計算を行う
+	$("[class='"+ childcls +"']:not([data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "'])").each(function(idx){
+		var rowidx = $(this).attr("rowindex");
+		var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+		var hidProdId = groupIndex + "_prodid_" + rowidx;
+		var hidProdNm = groupIndex + "_prodName_" + rowidx;
+		
+		var unitPrice = $(this).val().replaceAll(",","");
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		// 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+		planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ':' + $("#"+hidProdId).val()+ ':' + $("#"+hidProdNm).val() +';';
+		otherPrice = commUtils.mathNumAdd(otherPrice,unitPrice);
+	}); 
+	var firstShituLyoElement;
+	$("[class='"+ childcls +"'][data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "']").each(function(idx){
+		
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		if(!firstShituLyoElement){ 
+			firstShituLyoElement = $(this);
+			return true;
+		}
+		var rowidx = $(this).attr("rowindex");
+		var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+		var hidProdId = groupIndex + "_prodid_" + rowidx;
+		var hidProdNm = groupIndex + "_prodName_" + rowidx;
+		var unitPrice = $(this).val().replaceAll(",","");
+		// 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+		planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ':' + $("#"+hidProdId).val()+ ':' + $("#"+hidProdNm).val() +';';
+		otherPrice = commUtils.mathNumAdd(otherPrice,unitPrice);
+	}); 
+  	var summaryElement = $("#" + summaryPriceId);
+  	var summaryPrice = summaryElement.val().replaceAll(",","");
+  	if(summaryPrice == "" || !summaryPrice || isNaN(parseFloat(summaryPrice)) ) summaryPrice = 0;
+ 	var changePrice = commUtils.mathNumSub(parseFloat(summaryPrice), otherPrice); 
+ 	firstShituLyoElement.val(changePrice);
+ 	
+ 	var rowidx = firstShituLyoElement.attr("rowindex");
+	var hidFieldId = groupIndex + "_sobjId_" + rowidx;
+	var hidProdId = groupIndex + "_prodid_" + rowidx;
+	var hidProdNm = groupIndex + "_prodName_" + rowidx;
+	// 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+	planSyncInf += $("#"+hidFieldId).val() + ':' + changePrice + ':' + $("#"+hidProdId).val()+ ':' + $("#"+hidProdNm).val() +';';
+	
+ 	var parentRowIndex = firstShituLyoElement.attr("parentindex");
+ 	$("input[id$=':"+ parentRowIndex + ":price']").val(summaryPrice);
+}
+
+function __reComputePrice(childcls,parentRowIndex){
+	var sumVal = 0;
+ 	
+ 	var planSyncInf = '';
+  	// 合計値計算を行う
+  	$("[class='"+ childcls +"']").each(function(idx){
+ 		var unitPrice = $(this).val().replaceAll(",","");
+ 		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+ 		sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+ 	});
+  	// 同期情報を取得する
+  	_autoGetSetupSyncInfo(parentRowIndex);
+  	// 合計値でプランの単価に反映する
+  	$("input[id$=':"+ parentRowIndex + ":price']").val(sumVal);
+}
+//  
+function openChildProdutWin(groupIndex,rowIndex) {
+    var dumyField = $("#"+groupIndex+"_workHidItem").get(0);
+    // 引き渡し値を設定して、選択画面を開く
+    ctrlNm = $("#"+groupIndex+"_prodName_"+rowIndex).get(0);
+    ctrlId = $("#"+groupIndex+"_prodid_" + rowIndex).get(0);
+    ctrlHidNm = dumyField;
+    ctrlPriceId = dumyField;
+    ctrlOrderNumId = dumyField;
+    ctrlTaxRate = dumyField;
+    ctrlHidTaxRate = dumyField;
+    ctrlServiceTaxRate = dumyField;
+    ctrlHidServiceTaxRate = dumyField;
+    var openUrl = "/apex/ProductSearch?np=1";
+    // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+	objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+		ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, '', '', '');
+	commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupChildCallback(groupIndex));
+}
+
+// 会計明細の単価入力制御
+function switchPriceStatus() {
+	$("[id^='showDetailEvent']").each(function(idx) {
+		var rowIndex = $(this).attr("rowIndex");
+		if ($(this).css("visibility") == "hidden") {
+			$("input[id$=':" + rowIndex + ":price']").attr('readonly', false);
+			$("input[id$=':" + rowIndex + ":price']").css('background-color', '');
+		} else {
+			$("input[id$=':" + rowIndex + ":price']").attr('readonly', true);
+			$("input[id$=':" + rowIndex + ":price']").css('background-color', '#DCDCDC');
+		}
+	});
+}
+// ポップ商品選択後の自動処理
+function popupCallback(groupindex) {
+	return function () {
+		//2017/01/16 行追加共通化　by　zy BEGIN
+		$("input[id$='" + groupindex + ":productName']").blur();
+		//2017/01/16 行追加共通化　by　zy END
+		setupCalAmoutPrice(groupindex);
+	}
+}
+function popupChildCallback(groupIndex) {
+	return function() {
+		_autoGetSetupSyncInfo(groupIndex);
+		setupCalAmoutPrice(groupIndex);
+	}
+}
+function showProduInfoToView(groupindex) {
+    // 項目自動クリア
+    $("input:hidden[id$=':" + groupindex + ":hidBookingItemId']").val("");
+    $("input:hidden[id$=':" + groupindex + ":hidrefAppId']").val("");
+
+    // ステータス切替
+    switchPriceStatus();
+}
+function blockUi() {
+    $("form[id$=':setupForm']").block({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_011_0068}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $("form[id$=':setupForm']").unblock();
+}
+// 画面初期化
+$(document).ready(function() {
+    bindEvents();
+});
+//2017/01/16 行追加共通化　by　zy BEGIN
+var curFocusUUid;var blurDisabled = false;
+function lastBookingDetail(){
+	var lastSector = "input[id$=productName],input[id$=price],input[id$=orderNums]";
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	$(lastSector,"[id$=BookEstTable] tbody tr.tranDetailRow:last").unbind("focus");
+	$(lastSector,"[id$=BookEstTable] tbody tr.tranDetailRow:last").on("focus",function(e){
+        $(".pointIndex").addClass("disabled");
+	});
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+	$(lastSector,"[id$=BookEstTable] tbody tr.tranDetailRow:last").unbind("blur");
+	$(lastSector,"[id$=BookEstTable] tbody tr.tranDetailRow:last").on("blur",function(){
+		//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+		$(".pointIndex").removeClass("disabled");
+		//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+		//2017/01/18 排除扩展子明细行取得index值 by zy BEGIN
+		var rowIdx = $("tr.tranDetailRow").index($(this).closest("tr.tranDetailRow"));
+		//2017/01/18 排除扩展子明细行取得index值 by zy BEGIN
+		if (!chkValidate(rowIdx)) return;
+		curFocusUUid = (rowIdx + 1) + ':productName';
+		var curRow = $(this).closest("tr");
+		$(lastSector,curRow).keydown(function(e){
+			if (e.which == 9) {
+		        e.preventDefault();
+		    }
+		});
+		$(lastSector,"tr.dataRow:last").unbind("blur");
+		refreshOrder(true);
+		addTranItemFun();
+	}).addClass("lastBlurRow");
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	$("input.btn,input[id$=clearProduct]").unbind("mouseenter");
+	$("input.btn,input[id$=clearProduct]").on("mouseenter",function(){
+		blurDisabled = true;
+	});
+	$("input.btn,input[id$=clearProduct]").unbind("mouseleave");
+	$("input.btn,input[id$=clearProduct]").on("mouseleave",function(){
+		blurDisabled = false;
+	});
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+}
+function chkValidate(rowIdx){
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	if (blurDisabled) return false;
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+	var lastSector = "input[id$=productName],input[id$=price],input[id$=orderNums]";
+	var chkflag = true;
+	$(lastSector,"[id$=BookEstTable] tbody tr.tranDetailRow:eq(" + rowIdx + ")").each(function(){
+		if($(this).val() == "") {
+			chkflag = false;
+			return false;
+		}
+	});
+	return chkflag;
+}
+//2017/01/16 行追加共通化　by　zy END
+// 明細金額リアルタイム計算
+function setupCalAmoutPrice(rowIndex) {
+	// 単価
+	var unitPrice = kendo.parseFloat($("input:text[id$=':" + rowIndex + ":price']").val());
+	if (unitPrice == null) unitPrice = 0;
+	// 消費税率
+	var tax = kendo.parseFloat($("input:hidden[id$=':" + rowIndex + ":hidTaxRateType']").val());
+	if (tax == null) tax = 0;
+	// サビース料率
+	var service = kendo.parseFloat($("input:hidden[id$=':" + rowIndex + ":hidServiceRate']").val());
+	if (service == null) service = 0;
+	// 数量
+	var nums = kendo.parseFloat($("input:text[id$=':" + rowIndex + ":orderNums']").val());
+	if (nums == null) nums = 0;
+	// 単価定義区分
+	var unitPriceKbn = $("input:hidden[id$=':" + rowIndex + ":hidUnitPriceDefKb']").val();
+	
+	// 関連金額を計算する
+	var amountIncTax;
+	var amountExcTax;
+	var res = JINYACONNECT.PRODUCT.PROCESS(unitPrice, nums, tax, service, unitPriceKbn);
+	// 合計金額計算を行う
+	amountIncTax = res.priceIncTax;
+	amountExcTax = res.priceExcTax;
+	$("span[id$=':" + rowIndex + ":amoutPriceIncTax']").text(kendo.toString(amountIncTax, "n0"));	// 金額（税込み）
+	$("span[id$=':" + rowIndex + ":amoutPriceExcTax']").text(kendo.toString(amountExcTax, "n0"));	// 金額（税抜き） 
+}
+// 修改单价和数量时响应
+function setUpInvoiceNoShowFlgSubFun(groupindex){
+	setupCalAmoutPrice(groupindex);
+}
+// 行追加后计算
+function autoFocus(){
+	var _BookEst = $("[id$=':hidBookEstId'][bookEstId]");
+	for(var i = 0; i < _BookEst.length; i++){
+		setupCalAmoutPrice(_BookEst.eq(i).attr('rowIndex'));
+	}
+}
+</script>
+</apex:page>

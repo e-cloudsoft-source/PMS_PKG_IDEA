@@ -1,0 +1,1574 @@
+<apex:page standardController="AccountMaster__c" title="会席設定" extensions="DinnerSetupCtrl" showHeader="false"
+	sidebar="false" action="{!initKaiseki}">
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/cultures/kendo.culture.ja-JP.min.js')}"/>
+<!-- 2014/11/25 六曜計算追加 -->
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qreki.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qrekiHelp.js')}" /> <!-- 和暦LIBのサポート関数 -->
+<c:CommHeaderComp loadJsLib="false"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<style>
+html,body{
+	height: 100%;
+}
+/* Tool Bar */
+.productPanel .content .k-button{
+    width: calc(100%/4 - 10px);
+    overflow: hidden;
+    white-space: nowrap;
+    margin-left: 10px;
+    margin-bottom: 5px;
+}
+.k-tabstrip-items{
+	margin-left: 0px !important;
+	margin-right: 0px !important;
+	white-space: normal !important;
+}
+.panelToolBar .dateFormat{
+	display: none;
+}
+tr.cookDetail{
+	cursor: pointer;
+	height: 30px;
+}
+td.cookItem{
+	padding: 0;
+}
+#cookWindow{
+	height: 100%;
+}
+.basePanel{
+	overflow: auto;
+	max-height: 500px;
+	padding:5px;
+	box-shadow: 0 1px 2px 1px rgba(0,0,0,.08), 0 3px 6px rgba(0,0,0,.08);
+	margin-bottom: 10px;
+	line-height: 25px;
+}
+.panelToolBar {
+    width: 100%;
+    margin-top: 2px;
+    background: border-style: solid;
+    border-width: 1px;
+    border-collapse: separate;
+    border-spacing: 4px;
+    border-color: #c5c5c5;
+    position: relative;
+}
+.bottomBtn{
+    float:right;
+    margin-left:3px;
+}
+#cookWindow .panelToolBar span.k-input{
+	width:25% !important;
+}
+.panelWrap{
+	height:calc(100% - 80px);
+}
+.grid>div{
+	position: relative;
+}
+.gridBackGround{
+	background-image: url(textures/highlight.png);
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-moz-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-o-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-position: 50% 50%;
+    background-color: #e3e3e3;
+}
+#cookWindow .toolbar,#cookWindow .header{
+	height: 30px;
+	border-style: solid;
+	border-width: 0 0 1px;
+	border-color: #c5c5c5;
+	background-color: #eae8e8;
+}
+#cookWindow .toolbar{
+	padding: .4em .6em;
+}
+#cookWindow .content{
+	overflow: scroll;
+}
+.gridHeaderTbl{
+	width: 100%;
+	height:100%;
+	margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    empty-cells: show;
+    border-width: 0;
+    outline: 0;
+}
+.gridHeaderTbl input{
+	width: 100%;
+	height:100%;
+}
+.gridHeaderTbl td.titleItem{
+    padding: .4em .6em;
+    overflow: hidden;
+    border:0;
+    line-height: 1.6em;
+    vertical-align: middle;
+	width:80px;
+}
+.gridHeaderTbl tr.cookType>td{
+	border-color: #c5c5c5;
+	border-style: solid;
+    border-width: 0 1px 1px 1px;
+}
+.gridHeaderTbl tr.cookDetail:nth-child(even){
+	background-color: #f1f1f1;
+}
+.onEnterRow{
+	background-color: orange !important;
+}
+.detailTbl {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    empty-cells: show;
+    outline: 0;
+    border-left: 1px solid #ececec;
+    table-layout: fixed;
+}
+.detailTbl td{
+	padding: 0px;
+	overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+div.bd{
+    overflow: auto;
+    padding: 10px;
+    background-color: #f2f2f2;
+    border-style: solid;
+    border-width: 0 1px;
+    border-color: #808080;
+    margin: 0 -1px;
+}
+div.ft{
+	text-align: right;
+    border-top: solid 1px #808080;
+    padding: 5px 10px;
+    font-size: 77%;
+    background-color: #f2f2f2;
+}
+.taskScreen{
+	z-index: 10000;
+    border: none;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.6;
+    cursor: wait;
+    position: fixed;
+    display:none;
+}
+.taskContPanel{
+	z-index: 10005;
+	position: fixed;
+	left: 30%;
+	top:30%;
+	background: rgb(255,255,255);
+	display:none;
+}
+.datePicker{
+	z-index:10006;
+}
+.panelWrap .tabWrap{
+	height:calc(100% - 43px);
+	overflow: scroll;
+}
+.panelWrap .tabWrap>div{
+	height:100%;
+}
+.panelWrap .tabWrap>div>div{
+	height:calc(100% - 5px);
+}
+.noShowClass{
+	display: none;
+}
+.inputDate{
+	width: 130px !important;
+}
+div.catogaryDetail{
+	width: calc((100% - 180px)/2 - 3px);
+	height: 100%;
+	float:left;
+	border-left:2px solid #c5c5c5;
+	font-size: 18px;
+}
+div.catogaryDetail>div.content{
+	font-size: 12px;
+	color:white;
+	height: 100%;
+	overflow: scroll;
+}
+.CatogaryPanel>.content>div{
+	 margin-bottom: 6px!important;
+}
+.CatogaryBtn{
+	margin: 2px;
+    background: dodgerblue;
+    font-size: 13px;
+    padding: 2px;
+    height: 27px;
+    line-height: 25px;
+    margin-right: 0px;
+    padding-right: 1px;
+    position: relative;
+}
+.catogaryCol{
+	margin:2px;
+	border-radius:3px;
+	background: gray;
+	font-size:16px;
+	padding: 2px;
+	cursor: pointer;
+	float:left;
+}
+.catoSpan{
+	position:absolute;
+	top:1px;
+	right:30px;
+	width: 60px;
+	text-align: right;
+}
+.unitSpan{
+	position: absolute;
+	top: 1px;
+	right:1px;
+	padding-right:2px;
+}
+.catogaryCol.selected{
+	background: dodgerblue;
+}
+tr.noUseClass{
+	background: darkgray !important;
+	text-decoration: line-through;
+}
+#weekPanel{
+	display:none;
+	float:left;
+}
+#warningMessage{
+	-moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    background:#ffc;
+    color: #000;
+    margin-left:3px;
+    float:left;
+    padding: 2px;
+    border: 1px solid #ececec;
+}
+#weekPanel>span{
+	float:left;
+	border: 1px solid #ececec;
+	padding: 2px;
+}
+span.weekInfo.selected{
+	background: yellowgreen;
+}
+.copyBtn.bottomBtn input[type='text']{
+	display: none;
+}
+.k-animation-container .k-list-container{
+	width:auto !important;
+	min-width: auto !important;
+	white-space: nowrap !important;
+}
+div.k-button,input.k-button,button.k-button{
+	width:100px;
+}
+</style>
+<script>
+$=jQuery.noConflict();
+// 画面情報
+var PageInfo = {
+	materies:[],
+	allregy:[],
+	deleteFoods:[],
+	proDiv:'<div class="k-button _disabled_" code="_code_" pdnm="_name_" proid="_id_">_text_</div>',
+	exitRow :'<tr class="cookDetail" proid="_id_" foodid="_food_"><td class="prodCol" >_name_</td></tr>',
+	cookRow : '<tr class="cookType"><td class="titleItem">_cooktype_</td><td class="cookItem"><table class="detailTbl"><tbody></tbody></table></td></tr>',
+	deleteLabel:"削除",
+	disableLabel:"消去",
+	backLabel:"復元",
+	prods:{},
+	prodArr:[],
+};
+// 画面Lockする
+function blockUi() {
+   $.blockUI({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0278}</h1>'
+    }); 
+    return true;
+}
+// 画面Lock解除
+function unblock() {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+blockUi();
+// マウス移動の場合
+function onMouseMoveRow(){
+	// drag有効の場合
+	if ($(".dragging").length > 0) return;
+	// 該当処理行
+	var curTarget = $(event.target);
+	var wrapRow = curTarget.closest("tr.cookType"); 
+	if (wrapRow.hasClass("lastRow")) return false;
+	// 自動セクション閉じる取消
+	if (PageInfo.mouseEnterId) clearTimeout(PageInfo.mouseEnterId);
+	var section = $(".enterSection");
+	// セクション表示
+	section.show();
+	section.removeClass("cookDetail cookType detailRow");
+	section.attr("title","");
+	var offset;
+	// 料理明細左側
+	if (curTarget.hasClass("titleItem")) {
+		offset = curTarget.offset();
+		section.css({width:curTarget.outerWidth(),height:curTarget.outerHeight() -2});
+		offset.top -= 1;
+		offset.left -= 2;
+		section.offset(offset);
+		section.addClass("detailRow");
+		section.data("target",curTarget);
+		$(">input",section).hide();
+	// 料理明細ありの場合
+	} else if (curTarget.hasClass("prodCol")) {
+		var parDetail = curTarget.closest("tr.cookDetail");
+		var proid = parDetail.attr("proid");
+		var pageLabe = PageInfo.deleteLabel;
+		// 料理商品不存在
+		if (proid == undefined || proid == "") {
+			curTarget = parDetail.closest("tr.cookType");
+			pageLabe = PageInfo.disableLabel;
+		}
+		var offset = curTarget.offset();
+		section.css({width:curTarget.width(),height:curTarget.height()});
+		offset.top -= 1;
+		offset.left -= 2;
+		section.offset(offset);
+		section.data("target",curTarget);
+		section.addClass("cookDetail");
+		var prodnm = parDetail.attr("prodname");
+		section.attr("title",prodnm);
+		$(">input",section).show();
+		$(">input",section).val(pageLabe);
+	// 料理明細なしの場合
+	} else if (curTarget.hasClass("cookItem")){
+		if ($("tr.cookDetail",curTarget).length > 0) return;
+		var curRow = curTarget.closest("tr.cookType");
+		var offset = curRow.offset();
+		section.css({width:curRow.width(),height:curRow.height()});
+		offset.top -= 1;
+		offset.left -= 2;
+		section.offset(offset);
+		section.data("target",curRow);
+		section.addClass("cookType");
+		$(">input",section).show();
+		if (curRow.hasClass("noUseClass")) $(">input",section).val(PageInfo.backLabel);
+		else $(">input",section).val(PageInfo.disableLabel);
+	}
+}
+// マウス離れるの場合
+function mouseLeaveHide(){
+	PageInfo.mouseEnterId = setTimeout(function(){
+		$(".enterSection").hide();
+	},200);
+}
+// セクションマウス移動
+function mouseEnterSection(){
+	if (PageInfo.mouseEnterId) clearTimeout(PageInfo.mouseEnterId);
+}
+// 会席商品印刷
+function openPrintPdf(){
+	var prodId = $("#hidAccMasterId").val();
+	var url = '/apex/DinnerPDF?ids=' + prodId;
+	window.open(url);
+}
+</script>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblock();" id="refStatusBlock"/>
+<div id="cookWindow">
+	<div class="basePanel">
+		<apex:form >
+			<input type="hidden" id="hidAccMasterName"/>
+			<input type="hidden" value="{!accMaster.id}" id="hidAccMasterId"/>
+			<input type="hidden" value="{!accMaster.Materials__c}" id="hidAccMaterials"/>
+			<input type="hidden" value="{!accMaster.Allergy__c}" id="hidAccAllergy"/>
+			<input type="hidden" value="{!materialsJson}" id="hidMaterialsJson"/>
+			<input type="hidden" value="{!allergyJson}" id="hidAllergyJson"/>
+			<input type="hidden" value="{!processJson}" id="hidProcessJson"/>
+			<!-- 料理タイプリスト -->
+			<input type="hidden" value="{!detailJson}" id="hidDetailJson"/>
+			<input type="hidden" value="{!currentShopCode}" id="hidAccShopCode"/>
+			<div class="panelToolBar">
+				<div style="width:100%;font-size: 16px;">会席名：<span id="kaisekiName">{!accMaster.name}</span></div>
+				<span id="schduleInfo" style="display: inline-block;">
+					<span id="weekPanel">
+						<span id="dtInfo"></span>
+						<span>{!$Label.MSG_003_0076}</span>
+						<span class="weekInfo" name="Monday">{!$Label.MSG_003_0077}</span>
+						<span class="weekInfo" name="Tuesday">{!$Label.MSG_003_0078}</span>
+						<span class="weekInfo" name="Wednesday">{!$Label.MSG_003_0079}</span>
+						<span class="weekInfo" name="Thursday">{!$Label.MSG_003_0080}</span>
+						<span class="weekInfo" name="Friday">{!$Label.MSG_003_0081}</span>
+						<span class="weekInfo" name="Saturday">{!$Label.MSG_003_0082}</span>
+						<span class="weekInfo" name="Sunday">{!$Label.MSG_003_0083}</span>
+					</span>
+					<span class="warningMsg" style="display:none;" id="warningMessage">
+						<img alt="ERROR" class="msgIcon" src="/img/msg_icons/warning16.png" title="ERROR"/>
+			          	<!-- 献立明細未作成 -->
+			          	{!$Label.MSG_012_0470}
+					</span>
+					<input type="button" class="k-button otherBtn" style="margin-left:5px;" value="設定" onclick="openSchdule()"/>
+					<input type="button" class="k-button otherBtn" style="margin-left:5px;" value="こよみ" onclick="openClander()"/>
+					<input type="button" class="k-button otherBtn" style="margin-left:5px;" value="印刷" onclick="openPrintPdf()"/>
+				</span>
+				<div style="position: absolute;bottom: 0px;right:0px;">
+					<button class="k-button bottomBtn" type="button" onclick="saveKendoWin()">
+						<span>保存</span>
+					</button>
+					<input type="button" class="k-button cancelBtn bottomBtn" style="display:none;margin-right:5px;" value="取消" onclick="cancelSetting()"/>
+					<input type="button" class="k-button copyBtn bottomBtn" style="margin-right:5px;" value="コピー" onclick="copySetting()"/>
+					<input type="button" class="k-button copyBtn bottomBtn" style="margin-right:5px;" value="戻る" onclick="backAccount()"/>
+				</div>
+			</div>
+		</apex:form>
+	</div>
+	<div class="panelWrap">
+		<div class="gridWrap">
+			<div class="grid">
+				<div class="toolbar gridBackGround" style="display:none;"></div>
+				<div class="header">
+					<table class="gridHeaderTbl gridBackGround">
+						<tr>
+							<td class="titleItem" style="text-align: center;">明細名</td>
+							<td style="text-align: center;">料理名</td>
+						</tr>
+					</table>
+				</div>
+				<div class="content" style="overflow:scroll;height: calc(100% - 32px);">
+					<table  class="gridHeaderTbl" onmousemove="onMouseMoveRow()" onmouseleave="mouseLeaveHide()">
+						<tbody>
+							<apex:repeat var="cook" value="{!cookInfos}">
+								<tr class="cookType">
+									<td class="titleItem">{!cook.cookType}</td>
+									<td class="cookItem">
+										<table class="detailTbl">
+											<tbody>
+												<apex:repeat value="{!cook.foods}" var="food" >
+													<tr class="cookDetail" foodid="{!food.id}" prodname="{!food.AccountMasterSubRef__r.name}" proid="{!food.AccountMasterSubRef__c}">
+														<td class="prodCol">{!food.AccountMasterSubRef__r.name}</td>
+													</tr>
+												</apex:repeat>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+							</apex:repeat>
+							<tr class="cookType lastRow">
+									<td class="titleItem">
+										<input type="text" id="cookTypeLst" style="width: 80px;"/>
+									</td>
+									<td class="cookItem">
+										<table class="detailTbl">
+											<tbody>
+											</tbody>
+										</table>
+									</td>
+								</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="gridCatogry gridBackGround">
+				<div style="height:calc(100% - 30px);" onclick="selectedItem()">
+					<div class="catogaryDetail materialsPanel">
+						<div>原材料名:</div>
+						<div class="content">
+						</div>
+					</div>
+					<div class="catogaryDetail CatogaryPanel" style="width:180px;">
+						<div>栄養成分:</div>
+						<div class="content">
+							<div class="CatogaryBtn">たんぱく質 <input type="number" min="0" value="{!accMaster.Protein__c}" id="protein" data-oldvalue="{!accMaster.Protein__c}"  unit="4" onchange="changeCatoray()" onkeyup="changeCatoray()" name="catogaryDetail"  class="k-textbox catoSpan"/><span class="unitSpan">g</span></div>
+							<div class="CatogaryBtn">脂質  <input type="number" min="0" value="{!accMaster.Lipid__c}" id="lipid" data-oldvalue="{!accMaster.Lipid__c}"  unit="9" onchange="changeCatoray()" onkeyup="changeCatoray()" name="catogaryDetail" class="k-textbox catoSpan"/><span class="unitSpan">g</span></div>
+							<div class="CatogaryBtn">炭水化物  <input type="number" min="0" value="{!accMaster.Carbohydrate__c}" data-oldvalue="{!accMaster.Carbohydrate__c}" id="carbohy"  unit="4" onchange="changeCatoray()" onkeyup="changeCatoray()" name="catogaryDetail"  class="k-textbox catoSpan"/><span class="unitSpan">g</span></div>
+							<div class="CatogaryBtn">カロリー <input type="number" min="0" value="{!ROUND(accMaster.Calorie__c, 0)}" id="cal" data-oldvalue="{!accMaster.Calorie__c}" onchange="safeValue()" class="k-textbox catoSpan" onkeyup="keyupIntVal(this)" name="catogary"/><span class="unitSpan">kcal</span></div>
+						</div>
+					</div>
+					<div class="catogaryDetail AllergyPanel">
+						<div>含有アレルギー物質:</div>
+						<div class="content">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="productPanel">
+			<div class="toolbar gridBackGround">
+				<input type="text" class="k-textbox" onkeyup="filterProdRes()" style="width: 100%;" placeholder="商品コードまたは商品名を入力してください。" />
+			</div>
+			<div class="tabWrap">
+				<div class="content" ></div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="k-header k-drag-clue" style="width: 300px; padding: 0px; line-height: 26px; position: absolute; z-index: 20000; left: 203px; top: 597px;display: none;">
+	<span class="k-icon k-drag-status k-i-plus"></span>
+	<span class="k-clue-text"></span>
+</div>
+<div class="enterSection" onmouseenter="mouseEnterSection()" onmousewheel="scrollTable()" onmouseleave="mouseLeaveHide()" style="position: absolute;border: 2px solid orange;width:0px;height:0px;">
+	<input type="button" class="k-button" style="float:right;margin: 1.5px;height: 90%;" onclick="deleteCurRow()" value="削除"/>
+</div>
+<div class="taskScreen"></div>
+<!-- 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by BEGIN -->
+<div class="taskContPanel">
+<div id="schedule" style="min-width: 480px;    overflow: hidden; " >
+  <!-- Header -->
+  <div class="hd" style="background: linear-gradient(to bottom, rgb(255,255,255) 10%, rgb(204,204,204) 80%);height:20px;">
+  </div>
+  <apex:form >
+  <!-- Body -->
+  <div class="bd" >
+
+	  <!-- Message Panel Block -->        
+	  <apex:outputPanel id="scheduleMessagePanel">
+	    <apex:pageMessages id="inputTierFormMsg"/>
+	  </apex:outputPanel>
+
+	  <table>
+	  	<col style="width: 80px;" />
+	  	<col style="width: 90px;" />
+	  	<col style="width: 350px;" />
+	  	<tr style="{!if(shopOpts.size == 0,'display:none;','')}">
+	  		<td style="text-align: right;margin-right: 5px">
+	  			<span style="margin-right: 10px;margin-top: 14px;">{!$ObjectType.Room__c.Fields.BranchShopName__c.label}</span>
+	  		</td>
+	  		<td colspan="2">
+	  			<apex:selectList id="userDropDown">
+					<apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_005_0035}"/>
+					<apex:selectOptions value="{!shopOpts}"/>
+				</apex:selectList>
+	  		</td>
+	  	</tr>
+	  	<tr style="vertical-align: top;">
+	  	<td colspan="2"/>
+	  	</tr>
+	  	<tr style="vertical-align: top;">
+        <!-- 頻度 -->
+	  	<td style="text-align: right;"><span style="margin-right: 10px;margin-top: 14px;">{!$Label.MSG_003_0075}</span></td>
+	  	<td>
+            <!-- 毎週 -->
+	  		<label for="repeatWeek">{!$Label.MSG_003_0076}</label> 
+	  		<input type="radio" id="repeatWeek" name="repeatDayType" value="week" checked="checked"/>
+	  		<br/>
+	  		<br/>
+	  		<!-- 
+	  		<label for="repeatMonth">毎月</label> 
+	  		<input type="radio" id="repeatMonth" name="repeatDayType"  value="month" checked="checked" onclick="switchOption(this.value)"/>
+	  		 -->
+	  	</td>
+	  	<td>
+	  	<!-- 2018/03/12 ラックレート部屋タイプ別の対応　by　zy　BEGIN -->
+  		<div style="background-color: white;position: relative;" id="weekBlock">
+  		<!-- 2018/03/12 ラックレート部屋タイプ別の対応　by　zy　END -->
+  		<table style="margin-left:0px;border-spacing: 0px;border-width: 0px;table-layout: fixed;">
+			<tr>
+			   <td>
+            <!-- 月曜 -->
+	  		<label for="Monday">{!$Label.MSG_003_0077}</label> 
+	  		   </td>
+	  		   <td>
+	  		<input type="checkbox" id="Monday" value="Monday" recweek="2" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 火曜 -->
+	  		<label for="Tuesday">{!$Label.MSG_003_0078}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Tuesday" value="Tuesday" recweek="4" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 水曜 -->
+	  		<label for="Wednesday">{!$Label.MSG_003_0079}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Wednesday" value="Wednesday" recweek="8" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 木曜 -->
+	  		<label for="Thursday">{!$Label.MSG_003_0080}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Thursday" value="Thursday" recweek="16" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 金曜 -->
+	  		<label for="Friday">{!$Label.MSG_003_0081}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Friday" value="Friday" recweek="32" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 土曜 -->
+	  		<label for="Saturday">{!$Label.MSG_003_0082}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Saturday" value="Saturday" recweek="64" name="weekOpts"/>
+  			   </td>
+			</tr>
+			<tr>
+			   <td>
+            <!-- 日曜 -->
+	  		<label for="Sunday">{!$Label.MSG_003_0083}</label> 
+	  		 </td>
+	  		   <td>
+	  		<input type="checkbox" id="Sunday" value="Sunday" recweek="1" name="weekOpts"/>
+  		   </td>
+			</tr>
+			<tr>
+			   <td colspan="2">
+			 <!-- に繰り返し -->{!$Label.MSG_003_0084}
+			    </td>
+			</tr>
+			</table>
+  		</div>
+  		</td>
+	  	</tr>
+	  	
+	  	<tr><td colspan="3" style="height: 10px">&nbsp;</td></tr>
+	  	<tr>
+	  	<td style="text-align: right;margin-right: 5px"><!-- 開始日付 -->{!$Label.MSG_003_0092}</td>
+	  	<td colspan="2">
+	  		<apex:inputfield value="{!accMaster.DisplayDate__c}" html-oldvalue="{!accMaster.DisplayDate__c}" style="width:90px;" id="startDt"/>
+	  	</td>
+	  	</tr>
+	  	
+	  	<tr>
+	  	<td style="text-align: right;margin-right: 5px"><!-- 終了日付 -->{!$Label.MSG_003_0093}</td>
+	  	<td colspan="2">
+	  		<apex:inputfield value="{!accMaster.DisplayDate__c}" html-oldvalue="{!accMaster.DisplayDate__c}" style="width:90px;" id="endDt"/>
+	  	</td>
+	  	</tr>
+  	</table>
+
+  </div>
+  <!-- Footer -->
+  <div class="ft" >
+    <apex:outputPanel layout="block">
+        <div style="text-align: right;" >
+          <input type="reset" value="reset" id="scheduleFormresetbtn" style="display: none;"/>
+          <!-- 保存 -->
+          <input type="button" value="{!$Label.MSG_003_0072}" class="btn" style="width:100px" 	onclick="saveTaskRepeat()"/>
+          <!-- キャンセル -->
+          <input type="button" value="{!$Label.MSG_003_0073}" class="btn" style="width: 100px" 	onclick="panelHide()" />
+        </div>
+    </apex:outputPanel>
+  </div>
+  </apex:form>
+  </div>
+</div>
+<!-- 2018/06/25 マルチタスクのタスク登録機能改善繰り返し期間追加 by END -->
+<script>
+$(document).ready(function() {
+	// データ初期化
+	initData();
+	bindCookEvent();
+});
+// データ初期化
+function initData(){
+	// 原材料リスト
+	var marterJson = $("#hidMaterialsJson").val();
+	// アレルギーリスト
+	var allergyJson = $("#hidAllergyJson").val();
+	// 原材料リスト
+	if (marterJson != "") {
+		PageInfo.materies = JSON.parse(marterJson);
+		var contentDiv = $("<div/>");
+		for (var i = 0 ; i < PageInfo.materies.length ; i++) {
+			contentDiv.append($("<div class='catogaryCol' data-name='" + PageInfo.materies[i] + "'>" + PageInfo.materies[i] + "</div>"));
+		}
+		$(".catogaryDetail.materialsPanel .content").html(contentDiv.children());
+	}
+	// アレルギーリスト
+	if (allergyJson != "") {
+		PageInfo.allregy = JSON.parse(allergyJson);
+		var contentDiv = $("<div/>");
+		for (var i = 0 ; i < PageInfo.allregy.length ; i++) {
+			contentDiv.append($("<div class='catogaryCol' data-name='" + PageInfo.allregy[i] + "'>" + PageInfo.allregy[i] + "</div>"));
+		}
+		$(".catogaryDetail.AllergyPanel .content").html(contentDiv.children());
+	}
+	var exitAccMater = $("#hidAccMaterials").val();
+	var exitAllergys = $("#hidAccAllergy").val();
+	if (exitAccMater != "") {
+		var maters = exitAccMater.split(';');
+		for (var i = 0; i < maters.length ; i++) {
+			var material = maters[i];
+			$(".catogaryDetail.materialsPanel div[data-name='" + material + "']").addClass("selected");
+		}
+	}
+	if (exitAllergys != "") {
+		var allergys = exitAllergys.split(';');
+		for (var i = 0; i < allergys.length ; i++) {
+			var allergy = allergys[i];
+			$(".catogaryDetail.AllergyPanel div[data-name='" + allergy + "']").addClass("selected");
+		}
+	}
+	// 献立頻度情報設定
+	refreshScheduleInfo();
+}
+function keyupIntVal(el){
+	if (PageInfo.InnputValTimeId) clearTimeout(PageInfo.InnputValTimeId);
+	PageInfo.InnputValTimeId = setTimeout(setInterValInElement(el),500);
+}
+function setInterValInElement(el){
+	var val = kendo.parseInt(el.value);
+	if (val != null) el.value = val;
+}
+// 料理Bind
+function bindCookEvent(){
+	// 画面分割
+	$(".gridWrap").kendoSplitter({
+       orientation: "vertical",
+       panes: [
+           { collapsible: false},
+           { collapsible: false, size: "380px",resizable: true}
+       ]
+    });
+	$(".panelWrap").kendoSplitter({
+        orientation: "horizontal",
+        panes: [
+            { collapsible: true, size: "50%" },
+            { collapsible: false, resizable: true,size:"100%" }
+        ]
+    });
+    // 会計商品画面
+	$(".productPanel .content").kendoTabStrip({
+		dataTextField: "Catogray",
+        dataContentField: "ProdContent",
+        animation:  {
+            open: {
+                effects: "fadeIn",
+                duration: 0
+            },
+            close:{
+            	 duration: 2000
+            }
+        },
+        dataSource:{
+        	transport: {
+	            read: function (options) {
+	    			remoteCenter('getProds',{},false,afterGetProds,options);
+	    		}
+	        },
+        }
+	});
+	resizeElements();
+	// ドルプ機能初期化
+	bindDragBtn();
+	bindRowTarget();
+	// 料理明細選択リスト作成
+	bindDropDown();
+	bindMulite();
+}
+// 料理明細選択リスト作成
+function bindDropDown(){
+	var code = $("#hidDetailJson").val();
+	PageInfo.DetailArr = [];
+	if (code != "") {
+		var encodeDiv = $("<div/>").html(code);
+		var code = encodeDiv.text();
+		var dataArr = JSON.parse(code);
+		for (var i = 0 ; i < dataArr.length ; i++) {
+			var data = dataArr[i];
+			PageInfo.DetailArr.push({text:data,value:data});
+		}
+	}
+	$("#cookTypeLst").kendoDropDownList({
+         dataTextField: "text",
+         dataValueField: "value",
+         dataSource:PageInfo.DetailArr,
+    });
+    // 変更料理明細リスト
+    changeDropDown();
+}
+function bindMulite(){
+	// 新規プロジェックト画面に担当者選択リスト
+    $("[id$=userDropDown]").kendoMultiSelect({
+       filter: "contains",
+       height: 300,
+       autoClose: false,
+       autoBind: false,
+       select:function(e){
+       	var item = this.dataItem(e.item);
+    	var val = item.value;
+    	// 特殊処理
+    	if (val == "") {
+    		this.value([]);
+    	} else {
+    		var curValue = this.value();
+    		var hadBlank = false;
+    		var newValues = [];
+    		for (var i = 0 ; i < curValue.length ; i++) {
+    			var value = curValue[i];
+    			if (value != "") newValues.push(value);
+    			else hadBlank = true;
+    		}
+    		if (hadBlank) this.value(newValues);
+    	}
+       }
+    });
+	
+}
+// 変更料理明細リスト
+function changeDropDown(detailType) {
+	var dropDown = $("#cookTypeLst").data("kendoDropDownList");
+	var ds = filterDetail(detailType);
+	var lastRow = $("tr.lastRow");
+	if (ds.length > 0) {
+		dropDown.setDataSource(ds);
+		dropDown.select(0);
+		lastRow.show();
+		var curTop = lastRow.offset().top;
+		var content = lastRow.closest("div.content");
+		content.scrollTop(curTop);
+	} else lastRow.hide();
+	bindRowTarget();
+}
+// 料理明細フィルター
+function filterDetail(deleteDetail){
+	var ds = [];
+	var cookSet = {};
+	// 既存明細作成
+	var cookRows = $("tr.cookType").not(".lastRow");
+	cookRows.each(function(){
+		var cookType = $("td.titleItem",this).text();
+		cookSet[cookType] = true;
+	});
+	// 削除明細名
+	var deleteFlag = false;
+	for (var i = 0  ; i < PageInfo.DetailArr.length ; i++) {
+		var detail = PageInfo.DetailArr[i];
+		// 選択リスト内容追加
+		if (!(detail.text in cookSet)) ds.push(detail);
+		// 削除明細あり
+		if (deleteDetail != undefined && deleteDetail == detail.text) deleteFlag = true;
+	}
+	// 削除明細既存リストなし
+	if (!deleteFlag && deleteDetail != undefined) {
+		var detailInfo = {text:deleteDetail,value:deleteDetail};
+		PageInfo.DetailArr.push(detailInfo);
+		ds.push(detailInfo);
+	}
+	return ds;
+}
+// ドルプ機能初期化
+function bindDragBtn(){
+	$(".productPanel .content").kendoDraggable({
+		filter:".k-button:not('.k-state-disabled')",
+		group: "insertGroup",
+        hint: function(e) {
+            // golbal var setup
+            var dragClue = $(".k-drag-clue").clone();
+            dragClue.show();
+            dragClue.addClass("dragging");
+            dragClue.attr("proid",$(e).attr("proid"));
+            dragClue.find(".k-clue-text").text($(e).text());
+            return dragClue;
+        },
+        dragend:function(e){
+        	var dragElement = $(".k-drag-clue.dragging");
+        	var proid = dragElement.attr("proid");
+        	var btn = $("div.k-button[proid='" + proid + "']");
+        	var curRow = $("tr.onEnterRow");
+        	dragElement.remove();
+        	$(".onEnterRow").removeClass("onEnterRow");
+        	appendRowInfo(curRow,btn);
+        }
+	});
+	
+	$("div.enterSection").kendoDraggable({
+        hint: function(e) {
+            // golbal var setup
+            var dragClue = $(".k-drag-clue").clone();
+            dragClue.show();
+            dragClue.addClass("dragging");
+            var icon = dragClue.find(".k-icon.k-drag-status");
+            icon.removeClass("k-i-plus");
+            icon.addClass("k-i-arrows-swap");
+            var target = $(e).data("target");
+            if ($(e).hasClass("detailRow")){
+            	dragClue.find(".k-clue-text").text(target.text());
+            	dragClue.css({width:$(e).width(),height:$(e).height(),"line-height":$(e).height() + 'px'});
+            } else {
+            	var prodRow = $(target).closest("tr.cookDetail");
+	            var proid = prodRow.attr("proid");
+	            dragClue.attr("proid",proid);
+	            dragClue.find(".k-clue-text").text(getProdName(proid));
+            }
+            return dragClue;
+        },
+        drag:function(e) {
+        	var currentY = e.clientY;
+        	var curTarget = $(e.currentTarget);
+        	var detailChg = curTarget.hasClass("detailRow");
+        	var curRow = filterRows($("tr.cookType"),currentY);
+        	$(".onEnterRow").removeClass("onEnterRow");
+        	if (curRow == null || $(curRow).hasClass("lastRow")) return;
+        	if (detailChg) {
+        		$("td.titleItem",curRow).addClass("onEnterRow");
+        	} else {
+        		var details = $("tr.cookDetail",curRow);
+        		if (details.length > 0) curRow = filterRows(details,currentY);
+        		$(curRow).addClass("onEnterRow");
+        	}
+        },
+        dragend:dragToRow
+	});
+}
+function bindRowTarget(){
+	var notBindRow = $(".panelWrap .content .gridHeaderTbl tr.cookType").not(".bind");
+	notBindRow.kendoDropTarget({
+		group: "insertGroup",
+		dragenter:function(e){
+			$(".k-drag-clue.dragging").find(".k-icon.k-drag-status").show();
+			var target = $(e.dropTarget);
+			target.removeClass("onEnterRow");
+			if (!target.hasClass("noUseClass")) target.addClass("onEnterRow");
+		},
+		dragleave:function(e){
+			$(".k-drag-clue.dragging").find(".k-icon.k-drag-status").hide();
+			$(e.dropTarget).removeClass("onEnterRow");
+		}
+	});
+	notBindRow.addClass("bind");
+}
+function filterRows(rows,currentY){
+	var diffY = null;
+	var curRow = null;
+	var curRows = rows.filter(function(el){
+ 		var top = $(this).offset().top;
+ 		var bottom = top + $(this).height();
+ 		if (currentY > top && currentY < bottom) curRow = $(this);
+ 	});
+ 	return curRow;
+}
+// ドルプ当前行
+function dragToRow(e){
+	// hint削除
+	var dragElement = $(".k-drag-clue.dragging");
+	dragElement.remove();
+	// 原商品情報
+    var target = $(".enterSection").data("target");
+    var onEnterElement = $(".onEnterRow");
+    var curRow;
+    if (onEnterElement.hasClass("titleItem")) {
+    	curRow = onEnterElement.closest("tr.cookType");
+    	var prodRow = target.closest("tr.cookType");
+    	curRow.before(prodRow);
+    } else {
+    	var prodRow = target.closest("tr.cookDetail");
+    	curRow = onEnterElement;
+    	if (curRow.hasClass("noUseClass")) return false;
+    	if (curRow.hasClass("cookType")) {
+	    	$("table.detailTbl>tbody",curRow).append(prodRow);
+	    } else {
+	    	// 原商品情報
+    		var prodId = prodRow.attr("proid");
+    		var rowWrap = curRow.closest("tr.cookType");
+    		var curRowIdx = rowWrap.index();
+    		var orgRowIdx = prodRow.closest("tr.cookType").index();
+       		// 既存商品チェック
+			var exitProds = $(".cookDetail[proid='" + prodId + "']",rowWrap);
+			if (exitProds.length == 0 || curRowIdx == orgRowIdx) curRow.before(prodRow);
+	    }
+    }
+    $(".onEnterRow").removeClass("onEnterRow");
+}
+// 新規行
+function appendRowInfo(row,div){
+	var prodId = div.attr("proid");
+	var prodName = getProdName(prodId);
+	var foodId = div.attr("foodid");
+	if (foodId == undefined) foodId = "";
+	if (row.hasClass("lastRow")) {
+		var dropDown = $("#cookTypeLst").data("kendoDropDownList");
+		var cookRow = PageInfo.cookRow.replace("_cooktype_",dropDown.value());
+		var copyRow = row;
+		row = $(cookRow);
+		copyRow.before(row);
+		// 変更料理明細リスト
+		changeDropDown();
+	}
+	// 既存商品チェック
+	var exitProds = $(".cookDetail[proid='" + prodId + "']",row);
+	if (exitProds.length == 0) { 
+		// 料理ありと会計商品なしの場合
+		var cookRow = $(row).find("tr.cookDetail[foodid!=''][proid='']");
+		if (cookRow.length > 0){
+			cookRow.attr("proid",prodId);
+			$("td.prodCol",cookRow).text(prodName);
+		} else {
+			var exitRowStr = PageInfo.exitRow.replace(/_name_/g,prodName)
+						.replace(/_id_/g,prodId)
+						.replace('_food_',foodId);
+			var div = $(exitRowStr);
+			$("td.cookItem table>tbody",row).append(div);
+			// 削除料理ID再設定
+			if (PageInfo.deleteFoods.length > 0) {
+			 	var foodId = PageInfo.deleteFoods[0];
+			 	PageInfo.deleteFoods = PageInfo.deleteFoods.slice(1);
+			 	div.attr("foodid",foodId);
+			}
+		}
+	}
+}
+function resizeElements(){
+	var panel = $(".productPanel .tabWrap>.content");
+	var toolBar = $("ul",panel);
+	var gridContent = $(".productPanel>.tabWrap>.content");
+	var gridHt = panel.outerHeight() - toolBar.outerHeight() - 15;
+	//gridContent.outerHeight(gridHt);
+}
+// 会計商品データ更新
+function afterGetProds(result,options){
+	// 商品tab作成
+	refreshTab(result,options);
+	// 会計商品作成
+	bindProdGrid(result);
+}
+// 会計商品作成
+function bindProdGrid(result){
+	var prods = [];
+	for (var i = 0 ; i < result.length ; i++) {
+		var data = result[i];
+		prods = prods.concat(data.prods);
+	}
+	// arr
+	PageInfo.prodArr = prods;
+}
+// 会計商品名取得
+function getProdName(prodId) {
+	if (prodId in PageInfo.prods) return PageInfo.prods[prodId].ProdName;
+	return "";
+}
+// 商品tab作成
+function refreshTab(result,options){
+	var dataRs = result.slice(0);
+	PageInfo.prods = {};
+	for (var i = 0 ; i < dataRs.length; i++) {
+		var data = dataRs[i];
+		data.ProdContent = '';
+		for (var j = 0 ; j < data.prods.length;j++){
+			var prod = data.prods[j];
+			data.ProdContent += PageInfo.proDiv.replace('_id_',prod.Prodid)
+									.replace('_code_',prod.ProdCode)
+									.replace(/_name_/g,ToCDB(prod.ProdName))
+									.replace(/_text_/g,prod.ProdName)
+									.replace('_materies_',prod.Materials)
+									.replace('_allergy_',prod.Allergy)
+									.replace('_disabled_',prod.disabledFlag ? 'k-state-disabled' : '');
+			PageInfo.prods[prod.Prodid] = prod;
+		}
+	}
+	dataRs.push({Catogray:'結果',ProdContent:"<div></div>"});
+	options.success(dataRs);
+	var panel = $(".productPanel .tabWrap .content");
+	var toolBar = $("ul",panel);
+	var wrapHt = panel.outerHeight() - toolBar.outerHeight() - 22;
+	$("div.k-content",panel).outerHeight(wrapHt);
+	var tab = $(".productPanel .content").data("kendoTabStrip");
+	var items = tab.items();
+	tab.activateTab(items[0]);
+	var lastTab = items[items.length - 1];
+	$(lastTab).hide();
+	$("tr.cookDetail").each(function(){
+		var prodid = $(this).attr("proid");
+		if (!(prodid in PageInfo.prods)) {
+			var prodName = $(this).attr("prodname");
+			PageInfo.prods[prodid] = {ProdName:prodName,Prodid:prodid};
+		}
+	});
+	unblock();
+}
+// remote機能
+function remoteCenter(type,req,options,callback,callData){
+	if (req == undefined || !req) req = {};
+	// 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.DinnerSetupCtrl.remoteCenter}", type,JSON.stringify(req), function(result, event){
+        var errorFlag = false;
+        if(event.type == 'exception') {
+        	console.log("-------error-------");
+            alert(event.message);
+            if (options) options.error();
+            errorFlag = true;
+        } else if(result != null){
+        	// html encode
+        	try{
+        	} catch(e){}
+        	if (options) options.success(result);
+        }
+        if (callback != undefined) callback(result,callData,errorFlag);
+    });
+}
+
+function filterProdRes(){
+	var curTarget = event.currentTarget;
+	var curValue = curTarget.value;	
+	if (PageInfo.searchTimeout) clearTimeout(PageInfo.searchTimeout)
+	PageInfo.searchTimeout = setTimeout(function(){
+		var wrap = $("div.productPanel div.tabWrap");
+		var resultContent = $("div.k-content",wrap).last();
+		var curInputs = $("div.k-content",wrap).not(resultContent).find("div.k-button");
+		var tab = $(".productPanel .content").data("kendoTabStrip");
+		var items = tab.items();
+		resultContent.html("");
+		if (curValue == "") {
+			var lastTab = items[items.length - 1];
+			$(lastTab).hide();
+			tab.activateTab(items[0]);
+		} else {
+			//var filterArr = filterProds(curValue);
+			curValue = ToCDB(curValue.toUpperCase());
+			var btns = curInputs.filter("[code*='" + curValue + "'],[pdnm*='" + curValue + "']");
+			if (btns.length > 0) {
+				//var btns = curInputs.filter(filterArr.join(","));
+				if (btns.length > 0) {
+					resultContent.append(btns.clone());
+					var lastTab = items[items.length - 1];
+					$(".k-link",lastTab).text("結果[" + btns.length + "]");
+					$(lastTab).show();
+					tab.activateTab(lastTab);
+				}
+			}
+		}
+	},200);
+}
+// 検索商品
+function filterProds(value){
+	var prodSelector = [];
+	value = ToCDB(value.toUpperCase());
+	$(".tabWrap div.k-button").filter("[code*='" + value + "'],[pdnm*='" + value + "']")
+	var prods = PageInfo.prodArr.filter(function(obj){
+		if (obj.ProdName.indexOf(value) >= 0 || obj.ProdCode.indexOf(value) >= 0){
+			if (obj.Prodid != undefined) prodSelector.push("[proid='" + obj.Prodid + "']");
+		}
+	});
+	return prodSelector;
+}
+// 保存チェック
+function checkValidate(){
+	// 有効明細
+	var useRow = $("tr.cookType").not(".lastRow");
+	var checkError = false;
+	// 会計商品idあり
+	useRow.each(function(){
+		var details = $("tr.cookDetail",this);
+		if (details.length == 0) checkError = true;
+		$("tr.cookDetail",this).each(function(){
+			var prodId = $(this).attr("proid");
+			if (prodId == undefined || prodId == "") {
+				checkError = true;
+				return false;
+			}
+		});
+		if (checkError) {
+			//保存失敗、有効の料理明細会計商品必要です！
+			//alert("{!$Label.MSG_012_0471}");
+			//return false;
+		}
+	});
+	return checkError;
+}
+// 画面内容保存
+function saveKendoWin(){
+	//if (checkValidate()) return;
+	blockUi();
+	var data = getCookDetailInfo();
+	if (PageInfo.deleteFoods.length > 0) {
+		data.deleteids = PageInfo.deleteFoods;
+		PageInfo.deleteFoods = [];
+	}
+	var opts = [];
+	$("input[name=weekOpts]:checked").each(function(){
+		opts.push($(this).val());
+	});
+	if (opts.length > 0) {
+		blockUi();
+		data.opts = opts;
+	}
+	remoteCenter('updCookDetail',data,false,afterSave);
+}
+// 保存後
+function afterSave(result,data,error){
+	if (!error) {
+		var url = window.location.href;
+		var prodId = $("#hidAccMasterId").val();
+		url = url.replace(/id=\s*([^]*)/g,"id=" + prodId);
+		cancelSetting(url);
+	} else unblock();
+}
+// 料理データ作成
+function getCookDetailInfo(){
+	var cooks = [];
+	$(".panelWrap .content .gridHeaderTbl>tbody>tr").not(".lastRow").each(function(){
+		var curRow = $(this);
+		createDetailObject(cooks,curRow);
+	});
+	// 原材料リスト
+	var materials = [];
+	$("div.catogaryDetail.materialsPanel div.content>div.selected").each(function(){
+		materials.push($(this).data("name"));
+	});
+	// アレルギーリスト
+	var allergys = [];
+	$("div.catogaryDetail.AllergyPanel div.content>div.selected").each(function(){
+		allergys.push($(this).data("name"));
+	});
+	var pro = kendo.parseFloat($("#protein").val());
+    var lip = kendo.parseFloat($("#lipid").val());
+    var car = kendo.parseFloat($("#carbohy").val());
+    var cal = kendo.parseFloat($("#cal").val());
+	var prodId = $("#hidAccMasterId").val();
+	return {
+		prodid:prodId,
+		materials:materials.join(';'),
+		allergys:allergys.join(';'),
+		cooks:cooks,
+		pro:pro,
+		lip:lip,
+		car:car,
+		cal:cal,
+	};
+}
+// 明細情報作成
+function createDetailObject(cooks,curRow){
+	var cookType = $("td.titleItem",curRow).text();
+	$("tr.cookDetail",curRow).each(function(){
+		// 商品ID
+		var prodid = $(this).attr("proid");
+		// 商品名
+		var prodname = getProdName(prodid);
+		// 料理名
+		var foodid = $(this).attr("foodid");
+		if (foodid == undefined) foodid = "";
+		cooks.push({cooktype:cookType,id:prodid,name:prodname,foodid:foodid});
+	});
+}
+// 選択該当商品
+function selectRow(){
+	var prodName = $("#hidAccMasterName").val();
+    var prodId = $("#hidAccMasterId").val();
+	$("#kaisekiName").text(prodName);
+	//　コピーの場合、明細更新
+	$("tr.cookDetail").attr("foodid","");
+	// ボタン表示状態変更
+	$("#schduleInfo").hide();
+	$("input.bottomBtn.otherBtn").hide();
+	$("input.bottomBtn.copyBtn").hide();
+	$("input.bottomBtn.cancelBtn").show();
+}
+// コピー画面表示
+function copySetting(){
+	// 引き渡し値を設定して、選択画面を開く
+    var ctrlNm = $("#hidAccMasterName").get(0);
+    var ctrlId = $("#hidAccMasterId").get(0);
+    var openUrl = "/apex/ProductSearch?np=1&dinner";
+    // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+	var objs = new Array(ctrlNm, ctrlId);
+	commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, selectRow);
+}
+// コピー取消
+function cancelSetting(url){
+	if (url == undefined) url = window.location.href;
+	window.location.href = url;
+}
+// マウススクロール
+function scrollTable(){
+	var delta=event.detail? event.detail*(-120):event.wheelDelta;
+	var content = $("div.gridWrap>div.grid>div.content");
+	var top = content.scrollTop();
+	var scrollTop = top - delta;
+	content.scrollTop(scrollTop);
+	$(event.currentTarget).hide();
+}
+// 該当行削除
+function deleteCurRow(){
+	// セクション表示の行
+	var tar = $(".enterSection").data("target"),curRow;
+	//　該当行料理明細なしの場合
+	if (tar.hasClass("cookType")) {
+		curRow = tar;
+		// 該当行料理あり、料理商品なしの場合
+		var foodRow = $("tr.cookDetail",tar);
+		if (foodRow.length > 0) deleteFoodId(foodRow);
+	} else {
+		curRow = tar.closest("tr.cookDetail");
+		deleteFoodId(curRow);
+	}
+	$(".enterSection").hide();
+	deleteRow(curRow);
+}
+// 該当行削除
+function deleteRow(curRow){
+	var inputType = $(".enterSection>input").val();
+	if (inputType == PageInfo.deleteLabel) curRow.remove();
+	else if (inputType == PageInfo.disableLabel) {
+		var cookType = $("td.titleItem",curRow).text();
+		curRow.remove();
+		// 変更料理明細リスト
+		changeDropDown(cookType);
+	}
+	else if (inputType == PageInfo.backLabel) curRow.removeClass("noUseClass");
+}
+function deleteFoodId(curRow){
+	var foodid = curRow.attr("foodid");
+	if (foodid != undefined && foodid != "") PageInfo.deleteFoods.push(foodid);
+}
+// 選択項目
+function selectedItem(){
+	var curTarget = $(event.target);
+	// 項目選択・選択なし機能
+	if (curTarget.hasClass("catogaryCol")) {
+		var itemName = curTarget.data("name");
+		if (itemName != undefined && itemName != "") {
+			curTarget.toggleClass("selected");
+			curTarget.toggleClass("AccChanged");
+		}
+	}
+}
+// こよみ行く
+function openClander(){
+	var spcd = $("#hidAccShopCode").val();
+	window.open('/apex/CCalendar?mode=DINNER&spcd=' + spcd);
+}
+// カロリー計算
+function changeCatoray(){
+	var total = 0;
+	$("input[name=catogaryDetail]").each(function(){
+		var value = this.value;
+		if (value < 0) this.value = value = 0;
+		var unit = kendo.parseInt($(this).attr("unit"));
+		var power = kendo.parseFloat(value*unit);
+		total += power;
+	});	
+	$("input[name=catogary]").val(total);
+}
+// 负值为0
+function safeValue(){
+	var curtarget = event.currentTarget;
+	if (curtarget.value < 0) curtarget.value = 0;
+}
+// 保存繰り返し
+function saveTaskRepeat(){
+	// 開始日付
+	var start = $("input[id$=startDt]").val();
+	// 終了日付
+	var end = $("input[id$=endDt]").val();
+	var opts = [];
+	var weekdays = $("input[name='weekOpts']:checked");
+	if (weekdays.length == 0) {
+	          //曜日を選択してください
+		alert("{!$Label.MSG_003_0015}");
+		return false;
+	}
+	// 開始日時
+	var startDt = kendo.parseDate(start,JINYACONNECT.DateFormat);
+	// 終了日時
+    var endDt = kendo.parseDate(end,JINYACONNECT.DateFormat);
+    // 2016/11/25 TIMEZON fix END by zh
+    if (startDt == null || endDt == null) {
+        //開始日付、終了日付に有効な日付の値を入力してください。
+    	alert("{!$Label.MSG_003_0016}");
+    	return false;
+    }
+    // 曜日
+    var diffDay = (endDt.getTime() - startDt.getTime())/(1000*60*60*24);
+    if ( 365 < diffDay ) {
+        //設定期間は最大１年まで設定してください。
+    	alert("{!$Label.MSG_003_0017}");
+    	return false;
+    }
+    // 期間チェック
+    if (startDt > endDt ) {
+    	alert("{!$Label.ERR_0108}");
+    	return false;
+    }
+	weekdays.each(function(){
+		opts.push($(this).val());
+	});
+	// 店舗コード作成
+	var shopCode = '';
+	var multiSel = $("[id$=userDropDown]").data("kendoMultiSelect");
+	if (multiSel != undefined) {
+		var sel = multiSel.value();
+		if (sel.length > 0) {
+			for (var i = 0 ; i < sel.length ; i++) {
+				var selValue = sel[i];
+				if (selValue != "") shopCode += selValue + ';'; 
+			}
+		}
+	}
+	panelHide();
+	if (opts.length > 0) {
+		blockUi();
+		var prodId = $("#hidAccMasterId").val();
+		remoteCenter('updateOpts',{start:start,endDt:end,opts:opts,prodid:prodId,shops:shopCode},false,afterRepeat);
+	}
+}
+// 保存繰り返し後
+function afterRepeat(result){
+	if (result != null) {
+		var encodeDiv = $("<div/>").html(result);
+		$("#hidProcessJson").val(encodeDiv.text());
+		refreshScheduleInfo();
+	}
+	unblock();
+}
+// 献立明細情報更新
+function refreshScheduleInfo(){
+	// 情報取得
+	var processInfo = $("#hidProcessJson").val();
+	// 原情報クリア
+	$("span.weekInfo.selected").removeClass("selected");
+	$("#dtInfo").text("");
+	// 情報あり
+	if (processInfo != "") {
+		var schedule = JSON.parse(processInfo);
+		var info = schedule.start + '　から　'  + schedule.endDt + '　まで';
+		$("#dtInfo").text(info);
+		for (var i =  0 ; i < schedule.weekOpts.length ; i++) {
+			var opt = schedule.weekOpts[i];
+			var col = $("span.weekInfo[name='" + opt + "']");
+			col.addClass("selected");
+		}
+		$("#weekPanel").show();
+		$("#warningMessage").hide();
+		var spcdArr = [];
+		if (schedule.shops != "") {
+			spcdArr = schedule.shops.split(";");
+		}
+		$("#hidAccShopCode").val(spcdArr[0]);
+	} else $("#warningMessage").show();
+}
+function openSchdule(){
+	$(".taskContPanel").show();
+	$(".taskScreen").show();
+	// 自動設定曜日
+	$("input[name=weekOpts]").prop("checked",false);
+	// 情報取得
+	var processInfo = $("#hidProcessJson").val();
+	// 開始日付
+	var startDtInput = $("input[id$=startDt]");
+	// 終了日付
+	var endDtInput = $("input[id$=endDt]");
+	var spcd = $("#hidAccShopCode").val();
+	var shopArr = [spcd];
+	// 店舗コード作成
+	var multiSel = $("[id$=userDropDown]").data("kendoMultiSelect");
+	// 情報あり
+	if (processInfo != "") {
+		var schedule = JSON.parse(processInfo);
+		startDtInput.val(schedule.start);
+		endDtInput.val(schedule.endDt);
+		for (var i =  0 ; i < schedule.weekOpts.length ; i++) {
+			var opt = schedule.weekOpts[i];
+			$("#" + opt).prop("checked",true);
+		}
+		if (multiSel != undefined) {
+			if (schedule.shops != ""){
+				var shopCodes = schedule.shops.split(';');
+				shopArr = [];
+				for (var i = 0 ; i < shopCodes.length ; i++) {
+					var shopCode = shopCodes[i];
+					if (shopCode != "") shopArr.push(shopCode);
+				}
+			}
+		}
+	} else {
+		// 開始日付設定
+		var startDt = startDtInput.attr("oldvalue");
+		var begDt = new Date(startDt);
+		startDtInput.val(kendo.toString(begDt,JINYACONNECT.DateFormat));
+		// 終了日付設定
+		var endDt = endDtInput.attr("oldvalue");
+		endDtInput.val(kendo.toString(new Date(endDt),JINYACONNECT.DateFormat));
+		var weekDay = kendo.toString(begDt,"dddd");
+		$("#" + weekDay).prop("checked",true);
+	}
+	multiSel.value(shopArr);
+}
+function panelHide(){
+	$(".taskContPanel").hide();
+	$(".taskScreen").hide();
+}
+function backAccount(){
+	var prodId = $("#hidAccMasterId").val();
+	window.location.href = '/' + prodId;
+}
+function ToCDB(str) {
+	var txt = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォャュョッ、。ー「」";
+		txt+= "　　　　　ガギグゲゴザジズゼゾダヂヅデド　　　　　バビブベボ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+		txt+= "　　　　　　　　　　　　　　　　　　　　　　　　　パピプペポ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+	// 20150628 ひらがな検索機能追加
+	var txh = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんぁぃぅぇぉゃゅょ　　　　　　";
+		txh+= "　　　　　がぎぐげござじずぜぞだぢづでど　　　　　ばびぶべぼ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+		txh+= "　　　　　　　　　　　　　　　　　　　　　　　　　ぱぴぷぺぽ　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　";
+	var han = "ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｬｭｮｯ､｡ｰ｢｣ﾞﾟ";
+	var tmp = "";
+	for (var i = 0; i < str.length; i++) {
+		if (str.charCodeAt(i) > 65248 && str.charCodeAt(i) < 65375) {
+			tmp += String.fromCharCode(str.charCodeAt(i) - 65248);
+		} else if (str.charCodeAt(i) > 12352 && str.charCodeAt(i) < 12543) {
+			/*tmp += String.fromCharCode(str.charCodeAt(i) - 65248);*/
+			c = str.charAt(i);
+			n = txt.indexOf(c,0);
+			if (n == -1) n = txh.indexOf(c,0);
+			if (n >= 0 && n < 60) {
+				c = han.charAt(n)
+			}else if (n >= 60 && n < 120) {
+			    c = han.charAt(n - 60) + han.charAt(60);
+			}else if (n >= 120 && n < 180) {
+			    c = han.charAt(n - 120) + han.charAt(61);
+			}
+			tmp += c;
+		} else {
+			tmp += String.fromCharCode(str.charCodeAt(i));
+		}
+	}
+	return tmp
+}
+</script>
+</apex:page>

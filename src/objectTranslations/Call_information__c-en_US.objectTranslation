@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value><!-- Call information --></value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value><!-- Call information --></value>
+    </caseValues>
+    <fields>
+        <label><!-- Account --></label>
+        <name>Account__c</name>
+        <relationshipLabel><!-- Call Information --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 種類 --></label>
+        <name>CallType__c</name>
+    </fields>
+    <fields>
+        <label><!-- Call Time --></label>
+        <name>Call_Time__c</name>
+    </fields>
+    <fields>
+        <label><!-- 色 --></label>
+        <name>CarColor__c</name>
+    </fields>
+    <fields>
+        <label><!-- 車種 --></label>
+        <name>CarModel__c</name>
+    </fields>
+    <fields>
+        <label><!-- Company Name --></label>
+        <name>Company_Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- ひらがな --></label>
+        <name>Contact_KatakanaCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- Contact Name --></label>
+        <name>Contact_Name__c</name>
+    </fields>
+    <fields>
+        <label><!-- Contact --></label>
+        <name>Contact__c</name>
+        <relationshipLabel><!-- Call Information --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- DNO --></label>
+        <name>DNO__c</name>
+    </fields>
+    <fields>
+        <label><!-- DT0 --></label>
+        <name>DT0__c</name>
+    </fields>
+    <fields>
+        <label><!-- DT1 --></label>
+        <name>DT1__c</name>
+    </fields>
+    <fields>
+        <label><!-- DT4 --></label>
+        <name>DT4__c</name>
+    </fields>
+    <fields>
+        <label><!-- 画像情報 --></label>
+        <name>ImgHex64Info__c</name>
+    </fields>
+    <fields>
+        <label>IsGuestUpdated</label>
+        <name>IsCustomerUpdated__c</name>
+    </fields>
+    <fields>
+        <label><!-- 自動車ナンバー通知投稿対象外 --></label>
+        <name>IsNotNotifyCarInfomationCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- LNO --></label>
+        <name>LNO__c</name>
+    </fields>
+    <fields>
+        <label><!-- MessageUUID --></label>
+        <name>MessageUUID__c</name>
+    </fields>
+    <fields>
+        <label><!-- NAM --></label>
+        <name>NAM__c</name>
+    </fields>
+    <fields>
+        <label>No. of Matching Guest(s)</label>
+        <name>No_of_Matching_Customers__c</name>
+    </fields>
+    <fields>
+        <label><!-- RSN_Code --></label>
+        <name>RSN_Code__c</name>
+    </fields>
+    <fields>
+        <label><!-- SNO --></label>
+        <name>SNO__c</name>
+    </fields>
+    <fields>
+        <label><!-- Time --></label>
+        <name>Time__c</name>
+    </fields>
+    <fields>
+        <label><!-- isDCD1 --></label>
+        <name>isDCD1__c</name>
+    </fields>
+    <fields>
+        <label><!-- isRSNP --></label>
+        <name>isRSNP__c</name>
+    </fields>
+    <nameFieldLabel><!-- Call information名 --></nameFieldLabel>
+    <startsWith><!-- Consonant --></startsWith>
+</CustomObjectTranslation>

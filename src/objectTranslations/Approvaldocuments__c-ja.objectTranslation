@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>稟議</value>
+    </caseValues>
+    <fields>
+        <label><!-- 金額(税抜) --></label>
+        <name>AmountExc__c</name>
+    </fields>
+    <fields>
+        <label><!-- 承認申請進捗 --></label>
+        <name>ApprovalProgress__c</name>
+        <picklistValues>
+            <masterLabel>却下</masterLabel>
+            <translation><!-- 却下 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>最終承認済</masterLabel>
+            <translation><!-- 最終承認済 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>１次承認中</masterLabel>
+            <translation><!-- １次承認中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>２次承認中</masterLabel>
+            <translation><!-- ２次承認中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>３次承認中</masterLabel>
+            <translation><!-- ３次承認中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>４次承認中</masterLabel>
+            <translation><!-- ４次承認中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>５次承認中</masterLabel>
+            <translation><!-- ５次承認中 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 起案部署 --></label>
+        <name>DraftDepart__c</name>
+    </fields>
+    <fields>
+        <label><!-- 起案日 --></label>
+        <name>DraftDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 起案者 --></label>
+        <name>DraftUser__c</name>
+        <relationshipLabel><!-- 稟議 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 科目 --></label>
+        <name>Kamoku__c</name>
+        <picklistValues>
+            <masterLabel>カード手数料</masterLabel>
+            <translation><!-- カード手数料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ガス代</masterLabel>
+            <translation><!-- ガス代 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>クリーニング費</masterLabel>
+            <translation><!-- クリーニング費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ブライダル仕入</masterLabel>
+            <translation><!-- ブライダル仕入 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>リース料</masterLabel>
+            <translation><!-- リース料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>保険料</masterLabel>
+            <translation><!-- 保険料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>修繕費</masterLabel>
+            <translation><!-- 修繕費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>地代</masterLabel>
+            <translation><!-- 地代 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>売店仕入</masterLabel>
+            <translation><!-- 売店仕入 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>室料経費</masterLabel>
+            <translation><!-- 室料経費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>広告宣伝費</masterLabel>
+            <translation><!-- 広告宣伝費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>役員報酬</masterLabel>
+            <translation><!-- 役員報酬 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>振込手数料</masterLabel>
+            <translation><!-- 振込手数料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接待交際費</masterLabel>
+            <translation><!-- 接待交際費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>支払手数料</masterLabel>
+            <translation><!-- 支払手数料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>料理飲食経費</masterLabel>
+            <translation><!-- 料理飲食経費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>新聞図書費</masterLabel>
+            <translation><!-- 新聞図書費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>旅費交通費</masterLabel>
+            <translation><!-- 旅費交通費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>旅館外注費</masterLabel>
+            <translation><!-- 旅館外注費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>材料仕入</masterLabel>
+            <translation><!-- 材料仕入 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>植木手入費</masterLabel>
+            <translation><!-- 植木手入費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>業務委託費</masterLabel>
+            <translation><!-- 業務委託費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>水道料</masterLabel>
+            <translation><!-- 水道料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>法定福利費</masterLabel>
+            <translation><!-- 法定福利費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>消耗品費</masterLabel>
+            <translation><!-- 消耗品費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>減価償却費</masterLabel>
+            <translation><!-- 減価償却費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>無形固定資産償却</masterLabel>
+            <translation><!-- 無形固定資産償却 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>燃料費</masterLabel>
+            <translation><!-- 燃料費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>研究研修費</masterLabel>
+            <translation><!-- 研究研修費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>福利厚生費</masterLabel>
+            <translation><!-- 福利厚生費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>租税公課</masterLabel>
+            <translation><!-- 租税公課 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>管理諸費</masterLabel>
+            <translation><!-- 管理諸費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>給与手当</masterLabel>
+            <translation><!-- 給与手当 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>設備消耗品</masterLabel>
+            <translation><!-- 設備消耗品 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>諸会費</masterLabel>
+            <translation><!-- 諸会費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>販売手数料</masterLabel>
+            <translation><!-- 販売手数料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>車両関係費</masterLabel>
+            <translation><!-- 車両関係費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通信費</masterLabel>
+            <translation><!-- 通信費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>開業費償却</masterLabel>
+            <translation><!-- 開業費償却 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>雑給</masterLabel>
+            <translation><!-- 雑給 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>雑費</masterLabel>
+            <translation><!-- 雑費 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>電力料</masterLabel>
+            <translation><!-- 電力料 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>飲料仕入</masterLabel>
+            <translation><!-- 飲料仕入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 最終承認日 --></label>
+        <name>LastProcessDt__c</name>
+    </fields>
+    <fields>
+        <help><!-- １行39文字、13行以内入力ください。 --></help>
+        <label><!-- 趣旨 --></label>
+        <name>Purpose__c</name>
+    </fields>
+    <fields>
+        <label><!-- No. --></label>
+        <name>RowNo__c</name>
+    </fields>
+    <webLinks>
+        <label><!-- ApprovalItem --></label>
+        <name>ApprovalItem</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- ApprovalPDF --></label>
+        <name>ApprovalPDF</name>
+    </webLinks>
+</CustomObjectTranslation>

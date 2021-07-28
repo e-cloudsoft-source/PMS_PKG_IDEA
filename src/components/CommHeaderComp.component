@@ -1,0 +1,100 @@
+<apex:component controller="CommBaseCtrl">
+<apex:attribute name="loadJsLib" description="is load js/css lib flg" type="Boolean" default="true"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+<apex:attribute name="kendo2019" description="is load js/css lib flg" type="Boolean" default="false"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<apex:outputPanel rendered="{!loadJsLib}">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+<apex:outputPanel rendered="{!!kendo2019}">
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+</apex:outputPanel>
+<apex:outputPanel rendered="{!kendo2019}">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFile2019, 'styles/kendo.common.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFile2019, 'styles/kendo.default.min.css')}" />
+</apex:outputPanel>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}"/>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy BEGIN -->
+<apex:outputPanel rendered="{!!kendo2019}">
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!kendo2019}">
+    <apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/kendo.all.min.js')}"/>
+</apex:outputPanel>
+<!-- 2019/07/15 マルチタスク、一度決めたシフトを個人ごとにロックするボタンなどは設置可能 by zy END -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<apex:includeScript value="{!$Resource.CommLog}"/>
+<script>
+jQuery.noConflict();
+beenFocused = true;
+</script>
+<style>
+/* Console css */
+.console .count
+{
+    background-color: #26c6da;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    border-radius: 15px;
+    color: #ffffff;
+    font-size: 10px;
+    margin-left: 5px;
+    padding: 2px 6px 2px 5px;
+}
+.console div
+{
+    background-position: 6px -95px;
+    border-bottom: 1px solid #DDD;
+    padding: 5px 10px;
+    height: 1em;
+    line-height: 1em;
+    vertical-align: middle;
+}
+.console .error
+{
+    background-position: 6px -135px;
+}
+</style>
+</apex:outputPanel>
+
+<script>
+if (typeof JINYACONNECT === "undefined") {
+	JINYACONNECT = {};
+}
+// 
+JINYACONNECT.NumberFormat = "{!JSENCODE(NumberFormat)}";
+JINYACONNECT.NumberPointLen = "{!JSENCODE(PointLen)}";
+JINYACONNECT.TaxNumberFormat = "{!JSENCODE(TaxNumberFormat)}";
+JINYACONNECT.TaxNumberPointLen = "{!JSENCODE(TaxPointLen)}";
+JINYACONNECT.CurrencySybmol = "{!JSENCODE(CurrencySybmol)}";
+JINYACONNECT.DateFormat = "{!JSENCODE(DateFormat)}";
+JINYACONNECT.DateTmFormat = "{!JSENCODE(DateTimeFormat)}";
+JINYACONNECT.NS = "{!JSENCODE(Ns)}";
+(function($){
+	// Block UI
+	JINYACONNECT.blockUi = function() {
+	 	jQuery.blockUI({
+	         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> Processing...</h1>'
+	    }); 
+	    return true;
+	}
+	// Lock隗｣髯､
+	JINYACONNECT.unblockUi = function() {
+	    jQuery.unblockUI({ fadeOut: 200 }); 
+	}
+})(jQuery);
+// 2021.03.25 ADD TIMEOUT
+if (("Visualforce" in window) && Visualforce.remoting != undefined) {
+    Visualforce.remoting.timeout = 120000; // Set timeout at page level
+}
+
+</script>
+<!-- Block Status Function -->
+<apex:actionStatus onstart="JINYACONNECT.blockUi();" onstop="JINYACONNECT.unblockUi();" id="JINYACONNECT_LOADINGSTATUS"/>
+</apex:component>

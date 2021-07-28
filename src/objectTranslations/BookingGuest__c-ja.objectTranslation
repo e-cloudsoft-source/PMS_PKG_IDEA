@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>宿泊者名簿</value>
+    </caseValues>
+    <fields>
+        <label><!-- 取引先責任者 --></label>
+        <name>ContactRef__c</name>
+        <relationshipLabel><!-- 宿泊者名簿 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 代表者 --></label>
+        <name>DelegateFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 宿泊者番号 --></label>
+        <name>GuestAutoNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 宿泊者名（漢字） --></label>
+        <name>GuestName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約インデックスSUB --></label>
+        <name>IndexSubRef__c</name>
+        <relationshipLabel><!-- 宿泊者名簿 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 部屋グループ番号 --></label>
+        <name>RoomGroupNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋 --></label>
+        <name>RoomRef__c</name>
+        <relationshipLabel><!-- 宿泊者名簿 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 性別 --></label>
+        <name>Sex__c</name>
+        <picklistValues>
+            <masterLabel>女</masterLabel>
+            <translation><!-- 女 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>男</masterLabel>
+            <translation><!-- 男 --></translation>
+        </picklistValues>
+    </fields>
+</CustomObjectTranslation>

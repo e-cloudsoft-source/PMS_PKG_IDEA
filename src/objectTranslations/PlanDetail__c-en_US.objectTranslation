@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Package detail</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Package detail</value>
+    </caseValues>
+    <fields>
+        <label>Product</label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel>Plan detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- オプション商品提供最大数量 --></label>
+        <name>Amount__c</name>
+    </fields>
+    <fields>
+        <label>Consumer tax (Refer)</label>
+        <name>JmstRef__c</name>
+        <relationshipLabel>Plan detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- オプション商品フラグ --></label>
+        <name>OptionAccMstFLG__c</name>
+    </fields>
+    <fields>
+        <label>Product (Plan)</label>
+        <name>PlanProdcut__c</name>
+        <relationshipLabel>Plan detail (Plan)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Plan</label>
+        <name>PlanRef__c</name>
+        <relationshipLabel>Plan detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Amount</label>
+        <name>Price__c</name>
+    </fields>
+    <fields>
+        <label>Product quantity</label>
+        <name>ProductNumber__c</name>
+    </fields>
+    <fields>
+        <label>Service charge (%)</label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label>Consumer tax</label>
+        <name>TaxRate__c</name>
+    </fields>
+    <nameFieldLabel>Plan detail name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+    <validationRules>
+        <errorMessage>You cannot set the accounting items (plan) in the configuration information</errorMessage>
+        <name>PlanDetailItemTypeCheck</name>
+    </validationRules>
+</CustomObjectTranslation>

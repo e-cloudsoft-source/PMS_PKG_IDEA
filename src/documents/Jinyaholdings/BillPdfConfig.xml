@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>	
+<!--
+概要：請求書出力のとき、ラベル出力内容をカスタマイズ用定義情報
+	下記設定は全店舗共通、店舗ごとの定義ができません
+	<SHOP>
+		<SHOPCODE></SHOPCODE>							店舗コード、空欄のまま、変更しないください
+		<BILLPDFLAYOUT>									請求書レイアウトの情報定義
+			<SUBJECTLABEL>請  求  書</SUBJECTLABEL>		請求書のタイトル
+			<TITLELABEL>様</TITLELABEL>					請求先の敬称						
+			<ROWSLABEL>									請求金額下部の補足文字、ROW->COL方式で複数行定義可能
+				<ROW>
+					<COL STYLE="font-size:9pt;">毎度格別の御引立に預かり厚く御礼申し上げます</COL>	１行目の文字
+				</ROW>
+				<ROW>
+					<COL STYLE="font-size:9pt;">下記の通り御請求申し上げます。</COL>
+				</ROW>
+			</ROWSLABEL>
+			<PAYLABEL>お振込先</PAYLABEL>					振込情報のタイトル文言
+		</BILLPDFLAYOUT>
+	</SHOP>
+2019/02/28 TITLELABEL->FIXPOSITION 属性タグ新規追加(請求先の敬称の表示位置切替要)
+	TRUE:敬称文字は請求書中央の箇所に表示する、宛名の文字数と関係ない
+	FALSE:敬称文字は宛名の後ろに付ける、請求書に表示する（デフォルト値）、該当モードの場合、自動的に宛名文字を折り返し処理を行う
+2019/04/30 LETTERLAYOUT 送付状印刷機能追加に従って、送付状レイアウトをカスタマイズ用タグ新規追加
+2019/07/01 SHOP->BILLLAYOUTNAME 請求書送付状の宛名はカスタマイズ機能定義
+		BILLLAYOUTNAME:		宛名カスタマイズタグ
+			LEAD_PDF: 		予約画面から起動された請求書送付状の宛名表示内容がカスタマイズ用タグ
+				書式:		$$_API名XXX_$$	
+				STYLE:		表示のスタイルCSS定義(例：フォントサイズ、色など定義可能)
+				AOTUSPLIT:	１行目最大文字数を超える場合、自動改行実施する・しないフラグ
+						TRUE:	自動改行する
+						FALSE:	自動改行しない（デフォルト値）
+				MAXLENGTH:	１行目最大文字数を定義する、デフォルト値が20
+			BILL_PDF: 		会計画面から起動された請求書送付状の宛名表示内容がカスタマイズ用タグ
+				書式:		$$_API名XXX_$$	
+				STYLE:		表示のスタイルCSS定義(例：フォントサイズ、色など定義可能)
+				AOTUSPLIT:	１行目最大文字数を超える場合、自動改行実施する・しないフラグ
+						TRUE:	自動改行する
+						FALSE:	自動改行しない（デフォルト値）
+				MAXLENGTH:	１行目最大文字数を定義する、デフォルト値が20
+			注:２文字行目が改行定義したい場合、[&lt;br/&gt;]で改行してください
+2019/07/19 SHOP->BILLTITLENAME 請求書宛名はカスタマイズ機能定義
+			該当定義される場合、請求書の宛名は該当定義内容でPDFに出力する
+		BILLTITLENAME:		請求書宛名カスタマイズタグ
+			ALLREPLACE:		TRUE:元宛名表示箇所にXML指定で内容を表示する(最大4行目文字定義可能、自動改行も含め）
+							FALSE:元宛名表示がそのまま、カスタマイズ内容は元の宛名上に表示する（デフォルト値、最大３行目定義可能、自動改行も含め）
+			LEAD_PDF: 		予約画面から起動された請求書の宛名表示内容がカスタマイズ用タグ
+				書式:		$$_API名XXX_$$	
+				STYLE:		表示のスタイルCSS定義(例：フォントサイズ、色など定義可能)
+				AOTUSPLIT:	１行目最大文字数を超える場合、自動改行実施する・しないフラグ
+						TRUE:	自動改行する
+						FALSE:	自動改行しない（デフォルト値）
+				MAXLENGTH:	１行目最大文字数を定義する、デフォルト値が20
+			BILL_PDF: 		会計画面から起動された請求書の宛名表示内容がカスタマイズ用タグ
+				書式:		$$_API名XXX_$$	
+				STYLE:		表示のスタイルCSS定義(例：フォントサイズ、色など定義可能)
+				AOTUSPLIT:	１行目最大文字数を超える場合、自動改行実施する・しないフラグ
+						TRUE:	自動改行する
+						FALSE:	自動改行しない（デフォルト値）
+				MAXLENGTH:	１行目最大文字数を定義する、デフォルト値が20
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<!-- 2019/07/01 SHOP->BILLLAYOUTNAME 請求書送付状の宛名はカスタマイズ機能定義
+			 請求書送付状の宛名は取引先名、お客様名２行目出力したい場合
+		-->
+		<!-- 
+		<BILLLAYOUTNAME>
+			<LEAD_PDF STYLE="font-size:14pt;" AOTUSPLIT="FALSE" MAXLENGTH="20">
+					$$_Relcontact__r.CompanyNameCal__c_$$&lt;br/&gt;
+					$$_Relcontact__r.Name_$$ 様
+			</LEAD_PDF>
+			<BILL_PDF STYLE="font-size:14pt;" AOTUSPLIT="FALSE" MAXLENGTH="20">
+					$$_relaccount__r.CompanyNameCal__c_$$&lt;br/&gt;
+					$$_ContactName__c_$$ 様
+			</BILL_PDF>
+		</BILLLAYOUTNAME>
+		 -->
+		<!-- 2019/07/19 SHOP->BILLTITLENAME 請求書の宛名はカスタマイズ機能定義
+			 請求書の宛名上にお客様住所と会社名２行目出力したい場合
+		-->
+		<!-- 
+		<BILLTITLENAME ALLREPLACE="FALSE">
+			<LEAD_PDF STYLE="font-size:14pt;" AOTUSPLIT="TRUE" MAXLENGTH="20">
+				$$_Relcontact__r.MailingState_$$$$_Relcontact__r.MailingCity_$$$$_Relcontact__r.MailingStreet_$$&lt;br/&gt;
+				$$_Relcontact__r.CompanyNameCal__c_$$
+			</LEAD_PDF>
+			<BILL_PDF STYLE="font-size:14pt;" AOTUSPLIT="TRUE" MAXLENGTH="20">
+				$$_relaccount__r.MailingState_$$$$_relaccount__r.MailingCity_$$$$_relaccount__r.MailingStreet_$$&lt;br/&gt;
+				$$_relaccount__r.CompanyNameCal__c_$$
+			</BILL_PDF>
+		</BILLTITLENAME>
+		 -->
+		<BILLPDFLAYOUT>
+			<SUBJECTLABEL>御  請  求  書</SUBJECTLABEL>
+			<TITLELABEL FIXPOSITION="FALSE">様</TITLELABEL><!-- 2019/02/28 [FIXPOSITION]属性タグ新規追加 -->
+			<ROWSLABEL>
+				<ROW>
+					<COL STYLE="font-size:9pt;">毎度格別の御引立に預かり厚く御礼申し上げます。</COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="font-size:9pt;">下記の通り御請求申し上げます。</COL>
+				</ROW>
+			</ROWSLABEL>
+			<PAYLABEL>お振込先</PAYLABEL>
+		</BILLPDFLAYOUT>
+		<!-- 2019/04/30 送付状レイアウトカスタマイズ用タグ -->
+		<!-- CUSTOM_SHIPPING -> [注:１行36文字、15行以内入力ください。] -->
+		<LETTERLAYOUT>
+			<SUBJECTLABEL>書 類 送 付 の ご 案 内</SUBJECTLABEL>
+			<CUSTOM_SHIPPING>
+			拝啓&lt;br/&gt;時下ますますご清栄のこととお喜び申し上げます。&lt;br/&gt;平素は格別のご高配を賜り、厚く御礼申し上げます。&lt;br/&gt;下記の通り、書類を送付させて頂きますので、よろしくお願い申し上げます。
+			</CUSTOM_SHIPPING>
+			<REGARDSLABEL>敬具</REGARDSLABEL>
+			<RECORDLABEL>記</RECORDLABEL>
+			<DEPARTLABEL>■請求書 1部</DEPARTLABEL>
+			<ABOVELABEL>以上</ABOVELABEL>
+		</LETTERLAYOUT>
+	</SHOP>
+</root>

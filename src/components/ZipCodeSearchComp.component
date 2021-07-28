@@ -1,0 +1,439 @@
+<apex:component controller="ZipcodeSearchService">
+<script>
+    var $z = $||$j
+    // 初期化
+    $z(document).ready(function(){
+        // ウィンドウ字段BIND
+        jinyaZipCodeSearceBind(win);
+    });
+    // 内部工具
+    (function($z){
+        // 郵便番号検索方法声明
+        window.jinyaZipCodeSearceBind = function(win){
+            
+            var zCode,                   // 郵便番号
+                ziperror = false,        // 検索エラー状態
+                zipInputFields = [],     // 郵便番号入力字段
+                addressInputFields = [], // 都道府県入力字段
+                cityInputFields = [],    // 市区郡入力字段
+                streetInputFields = [],  // 町名・番地入力字段
+                otherFrames;             // Iframe対応
+            // タグツール
+            var elementInfo = {
+                // (都道府県 + 市区郡 + 町名・番地)取得
+                getZipCode:function(elementId){
+                    var s1 = $z("[element*='" + elementId + "street' i] input, [class*='contact_' i][class*='" + elementId + "street' i] textarea,[id='" + elementId + "street']",otherFrames||"");
+                    var s2 = $z("[element*='" + elementId + "city' i] input, [class*='contact_' i][class*='" + elementId + "city' i] input,[id='" + elementId + "city']",otherFrames||"");
+                    var s3 = $z("[element*='" + elementId + "state' i] input, [class*='contact_' i][class*='" + elementId + "state' i] input,[id='" + elementId + "state']",otherFrames||"");
+                    return s3.val() || "" + s2.val()|| "" + s1.val() || "";
+                },
+                // 該当要素の値設定
+                setValueByElement:function(id,value) {
+                    var inputElement = $z("[element*='" + id + "' i],[class*='contact_' i][class*='" + id + "' i],[id='" + id + "']",otherFrames || "");
+                    if (inputElement.children().length > 0) inputElement = inputElement.find("input,textarea");
+                    if (inputElement.length == 0) {
+                        if (id == 'zip') {
+                            inputElement = $z("[element*='postalcode' i],[id='" + id + "']",otherFrames || "");
+                        }
+                    }
+                    inputElement.val(value);
+                },
+                // 該当要素のタイプ
+                getElementType:function(element){
+                    return $z(element).attr('processtype') || "";
+                },
+                setTypeByClass:function(elements,type,childType){
+                    let reg = new RegExp('(' + type + ')','gi');
+                    childType = childType || "input";
+                    var contactRep = "contact_";
+                    if (elements.length > 0) {
+                        elements.each(function(){
+                            var elementName,that = this;
+                            that.classList.forEach(function(name){
+                                if (name.toLowerCase().includes(contactRep) && name.toLowerCase().includes(type)){
+                                    elementName = name.substr(name.lastIndexOf(".") + 1).replace(reg,"");
+                                    $z(childType,that).attr("searchname",elementName);
+                                }
+                            });
+                        });
+                    }
+                },
+                setTypeByElement:function(elements,type,childType){
+                    let reg = new RegExp('(' + type + ')','gi');
+                    childType = childType || "input";
+                    elements.each(function(){
+                        var elementName = $z(this).attr("element").replace(reg,"");
+                        $z(childType,this).attr("searchname",elementName);
+                    });
+                }
+            }
+            // ポップウィンドウ対応
+            if (win) {
+                // 循環チェック郵便の要素
+                checkFieldHad(win);
+                return ;
+            } else {
+                // 新規ウィン閉じる対応
+                if ("clearBookingItem" in window) {
+                    // 画面字段クリア
+                    var clearFun = window.clearBookingItem;
+                    window.clearBookingItem = function(){
+                        // 画面字段クリア機能処理
+                        clearFun.call(this);
+                        // 郵便要素クリア対応
+                        var autocompleteElements = $z("[element].ui-corner-all" );
+                        autocompleteElements.removeClass("ui-corner-all");
+                        // 郵便要素の検索値クリア
+                        autocompleteElements.each(function(){
+                            var autoTool = $z(this).data( "tool");
+                            if (autoTool) {
+                                // 前回の値クリア
+                                autoTool.term = "";
+                            }
+                        });
+                        // 提示メッセージクリア
+                        $z("[id*='searchInformation']").html("");
+                    }
+                }
+                bindEvent();
+            }
+            // 循環チェック郵便の要素
+            function checkFieldHad(win){
+                // ポップウィンドウ対応
+                if (win) {
+                    // ウィンドウ保持
+                    if (otherFrames == undefined) otherFrames = true;
+                    // ウィンドウIFAME
+                    var frames = win.frames;
+                    if (frames != null) {
+                        // ウィンドウの新規のIFAME
+                        var resultsFrame = frames["resultsFrame"];
+                        if (resultsFrame != null) {
+                            // ウィンドウの新規のIFAMEのドキュメント
+                            otherFrames = resultsFrame.document;
+                        }
+                        // ウィンドウの検索のIFAME
+                        var searchFrame = frames["searchFrame"];
+                        if (searchFrame != null) {
+                            // ウィンドウの検索のIFAMEの新規ボタン
+                            var newInputBtn = $z("input[name=new]",searchFrame.document);
+                            if (newInputBtn.length > 0) {
+                                if (!newInputBtn.hasClass("binded")) {
+                                    newInputBtn.addClass("binded");
+                                    // ウィンドウの検索のIFAMEの新規ボタンのクリック対応
+                                    newInputBtn.on("click",function(){
+                                        setTimeout(function(){
+                                            // ポップのウィンドウの状態「開く」
+                                            if (!win.closed) {
+                                                // 循環チェック郵便の要素
+                                                checkFieldHad(win);
+                                            }
+                                        },500);
+                                    });
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                // 郵便関係要素取得
+                getFields();
+                // 郵便関係要素あり
+                if (zipInputFields.length > 0 ||  addressInputFields.length > 0) {
+                    // 自動補完機能インベントを追加する
+                    bindEvent(addressInputFields,zipInputFields);
+                } else {
+                    // 郵便関係要素なし、機能再開
+                    setTimeout(function(){
+                        if (!win.closed) {
+                            checkFieldHad(win);
+                        }
+                    },500);
+                }
+            }
+            // 郵便関係要素取得
+            function getFields(){
+                // 郵便番号
+                zipInputFields = $z("input[id $= zip]",otherFrames|| "");
+                if (zipInputFields.length > 0) {
+                    zipInputFields.attr("searchname",zipInputFields.attr("id").replace("zip",""));
+                } else {
+                    zipInputFields = $z("[class*='contact_' i][class*=postalcode i]",otherFrames|| "");
+                    if (zipInputFields.length > 0) {
+                        elementInfo.setTypeByClass(zipInputFields,"postalcode");
+                        zipInputFields = zipInputFields.find("input");
+                    } else {
+                        zipInputFields = $z("[element*=postalcode i]",otherFrames|| "");
+                        if (zipInputFields.length > 0) {
+                            elementInfo.setTypeByElement(zipInputFields,"postalcode");
+                            zipInputFields = zipInputFields.find("input");
+                        }
+                    }
+                }
+                //variables for town, city and state
+                // 都道府県
+                addressInputFields = $z("input[id $= state]",otherFrames|| "");
+                if (addressInputFields.length > 0) {
+                    addressInputFields.attr("searchname",addressInputFields.attr("id").replace("state",""));
+                } else  {
+                    addressInputFields = $z("[class*='contact_' i][class*=state i]",otherFrames|| "");
+                    if (addressInputFields.length > 0) {
+                        elementInfo.setTypeByClass(addressInputFields,"state");
+                        addressInputFields = addressInputFields.find("input");
+                    } else {
+                        addressInputFields = $z("[element*=state i]",otherFrames|| "");
+                        if (addressInputFields.length > 0) {
+                            elementInfo.setTypeByElement(addressInputFields,"state");
+                            addressInputFields = addressInputFields.find("input");
+                        }
+                    }
+                }
+                // 市区郡
+                cityInputFields = $z("input[id $= city]",otherFrames|| "");
+                if (cityInputFields.length > 0) {
+                    cityInputFields.attr("searchname",cityInputFields.attr("id").replace("city",""));
+                } else  {
+                    cityInputFields = $z("[class*='contact_' i][class*=city i]",otherFrames|| "");
+                    if (cityInputFields.length > 0) {
+                        elementInfo.setTypeByClass(cityInputFields,"city");
+                        cityInputFields = cityInputFields.find("input");
+                    } else {
+                        cityInputFields = $z("[element*=city i]",otherFrames|| "");
+                        if (cityInputFields.length > 0) {
+                            elementInfo.setTypeByElement(cityInputFields,"city");
+                            cityInputFields = cityInputFields.find("input");
+                        }
+                    }
+                }
+                // 町名・番地
+                streetInputFields = $z("[id $= street]",otherFrames|| "");
+                if (streetInputFields.length > 0) {
+                    streetInputFields.attr("searchname",streetInputFields.attr("id").replace("street",""));
+                } else  {
+                    streetInputFields = $z("[class*='contact_' i][class*=street i]",otherFrames|| "");
+                    if (streetInputFields.length > 0) {
+                        elementInfo.setTypeByClass(streetInputFields,"street","textarea");
+                        streetInputFields = streetInputFields.find("textarea");
+                    } else {
+                        streetInputFields = $z("[element*=street i]",otherFrames|| "");
+                        if (streetInputFields.length > 0) {
+                            elementInfo.setTypeByElement(streetInputFields,"street","textarea");
+                            streetInputFields = streetInputFields.find("textarea");
+                        }
+                    }
+                }
+                // タイプ設定
+                if (zipInputFields.length > 0) $z(zipInputFields).attr("processtype","zip");
+                if (addressInputFields.length > 0) $z(addressInputFields).attr("processtype","state");
+                if (cityInputFields.length > 0) $z(cityInputFields).attr("processtype","city");
+                if (streetInputFields.length > 0) $z(streetInputFields).attr("processtype","street");
+                // 住所合成
+                $z.merge(addressInputFields,cityInputFields);
+                $z.merge(addressInputFields,streetInputFields);
+            }
+            // 自動補完機能インベントを追加する
+            function bindEvent(addressFields,zipFields){
+                // 要素なし
+                if (addressFields == undefined && zipFields == undefined) {
+                    // 郵便関係要素取得
+                    getFields();
+                } else {
+                    addressInputFields = addressFields;
+                    zipInputFields = zipFields;
+                }
+                //Create Autocomplete for zipcode search
+                $z(addressInputFields).each(function(){
+                    var baseElementId = $z(this).attr('id').replace("zip", "");
+                    $z(this).after('<span title="Near Search Function" id="' + baseElementId + 'searchInformation"></span>');
+                    createAddressAutoComplete(this);
+                });
+                //Create Autocomplete for address search
+                $z(zipInputFields).each(function(){
+                    var baseElementId = $z(this).attr('id').replace("zip", "");
+                    $z(this).after('<span title="Near Search Function" id="' + baseElementId + 'searchInformation"></span>');
+                    createAutoComplete(this);
+                });
+            }
+            // 住所自動補完機能
+            function createAddressAutoComplete(element){
+                if ($z(element).hasClass("ui-autocomplete-input")) return;
+                // 該当要素のタイプ
+                var type = elementInfo.getElementType(element);
+                var baseElementId = $z(element).attr('id').replace('zip', '');
+                baseElementId = baseElementId.replace('street', '');
+                baseElementId = baseElementId.replace('city', '');
+                baseElementId = baseElementId.replace('state', '');
+                // 自動補完機能
+                $z(element).autocomplete({
+                    source: function(request, response) {
+                        var prefix = baseElementId;
+                        if (otherFrames == undefined) {
+                            prefix = $z(element).attr("searchname");
+                        }
+                        // 住所取得
+                        var zipCodeEntered = elementInfo.getZipCode(prefix);
+                        $z(this.element).data( "tool",this);
+                        // 情報取得
+                        requestCenter('searchAddress',false,zipCodeEntered,afterGetCode.bind({id:baseElementId,response:response,type:type ,element:element}));
+                    },
+                    minLength: 2,
+                    select: function( event, ui ) {
+                        var baseId = $z(event.target).attr("searchname");
+                        var zipName = "zip";
+                        if (otherFrames == undefined){
+                            zipName = "postalcode"
+                        }
+                        // 選択情報を設定する
+                        elementInfo.setValueByElement(baseId + "country",ui.item.zipcode.country);
+                        elementInfo.setValueByElement(baseId + "street",ui.item.zipcode.street);
+                        elementInfo.setValueByElement(baseId + "city",ui.item.zipcode.city);
+                        elementInfo.setValueByElement(baseId + "state",ui.item.zipcode.state);
+                        elementInfo.setValueByElement(baseId + zipName,ui.item.zipcode.zip);
+                        $z("#errorBlk",otherFrames||"").remove();
+                    },
+                    open: function() {
+                        console.log('open function: ');
+                        $z( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+                    },
+                    close: function() {
+                        console.log('close ');
+                        $z( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+                    }
+                });
+            }
+            // 郵便番号自動補完機能
+            function createAutoComplete(element){
+                if ($z(element).hasClass("ui-autocomplete-input")) return;
+                var baseElementId = $z(element).attr('id').replace('zip', '');
+                var type = elementInfo.getElementType(element);
+                $z(element).autocomplete({
+                    source: function(request, response) {
+                        // 郵便番号取得
+                        var zipCodeEntered = $z(element).val();
+                        $z(this.element).data( "tool",this);
+                        requestCenter('searchZIPCode',false,zipCodeEntered,afterGetCode.bind({id:baseElementId,response:response,type:type,element:element}));
+                    },
+                    minLength: 3,
+                    select: function( event, ui ) {
+                        // 選択情報を設定する
+                        var baseId = $z(event.target).attr("searchname");
+                        var zipName = "zip";
+                        if (otherFrames == undefined){
+                            zipName = "postalcode"
+                        }
+                        elementInfo.setValueByElement(baseId + "country",ui.item.zipcode.country);
+                        elementInfo.setValueByElement(baseId + "street",ui.item.zipcode.street);
+                        elementInfo.setValueByElement(baseId + "city",ui.item.zipcode.city);
+                        elementInfo.setValueByElement(baseId + "state",ui.item.zipcode.state);
+                        elementInfo.setValueByElement(baseId + zipName,ui.item.zipcode.zip);
+                        $z("#errorBlk",otherFrames|| "").remove();
+                    },
+                    open: function() {
+                        console.log('open function: ');
+                        $z( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+                    },
+                    close: function() {
+                        console.log('close ');
+                        $z( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+                    }
+                });
+            }
+            // 情報取得後
+            function afterGetCode(result,errFlg,event){
+                var baseElementId = this.id,
+                    response = this.response,
+                    element = this.element,
+                    type = this.type;
+                // エラー対応
+                if (errFlg) {
+                    console.log(event.message);
+                    ziperror=true;
+                    $z(element,otherFrames||"").after("<div id=errorBlk><font color=red><b>Retrieve failed</b></font></div>");
+                } else {
+                    //  結果処理
+                    try{
+                        zCode = htmlDecode(result);
+                        zCode = JSON.parse(zCode);
+                        $z("#errorBlk",otherFrames||"").remove();
+                        ziperror=false;
+                    }catch(Exception){
+                        console.log(Exception);
+                    }
+                }
+                // console.log(zCode);
+                var sourceData = [];
+                try{
+                    //自動補完内容作成
+                    $z.map(zCode.response.location, function(item){
+                        //alert(item.zipcode);
+                        sourceData.push({
+                            label: item.postal + ' - ' + item.prefecture + ', ' + item.city + ', ' + item.town,
+                            value: type == 'zip' ? item.postal : (type == 'city' ? item.city : (type == 'state' ? item.prefecture : (type == 'street' ? item.town : item.zipcode)) ),
+                            zipcode: {
+                                zip: item.postal,
+                                street: item.town,
+                                city: item.city,
+                                state: item.prefecture,
+                                country: "JP"
+                            }
+                        })
+                    });
+                //console.log(JSON.stringify(sourceData));
+                }catch(Exception){
+                    console.log(Exception);
+                }
+                console.log(sourceData.length);
+                //　結果メッセージ対応
+                if(ziperror==false)
+                {
+                    var selector = "[id='" + baseElementId + (otherFrames == undefined ? "" : (type != "zip" ? type : "")) + "searchInformation']";
+                    console.log(selector);
+                    $z(selector,otherFrames||"").html("");
+                    $z(selector,otherFrames||"").text('' + sourceData.length + ' 件');
+                }
+                checkAndInsertCss();
+                response(sourceData);
+            }
+            // チェックと追加
+            function checkAndInsertCss(){
+                if (otherFrames) {
+                    var searchForm = $z("form",otherFrames);
+                    if (!searchForm.hasClass("binded")) {
+                        var autoCss = "<style>.ui-autocomplete { max-height: 160px;width:300px; overflow-y: auto; overflow-x: hidden;}* html .ui-autocomplete { height: 160px;}</style>"
+                        searchForm.prepend(autoCss);
+                        searchForm.prepend($z("link[href*='jquery-ui-1.10.2.custom.min.css']").clone());
+                        var uiStyle = $z("style:contains('ui-autocomplete-loading'):first");
+                        if (uiStyle.length > 0) {
+                            searchForm.prepend(uiStyle.clone());
+                        }
+                        searchForm.addClass("binded");
+                    }
+                }
+            }
+        }
+        // リモート中心
+        function requestCenter(type,lockFlg,data,callback){
+            // ロック画面フラグ
+            if (lockFlg) blockUi();
+            // 事前チェックを行う
+            Visualforce.remoting.Manager.invokeAction(
+               "{!$RemoteAction.ZipcodeSearchService.requestCenter}", type,data, function(result, event){
+                // ロック画面フラグ
+                if (lockFlg) unblockUi();
+                // 異常
+                if(event.type == 'exception') {
+                    if (callback) callback(result,true,event);
+                } else {
+                    if (callback) callback(result,false,event);
+                }
+            });
+        }
+        // HTMLデコード
+        function htmlDecode(val){
+            var txt = document.createElement("textarea");
+            txt.innerHTML = val;
+            return txt.value;
+        }
+    })(jQuery);
+</script>
+</apex:component>

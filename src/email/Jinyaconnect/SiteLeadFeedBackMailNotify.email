@@ -1,0 +1,28 @@
+以下の内容で、{!Lead__c.Relcontact__c}様へ送付させていただきましたのでお知らせ致します。
+
+{!Lead__c.Relcontact__c}様
+ご予約頂きまして、誠にありがとう御座います、下記の内容にて、ご予約を承りました。
+
+お申し込み内容:   	{!Lead__c.Field310__c}
+ご利用日時:         	{!DATEVALUE(Lead__c.EntryTime__c)} {!Lead__c.Field4__c}
+人数:				大人 {!Lead__c.StayPersons__c}名 / 子供{!Lead__c.ChildFA__c}名
+代表者名:			{!Lead__c.Relcontact__c}
+代表者名ふりがな:	{!Lead__c.ContactKatakana__c}
+電話番号:                  {!Lead__c.ContactPhone__c}
+E-MAIL:			{!Lead__c.ContactEmail__c}
+郵便番号:                  {!Lead__c.ContactPostalCode__c}
+ご住所:			{!Lead__c.ContactAddress__c}
+
+{!Lead__c.Relcontact__c}様のお越しを心よりお待ち申し上げております。
+※満席等の場合は、改めてご連絡させていただくことも御座います。
+
+鶴巻温泉　元湯陣屋
+フロント　予約係
+TEL：０４６３−７７−１３００
+
+陣屋ではFacebookへのご感想、コメントをお願いしています。
+陣屋での思い出、発見などどんなことでも結構です。
+心温まるHAPPYなコメントはスタッフの励みにもなります。
+
+http://www.facebook.com/TsurumakiOnsenJinya
+陣屋（鶴巻温泉　元湯　陣屋）　フェイスブック推進チーム

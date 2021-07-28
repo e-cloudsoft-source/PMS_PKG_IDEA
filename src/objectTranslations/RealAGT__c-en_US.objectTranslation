@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>RealAGT</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>RealAGT</value>
+    </caseValues>
+    <fields>
+        <label><!-- AGT --></label>
+        <name>AccountRef__c</name>
+        <relationshipLabel>Real AGT</relationshipLabel>
+    </fields>
+    <fields>
+        <label>AGT provide number</label>
+        <name>AgtMaxRooms__c</name>
+    </fields>
+    <fields>
+        <label>End date</label>
+        <name>EndDate__c</name>
+    </fields>
+    <fields>
+        <label>Room type</label>
+        <name>RoomTypeRel__c</name>
+        <relationshipLabel><!-- リアルAGT --></relationshipLabel>
+    </fields>
+    <fields>
+        <help>When you have to create a key , store the data into the related item.</help>
+        <label>Search key</label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label>Start date</label>
+        <name>StartDate__c</name>
+    </fields>
+    <nameFieldLabel>Number</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

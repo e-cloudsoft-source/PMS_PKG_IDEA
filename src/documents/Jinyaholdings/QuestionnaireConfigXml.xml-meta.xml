@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>アンケート表示情報文言定義</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>アンケート定義ファイル</name>
+    <public>false</public>
+</Document>

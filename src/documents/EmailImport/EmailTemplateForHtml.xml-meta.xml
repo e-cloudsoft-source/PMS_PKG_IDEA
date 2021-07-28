@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>修正不要</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>HTML電文の共通解析テンプレート</name>
+    <public>false</public>
+</Document>

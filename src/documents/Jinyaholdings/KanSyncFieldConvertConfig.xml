@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：勘定奉行連携店舗別のCSV変換関連コードの定義
+書式：
+	<SHOP>	店舗別支払メディア情報定義可能
+		<SHOPCODE></SHOPCODE>				店舗コード
+		<PCA>								支払メニューの表示スタイル情報
+			<PCA_FIELD>						店舗別の勘定奉行連携の可変項目の定義情報
+											各項目定義はサンプルデータのコメントを参照ください
+			</PCA_FIELD>
+			<PCA_TAX>						仮受消費税個別定義情報
+				<KANJOCODE>3350</KANJOCODE> 仮受消費税を出力する場合、関連の会計科目のSeq#定義する
+			</PCA_TAX>	
+			<PCA_PYA_TAX>					仮払消費税個別定義情報
+				<KANJOCODE>3351</KANJOCODE>	仮払消費税を出力する場合、関連の会計科目のSeq#定義する
+			</PCA_PYA_TAX>	
+			<PCA_ADVPAY_L>						前受金データを出力する場合、関連の[借方]の会計科目のSeq#定義する
+				<KANJOCODE>3241003</KANJOCODE>	関連の会計科目のSeq#定義する
+			</PCA_ADVPAY_L> 
+			<PCA_ADVPAY_R>						前受金データを出力する場合、関連の[貸方]の会計科目のSeq#定義する
+				<KANJOCODE>3241003</KANJOCODE>	関連の会計科目のSeq#定義する
+			</PCA_ADVPAY_R> 
+            <PCA_REFUND_R> 						返金関連の[貸方]定義情報
+                <KANJOCODE>3241001</KANJOCODE>	関連の会計科目Seq#定義
+            </PCA_REFUND_R>
+		</PCA>
+		<CASH>								入金、出金科目と会計科目のMapping定義情報、
+											入出金の関連情報はPCA連携対象外したい場合、該当タグは削除すると、PCA連携対象外になる
+			<CASH_INPUT>					入金
+				<CONVERT>
+					<KEMOKU>内金</KEMOKU>				入金の科目の選択リスト値
+					<I_KANJOCODE>1110</I_KANJOCODE> 	借方の会計科目のSeq#
+					<O_KANJOCODE>3241002</O_KANJOCODE> 	貸方の会計科目のSeq#
+				</CONVERT>
+			</CASH_INPUT>
+			<CASH_OUTPUT>					出金
+				<CONVERT>
+					<KEMOKU>交通費</KEMOKU>
+					<I_KANJOCODE>1841</I_KANJOCODE>		借方の会計科目のSeq#
+					<O_KANJOCODE>1110</O_KANJOCODE>		貸方の会計科目のSeq#
+				</CONVERT>
+			</CASH_OUTPUT>
+		</CASH>
+	</SHOP>
+2018.08.15 仕入明細は税込金額から出力機能追加
+	タグ：SHOP->PCA->TAX_AUTOCAL	仕入明細は税込金額から出力、しない切替フラグ
+								TRUE:仕入明細は税込金額を出力する
+								FALSE:仕入明細は税抜金額を出力する(デフォルト値)
+	タグ：SHOP->PCA->ROLLUP_BEGINDT	RUファイルを出力の際に、伝票番号を日単位を出力したい場合、該当タグに採番開始日を設定が必要
+								書式；YYYYMMDD
+2018.09.19	ROLLUP_SUBKAMOKU_OUTPUT：ROLLUP機能場合、補助科目まで明細出力する、しないフラグ（TRUE/FALSE)(デフォルト値:FALSE）
+			ROLLUP_COMMENT:	ROLLUP機能場合、摘要欄に固定出力したい文言を定義する
+2019/10/15 新規追加 (軽減税率により、消費税明細行が分ける出力機能対応）
+	①PCA->PCA_TAX->KANJOCODE->RATE 属性定義追加	
+	②PCA->PCA_PYA_TAX->KANJOCODE->RATE 属性定義追加
+	①：仮受消費税明細が税率により複数出力したい場合
+		例：８％と１０％明細混在、消費税明細行目が分ける出力したい
+		<PCA_TAX>
+			<KANJOCODE RATE="8">33501</KANJOCODE>
+			<KANJOCODE RATE="10">3350</KANJOCODE>
+		</PCA_TAX>	
+	②：仮払消費税明細が税率により複数出力したい場合
+		例：８％と１０％明細混在、消費税明細行目が分ける出力したい
+		<PCA_PYA_TAX>
+			<KANJOCODE RATE="8">33511</KANJOCODE>
+			<KANJOCODE RATE="10">3351</KANJOCODE>
+		</PCA_PYA_TAX>	
+2020/03/31 出力モードを新規追加
+		PCA->OUTPUT_TYPE_MODE:(1 OR 2、デフォルト値が1) 
+		設定値が2の場合、下記出力列を新規追加する、以外の場合、既存の内容をCSV出力する
+			// CSJS200に会計科目の借方部門コードを出力する
+			// CSJS203、CSJS220、CSJS222の追加
+			// 	CSJS203：会計科目と紐づくため会計科目の借税区分をCSJS203に出力する。
+			// 	CSJS220：税率の値、8%なら8、10%なら10、0%は空白か0を出力
+			// 	CSJS222：軽減税率かどうかを出力する。8%の取引の行には"1"、10%の取引の行には"0"
+			// CSJS221を追加し、摘要を出力する
+			// CSJS300に会計科目の貸方部門コードを出力する
+			// CSJS303、CSJS320、CSJS322の追加
+			// 	CSJS303：会計科目と紐づくため会計科目の貸税区分をCSJS303に出力する。
+			// 	CSJS320：税率の値、8%なら8、10%なら10、0%は空白か0を出力
+			// 	CSJS322：軽減税率かどうかを出力する。8%の取引の行には"1"、10%の取引の行には"0"10%の取引の行には"0"
+			// CSJS321を追加し、摘要を出力する
+2020/12/04 連泊の支払を入れた際の挙動修正機能の有効化タグ新規追加
+		PCA→PCA_NEWMODE	連泊の支払明細出力モード変更設定タグ
+-->
+	<SHOP>
+		<SHOPCODE>01</SHOPCODE>
+		<PCA>	<!-- 勘定奉行連携用項目変換定義情報 -->
+			<NOSHOW_OUPTPUT></NOSHOW_OUPTPUT><!-- 会計画面に設定した非表示の明細は仕訳明細に出力する・しないフラグ(デフォルト：出力） -->
+			<ROLLUP_OUTPUT>true</ROLLUP_OUTPUT>	<!-- 仕入明細に対して、ROLLUP処理する、しない、デフォルトは処理する（TRUE) -->
+			<!-- 仕入明細は税込金額から出力、しない切替フラグ -->
+			<!-- 
+			<TAX_AUTOCAL>TRUE</TAX_AUTOCAL>
+			 -->
+			<!-- ROLLUPの伝票番号は日単位で連続採番したい、採番開始日(YYYYMMDD)を該当タグに設定する、該当日により、伝票番号を計算して、出力する-->
+			<!-- 
+			<ROLLUP_BEGINDT>20180815</ROLLUP_BEGINDT>
+			 -->
+			<!-- ROLLUP機能場合、補助科目まで明細出力する、しないフラグ -->
+			<ROLLUP_SUBKAMOKU_OUTPUT>FALSE</ROLLUP_SUBKAMOKU_OUTPUT>
+			<!-- ROLLUP機能場合、摘要欄に固定出力したい文言を定義する -->
+			<ROLLUP_COMMENT></ROLLUP_COMMENT>
+			<!-- 2020.03.31 出力モードを新規する ( 1 OR 2)-->
+			<OUTPUT_TYPE_MODE>1</OUTPUT_TYPE_MODE>
+			<PCA_FIELD>	<!-- 勘定奉行連携のXML定義情報 -->
+				<!-- 伝票番号(開始番号) 店舗単位で、伝票開始番号は別々で定義を行う、1会計1伝票番号で出力する -->
+				<STARTNO>6001</STARTNO>
+				<!-- 借方部門コード 店舗単位で、部門コードは別々で定義を行う -->
+				<DEBDEPARTCODE>180</DEBDEPARTCODE>
+				<!-- 借方消費税額 -->
+				<DEBCONSUMPTAX>0</DEBCONSUMPTAX>
+				<!-- 貸方部門コード 店舗単位で、部門コードは別々で定義を行う -->
+				<CREDEPARTCODE>180</CREDEPARTCODE>
+				<!-- 貸方消費税額 -->
+				<CRECONSUMPTAX>0</CRECONSUMPTAX>
+			</PCA_FIELD>
+			<PCA_TAX>	<!-- 仮受消費税個別定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<KANJOCODE>3350</KANJOCODE>
+			</PCA_TAX>	
+			<PCA_PYA_TAX>	<!-- 仮払消費税個別定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<KANJOCODE>3351</KANJOCODE>
+			</PCA_PYA_TAX>	
+			<PCA_ADVPAY_L>	<!-- 前受金関連の[借方]定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<!-- 
+				<KANJOCODE>1521</KANJOCODE>
+				 -->
+			</PCA_ADVPAY_L> 
+			<PCA_ADVPAY_R>	<!-- 前受金関連の[貸方]定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<!-- 
+				<KANJOCODE>1521</KANJOCODE>
+				 -->
+			</PCA_ADVPAY_R> 
+            <PCA_REFUND_R> <!-- 返金関連の[貸方]定義情報 -->
+                <!-- 関連の会計科目Seq#定義 -->
+                <!-- 
+                <KANJOCODE>3241002</KANJOCODE>
+                 -->
+            </PCA_REFUND_R>
+            <PCA_NEWMODE>
+            	<ACTIVE>TRUE</ACTIVE><!-- 該当機能有効・無効フラグ（デフォルト：無効） -->
+            	<AP_KANJOSEQ_L>3241002</AP_KANJOSEQ_L>	<!-- 前受金[借方]会計科目Seq#定義(前受金の勘定科目のSEQ) -->
+            	<AP_KANJOSEQ_R>3241002</AP_KANJOSEQ_R>	<!-- 前受金[貸方]会計科目Seq#定義(前受金の勘定科目のSEQ) -->
+            	<DP_KANJOSEQ_L>1841002</DP_KANJOSEQ_L>	<!-- 売掛金[借方]会計科目Seq#定義(売掛金の勘定科目のSEQ) -->
+            	<AC_KANJOSEQ_R>15212</AC_KANJOSEQ_R>	<!-- 売掛金[貸方]会計科目Seq#定義(売掛金の勘定科目のSEQ) -->
+            </PCA_NEWMODE>
+		</PCA>
+
+		<CASH>		<!-- 入金、出金科目の選択リストの定義値と会計科目のSeq#をマッピングする -->
+			<CASH_INPUT>					<!-- 入金 -->
+				<!-- 
+				<CONVERT>
+					<KEMOKU>売掛金</KEMOKU>
+					<I_KANJOCODE>1110</I_KANJOCODE>
+					<O_KANJOCODE>1521</O_KANJOCODE>
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>予約金</KEMOKU>
+					<I_KANJOCODE>1110</I_KANJOCODE>
+					<O_KANJOCODE>3241002</O_KANJOCODE>
+				</CONVERT>
+				-->
+			</CASH_INPUT>
+			<CASH_OUTPUT>					<!-- 出金 -->
+				<!-- 
+				<CONVERT>
+					<KEMOKU>交通費</KEMOKU>
+					<I_KANJOCODE>1210</I_KANJOCODE>
+					<O_KANJOCODE>1110</O_KANJOCODE>
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>雑費</KEMOKU>
+					<I_KANJOCODE>1821</I_KANJOCODE>
+					<O_KANJOCODE>1110</O_KANJOCODE>
+				</CONVERT>
+				-->
+			</CASH_OUTPUT>
+		</CASH>
+	</SHOP>
+</root>
+		

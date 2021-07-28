@@ -1,0 +1,204 @@
+<apex:component controller="CustomBathTaxAutoSetCtrl">
+<script>
+// 核心对象
+if (typeof ACTCUSTOM === "undefined") {
+	ACTCUSTOM = {};
+}
+// 处理种别
+if (typeof ACTCUSTOM.TPYE === "undefined") {
+	ACTCUSTOM.TPYE = {};
+	// クリア
+	ACTCUSTOM.TPYE.CLEAR = "clear";
+	// 数量
+	ACTCUSTOM.TPYE.NUMS = "nums";
+}
+// 数量变量
+if (typeof ACTCUSTOM.OBJ === "undefined") {
+	ACTCUSTOM.OBJ = {};
+	// プランの入湯税に自動入力設定有効FLG
+	ACTCUSTOM.OBJ.ISBATHTAXSETFLG = {!isBTaxSetFlg};
+	// プランの入湯税に自動入力行追加数据集
+	ACTCUSTOM.OBJ.ADDROWCALLBACKRES = null;
+}
+// HTML索引值变量
+if (typeof ACTCUSTOM.TAG === "undefined") {
+	ACTCUSTOM.TAG = {};
+}
+// HTMLFUNCTION名
+if (typeof ACTCUSTOM.FUN === "undefined") {
+	ACTCUSTOM.FUN = {};
+}
+(function($){
+	// HTML索引值设定
+	ACTCUSTOM.TAGINITFUN = function (tabRowTag, hidProductIdTag, rowindexTag, hidBTaxAccMstIdTag, hidBTaxToPlanRowIndexTag, orderNumsTag, clearProductTag, hidBTaxAccMstItemTag, autoGetProductInfoFun, refreshOrderFun, checkAddTranItemFun
+	// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+	,oldOrderNumsTag
+	// 2020/07/30 BUG-FIX-#7106 WGCH END
+	){
+		// TABLE内_所有数据行索引
+		ACTCUSTOM.TAG.TABROW = tabRowTag;
+		// TABLE内_会计商品ID索引
+		ACTCUSTOM.TAG.HIDPRODUCTID = hidProductIdTag;
+		// TABLE内_ROWINDEX属性索引
+		ACTCUSTOM.TAG.ROWINDEX = rowindexTag;
+		// TABLE内_入汤税会计商品ID索引
+		ACTCUSTOM.TAG.HIDBTAXACCMSTID = hidBTaxAccMstIdTag;
+		// TABLE内_入汤税商品对应PLAN行对应INDEX索引
+		ACTCUSTOM.TAG.HIDBTAXTOPLANROWINDEX = hidBTaxToPlanRowIndexTag;
+		// TABLE内_数量索引
+		ACTCUSTOM.TAG.ORDERNUMS = orderNumsTag;
+		// TABLE内_clearProduct索引
+		ACTCUSTOM.TAG.CLEARPRODUCT = clearProductTag;
+		// TABLE内_ポップ商品選択後のJSON数据集索引
+		ACTCUSTOM.TAG.HIDBTAXACCMSTITEM = hidBTaxAccMstItemTag;
+		// PAGE页面自动设定商FUNCTION名
+		ACTCUSTOM.FUN.AUTOGETPRODUCTINFO = autoGetProductInfoFun;
+		// PAGE页面自动触发行追加行号处理FUNCTION名
+		ACTCUSTOM.FUN.REFRESHORDER = refreshOrderFun;
+		// PAGE页面自动触发行追加处理FUNCTION名
+		ACTCUSTOM.FUN.CHECKADDTRANITEM = checkAddTranItemFun;
+		// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+		ACTCUSTOM.TAG.OLDORDERNUMS = oldOrderNumsTag;
+		// 2020/07/30 BUG-FIX-#7106 WGCH END
+	}
+	// 入汤税设定处理
+	ACTCUSTOM.BATHTAXAUTOSETFUN = function (thisRowIndex, result, isCallBack){
+		// プランの入湯税に自動入力設定无效跳出
+		if(!ACTCUSTOM.OBJ.ISBATHTAXSETFLG) return;
+		// 无效数据集跳出(NULL == UNDEFINED) => TRUE
+		if(commUtils.isUndefined(result)) return;
+		// 获取明细所有行
+		var $trRowAll = $( ACTCUSTOM.TAG.TABROW );
+		// 空白行Arr
+		var $blankArr = new Array();
+		// 相同指定的商品FLG
+		var isHasBathTaxAccMstFlg = false;
+		$trRowAll.each(function(){
+			// 会计商品ID(当前关联的入汤税商品ID)
+			var $hidProductId = $(this).find("[id$='" + ACTCUSTOM.TAG.HIDPRODUCTID + "']");
+			if($hidProductId.val() != ''){
+				// 当前行-RowNo
+				var rowIndex = $hidProductId.attr( ACTCUSTOM.TAG.ROWINDEX ) * 1;
+				// 当前行-ROW -> 会计商品ID
+				var hidProductId = $("[id$=':" + rowIndex + ":" + ACTCUSTOM.TAG.HIDPRODUCTID + "']").val();
+				// 存在入汤税商品
+				if(result.productId == hidProductId){
+					isHasBathTaxAccMstFlg = true;
+					return false;
+				}
+			} else {
+				// 当前行-RowNo
+				var rowIndex = $hidProductId.attr( ACTCUSTOM.TAG.ROWINDEX ) * 1;
+				if(thisRowIndex == rowIndex) return true;
+				$blankArr.push(rowIndex);
+			}
+		});
+		// 不存在相同指定的商品
+		if(!isHasBathTaxAccMstFlg){
+			// 设定第一次当前Plan行对应的入汤税商品Id
+			// 2020/07/30 BUG-FIX-#7100 WGCH BEGIN
+			if(thisRowIndex != null) $("input[id$=':" + thisRowIndex + ":" + ACTCUSTOM.TAG.HIDBTAXACCMSTID + "']").val(result.productId);
+			// 2020/07/30 BUG-FIX-#7100 WGCH END
+			// 存在有效的空白行
+			if($blankArr.length > 0){
+				result.rowIndex = $blankArr[0];
+				// 入汤税商品行设定对应关联的PLAN行RowNo
+				// 2020/07/30 BUG-FIX-#7100 WGCH BEGIN
+				// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+				if(thisRowIndex != null) $("input[id$=':" + result.rowIndex + ":" + ACTCUSTOM.TAG.HIDBTAXTOPLANROWINDEX + "']").val(thisRowIndex);
+				// 2020/07/30 BUG-FIX-#7106 WGCH END
+				// 2020/07/30 BUG-FIX-#7100 WGCH END
+				// PAGE页面自动设定商FUNCTION名
+				eval(ACTCUSTOM.FUN.AUTOGETPRODUCTINFO)(result);
+				// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+				var planRowIndex = commUtils.isUndefined(thisRowIndex) ? result[ACTCUSTOM.TAG.HIDBTAXTOPLANROWINDEX] : thisRowIndex;
+				if(!commUtils.isUndefined(planRowIndex)){
+					// 入汤税商品行设定对应关联的PLAN行RowNo
+					$("input[id$=':" + result.rowIndex + ":" + ACTCUSTOM.TAG.HIDBTAXTOPLANROWINDEX + "']").val(planRowIndex);
+					var $oldOrderNums = $("input[id$=':" + planRowIndex + ":" + ACTCUSTOM.TAG.OLDORDERNUMS + "']");
+					// プランの入湯税に自動入力行追加数量
+					if($oldOrderNums.length > 0 && ($oldOrderNums.val() * 1) > 1){
+						var $thisOrderNums = $("input:text[id$=':" + result.rowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']");
+						if($thisOrderNums.val() != $oldOrderNums.val()) $("input:text[id$=':" + result.rowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']").val( $oldOrderNums.val() ).change();
+					}
+				}
+				// 2020/07/30 BUG-FIX-#7106 WGCH END
+				// 2020/08/30 エステなど商品を追加したプラン機能 WGCH BEGIN
+				// 重置行追加后的数据
+				if(isCallBack) ACTCUSTOM.OBJ.ADDROWCALLBACKRES = null;
+				// 2020/08/30 エステなど商品を追加したプラン機能 WGCH END
+				return;
+			}
+			// 2020/07/30 BUG-FIX-#7106 WGCH BEGIN
+			result[ACTCUSTOM.TAG.HIDBTAXTOPLANROWINDEX] = thisRowIndex;
+			// 2020/07/30 BUG-FIX-#7106 WGCH END
+			// 保持当前数据集合
+			ACTCUSTOM.OBJ.ADDROWCALLBACKRES = result;
+			// 行号处理
+			// PAGE页面自动触发行追加行号处理FUNCTION名
+			eval(ACTCUSTOM.FUN.REFRESHORDER)(true);
+			// PAGE页面自动触发行追加处理FUNCTION名
+			eval(ACTCUSTOM.FUN.CHECKADDTRANITEM)();
+		}
+		// 重置行追加后的数据
+		if(isCallBack) ACTCUSTOM.OBJ.ADDROWCALLBACKRES = null;
+	}
+	// 处理入湯税行
+	ACTCUSTOM.PROBATHTAXROWFUN = function (rowIndex, actionTp){
+		// プランの入湯税に自動入力設定无效跳出
+		if(!ACTCUSTOM.OBJ.ISBATHTAXSETFLG) return;
+		// 设定第一次当前Plan行对应的入汤税商品Id
+		// 2020/07/30 BUG-FIX-#7100 WGCH BEGIN
+		var hidBTaxAccMstId = $("input[id$=':" + rowIndex + ":" + ACTCUSTOM.TAG.HIDBTAXACCMSTID + "']").val();
+		// 2020/07/30 BUG-FIX-#7100 WGCH END
+		// 当クリア处理是非关联入汤税PLAN行的情况
+		if(hidBTaxAccMstId == ""){
+			// クリア处理
+			if(actionTp == ACTCUSTOM.TPYE.CLEAR){
+				// 获取该行关联的Plan行RowIndex
+				// 2020/07/30 BUG-FIX-#7100 WGCH BEGIN
+				var planRowIndex = $("input[id$=':" + rowIndex + ":" + ACTCUSTOM.TAG.HIDBTAXTOPLANROWINDEX + "']").val();
+				// 2020/07/30 BUG-FIX-#7100 WGCH END
+				if(planRowIndex != ""){
+					// 清空关联行入汤税商品Id
+					// 2020/07/30 BUG-FIX-#7100 WGCH BEGIN
+					$("input[id$=':" + planRowIndex + ":" + ACTCUSTOM.TAG.HIDBTAXACCMSTID + "']").val("");
+					// 2020/07/30 BUG-FIX-#7100 WGCH END
+				}
+			}
+			return;
+		}
+		// 当前入汤税商品INPUT
+		var $hidBTaxAccMstId = $("[id$=':" + ACTCUSTOM.TAG.HIDPRODUCTID + "'][value='" + hidBTaxAccMstId + "']");
+		if($hidBTaxAccMstId.length <= 0) return;
+		var nameArray = $hidBTaxAccMstId.attr("id").split(":");
+		var currRowIndex = nameArray[nameArray.length - 2];
+		if(actionTp == ACTCUSTOM.TPYE.CLEAR){
+			// $("input:text[id$=':" + currRowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']").val( $this.val() );
+			// 当前没关联PlanClear, 联动クリア「入湯税行」
+			$("[id$='" + ACTCUSTOM.TAG.CLEARPRODUCT + "'][" + ACTCUSTOM.TAG.ROWINDEX + "='" + currRowIndex +"']").click();
+		} else if(actionTp == ACTCUSTOM.TPYE.NUMS){
+			// 2020/07/30 BUG-FIX-#7100 WGCH BEGIN
+			// 处理与被处理不可以是同一行防止死循环
+			if(rowIndex == currRowIndex) return;
+			// 2020/07/30 BUG-FIX-#7100 WGCH END
+			// 联动数量
+			$("input:text[id$=':" + currRowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']").val( $("input:text[id$=':" + rowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']").val() );
+			// 触发金额计算Logic处理
+			$("input:text[id$=':" + currRowIndex + ":" + ACTCUSTOM.TAG.ORDERNUMS + "']").change();
+		}
+	}
+	// ポップ商品選択後の入湯税自動処理
+	ACTCUSTOM.POPUPCALLBACKFUN = function (groupindex){
+		// プランの入湯税に自動入力設定无效跳出
+		if(!ACTCUSTOM.OBJ.ISBATHTAXSETFLG) return;
+		var hidBTaxAccMstItem = $("input:hidden[id$=':" + groupindex + ":" + ACTCUSTOM.TAG.HIDBTAXACCMSTITEM + "']").val();
+		if(hidBTaxAccMstItem && hidBTaxAccMstItem != ""){
+			var result = JSON.parse(hidBTaxAccMstItem);
+			// 入湯税の自動入力
+			ACTCUSTOM.BATHTAXAUTOSETFUN(groupindex, result.bTaxAccMstItem);
+		}
+	}
+})(jQuery);
+</script>
+</apex:component>

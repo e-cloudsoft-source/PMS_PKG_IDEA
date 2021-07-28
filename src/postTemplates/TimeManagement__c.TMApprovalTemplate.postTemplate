@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PostTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <default>true</default>
+    <description>勤務修正承認申請するとき、Chatterで表示する内容テンプレート</description>
+    <fields>WorkerName__c</fields>
+    <fields>WorkDay__c</fields>
+    <fields>WorkBeginTime__c</fields>
+    <fields>WorkEndTime__c</fields>
+    <label>勤務修正承認投稿テンプレート</label>
+</PostTemplate>

@@ -1,0 +1,916 @@
+<!-- 会計書印刷 -->
+<apex:page standardController="AccountAcount__c" extensions="BillSplitProcess" title="{!$Label.ps__msg_006_0300}"
+    showHeader="false" sidebar="false" action="{!refreshBillInfo}">
+<!-- 2018/05/01 請求書分割 WGCH BEGIN -->
+<!-- 
+<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}" />
+
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.tablescroll.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}" />
+-->
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="true"/>
+<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.tablescroll.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<!-- 2018/05/01 請求書分割 WGCH END -->
+<!-- 2018/03/30 会計書の店舗切替を保存 WGCH BEGIN -->
+<c:UserConfigComp functiontype="KREP" rendered="{!spCdCookieFlg}" />
+<!-- 2018/03/30 会計書の店舗切替を保存 WGCH END -->
+<style>
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+/* 2018/04/03 会計分割 WGCH BEGIN */
+.tr_Hide{
+	display: none;
+}
+.k-tabstrip-items .k-state-active, .k-ie7 .k-tabstrip-items .k-state-active .k-loading,
+.k-state-active, .k-state-active:hover, .k-active-filter, .k-tabstrip .k-state-active {
+	border-color: rgb(191,175,0) !important;
+}
+.pageblockImp{
+	background-color: #FFFFFF !important;
+	border-color: #FFFFFF !important;
+}
+.yui-skin-sam .yui-panel .bd{
+padding: 4px;
+}
+/* 2018/04/03 会計分割 WGCH END */
+</style>
+<script>
+$j=jQuery.noConflict();
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+</script>
+
+<apex:form >
+<!-- 会計分割 -->
+<apex:pageblock title="{!$Label.ps__msg_006_0294}">
+
+    <!-- 検索条件 -->
+    <!-- 表示条件 -->
+    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_006_0260}" >
+
+        <apex:outputPanel id="cond1" >
+        <span class="lookupInput">
+        <!--　会計期間 -->
+        <apex:pageblockSectionItem >
+            <!-- 一括会計 -->
+            <apex:outputlabel value="{!$Label.ps__msg_006_0261}" />
+            <apex:outputPanel >
+            <!-- 一括会計 -->
+                <apex:inputCheckbox value="{!c_showAll}" style="margin-left: 17px" label="{!$Label.ps__msg_006_0261}"/>
+                <span style="margin-left: 10px"><!-- 会計期間 -->{!$Label.MSG_006_0262}</span>
+                <apex:inputField value="{!c_termSt.WorkDay__c}" id="fromDate" style="margin-left: 10px;"/>
+                <span style="margin-left: 10px"><!-- 〜 -->{!$Label.MSG_006_0263}</span>
+                <apex:inputField value="{!c_termEt.WorkDay__c}" id="toDate" style="margin-left: 10px"/>
+
+            </apex:outputPanel>
+        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+
+        <apex:outputPanel id="cond2" >
+        <span class="lookupInput">
+	        <!--　商品名 -->
+	        <apex:pageblockSectionItem >
+	            <apex:outputlabel value="{!$Label.ps__msg_006_0295}" />
+
+				<apex:outputPanel >
+		            <apex:inputText value="{!c_productNm}" id="productName" style="margin-left: 30px;" size="38" />
+					<!-- カテゴリ -->
+					<apex:outputlabel value="{!$Label.ps__msg_006_0265}" style="margin-left: 10px" rendered="{!dpOptionLst.size > 0}"/>
+					<apex:selectList value="{!c_dpId}" multiselect="false" size="1"
+						style="margin-left: 6px" rendered="{!dpOptionLst.size > 0}" >
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!dpOptionLst}"/>
+					</apex:selectList>
+					
+					<!-- 部門 -->
+		        	<apex:outputlabel value="{!$Label.ps__msg_006_0266}" style="margin-left: 10px" rendered="{!dpOptionLst.size > 0}"/>
+					<apex:selectList value="{!c_gpId}" multiselect="false" size="1"
+						style="margin-left: 6px" rendered="{!gpOptionLst.size > 0}">
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!gpOptionLst}"/>
+					</apex:selectList>
+					
+					<!-- 分割NO -->
+		        	<apex:outputlabel value="{!$Label.ps__msg_006_0267}" style="margin-left: 10px" rendered="{!groupNoOptLst.size > 0}"/>
+					<apex:selectList value="{!c_splitNo}" multiselect="false" size="1"
+						style="margin-left: 6px" rendered="{!groupNoOptLst.size > 0}">
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!groupNoOptLst}"/>
+					</apex:selectList>
+                </apex:outputPanel>
+	        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+
+
+
+        <apex:outputPanel id="cond3" >
+        <span class="lookupInput">
+	        <apex:pageblockSectionItem >
+	        <!-- 商品種別 -->
+		        <apex:outputlabel value="{!$Label.ps__msg_006_0268}" style="vertical-align: top;margin-top: 6px;"/>
+		        <apex:selectList value="{!c_actType}" multiselect="true" size="3"
+		            style="margin-left: 17px; width:200px" id="c_actionType">
+		            <apex:selectOption itemValue="" itemLabel="ALL"/>
+		            <apex:selectOptions value="{!typeOptionLst}"/>
+		        </apex:selectList>
+	        </apex:pageblockSectionItem>
+	        <!--
+            <span>商品種別は複数選択、プランも含め選択して、商品検索すると、<br></br>プランとプラン明細重複表示するため、ご注意ください。</span>
+             -->
+	        <span style="margin-left: 100px">
+	        <!-- 検索 -->
+	        <apex:commandButton value="{!$Label.ps__msg_006_0269}" action="{!refreshBillInfo}" reRender="dataBlock,accSplitGroupNo,billSplitGroupNo" status="refStatusBlock" style="width:100px"/>
+	        </span>
+        </span>
+        </apex:outputPanel>
+    </apex:pageBlockSection>
+</apex:pageblock>
+</apex:form>
+
+<apex:form >
+<!-- 会計明細 -->
+<apex:pageblock title="{!$Label.ps__msg_006_0296}" id="dataBlock">
+<apex:pageMessages />
+
+    <apex:pageBlockButtons >
+    <!-- 登録 -->
+        <apex:commandButton action="{!saveNo}" status="refStatusBlock" reRender="dataBlock,accSplitGroupNo,billSplitGroupNo" value="{!$Label.ps__msg_006_0270}" style="width:100px"/>
+        <!-- 印刷 -->
+        <input type="button" name="printPdf" value="{!$Label.MSG_006_0271}" style="width:100px" class="btn" />
+    </apex:pageBlockButtons>
+    
+    <!-- プラン会計明細「▼」と該当プランに所属する会計明細の分割NOは違う分割番号を設定してください -->
+	<span style="color: red; margin-top: 4px; margin-bottom: 4px; {!IF(AccountSplitBkIshow, 'display:block', 'display:none')}">{!$Label.MSG_006_0272}</span>
+	
+    <table style='width:100%' class='list' id="detailTable">
+        <thead class='rich-table-thead'>
+            <tr class="headerRow" nowrap="nowrap">
+            <th class='headerRow' nowrap='nowrap' style='width:2%;'>
+	           <!-- 分割グループ設定 -->
+	           <!-- 分割NO -->
+	            <apex:selectList size="1" id="selectAll" title="{!$Label.ps__msg_006_0267}">
+	               <apex:selectOption itemValue="" itemLabel=""/>
+	               <apex:selectOptions value="{!groupNoOptLst}"/>
+	           </apex:selectList>
+            </th>
+            <th class='headerRow' nowrap='nowrap' style='width:3%'><!-- 会計書宛名 -->{!$Label.MSG_006_0274}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:5%'><!-- 領収証宛名 -->{!$Label.MSG_006_0275}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:5%'><!-- 領収証但し -->{!$Label.MSG_006_0276}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:8%'><!-- Account# -->{!$Label.MSG_006_0277}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:8%'><!-- 会計明細 -->{!$Label.ps__msg_006_0296}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:8%'><!-- ＤＰコード -->{!$Label.MSG_006_0297}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:8%'><!-- ＧＰコード -->{!$Label.MSG_006_0298}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:30%'><!-- 商品名 -->{!$Label.ps__msg_006_0295}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:5%'><!-- 単価 -->{!$Label.MSG_006_0278}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:5%'><!-- 数量 -->{!$Label.MSG_006_0279}</th>
+            <th class='headerRow' nowrap='nowrap' style='width:5%'><!-- 合計金額 -->{!$Label.MSG_006_0280}</th>
+            </tr>
+        </thead>
+        <tBody>
+            <!-- 会計単位LOOPする -->
+            <apex:repeat value="{!billInfLst}" var="oneAcc" >
+                <!-- 会計明細LOOPする -->
+                <apex:repeat value="{!oneAcc.tranLst}" var="oneTran" >
+                <tr style="background-color: #EEE8AA">
+                    <td>
+                    	<span class="lookupInput">
+	                    <!-- 分割グループ設定rendered="{!!oneTran.isPlan}"  -->
+	                    <apex:selectList value="{!oneTran.tran.SplitGroupNo__c}" size="1" 
+	                       styleClass="{!IF(oneTran.isPlan, oneTran.tran.Id + '_01','_00')}">
+	                        <apex:selectOption itemValue="" itemLabel=""/>
+	                        <apex:selectOptions value="{!groupNoOptLst}"/>
+	                    </apex:selectList>
+	                    <!-- プラン -->
+	                    <!-- ▼ -->
+	                    <span style="font-size: 90%; display: {!IF(oneTran.isPlan,'true', 'none')}" title="{!$Label.MSG_006_0281}">{!$Label.MSG_006_0282}</span>
+	                    </span>
+                    </td>
+                    <td><apex:inputText html-data-id="dialog_accName_{!IF(ISBLANK(oneTran.tran.SplitGroupNo__c), '99', oneTran.tran.SplitGroupNo__c)}" value="{!oneTran.tran.AccountName__c}"   /></td>
+                    <td><apex:inputText html-data-id="dialog_receiptName_{!IF(ISBLANK(oneTran.tran.SplitGroupNo__c),'99', oneTran.tran.SplitGroupNo__c)}" value="{!oneTran.tran.AccountReceiptName__c}" maxlength="255"   /></td>
+                    <td><apex:inputText html-data-id="dialog_accountProviso_{!IF(ISBLANK(oneTran.tran.SplitGroupNo__c), '99',oneTran.tran.SplitGroupNo__c)}"  value="{!oneTran.tran.AccountProviso__c}" maxlength="255" style="width:100px"	 /></td>
+                    <td><apex:outputLink value="/{!oneAcc.acc.Id}" target="_blank" rendered="{!oneTran.isFirst}">{!oneAcc.acc.Name}</apex:outputLink></td>
+                    <td><apex:outputField value="{!oneTran.tran.Name}" /></td>
+                    <td><apex:outputField value="{!oneTran.tran.Field25__r.Name}" /></td>
+                    <td><apex:outputField value="{!oneTran.tran.Field26__r.Name}"/></td>
+                    <td><apex:outputtext value="{!LEFT(oneTran.tran.Field5__c,34)}"/></td>
+                    <td style="text-align: right;">
+                    	<!-- <apex:outputField value="{!oneTran.tran.Field39__c}" /> -->
+                    	<apex:outputText value="{0,number,{!numberFormat}}">
+		                	<apex:param value="{!VALUE(NULLVALUE(oneTran.tran.Field20__c,'0'))}" />
+		            	</apex:outputText>
+                    </td>
+                    <td><apex:outputField value="{!oneTran.tran.Field21__c}" /></td>
+                    <td style="text-align: right;">
+                    	<!-- <apex:outputField value="{!oneTran.tran.Field41__c}" /> -->
+                    	<apex:outputText value="{0,number,{!numberFormat}}">
+		                	<apex:param value="{!oneTran.tran.Field41__c}" />
+		            	</apex:outputText>
+                    </td>
+                </tr>
+                    <!-- 会計明細（プラン)の明細データ単位LOOPする -->
+	                <apex:repeat value="{!oneTran.childLst}" var="children" >
+	                <tr style="background-color: #FFEFD5">
+	                    <td style="text-align: right;">
+	                    <span style="margin-left: 10px">
+	                    <!-- 分割グループ設定 -->
+	                     <apex:selectList value="{!children.SplitGroupNo__c}" size="1"
+	                        styleClass="{!oneTran.tran.Id}_child" >
+	                        <apex:selectOption itemValue="" itemLabel=""/>
+	                        <apex:selectOptions value="{!groupNoOptLst}"/>
+	                    </apex:selectList>
+
+	                    </span></td>
+	                    <td colspan="4"></td>
+	                    <td>{!children.Name}</td>
+	                    <td>{!children.Field25__r.Name}</td>
+	                    <td>{!children.Field26__r.Name}</td>
+	                    <td><apex:outputField value="{!children.Field5__c}" /></td>
+	                    <td style="text-align: right;">
+	                    	<!-- <apex:outputField value="{!children.Field39__c}" /> -->
+	                    	<apex:outputText value="{0,number,{!numberFormat}}">
+			                	<apex:param value="{!VALUE(NULLVALUE(children.Field20__c,'0'))}" />
+			            	</apex:outputText>
+	                    </td>
+	                    <td><apex:outputField value="{!children.Field21__c}" /></td>
+	                    <td style="text-align: right;">
+	                    	<!-- <apex:outputField value="{!children.Field41__c}" /> -->
+	                    	<apex:outputText value="{0,number,{!numberFormat}}">
+			                	<apex:param value="{!children.Field41__c}" />
+			            	</apex:outputText>
+	                    </td>
+	                 </tr>
+	                </apex:repeat>
+                </apex:repeat>
+            </apex:repeat>
+        </tBody>
+    </table>
+<script>
+jQuery(document).ready(function() {
+    repeatBindEvent();
+    bindSelects();
+});
+// Input -> Combox転換
+function bindSelects(){
+	// 2013/10/21 会計書宛名情報設定用
+	$j("[data-id^='dialog_accName'],[data-id^='dialog_receiptName']").kendoComboBox(
+	{
+       dataTextField: "label",
+       dataValueField: "value",
+       dataSource: {!(accountNames)},
+    });
+    $j("[data-id^='dialog_accountProviso']").kendoComboBox(
+	{
+       dataTextField: "label",
+       dataValueField: "value",
+       dataSource: {!(accountProvisos)},
+    });
+}
+
+</script>
+<input type="hidden" id="bulkAccIdHid" value="{!bulkAccId}" />
+</apex:pageblock>
+
+</apex:form>
+
+<apex:form >
+<!-- This is the content of the modal dialog -->
+<div id="myPanel" style="display: none;" >
+  <div class="hd">
+  <!-- 会計書印刷 -->
+    <apex:outputText value="{!$Label.ps__msg_006_0283}" />
+  </div>
+  <div class="bd">
+  <!-- 2018/05/01 請求書分割 WGCH BEGIN -->
+  <!-- TAB化処理 -->
+  <div id="tabstrip" style="min-width: 445px">
+  	<ul>
+  		<li id="tab_acc" class="k-state-active">会計書分割</li>
+  		<li id="tab_bill">請求書分割</li>
+  	</ul>
+  	<div class="workspace" mode="acc">
+  		<apex:pageBlock id="accPrintBlock" >
+  			<table>
+  			<!-- 店舗 -->
+  			<apex:outputPanel rendered="{!mulitiShops.size > 1}">
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0454}"/></td>
+  			<td style="vertical-align: top;">
+  				<apex:selectList size="1" value="{!oShopCode}" id="branchShopCd" onchange="autoShowAccSplitFun(this);" >
+  					<apex:selectOptions value="{!mulitiShops}" />
+  				</apex:selectList>
+  			</td>
+  			</tr>
+  			</apex:outputPanel>
+  			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+  			<tr style="display: {!IF(RespectFlg,'','none')}">
+  				<td style="vertical-align: top;">敬称</td>
+  				<td>
+	  				<apex:selectList size="1" value="{!mrStr}" id="accmultiselectId">
+	  					<apex:selectOptions value="{!mrTypeLst}" />
+	  				</apex:selectList>
+  				</td>
+  			</tr>
+  			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+  			<!-- 言語： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0284}" for="dialog_language"/></td>
+  			<td style="vertical-align: top;">
+  			<select id="dialog_language"><option value="jp"><!-- 日本語 -->{!$Label.MSG_006_0286}</option><option value="en"><!-- 英語 -->{!$Label.MSG_006_0288}</option></select>
+  			</td>
+  			</tr>
+  			<!-- ハンコ表示： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0220}：" for="dialog_groupNo"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<apex:inputCheckbox id="dialog_stampIsShowFlg" value="{!accStampIsShowFlg}"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 一つタブに出力： -->
+  			<tr id="tr_accSplit" class="tr_Hide">
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0455}" for="dialog_accSplit"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<apex:inputCheckbox id="dialog_accSplitOutputFlg" value="{!accSplitOutputFlg}"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 印刷分割No： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0289}" for="dialog_groupNo"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<input type="checkbox" id="gpChkAll" class="gpChkAll" value="" checked="checked" /><!-- ALL -->{!$Label.MSG_006_0290}
+  			<apex:outputPanel id="accSplitGroupNo">
+  			<apex:repeat value="{!c_groupNo}" var="gpno" >
+  			<input type="checkbox" name="gpChk" value="{!gpno.value}" checked="checked" />{!gpno.label}
+  			</apex:repeat>
+  			</apex:outputPanel>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 2019/04/30 明細分割時に領収書不要を改善対応 WGCH BEGIN -->
+  			<!-- 領収書あり： -->
+  			<tr style="{!IF(accReceiptIsShow, '', 'display:none;')}">
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0440}：" for="dialog_accountReceipt"/></td>
+  			<td style="vertical-align: top;">
+  			<apex:outputPanel rendered="{!accReceiptIsShow}">
+  			<span class="lookupInput" >
+  			<input type="checkbox" id="dialog_accountReceipt" />
+  			</span>
+  			</apex:outputPanel>
+  			</td>
+  			</tr>
+  			<!-- 2019/04/30 明細分割時に領収書不要を改善対応 WGCH END -->
+  			</table>
+  
+  			<div style="text-align: right;" >
+  				<!-- キャンセル -->
+  				<input type="button" value="{!$Label.MSG_006_0291}" id="acc_cancelBtn" class="btn" style="width: 100px"/>
+  				<!-- 確定 -->
+  				<input type="button" value="{!$Label.MSG_006_0292}" id="acc_printKaikeBtn" class="btn" style="width: 100px"/>
+  			</div>
+  		</apex:pageBlock>
+  	</div>
+  	<div class="workspace" mode="bill">
+  		<apex:pageBlock id="billPrintBlock">
+  			<table>
+  			<!-- 店舗 -->
+  			<apex:outputPanel rendered="{!mulitiShops.size > 1}">
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0454}"/></td>
+  			<td style="vertical-align: top;">
+  				<apex:selectList size="1" value="{!billShopCode}" id="branchShopCd">
+  					<apex:selectOptions value="{!mulitiShops}" />
+  				</apex:selectList>
+  			</td>
+  			</tr>
+  			</apex:outputPanel>
+  			<!-- 発行日付： -->
+  			<tr>
+  			<td style="vertical-align: top;"><label>{!$Label.MSG_006_0219}：</label></td>
+  			<td style="vertical-align: top;"><input id="dialog_acountdate" type="text" style="width: 96px;" value="{!toDate}"/></td>
+  			</tr>
+  			<!-- 通貨： -->
+  			<apex:outputPanel rendered="{!oDefaultCurrency != 'JPY'}">
+  			<tr>
+  			<td style="vertical-align: top;"><label>{!$Label.ps__msg_006_0217}：</label></td>
+  			<td style="vertical-align: top;"><select id="dialog_currencyType"><option value="JPY">{!$Label.ps__msg_006_0216}</option><option value="{!oDefaultCurrency}">{!oDefaultCurrency}</option></select></td>
+  			</tr>
+  			</apex:outputPanel>
+  			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+  			<tr style="display: {!IF(RespectFlg,'','none')}">
+  				<td style="vertical-align: top;">敬称</td>
+  				<td>
+	  				<apex:selectList size="1" value="{!mrStr}" id="billmultiselectId">
+	  					<apex:selectOptions value="{!mrTypeLst}" />
+	  				</apex:selectList>
+  				</td>
+  			</tr>
+  			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+  			<!-- 言語： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0284}" for="dialog_language"/></td>
+  			<td style="vertical-align: top;">
+  			<select id="dialog_language"><option value="jp" ><!-- 日本語 -->{!$Label.MSG_006_0286}</option><option value="en" ><!-- 英語 -->{!$Label.MSG_006_0288}</option></select>
+  			</td>
+  			</tr>
+  			<!-- ハンコ表示： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0220}：" for="dialog_groupNo"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<apex:inputCheckbox id="dialog_stampIsShowFlg" value="{!billStampIsShowFlg}"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 一つタブに出力： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0455}" for="dialog_accSplit"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<apex:inputCheckbox id="dialog_accSplitOutputFlg" value="{!accSplitOutputFlg}"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 印刷分割No： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0289}" for="dialog_groupNo"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<input type="checkbox" id="gpChkAll" class="gpChkAll" value="" checked="checked" /><!-- ALL -->{!$Label.MSG_006_0290}
+  			<apex:outputPanel id="billSplitGroupNo">
+  			<apex:repeat value="{!c_groupNo}" var="gpno" >
+  			<input type="checkbox" name="gpChk" value="{!gpno.value}" checked="checked" />{!gpno.label}
+  			</apex:repeat>
+  			</apex:outputPanel>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- コメント： -->
+  			<tr>
+  			<td style="vertical-align: top;" rowspan="1" ><label>{!$Label.MSG_006_0221}：</label></td>
+  			<td style="vertical-align: top;">
+  			<div id="td_mulitiComments"></div>
+  			<textarea id="dialog_comment" rows="4" cols="40" /><p>{!$Label.MSG_006_0222}</p></td></tr>
+  			<tr id="div_fixed_msg">
+  				<td style="vertical-align: top;" rowspan="1" ><label>口座情報：</label></td>
+	  			<td style="vertical-align: top;">
+	  				<div>
+	  					<select size="1" style="margin-bottom:1px;width:263px;height: 20px;" id="select_fixed_msg"></select>
+	  				</div>
+		  		</td>
+  			</tr>
+  			<!-- 2019/04/30 請求書の送付表新規作成 BY zyz BEGIN -->
+  			<tr style="{!IF(billLetterFlg, '', 'display:none;')}">
+  			<td style="vertical-align: top;"><apex:outputLabel value="送付状あり："/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<input type="checkbox" id="dialog_shipping" checked="checked"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 2019/04/30 請求書の送付表新規作成 BY zyz END -->
+  			</table>
+  
+  			<div style="text-align: right;" >
+  				<!-- キャンセル -->
+  				<input type="button" value="{!$Label.MSG_006_0291}" id="bill_cancelBtn" class="btn" style="width: 100px"/>
+  				<!-- 確定 -->
+  				<input type="button" value="{!$Label.MSG_006_0292}" id="bill_printKaikeBtn" class="btn" style="width: 100px"/>
+  			</div>
+  		</apex:pageBlock>
+  	</div>
+  </div>
+  <!-- 2018/05/01 請求書分割 WGCH END -->
+  </div>
+</div>
+</apex:form>
+
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+
+<script>
+jQuery(document).ready(function() {
+    bindEvents();
+});
+
+
+<!-- YAHOO UI BEGIN ----------------------->
+// Create a namespace for our custom functions
+YAHOO.namespace("force.com");
+// Function called when we want to show the dialog
+YAHOO.force.com.showMe = function() {
+    document.getElementById("myPanel").style.display = "block";
+    YAHOO.force.com.myDialog.show();
+}
+// Function called when we want to hide the dialog
+YAHOO.force.com.hideMe = function() {
+    YAHOO.force.com.myDialog.hide();
+}
+// Function called when the DOM is ready to create the dialog,
+// render the dialog into the document body, add our dialog skin
+// css to the body tag, and wire up the buttons on our dialog
+YAHOO.force.com.init = function() {
+	document.body.className = document.body.className + " yui-skin-sam";
+
+	YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+	    "myPanel",  // The id of our dialog container
+	    {
+	            width           :   600,    // You can play with this until it's right
+	            visible         :   false,  // Should be invisible when rendered
+	            draggable       :   true,   // Make the dialog draggable
+	            close           :   false,  // Don't include a close title button
+	            modal           :   true,   // Make it modal
+	            fixedCenter     :   true,   // Keep centered if window is scrolled
+	            zindex          :   4,     // Make sure it's on top of everything
+
+	            // This line adds the appear/vanish fade effect
+	            effect          :   {
+	                                  effect:YAHOO.widget.ContainerEffect.FADE,
+	                                  duration:0.35
+	                                }
+	    }
+	);
+	// Render the dialog to the document.body level of the DOM
+	YAHOO.force.com.myDialog.render(document.body);
+}
+// Add the init method to the window.load event
+YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+<!-- YAHOO UI END ----------------------->
+
+
+function bindEvents() {
+    // 日付
+    $j("input[id$=':fromDate']" + "," + "input[id$=':toDate']")
+    .on('blur', function(){
+    	var $this = $j(this);
+    	if ($this.val() == "") return;
+		// 2016/11/25 TIMEZON fix BEGIN by zh
+		//var inputDt = Date.parse($this.val());
+		var inputDt = kendo.parseDate($this.val(),JINYACONNECT.DateFormat);
+	    // 2016/11/25 TIMEZON fix END by zh
+	    // 日付書式処理を行う
+		$this.val(dateFormat.format(inputDt));
+    });
+    // 分割印刷
+    // 2018/05/01 請求書分割 WGCH BEGIN
+    $j("#acc_printKaikeBtn, #bill_printKaikeBtn").click(function(e) {
+	   	var id = "?id={!accSobj.Id}";
+	   	var bulkId = "&bulkid=" + $j("#bulkAccIdHid").val();
+		var lang = "&language=" + encodeURIComponent($j("#dialog_language", _THIS_DIVMODE).val());
+		var groupFlg="&g=1";
+	   	// 2018/05/01 請求書分割 WGCH BEGIN
+	   	// var baseOpenUrl = "{!$Page.AccountPdfSwitch}" + id + bulkId + lang + groupFlg;
+	   	var accPageFlg = $j(_THIS_DIVMODE).attr("mode") == "acc"; // 会计分割Mode
+	   	var page = accPageFlg ? "{!$Page.AccountPdfSwitch}" : "{!$Page.BillPdfSwitch}";
+	   	var baseOpenUrl = page + id + bulkId + lang + groupFlg;
+	   	// 2018/05/01 請求書分割 WGCH END
+	   	//var groupNo = $j("[name$='gpChk']").val();
+	   	if ($j("[name$='gpChk']:checked", _THIS_DIVMODE).length < 1) {
+	   	//印刷したい分割NOを指定してください。
+	   		alert("{!$Label.MSG_006_0293}");
+	   		return false;
+	   	}
+	   	// 2018/04/03 会計分割 WGCH BEGIN
+	   	var gnoSize = 0;
+	   	var gnoValStr = contactValStr = recpNameValStr = accountProvisoValStr = '';
+	   	var accSplitOutputFlg = $j("input[id$=':dialog_accSplitOutputFlg']", _THIS_DIVMODE).prop('checked');
+	   	var branchCd = $j("select[id$=':branchShopCd']", _THIS_DIVMODE).length > 0 ? $j("select[id$=':branchShopCd']", _THIS_DIVMODE).val() : "";
+		if(accSplitOutputFlg && accPageFlg){
+			// FacilityCode再次判断
+			accSplitOutputFlg = fcInfoDs[branchCd];
+		}
+		// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+		var mrSelectObj = $j("select[id$=accmultiselectId]");
+		// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+		if(!accPageFlg){
+		   	var comment = $j("#dialog_comment").val();
+		   	var reqDate = $j("#dialog_acountdate").val();
+		   	var currencyLen = $j("#dialog_currencyType").length;
+		   	var currencyVal = $j("#dialog_currencyType").val();
+		   	// 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw BEGIN
+		   	var fixedMsg = $j("#select_fixed_msg").val() || "";
+		   	// 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw END
+	
+		   	baseOpenUrl += "&comment=" + encodeURIComponent(comment);
+		   	baseOpenUrl += "&pdt=" + encodeURIComponent(reqDate);
+		   	// 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw BEGIN
+		   	baseOpenUrl += "&fixedMsg=" + encodeURIComponent(fixedMsg);
+		   	// 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw END
+		   	if (currencyLen > 0 && currencyVal == "JPY") {
+		   	    baseOpenUrl += "&cy=" + encodeURIComponent(currencyVal);
+		   	}
+		   	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+		   	mrSelectObj = $j("select[id$=billmultiselectId]");
+		   	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+	   	}
+	   	// 2018/04/03 会計分割 WGCH END
+	   	// 2019/04/30 明細分割時に領収書不要を改善対応 WGCH BEGIN
+	   	var noreceipt = '';
+	   	// 会计mode
+	   	if(accPageFlg){
+	   		// 只有undefeated || fales才能进入， true不会进入
+	   		var acccReceipt = $j("input[id='dialog_accountReceipt']", _THIS_DIVMODE);
+	   		if(acccReceipt.length > 0 && acccReceipt.prop("checked") == false) noreceipt = '&noreceipt=1';
+	   	}
+	   	// 2019/04/30 明細分割時に領収書不要を改善対応 WGCH END
+	   	// 2019/04/30 請求書の送付表新規作成 BY zyz BEGIN
+	   	var shippingUrl = '';
+	   	var shippingStr = $j("input[id='dialog_shipping']", _THIS_DIVMODE);
+	   	if(shippingStr.prop("checked")){ 
+	   		shippingUrl= "&letter"; 
+	   	} 
+	   	// 2019/04/30 請求書の送付表新規作成 BY zyz END
+	   	// 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh
+		var stampIsShowFlgStr = "&stampFlg=" + encodeURIComponent( $j("input[id$=':dialog_stampIsShowFlg']", _THIS_DIVMODE).prop('checked') );
+		// 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh
+	   	$j("[name$='gpChk']:checked", _THIS_DIVMODE).each(function(){
+    // 2018/05/01 請求書分割 WGCH END
+	   		var groupNo = this.value;
+	   		// グループ毎に関連の会計書宛名、領収書宛名、会計書但し書き一行目の設定内容を取得、次のページに引き渡し
+	   		var firstKey = groupNo == "" ?  "99" : groupNo;
+	   		// 2018/04/03 会計分割 WGCH BEGIN
+	   		var contact = $j("input[data-id$='dialog_accName_"+firstKey+"']");
+	   		var receiptName = $j("input[data-id$='dialog_receiptName_"+firstKey+"']");
+	   		var accountProviso = $j("input[data-id$='dialog_accountProviso_"+firstKey+"']");
+	   		if(accSplitOutputFlg){
+	   			if(groupNo != '') gnoValStr += '&g' + gnoSize + '=' + groupNo;
+	   			if(contact.length > 0) contactValStr += '&cNm' + gnoSize + '=' + encodeURIComponent(contact.get(0).value);
+	   			// 2018/12/15 請求書-領収書新規レイアウトを追加 WGCH BEGIN
+	   			// if(receiptName.length > 0 && accPageFlg) recpNameValStr += '&rNm' + gnoSize + '=' + encodeURIComponent(receiptName.get(0).value);
+	   			// if(accountProviso.length > 0 && accPageFlg) accountProvisoValStr += '&aPro' + gnoSize + '=' + encodeURIComponent(accountProviso.get(0).value) ;
+	   			if(receiptName.length > 0) recpNameValStr += '&rNm' + gnoSize + '=' + encodeURIComponent(receiptName.get(0).value);
+	   			if(accountProviso.length > 0) accountProvisoValStr += '&aPro' + gnoSize + '=' + encodeURIComponent(accountProviso.get(0).value) ;
+	   			// 2018/12/15 請求書-領収書新規レイアウトを追加 WGCH END
+	   		} else {
+//console.debug(firstKey);
+		   		// var contact = $j("input[data-id$='dialog_accName_"+firstKey+"']");
+		   		var contactUrl =  (contact.length > 0 )  ? "&cuName=" + encodeURIComponent(contact.get(0).value) : "";
+		   		// 2018/12/15 請求書-領収書新規レイアウトを追加 WGCH BEGIN
+		   		// var receiptName = $j("input[data-id$='dialog_receiptName_"+firstKey+"']");
+		   		// var receiptNameUrl =  (receiptName.length > 0 && accPageFlg)  ? "&recpName=" + encodeURIComponent(receiptName.get(0).value) : "";
+		   		var receiptNameUrl =  (receiptName.length > 0)  ? "&recpName=" + encodeURIComponent(receiptName.get(0).value) : "";
+		   		// var accountProviso = $j("input[data-id$='dialog_accountProviso_"+firstKey+"']");
+		   		// var accountProvisoUrl =  (accountProviso.length > 0 && accPageFlg)  ? "&accountProviso=" + encodeURIComponent(accountProviso.get(0).value) : "";
+		   		var accountProvisoUrl =  (accountProviso.length > 0)  ? "&accountProviso=" + encodeURIComponent(accountProviso.get(0).value) : "";
+				// 2018/12/15 請求書-領収書新規レイアウトを追加 WGCH END
+				//console.debug(contact);
+		   		//alert(groupNo);
+		   		// 2017/12/27 分割の前受金重複不具合解消対応 BEGIN
+				//var openUrl = baseOpenUrl + contactUrl + receiptNameUrl + accountProvisoUrl + "&gno=" + groupNo;
+				var openUrl = baseOpenUrl + contactUrl + receiptNameUrl + accountProvisoUrl + "&noar=1&gno=" + groupNo;
+		   		// 2017/12/27 分割の前受金重複不具合解消対応 END
+				// 2018/01/15 分割会計時を行う際、店舗切替できるように改善対応 zyz BEGIN
+				// var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+				if(branchCd != "") openUrl += '&shopcd=' + branchCd;
+				// 2018/01/15 分割会計時を行う際、店舗切替できるように改善対応 zyz END
+				// 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh
+				openUrl += stampIsShowFlgStr;
+				// 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh
+				// 2018/03/30 会計書の店舗切替を保存 WGCH BEGIN
+				if(spCdCookieFlg) setSpCdCookieFun(branchCd);
+				// 2018/03/30 会計書の店舗切替を保存 WGCH END
+				// 2019/04/30 明細分割時に領収書不要を改善対応 WGCH BEGIN
+				openUrl += noreceipt;
+				// 2019/04/30 明細分割時に領収書不要を改善対応 WGCH END
+				// 2019/04/30 請求書の送付表新規作成 BY zyz BEGIN
+				openUrl += shippingUrl;
+				// 2019/04/30 請求書の送付表新規作成 BY zyz END
+				// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+				openUrl += (mrSelectObj.length > 0 ? ("&mr="+encodeURIComponent(mrSelectObj.get(0).value)) : "");
+				// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+			   	// open openUrl;
+			   	window.open(openUrl)
+		   	}
+		   	gnoSize ++;
+		   	// 2018/04/03 会計分割 WGCH END
+	   	});
+	   	// 2018/04/03 会計分割 WGCH BEGIN
+	   	if(accSplitOutputFlg){
+		   	var openUrl = baseOpenUrl + gnoValStr + contactValStr + recpNameValStr + accountProvisoValStr + "&gnoSize=" + gnoSize + "&noar=1";
+			if(branchCd != "") openUrl += '&shopcd=' + branchCd;
+			// 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh
+			openUrl += stampIsShowFlgStr;
+			// 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh
+			// 2018/03/30 会計書の店舗切替を保存 WGCH BEGIN
+			if(spCdCookieFlg) setSpCdCookieFun(branchCd);
+			// 2018/03/30 会計書の店舗切替を保存 WGCH END
+			// 2019/04/30 明細分割時に領収書不要を改善対応 WGCH BEGIN
+			openUrl += noreceipt;
+			// 2019/04/30 明細分割時に領収書不要を改善対応 WGCH END
+			// 2019/04/30 請求書の送付表新規作成 BY zyz BEGIN
+			openUrl += shippingUrl;
+			// 2019/04/30 請求書の送付表新規作成 BY zyz END
+			// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+			openUrl += (mrSelectObj.length > 0 ? ("&mr="+encodeURIComponent(mrSelectObj.get(0).value)) : "");
+			// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+			// open openUrl;
+			window.open(openUrl)
+	   	}
+	   	// 2018/04/03 会計分割 WGCH END
+	   	// Window Close
+    	YAHOO.force.com.hideMe();
+    });
+    // キャンセルボタン
+    $j("#acc_cancelBtn, #bill_cancelBtn").click(function(e) {
+    	YAHOO.force.com.hideMe();
+    });
+	// Table Header Float Controll
+    //$j("#detailTable").tableScroll({height:400});
+    // 2018/04/03 会計分割 WGCH BEGIN
+    autoShowAccSplitFun($j("select[id$=':branchShopCd']"));
+    // 2018/04/03 会計分割 WGCH END
+    // 2018/05/01 請求書分割 WGCH BEGIN
+    _getCommentHtml();
+    // 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw BEGIN
+    _getFixedMsgHtml();
+    // 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw END
+    setTabstripFun();
+    // 2018/05/01 請求書分割 WGCH END
+
+}
+// 2018/04/03 会計分割 WGCH BEGIN
+var _THIS_DIVMODE = "div.k-state-active";
+var fcInfoDs = JSON.parse('{!JSENCODE(fcInfoJson)}');
+function autoShowAccSplitFun(_this) {
+	var spcd = $j(_this).length > 0 ? $j(_this).val() : "";
+	if(fcInfoDs[spcd]) $j("#tr_accSplit").removeClass('tr_Hide');
+	else $j("#tr_accSplit").addClass('tr_Hide');
+	// 2018/06/08 レシート印刷機能言語選択する WGCH BEGIN
+	// 设置默认语言
+	$j("select[id='dialog_language']").val('{!JSENCODE(accSobj.AccountLanguage__c)}');
+	// 2018/06/08 レシート印刷機能言語選択する WGCH END
+}
+// 2018/04/03 会計分割 WGCH END
+// 2018/05/01 請求書分割 WGCH BEGIN
+// Tab样式设定
+function setTabstripFun(){
+	$j("div[id$=':accPrintBlock'], div[id$=':billPrintBlock']").addClass("pageblockImp");
+	var $tabStripElement = $j("#tabstrip").kendoTabStrip({
+			select:function(e,options){
+				var tabId = e.item["id"];
+				if(tabId == "tab_acc"){ // 会計書印刷
+					$j("#myPanel .hd").text("{!$Label.MSG_006_0283}");
+				} else if (tabId == "tab_bill") { // 請求書印刷
+					$j("#myPanel .hd").text('請求書印刷');
+				}
+			}
+		});
+}
+// 請求書のコメント欄を毎回手打ちし自動 
+function _getCommentHtml(){
+	var commOpts = JSON.parse("{!JSENCODE(mulitiComments)}");
+	var comHtml = "";
+	var comment = "";
+	var targetId = "dialog_comment";
+	if (commOpts.length > 1) {
+		var tHtml = '<select size="1" style="margin-bottom:1px;width:263px;height: 20px;" onchange="_commentSelectVal(\''+targetId+'\',this,this.value)">$$_OPTBODY_$$</select>';
+		var oHtml = '<option value=""/>';
+		for (i=0;i<commOpts.length;i++) {
+			oHtml+='<option value="'+commOpts[i].val+'">'+commOpts[i].lab+'</option>';
+		}
+		comHtml = tHtml.replace('$$_OPTBODY_$$',oHtml);
+	} else if (commOpts.length == 1) {
+		comment = commOpts[0].val;
+	}
+	$j("textarea[id='dialog_comment']").text(comment);
+	$j("#td_mulitiComments").prepend(comHtml);
+}
+// 選択内容はコメントに設定する
+function _commentSelectVal(targetId, that, val) {
+    $j("#"+targetId).val(val).focus();
+}
+// 2018/05/01 請求書分割 WGCH END
+// 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw BEGIN
+function _getFixedMsgHtml(){
+		var $spcd = $j("select[id$=':branchShopCd']", "div[id$=':billPrintBlock']");
+		if($spcd.length){
+			spcdChange.call($spcd[0]);
+			$spcd.change(spcdChange);
+		}else spcdChange.call({value: "{!IF(mulitiShops.size > 1, NULLVALUE(oShopCode, ''), '')}"});
+	}
+
+function spcdChange(){
+	var fixedMsg = JSON.parse("{!JSENCODE(jsonFixedMsg)}");
+	var value = this.value;
+	var showItems = [];
+	showItems = showItems.concat(fixedMsg[""] || []).concat(value ? (fixedMsg[value] || []) : []);
+	var $select = $j("#select_fixed_msg").html("");
+	var $div = $j("#div_fixed_msg");
+	if(!showItems.length) return $div.hide();
+	var html = '<option value=""/>', def = false;
+	for(var i = 0; i < showItems.length; i++) html += '<option value="'+ showItems[i].Msg +'" ' + (showItems[i].bDefault && !def ? (def = true,'selected') : '') + '>'+ showItems[i].Label +'</option>';
+	$select.html(html);
+	$select.show();
+	$div.show();
+}
+
+// 2019/1/15 請求書に掲載する振込先口座情報を、同一店舗内で切り替えする BY cxw END
+
+function repeatBindEvent() {
+	// 印刷の指定分割NOの連動
+    // 2018/05/01 請求書分割 WGCH BEGIN
+    /*
+    $j("#gpChkAll").click(function(e) {
+        if(this.checked){
+            $j("[name='gpChk']").attr('checked','checked');
+        } else {
+            $j("[name='gpChk']").removeAttr('checked');
+        }
+    });
+    $j("[name='gpChk']").click(function(e) {
+        var allCheckLen = $j("[name='gpChk']").length;
+        var allChecked = $j("[name='gpChk']:checked").length != allCheckLen ? false : true;
+        if (allChecked) $j("#gpChkAll").attr('checked','checked');
+        else $j("#gpChkAll").removeAttr('checked');
+    });
+    */
+    $j(".gpChkAll").click(function(e) {
+        if(this.checked){
+            $j("[name='gpChk']", _THIS_DIVMODE).prop('checked', true);
+        } else {
+            $j("[name='gpChk']", _THIS_DIVMODE).prop('checked', false);
+        }
+    });
+    $j("[name='gpChk']").click(function(e) {
+        var allCheckLen = $j("[name='gpChk']", _THIS_DIVMODE).length;
+        var allChecked = $j("[name='gpChk']:checked", _THIS_DIVMODE).length != allCheckLen ? false : true;
+        if (allChecked) $j("#gpChkAll", _THIS_DIVMODE).prop('checked', true);
+        else $j("#gpChkAll", _THIS_DIVMODE).prop('checked', false);
+    });
+    // 2018/05/01 請求書分割 WGCH END
+	// 分割番号選択連動
+    $j("select[id$='selectAll']").change(function(e) {
+        var allVal = this.value;
+        $j("select[class$='01'],select[class$='00']").each(function(idx) {
+            $j(this).val(allVal);
+            //$j(this).change();
+        });
+    });
+    $j("select[class$='01']").change(function(e) {
+        //alert($j(this).val());
+        var parentId = ($j(this).attr("class")).substr(0,18);
+        var parentNo = $j(this).val();
+        // 18桁IDで、所属するプラン明細一括設定を行う
+        var findKey = parentId + "_child";
+        $j("select[class='"+findKey+"']").val(parentNo);
+    });
+    // 印刷
+    $j("[name = 'printPdf']").click(function(e) {
+		//var contact = "{!JSENCODE(accSobj.ContactName__c)}";
+		//var receiptName = "{!JSENCODE(accSobj.BillingCal__c)}";
+		//var accountProviso = "{!JSENCODE($Setup.CommDefine__c.AccountProviso__c )}";
+		//$j("#dialog_accName").val(contact);
+		//$j("#dialog_receiptName").val(receiptName);
+		//$j("#dialog_accountProviso").val(accountProviso);
+		YAHOO.force.com.showMe();
+    });
+}
+// Block Action Window
+function blockUi() {
+    $j("body").block({
+    //Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_006_0299}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j("body").unblock();
+}
+// 2018/03/30 会計書の店舗切替を保存 WGCH BEGIN
+var userId = "{!JSENCODE(userId)}";
+var spCdCookieFlg = {!spCdCookieFlg};
+function setSpCdCookieFun(cookVal){
+	var modeKey = $j(_THIS_DIVMODE).attr("mode") == "acc" ? 'ACCSPCD' : 'BILLSPCD';
+	JINYACONNECT.CONFIG.saveKrepConfig(modeKey, cookVal ,userId,'');
+}
+// 2018/03/30 会計書の店舗切替を保存 WGCH END
+</script>
+</apex:page>

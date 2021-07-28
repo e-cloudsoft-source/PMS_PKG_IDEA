@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Guest book detail</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Guest book detail</value>
+    </caseValues>
+    <fields>
+        <label>Account name</label>
+        <name>ContactRef__c</name>
+        <relationshipLabel>Guest book</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Representative</label>
+        <name>DelegateFlg__c</name>
+    </fields>
+    <fields>
+        <label>Guest number</label>
+        <name>GuestAutoNo__c</name>
+    </fields>
+    <fields>
+        <label>Guest name (Kanji)</label>
+        <name>GuestName__c</name>
+    </fields>
+    <fields>
+        <label>Reservation index SUB</label>
+        <name>IndexSubRef__c</name>
+        <relationshipLabel>Guest book</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Room group number</label>
+        <name>RoomGroupNo__c</name>
+    </fields>
+    <fields>
+        <label>Room</label>
+        <name>RoomRef__c</name>
+        <relationshipLabel>Guest book</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Gender</label>
+        <name>Sex__c</name>
+        <picklistValues>
+            <masterLabel>女</masterLabel>
+            <translation><!-- 女 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>男</masterLabel>
+            <translation><!-- 男 --></translation>
+        </picklistValues>
+    </fields>
+    <nameFieldLabel>Guest Name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

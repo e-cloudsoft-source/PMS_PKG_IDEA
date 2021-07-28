@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>データ状態定義</value>
+    </caseValues>
+    <fields>
+        <help><!-- 予約情報の検索キーを設定済み・未設定識別フラグ --></help>
+        <label><!-- 予約更新済み(NEW) --></label>
+        <name>LeadFixed1__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約情報の検索キーを設定済み・未設定識別フラグ --></help>
+        <label><!-- 予約更新済み --></label>
+        <name>LeadFixed__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約検索キーデータ設定処理中識別フラグ --></help>
+        <label><!-- 予約更新中 --></label>
+        <name>LeadUpdateFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋状態管理のインデックス設定済み --></help>
+        <label><!-- 部屋状態管理更新済み(New) --></label>
+        <name>RoomsStatusFixed1__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋状態管理のインデックス設定済み --></help>
+        <label><!-- 部屋状態管理更新済み --></label>
+        <name>RoomsStatusFixed__c</name>
+    </fields>
+    <fields>
+        <help><!-- StockChangeHisotryDataFixBatchバッチ実施結果の記録 --></help>
+        <label><!-- 在庫変更履歴更新済み --></label>
+        <name>StockChangeHisotryFixed__c</name>
+    </fields>
+</CustomObjectTranslation>

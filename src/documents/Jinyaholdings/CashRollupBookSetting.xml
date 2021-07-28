@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、現金合わせる機能の外貨単位情報を定義できる、外貨の現金合わせる対応できる
+書式：
+　　　SHOPCODE:        店舗コード、支店が非存在　または　各店舗は共通化する場合、空白のままに定義する
+　　　PRICE:     	 	　通貨単位情報を定義する
+		label			手許有高の通貨単位のラベル情報
+		apiName			現金合わせる手許有高関連の項目のAPI名
+		percount		通貨単位の実際計算単位
+2016.10.31 現金合せ初期値設定機能追加
+	INIT_CONFIG:		項目の初期値設定を行う
+		DEFALUT_VALUE:	項目の初期値
+			ApiName:	現金合わせる手許有高関連の項目のAPI名
+	例：準備金の初期値は50万円、手許有高（1万）枚数は50枚を初期値として、設定するとき
+		<INIT_CONFIG>
+			準備金の初期値は50万円
+			<DEFALUT_VALUE ApiName="ReserveFund__c">500000</DEFALUT_VALUE>
+			手許有高（1万）枚数
+			<DEFALUT_VALUE ApiName="TenThousandCashNums__c">50</DEFALUT_VALUE>
+        </INIT_CONFIG>	
+2017.07.05 POS(オーダーエントリ定義情報.XMLタグ「PRINTNO」値)端末単位の初期値設定機能追加
+    例：営業開始のタイミング、オーダーエントリ定義情報.XMLタグ「PRINTNO」値はS001の端末の準備金は20万円を準備する場合
+        手許有高（1万）枚数は20枚を初期値として、設定するとき
+        <INIT_CONFIG>
+            準備金の初期値は50万円
+            <DEFALUT_VALUE PRINTNO="S01" ApiName="ReserveFund__c">200000</DEFALUT_VALUE>
+            手許有高（1万）枚数
+            <DEFALUT_VALUE PRINTNO="S01" ApiName="TenThousandCashNums__c">20</DEFALUT_VALUE>
+-->
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE></SHOPCODE>
+        <!-- これから海外の通貨情報を定義場合 -->
+        <!-- 通貨「USドル」一部定義は例として、下記ように定義する -->
+        <!-- 
+        <PRICE>
+        	<label>100</label>
+        	<apiName>TenThousandCashNums__c</apiName>
+        	<percount>100</percount>
+        </PRICE>
+        <PRICE>
+        	<label>50</label>
+        	<apiName>FiveThousandCashNums__c</apiName>
+        	<percount>50</percount>
+        </PRICE>
+        <PRICE>
+        	<label>20</label>
+        	<apiName>TwoThousandCashNums__c</apiName>
+        	<percount>20</percount>
+        </PRICE>
+        <PRICE>
+        	<label>10</label>
+        	<apiName>OneThousandCashNums__c</apiName>
+        	<percount>10</percount>
+        </PRICE>
+        <PRICE>
+        	<label>5</label>
+        	<apiName>FiveHundredCashNums__c</apiName>
+        	<percount>5</percount>
+        </PRICE>
+        <PRICE>
+        	<label>2</label>
+        	<apiName>OneHundredCashNums__c</apiName>
+        	<percount>2</percount>
+        </PRICE>
+        <PRICE>
+        	<label>1</label>
+        	<apiName>FiftyCashNums__c</apiName>
+        	<percount>1</percount>
+        </PRICE>
+        <PRICE>
+        	<label>Quarter</label>
+        	<apiName>TenCashNums__c</apiName>
+        	<percount>0.25</percount>
+        </PRICE>
+        <PRICE>
+        	<label>Dime</label>
+        	<apiName>OneCashNums__c</apiName>
+        	<percount>0.1</percount>
+        </PRICE>
+		-->
+		<!-- 新規の場合、項目の初期値設定を行う -->
+		<!-- 
+        <INIT_CONFIG>
+            <DEFALUT_VALUE ApiName="ReserveFund__c">500000</DEFALUT_VALUE>
+            <DEFALUT_VALUE ApiName="TenThousandCashNums__c">50</DEFALUT_VALUE>
+        </INIT_CONFIG>
+        -->
+	</SHOP>
+</root>

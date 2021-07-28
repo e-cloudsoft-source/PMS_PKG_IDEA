@@ -1,0 +1,1300 @@
+<apex:page title="売掛-入金消込" controller="BillEraseListCtrl" sidebar="false" action="{!getTTend}">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2018, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/kendo.all.min.js')}"/>
+<!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/cultures/kendo.culture.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<meta id="view_id" name="viewport" content="width=device-width,initial-scale=1.0"/>
+<!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<c:CommHeaderComp loadJsLib="false"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!-- 2019/06/15 消込機能改善対応 BY zyz
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qreki.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qrekiHelp.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2018, 'js/cultures/kendo.culture.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.qrlib, 'qrjslib/instascan.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.qrlib, 'qrjslib/qr_packed.js')}"/>
+ -->
+<style>
+/* 画面初期化 */
+html, body {
+    height: 100%;
+}
+#contentWrapper{
+    height:100%;
+}
+#contentWrapper .bodyDiv{
+    height:auto;
+}
+#bodyTable{
+    height:100%;
+}
+#contentWrap{
+    width: 100%;
+    height:100%;
+    font-size:16px;
+    min-width: 1300px;
+}
+/* 画面初期化 */
+.headDiv{
+    width: 100%;
+    height:50px;
+    line-height: 50px;
+    text-align: center;
+}
+.headerSpan{
+    display: inline-block;
+    text-align: center;
+    height: 30px;
+    line-height: 30px;
+}
+/* title 横幅設定 begin */
+.titleItem{
+    border: 1px solid #c5c5c5;
+}
+.titleItem>span:nth-child(1),tr.detailRow>td:nth-child(1){
+    width: 60px;
+    cursor: pointer;
+    text-align: center;
+}
+.titleItem>span:nth-child(2),tr.detailRow>td:nth-child(2){
+    width: calc(100% - 1190px);
+}
+.titleItem>span:nth-child(3),tr.detailRow>td:nth-child(3){
+    width: 240px;
+}
+.titleItem>span:nth-child(4),tr.detailRow>td:nth-child(4){
+    width: 240px;
+}
+.titleItem>span:nth-child(5),tr.detailRow>td:nth-child(5){
+    width: 120px;
+}
+.titleItem>span:nth-child(6),tr.detailRow>td:nth-child(6){
+    width: 90px;
+}
+.titleItem>span:nth-child(7),tr.detailRow>td:nth-child(7){
+    width: 90px;
+}
+.titleItem>span:nth-child(8),tr.detailRow>td:nth-child(8){
+    width: 150px;
+}
+.titleItem>span:nth-child(9),tr.detailRow>td:nth-child(9){
+    width: 150px;
+}
+tr.detailRow>td{
+    padding: 0px 2px;
+}
+/* IPAD BEGIN */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) {
+.titleItem>span:nth-child(2),tr.detailRow>td:nth-child(2){
+    width: calc(100% - 1150px);
+    /*width: calc(100% - 583px);*/
+}
+.blockUI.blockMsg.blockPage h1{font-size: 10px;}
+}
+/* IPAD END */
+tr.detailRow .k-input[type='text'],tr.detailRow>td:nth-child(6),tr.detailRow>td:nth-child(7),tr.detailRow>td:nth-child(9){
+    text-align: right;
+}
+/* title 横幅設定 end */
+/*　テーブル　*/
+.inventoryTable{
+    /*　width: 100%;　*/
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    empty-cells: show;
+    border-width: 0;
+    outline: 0;
+}
+.gridBackGround{
+    background-image: url(textures/highlight.png);
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-moz-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,-o-linear-gradient(top,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+    background-position: 50% 50%;
+    background-color: #e3e3e3;
+}
+.inventoryTable tr.detailRow:nth-child(odd){
+    background: white;
+}
+tr.detailRow>td{
+    position:relative;
+    border-color: #c5c5c5;
+    border-style: solid;
+    border-width: 0px 1px 1px 0px;
+}
+tr.detailRow>td:nth-child(1){
+    border-color: #c5c5c5;
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
+}
+.detailRow .k-input{
+    width:98%;
+    text-align: right;
+}
+/*　テーブル　*/
+div.itemWrap{
+    border: 2px solid #ececec;
+}
+div.tableWrap{
+    overflow: scroll;
+    max-height: 600px;
+}
+.toolbar{
+    height: 30px;
+    padding:5px;
+    font-size:14px;
+    position:relative;
+    border-style: solid;
+    border-width: 0 0 1px;
+    border-color: #c5c5c5;
+    background-color: #eae8e8;
+}
+.loadinggif{
+    width: 16px;
+    display: inline-block;
+    height: 16px;
+    background-image: url("{!URLFOR($Resource.Expo, 'css/Default/loading.gif')}");
+}
+#functionBtn{
+    position: absolute;
+    left: calc(100%/2 - 50px);
+}
+#toolBtn{
+    float:left;
+}
+.footDiv{
+    height: 30px;
+    /*line-height: 35px;*/
+    padding: 5px;
+}
+.warningIcon{
+    height:16px;
+    width:16px;
+    background-image: url(../img/msg_icons/warning16.png);
+}
+td.orgQtyClass{
+    position: relative;
+}
+td.orgQtyClass .warningIcon{
+    position: absolute;
+    top: calc(100%/2 - 10px);
+    left: 3px;
+}
+#functionBtn .k-button{
+    width: 100px;
+}
+#functionSearchBtn .k-button{
+	width: 100px;
+}
+.displayClass{
+    display:none;
+}
+/* モバイルのswitch BEGIN */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 23px;
+}
+.switch input {display:none;}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 19px;
+  width: 19px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(17px);
+  -ms-transform: translateX(17px);
+  transform: translateX(17px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+/* モバイルのswitch END */
+div.tableWrap .inventoryTable tr{
+    height: 50px;
+}
+span.prodClass{
+    display: table-cell;
+    vertical-align: middle;
+    height: 52px;
+    line-height: 25px;
+}
+div.tableWrap.noImage .inventoryTable tr{
+    height: 25px;
+    line-height:25px;
+}
+div.tableWrap.noImage span.prodClass{
+    height: 45px;
+}
+#toolBtn .k-button{
+    border-radius:0px;
+}
+.k-button.selected{
+    color: #fff;
+    background-color: #f35800;
+    border-color: #f85a00;
+    background-image: url(textures/highlight.png);
+    background-image: none,-webkit-gradient(linear,left top,left bottom,from(rgba(255,255,255,.2)),to(rgba(255,255,255,0)));
+    background-image: none,-webkit-linear-gradient(top,rgba(255,255,255,.2) 0,rgba(255,255,255,0) 100%);
+    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.2) 0,rgba(255,255,255,0) 100%);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+/* 2018/11/8 棚卸画面、「適正在庫」列は追加の対応 by cxw BEGIN */
+div.tableWrap .inventoryTable tr,span.prodClass{
+    height: 25px;
+    line-height: auto;
+}
+div.tableWrap .inventoryTable tr input.k-textbox{
+    padding:0px;
+    line-height: auto;
+    height:25px;
+}
+/* 2018/11/8 棚卸画面、「適正在庫」列は追加の対応 by cxw END */
+/*2018/12/30 棚卸し機能（在庫照合、在庫数改修） by cxw BEGIN*/
+@keyframes move {
+  from {top: 0}
+  to {top: 487px}
+}
+@media screen and (orientation: landscape) {
+    #caneraMode #close-box {
+        right: 50px;
+        width: 90px;
+        top: calc(50% - 40px);
+    }
+}
+
+@media screen and (orientation: portrait) {
+    #caneraMode #close-box {
+        bottom: 80px;
+        width: 100%;
+    }
+}
+/*2018/12/30 棚卸し機能（在庫照合、在庫数改修） by cxw END*/
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+#grid{
+	overflow:auto;
+}
+/* 2019/06/15 消込機能改善対応 BY zyz BEGIN */
+.k-grid td{
+border-style: solid;
+border-width: 0 0 0 1px;
+padding: 0.4em .3em;
+overflow: hidden;
+line-height: 1.6em;
+vertical-align: middle;
+text-overflow: ellipsis;
+}
+/* 2019/06/15 消込機能改善対応 BY zyz END */
+</style>
+<script>
+beenFocused = true;
+var PageInfo = {
+    // 画面初期化
+    DATAREAD:'queryStockData',
+    // データ保存
+    DATAUPD:'updateStockData',
+};
+var _isMobileOS;
+kendo.culture("ja-JP");
+$(document).ready(function(){
+    _isMobileOS = kendo.support.mobileOS;
+	// 2019/06/15 消込機能改善対応 BY zyz BEGIN
+	// ipad上检索按钮对应位置
+	if(_isMobileOS && layoutFlg) {
+		$("span[class$=btnCls]").css("position","unset");
+		$(".toolbar").css("height","40px");
+		$("#view_id").attr('content',"width=device-width, minimum-scale=0.5, maximum-scale=2.0, initial-scale=0.5;");
+	}
+	// 数据转换成kendoGrid
+	// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+	setKendoGrid(layoutFlg,filterableVal);
+	// 2019/11/30 Filter機能改善対応 BY zyz END
+	// 2019/06/15 消込機能改善対応 BY zyz END
+    // 初期化
+    bindEvent();
+    bindWindowResize();
+    // 画面関係情報刷新
+    reloadPageInfo();
+    // 2019/06/15 消込機能改善対応 BY zyz BEGIN
+	// 时间框锁死
+	$("input[id$=':fromDate']").attr('readonly', true);
+	$("input[id$=':toDate']").attr('readonly', true);
+	// 店铺选择列表CSS处理
+	$("select[id$=':areaName']").css({ fontSize: 13, height:28, padding:0}).kendoDropDownList();
+	// flg选中状态
+	autoCheckFocus(layoutFlg);
+	// 2019/06/15 消込機能改善対応 BY zyz END
+});
+// 初期化
+function bindEvent(){
+    /* Window:F5 / Ctrl+R  Mac:Command+R 対応[2015/12/10 ADD] */
+    var $key = key.noConflict();
+    $key.filter = function(event){
+        // 全画面から画面更新可能
+        return true;
+    }
+    $key('command+r, ctrl+r, f5', function(e){ 
+        onblockUi();
+        Search();
+		// 2020/01/30 コマンドＲで画面更新をする検索していた期間のままキープする BY zk BEGIN
+		e.preventDefault();
+		return false;
+		// 2020/01/30 コマンドＲで画面更新をする検索していた期間のままキープする BY zk END
+    });
+    $("span[id$=searchId]").on("click",function(){
+        onblockUi();
+        });
+}
+function bindWindowResize(){
+    $(window).resize(function(){
+        resiePage();
+    });
+    resiePage();
+}
+function resiePage(){
+    var maxHt = document.body.offsetHeight;
+    // モビール
+    if (_isMobileOS) {
+        if (isSf1()) maxHt = $(document).height() - 50; // 50はツールの頭部
+        else maxHt = document.body.offsetHeight - 20; // 50はツールの頭部
+    }
+	// 2019/06/15 消込機能改善対応 BY zyz BEGIN
+	if(layoutFlg){
+		// 取得页面位置高度
+		var wrapTop = $("div#grid .k-grid-content").offset().top;
+		var footHt = $("div.footDiv").height();
+		var headHt = $(".k-header").height();
+		var temHt = $(".k-footer-template").height();
+		var lastHt = maxHt - wrapTop - footHt - headHt - temHt - 15;
+		// 设定页面内容高度
+		$("div#grid .k-grid-content").css("max-height",lastHt);
+	} else {
+    var wrapTop = $("div.tableWrap").offset().top;
+    var footHt = $("div.footDiv").height();
+    var lastHt = maxHt - wrapTop - footHt - 5;
+    $("div.tableWrap").css("max-height",lastHt);
+	}
+	// 2019/06/15 消込機能改善対応 BY zyz END
+}
+// チェック変更
+function changeStatus(){
+    var curTarget = $(event.currentTarget);
+    var oldValue = curTarget.val();
+    var curRow = curTarget.closest("tr.detailRow");
+    var newdt = new Date();
+    var month = (newdt.getMonth()+ 1);
+    if((month+'').length == 1){
+        month = '0'+month;
+    }
+    var dayDt = newdt.getDate();
+    if((dayDt+'').length == 1){
+        dayDt = '0'+dayDt;
+    }
+    var hours = newdt.getHours();
+    if((hours+'').length == 1){
+        hours = '0'+hours;
+    }
+    var minutes = newdt.getMinutes();
+    if((minutes+'').length == 1){
+        minutes = '0'+minutes;
+    }
+    var ttenddt = newdt.getFullYear()+'/'+month+'/'+dayDt+' '+hours+':'+minutes;
+    var stockDt = curRow.attr("stockDt",ttenddt);
+    var clearName = $("input[id$=hidUserName]").val();
+    if(oldValue == "true"){
+        if (window.confirm( "未消込に戻る、よろしいですか。")) { 
+            $("[Name$=cleardate]",curRow).text("");
+            $("[Name$=clearName]",curRow).text("");
+            oldValue = "false";
+            $("[Name$=CheckName]",curRow).val(oldValue);
+            curRow.addClass("updateElement");
+        } else {
+            $("[Name$=CheckName]",curRow).prop("checked",true);
+            $("[Name$=CheckName]",curRow).val(oldValue);
+            curRow.removeClass("updateElement");
+            return false;
+        }
+    }else if(oldValue == "false"){
+         $("[Name$=cleardate]",curRow).text(ttenddt);
+         $("[Name$=clearName]",curRow).text(clearName);
+         oldValue = "true";
+         $("[Name$=CheckName]",curRow).val(oldValue);
+         curRow.addClass("updateElement");
+    }
+}
+function reloadPageInfo(){
+	// 2019/06/15 消込機能改善対応 BY zyz BEGIN
+	if(!layoutFlg) {
+    // 計算指定棚ろし金額
+    computeEachAmount();
+    }
+    // 2019/06/15 消込機能改善対応 BY zyz END
+    // checkbox状態更新
+    $("input:checkbox.checked").prop("checked",true);
+    $("input:checkbox:not('.checked')").prop("checked",false);
+}
+// 在庫データ保存
+function updData(){
+    onblockUi();
+    var updLst = [];
+    var diffMap = {};
+    var flgMap = {};
+    var warp = $("div.itemWrap");
+    selectors = $('tr.updateElement');
+    var begDate = $("input[id$=fromDate]").val();
+    var endDate = $("input[id$=toDate]").val();
+    $("input[id$=fromDate]").val();
+    var hidcheckFlg = $("input[id$=hidtermCk]").val();
+    selectors.each(function(){
+        var curRow = $(this);
+        var input = $("input.k-input",curRow);
+        var curGrid = curRow.closest("div.itemWrap");
+        var ttendId = curRow.attr("prodid");
+        var stockDt = curRow.attr("stockDt");
+        var initStock = input.val();
+        var checkbox = $("input:checkbox",curRow);
+        var checkValue = checkbox.val();
+        updLst.push(ttendId);
+        // チェック済み→未の場合特処理
+        diffMap[ttendId] =stockDt;
+        flgMap[ttendId] =checkValue;
+    });
+    var obj = {
+        ttends:updLst,
+        bDt:begDate,
+        eDt:endDate,
+        bcheck:hidcheckFlg,
+        diffFlgMap:flgMap,
+        diffTTendMap:diffMap
+    };
+    $("input[id$=hidSaveJson]").val(JSON.stringify(obj));
+    saveFun();
+}
+function onblockUi(){
+    JINYACONNECT.blockUi();
+}
+function unblockUi(){
+    JINYACONNECT.unblockUi();
+}
+function afterRead(data){
+    loadPage(data);
+}
+// 画面内容刷新
+function loadPage(result, flag){
+    var grids = $("div.itemWrap");
+    for (var i = 0 ; i < result.length ; i++) {
+        var row = result[i];
+        var curGrid = grids.filter("[name='" + row.mstId + "']");
+        var curRow = $("tr.detailRow[prodid='" + row.accountId + "']");
+    }
+     // 画面関係情報刷新
+    reloadPageInfo();
+    if(!flag) JINYACONNECT.unblockUi();
+}
+// 計算指定棚ろし金額
+function computeEachAmount(grids){
+    if (grids == undefined) grids = $("div.itemWrap");
+    grids.each(function(){
+        var grid = $(this);
+        computeGridAmount(grid);
+    });
+}
+// 指定棚内容刷新
+function computeGridAmount(grid){
+    var totalAmount = 0;
+    $("tr.detailRow",grid).each(function(){
+        var price = $(this).attr("Payment");
+        var priceFloat = kendo.parseFloat(price);
+        if (priceFloat != null) {
+            totalAmount += priceFloat;
+        }
+    });
+    $(".totalAmount",grid).text(kendo.toString(totalAmount,"c"));
+}
+
+// check的数据显示状态调整
+function syncCheckBox(){
+    var Fieldflg = $("input[id$=isFieldFlg]").prop("checked");
+    $("input[id$=hidtermCk]").val(Fieldflg);
+}
+// 2019/06/15 消込機能改善対応 BY zyz BEGIN
+// 刷新页面后，check的数据重新check
+function autoCheckFocus(layFlg){
+	if(layFlg) return false;
+	// 2019/06/15 消込機能改善対応 BY zyz END
+    $("tr.detailRow").each(function(){
+        var $this = $(this);
+        var checkFlg =$("input[name$=CheckName]",$this).val();
+        if(checkFlg == "true" ) $("input[name$=CheckName]",$this).prop("checked",true);
+    });
+    computeEachAmount();
+}
+</script>
+<div id="contentWrap">
+    <apex:form >
+    <apex:actionStatus onstart="javascript:blockUi();" onstop="unblock();" id="refStatusBlock"/>
+	<!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+	<!-- 2019/11/30 Filter機能改善対応 BY zyz BEGIN -->
+	<apex:actionFunction name="saveFun" action="{!saveTTend}" reRender="masterWrap,BulkClearList" status="refStatusBlock" oncomplete="unblockUi();setKendoGrid({!layoutFlg},{!filterVal});bindWindowResize();autoCheckFocus({!layoutFlg});"/>
+	<apex:actionFunction name="Search" action="{!getTTend}" reRender="masterWrap,BulkClearList" status="refStatusBlock" oncomplete="unblockUi();setKendoGrid({!layoutFlg},{!filterVal});bindWindowResize();autoCheckFocus({!layoutFlg});"/>
+	<!-- 2019/11/30 Filter機能改善対応 BY zyz END -->
+	<!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+    <apex:inputhidden value="{!saveValStr}" id="hidSaveJson"/>
+    <apex:inputhidden value="{!userName}" id="hidUserName"/>
+    <apex:inputhidden value="{!c_termCk}" id="hidtermCk"/>
+	<!-- 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN -->
+	<apex:inputhidden value="{!userId}" id="hidUserId"/>
+	<!-- 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END -->
+    <div class="toolbar gridBackGround">
+        <span>
+            <apex:outputPanel styleClass="requiredInput" layout="block">
+            <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+            <!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+        	<!-- 店铺 -->
+        	<apex:outputPanel rendered="{!branchShopLst.size > 0 && layoutFlg}">
+        	<apex:selectList size="1" value="{!branchShopNm}" id="areaName" style="font-size: 16px">
+        	<!-- All -->
+		        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_041_0002}"/>
+		        <apex:selectOptions value="{!branchShopLst}" />
+        	</apex:selectList>&nbsp;&nbsp;
+        	</apex:outputPanel>
+        	<!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+            <span class="spanClass" style="margin-left:10px;">計上日</span>&nbsp;&nbsp;
+            <apex:inputField value="{!c_termSt.WorkDay__c}" id="fromDate" style="margin-left: 10px;font-size: 1.2em; width:120px;" styleClass="k-input" />
+             <!-- 〜 -->
+            &nbsp;{!$Label.MSG_006_0210} &nbsp;
+            <apex:inputField value="{!c_termEt.WorkDay__c}" id="toDate" style="margin-left: 10px;font-size: 1.2em; width:120px;" styleClass="k-input" />
+            &nbsp;&nbsp;&nbsp;
+            <span class="spanClass">消込済明細も表示</span>&nbsp;&nbsp;
+            <input type="checkbox" Id="isFieldFlg" style="vertical-align:middle;" checked="{!if(c_termCk,'checked','')}" onclick="syncCheckBox()"/>&nbsp;&nbsp;
+            <!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+            <span id="functionSearchBtn" class="btnCls">
+           	<!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+           	<!-- 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz BEGIN -->
+                <span class="k-button" Id="searchId" onclick="SearchInfo()">{!$Label.MSG_006_0448}</span>
+                <!-- 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz END -->
+            </span>
+            </apex:outputPanel>
+        </span>
+        <span id="toolBtn">
+        </span>
+    </div>
+    </apex:form>
+    <!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+	<apex:form id="BulkClearList" rendered="{!layoutFlg}">
+	<!-- 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN -->
+	<apex:inputhidden value="{!configFieldVal}" id="hidconfigFieldVal"/>
+	<apex:inputhidden value="{!configDirVal}" id="hidconfigDirVal"/>
+	<!-- 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END -->
+	<apex:pageBlock id="BulkClearBlock">
+		<!-- 2019/11/15 入金消込のvisualforceページ改善 BY zyz BEGIN -->
+		<apex:pageMessages />
+		<!-- 2019/11/15 入金消込のvisualforceページ改善 BY zyz END -->
+		<!-- 2019/09/27 性能改善 WSQ BEGIN -->
+		<input type="hidden" value="{!ttendItemJson}" id="hidItemJson"/>
+		<!-- 2019/09/27 性能改善 WSQ END -->
+            <div class="footDiv gridBackGround">
+                <span id="functionBtn">
+                    <span class="k-button" onclick="updDataVal()">保存</span>
+                </span>
+            </div>
+            <div id="grid" ></div> 
+            <div class="footDiv gridBackGround">
+		        <span id="functionBtn">
+		            <span class="k-button" onclick="updDataVal()">保存</span>
+		        </span>
+            </div>
+    </apex:pageBlock>
+    </apex:form>
+    <!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+    <br/>
+    <!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+    <apex:form id="masterWrap" rendered="{!!layoutFlg}">
+    <!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+        <div class="itemWrap">
+
+            <div class="footDiv gridBackGround">
+                <span id="functionBtn">
+                    <span class="k-button" onclick="updData()">保存</span>
+                </span>
+            </div>
+            
+            <div class="gridBackGround">
+                <div class="titleItem">
+                    <span class="headerSpan">消込</span>
+                    <span class="headerSpan">請求先</span>
+                    <span class="headerSpan">お客様</span>
+                    <span class="headerSpan">ご予約</span>
+                    <span class="headerSpan">会計</span>
+                    <span class="headerSpan">売上計上日</span>
+                    <span class="headerSpan">売掛金額</span>
+                    <span class="headerSpan">消込者</span>
+                    <span class="headerSpan">消込日時</span>
+                </div>
+            </div>
+            <div class="tableWrap noImage">
+            <table class="inventoryTable gridBackGround" style="width: 100%;" cellpadding="0" cellspacing="0">
+            
+                <apex:repeat value="{!stocks}" var="stock">
+                    <tr class="detailRow" prodid="{!stock.ttendId}" Payment="{!stock.ttPayment}" stockDt="{!stock.ttClearDateTime}" stockflg="{!stock.ttClearFlg}" id="{!stock.ttendId}">
+                        <td>
+                            <apex:inputhidden value="{!stock.ttendId}" id="hidttendId"/>
+                            <label class="switch">
+                              <input type="checkbox" value="{!stock.ttClearFlg}" name="CheckName" onchange="changeStatus()" class="{!if(stock.ttClearFlg,'checked','')}"/>
+                              <span class="slider round"></span>
+                            </label>
+                        </td>
+                        <td>{!stock.ttReceiptName}</td>
+                        <td><a href="/{!stock.ttContactId}" target="_blank">{!stock.ttContact}</a> </td>
+                        <td><a href="/{!stock.ttLeadId}" target="_blank">{!stock.ttLead}</a></td>
+                        <td><a href="/{!stock.ttAccountId}" target="_blank">{!stock.ttAccount}</a></td>
+                        <td class="stockClass">{!stock.ttSalesDate}</td>
+                        <td class="priceClass">
+                            <apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}">
+                              <apex:param value="{!stock.ttPayment}"></apex:param>
+                             </apex:outputtext>
+                        </td>
+                        <td Name="clearName" >
+                            {!stock.ttClearName}
+                        </td>
+                        <td Name="cleardate" class="stockClass">
+                            {!stock.ttClearDateTime}
+                        </td>
+                    </tr>
+                </apex:repeat>
+
+            </table>
+            </div>
+            <div class="footDiv gridBackGround">
+                <span id="functionBtn">
+                    <span class="k-button" onclick="updData()">保存</span>
+                </span>
+                <span style="float:right;">
+                    <span>合計</span>
+                    <span class="totalAmount"></span>
+                </span>
+            </div>
+        </div>
+    </apex:form>
+</div>
+<!-- 2019/06/15 消込機能改善対応 BY zyz BEGIN -->
+<script>
+var layoutFlg = {!layoutFlg};
+/** 書式処理 */
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = JINYACONNECT.NumberPointLen;
+currency.symbol = JINYACONNECT.CurrencySybmol;
+currency.pattern = ["$-n","$n"];
+// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz BEGIN
+// 初始化，清空本地的值
+localStorage.setItem("gridFilters", "");
+// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz END
+// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+var filterableVal = {!filterVal};
+function setKendoGrid(layFlg,filterVal){
+// 2019/11/30 Filter機能改善対応 BY zyz END
+	if(!layFlg) return false;
+	// 初期化
+   	var $grid = $("#grid");
+   	// 获取隐藏域内的json串
+   	var hidjson = $("input[id$=hidItemJson]").val();
+    var JsonStr = JSON.parse(hidjson);
+    // 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN
+    var fieldVal = $("input[id$=hidconfigFieldVal]").val();
+    var dirVal = $("input[id$=configDirVal]").val();
+    // 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END
+    // 数据的DataSource
+    var ttendTypeDs = new kendo.data.DataSource({data: JsonStr,
+			schema: {
+				model: {
+					fields: {
+						ttClearFlg: { type: "boolean" },
+						ttReceiptDt: { type: "string" },
+						ttReceiptName: { type: "string"  },
+						ttProductName: { type: "string"  },
+						ttContact: { type: "string"  },
+						ttLead: { type: "string"  },
+						ttAccount: { type: "string"  },
+						ttSalesDate: { type: "string"  },
+						ttPayment: { type: "number"  },
+						// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+						ttClearPayment: { type: "number" },
+						ttsettlePayment: { type: "number" },
+						ttOldPayment: { type: "number" },
+						// 2019/08/15 入金消込機能の改善 BY zyz END
+						ttClearName: { type: "string" },
+						// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+						ttComment: { type: "string" },
+						// 2019/08/15 入金消込機能の改善 BY zyz END
+						ttClearDateTime: { type: "string" },
+						ttchangeFlg:{ type: "boolean" }
+					}
+				}
+			},
+        // 金额合计行
+        // 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+        aggregate: [{ field: "ttPayment", aggregate: "sum"},{ field: "ttsettlePayment", aggregate: "sum"},{ field: "ttOldPayment", aggregate: "sum"}]
+        // 2019/08/15 入金消込機能の改善 BY zyz END
+        // 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN
+        ,sort: { field: fieldVal, dir: dirVal }
+        // 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END
+    });
+    $grid.kendoGrid({
+     	dataSource:ttendTypeDs,
+        scrollable: true,
+        resizable: true,
+		columns: [
+			// 消込
+            {	field: "ttClearFlg",
+            	title: "消込",
+            	type:"boolean",
+            	sortable: false,
+            	filterable: false,
+            	// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+            	width: 60,
+            	minResizableWidth:60,
+            	// 2019/08/15 入金消込機能の改善 BY zyz END
+            	attributes: {style: "text-align: center;"},
+                template:                        
+                        "# if (ttClearFlg) { #"
+                          + '<label class="switch">'
+		                  + '<input type="checkbox" value="#= ttClearFlg#" name="CheckName" onchange="changeStatusVal(this)" class="checked clearFlgCls"  checked="checked" />'
+		                  + '<span class="slider round"></span>'
+		                  + '</label>'
+                          + "# } else { #"
+                          + '<label class="switch">'
+		                  + '<input type="checkbox" value="#= ttClearFlg#" name="CheckName" onchange="changeStatusVal(this)" class="clearFlgCls"/>'
+		                  + '<span class="slider round"></span>'
+		                  + '</label>'
+                          + "# } #",
+            },
+			{	field:"ttReceiptDt" ,title: "入金日",sortable: true,filterable: false, width:155, 
+				template:'<input type="text" name="ttReceiptDt" style="width:150px;" class="ttReceiptDtCls" onchange="getReceiptDt(this)" value="#= ttReceiptDt#" />'
+			},
+			// 請求先
+			// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+			// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+			{	field:"ttReceiptName", title: "請求先", sortable: true, filterable: filterVal, width:400, minResizableWidth:200, },
+			
+			// 2019/11/30 Filter機能改善対応 BY zyz END
+			// 2019/08/15 入金消込機能の改善 BY zyz END
+			// 支払商品
+			// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+			{	field:"ttProductName", title: "支払商品名", sortable: true, filterable: filterVal,width:150 ,},
+			// 2019/11/30 Filter機能改善対応 BY zyz END
+			// お客様
+			// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+			{	field:"ttContact", title: "お客様",  sortable: true, filterable: filterVal,width:200,
+				template: '<a href="/#= ttContactId#" target="_blank">#=ttContact#</a>'
+			},
+			// 2019/11/30 Filter機能改善対応 BY zyz END
+			// ご予約
+			// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+			{	field:"ttLead", title: "ご予約",  sortable: true, filterable: filterVal,width:200,
+				template: '<a href="/#= ttLeadId#" target="_blank">#=ttLead#</a>'
+			},
+			// 2019/11/30 Filter機能改善対応 BY zyz END
+			// 会計
+			{	field:"ttAccount", title: "会計",sortable: true, filterable: false,width:150,
+				template: '<a href="/#= ttAccountId#" target="_blank">#=ttAccount#</a>'
+			},
+			// 売上計上日
+			{	field:"ttSalesDate", title: "売上計上日",  sortable: true, filterable: false,width:110},
+			// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+			// 支払金額
+			{	field:"ttPayment", title: "売掛金額",  sortable: true, filterable: false,width:100,attributes: {style: "text-align: right;"},format: "{0:c}",
+                template: '<span name="paymentName" class="paymentCls">#= ttPayment#</span>',
+                footerTemplate: "<div id='prodSummyDivId'></div><div style='text-align: right'>#= kendo.toString(sum, 'C') #</div>"
+			},
+			// 今回消込金額
+			{	field:"ttClearPayment", title: "今回消込金額",  sortable: true, filterable: false,width:120,
+				template: '<input type="number" name="clearPaymentName" oldPay="#= ttClearPayment#" onchange="changePayment(this)" style="width: 100px;text-align: right;" class="k-input k-textbox clearPaymentCls" value="#= ttClearPayment#"></input>'
+			},
+			// 消込済金額
+			{	field:"ttsettlePayment", title: "消込済金額",  sortable: true, filterable: false,width:120,attributes: {style: "text-align: right;"},format: "{0:c}",
+				template: '<span name="settlePaymentName" readPay="#= ttsettlePayment#" class="settlePaymentCls">#= ttsettlePayment#</span>',
+				footerTemplate: "<div style='text-align: right'>#= kendo.toString(sum, 'C') #</div>"
+			},
+			// 残金
+			{	field:"ttOldPayment", title: "残金",  sortable: true, filterable: false,width:120,attributes: {style: "text-align: right;"},format: "{0:c}",
+				template: '<span name="oldpaymentName" class="oldpaymentCls" oldValue="#= ttOldPayment#">#= ttOldPayment#</span>',
+				footerTemplate: "<div style='text-align: right'>#= kendo.toString(sum, 'C') #</div>"
+			},
+			// 2019/08/15 入金消込機能の改善 BY zyz END
+			// 消込者
+			{	field:"ttClearName", title: "消込者",  sortable: true, filterable: false,width:120,
+				template:   
+		                  '<span name="clearName" class="clearNameCls">#= ttClearName#</span>'
+			},
+			// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+			// コメント
+			// <textarea  template: '<input name="ttCommentName" class="k-textbox ttCommentCls" type="text" value="#= ttComment#" />'
+			{	field:"ttComment", title: "コメント",  sortable: true, filterable: false,width:220,
+				template: '<textarea rows="2" name="ttCommentName" maxlength="255" oldCom="#= ttComment#" onchange="changeComment(this)" class="k-textbox ttCommentCls" >#= ttComment#</textarea>'
+				
+			},
+			// 2019/08/15 入金消込機能の改善 BY zyz END
+			// 消込日
+			{	field:"ttClearDateTime", title: "消込日時", sortable: true, filterable: false,width:150,
+				template:   
+		                  '<span name="cleardate" class="cleardateCls">#= ttClearDateTime#</span>'
+			},
+			// 隐藏列，变更数据记录
+			{	field:"ttchangeFlg", sortable: true, filterable: false,hidden:true,value:true,
+				template: '<span name="changeFlg" class="changeFlgCls">#= ttchangeFlg#</span>'
+			}
+		],
+		filterable: {
+			operators: {
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				},
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				},
+			},
+			messages: {
+				// フィルター:
+				info: " ",
+				// および
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+				// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				// 2019/11/30 Filter機能改善対応 BY zyz END
+		    }
+		},
+		dataBound:function(e){
+			getDataFun(e);
+		},
+		filterMenuOpen: function(e) {
+			// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+			clearTitle(filterVal);
+			// 2019/11/30 Filter機能改善対応 BY zyz END
+		},
+		// 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN
+		sort: function(e) {
+			getSorttable(e);
+		},
+		// 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END
+		// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz BEGIN
+		filter: function(e) {
+			if(e.filter == null) localStorage.setItem("gridFilters", "");
+		},
+		// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz END
+        // 排序
+        sortable:true,
+     });
+     // 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz BEGIN
+     filterInfo();
+     // 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz END
+}
+// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz BEGIN
+function SearchInfo(){
+	// 使用检索清空记忆
+	localStorage.setItem("gridFilters", "");
+	Search();
+}
+function filterInfo(){
+    // 获取当前本地使用的过滤值
+    var getFilters = localStorage.getItem("gridFilters");
+    var filterlst = {};
+    if(getFilters != undefined && getFilters != "") filterlst = JSON.parse(getFilters);
+    // 使用过滤条件
+    $("#grid").data("kendoGrid").dataSource.filter(filterlst);
+}
+// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz END
+// 清空过滤的title
+// 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+function clearTitle(filterVal) {
+// 2019/11/30 Filter機能改善対応 BY zyz END
+	$(".k-widget.k-dropdown.k-header").attr('title','');
+    $(".k-button").attr('title','');
+    $(".k-textbox").attr('title','');
+    // 2019/11/30 Filter機能改善対応 BY zyz BEGIN
+    if(typeof(filterVal) == "object"){
+    	$(".k-label").css({'font-weight':'bold'});
+    	$(".k-filter-selected-items").css({'margin-left': '1.5em','font-weight':'bold'});
+    }
+    // 2019/11/30 Filter機能改善対応 BY zyz END
+}
+// 入金日输入框格式转换
+function getDataFun(e){
+	var picker = $("input.ttReceiptDtCls").data("kendoDatePicker");
+	if(picker == undefined) {
+		$(".ttReceiptDtCls").kendoDatePicker();
+		$('.ttReceiptDtCls').focus(function(e){
+		    var obj = $(this).data('kendoDatePicker');
+		    if (typeof(obj.options.opened) == 'undefined' || !obj.options.opened){
+		        obj.open();
+		    }
+		});
+	}
+	// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+	// 金额的格式处理
+	$(".paymentCls").each(function(){
+		var priceFloat = kendo.parseFloat($(this).text());
+		$(this).text(kendo.toString(priceFloat,"c"));
+	});
+	$(".oldpaymentCls").each(function(){
+		var priceFloat = kendo.parseFloat($(this).text());
+		$(this).text(kendo.toString(priceFloat,"c"));
+	});
+	$(".settlePaymentCls").each(function(){
+		var priceFloat = kendo.parseFloat($(this).text());
+		$(this).text(kendo.toString(priceFloat,"c"));
+	});
+	// 2019/08/15 入金消込機能の改善 BY zyz END
+	// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz BEGIN
+	// 存储过滤条件的值到当前本地
+	var gridFilters = $("#grid").data("kendoGrid").dataSource.filter();
+	if(gridFilters != undefined && gridFilters != null) localStorage.setItem("gridFilters", JSON.stringify(gridFilters));
+	// 2020/05/30 入金消込機能、フィルター機能の設定値をキープ対応 BY zyz END
+}
+// 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN
+function getSorttable(e){
+	// 2019/08/15 修改数据未保存，点击排序功能bug对应修改 BY zyz BEGIN
+	var updateFlg = false;
+	// 是否存在变更未保存数据
+	$(".changeFlgCls").each(function(){
+		if($(this).text() == 'true') updateFlg = true;
+	});
+	if(updateFlg && confirm("未保存のデータがありますが、よろしいですか？")) {
+		e.preventDefault();
+		return false;
+	}
+	// 2019/08/15 修改数据未保存，点击排序功能bug对应修改 BY zyz END
+	var branchCd = $("select[id$=':areaName']").length > 0 ? $("select[id$=':areaName']").val() : "";
+	var userId = $("input[id$=hidUserId]").val();
+	var fieldSort = e.sort.field;
+	var dirsort = '';
+	if(e.sort.dir != undefined) dirsort = e.sort.dir;
+	var cookVal = fieldSort+':' + dirsort;
+	JINYACONNECT.CONFIG.saveKrepConfig('BILLERASE',cookVal,userId,branchCd);
+}
+// 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END
+// 入金日变更响应事件 
+function getReceiptDt($this){
+	// 获取输入框内的值
+	var inputDate = $this.value;
+	// 清空入金日对应
+	if(inputDate =="") {
+		var curTrget = $this.closest("tr");
+		$(".changeFlgCls",curTrget).text(true);
+		var onChangeFlg = $("input.onChangeCls",curTrget);
+		var alertFlg = $(".clearFlgCls",curTrget).prop("checked");
+		if(alertFlg && onChangeFlg.length == 0) {
+			$("input.ttReceiptDtCls",curTrget).addClass("onChangeCls");
+			if (window.confirm( "未消込に戻る、よろしいですか。")) { 
+				$(".clearFlgCls",curTrget).prop("checked",false);
+				$(".clearFlgCls",curTrget).val(false);
+				$(".clearNameCls",curTrget).text("");
+				$(".cleardateCls",curTrget).text("");
+			}
+		} else $("input.ttReceiptDtCls",curTrget).removeClass("onChangeCls");
+	} else {
+		// 正则匹配是否有效值
+		var dateEff = inputDate.match(/^[0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2}$/);
+		// 日期值无效，清空输入框 否则自动checkin
+		if(dateEff == null) $this.value = null;
+		else changeStatusVal($this);
+	}
+}
+// チェック変更
+function changeStatusVal($this){
+	var curTarget = $(event.currentTarget);
+	var oldValue = curTarget.val();
+	var curTrget = $this.closest("tr");
+	// 当前时间转型，给消込日時赋值
+	var newdt = new Date();
+	var month = (newdt.getMonth()+ 1);
+	if((month+'').length == 1){
+    	month = '0'+month;
+    }
+    var dayDt = newdt.getDate();
+    if((dayDt+'').length == 1){
+    	dayDt = '0'+dayDt;
+    }
+    var hours = newdt.getHours();
+    if((hours+'').length == 1){
+    	hours = '0'+hours;
+    }
+    var minutes = newdt.getMinutes();
+    if((minutes+'').length == 1){
+    	minutes = '0'+minutes;
+    }
+	var ttenddt = newdt.getFullYear()+'/'+month+'/'+dayDt+' '+hours+':'+minutes;
+	// 2019/11/30 [入金日にはデフォルトで今日の日付]機能改善対応 BY zyz BEGIN
+	// 当前时间的年月日取得
+	var currentDt = newdt.getFullYear()+'/'+month+'/'+dayDt;
+	// 2019/11/30 [入金日にはデフォルトで今日の日付]機能改善対応 BY zyz END
+	// 获取消込者
+	var clearName = $("input[id$=hidUserName]").val();
+	// 获取kendoGrid的uid的值
+    var getuid = "";
+    // 入金日联动获取uid，消除checkbox获取uid
+    if(oldValue == "" || (oldValue != "true" && oldValue != "false")){
+    	getuid = curTrget.dataset.uid;
+    	oldValue = "false";
+    } else getuid = curTrget.dataset.uid;
+    var setTrVal = $("div[id='grid']").data("kendoGrid").dataSource.getByUid(getuid);
+	if(oldValue == "true"){
+		if (window.confirm( "未消込に戻る、よろしいですか。")) { 
+			$(".clearFlgCls",curTrget).prop("checked",false);
+			$(".clearFlgCls",curTrget).val(false);
+			$(".clearNameCls",curTrget).text("");
+			$(".cleardateCls",curTrget).text("");
+			$(".changeFlgCls",curTrget).text(true);
+			// 2019/11/30 [入金日にはデフォルトで今日の日付]機能改善対応 BY zyz BEGIN
+			$("input.ttReceiptDtCls",curTrget).val("");
+			// 2019/11/30 [入金日にはデフォルトで今日の日付]機能改善対応 BY zyz END
+		} else {
+			$(".clearFlgCls",curTrget).prop("checked",true);
+			$(".clearFlgCls",curTrget).val(true);
+			// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+			var paymentInput = kendo.parseFloat($(".clearPaymentCls",curTrget).val());
+			var paymentOld = kendo.parseFloat($(".clearPaymentCls",curTrget).attr("oldPay"));
+			if(paymentInput == paymentOld) $(".changeFlgCls",curTrget).text(false);
+			// $(".changeFlgCls",curTrget).text(false);
+			// 2019/08/15 入金消込機能の改善 BY zyz END
+			return false;
+		}
+	}else if(oldValue == "false"){
+		$(".clearFlgCls",curTrget).prop("checked",true);
+		$(".clearFlgCls",curTrget).val(true);
+		$(".clearNameCls",curTrget).text(clearName);
+		$(".cleardateCls",curTrget).text(ttenddt);
+		$(".changeFlgCls",curTrget).text(true);
+		// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+		var paymentAll = kendo.parseFloat($(".oldpaymentCls",curTrget).attr("oldValue"));
+		$(".clearPaymentCls",curTrget).val(kendo.parseInt(paymentAll));
+		$(".oldpaymentCls",curTrget).text(kendo.toString(0,"c"));
+		var payment = $(".paymentCls",curTrget).text();
+		$(".settlePaymentCls",curTrget).text(payment);
+		$(".clearPaymentCls",curTrget).css({'backgroundColor':'lightskyblue'});
+		// 2019/08/15 入金消込機能の改善 BY zyz END
+		// 2019/11/30 [入金日にはデフォルトで今日の日付]機能改善対応 BY zyz BEGIN
+		// 入金日时间为空的情况下，对入金日赋值
+		var inputDateVal = $("input.ttReceiptDtCls",curTrget).val();
+		if(inputDateVal == "")$("input.ttReceiptDtCls",curTrget).val(currentDt);
+		// 2019/11/30 [入金日にはデフォルトで今日の日付]機能改善対応 BY zyz END
+	}
+}
+// 在庫データ保存
+function updDataVal(){
+	onblockUi();
+    var updLst = [];
+    var diffMap = {};
+    var flgMap = {};
+    var repDtMap = {};
+    // 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+    var payMap = {};
+    var comMap = {};
+    // 2019/08/15 入金消込機能の改善 BY zyz END
+    // 获取店铺
+    var queryArea = $("select[id$=':areaName']").length > 0 ? $("select[id$=':areaName']").val() : "";
+    // 检索框的日期获取
+    var begDate = $("input[id$=fromDate]").val();
+    var endDate = $("input[id$=toDate]").val();
+    var hidcheckFlg = $("input[id$=hidtermCk]").val();
+	var newdt = new Date();
+	var month = (newdt.getMonth()+ 1);
+	if((month+'').length == 1){
+    	month = '0'+month;
+    }
+    var dayDt = newdt.getDate();
+    if((dayDt+'').length == 1){
+    	dayDt = '0'+dayDt;
+    }
+    var hours = newdt.getHours();
+    if((hours+'').length == 1){
+    	hours = '0'+hours;
+    }
+    var minutes = newdt.getMinutes();
+    if((minutes+'').length == 1){
+    	minutes = '0'+minutes;
+    }
+	var ttenddt = newdt.getFullYear()+'/'+month+'/'+dayDt+' '+hours+':'+minutes;
+    var dataVal = $("div[id='grid']").data("kendoGrid").dataSource.data();
+    for(var i = 0 ; i < dataVal.length;i++){
+    	var dataItem = dataVal[i];
+    	// 取得数据的uid
+    	var dataUid = dataItem.uid;
+    	var tableDate = $("div[id='grid']").data("kendoGrid").dataSource.getByUid(dataUid);
+    	// 取得数据是否变更
+    	var changeFlg = $(".changeFlgCls" ,"tr[data-uid$="+ dataUid +"]").text();
+    	if(changeFlg == "true"){
+    		// 数据的Id
+    		var ttendId = tableDate.get("ttendId");
+    		// 消込日时间取得
+    		var stockDt = $(".cleardateCls" ,"tr[data-uid$="+ dataUid +"]").text();
+    		if(stockDt == "") stockDt = ttenddt;
+    		// 消込flg取得
+    		var checkValue = $(".clearFlgCls" ,"tr[data-uid$="+ dataUid +"]").val();
+    		// 入金日取得
+    		var repDtValue = $("input.ttReceiptDtCls" ,"tr[data-uid$="+ dataUid +"]").val();
+    		// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+    		var payValue = $("input.clearPaymentCls" ,"tr[data-uid$="+ dataUid +"]").val();
+    		var commentValue = $("textarea.ttCommentCls" ,"tr[data-uid$="+ dataUid +"]").val();
+    		// 2019/08/15 入金消込機能の改善 BY zyz END
+    		// 数据Id的集合
+    		updLst.push(ttendId);
+    		diffMap[ttendId] =stockDt;
+    		flgMap[ttendId] =checkValue;
+    		repDtMap[ttendId] =repDtValue;
+    		// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+    		payMap[ttendId] =payValue;
+    		comMap[ttendId] =commentValue;
+    		// 2019/08/15 入金消込機能の改善 BY zyz END
+    	}
+    }
+    var obj = {
+        ttends:updLst,
+        tspcd:queryArea,
+        bDt:begDate,
+        eDt:endDate,
+        bcheck:hidcheckFlg,
+        diffFlgMap:flgMap,
+        diffTTendMap:diffMap,
+        // 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+        diffRepMap:repDtMap,
+        diffPayMap:payMap,
+        diffComMap:comMap
+        // 2019/08/15 入金消込機能の改善 BY zyz END
+    };
+	$("input[id$=hidSaveJson]").val(JSON.stringify(obj));
+	saveFun();
+}
+// 2019/08/15 入金消込機能の改善 BY zyz BEGIN
+// 消込金额变更监听
+function changePayment($this){
+	// 获取行
+	var curTrget = $this.closest("tr");
+	// 获取应该还款的剩余金额
+	var paymentAll = kendo.parseFloat($(".oldpaymentCls",curTrget).attr("oldValue"));
+	// 获取输入的金额
+	var paymentInput = kendo.parseFloat($(".clearPaymentCls",curTrget).val());
+	// 输入的金额不可超过最大还款的金额
+	if(paymentAll <= paymentInput) {
+		// 输入金额变更为最大残金金额
+		$(".clearPaymentCls",curTrget).val(kendo.parseInt(paymentAll));
+		// 变更残金金额为0
+		$(".oldpaymentCls",curTrget).text(kendo.toString(0,"c"));
+		// 变更消込済金額
+		var payment = $(".paymentCls",curTrget).text();
+		$(".settlePaymentCls",curTrget).text(payment);
+		// check事件响应
+		changeStatusVal($this);
+	} else {
+		// 计算剩余残金金额
+		var paymentReal = kendo.parseInt(paymentAll) - kendo.parseInt(paymentInput);
+		$(".oldpaymentCls",curTrget).text(kendo.toString(paymentReal,"c"));
+		// 计算消込済金額
+		var readpayment = kendo.parseFloat($(".settlePaymentCls",curTrget).attr("readPay"));
+		var readAll = kendo.parseInt(readpayment) + kendo.parseInt(paymentInput);
+		$(".settlePaymentCls",curTrget).text(kendo.toString(readAll,"c"));
+	}
+	// 既存数据的还款金额
+	var paymentOld = kendo.parseFloat($(".clearPaymentCls",curTrget).attr("oldPay"));
+	// 还款金额变更，数据变更记录
+	if(paymentInput != paymentOld) {
+		$(".changeFlgCls",curTrget).text(true);
+		$this.style.backgroundColor="lightskyblue";
+	} else $this.style.backgroundColor="";
+}
+function changeComment($this){
+	// 获取行
+	var curTrget = $this.closest("tr");
+	// 获取输入框内容
+	var commentAll = $(".ttCommentCls",curTrget).val();
+	// 获取既存数据内容
+	var commentOld = $(".ttCommentCls",curTrget).attr("oldCom");
+	if(commentAll != commentOld){
+		$(".changeFlgCls",curTrget).text(true);
+		$this.style.backgroundColor="lightskyblue";
+	}
+}
+// 2019/08/15 入金消込機能の改善 BY zyz END
+</script>
+<!-- 2019/06/15 消込機能改善対応 BY zyz END -->
+<!-- 2019/07/15 入金消込機能ソートを保持の改善 BY zyz BEGIN -->
+<c:UserConfigComp functiontype="KREP"/>
+<!-- 2019/07/15 入金消込機能ソートを保持の改善 BY zyz END -->
+</apex:page>

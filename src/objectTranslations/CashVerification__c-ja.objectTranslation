@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>現金合せ</value>
+    </caseValues>
+    <fields>
+        <label><!-- AutoUpdateFlg(System) --></label>
+        <name>AutoUpdateFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 現金入金 --></label>
+        <name>CaseDeposit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 現金出金 --></label>
+        <name>CasePayment__c</name>
+    </fields>
+    <fields>
+        <label><!-- 現金有高[現物] --></label>
+        <name>CashAmountAct__c</name>
+    </fields>
+    <fields>
+        <label><!-- 現金有高[論理] --></label>
+        <name>CashAmountLogic__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上現金 --></label>
+        <name>CashSales__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（50） --></label>
+        <name>FiftyCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（50） --></label>
+        <name>FiftyMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（5） --></label>
+        <name>FiveCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（500） --></label>
+        <name>FiveHundredCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（500） --></label>
+        <name>FiveHundredMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（5） --></label>
+        <name>FiveMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（5千） --></label>
+        <name>FiveThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（5千） --></label>
+        <name>FiveThousandMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 最終更新者 --></label>
+        <name>LastModifiedByUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- 最終更新日 --></label>
+        <name>LastModifiedDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（1） --></label>
+        <name>OneCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（100） --></label>
+        <name>OneHundredCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（100） --></label>
+        <name>OneHundredMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（1） --></label>
+        <name>OneMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（1千） --></label>
+        <name>OneThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（1千） --></label>
+        <name>OneThousandMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 準備金 --></label>
+        <name>ReserveFund__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計上日 --></label>
+        <name>RsvAccountRef__c</name>
+        <relationshipLabel><!-- 現金合せ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 営業日付 --></label>
+        <name>SalesDateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- キー --></label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 現金合せ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（10） --></label>
+        <name>TenCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（10） --></label>
+        <name>TenMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（1万） --></label>
+        <name>TenThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（1万） --></label>
+        <name>TenThousandMachNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手許有高（2千） --></label>
+        <name>TwoThousandCashNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 機械有高（2千） --></label>
+        <name>TwoThousandMachNums__c</name>
+    </fields>
+</CustomObjectTranslation>

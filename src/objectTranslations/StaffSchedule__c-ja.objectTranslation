@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>シフト</value>
+    </caseValues>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>CommentLst__c</name>
+        <picklistValues>
+            <masterLabel>体調不良にて休み</masterLabel>
+            <translation><!-- 体調不良にて休み --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>体調不良にて早退</masterLabel>
+            <translation><!-- 体調不良にて早退 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>体調不良にて遅刻</masterLabel>
+            <translation><!-- 体調不良にて遅刻 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>私用にて早退</masterLabel>
+            <translation><!-- 私用にて早退 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>私用にて遅刻</masterLabel>
+            <translation><!-- 私用にて遅刻 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>電車遅延による遅刻</masterLabel>
+            <translation><!-- 電車遅延による遅刻 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 行動ID --></label>
+        <name>EventId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 行動件名 --></label>
+        <name>EventTitle__c</name>
+    </fields>
+    <fields>
+        <help><!-- 従業員+&apos;_&apos; + 勤怠日(ID_YYYY/MM/DD) --></help>
+        <label><!-- SearchKey --></label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- 従業員 --></label>
+        <name>StaffUserRef__c</name>
+        <relationshipLabel><!-- シフト --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 開始ステータス --></label>
+        <name>StatusLst__c</name>
+        <picklistValues>
+            <masterLabel>10:00</masterLabel>
+            <translation><!-- 10:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10:30</masterLabel>
+            <translation><!-- 10:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:00</masterLabel>
+            <translation><!-- 11:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:30</masterLabel>
+            <translation><!-- 11:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:00</masterLabel>
+            <translation><!-- 12:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:30</masterLabel>
+            <translation><!-- 12:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:00</masterLabel>
+            <translation><!-- 13:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:00</masterLabel>
+            <translation><!-- 16:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:00</masterLabel>
+            <translation><!-- 17:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:00</masterLabel>
+            <translation><!-- 18:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21:00</masterLabel>
+            <translation><!-- 21:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5:00</masterLabel>
+            <translation><!-- 5:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5:30</masterLabel>
+            <translation><!-- 5:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6:00</masterLabel>
+            <translation><!-- 6:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6:30</masterLabel>
+            <translation><!-- 6:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7:00</masterLabel>
+            <translation><!-- 7:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7:30</masterLabel>
+            <translation><!-- 7:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8:00</masterLabel>
+            <translation><!-- 8:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8:30</masterLabel>
+            <translation><!-- 8:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9:00</masterLabel>
+            <translation><!-- 9:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9:30</masterLabel>
+            <translation><!-- 9:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>代休</masterLabel>
+            <translation><!-- 代休 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>公休</masterLabel>
+            <translation><!-- 公休 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>半休</masterLabel>
+            <translation><!-- 半休 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>夏休</masterLabel>
+            <translation><!-- 夏休 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>希望休</masterLabel>
+            <translation><!-- 希望休 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>有休</masterLabel>
+            <translation><!-- 有休 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>経理</masterLabel>
+            <translation><!-- 経理 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 終了ステータス --></label>
+        <name>StopStatusLst__c</name>
+        <picklistValues>
+            <masterLabel>0:00</masterLabel>
+            <translation><!-- 0:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>0:30</masterLabel>
+            <translation><!-- 0:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10:30</masterLabel>
+            <translation><!-- 10:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10：00</masterLabel>
+            <translation><!-- 10：00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:00</masterLabel>
+            <translation><!-- 11:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:30</masterLabel>
+            <translation><!-- 11:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:00</masterLabel>
+            <translation><!-- 12:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:30</masterLabel>
+            <translation><!-- 12:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:00</masterLabel>
+            <translation><!-- 13:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:30</masterLabel>
+            <translation><!-- 13:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14:00</masterLabel>
+            <translation><!-- 14:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14:30</masterLabel>
+            <translation><!-- 14:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15:00</masterLabel>
+            <translation><!-- 15:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15:30</masterLabel>
+            <translation><!-- 15:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:00</masterLabel>
+            <translation><!-- 16:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:30</masterLabel>
+            <translation><!-- 16:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:00</masterLabel>
+            <translation><!-- 17:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:30</masterLabel>
+            <translation><!-- 17:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:00</masterLabel>
+            <translation><!-- 18:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:30</masterLabel>
+            <translation><!-- 18:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19:00</masterLabel>
+            <translation><!-- 19:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19:30</masterLabel>
+            <translation><!-- 19:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>1:00</masterLabel>
+            <translation><!-- 1:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>1:30</masterLabel>
+            <translation><!-- 1:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20:00</masterLabel>
+            <translation><!-- 20:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20:30</masterLabel>
+            <translation><!-- 20:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21:00</masterLabel>
+            <translation><!-- 21:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21:30</masterLabel>
+            <translation><!-- 21:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>22:00</masterLabel>
+            <translation><!-- 22:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>22:30</masterLabel>
+            <translation><!-- 22:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>23:00</masterLabel>
+            <translation><!-- 23:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>23:30</masterLabel>
+            <translation><!-- 23:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2:00</masterLabel>
+            <translation><!-- 2:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2:30</masterLabel>
+            <translation><!-- 2:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>3:00</masterLabel>
+            <translation><!-- 3:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>3:30</masterLabel>
+            <translation><!-- 3:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>4:00</masterLabel>
+            <translation><!-- 4:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>4:30</masterLabel>
+            <translation><!-- 4:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5:00</masterLabel>
+            <translation><!-- 5:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5:30</masterLabel>
+            <translation><!-- 5:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6:00</masterLabel>
+            <translation><!-- 6:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6:30</masterLabel>
+            <translation><!-- 6:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7:00</masterLabel>
+            <translation><!-- 7:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7:30</masterLabel>
+            <translation><!-- 7:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8:00</masterLabel>
+            <translation><!-- 8:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8:30</masterLabel>
+            <translation><!-- 8:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9:00</masterLabel>
+            <translation><!-- 9:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9:30</masterLabel>
+            <translation><!-- 9:30 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 勤怠管理 --></label>
+        <name>TimeManagementRef__c</name>
+        <relationshipLabel><!-- シフト --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 勤怠日 --></label>
+        <name>WorkDay__c</name>
+    </fields>
+</CustomObjectTranslation>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Attendant</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Attendant</value>
+    </caseValues>
+    <fields>
+        <help>When you leave the office, put a check mark</help>
+        <label>Resignation</label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label>Mobile number</label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label>Name in hiragana</label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <label>Employees</label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label>Home telephone</label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label>Affiliation</label>
+        <name>Field4__c</name>
+        <picklistValues>
+            <masterLabel>フロント</masterLabel>
+            <translation>Front office</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接客</masterLabel>
+            <translation>Reception</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>番頭</masterLabel>
+            <translation>Clerk</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>経理</masterLabel>
+            <translation>Accounting</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>総料理長</masterLabel>
+            <translation>Head cook</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>調理師</masterLabel>
+            <translation>Cook</translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Roman letters[Surname]</label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label>Roman letters[Name]</label>
+        <name>Field6__c</name>
+    </fields>
+    <fields>
+        <label>Cash register#</label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label>Other names</label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label>Hire date</label>
+        <name>Field9__c</name>
+    </fields>
+    <nameFieldLabel>Attendant</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

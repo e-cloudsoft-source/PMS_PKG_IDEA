@@ -1,0 +1,90 @@
+<apex:component allowDML="false" id="StreamApiNotifyComp">
+
+<apex:attribute name="callbackFun1" type="String" description="Return Message Data" default="" required="false"/>
+<apex:attribute name="pushTopicName1" type="String" description="Topic Name" required="true"/>
+
+<apex:attribute name="callbackFun2" type="String" description="Return Message Data" default="" required="false"/>
+<apex:attribute name="pushTopicName2" type="String" description="Topic Name" default="" required="false"/>
+
+<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/cometd.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/json2.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/jquery.cometd.js')}" />
+ <script type="text/javascript">
+ (function($){
+ 	var pushTopicSubscription1;
+ 	var pushTopicSubscription2;
+    var callbacks1,callbackFun1 = "{!JSENCODE(callbackFun1)}";
+    var callbacks2,callbackFun2 = "{!JSENCODE(callbackFun2)}";
+    if(callbackFun1 != "") callbacks1 = eval(callbackFun1);
+    if(callbackFun2 != "") callbacks2 = eval(callbackFun2);
+    $(document).ready(function() {
+	     try{
+			$.cometd.disconnect();
+	         // Connect to the CometD endpoint
+			$.cometd.init({
+	            url: window.location.protocol+'//'+window.location.hostname+'/cometd/33.0/',
+	            requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'},
+	            appendMessageTypeToURL : false
+	        });
+	                
+			$.cometd.addListener('/meta/handshake', function(message){ 
+	              console.log("--handshake status: " + JSON.stringify(message));
+	              if(message.successful){
+	                  callInfoSubscription();
+	                  $("#errorDiv").html('');
+	              }else if(!message.successful && message.error != undefined){
+	                  $("#errorDiv").html('<span style="color: RED;">' + message.error + '</span><br>');
+	              }
+			});
+	          
+			$.cometd.addListener('/meta/connect', function(message){
+	              if(!message.successful){
+	                  console.log('--Connection not successful. Trying to handshake.')
+	                  var topicToUnsubscribe1 = pushTopicSubscription1;
+	                  $.cometd.unsubscribe(topicToUnsubscribe1);
+	                  var topicToUnsubscribe2 = pushTopicSubscription2;
+	                  $.cometd.unsubscribe(topicToUnsubscribe2);
+	                  pushTopicSubscription1 = pushTopicSubscription2 = null;
+	                  $.cometd.handshake();
+	              }else{
+	                  //console.log('--Got Connected');
+	              }
+			});
+          
+			$.cometd.addListener('/meta/disconnect', function(message){
+				console.log('--Got Disconnected');
+				$.cometd.handshake();
+			});
+		}catch(exception){
+			console.log('--Exception: ' + exception);
+		}
+     });
+     
+     function callInfoSubscription() {
+        // Subscribe to a topic. JSON-encoded update will be returned
+        // in the callback
+        pushTopicSubscription1 = $.cometd.subscribe('/topic/{!pushTopicName1}', function(message) {
+console.debug("message:::" + message.data);	
+			if(callbacks1) callbacks1(message.data);
+console.debug("message[1]:::" + message.data.sobject);
+         });
+         
+		if ("{!JSENCODE(pushTopicName2)}" != "") {
+	        // Subscribe to a topic. JSON-encoded update will be returned
+	        // in the callback
+	        pushTopicSubscriptio2 = $.cometd.subscribe('/topic/{!pushTopicName2}', function(message) {
+console.debug("message:::" + message.data);
+				if(callbacks2) callbacks2(message.data);
+console.debug("message[2]:::" + message.data.sobject);
+	         });
+         }
+     }
+	window.StreamApiNotifyComp_disconnect = function() {
+	    $.cometd.disconnect();
+	}
+})(jQuery)
+
+window.onbeforeunload = StreamApiNotifyComp_disconnect;
+</script>
+<div id="errorDiv"></div>
+</apex:component>

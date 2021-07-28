@@ -1,0 +1,3135 @@
+<!-- スタッフ -->
+<apex:page controller="StaffScheduleCtrl" action="{!init}" id="StaffSchedule" 
+sidebar="false" title="{!$Label.ps__msg_035_0102}">
+<meta name="viewport" content="width=1960;initial-scale=0.5;user-scalable=yes;"/>
+
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.tablehover.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.stickytableheaders.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<!-- 2014/11/25 六曜計算追加 -->
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qreki.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qrekiHelp.js')}" /> <!-- 和暦LIBのサポート関数 -->
+<!-- 2014/11/27 CKEDITOR追加 -->
+<!-- 
+<apex:includeScript value="{!URLFOR($Resource.ckeditor, 'ckeditor.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.ckeditor, 'util.js')}" />
+ -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!-- 
+<apex:includeScript value="{!$Resource.planExtendPlug}"/>
+ -->
+<!-- 2015/07/10 KeyDefine追加 -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="false"/>
+<style>
+td.hover, tr.hover{background-color: #f0f8ff !important;opacity: 0.8;}
+td.click, th.click{background-color: yellow;}
+.leftPanel{
+    white-space:nowrap;
+    width:80px;
+}
+.leftPanelItem {
+    white-space:nowrap;
+    width: 110px;
+}
+/**** SF STYLE MODIFY *****/
+.datatable{
+    table-layout:auto;
+}
+.datePicker {
+   position:fixed;
+}
+/* CKEDITOR RICH TEXTAREA CSS */
+.cke_contents {
+    height: 80px !important;
+}
+.dataCell{
+    white-space: nowrap;
+    overflow: hidden;
+}
+div#simulationDiv{
+    position: absolute;
+    background: #69f;
+    display: none;
+    filter: alpha(opacity=70);
+    -moz-opacity: 0.7;
+    -khtml-opacity:  0.7;
+    opacity:  0.4;
+    
+}
+table#simulationTable{
+    border: 3px solid green;
+    border-spacing: 0;
+    width: 100%;
+    height:100%;
+    table-layout: fixed;
+}
+.redBackground{
+    background: red !important;
+}
+.blueBackground{
+    background: blue;
+}
+.yellowBackground{
+    background: yellow !important;
+}
+.greenBackground{
+    background: rgb(94,186,207);
+}
+.triangle-topright {
+    position:absolute;
+    z-index:8;
+    width:5px;
+    height:5px; 
+    line-height:5px;
+    font-size:1pt;
+    padding:1px;
+    text-align:center;
+    opacity: 0.8;
+    border-radius:50px;
+    border:solid #4876FF 1px;
+    background:#4876FF;
+    -moz-background-size:cover;
+    background-size:cover;
+    color:white;
+    /* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN */
+    top:0;
+    right:0;
+    /* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END */
+}
+.triangle-statusInfo {
+    position:absolute;
+    z-index:0;
+    top: 0px;
+    padding:1px;
+    opacity: 1;
+    color:block;
+}
+#simulationIcon:active{
+    cursor: crosshair;
+}
+#simulationIcon:hover{
+    cursor: crosshair;
+}
+#dTable tbody .area{
+    background-color: #eef4ff;
+}
+#currentDiv{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    /* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN */
+    z-index:3;
+    /* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END */
+}
+#copyDiv{
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    /* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN */
+    z-index:3;
+    /* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END */
+}
+#currentDiv .wtBorder {
+    font-size: 0;
+    position: absolute;
+}
+#currentDiv .wtBorder .corner{
+    cursor: crosshair;
+    font-size: 0;
+}
+#copyDiv .wtBorder {
+    font-size: 0;
+    position: absolute;
+}
+#copyDiv .wtBorder .corner{
+    cursor: crosshair;
+    font-size: 0;
+}
+#editPanel{
+    position: absolute;
+    display: none;
+    /*width: 80px;*/
+    height: 30px;
+    z-index: 9;
+    margin: 2px;
+}
+.editColl{
+    
+}
+/*
+* Kendo UI Stand Css Edit
+*/
+.k-dirty{
+    position: absolute;
+    width: 0;
+    height: 0;
+    /*
+    top: 2px;
+    left: 2px;
+    */
+    top:0;
+    left:0;
+    border-style: solid;
+    border-width: 4px;
+    border-color: #f00 transparent transparent #f00;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    vertical-align: top;
+}
+.k-error{
+    position: absolute;
+    width: 0;
+    height: 0;
+    /*
+    top: 2px;
+    left: 2px;
+    */
+    top:0;
+    left:0;
+    border-style: solid;
+    border-width: 4px;
+    border-color: #1B8AF7  transparent transparent #1B8AF7 ;
+    /*margin: -0.45em 0 0 -0.6em;*/
+    padding: 0;
+    overflow: hidden;
+    vertical-align: top;
+}
+/* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN */
+/*
+div.staffContent{
+    width:38px;
+    height:10px;
+    word-wrap:break-word;
+	word-break:break-all;
+	hyphens: auto;
+    margin: 0px;
+    padding: 0px;
+    cursor: pointer;
+    white-space: normal;
+}
+div.staffComment{
+    width:38px;
+    height:10px;
+    word-wrap:break-word;
+    overflow: hidden;
+    margin: 0px;
+    padding: 0px;
+    cursor: pointer;
+    z-index: 1;
+    
+}*/
+/* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END */
+.TimeStatus_Work{
+    background-color: {!workTimeBtnInfo.Start_BackColor} !important;
+}
+.TimeStatus_Out{
+    background-color: {!workTimeBtnInfo.RestStart_BackColor} !important;
+}
+.TimeStatus_Back{
+    background-color: {!workTimeBtnInfo.RestEnd_BackColor} !important;
+}
+.TimeStatus_End{
+    background-color: {!workTimeBtnInfo.End_BackColor} !important;
+}
+.triangle_comment {               
+      position:absolute;
+      width:10px;
+      height:10px; 
+      z-index:4;
+      padding:1px;
+      opacity: 0.8;
+      right:0;
+      bottom:0;
+      background-image: url("/img/alohaSkin/help_orange.png");
+      background-size: 12px 12px;
+}
+tr.notRoleCol >td:nth-last-child(1),tr.notRoleCol >td:nth-child(1) ,tr.notRoleCol >td:nth-child(2){
+	background:rgb(242,243,243);
+}
+.tableFloatingHeaderOriginal{
+	z-index: 10 !important;
+}
+/* 2017/03/06 シフト->新規行動機能対応 zyz BEGIN */
+.addNewEventIcon {
+	z-index:1;
+    border: none;
+    width: 11px;
+    height: 10px;
+    position:absolute;
+    bottom: 0;
+    left:0;
+}
+.addNewEventIcon:hover{
+	cursor: pointer;
+	background-color: #F5F6CE;
+}
+/* 2017/03/06 シフト->新規行動機能対応 zyz END */
+/* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN */
+div.staffContent{
+    height:28px;
+    word-wrap:break-word;
+	word-break:break-all;
+	white-space: normal;
+	hyphens: auto;
+    margin: 0px;
+    padding: 0px;
+    cursor: pointer;
+    position: absolute;
+    top: 1px;
+    left:5px;
+    z-index: 1;
+    font-size: 8pt; 
+    text-align: left;
+    overflow: hidden;
+}
+.contentElement{
+	position: relative;
+}
+/* 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END */
+</style>
+
+<script>
+    $j=jQuery.noConflict();
+   
+    var JS_StayPersons = 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingMansDef__c,0)} + 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingFemailsDef__c,0)} + 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingChildrenDef__c,0)};
+    // Name Space
+    var g_ns="{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+    var staffMessageObj = $j.parseJSON("{!JSENCODE(staffMessageJsonStr)}");
+    var timerInterval = 1*{!JSENCODE(TEXT($Setup.CommDefine__c.ps__TimerSecond__c))}*1000;
+    var intervalId = null;
+    var drawFlag = false,orginX,orginY,moveFlag = false,copyFunFlag = false,selectLstStr="",
+    beginX,endX,beginY,endY,copyindex=0,copyObj = new Object(),
+    savingLockFlag = false;
+    var comboBox;
+    // Js Event Bind
+    function bindEvent() {
+        // TabelHover
+        editModeflag = ($j("input[id$=':editModeFlag']").val() == "true");
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        /*
+        var numCols = $j("#dTable").find('tr')[0].cells.length;
+        
+        $j('#dTable').tableHover({
+            colClass: 'hover',
+            cellClass: 'hovercell',
+            headCols: true,
+            ignoreCols: [1,2,3, numCols]
+        });*/
+        bindFocus();
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+        $j("#dTable").stickyTableHeaders();
+        // Timer Define
+        startRunning();
+        var hidNoCopyFlag = $j("#hidNoCopyFlag").val();
+        $j("#dTable tbody .contentElement").mouseenter(function(e){
+            if(!dragFlag && !mouseDownInDivflag){
+                if(hidNoCopyFlag && hidNoCopyFlag == "false"){
+                    //editModeFlag = true;
+                }
+                e.preventDefault();
+                return true;
+            }
+            var colIndex = $j(this).index();
+            var rowIndex = $j(this).parent("tr.user-row").index();
+            var currentColIndex = $j("td.current").parents("tr").find("td").index($j("td.current"));
+            var currentRowIndex = $j("td.current").parent("tr.user-row").index();
+            var startColIndex = Math.min(colIndex,currentColIndex);
+            var startRowIndex = Math.min(rowIndex,currentRowIndex);
+            var endColIndex = Math.max(colIndex,currentColIndex);
+            var endRowIndex = Math.max(rowIndex,currentRowIndex);
+            var cornerElement;
+            var dragMode = 0;
+            if(colIndex > currentColIndex){
+                if(rowIndex < currentRowIndex){
+                    cornerElement = $j("tr.user-row").eq(currentRowIndex).find("td").eq(colIndex);
+                    dragMode = 1;
+                }else{
+                    cornerElement = $j(this);
+                }
+            }else{
+                cornerElement = $j("td.current");
+                dragMode = 2;
+                if(rowIndex > currentRowIndex){
+                    cornerElement = $j("tr.user-row").eq(rowIndex).find("td").eq(currentColIndex);
+                    dragMode = 3;
+                }
+            }
+            
+            if(dragFlag && $j("td.area").length >= 0){
+            	$j(".fillX,.fillY").removeClass("fillX").removeClass("fillY");
+                if($j(this).hasClass("area") || $j(this).hasClass("current")){
+                    $j("#copyDiv .wtBorder").hide();
+                    e.preventDefault();
+                    return true;
+                }
+                var firstElement = $j("td.area:first");
+                var lastElement = $j("td.area:last");
+                if($j("td.area").length == 0 && $j("td.current").length > 0){
+                    firstElement = $j("td.current");
+                    lastElement = $j("td.current");
+                }
+                var firstElementLeft = firstElement.position().left;
+                var firstElementTop = firstElement.offset().top;
+                var lastElementLeft = lastElement.position().left;
+                var lastElementTop = lastElement.offset().top;
+                var moveflag = false;
+                var currentTd = $j(this);
+                // forward X 
+                if(e.pageY < lastElementTop + lastElement.outerHeight()  && e.pageY > firstElementTop){
+                    if( $j("td.current").hasClass("notRoleCol")){
+                        e.preventDefault();
+                        return true;
+                    }
+                    if(e.pageX <  firstElement.offset().left){
+                        var copyHeight = Math.abs(firstElement.position().top - lastElement.position().top) + $j(this).outerHeight();
+                        var copyWidth = Math.abs($j(this).position().left - lastElementLeft) + $j(this).outerWidth();
+                        $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                                ,height : 1 , width : copyWidth
+                                                ,top :  firstElement.position().top ,left : $j(this).position().left});
+                        $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                        ,height:copyHeight , width:1
+                                                        ,top :  firstElement.position().top , left:$j(this).position().left});
+                        $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                        ,height:1 , width : copyWidth
+                                                        ,top : lastElement.position().top + $j(this).outerHeight(),left:$j(this).position().left});
+                        $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                                ,height:copyHeight , width:1
+                                                                ,top : firstElement.position().top ,left:lastElementLeft + $j(this).outerWidth()});
+                        
+                        $j("#dTable tbody>tr.user-row").slice(firstElement.parent("tr.user-row").index(),lastElement.parent("tr.user-row").index() + 1).each(function(){
+                            $j(this).find("td").slice(currentTd.index(),lastElement.parents("tr.user-row").find("td").index(lastElement) + 1).not(".area").addClass("fillX");
+                        });
+                    }else{
+                        var copyHeight = Math.abs(firstElement.position().top - lastElement.position().top) + $j(this).outerHeight();
+                        var copyWidth = Math.abs($j(this).position().left - firstElementLeft) + $j(this).outerWidth();
+                        $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                                ,height : 1 , width : copyWidth
+                                                ,top :  firstElement.position().top ,left : firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                        ,height:copyHeight , width:1
+                                                        ,top :  firstElement.position().top , left:firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                        ,height:1 , width : copyWidth
+                                                        ,top : lastElement.position().top + $j(this).outerHeight(),left:firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                                ,height:copyHeight , width:1
+                                                                ,top : firstElement.position().top ,left: $j(this).position().left + $j(this).outerWidth()});
+                        
+                        $j("#dTable tbody>tr.user-row").slice(firstElement.parent("tr.user-row").index(),lastElement.parent("tr.user-row").index() + 1).each(function(){
+                            $j(this).find("td").slice(firstElement.parents("tr.user-row").find("td").index(firstElement) ,currentTd.index() + 1).not(".area").addClass("fillX");
+                        });
+                    }
+                }else{
+                //forward Y
+                    moveflag = true;
+                    if(e.pageY < firstElementTop){
+                        var copyHeight = Math.abs($j(this).position().top - lastElement.position().top) + $j(this).outerHeight();
+                        var copyWidth = Math.abs(firstElementLeft - lastElementLeft) + $j(this).outerWidth();
+                        $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                                ,height : 1 , width : copyWidth
+                                                ,top :  $j(this).position().top ,left : firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                        ,height:copyHeight , width:1
+                                                        ,top :  $j(this).position().top , left:firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                        ,height:1 , width : copyWidth
+                                                        ,top : lastElement.position().top + $j(this).outerHeight(),left:firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                                ,height:copyHeight , width:1
+                                                                ,top : $j(this).position().top ,left:lastElementLeft + $j(this).outerWidth()});
+                        $j("#dTable tbody>tr.user-row").slice(currentTd.parent("tr.user-row").index(),lastElement.parent("tr.user-row").index() + 1).each(function(){
+                            $j(this).find("td").slice(firstElement.parents("tr.user-row").find("td").index(firstElement) ,lastElement.parents("tr.user-row").find("td").index(lastElement) + 1).not(".area").addClass("fillY");
+                        });
+                    }else{
+                        var copyHeight = Math.abs($j(this).position().top - firstElement.position().top) + $j(this).outerHeight();
+                        var copyWidth = Math.abs(firstElementLeft - lastElementLeft) + $j(this).outerWidth();
+                        $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                                ,height : 1 , width : copyWidth
+                                                ,top :  firstElement.position().top ,left : firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                        ,height:copyHeight , width:1
+                                                        ,top :  firstElement.position().top , left:firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                        ,height:1 , width : copyWidth
+                                                        ,top : $j(this).position().top + $j(this).outerHeight(),left:firstElement.position().left});
+                        $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                        ,height:copyHeight , width:1
+                                                        ,top : firstElement.position().top ,left:lastElementLeft + $j(this).outerWidth()});
+                        $j("#dTable tbody>tr.user-row").slice(firstElement.parent("tr.user-row").index(),currentTd.parent("tr.user-row").index() + 1).each(function(){
+                            $j(this).find("td").slice(firstElement.parents("tr.user-row").find("td").index(firstElement) ,lastElement.parents("tr.user-row").find("td").index(lastElement) + 1).not(".area").addClass("fillY");
+                        });
+                    }
+                    
+                }
+                $j("#copyDiv .area").show();
+            }else if(mouseDownInDivflag){
+                $j("td.area").removeClass("area");
+                
+                var rowIndex = startRowIndex;
+                $j("#dTable tbody>tr.user-row").slice(startRowIndex,endRowIndex + 1).each(function(){
+                    $j(this).find("td").slice(startColIndex,endColIndex + 1).each(function(){
+                        $j(this).addClass("area");
+                    });
+                });
+                $j("#currentDiv .corner").css({"background-color" : "rgb(82,146,247)" ,height:5 , width:5 ,border: "2px solid rgb(255, 255, 255)"
+                                                    ,top:$j(cornerElement).position().top + $j(cornerElement).height() ,left:$j(cornerElement).position().left + $j(cornerElement).width() + 5});
+            }
+            copyObj = new Object();
+            copyObj.staffXArr = new Array();
+            copyObj.staffXStopArr = new Array();
+            copyObj.staffYArr = new Array();
+            copyObj.staffYStopArr = new Array();
+            if($j("td.area").length > 0)
+                $j("td.area").each(function(){
+                    var rowIndex = $j(this).parents("tr.user-row").index();
+                    var context = $j(this).data("statuslst");
+                    var statStatus = $j(this).data("stopstatus");
+                    //.find(".staffContent").text();
+                    if(!copyObj.staffXArr[rowIndex]){
+                        copyObj.staffXArr[rowIndex] = new Array();
+                        copyObj.staffXStopArr[rowIndex] = new Array();
+                        copyObj["currentIndex" + rowIndex] = 0;
+                        copyObj["rowLength" + rowIndex] = 0;
+                    }
+                    copyObj["rowLength" + rowIndex]++;
+                    //X forward array
+                    copyObj.staffXArr[rowIndex].push(context);
+                    copyObj.staffXStopArr[rowIndex].push(statStatus);
+                    //Y forward array
+                    copyObj.staffYArr.push(context);
+                    copyObj.staffYStopArr.push(statStatus);
+                    
+                }); 
+            else if($j("td.current").length > 0){
+                var currentCol = $j("td.current");
+                var rowIndex = $j(currentCol).parents("tr.user-row").index();
+                var context = $j(currentCol).data("statuslst");
+                var stopStatus = $j(currentCol).data("stopstatus");
+                //.find(".staffContent").text();
+                if(!copyObj.staffXArr[rowIndex]){
+                    copyObj.staffXArr[rowIndex] = new Array();
+                    copyObj.staffXStopArr[rowIndex] = new Array();
+                    copyObj["currentIndex" + rowIndex] = 0;
+                    copyObj["rowLength" + rowIndex] = 0;
+                }
+                copyObj["rowLength" + rowIndex]++;
+                //X forward array
+                copyObj.staffXArr[rowIndex].push(context);
+                copyObj.staffXStopArr[rowIndex].push(stopStatus);
+                //Y forward array
+                copyObj.staffYArr.push(context);
+                copyObj.staffYStopArr.push(stopStatus);
+                
+            }
+            copyObj["getNowRowIndex"] = function(nowRowIndex){
+                if(copyObj["currentIndex" + nowRowIndex] + 1 >  copyObj["rowLength" + nowRowIndex]) copyObj["currentIndex" + nowRowIndex] = 0;
+                var index = copyObj["currentIndex" + nowRowIndex];
+                copyObj["currentIndex" + nowRowIndex]++;
+                return index;
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+        $j("#dTable tbody td:not('.contentElement'),.bodyDiv,.bPageFooter").mousemove(function(e){
+            e.preventDefault();
+        });
+        $j("td.departElement,div.mainDiv,#dTable>tfoot,.noSidebarCell").mousedown(function(e){
+            if(e.target.tagName != 'SELECT')
+            	e.preventDefault();
+        });
+        $j(document).mouseup(function(event){
+            if(dragFlag){
+                if($j(".fillX").length > 0){
+                    if(!$j("td.fillX").hasClass("editColl"))
+                        $j("td.fillX").addClass("editColl");
+                    $j(".fillX").each(function(){
+                        var currentRowIndex = $j(this).parents("tr.user-row").index();
+                        var rowArr = copyObj.staffXArr[currentRowIndex];
+                        var rowStopArr = copyObj.staffXStopArr[currentRowIndex];
+                        if($j(this).hasClass("notRoleCol")){
+                            $j(this).removeClass(".fillX");
+                        }else{
+                        	$j(this).data("statuslst",rowArr[copyObj.getNowRowIndex(currentRowIndex)]);
+                        	$j(this).data("stopstatus",rowStopArr[copyObj.getNowRowIndex(currentRowIndex)]);
+                        	var context = rowArr[copyObj.getNowRowIndex(currentRowIndex)];
+                        	if(rowStopArr[copyObj.getNowRowIndex(currentRowIndex)] != "")context += "〜";
+                        	if(rowStopArr[copyObj.getNowRowIndex(currentRowIndex)] != "")
+                        		context += $j(this).data("stopstatus");
+                        	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+							// 添加绑定
+					    	insertTdElements(this);
+					    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                            $j(this).find(".staffContent").text(context);
+                            $j(this).removeClass(".fillX").addClass("area");
+                            $j(this).find(".k-dirty").show();
+                        }
+                        //index++;
+                    });
+                }else if($j(".fillY").length > 0){
+                    if(!$j("td.fillY").hasClass("editColl"))
+                        $j("td.fillY").addClass("editColl");
+                    var areaElements = $j("td.area");
+                    var index = 0;
+                    $j(".fillY").each(function(){
+                        if($j(this).hasClass("notRoleCol")){
+                            $j(this).removeClass(".fillY");
+                        }else{
+                        	$j(this).data("statuslst",copyObj.staffYArr[index]);
+                        	$j(this).data("stopstatus",copyObj.staffYStopArr[index]);
+                        	var context = copyObj.staffYArr[index];
+                        	var stopStr = copyObj.staffYStopArr[index];
+                        	if(stopStr != null && stopStr != "") context += "〜";
+                        	if(stopStr != null && stopStr != "") context += stopStr;
+                        	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+							// 添加绑定
+					    	insertTdElements(this);
+					    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                            $j(this).find(".staffContent").text(context);
+                            $j(this).removeClass(".fillY").addClass("area");
+                            $j(this).find(".k-dirty").show();
+                        }
+                        index++;
+                        if(copyObj.staffYArr.length == index)index = 0;
+                    });
+                }
+                var cornerElement = $j("td.area:last"),cornerTop,cornerLeft ;
+                if($j("td.area").length <= 0)
+                    cornerElement = $j("td.current");
+                    
+                cornerTop = cornerElement.position().top + cornerElement.height();
+                cornerLeft = cornerElement.position().left + cornerElement.width() + 5;
+                if($j("#copyDiv .wtBorder").eq(3).css("display") == 'block'){
+                	cornerTop = $j("#copyDiv .wtBorder").eq(3).position().top + $j("#copyDiv .wtBorder").eq(3).height() - 5;
+                	cornerLeft = $j("#copyDiv .wtBorder").eq(3).position().left - 5;
+                }
+                $j("#currentDiv .corner").css({"background-color" : "rgb(82,146,247)" ,height:5 , width:5 ,border: "2px solid rgb(255, 255, 255)"
+                                                        ,top:cornerTop ,left: cornerLeft});
+                saveMessage();
+            }
+            dragFlag = false;
+            mouseDownInDivflag = false;
+            $j("#copyDiv .area").hide();
+            event.preventDefault();
+        });
+        $j(document).keydown(function(e){
+            if(editModeFlag){
+                if(e.keyCode == 13){
+                    if(!closeFlag){
+                        changeToShowMode(false);
+                    }
+                    closeFlag = false;
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+                else if(e.keyCode == 9){
+                    return;
+                    var currentIndex = $j("td.focus").index();
+                    var currentTr= $j("td.focus").parents("tr.user-row");
+                    currentIndex++;
+                    var currentTrIdx = $j("tr.user-row").index(currentTr);
+                    if(currentIndex > currentTr.find("td.contentElement:last").index() ){
+                        currentIndex = 2;
+                        currentTrIdx++;
+                        if(currentTrIdx >= $j("tr.user-row").length){
+                            currentTrIdx = 0;
+                        }
+                    }
+                    comboBox.close();
+                    var nextElement = $j("tr.user-row").eq(currentTrIdx).find("td").eq(currentIndex);
+                        changeTdEditMode(nextElement);
+                        clickIndex = 0;
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                    comboBox.open();
+                }else if(e.keyCode == 27){
+                    if(!closeFlag){
+                        $j("#editPanel").hide();
+                        bindFocus();
+                        comboBox.close();
+                        $j(".onEditing").removeClass("onEditing");
+                        cornerShow($j(".onEditing"));  
+                        comboBox.refresh();
+                        editModeFlag = false;
+                    }
+                    closeFlag = false;
+                    e.preventDefault();
+                }
+            }
+        });
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        bindScroll();
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+        setInterval(refreshMessage,timerInterval);
+        $j("form[id $='createForm']").unbind("submit");
+        $j("form[id $='createForm']").submit(function(e){
+            e = e||event;  
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+    }
+    var eventHandler = function eventHandler(result) {
+        //Enclosing tab has refreshed:
+        //and the object Id is:
+            alert('{!$Label.MSG_035_0103}' + result.id
+          + '{!$Label.MSG_035_0104}' + result.objectId);
+        };
+    
+    window.onbeforeunload = onbeforeunload_handler;
+        function onbeforeunload_handler() {
+            if($j("td.editColl").length > 0){
+                if(confirm("some cell need save or not?")){
+                    saveMessage();
+                }
+            }
+        }
+
+    
+    function saveMessage(){
+        var messageArr = new Array();
+        $j("td.editColl").each(function(){
+            var staffObj = new Object();
+            staffObj["staffdate"] = $j(this).data("staffdate");
+            staffObj["uid"] = $j(this).data("uid");
+            staffObj["staffStatus"] = $j(this).data("statuslst");
+            staffObj["staffComment"] =  $j.trim($j(this).data("comment"));
+           // $j(this).find(".staffComment").text();
+            staffObj["staffid"] = $j(this).data("staffid");
+            staffObj["timeStmp"] = $j(this).data("timelong");
+            staffObj["status"] = $j.trim($j(this).data("status"));
+            staffObj["stopStatus"] = $j.trim($j(this).data("stopstatus"));
+            messageArr.push(staffObj);
+        });
+        savingLockFlag = true;
+        // 既に定義する売価はプランカラ取得、画面に設定する
+        Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.StaffScheduleCtrl.saveTimeMessage}", JSON.stringify(messageArr), g_defEventTile ,function(result, event){
+            if(event.type == 'exception') {
+            	savingLockFlag = false;
+                console.log("-------error-------");
+                //alert(event.message);
+            } else if(result.length > 0){
+                for(var i = 0 ; i < result.length; i++){
+                    var obj = result[i];
+                    var aimElement = $j("td[data-searchkey='" + obj.staff[g_ns + 'SearchKey__c'] + "']");
+                    if (aimElement.find(".k-dirty").length == 0 ) createDirtyIcon(aimElement.get(0));
+                    if(obj.errorMsg != undefined && obj.errorMsg != null && obj.errorMsg != '' ){
+                        if(obj.errorMsg == 'delete'){
+                            aimElement.data("staffid","");
+                            aimElement.data("timelong","");
+                            //aimElement.find(".staffContent").text("");
+                        }else{
+                            aimElement.find(".k-dirty").addClass("k-error").removeClass("k-dirty");
+                            aimElement.find(".k-error").attr("title",obj.errorMsg);
+                        }
+                    }else {
+                    	aimElement.data("staffid",obj.staff.Id);
+                    	// 2018/05/25 シフト画面再表示スッタフ内容なし修正　by　zy BEGIN
+                    	//aimElement.attr("data-stopstatus",[obj.staff[g_ns + 'StopStatusLst__c']]);
+                    	aimElement.attr("data-stopstatus",saveVal(obj.staff[g_ns + 'StopStatusLst__c']));
+                    	aimElement.attr("data-statuslst",saveVal(obj.staff[g_ns + 'StatusLst__c']));
+	                    aimElement.attr("data-comment",saveVal(obj.staff[g_ns + 'CommentLst__c']));
+                    	// 2018/05/25 シフト画面再表示スッタフ内容なし修正　by　zy END
+                   		aimElement.data("timelong",obj.timeStmp);
+                        aimElement.find(".k-dirty").hide();
+                        staffMessageObj[obj.staff[g_ns + 'SearchKey__c']] = obj;
+                    }
+                }
+                savingLockFlag = false;
+                $j(".editColl").removeClass("editColl");
+            }
+        });
+    }
+    function refreshMessage(){
+    	if(savingLockFlag) return;
+    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        /*
+        var startDtStr = $j("tr.user-row:eq(0) td.contentElement:first").data("staffdate");
+        var endDtStr = $j("tr.user-row:eq(0) td.contentElement:last").data("staffdate");
+        */
+        var allRows = $j("tr.user-row");
+        // 超过50user需要进行懒加载
+        if(allRows.length > 50) allRows = allRows.filter(":onscreen");
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+        var userIds = new Array();
+        allRows.each(function(){
+            var userId = $j(this).children("td.contentElement:first").data("uid");
+            userIds.push(userId);
+        });
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+    	refreshPageInfos(userIds,true,false);
+    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+    	// 获取所有人的消息
+        refreshAllUserWkTime();
+        // 集計情報を更新を行う
+        summaryLeadInfoXml();
+    }
+    // 2019/11/26 シフトCPU limit修正 by zy BEGIN
+    function refreshPageInfos(userIds,refreshContentFlag,refHeadFlag,callback){
+    // 2019/11/26 シフトCPU limit修正 by zy END
+        var startDtStr = $j("tr.user-row:eq(0) td.contentElement:first").data("staffdate");
+        var endDtStr = $j("tr.user-row:eq(0) td.contentElement:last").data("staffdate");
+         // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+        //console.debug(startDtStr);
+        //console.debug(endDtStr);
+        ///console.debug(userIds.toString());
+        // 既に定義する売価はプランカラ取得、画面に設定する
+        Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.StaffScheduleCtrl.refreshTimeMessage}", startDtStr,endDtStr,userIds.toString(),refHeadFlag, function(result, event){
+            if(event.type == 'exception') {
+            	console.log("-------error-------");
+              //  alert(event.message);
+            } else if(result != null){
+                // 2019/11/26 シフトCPU limit修正 by zy BEGIN
+                if (callback != undefined) {
+                    callback(result,userIds);
+                    return;
+                }
+                // 2019/11/26 シフトCPU limit修正 by zy END
+            	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+            	if (refreshContentFlag) {
+            	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                var updateArr = new Array();
+                for(var i = 0 ; i < userIds.length; i++){
+                    var userId = userIds[i];
+                    var dispRecord = result.dispRecordMap[userId];
+                    for(var j = 0 ; j < dispRecord.timeList.length; j++){
+                        var tm = dispRecord.timeList[j];
+                        if(dispRecord.timeWorkSumByUser != undefined){
+                        	$j("#dTable td.timeSum[data-userid='" + userId + "']").text(dispRecord.timeWorkSumByUser);
+                        }
+                        var updElementTd = $j("td[data-searchkey='" + tm.searchKey + "']");
+                        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+						// 添加绑定
+				    	if (updElementTd.length > 0) insertTdElements(updElementTd.get(0));
+				    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                        //schedult message update 
+                        if(!updElementTd.hasClass("onEditing,fillY,fillX,area,current")){
+                            var obj = tm.schedule;
+                            if(obj == null ){
+                            	if(staffMessageObj[tm.searchKey] != undefined){
+                            		//clear td element
+	                                updElementTd.data("timelong","");
+	                                updElementTd.data("comment","");
+	                                updElementTd.attr("data-stopstatus","");
+	                                updElementTd.find(".triangle_comment").hide();
+	                                updElementTd.find(".staffContent").text('');
+	                                updElementTd.data("statuslst",'');
+	                                staffMessageObj[tm.searchKey] = undefined;
+                            	}
+                            }else{
+                                //need update
+                                if((staffMessageObj[tm.searchKey] != undefined && staffMessageObj[tm.searchKey].timeStmp != obj.timeStmp) || staffMessageObj[tm.searchKey] == undefined){
+                                    staffMessageObj[obj.staff[g_ns + 'SearchKey__c']] = obj;
+                                    updElementTd.data("timelong",obj.timeStmp);
+                                    if(obj.staff[g_ns + 'CommentLst__c']  && obj.staff[g_ns + 'CommentLst__c'] != ""){
+                                        updElementTd.data("comment",obj.staff[g_ns + 'CommentLst__c'] );
+                                        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+	                                	updElementTd.attr("data-comment",obj.staff[g_ns + 'CommentLst__c']);
+	                                	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                                       // updElementTd.find(".staffComment").text(obj.staff[g_ns + 'CommentLst__c']);
+                                        if(updElementTd.find(".triangle_comment").css("display") == "none" || updElementTd.find(".triangle_comment").attr("display") == "none"){
+                                            updElementTd.find(".triangle_comment").show();
+                                        }
+                                    }else if(updElementTd.find(".triangle_comment").attr("display") != "none"){ 
+                                        updElementTd.find(".triangle_comment").hide();
+                                    }
+                                    // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+                                    if(obj.staff[g_ns + 'StatusLst__c'] != undefined || obj.staff[g_ns + 'StopStatusLst__c'] != undefined){
+                                    	var statusLst = obj.staff[g_ns + 'StatusLst__c'];
+                                    	if (statusLst == undefined) statusLst = '';
+                                    // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                                    	if(obj.staff[g_ns + 'StopStatusLst__c'] != undefined) statusLst += '〜' + obj.staff[g_ns + 'StopStatusLst__c'];
+                                    	updElementTd.find(".staffContent").text(statusLst);
+                                    	updElementTd.attr("data-stopstatus", obj.staff[g_ns + 'StopStatusLst__c']);
+                                    	updElementTd.data("staffStatus",obj.staff[g_ns + 'StatusLst__c']);
+                                    }else{
+                                    	updElementTd.data("staffStatus",'');
+                                    	updElementTd.find(".staffContent").text('');
+                                    }
+                                }
+                                //task number 
+                                var taskNum = updElementTd.find(".triangle-topright").text();
+                                if(parseInt(taskNum) != tm.taskNum){
+                                	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+                                	updElementTd.attr("data-tasknum",tm.taskNum);
+                                	updElementTd.data("tasknum",tm.taskNum);
+                                	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+                                    if(tm.taskNum > 0 ){
+                                        updElementTd.find(".triangle-topright").show();
+                                        updElementTd.find(".triangle-topright").text(tm.taskNum);
+                                    }else{
+                                        updElementTd.find(".triangle-topright").hide();
+                                        updElementTd.find(".triangle-topright").text(tm.taskNum);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+                // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+                }
+                if (refHeadFlag) {
+	                // 日単位の勤怠時間合計値を設定する
+	                var dtimeCol = $j("#dTable td.dailyWorkTime");
+	                for (i=0;i<dtimeCol.length;i++) {
+	                	var key = dtimeCol[i].getAttribute("data-time");
+	                	var val = result.dayliTimeSumMap[key];
+	                	if (typeof(val) == "undefined") {
+	                		var isSetTextFlg = dtimeCol[i].getAttribute("data-isclose");
+	                		if (isSetTextFlg == "true") $j(dtimeCol[i]).text("");
+	                		else $j(dtimeCol[i]).text("0");
+	                	}
+	                	else  $j(dtimeCol[i]).text(val);
+	                }
+	                // 勤怠時間合計値
+	                $j("#dTable span.allWorkDaysCount").each(function() {
+	                	$j(this).text( result.allWorkDaysCount);
+	                });
+                }
+                // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+            }
+        });
+    }
+    var removeClassArr = "TimeStatus_Work TimeStatus_Out TimeStatus_Back TimeStatus_End";
+    //element
+    //change to class name
+    //compare prefix
+    //secondFlag false: only change one element, true up and down both change 
+    //editArea all: 全部表示　up : 上部表示 down:　下部表示　
+    function replaceWorkStatusClass(that,changeClassName,beforePrefix,secondFlag,editArea){
+        var upElement = $j(that).find(".TimeRow").eq(0);
+        var middleElement = $j(that).find(".secondCol").eq(0);
+        var downElement = $j(that).find(".secondCol").eq(1);
+        if(editArea == 'all'){
+       	 	removeAndInsertClass(upElement,changeClassName,beforePrefix);
+        	removeAndInsertClass(downElement,changeClassName,beforePrefix);
+        }else if(editArea == 'up'){
+        	removeAndInsertClass(upElement,changeClassName,beforePrefix);
+        	if(secondFlag)
+        		removeAndInsertClass(downElement,'',beforePrefix);
+        	else{
+        		//if column not had background change to white
+        		if(downElement.attr("style").includes('translation')){
+        			downElement.attr("style",downElement.attr("style").replace("translation","white"));
+        		}
+        	}
+        }else if(editArea == 'down'){
+        	if(secondFlag)
+        		removeAndInsertClass(upElement,'',beforePrefix);
+        	removeAndInsertClass(downElement,changeClassName,beforePrefix);
+        }
+    }
+    function removeAndInsertClass(changeElement,changeClassName,beforePrefix){
+    	var currentClass = changeElement.attr("class");
+    	if(!currentClass.includes(changeClassName)){
+    		if(currentClass.includes(beforePrefix)){
+	            changeElement.removeClass(removeClassArr);
+	        }
+	        if(changeClassName != ''){
+	        	changeElement.addClass(changeClassName);
+	        }
+    	}
+    	
+    }
+    var dragFlag = false,mouseDownInDivflag = false,copyArr;
+    /*
+    // Create a namespace for our custom functions
+    YAHOO.namespace("force.com");
+
+    // Function called when we want to show the dialog
+    YAHOO.force.com.showMe = function() {
+        document.getElementById("myPanel").style.display = "block";
+        stopRunning();
+        YAHOO.force.com.myDialog.show();
+        // CKEDITOR処理の呼び出し
+        CKEDITOR.jinya.initInstance($j, "ckeditorClass");
+    }
+
+    // Function called when we want to hide the dialog
+    YAHOO.force.com.hideMe = function() {
+        startRunning();
+        multiSelectRest();
+        YAHOO.force.com.myDialog.hide();
+    }
+    var onRowArr;
+    // 2014/01/17 Schedule Panel Add
+    // Function called when we want to show the dialog
+    YAHOO.force.com.showSchedule = function(dtVal,that) {
+        $j("#scheduleFormresetbtn").click();
+        onRowArr = new Array();
+        var copyColIndex = $j(that).index();
+        $j("#dTable tbody tr.user-row:not(.notRoleCol)").each(function(){
+            onRowArr.push($j(this).eq(copyColIndex));
+        });
+        // CheckBox Clear
+        $j("input[name='weekOpts']:checked").removeAttr("checked");
+        // 初期設定
+        document.getElementById("schedule").style.display = "block";
+        // 指定のコピー日
+        var copyOrgDate = Date.parse(dtVal);
+        // Hiddenに自動設定する
+        $j("input[id$=':hidCopyOrgDate']").val(dtVal);
+        // 曜日
+        var weekday = copyOrgDate.toString("dddd");
+        // 開始日
+        var startDt = copyOrgDate.addDays(1);
+        $j("input[id$=':sch_startDate']").val(startDt.toString('yyyy/MM/dd'));
+        // 終了日
+        $j("input[id$=':sch_endDate']").val(startDt.addDays(7).toString('yyyy/MM/dd'));
+        // 曜日初期値設定
+        $j("#"+weekday).attr("checked", true);
+        //$j("#dayOfMonth").val(selectday);
+        //$j("#dayOfWeek").val(weekday);
+        // Tier初期値設定
+        //$j("#tierSelect").val(tierName);
+        // 初期化設定
+        //switchOption($j("#repeatWeek").val());
+        stopRunning();
+        YAHOO.force.com.schedule.show();
+    }
+
+    // Function called when we want to hide the dialog
+    YAHOO.force.com.hideSchedule = function() {
+        // ErrMessage Clear
+        $j("span[id$=':inputTierFormMsg']").hide();
+        startRunning();
+        YAHOO.force.com.schedule.hide();
+    }
+
+    
+    // Function called when the DOM is ready to create the dialog,
+    // render the dialog into the document body, add our dialog skin
+    // css to the body tag, and wire up the buttons on our dialog
+    YAHOO.force.com.init = function() {
+        document.body.className = document.body.className + " yui-skin-sam";
+        
+        YAHOO.force.com.schedule = new YAHOO.widget.Panel(
+            "schedule",  // The id of our dialog container
+            {
+                    width           :   660,    // You can play with this until it's right
+                    visible         :   false,  // Should be invisible when rendered
+                    draggable       :   true,   // Make the dialog draggable
+                    close           :   false,  // Don't include a close title button
+                    modal           :   true,   // Make it modal
+                    fixedCenter     :   true,   // Keep centered if window is scrolled
+                    zindex          :   4,     // Make sure it's on top of everything
+
+                    // This line adds the appear/vanish fade effect
+                    effect          :   {
+                                          effect:YAHOO.widget.ContainerEffect.FADE,
+                                          duration:0.35
+                                        }
+            }
+         );
+
+        // Render the dialog to the document.body level of the DOM
+        YAHOO.force.com.schedule.render(document.body);
+
+    }
+
+    // Add the init method to the window.load event
+    //YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+    function comDateFormat(date, format){
+        return kendo.toString(date, format );
+    }
+    function comPadZero(value, length){
+        return new Array(length - ('' + value).length + 1).join('0') + value;
+    }*/
+   /*
+    function setDepartureDateAuto(){
+        var starts = document.getElementById("StaffScheduleCtrl:createForm:createPageBlock:createPageBlockSection:entryDateItem:entryDate").innerHTML;
+        var stays = document.getElementById("StaffScheduleCtrl:createForm:createPageBlock:createPageBlockSection:staysNumsItem:staysNums").value;
+        document.getElementById("StaffScheduleCtrl:createForm:createPageBlock:createPageBlockSection:departureDateItem:departureDate").innerHTML=comDateFormat(new Date((new Date(starts)).getTime() + stays*24*60*60*1000), 'yyyy/MM/dd');
+    }
+    // 保存前処理
+    function doBeforeSave() {
+        // CKEDITOR情報は実勢の項目にコピーする
+        CKEDITOR.jinya.copyValue($j, "ckeditorClass");
+    
+        if (!checkRoomsNumber()) return false;
+        
+        var hideItem = "{!$Component.createForm}:hidStartDays";
+        document.getElementById(hideItem).value = document.getElementById("StaffScheduleCtrl:createForm:createPageBlock:createPageBlockSection:entryDateItem:entryDate").innerHTML;
+        //$j(".ui-autocomplete").hide();
+        //$j(".ui-autocomplete").empty();
+        clearAutoCompletePanel();
+        return true;
+    }*/
+    // 画面Lockする
+    function blockUi() {
+        $j.blockUI({
+            //Processing...
+             message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_035_0105}</h1>'
+        });
+        cancelEidtMode();
+        $j(".hover").removeClass("hover");
+        $j(".hovercell").removeClass("hovercell");
+        $j("#currentDiv .corner").hide();
+        return true;
+    }
+    // 画面Lock解除
+    function unblock() {
+        $j.unblockUI({ fadeOut: 200 }); 
+    }
+
+    // 予約データを登録処理後の自動処理
+    function bookingCreateCallBack() {
+        var createResult = $j("input[id$=':hidDataCreateOK']").val();
+        if (createResult.toLowerCase() == "true") {
+            $j("input[id$=':hidDataCreateOK']").val("");
+            YAHOO.force.com.hideMe();
+        }
+    }
+    // 予約名自動設定機能
+    function autoSetupLeadName() {
+        var contactName = $j("input[id$=':relcontact']").val();
+        var leadName = $j("input[id$=':leadName']").val();
+        if (leadName == "" && contactName != "") {
+            $j("input[id$=':leadName']").val(contactName);
+        }
+    }
+    /*
+    function focusField(filedId) {
+        $j("[id$='"+filedId+"']").focus();
+    }*/
+    // ３０日間連泊情報照会画面起動
+    // 2017/06/28 DUMY機能、削除 BEGIN
+    /*
+    function openBookingInfoWin() {
+        // 指定日 // 支店コード
+        var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+        window.open("/apex/RoomScheduleReport?spcd="+branchCd);
+    }*/
+    // 2017/06/28 DUMY機能、削除 END
+    function syncSelectInfo (val, id) {
+        var key = "select[id$=':" + id + "']";
+        var objs = $j(key);
+        if (objs.length > 1) {
+            for (i =0; i < objs.length; i++) {
+                $j(objs[i]).val(val);
+            }
+        }
+    }
+    /*
+    // Switch Option Function
+    function switchOption(optVal) {
+        $j("#weekBlock").hide();
+        $j("#monthBlock").hide();
+        if (optVal == "week") {
+            $j("#weekBlock").show();
+        } else {
+            $j("#monthBlock").show();
+        }
+    }*/
+    /*
+    function switchMonthOption(optVal) {
+        $j("#monthOfDay").attr("disabled", "disabled");
+        $j("#weekOfMonth").attr("disabled", "disabled");
+        $j("#dayOfWeek").attr("disabled", "disabled");
+        if (optVal == "month1") {
+            $j("#monthOfDay").removeAttr("disabled");
+        } else {
+            $j("#weekOfMonth").removeAttr("disabled");
+            $j("#dayOfWeek").removeAttr("disabled");
+        }
+    }*/
+    // 選択情報はHIDDEN項目へ反映する
+    /*
+    function copyWorkInfoFun() {
+        // 該当画面にコピー元のユーザーID
+        var userids = $j("a[id$='_left']");
+        if (userids.length == 0) return false;
+        // User Id作成する
+        var userIdsArr = new Array();
+        userids.each(function(i, elem) {
+            userIdsArr.push($j(this).data("userid"));
+        });
+        $j("input[id$=':hidUserIds']").val(userIdsArr.toString());
+        // 頻度
+        var repeatType = $j("input[name='repeatDayType']:checked").val();
+        // 毎週
+        if (repeatType == "week") {
+            //weekOpts
+            var weekdays = $j("input[name='weekOpts']:checked");
+            if (weekdays.length == 0) {
+                alert("曜日を選択してください");
+                return false;
+            }
+            // 
+            var weekopts = new Array();
+            weekdays.each(function(){
+                weekopts.push($j(this).val());
+            });
+            // 週別で設定
+            $j("input[id$=':hidRepeatType']").val(true);
+            // 毎週：月曜日〜日曜日
+            $j("input[id$=':hidWeekOpts']").val(weekopts.toString());
+        } 
+        // 開始日
+        var varStartDt = $j("input[id$=':sch_startDate']").val();
+        var varEndDt = $j("input[id$=':sch_endDate']").val();
+        // 有効な日付をチェックする
+        var startDt = Date.parse(varStartDt);
+        var endDt = Date.parse(varEndDt);
+        if (startDt == null || endDt == null) {
+            alert("開始日付、終了日付に有効な日付の値を入力してください。");
+            return false;
+        }
+        // 曜日
+        var tmpEndDt = new Date(startDt.getTime());;
+        if (tmpEndDt.addDays(30) < endDt ) {
+            alert("設定期間は最大30日間設定してください。");
+            return false;
+        }
+        // 期間チェック
+        if (startDt > endDt ) {
+            alert("{!$Label.ERR_0108}");
+            return false;
+        }
+        $j("input[id$=':hidStartDate']").val(startDt.toString("yyyy/MM/dd"));
+        $j("input[id$=':hidEndDate']").val(endDt.toString("yyyy/MM/dd"));
+        // Call ActionFunction
+        scheduleSaveFun();
+    }
+    // 予約データを登録処理後の自動処理
+    function raceRateCreateCallBack() {
+        var createResult = $j("input[id$=':sch_hidDataCreateOK']").val();
+        if (createResult.toLowerCase() == "true") {
+            $j("input[id$=':sch_hidDataCreateOK']").val("");
+            YAHOO.force.com.hideSchedule();
+        }
+    }
+    // 日付書式処理
+    function dateFormatFun(obj) {
+        var inputDt = Date.parse(obj.value);
+        if (inputDt == null) return;
+        obj.value = inputDt.toString("yyyy/MM/dd");
+    }
+    
+    // 休館情報設定を行う
+    function createRestHotelInfoJsFun() {
+        // 開始日
+        var varStartDt = $j("input[id$=':layoff_startDate']").val();
+        var varEndDt = $j("input[id$=':layoff_endDate']").val();
+        // 有効な日付をチェックする
+        var startDt = Date.parse(varStartDt);
+        var endDt = Date.parse(varEndDt);
+        if (startDt == null || endDt == null) {
+            alert("開始日付、終了日付に有効な日付の値を入力してください。");
+            return false;
+        }
+        // 曜日
+        var tmpEndDt = new Date(startDt.getTime());
+        if (tmpEndDt.addYears(1) < endDt ) {
+            alert("設定期間は最大１年まで設定してください。");
+            return false;
+        }
+        // 期間チェック
+        if (startDt > endDt ) {
+            alert("{!$Label.ERR_0108}");
+            return false;
+        }
+        $j("input[id$=':hidRestStartDate']").val(startDt.toString("yyyy/MM/dd"));
+        $j("input[id$=':hidRestEndDate']").val(endDt.toString("yyyy/MM/dd"));
+        // 指定の形式
+        var hotelstatus = $j("input[name='roomstatusRadio']:checked").val();
+        $j("input[id$=':hidRestHotelStatus']").val(hotelstatus);
+        // Call Ajax Acation
+        createRestHotelInfoFun();
+    }
+    // 予約データを登録処理後の自動処理
+    function restUpdateCallBack() {
+        var createResult = $j("input[id$=':rest_hidDataCreateOK']").val();
+        if (createResult.toLowerCase() == "true") {
+            $j("input[id$=':rest_hidDataCreateOK']").val("");
+            YAHOO.force.com.hideLayoffPanel();
+        }
+    }
+    // AutoComplete項目選べるリストクリックする処理
+    function clearAutoCompletePanel() {
+        $j(".ui-autocomplete").hide();
+        $j(".ui-autocomplete").empty();
+    }
+    // プラン設定機能
+    function openMiniPlanSetup(item) {
+        // プラン明細を展開する 
+        var planItem = $j("#planCustomeBtn").data("jinyaPlanExtend");
+        planItem.switchStatus();
+    }
+    // Check部屋数
+    function checkRoomsNumber() {
+        if ($j("input:text[id$=':broom:name']").length == 0 ||
+            ($j("input:text[id$=':broom:name']").length > 0 &&
+             $j("input:text[id$=':broom:name']").val() == "")) return true;
+        var rooms = $j("input:text[id$=':bookingRooms']").val();
+        if (rooms > 1) {
+            alert('部屋数は複数場合、部屋設定することができません。');
+            return false;
+        }
+        return true;
+    }
+    // 室料計算用Method
+    function calRoomRateFun() {
+        // 現状の画面はラックレートするがどうかチェックする
+        if ($j("#hidIsRateRateFlg").val() == "true") {
+            //$j("input[id$=':hidRackratePrice']").val($btnObj.val());
+            var roomPrice = $j("#hidRackratePrice").val();  // ボタンに記載する金額を取得する
+            var planPrice = $j("#hidPlanPrice").val();  // 選択するプラン金額を格納する
+            return commUtils.mathNumSub(roomPrice, planPrice);// 室料のみプラン設定画面へ引き渡す
+        } else {
+            // ラックレートじゃない場合、室料は自動設定を行わない
+            //return 0;
+            return null;
+        }
+    }*/
+    function stopRunning() {
+        clearTimeout(intervalId);
+    }
+    function startRunning() {
+        // Timer Define
+        clearTimeout(intervalId);
+        //intervalId = setTimeout(timerPollerFun, timerInterval);
+    }
+    function multiSelectRest(){
+        var selectOptins = $j("select[id$='_selected'][multiple='multiple'] option");
+        if(selectOptins.length > 0){
+            selectOptins.each(function(){
+                this.selected = true;
+            });
+            var elementId = $j("select[multiple='multiple']:not([id$='_selected'],[id$='_unselected'])").attr("id");
+            MultiSelectPicklist.handleMSPUnSelect(elementId);
+        }
+        
+    }
+    function unbindFocus(){
+    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        //$j('#dTable').unbind('mouseover').unbind('mouseout');
+        $j("#dTable").unbind("mousemove");
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+    }
+    function bindFocus(){
+    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+    	/*
+        $j('#dTable').tableHover({
+            colClass: 'hover',
+            cellClass: 'hovercell',
+            headCols: true,
+            ignoreCols: [1,2,3, $j("#dTable").find('tr')[0].cells.length]
+        });*/
+        $j("#dTable").bind("mousemove",function(){
+        	var curTarget = $j(event.target);
+			$j(".hover").removeClass("hover");
+			if (curTarget.hasClass("contentElement")) {
+				var curIdx = curTarget.index();
+				var curRow = curTarget.closest("tr.user-row");
+				if (curRow.length > 0 && curIdx > 1) {
+					$j("td",curRow).addClass("hover");
+					$j("#dTable tr.user-row:onscreen").find("td:eq(" + curIdx+ ")").addClass("hover");
+					var headIdx = curIdx - 2;
+					$j("#dTable>thead>tr").find("td:eq(" + headIdx + ")").addClass("hover");
+				}
+			}
+        });
+        // 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+    }
+    var clickIndex = 0,tdMouseDownFlag = false;
+    function onTdMouseDown(that,event){
+    	tdMouseDownFlag = true;
+        if($j(that).hasClass("current")){
+            tdMouseDownFlag = false;
+            mouseDownInDivflag = true;
+        }else{
+        	mouseDownInDivflag = true;
+        	editModeFlag = false;
+        	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        	// if($j("#editPanel").attr("display") != undefined && $j("#editPanel").attr("display") != "none"){
+        	if($j("#editPanel").is(":visible")){
+        	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+		        cancelEidtMode();
+	        }
+            $j("td.area").removeClass("area");
+            $j("#currentDiv .wtBorder").show();
+            $j("#currentDiv .wtBorder").eq(0).css({"background-color" : "rgb(82,146,247)"
+                                                    ,height:2 , width:$j(that).outerWidth()
+                                                    ,top:$j(that).position().top,left:$j(that).position().left});
+            $j("#currentDiv .wtBorder").eq(1).css({"background-color" : "rgb(82,146,247)"
+                                                    ,height:$j(that).outerHeight(),width:2
+                                                    ,top:$j(that).position().top,left:$j(that).position().left});
+            $j("#currentDiv .wtBorder").eq(2).css({"background-color" : "rgb(82,146,247)"
+                                                    ,height:2 , width:$j(that).outerWidth()
+                                                    ,top:$j(that).position().top + $j(that).outerHeight(),left:$j(that).position().left});
+            $j("#currentDiv .wtBorder").eq(3).css({"background-color" : "rgb(82,146,247)"
+                                                    ,height:$j(that).outerHeight() , width:2
+                                                    ,top:$j(that).position().top,left:$j(that).position().left + $j(that).outerWidth()});
+            $j("#currentDiv .corner").css({"background-color" : "rgb(82,146,247)"
+                                                    ,height:5 , width:5
+                                                    ,border: "2px solid rgb(255, 255, 255)"
+                                                    ,top:$j(that).position().top + $j(that).height()  ,left:$j(that).position().left + $j(that).width() + 5});
+            cornerShow($j(that));
+            $j("td.current").removeClass("current");
+            $j(that).addClass("current");
+            //$j(".hover").removeClass("hover");
+            //$j(".hovercell").removeClass("hovercell");
+             clickIndex ++ ;
+            $j("#copyDiv .area").hide();
+            $j(that).focus();  
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
+       	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        // 绑定当前页面mouse移动
+        var mouseEnterTds = $j("tr.user-row:onscreen td.contentElement:not('.bindMouse')");
+        // 绑定mouse事件
+		bindMouseEnter(mouseEnterTds);
+		// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+    }
+    function cancelEidtMode(){
+    	$j("#editPanel").hide();
+        var onEditingElement = $j(".onEditing");
+        onEditingElement.removeClass("onEditing");
+        comboBox.refresh();
+        comboBox.close();
+        bindFocus();
+    }
+    function onCornerDragStart(event){
+        if(!editModeFlag)
+            dragFlag = true;
+        event.preventDefault();
+    }
+    var editModeFlag = false,STAFF_MESSAGE_NO_SELECT = "{!JSENCODE($Label.MSG_0000)}",
+        statusPrex = "{!JSENCODE(StaffStatusMsgKbn)}",commentPrex = "{!JSENCODE(StaffCommentMsgKbn)}",stopStatusPrex = "{!JSENCODE(StaffStopStatusMsgKbn)}";
+   
+    function changeToShowMode(flag){
+        comboBox.toggle();
+        editModeFlag = false;
+        tdMouseDownFlag = false;
+        $j("#editPanel").hide();
+        //firefox list not hide
+        comboBox.list.hide();
+        var onEditingElement = $j(".onEditing");
+        if(!flag){
+             var statusArr = new Array();
+             var commentArr = new Array();
+             var statusStr = "";
+             var commentStr = "";
+            var inputString = comboBox.input.text();
+            if(comboBox.input.val() != "") inputString = comboBox.input.val();
+            var comboBoxValue = comboBox.value();
+            if(inputString != "" && comboBoxValue.includes(inputString)) inputString = comboBoxValue;
+             var aimDt = $j(".onEditing").data("staffdate");
+             var dateFlag = aimDt < g_jsToday ;
+             
+            var selectMsgValue = inputString;
+                    if(selectMsgValue.indexOf(statusPrex) >= 0){
+                        selectMsgValue = selectMsgValue.replace(statusPrex,"");
+                        statusArr.push(selectMsgValue);
+                    }else if(selectMsgValue.indexOf(commentPrex) >= 0){
+                        selectMsgValue = selectMsgValue.replace(commentPrex,"");
+                        if(selectMsgValue != "")
+                            commentArr.push(selectMsgValue);
+                    }else if(selectMsgValue.indexOf("custom_") >= 0){
+                        selectMsgValue = selectMsgValue.replace("custom_","");
+                        if(selectMsgValue != ""){
+                        	if(currentEditMode == "status"){
+                        		statusArr.push(selectMsgValue);
+	                        }else if(currentEditMode == "comment"){
+	                        	 commentArr.push(selectMsgValue);
+	                        }
+                        }
+            }else if(selectMsgValue.indexOf(stopStatusPrex) >= 0){
+            	selectMsgValue = selectMsgValue.replace(stopStatusPrex,"");
+            	 if(selectMsgValue != "")
+                    statusArr.push(selectMsgValue);
+            }
+            else{
+            	if(currentEditMode == "status"){
+					statusArr.push(selectMsgValue);
+		       	}else  if(currentEditMode == "stopStatus"){
+		       		statusArr.push(selectMsgValue);
+		       	}else if(currentEditMode == "comment"){
+		       	 	commentArr.push(selectMsgValue); 
+		       	}
+            }
+			
+			var showValStr = statusArr.toString();
+            var beforeComment = onEditingElement.data("comment");
+            //開始ステータス
+            if( currentEditMode == "status"){
+            	if(onEditingElement.data("beforeedit") != showValStr){
+	            	//更新アイコン show
+	            	onEditingElement.find(".k-dirty").show();
+	                onEditingElement.addClass("editColl").removeClass("onEditing");
+                	var textContent = statusArr.toString();
+                	var stopStatusFlag = (typeof(onEditingElement.data("stopstatus")) != undefined &&  onEditingElement.data("stopstatus") != "");
+                	if(stopStatusFlag) textContent += '〜' + onEditingElement.data("stopstatus");
+                    onEditingElement.find(".staffContent").text(textContent);
+                    onEditingElement.data("statuslst",statusArr.toString());
+                    //メッセージを更新する
+               	 	saveMessage(); 
+                }
+            //コメント
+            }else if(currentEditMode == "comment" && !dateFlag){
+            	if(beforeComment != commentArr.toString()){
+            		//更新アイコン show
+	            	onEditingElement.find(".k-dirty").show();
+	                onEditingElement.addClass("editColl").removeClass("onEditing");
+	                onEditingElement.data("comment",commentArr.toString());
+                    onEditingElement.find(".triangle_comment").show();
+                    //メッセージを更新する
+                	saveMessage();
+            	}
+            //終了ステータス
+            }else if( currentEditMode == "stopStatus"){
+            	if(onEditingElement.data("stopstatus") != statusArr.toString()){
+            		//更新アイコン show
+	            	onEditingElement.find(".k-dirty").show();
+	                onEditingElement.addClass("editColl").removeClass("onEditing");
+	                var textContent = onEditingElement.data("statuslst");
+	               	if(statusArr.toString() != '')
+	               		textContent +=  '〜' + statusArr.toString();
+	               	onEditingElement.find(".staffContent").text(textContent );
+	               	onEditingElement.data("stopstatus",statusArr.toString());
+	               	//メッセージを更新する
+	            	saveMessage();
+            	}
+            }
+            if(currentEditMode == "comment" && !dateFlag){
+                onEditingElement.find(".triangle_comment").hide();
+                onEditingElement.find(".triangle_comment").attr("title","");
+                if($j.trim(commentArr.toString()).length > 0){
+                   onEditingElement.find(".triangle_comment").show();
+                   onEditingElement.find(".triangle_comment").attr("title",commentArr.toString());
+                }
+            }
+        }
+        bindFocus();
+        onEditingElement.removeClass("onEditing");
+        cornerShow(onEditingElement); 
+        comboBox.refresh();
+    }
+    var currentEditMode;
+    function clickToEditStatus(that,event){
+        if(!tdMouseDownFlag){
+            currentEditMode = "status";
+            var parentTdElement = $j(that);  //.parents("td.current"); two select update 2015/10/30
+            if(validateRole(parentTdElement,event)){
+                //edit init
+                unbindFocus();
+                editModeFlag = true;
+                var valueArr = new Array();
+                parentTdElement.addClass("onEditing");
+                $j(".hover").removeClass("hover");
+                $j(".hovercell").removeClass("hovercell");
+                $j("#editPanel").css({left:parentTdElement.position().left,top:parentTdElement.position().top});
+                //text get
+                var showTextStr = parentTdElement.data("statuslst").trim();
+                $j(that).data("beforeedit",showTextStr);
+                comboBox.dataSource.filter("");
+                comboBox.dataSource.filter({ field: "value", operator: 	"startswith", value: statusPrex });
+                $j("#editPanel").show();
+                comboBox.toggle();
+                $j("#currentDiv .corner").hide();
+                comboBox.value(showTextStr); 
+            }
+        }
+        event.preventDefault();
+    }
+    function clickToEditComment(that,event){
+        if(!tdMouseDownFlag){
+            currentEditMode = "comment";
+            var parentTdElement = $j(that);  //.parents("td.current"); two mode select update 
+            if(validateRole(parentTdElement,event)){
+                //edit init
+                unbindFocus();
+                editModeFlag = true;
+                parentTdElement.addClass("onEditing");
+                $j(".hover").removeClass("hover");
+                $j(".hovercell").removeClass("hovercell");
+                $j("#editPanel").css({left:parentTdElement.position().left,top:parentTdElement.position().top});
+                
+                comboBox.dataSource.filter("");
+                comboBox.dataSource.filter({ field: "value", operator: "startswith", value: commentPrex });
+                var aimDt = $j(".onEditing").data("staffdate");
+                if(aimDt >= g_jsToday ){
+               	 	var showText = '';
+                    if(parentTdElement.data("comment") != ""){
+                        showText = parentTdElement.data("comment").trim();
+                        //2015/10/30 upd select only one
+                    }
+                    $j("#editPanel").show();
+                    comboBox.toggle();
+					comboBox.value(showText);
+                    $j("#currentDiv .corner").hide();
+                }else{
+                    editModeFlag = false;
+                    parentTdElement.removeClass("onEditing");
+                    clickToEditStatus(parentTdElement,event);  //.find(".staffContent") 2015/10/30 update 
+                }
+            }
+        }
+        event.preventDefault();
+    }
+    function clickToEditStopStatus(that,event){
+        if(!tdMouseDownFlag){
+            currentEditMode = "stopStatus";
+            var parentTdElement = $j(that);  //.parents("td.current"); two mode select update 
+            if(validateRole(parentTdElement,event)){
+                //edit init
+                unbindFocus();
+                editModeFlag = true;
+                parentTdElement.addClass("onEditing");
+                $j(".hover").removeClass("hover");
+                $j(".hovercell").removeClass("hovercell");
+                $j("#editPanel").css({left:parentTdElement.position().left,top:parentTdElement.position().top});
+                
+                comboBox.dataSource.filter("");
+                comboBox.dataSource.filter({ field: "value", operator: "startswith", value: stopStatusPrex });
+	            var showText = '';
+	            if(parentTdElement.data("stopstatus") != ""){
+	                 showText = parentTdElement.data("stopstatus").trim();
+	                      //2015/10/30 upd select only one
+	            }
+	            $j("#editPanel").show();
+	            comboBox.toggle();
+				comboBox.value(showText);
+	            $j("#currentDiv .corner").hide();
+            }
+        }
+        event.preventDefault();
+    }
+    
+    function changeMessage(){
+        var onEditingElement = $j(".onEditing");
+        onEditingElement.find(".staffContent").text($j("select[id$='newStaffSelect']").val());
+        //onEditingElement.data("comment",$j("textarea[id$='newStaffComment']").val());
+        changeToShowMode(false);
+    }
+    /*
+    function clickToEditMode(that){
+        if($j(that).parents("td.contentElement").hasClass("current") && clickIndex > 0){
+            changeTdEditMode(that);
+            clickIndex = 0;
+        }
+    }
+    */
+    
+    function onTabKeyFun(that){
+        if(event.keyCode == 13){
+            if($j(that).hasClass("current")){
+                changeTdEditMode(that);
+                clickIndex = 0;
+            }
+        }
+    }
+    function dbClickTdEditMode(that){
+        if($j(that).hasClass("notRoleCol")){
+            alert("{!JSENCODE($Label.MSG_022_0003)}");
+            return;
+        }
+        if($j("#editPanel").attr("display") == "none"){
+            changeTdEditMode(that);
+            clickIndex = 0;
+        }
+    }
+    function nextEditTd(){
+        if(event.keyCode == 9){
+            var currentIndex = $j("td.current").index();
+            var currentTr= $j("td.current").parents("tr.user-row");
+            currentIndex++;
+            var currentTrIdx = $j("tr.user-row").index(currentTr);
+            if(currentIndex >= currentTr.find("td.contentElement").length ){
+                currentIndex = 0;
+                if(currentTrIdx >= $j("tr.user-row").length){
+                    currentTrIdx = 0;
+                }
+            }
+            var nextElement = $j("tr.user-row").eq(currentTrIdx).find("td").eq(currentIndex);
+                changeTdEditMode(nextElement);
+                clickIndex = 0;
+        }
+    }
+    
+    var summaryInfoDef = JSON.parse("{!JSENCODE(JsonSummaryInfo)}");
+   
+    // 予約の集計情報を取得する
+    function summaryLeadInfoXml() {
+        // 画面から表示の開始日と終了日を取得する
+        var startDate = $j("#hidStartDate").val();
+        var endDate =  $j("#hidEndDate").val();
+        // 店舗コード
+        var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+        var hidSummaryShopCd = $j("#hidSummaryShopCode").val();
+        if (hidSummaryShopCd.length > 0) branchCd = hidSummaryShopCd;
+        // 既に定義する売価はプランカラ取得、画面に設定する
+        Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.StaffScheduleCtrl.summaryTitleInfoByXml}",branchCd, startDate,endDate, "{!JSENCODE(JsonSummaryInfo)}", function(result, event){
+            if(event.type == 'exception') {
+                alert(event.message);
+            } else {
+                $j("thead").each(function(){
+                	var totalMessage = new Object(),titleArr = new Array();	
+                	$j(this).find("._summaryCell").each(function(){
+                		var key = this.getAttribute("data-id");
+                		var title = key.split("_")[0];
+                        if(totalMessage[title + "_lead"] == undefined){
+                        	totalMessage[title + "_lead"] = 0;
+                        	totalMessage[title + "_people"] = 0;
+                        	titleArr.push(title);
+                        }
+                        //2015/10/30 予約の集計　休館
+	                    if (result.result[key] != undefined) {
+	                        var message = result.result[key];
+	                        this.innerHTML = message;
+	                        var messageArray = message.replace(")","").split("(");
+	                        var perPeopleCount = messageArray[1];
+	                        var perLeadCount = messageArray[0];
+	                        if( parseInt(perLeadCount) == 0 && $j(this).data("status") == 'rest') return true;
+	                        totalMessage[title + "_lead"] += parseInt(perLeadCount);
+	                        totalMessage[title + "_people"] += parseInt(perPeopleCount);
+                            //予約数:
+                            //人数:
+	                        message = "{!$Label.MSG_035_0130} " + perLeadCount + ",{!$Label.MSG_035_0131}" + perPeopleCount;
+	                        this.title = message;
+	                        $j(this).bind("mouseenter",function(){
+	                        	// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw BEGIN
+	                        	var spcd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+	                        	//openTips(this,'leads',$j(this).data("leadids"));
+	                            openTips(this,'leads',$j(this).data("leadids"), spcd);
+				                // 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw END
+	                        });
+	                        $j(this).bind("mouseleave",function(){
+	                            //closeTip();
+	                        });
+	                        $j(this).data("leadids",result.leadIds[key]);
+	                    } else {
+	                        $j(this).unbind("mouseenter");
+	                        if($j(this).data("status") == 'rest') this.innerHTML="";
+	                        else this.innerHTML="0(0)";
+	                    }
+                	});
+	                for(var i = 0 ; i < titleArr.length;i++){
+	                	var title = titleArr[i];
+	                	var message = totalMessage[title + "_lead"] + "(" + totalMessage[title + "_people"] + ")";
+	                	// 2016/12/13 集計情報TITLE包含空格 fix BEGIN by zh 
+	                	//$j("." + title + "_totalSummaryInfo").text(message);
+	                	$j("span[class='" + title + "_totalSummaryInfo']").text(message);
+	                	// 2016/12/13 集計情報TITLE包含空格 fix END by zh 
+	                }
+                });
+            }
+        });
+        //　指定期間の集計情報を画面に反映を行う
+    }
+	// 2017/03/07 シフト->新規行動機能対応 zyz BEGIN
+	//function addNewEvent(that, st, et, usernm){userId
+	function addNewEvent(that, st, et, usernm, userId){
+		var parentTdElement = $j(that).closest("td.headerRow").get(0);
+		var chkRs = validateRole(parentTdElement);
+		if (chkRs) {
+			var url = "{!URLFOR('/'+$ObjectType.Event.KeyPrefix + '/e')}";
+			//var param = "?retURL={!URLFOR('/apex/StaffSchedule')}&evt1="+usernm+"&StartDateTime="+st+"&EndDateTime="+et;
+			userId = userId.substr(0,15);
+			// 2017/09/11 シフト画面に設定条件を自動記憶する BEGIN
+			//var param = "?retURL={!URLFOR('/apex/StaffSchedule')}&evt1="+usernm+"&evt1_lkid="+userId+"&StartDateTime="+st+"&EndDateTime="+et;
+			var param = "?evt1="+usernm+"&evt1_lkid="+userId+"&StartDateTime="+st+"&EndDateTime="+et;
+			var retUrl= '&retURL={!URLFOR('/apex/StaffSchedule')}';
+            var pspcd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+            var pdpcd = $j("select[id$=':departCd']").length > 0 ? $j("select[id$=':departCd']").val() : "";
+            var pyr = $j("select[id$=':selectYear']").val();
+            var pmo = $j("select[id$=':selectMonth']").val();
+            var psort = $j("#hidSortField").val();
+            var pskey = $j("#hidSortStaus").val();
+            retUrl+= '?'+encodeURIComponent('pspcd='+(pspcd)+'&pdpcd='+(encodeURIComponent(pdpcd))+'&pyr='+(pyr)+'&pmo='+(pmo)+'&pstkey='+(psort)+'&pstval='+pskey);
+            param += retUrl;
+            // 2017/09/11 シフト画面に設定条件を自動記憶する END
+			window.location.href=url+param;
+		}
+	}
+	// 2017/03/07 シフト->新規行動機能対応 zyz END
+    function validateRole(that){
+         var hidUserRoleFlag = $j("#hidUserRoleFlag").val() != "false" ? true : false;
+        if($j(that).hasClass("notRoleCol") && !hidUserRoleFlag){
+            event.preventDefault();
+            alert("{!JSENCODE($Label.MSG_022_0003)}");
+            return false;
+        }
+        return true;
+    }
+    function cornerShow(that){
+         var hidNoCopyFlag = $j("#hidNoCopyFlag").val();
+        if(hidNoCopyFlag && hidNoCopyFlag == "false"){
+            $j("#currentDiv .corner").hide();
+        }else  if(!$j(that).hasClass("notRoleCol") ){
+            $j("#currentDiv .corner").show();
+        }
+    }
+    function clickUpOrDownFun(that,event){
+    	//console.debug(that);
+    	var tdElement = $j(that);　//.parents("td.contentElement");　2015/10/30 upd
+    	var mousePageY = event.pageY;
+    	var tdElementTop = tdElement.offset().top;
+    	var tdElementHeight = tdElement.height();
+    	var computeContent = Math.abs(mousePageY - tdElementTop);
+    	var checkArea = Math.floor(tdElementHeight/3);
+    	var areaOne = checkArea,areaSecond = checkArea*2 + 5 ;
+    	if(computeContent <= areaOne){
+    		clickToEditStatus(that,event);
+    	}else if(areaOne < computeContent && computeContent <= areaSecond){
+    		clickToEditStopStatus(that,event);
+    	}else{
+    		clickToEditComment(that,event);
+    	}
+    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+		// 添加绑定
+    	insertTdElements(that);
+    	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+    }
+     function clickToCallEditStatus(that,event){
+    	clickToEditStatus($j(that).prev(),event);
+    }
+</script>
+
+<!-- This is the page that we want to display to the user -->
+<!-- Staff -->    <!-- スタッフ -->
+<apex:sectionHeader title="{!$Label.ps__msg_035_0107}" subtitle="{!$Label.ps__msg_035_0102}"/>
+<!-- 室料情報を格納 -->
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblock();" id="refStatusMsgBlock"/>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblock();" id="refStatusBlock"/>
+<apex:form id="dispForm">
+<!-- 在庫更新を行う -->
+
+<apex:actionFunction name="timerPollerFun" action="{!refreshNewInfo}" reRender="dispForm" />
+<script>
+    
+    var g_jsToday = kendo.toString(new Date(), JINYACONNECT.DateFormat);   // 当日の日付
+    // 2015/12/17 行動件名個別指定機能対応 BEIGN
+    var g_defEventTile = "{!JSENCODE(defEventTitle)}";
+    // 2015/12/17 行動件名個別指定機能対応 END
+    $j(document).ready(function() {
+        bindEvent();
+       
+        //--------------------------
+        // 六曜計算(和暦計算表示制御共通関数呼び出し)
+        //--------------------------
+        if({!isShowQreqki})
+            QREKI.jinya.bindInstance($j, "qrekispan", "dtval");
+            
+        // 予約情報の自動集計
+        //summaryLeadInfo();
+        summaryLeadInfoXml();
+        
+    });
+</script>
+    <!-- のスタッフ -->
+    <apex:pageBlock title="{!thisYear}/{!thisMonth}{!$Label.ps__msg_035_0108}" id="contents">
+    <apex:pageMessages rendered="false"/>
+
+    <input type="hidden" value="{!dispHeaders[0].name}" id="hidStartDate" />
+    <input type="hidden" value="{!dispHeaders[dispHeaders.size-1].name}" id="hidEndDate" />
+    <input type="hidden" value="{!$Setup.CommDefine__c.ps__StaffNoCopyFlag__c}" id="hidNoCopyFlag"/>
+    <input type="hidden" value="{!$User.StaffScheduleAllEdit__c}" id="hidUserRoleFlag"/>
+    <input type="hidden" value="{!summaryShopCode}" id="hidSummaryShopCode" />
+    <!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN -->
+    <input type="hidden" value="{!sortFieldName}" id="hidSort"/>
+	<input type="hidden" value="{!branchShopNm}" id="hidBranchShopNm"/>
+	<input type="hidden" value="{!departCd}" id="hidDepartCd"/>
+	<input type="hidden" value="{!allUserIds}" id="hidUserIds"/>
+	<!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END -->
+    <apex:pageBlockButtons location="top">
+
+        <!-- 前月 -->
+        <apex:commandButton style="width:100px;" styleClass="btn" value="{!$Label.ps__msg_035_0109}" action="{!toPrev}" reRender="dispForm" status="refStatusBlock"/>
+        <!-- 今月 -->
+        <apex:commandButton style="width:100px;" styleClass="btn" value="{!$Label.ps__msg_035_0110}" action="{!toThisMo}" reRender="dispForm" status="refStatusBlock"/>
+        <!-- 来月 -->
+        <apex:commandButton style="width:100px;" styleClass="btn" value="{!$Label.ps__msg_035_0111}" action="{!toNext}" reRender="dispForm" status="refStatusBlock"/>
+        
+        <apex:outputPanel style="{!IF(yearMonthRightPosition, 'float:right;margin-right:50px','float:left;margin-right:10px')};vertical-align:top;">
+            <apex:selectList size="1" value="{!thisYear}" style="height:24px;font-size:16px;" id="selectYear">
+                <apex:selectOptions value="{!yearList}" />
+                <apex:actionSupport event="onchange" onsubmit="syncSelectInfo(this.value, 'selectYear')" action="{!gotoYearMonth}" rerender="dispForm" status="refStatusBlock"/>
+            </apex:selectList>
+            <apex:commandButton value="<<" action="{!toPrev}" reRender="dispForm"
+                style="margin-left:-5px;margin-right:2px" status="refStatusBlock"/>
+            <apex:selectList size="1" value="{!thisMonth}" style="height:24px;font-size:16px;" id="selectMonth">
+                <!-- 1月 -->
+                <apex:selectOption itemValue="1" itemLabel="{!$Label.ps__msg_035_0112}"/>
+                <!-- 2月 -->
+                <apex:selectOption itemValue="2" itemLabel="{!$Label.ps__msg_035_0113}"/>
+                <!-- 3月 -->
+                <apex:selectOption itemValue="3" itemLabel="{!$Label.ps__msg_035_0114}"/>
+                <!-- 4月 -->
+                <apex:selectOption itemValue="4" itemLabel="{!$Label.ps__msg_035_0115}"/>
+                <!-- 5月 -->
+                <apex:selectOption itemValue="5" itemLabel="{!$Label.ps__msg_035_0116}"/>
+                <!-- 6月 -->
+                <apex:selectOption itemValue="6" itemLabel="{!$Label.ps__msg_035_0117}"/>
+                <!-- 7月 -->
+                <apex:selectOption itemValue="7" itemLabel="{!$Label.ps__msg_035_0118}"/>
+                <!-- 8月 -->
+                <apex:selectOption itemValue="8" itemLabel="{!$Label.ps__msg_035_0119}"/>
+                <!-- 9月 -->
+                <apex:selectOption itemValue="9" itemLabel="{!$Label.ps__msg_035_0120}"/>
+                <!-- 10月 -->
+                <apex:selectOption itemValue="10" itemLabel="{!$Label.ps__msg_035_0121}"/>
+                <!-- 11月 -->
+                <apex:selectOption itemValue="11" itemLabel="{!$Label.ps__msg_035_0122}"/>
+                <!-- 12月 -->
+                <apex:selectOption itemValue="12" itemLabel="{!$Label.ps__msg_035_0123}"/>
+                <apex:actionSupport event="onchange" onsubmit="syncSelectInfo(this.value, 'selectMonth')" action="{!gotoYearMonth}" rerender="dispForm" status="refStatusBlock"/>
+            </apex:selectList>
+            <apex:commandButton value=">>" action="{!toNext}"
+                reRender="dispForm" style="margin-left:-5px;" status="refStatusBlock"/>
+
+        </apex:outputPanel>
+    </apex:pageBlockButtons>
+    <!-- 支店機能 -->
+    <apex:outputPanel >
+        <apex:selectList size="1" value="{!branchShopNm}" rendered="{!branchShopLst.size > 0}" id="branchShopCd">
+	    	<!-- All -->
+	        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_035_0124}"/>
+	        <apex:selectOptions value="{!branchShopLst}" />
+	        <apex:actionSupport event="onchange" action="{!changeBranchShop}" rerender="dispForm" status="refStatusBlock"/>
+	    </apex:selectList>
+        <apex:selectList size="1" value="{!departCd}" id="departCd" rendered="{!departCodeLst.size > 0}" style="margin-left: 10px">
+            <!-- All -->
+            <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_035_0124}"/>
+            <apex:selectOptions value="{!departCodeLst}" />
+            <apex:actionSupport event="onchange" action="{!refreshNewInfo}" rerender="dispForm" status="refStatusBlock"/>
+        </apex:selectList>
+        
+        <apex:outputPanel id="colorpanel" rendered="true" style="margin-left: 20px">
+        <span style="vertical-align: middle; font-weight: bold;">&nbsp;{!$Label.MSG_1006}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle;" class="TimeStatus_Work" /></span>
+        <span style="vertical-align: middle; font-weight: bold;">&nbsp;{!$Label.MSG_1008}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle;" class="TimeStatus_Out" /></span>
+        <span style="vertical-align: middle; font-weight: bold;">&nbsp;{!$Label.MSG_1009}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle;" class="TimeStatus_Back" /></span>
+        <span style="vertical-align: middle; font-weight: bold;">&nbsp;{!$Label.MSG_1007}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle;" class="TimeStatus_End" /></span>
+        </apex:outputPanel>
+
+    </apex:outputPanel>
+    <apex:outputPanel id="ciTable" >
+    
+    <table id="dTable" class="list datatable" border="0" cellpadding="0" cellspacing="0" style="margin-top: 5px">
+        <thead class="rich-table-thead">
+        <tr class="headerRow" nowrap="nowrap">
+            <th class="headerRow leftPanel" nowrap="nowrap">
+                <apex:commandLink action="{!gotoYearMonth}" rerender="dispForm"  status="refStatusBlock">
+                    <!-- 氏名 -->
+                    <apex:outputText value="{!$Label.ps__msg_035_0125} {!IF(currSortField = SortFieldForUser, currSortStatusMark, '')}"/>
+                    <apex:param name="sortFieldName" value="{!SortFieldForUser}"/>
+                </apex:commandLink>
+                <input type="hidden" id="hidSortField" value="{!currSortField}" />
+                <input type="hidden" id="hidSortStaus" value="{!currSortStatus}" />
+            </th>
+            <th class="headerRow leftPanel" nowrap="nowrap">
+                <apex:commandLink action="{!gotoYearMonth}" rerender="dispForm"  status="refStatusBlock">
+                    <!-- 部署 -->
+                    <apex:outputText value="{!$Label.ps__msg_035_0126} {!IF(currSortField = SortFieldForDepart, currSortStatusMark, '')}"/>
+                    <apex:param name="sortFieldName" value="{!SortFieldForDepart}"/>
+                </apex:commandLink>
+            </th> 
+			<!-- 
+			<th>
+				勤務時間
+			</th>
+			 -->
+            <apex:repeat var="col" value="{!dispHeaders}">
+                <th class="headerRow" nowrap="nowrap" data-name="dateRow" data-date="{!col.name}" style="text-align:center;width:38px; background: {!headerColorMap[col.days]}; url({!URLFOR($Resource.reportFiles, 'img/blank')});" title="{!col.holidayLab}">
+                    {!col.label}
+                </th>
+            </apex:repeat>
+            <th class="headerRow leftPanel" nowrap="nowrap">
+                <!-- 氏名 -->
+                <apex:outputText value="{!$Label.ps__msg_035_0125}"/>
+            </th>
+        </tr>
+        <!-- 六曜 -->
+        <tr class="headerRow" nowrap="nowrap" style="display:{!IF(isShowQreqki,'','none')}">
+            <th class="headerRow leftPanel" nowrap="nowrap" colspan="2"><!-- 六輝 -->{!$Label.MSG_035_0128}</th>
+            <apex:repeat var="col" value="{!dispHeaders}">
+                <td class="headerRow" nowrap="nowrap" style="text-align:center;">
+                    <span class="qrekispan" dtval="{!col.name}"></span>
+                </td>
+            </apex:repeat>
+            <th class="headerRow leftPanel" nowrap="nowrap"><!-- 六輝 -->{!$Label.MSG_035_0128}</th>
+        </tr>
+        <!-- 営業 -->
+        <tr style="background:#FFFACD; url({!URLFOR($Resource.reportFiles, 'img/blank')});width:38px;display:{!if(isShowBussinisHeader, 'true', 'none')}">
+            <th class="headerRow" nowrap="nowrap" colspan="2">
+                <span style="width:80px;"><!-- 営業 -->{!$Label.MSG_035_0129}</span>
+            </th>
+            
+            <apex:repeat var="col" value="{!dispHeaders}" rendered="{!isShowBussinisHeader}">
+                <td class="headerRow" nowrap="nowrap" style="text-align:center;width:38px;max-width:38px;overflow: hidden;white-space: nowrap;">
+                    
+                    <span style="width:36px;color: {!colorInfoMap[col.days]}" title="{!restInfoMap[col.days]}">{!restInfoMap[col.days]}</span>
+               		
+                </td>
+            </apex:repeat>
+            <th class="headerRow" nowrap="nowrap">
+                <span style="width:80px;"><!-- 営業 -->{!$Label.MSG_035_0129}</span>
+            </th>
+        </tr>
+
+       	<tr style="background:#FFFACD; url({!URLFOR($Resource.reportFiles, 'img/blank')});">
+           	<th class="headerRow leftPanel" nowrap="nowrap" colspan="2"><!-- 勤務時間 --><span class="allWorkDaysCount"  style="float: right;margin-right: 10px">{!IF(allWorkDaysCount = 0, 0, allWorkDaysCount)}</span>{!$Label.MSG_035_0127}</th>
+           	<!-- 
+           	<td class="headerRow leftPanel allWorkDaysCount">{!IF(allWorkDaysCount = 0, 0, allWorkDaysCount)}</td>
+           	 -->
+           	<apex:repeat var="col" value="{!dispHeaders}">
+                <td class="headerRow dailyWorkTime" nowrap="nowrap" data-time='{!col.name}' data-isclose="{!col.isCloseOrFutureDay}" style="text-align:center;width:38px;" >
+                  <!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN 
+                   {!if(!col.isCloseOrFutureDay || dayTimeWroksSumMap[col.name] >0, IF(dayTimeWroksSumMap[col.name] = 0, '0', dayTimeWroksSumMap[col.name]), '')}
+               	  -->
+                </td>
+            </apex:repeat>
+            <th class="headerRow" nowrap="nowrap">
+                <span style="width:80px;"><!-- 勤務時間 -->{!$Label.MSG_035_0127}</span>
+            </th>
+           </tr>
+
+        <apex:repeat var="colHeader" value="{!summaryInfo.conditionVal}">
+        <tr style="background:#FFFAC1; ">
+            <th class="headerRow" nowrap="nowrap" colspan="2">
+                <span class="{!colHeader}_totalSummaryInfo"  style="float: right;margin-right: 10px"></span>
+                <span style="width:80px;">{!colHeader}</span>
+            </th>
+
+            <apex:repeat var="col" value="{!dispHeaders}">
+                <td class="headerRow" nowrap="nowrap" style="text-align:center;width:38px;" >
+                	<!-- 2015/10/30 upd 休館機能 data-status -->
+                    <span data-id="{!colHeader}_{!col.name}" taskDt="{!col.name}" data-status="{!if(col.isCloseOrFutureDay,'rest','normal')}" class="_summaryCell" >
+                    </span>
+                </td>
+            </apex:repeat>
+            
+            <th class="headerRow" nowrap="nowrap">
+                <span style="width:80px;">{!colHeader}</span>
+            </th>
+        </tr>
+        </apex:repeat>
+
+        <!-- TIER --> 
+        </thead>
+        <tbody>
+        <apex:repeat id="repeat" var="typesobj" value="{!userLst}">
+         <apex:repeat var="row" value="{!dispRecordMap[typesobj.Id]}">
+         	<!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN -->
+            <tr class="user-row {!row.roleClass}" userid="{!typesobj.Id}" usernm="{!row.userNm}" onmouseover="if (window.hiOn){hiOn(this);} "  onmouseout="if (window.hiOff){hiOff(this);} " onBlur="if (window.hiOff){hiOff(this);}" onFocus="if (window.hiOn){hiOn(this);}">
+            <!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END --> 
+                <td class="dataCell leftPanelItem" >
+                    <a href="/{!row.userId}" id="{!row.userId}_left" data-userid="{!row.userId}" onmouseout="LookupHoverDetail.getHover('{!row.userId}_left').hide();" onmouseover="LookupHoverDetail.getHover('{!row.userId}_left', '/{!row.userId}/m?retURL=%2F{!row.userId}&isAjaxRequest=1').show();">
+                        {!row.userNm}{!IF(LEN(row.userPlusInf) > 0, '('+row.userPlusInf+')','')}
+                    </a>
+                </td>
+                <td class="dataCell leftPanelItem departElement" ><div class="departElement" style="width: 80px;overflow: hidden;" title="{!typesobj.Department}">{!typesobj.Department}</div></td>
+                <!-- 
+				<td class="dataCell leftPanelItem timeSum" data-userid = "{!row.userId}">{!IF(NULLVALUE(row.timeWorkSumByUser,0)=0, '0', NULLVALUE(row.timeWorkSumByUser,0))} </td> -->
+                <apex:repeat var="col" value="{!row.timeList}">
+                <!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN -->
+                <td class="headerRow contentElement {!row.roleClass} bindMouse" nowrap="nowrap" tabIndex="1000" data-staffdate="{!col.taskDt}" data-timelong="{!col.staffTimeLong}" data-uid="{!typesobj.Id}"
+                    data-searchkey="{!col.searchKey}" data-status="" data-setkey="{!col.setKey}" data-workday="{!col.workDay}" data-timework = "{!col.timeWorkSum}"
+                    data-staffid="{!col.staff.id}" data-comment="{!col.staff.CommentLst__c}" data-stopstatus="{!col.staff.StopStatusLst__c}" data-statuslst="{!col.staff.StatusLst__c}" 
+                    style="text-align:center;width:38px;height:28px;overflow: hidden;padding: 1px 2px 1px 1px;" data-viewflag="{!row.isViewFlg}"
+                    data-tasknum = "{!col.taskNum}" data-cnss="{!col.currentNightStatusStyleStr}" data-ctss="{!col.currentStatusStyleStr}" data-isclone="{!col.isShowCloneFlag}"
+                    onmousedown="onTdMouseDown(this,event)" ondblclick="clickUpOrDownFun(this,event)">
+                <!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END -->
+                	<!-- 
+                       <div  style="position: relative;width: 0px;height: 0px;">
+                            <span class="k-dirty" style="display: none;"></span>
+                            <span class="triangle-topright"  onmouseenter="javascript:if ({!!ISBLANK(row.isViewFlg)}) {return false;} else {openTips(this,'comment')};" title="{!IF(ISBLANK(row.isViewFlg),'','参照権がありません')}" userId="{!row.userId}" taskDt="{!col.taskDt}" style="display:{!IF(col.taskNum == 0, 'none','block')}">  
+                                {!col.taskNum}
+                            </span>
+                            <span class="triangle_comment" title="{!col.staff.CommentLst__c}" style="display:{!if(col.staff.CommentLst__c != '','block','none')}">
+                                <img src="/img/alohaSkin/help_orange.png" alt="" style="width: 10px;height: 10px;"/>
+                            </span>
+                       </div> 
+                       <apex:outputPanel >
+                       		<div class="mainDiv "  style="font-size: 8pt; text-align: left;height:28px;width:38px; position: relative;overflow: hidden;" >
+	                   			<div style="position: relative;height:28px;padding-top: 0px;" class="TimeRow {!if(col.isShowPreWorkInfo,col.currentNightStatusStyleStr,col.currentStatusStyleStr)}"  >
+	                   				&nbsp;
+	                   			</div>
+	                   			<div style="position: relative;height:{!if(col.isShowPreWorkInfo,'2px','0px')};background-color: white;top: -14px;" class="secondCol" ></div>
+	                   			<div style="position: relative;height:14px;margin-top: 0px;cursor: pointer;top: -14px;z-index: 0;{!if(col.isShowCloneFlag,'background:white;','background:translation;')} " class="secondCol {!if(col.isShowPreWorkInfo,'TimeRow','')} {!if(col.isShowCloneFlag,'',col.currentStatusStyleStr)}" >
+	                   				&nbsp;
+	                   			</div>
+	                   			-->
+								<!-- 2017/03/06 シフト->新規行動機能対応 zyz BEGIN 
+								<div class="triangle-statusInfo">
+									<div class="staffContent" style="word-wrap: break-word; word-break: normal;z-index: 5;"  >
+										{!col.staff.StatusLst__c}{!if(!ISBLANK(col.staff.StopStatusLst__c) ,'〜' , '')} {!col.staff.StopStatusLst__c}
+									</div>
+									<a href="javascript:void()" onclick="addNewEvent(this,'{!JSENCODE(col.taskDt)}','{!JSENCODE(col.taskDt)}','{!JSENCODE(row.eventNm)}','{!JSENCODE(row.userId)}');">
+										<img src="/s.gif" class="addNewEventIcon"  title="{!$Label.MSG_035_0135}" style="border: none;width: 11px;height: 10px;"/>
+									</a>
+								</div>
+								-->
+								<!-- 2017/03/06 シフト->新規行動機能対応 zyz END
+	                   		</div>
+                       </apex:outputPanel> 
+						-->
+						<!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END -->
+                </td>
+              </apex:repeat>
+            
+                <td class="dataCell leftPanelItem" >
+                    <a href="/{!row.userId}" id="{!row.userId}_right" onmouseout="LookupHoverDetail.getHover('{!row.userId}_right').hide();" onmouseover="LookupHoverDetail.getHover('{!row.userId}_right', '/{!row.userId}/m?retURL=%2F{!row.userId}&isAjaxRequest=1').show();">
+                    	{!row.userNm}{!IF(LEN(row.userPlusInf) > 0, '('+row.userPlusInf+')','')}
+                    </a>
+                </td>
+            </tr>
+        </apex:repeat>
+        </apex:repeat>
+        </tbody>
+        <!-- 
+        <tfoot>
+        	<tr>
+            	<td colspan="2">
+            		勤務時間
+            	</td>
+            	<td class="allWorkDaysCount">
+            		{!allWorkDaysCount} 
+            	</td>
+            	<apex:repeat var="col" value="{!dispHeaders}">
+	                <td class="headerRow dailyWorkTime" nowrap="nowrap" data-time='{!col.name}' style="text-align:center;width:38px;" >
+	                   {!dayTimeWroksSumMap[col.name]}
+	                </td>
+	            </apex:repeat>
+	            <td></td>
+            </tr>
+        </tfoot>
+         -->
+    </table>
+    </apex:outputPanel>
+
+   </apex:pageBlock>
+ 
+ </apex:form>
+
+
+<script>
+function oneBindEvent() {
+    //setInterval(saveMessage,50000);
+    comboBox =  $j("select[id$='newStaffSelect']").kendoComboBox({
+        animation: false,
+        autoBind: false,
+        suggest: true,
+        select:function(e){
+        	e.sender.input.text(e.item.text());
+        },
+        close:function(e){
+        	//console.log("close");
+            if(mouseDownFlag){
+            	mouseDownFlag = false;
+            }else{
+            	closeFlag = true;
+            }
+        }
+    }).data("kendoComboBox");
+    //comboBox.dataSource.filter("");
+    comboBox.list.mousedown(function(e){
+       	mouseDownFlag = true;
+    });
+    comboBox.input.blur(function(e){
+    	closeFlag=false;
+    	cancelEidtMode();
+    });
+    comboBox.input.keydown(function(e){
+    	$j(e.target).data("inputvalue",e.target.value);
+        if(e.keyCode != 13 && closeFlag && e.keyCode != 27)
+            closeFlag=false;
+    });
+    
+    var dataArray = comboBox.dataSource.view(),optionsArr = new Array();
+    for(var i = 0 ; i < dataArray.length; i++){
+        var dataOpt = dataArray[i];
+        optionsArr.push(dataOpt.text);
+    }
+    selectLstStr = optionsArr.toString();
+}
+var closeFlag = false,mouseDownFlag = false;
+$j(document).ready(function() {
+    // 新規予約初期化呼び出し
+    //YAHOO.force.com.init();
+    // One Event Call()
+    oneBindEvent();
+});
+
+function monitorPushTimeInfoToCell(data) {
+
+//console.debug("input monitorPushTimeInfoToCell******");
+    var statusClass ="";
+    var sobj = data.sobject;
+    
+    var workerId =  sobj[g_ns + 'WorkerRef__c'];
+    var workerDay = sobj[g_ns + 'WorkDay__c'];
+    var wSTime  =   sobj[g_ns + 'WorkBeginTime__c'];
+    var wETime  =   sobj[g_ns + 'WorkEndTime__c'];
+    var wI1sTime =  sobj[g_ns + 'EnteringTime__c'];
+    var wI2sTime =  sobj[g_ns + 'EnteringTime2__c'];
+    var wI3sTime =  sobj[g_ns + 'EnteringTime3__c'];
+    var wO1sTime =  sobj[g_ns + 'OutingTime__c'];
+    var wO2sTime =  sobj[g_ns + 'OutingTime2__c'];
+    var wO3sTime =  sobj[g_ns + 'OutingTime3__c'];
+    var calEndDate = null;
+
+//console.debug('sobject::' + sobj);
+    if (wSTime != null && wSTime != "") {
+        statusClass = "TimeStatus_Work";
+        calEndDate = wSTime;
+    } 
+    if (wETime != null && wETime != "") {
+        statusClass = "TimeStatus_End";
+        calEndDate = wETime; 
+    } else {
+        var outIdx = 0;
+        // 入室・退室
+        if (wO3sTime != null && wO3sTime != "") {
+            outIdx = 3;
+            calEndDate = wO3sTime; 
+        } else if (wO2sTime != null && wO2sTime != "") {
+            outIdx = 2;
+            calEndDate = wO2sTime; 
+        } else if (wO1sTime != null && wO1sTime != "") {
+            outIdx = 1;
+            calEndDate = wO1sTime; 
+        }
+//console.debug('outIdx::' + outIdx);
+        if (outIdx > 0) {
+            statusClass = "TimeStatus_Out";
+            if (wI3sTime != null && wI3sTime != "" && outIdx == 3) {
+                statusClass = "TimeStatus_Back";
+                calEndDate = wI3sTime; 
+            } else if (wI2sTime != null && wI2sTime != "" && outIdx == 2) {
+                statusClass = "TimeStatus_Back";
+                calEndDate = wI2sTime; 
+            } else if (wI1sTime != null && wI1sTime != "" && outIdx == 1) {
+                statusClass = "TimeStatus_Back";
+                calEndDate = wI1sTime; 
+            }
+        }
+    }
+//console.debug('calEndDate::' + calEndDate);
+    // Statusあり、計算用日付
+    if (calEndDate != null && statusClass != "") {
+//console.debug('calEndDate::' + calEndDate);
+//console.debug('statusClass::' + statusClass);
+
+        var workDt = kendo.parseDate(workerDay);
+        var eventDt  = new Date(calEndDate).clearTime();
+        
+        // TODO: 跨がりのステータスが存在する場合、複数日間のCELLを一括設定可能性があり
+        // 例：2015/08/11 出勤、 2015/08/13 退勤、その場合、8/11,8/12, 8/13のCellの色は全部自動退勤のステータスを更新が必要です
+        // 指定CELLのCSSを指定する
+        monitorPushStatusToCell(workerId, workDt, eventDt, statusClass);    
+    }
+    
+}
+function monitorPushRestInfoToCell(data) {
+    var statusClass ="";
+    // 休憩オブジェクトから変更の場合
+    var sobj = data.sobject;
+    var enterTime = sobj[g_ns + 'EnteringTime__c'];
+    var outingTime = sobj[g_ns + 'OutingTime__c'];
+    var workerId = sobj[g_ns + 'WorkerRefCal__c'];
+    var workerDay = sobj[g_ns + 'WorkDayCal__c'];
+    var calEndDate = null;
+    if (outingTime != null && outingTime != "") {
+        statusClass = "TimeStatus_Out";
+        calEndDate = outingTime;
+    }
+    if (enterTime != null && enterTime != "") {
+        statusClass = "TimeStatus_Back";
+        outingTime = enterTime;
+    }
+    if (calEndDate != null && statusClass != "") {
+//console.debug('calEndDate::' + calEndDate);
+//console.debug('statusClass::' + statusClass);
+
+        var workDt = kendo.parseDate(workerDay);
+        var eventDt  = new Date(calEndDate);
+        
+        // TODO: 跨がりのステータスが存在する場合、複数日間のCELLを一括設定可能性があり
+        // 例：2015/08/11 出勤、 2015/08/13 退勤、その場合、8/11,8/12, 8/13のCellの色は全部自動退勤のステータスを更新が必要です
+        // 指定CELLのCSSを指定する
+        // 指定CELLのCSSを指定する
+        monitorPushStatusToCell(workerId, workDt,eventDt , statusClass);
+    }
+}
+function monitorPushStatusToCell(workid, startDt, toDate, statusClass) {
+//console.debug("******* monitorPushStatusToCell *******");
+    var orgWorkDay = startDt.clone();
+    isNightStatus = (startDt.compareTo(toDate) == 0 ? false : true);
+    var todayDt = new Date();
+    var orgKey = kendo.toString(orgWorkDay, JINYACONNECT.DateFormat);
+    var todayDateStr = kendo.toString(todayDt.clone(),JINYACONNECT.DateFormat);
+    while (startDt.compareTo(toDate) <= 0) {
+    	var startDtStr = kendo.toString(startDt, JINYACONNECT.DateFormat);
+        var key = ""+commUtils.sfId15to18Byte(workid) + "_" + startDtStr;
+        var $that = $j("td[data-searchkey='" + key + "']");
+        if($that.length > 0){
+        	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+        	if($that.find(".mainDiv").length == 0) createMainDiv($that.get(0));
+        	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+	        var elementflag = $that.find(".TimeRow").length == 1 ? true : false;
+	        var downElement;
+	        if(isNightStatus){
+	            if(elementflag){
+	                if(kendo.toString(orgWorkDay, JINYACONNECT.DateFormat) != $that.data("staffdate")){
+	                	 var hideCols = $that.find(".secondCol");
+                             hideCols.eq(1).addClass("TimeRow");
+                             hideCols.eq(0).css({height:2});
+	                     replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'up');
+	                }else{
+	                	 replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'all');
+	                }
+	            }else{
+					if(orgKey != startDtStr){
+						 var hideCols = $that.find(".secondCol");
+                             hideCols.eq(1).addClass("TimeRow");
+                             hideCols.eq(0).css({height:2});
+                             replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'up');
+					}     
+					else       	
+	                 replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'down');
+	            }
+	        }else{
+	            var downElement;
+	            if(orgWorkDay.compareTo(startDt) == 0){
+	                if(elementflag){
+	                    if($that.data("setkey") == orgKey || $that.data("setkey") == ""){
+	                        replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'all');
+	                    }else{
+	                        var hideCols = $that.find(".secondCol");
+	                            hideCols.eq(1).addClass("TimeRow");
+	                            hideCols.eq(0).css({height:2});
+	                        replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'down');
+	                    }
+	                }else{
+	                    replaceWorkStatusClass($that,statusClass,"TimeStatus_",false, 'down');
+	                }
+	            }else{
+	            	//console.log('************orgWorkDay != startDt ?*********************')
+	                downElement = $that.find(".TimeRow").eq(0);
+	                if(elementflag){
+	                    downElement = $that.find(".TimeRow").eq(0);
+	                    var hideCols = $that.find(".secondCol");
+	                    hideCols.eq(1).addClass("TimeRow");
+	                }else{
+	                    downElement = $that.find(".TimeRow").eq(0);
+	                }
+	
+	            }
+	        }
+	    }
+	    if(startDt.compareTo(toDate) == 0){
+	    	var cycflag = true;
+		       	var changeDate = toDate.clone();
+		        var changeDateStr = kendo.toString(changeDate,JINYACONNECT.DateFormat);
+		        // 退勤
+	           	if(statusClass == "TimeStatus_End"){
+	                 if(toDate.compareTo(todayDt) <= 0){
+	                    while (changeDateStr <= todayDateStr && cycflag){
+	                    	changeDate.addDays(1);
+		                    changeDateStr = kendo.toString(changeDate,JINYACONNECT.DateFormat);
+		                	var currentkey = ""+commUtils.sfId15to18Byte(workid) + "_" + changeDateStr;
+		        			var nextElement = $j("td[data-searchkey='" + currentkey + "']");
+		                	if(nextElement.length > 0){
+		                        if(nextElement.data("setkey") == orgKey){
+		                            var timeRows = nextElement.find(".TimeRow");
+		                            var timeRowflag = timeRows.length == 1 ? true : false;
+		                            if(timeRowflag){
+		                                var currentClass = nextElement.attr("class");
+		                                nextElement.find(".TimeRow").removeClass(removeClassArr);
+		                                nextElement.data("setkey","");
+		                                var secondCol = nextElement.find(".secondCol[class*='TimeStatus_']");
+							        	secondCol.removeClass(removeClassArr);
+		                            }else{
+		                           		nextElement.find(".secondCol").eq(0).css({height:0});
+		                                timeRows.eq(0).attr("class",timeRows.eq(1).attr("class").replace("secondCol",""));
+		                            }
+		                        }else if(nextElement.data("setkey") == nextElement.data("staffdate")){
+		                        	cycflag = true;
+		                        	var timeRows = nextElement.find(".TimeRow");
+		                            var timeRowflag = timeRows.length == 1 ? true : false;
+		                            if(!timeRowflag){
+		                            	nextElement.find(".secondCol").eq(0).css({height:0});
+		                                timeRows.eq(0).attr("class",timeRows.eq(1).attr("class").replace("secondCol",""));
+		                            }
+		                        }
+	                        }
+	                    }
+	                 }
+	            }else{
+	                while (changeDateStr <= todayDateStr && cycflag){
+	                	changeDate.addDays(1);
+	                    changeDateStr = kendo.toString(changeDate,JINYACONNECT.DateFormat);
+	                	//if(nextElement.length == 0){
+	                	var currentkey = ""+commUtils.sfId15to18Byte(workid) + "_" + changeDateStr;
+	        			var nextElement = $j("td[data-searchkey='" + currentkey + "']");
+	                	if(nextElement.length > 0){
+	                		//nextElement = nextElement.next();
+		                    var staffDate = nextElement.data("staffdate");
+		                    if(staffDate > todayDateStr || (nextElement.data("setkey") != "" && orgKey < nextElement.data("setkey"))){
+		                        if(staffDate != nextElement.data("workday")){
+		                            cycflag = false;
+		                            continue;
+		                        }
+		                    }
+		                    var timeRows = nextElement.find(".TimeRow");
+		                    var timeRowflag = timeRows.length == 1 ? false : true;
+		                    if(nextElement.find("[class*='TimeStatus_']").length > 0){
+		                        if(timeRowflag){
+		                            if(staffDate == orgKey){
+		                                cycflag = false;
+		                                replaceWorkStatusClass(nextElement,statusClass,"TimeStatus_",false, 'down');
+		                            }else{
+		                            	cycflag = false;
+		                            	nextElement.find(".secondCol").eq(0).css({height:2});
+		                            	nextElement.find(".secondCol").eq(1).addClass("TimeRow");
+		                            	replaceWorkStatusClass(nextElement,statusClass,"TimeStatus_",false, 'up');
+		                            }
+		                        }else{
+		                        	var hideCols = nextElement.find(".secondCol");
+		                        	var secondColClass = hideCols.eq(1).attr("class");
+		                        	if(secondColClass.includes("TimeStatus_")){
+			                            //hideCols.eq(1).attr("class",timeRows.eq(0).attr("class"));
+			                            hideCols.eq(1).addClass("TimeRow");
+			                            hideCols.eq(0).css({height:2});
+						    cycflag = false;
+		                        	}
+		                        	replaceWorkStatusClass(nextElement,statusClass,"TimeStatus_",false, 'up');
+		                        	//replaceWorkStatusClass(nextElement,statusClass,"TimeStatus_",true, 'up');
+		                        }
+		                    }else{
+		                        replaceWorkStatusClass(nextElement,statusClass,"TimeStatus_",false, 'up');
+		                    }
+		                    nextElement.data("setkey",orgKey);
+	                	}
+	                }
+	            }
+	    }
+        startDt.addDays(1);
+    }
+}
+</script>
+
+<div id="currentDiv">
+    <div class="wtBorder current"></div>
+    <div class="wtBorder current"></div>
+    <div class="wtBorder current"></div>
+    <div class="wtBorder current"></div>
+    <div class="wtBorder current corner" onmousedown = "onCornerDragStart(event)"></div>
+</div>
+<div id="copyDiv">
+    <div class="wtBorder area"></div>
+    <div class="wtBorder area"></div>
+    <div class="wtBorder area"></div>
+    <div class="wtBorder area"></div>
+</div>
+
+<div id="editPanel">
+     <apex:form id="createForm">
+          <div class="bd" style="overflow: auto;background: white;" >
+            <apex:selectList size="1" id="newStaffSelect" value="{!newStaffSchedule.StatusLst__c}" style="font-size: 8pt;width:160px;" styleClass="selectElement" >
+                <apex:selectOptions value="{!staffStatusLst}" />
+            </apex:selectList>
+          </div>
+    </apex:form>
+</div>
+<!-- 行動の詳細情報 -->
+<c:SSLookupHoverDetail />
+<!-- 勤怠管理監視 -->
+<c:StreamApiNotifyComp pushTopicName1="TimeManagement" callbackFun1="monitorPushTimeInfoToCell"  pushTopicName2="RestTimeManagement" callbackFun2="monitorPushRestInfoToCell"/>
+<!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN -->
+<script type="text" id="contentElement">
+<td class="headerRow contentElement _roleClass_ _className_" nowrap="nowrap" style="width:38px;height:28px;" tabIndex="1000"
+    data-staffdate="_taskDt_" data-timelong="_timelong_" data-uid="_userId_"
+	data-searchkey="_searchKey_" data-setkey="_setKey_" data-workday="_workDay_"
+	data-staffid="_staffId_" data-comment="_comment_" data-stopstatus="_stopStatus_" data-statuslst="_staffStatus_" 
+    data-taskNum = "_taskNum_"  data-cnss="_ctss_" data-ctss="_cnss_" data-isclone="_iscloneflag_"
+	data-viewflag = "_viewflag_"
+    onmousedown="onTdMouseDown(this,event)" ondblclick="clickUpOrDownFun(this,event)">
+</td>
+</script>
+<script type="text" id="mainDivTemplate">
+<div class="mainDiv" style="font-size: 8pt; text-align: left;height:28px; position: relative;overflow: hidden;" >
+	<div style="position: relative;height:28px;padding-top: 0px;" class="TimeRow _firstCss_"  >
+		&nbsp;
+	</div>
+	<div style="position: relative;height:_midleHt_;background-color: white;top: -14px;" class="secondCol" ></div>
+	<div style="position: relative;height:14px;margin-top: 0px;cursor: pointer;top: -14px;z-index: 0;background:_background_ " class="secondCol _timeRow_ _colStr_" >
+		&nbsp;
+	</div>
+</div>			
+</script>
+<script>
+// 添加新task
+function addNewCloneEvent(el) {
+	var curTd = $j(el).closest("td.contentElement");
+	var curRow = $j(el).closest("tr.user-row");
+	var userId = curRow.attr("userid");
+	var usernm = curRow.attr("usernm");
+	var dateIdx = $j("td.contentElement",curRow).index(curTd);
+	var headRow = $j("#dTable>thead:first>tr>th.headerRow[data-date]").eq(dateIdx);
+	var curDt = headRow.data("date");
+	addNewEvent(el,curDt,curDt,usernm,userId);
+}
+var allUserArr = [];
+var rowDatas = [];
+var maxTop = 0,minScreenTop,maxScreenTop;
+// 画面内表示高計算
+function refreshMaxTop(){
+	maxTop = getScrollHeight() - document.documentElement.clientHeight;
+	minScreenTop = 0;
+	maxScreenTop = document.documentElement.clientHeight + 50;
+}
+// 2018/05/25 シフト画面无故卡顿问题对应　by　zy BEGIN
+var screenTimeoutId,screenLockId;
+// 2018/05/25 シフト画面无故卡顿问题对应　by　zy END
+function bindScroll(){
+	getAllUserInfo();
+    // 画面内表示高計算
+	refreshMaxTop();
+    // 2019/11/26 シフトCPU limit修正 by zy BEGIN
+	// refreshScreenIcons();
+    // 2019/11/26 シフトCPU limit修正 by zy END
+	$j(window).scroll(function(){
+		var topHead = $j("#dTable>.tableFloatingHeaderOriginal").get(0);
+		if (topHead != undefined) {
+			var topHeadRect = topHead.getBoundingClientRect();
+			minScreenTop = topHeadRect.top + topHeadRect.height;
+		} else minScreenTop = 0;
+		if (maxTop != undefined) {
+			var lastY = Math.abs(maxTop - this.scrollY);
+			if (lastY <= 80) {
+				getNextArrUser();
+				maxTop = undefined;
+			}
+		}
+		// 滚动是关闭自动刷新
+		if (screenLockId) clearTimeout(screenLockId);
+		// 如果画面没锁定刷新则将刷新关闭
+		if (savingLockFlag) {
+			// 如果刷新为滚动时关闭
+			savingLockFlag = false;
+			// 则停止关闭5毫秒后开启
+			screenLockId = setTimeout(function(){
+				savingLockFlag = true;
+			},5);
+		}
+		// 2018/05/25 シフト画面无故卡顿问题对应　by　zy BEGIN
+		if (screenTimeoutId) clearTimeout(screenTimeoutId);
+		screenTimeoutId = setTimeout(function(){
+			refreshScreenIcons();
+		},5);
+		// 2018/05/25 シフト画面无故卡顿问题对应　by　zy END
+	});
+}
+// 刷新当前页面icon
+function refreshScreenIcons(){
+	//console.log("refreshScreenIcons begin");
+	var screenRow = $j("tr.user-row");
+	var onScreenRow = screenRow.filter(":onscreen");
+	var notScreenRow = screenRow.not(":onscreen");
+	// 刷新text内容
+	refreshTextDiv(onScreenRow,notScreenRow);
+	// 刷新主背景
+	refreshMainDiv(onScreenRow,notScreenRow);
+	// 刷新新规event按钮
+	refreshNewEventIcon(onScreenRow,notScreenRow);
+	// 刷新task提示
+	refrehsTaskNumIcon(onScreenRow,notScreenRow);
+	// 刷新comment提示
+	refreshCommentIcon(onScreenRow,notScreenRow);
+}
+// 刷新新规event按钮
+function refreshNewEventIcon(onScreen,noScreen){
+	var needProsEle = onScreen.find(" td.contentElement").filter(":not(:has('.addNewEventIcon'))");
+	needProsEle.append(newEventIcon);
+	noScreen.find(".addNewEventIcon").remove();
+	//console.log("refreshNewEventIcon:" + needProsEle.length + "	over");
+}
+// 刷新task提示
+function refrehsTaskNumIcon(onScreen,noScreen){
+	var needTaskCol = $j("td.contentElement[data-tasknum!=0]",onScreen).filter(":not(:has('.triangle-topright'))");
+	needTaskCol.each(function(){
+		// タスク数表示作成
+		createTaskNum(this);
+	});
+	if (noScreen.length > 0) noScreen.find(".triangle-topright").remove();
+	//console.log("refrehsTaskNumIcon:" + needTaskCol.length + "	over");
+}
+// 刷新comment提示
+function refreshCommentIcon(onScreen,noScreen){
+     var needCommentCol = $j("td.contentElement[data-comment!='']",onScreen).filter(":not(:has('.triangle_comment'))");
+     needCommentCol.each(function(){
+     	// コメント作成
+     	createComment(this);
+     });
+     if (noScreen.length > 0) noScreen.find(".triangle_comment").remove();
+     //console.log("refreshCommentIcon:" + needCommentCol.length + "	over");
+}
+// 刷新text内容
+function refreshTextDiv(onScreen,noScreen){
+	var needCommentCol = $j("td.contentElement[data-statuslst!=''],td.contentElement[data-stopstatus!='']",onScreen).filter(":not(:has('.staffContent'))");
+	needCommentCol.each(function(){
+		// シフト作成
+		createTextContent(this);
+	});
+	if (noScreen.length > 0) noScreen.find(".staffContent").remove();
+	//console.log("refreshTextDiv:" + needCommentCol.length + "	over");
+}
+// 刷新主背景
+function refreshMainDiv(onScreen,noScreen){
+	var needCommentCol = $j("td.contentElement[data-cnss!=''],td.contentElement[data-ctss!='']",onScreen).filter(":not(:has('.mainDiv'))");
+	needCommentCol.each(function(){
+		// 主背景作成
+		createMainDiv(this);
+	});
+	if (noScreen.length > 0) noScreen.find(".mainDiv").remove();
+	//console.log("refreshMainDiv:" + needCommentCol.length + "	over");
+}
+// 页面load长度
+var DATA_LOAD_LEN = 50;
+// 背景模板
+var mainTemp = $j("#mainDivTemplate").text();
+// 内容模板
+var statusTemp = '<div class="staffContent">_status_</div>';
+// 提示模板
+var commentTemp = '<span class="triangle_comment" title="_comment_"> </span>';
+// 新规模板
+var newEventIcon = '<a href="javascript:void()" class="addNewEventIcon"  title="{!$Label.MSG_035_0135}" onclick="addNewCloneEvent(this);"></a>';
+// 任务模板
+var taskIcon = '<span class="triangle-topright" style="_show_"  onmouseenter="_clickFun_" title="_title_" userId="_userId_" taskDt="_taskDt_"> _taskNum_ </span>';
+// 提示信息
+var dirtyIcon = '<span class="k-dirty" style="display: none;"></span>';
+// 向td插入元素
+function insertTdElements(el){
+	var curTd = $j(el);
+	// シフト作成
+	if(curTd.find(".staffContent").length == 0) createTextContent(el);
+	// コメント作成
+	if(curTd.find(".triangle_comment").length == 0) {
+		createComment(el);
+		$j(".triangle_comment",el).hide();
+	}
+	// 主背景作成
+	if(curTd.find(".mainDiv").length == 0) createMainDiv(el);
+	// タスク数表示作成
+	if(curTd.find(".triangle-topright").length == 0) createTaskNum(el);
+	// エラーメッセージ作成
+	if (curTd.find(".k-dirty").length == 0 ) createDirtyIcon(el);
+}
+// コメント作成
+function createComment(el){
+	var element = $j(el);
+   	var comment = element.data("comment");
+   	var commentStr = commentTemp.replace('_comment_',comment);
+   	el.insertAdjacentHTML("beforeEnd", commentStr);
+}
+// シフト作成
+function createTextContent(el){
+	var element = $j(el);
+	var content = getStaffValue(element.data("statuslst"),element.data("stopstatus"));
+	var statusStr = statusTemp.replace('_status_',content);
+	el.insertAdjacentHTML("beforeEnd", statusStr);
+}
+// タスク数表示作成
+function createTaskNum(el){
+	var clickFun = '',title = '';
+	var obj = $j(el);
+	var userId = obj.data("uid");
+	var taskDt = obj.data("staffdate");
+	var taskNum = obj.data("tasknum");
+	var isViewFlag = obj.data("viewflag");
+	if (isViewFlag == "") clickFun = "openTips(this,'comment')";
+	else title = '参照権がありません';
+	var showStr = 'display:none;';
+	if (taskNum > 0) showStr = '';
+	var task = taskIcon.replace("_clickFun_",saveVal(clickFun))
+					   .replace("_title_",saveVal(title))
+					   .replace("_userId_",saveVal(userId))
+					   .replace("_taskDt_",saveVal(taskDt))
+					   .replace("_taskNum_",saveVal(taskNum))
+					   .replace('_show_',showStr);
+	el.insertAdjacentHTML("beforeEnd", task);
+}
+// 主背景作成
+function createMainDiv(el){
+	var element = $j(el);
+	var cnss = element.data("cnss");
+	var ctss = element.data("ctss");
+	var isCloneFlag = element.data("isclone");
+	// 中间色块显示
+    var hadWorkInfoFlag = cnss != undefined && cnss != '';
+    var firstClass = hadWorkInfoFlag ? cnss : ctss;
+    var secondPadding = hadWorkInfoFlag ? '2px' : '0px';
+    var thirdStyle = isCloneFlag ? 'white' : 'translation';
+    var nextTimeRow = hadWorkInfoFlag ? "TimeRow" : '';
+    var lastClass = !isCloneFlag ? firstClass : '';
+    var mainStr = mainTemp.replace("_firstCss_",firstClass).replace("_midleHt_",secondPadding)
+    			.replace('_background_',thirdStyle).replace('_colStr_',lastClass)
+    			.replace('_timeRow_',nextTimeRow);
+	el.insertAdjacentHTML("beforeEnd", mainStr);
+}
+// エラーメッセージ作成
+function createDirtyIcon(el){
+	var task = dirtyIcon;
+	el.insertAdjacentHTML("beforeEnd", task);
+}
+
+//取得全部用户信息
+function getAllUserInfo(){
+	var userIds = $j("#hidUserIds").val();
+	allUserArr = [];
+	if (userIds != "") {
+		var userArr = userIds.split(',');
+		for (var i = 0 ; i < userArr.length ; i++) {
+			var userId = userArr[i];
+			if (userId != "") allUserArr.push({'userId':userId});
+		}
+		// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+		// 获取所有人的消息
+       	refreshAllUserWkTime();
+       	// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+	}
+}
+//取得下一批内容
+function getNextArrUser(){
+	var lastIdx = $j("tr.user-row:last").index() + 1;
+	var userArr = allUserArr.slice(lastIdx, lastIdx + DATA_LOAD_LEN);
+	if (userArr.length > 0) {
+		blockUi();
+		var arr = [];
+		for (var i =  0 ; i < userArr.length; i++) {
+			arr.push(userArr[i].userId);
+		}
+		remoteGetUserInfo(arr,"renderMsg();unblock();");
+	}
+}
+// 加载后续内容
+function renderMsg(){
+	var curTable = $j("<table/>");
+	if (rowDatas.length > 0) {
+		for (var i = 0 ; i < rowDatas.length ;i++) {
+			var data = rowDatas[i];
+			var createRow = createStaffRow(data);
+			curTable.append(createRow);
+		}
+	}
+	$j("#dTable tbody").append(curTable.find("tr"));
+	// 刷新超出高度范围
+	refreshMaxTop();
+	// 刷新当前屏幕内容
+	refreshScreenIcons();
+	rowDatas = [];
+}
+// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy BEGIN
+// 2019/11/26 シフトCPU limit修正 by zy BEGIN
+var MAX_USE_DATA_LEN = 400;
+// 2019/11/26 シフトCPU limit修正 by zy END
+// 获取所有人的消息
+function refreshAllUserWkTime(){
+	setTimeout(function(){
+		var userIds = new Array();
+        // 2019/11/26 シフトCPU limit修正 by zy BEGIN
+        var maxLen = 0, allArr = [];
+        // 2019/11/26 シフトCPU limit修正 by zy END
+	    for (var i = 0 ; i < allUserArr.length;i++) {
+	    	var userId = allUserArr[i].userId;
+            // 2019/11/26 シフトCPU limit修正 by zy BEGIN
+            if (i > MAX_USE_DATA_LEN) {
+                if (maxLen > 0) {
+                    allArr[allArr.length - 1].push(userId);
+                } else {
+                    allArr.push([userId]);
+                    maxLen = MAX_USE_DATA_LEN;
+                }
+                maxLen--;
+                continue;
+            }
+            // 2019/11/26 シフトCPU limit修正 by zy END
+	    	userIds.push(userId);
+	    }
+        // 2019/11/26 シフトCPU limit修正 by zy BEGIN
+	    refreshPageInfos(userIds,false,false,refreshOther.bind({user:allArr}));
+        // 2019/11/26 シフトCPU limit修正 by zy END
+    });
+}
+// 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END
+// staff作成
+function createStaffRow(data){
+	var eachCol = $j("#contentElement").html();
+	var row = '<tr class="user-row _roleClass_" userid="_userId_" usernm="_userNm_" onmouseover="if (window.hiOn){hiOn(this);} "  onmouseout="if (window.hiOff){hiOff(this);} " onBlur="if (window.hiOff){hiOff(this);}" onFocus="if (window.hiOn){hiOn(this);}"/>';
+	var leftTd = '<td class="dataCell leftPanelItem" > <a href="/_userId_" id="_userId__left" data-userid="_userId_" onmouseout="LookupHoverDetail.getHover(\'_userId__left\').hide();" onmouseover="LookupHoverDetail.getHover(\'_userId__left\', \'/_userId_/m?retURL=%2F_userId_&isAjaxRequest=1\').show();">_userNm__plusInf_ </a>  </td>';
+	var rightTd = '<td class="dataCell leftPanelItem" > <a href="/_userId_" id="_userId__right" data-userid="_userId_" onmouseout="LookupHoverDetail.getHover(\'_userId__right\').hide();" onmouseover="LookupHoverDetail.getHover(\'_userId__right\', \'/_userId_/m?retURL=%2F_userId_&isAjaxRequest=1\').show();">_userNm__plusInf_ </a>  </td>';
+	var depTd = '<td class="dataCell leftPanelItem departElement" ><div class="departElement" style="width: 80px;overflow: hidden;" title="_depart_">_depart_</div></td>';
+ 	row = row.replace('_roleClass_',data.roleClass).replaceAll('_userId_',data.userId).replaceAll('_userNm_',data.userNm);
+ 	var curRow = $j(row);
+ 	var leftTdStr = leftTd.replaceAll('_userId_',data.userId).replaceAll('_userNm_',data.userNm).replaceAll('_plusInf_',data.userPlusInf);
+ 	curRow.append($j(leftTdStr));
+ 	var depTdStr = depTd.replaceAll('_depart_',data.depart);
+ 	curRow.append($j(depTdStr));
+	for (var i = 0 ; i < data.dayLst.length ; i++) {
+		var obj = data.dayLst[i];
+		var col = eachCol.replaceAll('_taskDt_',saveVal(obj.taskDt)).replaceAll('_roleClass_',saveVal(data.roleClass)).replaceAll('_className_',saveVal(obj.className))
+						.replaceAll('_timelong_',saveVal(obj.timelong)).replaceAll('_userId_',saveVal(data.userId)).replaceAll('_searchKey_',saveVal(obj.searchKey))
+						.replaceAll('_setKey_',saveVal(obj.setKey)).replaceAll('_workDay_',saveVal(obj.workDay)).replaceAll('_taskNum_',saveVal(obj.taskNum,0))
+						.replaceAll('_ctss_',saveVal(obj.currentStatusStyleStr)).replaceAll('_cnss_',saveVal(obj.currentNightStatusStyleStr))
+						.replaceAll('_iscloneflag_',obj.isShowCloneFlag).replaceAll('_viewflag_',data.isViewFlg);
+		var staff = obj.staff;
+		if (staff != undefined) {
+			var content = getStaffValue(staff[g_ns + "StatusLst__c"],staff[g_ns + "StopStatusLst__c"]);
+			col = col.replaceAll('_staffId_',saveVal(staff[g_ns + "Id"]))
+					.replaceAll('_comment_',saveVal(staff[g_ns + "CommentLst__c"]))
+					.replaceAll('_stopStatus_',saveVal(staff[g_ns + "StopStatusLst__c"]))
+					.replaceAll('_staffStatus_',saveVal(staff[g_ns + "StatusLst__c"]))
+					.replaceAll('_staffComment_',saveVal(content));
+		} else {
+			col = col.replaceAll('_staffId_','').replaceAll('_comment_','').replaceAll('_stopStatus_','')
+					 .replaceAll('_staffStatus_','').replaceAll('_staffComment_','')
+					 .replaceAll('_ctss_','').replaceAll('_cnss_','').replaceAll('_iscloneflag_','');
+		}
+		curRow.append($j(col));
+	}
+	var rightTdStr = rightTd.replaceAll('_userId_',data.userId).replaceAll('_userNm_',data.userNm).replaceAll('_plusInf_',data.userPlusInf);
+	curRow.append($j(rightTdStr));
+	return curRow;
+}
+// 根据status、stopstatus作成显示内容
+function getStaffValue(status,stopStatus){
+	var content = saveVal(status);
+	var _status = saveVal(stopStatus);
+	if (_status != "") content += '〜' + _status;
+	return content;
+}
+// 安全值作成
+function saveVal(val,def){
+	if (val == undefined) 
+		if (def != undefined) return def;
+		else return '';
+	return val;
+}
+// 获取下一个页面该有的数据
+function remoteGetUserInfo(arr,callBack){
+	var userIds = arr.join(',');
+	var departCd = $j("#hidDepartCd").val();
+	var sortField = $j("#hidSort").val();
+	var branchNum = $j("#hidBranchShopNm").val();
+	var startDtStr = $j("#hidStartDate").val();
+	var endDtStr = $j("#hidEndDate").val();
+	// 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.StaffScheduleCtrl.getExitAllUser}", userIds , sortField , branchNum ,departCd ,startDtStr,endDtStr,function(result, event){
+        if(event.type == 'exception') {
+            console.log("-------error-------");
+            unblock();
+        } else {
+        	rowDatas = result;
+        	if (callBack != undefined) setTimeout(function() {eval(callBack)});
+        }
+    });
+}
+// 窗口内的行
+jQuery.expr.filters.onscreen = function(el) {
+  var rect = el.getBoundingClientRect();
+  return (rect.top + rect.height) > minScreenTop && (rect.top + rect.height) < maxScreenTop;
+};
+/*
+ 取文档内容实际高度 
+*/
+function getScrollHeight(){
+    return Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);
+}
+// 绑定mouse事件
+function bindMouseEnter(bindTds){
+   var hidNoCopyFlag = $j("#hidNoCopyFlag").val();
+   bindTds.mouseenter(function(e){
+       if(!dragFlag && !mouseDownInDivflag){
+           if(hidNoCopyFlag && hidNoCopyFlag == "false"){
+               //editModeFlag = true;
+           }
+           e.preventDefault();
+           return true;
+       }
+       var colIndex = $j(this).index();
+       var rowIndex = $j(this).parent("tr.user-row").index();
+       var currentColIndex = $j("td.current").parents("tr").find("td").index($j("td.current"));
+       var currentRowIndex = $j("td.current").parent("tr.user-row").index();
+       var startColIndex = Math.min(colIndex,currentColIndex);
+       var startRowIndex = Math.min(rowIndex,currentRowIndex);
+       var endColIndex = Math.max(colIndex,currentColIndex);
+       var endRowIndex = Math.max(rowIndex,currentRowIndex);
+       var cornerElement;
+       var dragMode = 0;
+       if(colIndex > currentColIndex){
+           if(rowIndex < currentRowIndex){
+               cornerElement = $j("tr.user-row").eq(currentRowIndex).find("td").eq(colIndex);
+               dragMode = 1;
+           }else{
+               cornerElement = $j(this);
+           }
+       }else{
+           cornerElement = $j("td.current");
+           dragMode = 2;
+           if(rowIndex > currentRowIndex){
+               cornerElement = $j("tr.user-row").eq(rowIndex).find("td").eq(currentColIndex);
+               dragMode = 3;
+           }
+       }
+       
+       if(dragFlag && $j("td.area").length >= 0){
+       	$j(".fillX,.fillY").removeClass("fillX").removeClass("fillY");
+           if($j(this).hasClass("area") || $j(this).hasClass("current")){
+               $j("#copyDiv .wtBorder").hide();
+               e.preventDefault();
+               return true;
+           }
+           var firstElement = $j("td.area:first");
+           var lastElement = $j("td.area:last");
+           if($j("td.area").length == 0 && $j("td.current").length > 0){
+               firstElement = $j("td.current");
+               lastElement = $j("td.current");
+           }
+           var firstElementLeft = firstElement.position().left;
+           var firstElementTop = firstElement.offset().top;
+           var lastElementLeft = lastElement.position().left;
+           var lastElementTop = lastElement.offset().top;
+           var moveflag = false;
+           var currentTd = $j(this);
+           // forward X 
+           if(e.pageY < lastElementTop + lastElement.outerHeight()  && e.pageY > firstElementTop){
+               if( $j("td.current").hasClass("notRoleCol")){
+                   e.preventDefault();
+                   return true;
+               }
+               if(e.pageX <  firstElement.offset().left){
+                   var copyHeight = Math.abs(firstElement.position().top - lastElement.position().top) + $j(this).outerHeight();
+                   var copyWidth = Math.abs($j(this).position().left - lastElementLeft) + $j(this).outerWidth();
+                   $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                           ,height : 1 , width : copyWidth
+                                           ,top :  firstElement.position().top ,left : $j(this).position().left});
+                   $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                   ,height:copyHeight , width:1
+                                                   ,top :  firstElement.position().top , left:$j(this).position().left});
+                   $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                   ,height:1 , width : copyWidth
+                                                   ,top : lastElement.position().top + $j(this).outerHeight(),left:$j(this).position().left});
+                   $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                           ,height:copyHeight , width:1
+                                                           ,top : firstElement.position().top ,left:lastElementLeft + $j(this).outerWidth()});
+                   
+                   $j("#dTable tbody>tr.user-row").slice(firstElement.parent("tr.user-row").index(),lastElement.parent("tr.user-row").index() + 1).each(function(){
+                       $j(this).find("td").slice(currentTd.index(),lastElement.parents("tr.user-row").find("td").index(lastElement) + 1).not(".area").addClass("fillX");
+                   });
+               }else{
+                   var copyHeight = Math.abs(firstElement.position().top - lastElement.position().top) + $j(this).outerHeight();
+                   var copyWidth = Math.abs($j(this).position().left - firstElementLeft) + $j(this).outerWidth();
+                   $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                           ,height : 1 , width : copyWidth
+                                           ,top :  firstElement.position().top ,left : firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                   ,height:copyHeight , width:1
+                                                   ,top :  firstElement.position().top , left:firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                   ,height:1 , width : copyWidth
+                                                   ,top : lastElement.position().top + $j(this).outerHeight(),left:firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                           ,height:copyHeight , width:1
+                                                           ,top : firstElement.position().top ,left: $j(this).position().left + $j(this).outerWidth()});
+                   
+                   $j("#dTable tbody>tr.user-row").slice(firstElement.parent("tr.user-row").index(),lastElement.parent("tr.user-row").index() + 1).each(function(){
+                       $j(this).find("td").slice(firstElement.parents("tr.user-row").find("td").index(firstElement) ,currentTd.index() + 1).not(".area").addClass("fillX");
+                   });
+               }
+           }else{
+           //forward Y
+               moveflag = true;
+               if(e.pageY < firstElementTop){
+                   var copyHeight = Math.abs($j(this).position().top - lastElement.position().top) + $j(this).outerHeight();
+                   var copyWidth = Math.abs(firstElementLeft - lastElementLeft) + $j(this).outerWidth();
+                   $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                           ,height : 1 , width : copyWidth
+                                           ,top :  $j(this).position().top ,left : firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                   ,height:copyHeight , width:1
+                                                   ,top :  $j(this).position().top , left:firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                   ,height:1 , width : copyWidth
+                                                   ,top : lastElement.position().top + $j(this).outerHeight(),left:firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                           ,height:copyHeight , width:1
+                                                           ,top : $j(this).position().top ,left:lastElementLeft + $j(this).outerWidth()});
+                   $j("#dTable tbody>tr.user-row").slice(currentTd.parent("tr.user-row").index(),lastElement.parent("tr.user-row").index() + 1).each(function(){
+                       $j(this).find("td").slice(firstElement.parents("tr.user-row").find("td").index(firstElement) ,lastElement.parents("tr.user-row").find("td").index(lastElement) + 1).not(".area").addClass("fillY");
+                   });
+               }else{
+                   var copyHeight = Math.abs($j(this).position().top - firstElement.position().top) + $j(this).outerHeight();
+                   var copyWidth = Math.abs(firstElementLeft - lastElementLeft) + $j(this).outerWidth();
+                   $j("#copyDiv .wtBorder").eq(0).css({"background-color" : "red"
+                                           ,height : 1 , width : copyWidth
+                                           ,top :  firstElement.position().top ,left : firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(1).css({"background-color" : "red"
+                                                   ,height:copyHeight , width:1
+                                                   ,top :  firstElement.position().top , left:firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(2).css({"background-color" : "red"
+                                                   ,height:1 , width : copyWidth
+                                                   ,top : $j(this).position().top + $j(this).outerHeight(),left:firstElement.position().left});
+                   $j("#copyDiv .wtBorder").eq(3).css({"background-color" : "red"
+                                                   ,height:copyHeight , width:1
+                                                   ,top : firstElement.position().top ,left:lastElementLeft + $j(this).outerWidth()});
+                   $j("#dTable tbody>tr.user-row").slice(firstElement.parent("tr.user-row").index(),currentTd.parent("tr.user-row").index() + 1).each(function(){
+                       $j(this).find("td").slice(firstElement.parents("tr.user-row").find("td").index(firstElement) ,lastElement.parents("tr.user-row").find("td").index(lastElement) + 1).not(".area").addClass("fillY");
+                   });
+               }
+               
+           }
+           $j("#copyDiv .area").show();
+       }else if(mouseDownInDivflag){
+           $j("td.area").removeClass("area");
+           
+           var rowIndex = startRowIndex;
+           $j("#dTable tbody>tr.user-row").slice(startRowIndex,endRowIndex + 1).each(function(){
+               $j(this).find("td").slice(startColIndex,endColIndex + 1).each(function(){
+                   $j(this).addClass("area");
+               });
+           });
+           $j("#currentDiv .corner").css({"background-color" : "rgb(82,146,247)" ,height:5 , width:5 ,border: "2px solid rgb(255, 255, 255)"
+                                               ,top:$j(cornerElement).position().top + $j(cornerElement).height() ,left:$j(cornerElement).position().left + $j(cornerElement).width() + 5});
+       }
+       copyObj = new Object();
+       copyObj.staffXArr = new Array();
+       copyObj.staffXStopArr = new Array();
+       copyObj.staffYArr = new Array();
+       copyObj.staffYStopArr = new Array();
+       if($j("td.area").length > 0)
+           $j("td.area").each(function(){
+               var rowIndex = $j(this).parents("tr.user-row").index();
+               var context = $j(this).data("statuslst");
+               var statStatus = $j(this).data("stopstatus");
+               //.find(".staffContent").text();
+               if(!copyObj.staffXArr[rowIndex]){
+                   copyObj.staffXArr[rowIndex] = new Array();
+                   copyObj.staffXStopArr[rowIndex] = new Array();
+                   copyObj["currentIndex" + rowIndex] = 0;
+                   copyObj["rowLength" + rowIndex] = 0;
+               }
+               copyObj["rowLength" + rowIndex]++;
+               //X forward array
+               copyObj.staffXArr[rowIndex].push(context);
+               copyObj.staffXStopArr[rowIndex].push(statStatus);
+               //Y forward array
+               copyObj.staffYArr.push(context);
+               copyObj.staffYStopArr.push(statStatus);
+               
+           }); 
+       else if($j("td.current").length > 0){
+           var currentCol = $j("td.current");
+           var rowIndex = $j(currentCol).parents("tr.user-row").index();
+           var context = $j(currentCol).data("statuslst");
+           var stopStatus = $j(currentCol).data("stopstatus");
+           //.find(".staffContent").text();
+           if(!copyObj.staffXArr[rowIndex]){
+               copyObj.staffXArr[rowIndex] = new Array();
+               copyObj.staffXStopArr[rowIndex] = new Array();
+               copyObj["currentIndex" + rowIndex] = 0;
+               copyObj["rowLength" + rowIndex] = 0;
+           }
+           copyObj["rowLength" + rowIndex]++;
+           //X forward array
+           copyObj.staffXArr[rowIndex].push(context);
+           copyObj.staffXStopArr[rowIndex].push(stopStatus);
+           //Y forward array
+           copyObj.staffYArr.push(context);
+           copyObj.staffYStopArr.push(stopStatus);
+           
+       }
+           
+       copyObj["getNowRowIndex"] = function(nowRowIndex){
+           if(copyObj["currentIndex" + nowRowIndex] + 1 >  copyObj["rowLength" + nowRowIndex]) copyObj["currentIndex" + nowRowIndex] = 0;
+           var index = copyObj["currentIndex" + nowRowIndex];
+           copyObj["currentIndex" + nowRowIndex]++;
+           return index;
+       }
+       e.preventDefault();
+       e.stopImmediatePropagation();
+   });
+   bindTds.addClass("bindMouse");
+}
+// 2019/11/26 シフトCPU limit修正 by zy BEGIN
+function refreshOther(result,userIds){
+    let {user} = this;
+    if (!("allUses" in window)) allUses = [];
+    if (!("winDayliTimeMap" in window)) winDayliTimeMap = {};
+    if (!("allWorkDaysCount" in window)) allWorkDaysCount = 0;
+    allUses.concat(userIds);
+    var dtimeCol = $j("#dTable>thead:first td.dailyWorkTime");
+    for (i = 0 ; i < dtimeCol.length; i++) {
+        var key = dtimeCol[i].getAttribute("data-time");
+        var val = result.dayliTimeSumMap[key];
+        if (val != undefined) {
+            if (!(key in winDayliTimeMap)) winDayliTimeMap[key] = val;
+            else winDayliTimeMap[key] += val;
+        }
+    }
+    if ("dispRecordMap" in result) {
+        for(var i = 0 ; i < userIds.length; i++){
+            var userId = userIds[i];
+            var dispRecord = result.dispRecordMap[userId];
+            for(var j = 0 ; j < dispRecord.timeList.length; j++){
+                var tm = dispRecord.timeList[j];
+                if(dispRecord.timeWorkSumByUser != undefined){
+                    $j("#dTable td.timeSum[data-userid='" + userId + "']").text(dispRecord.timeWorkSumByUser);
+                }
+                var updElementTd = $j("td[data-searchkey='" + tm.searchKey + "']");
+                if (updElementTd.length > 0) {
+                    if ("currentNightStatusStyleStr" in tm) updElementTd.attr("data-cnss",tm.currentNightStatusStyleStr),updElementTd.data("cnss",tm.currentNightStatusStyleStr);
+                    if ("currentStatusStyleStr" in tm) updElementTd.attr("data-ctss",tm.currentStatusStyleStr),updElementTd.data("ctss",tm.currentNightStatusStyleStr);
+                    if ("isShowCloneFlag" in tm) updElementTd.attr("data-isclone",tm.isShowCloneFlag),updElementTd.data("isclone",tm.currentNightStatusStyleStr);
+                    if ("workDay" in tm) updElementTd.attr("data-workday",tm.workDay),updElementTd.data("workday",tm.currentNightStatusStyleStr);
+                }
+            }
+        }
+    }
+    allWorkDaysCount += result.allWorkDaysCount;
+    if (user.length > 0) {
+        var userIds = user[0];
+        user.splice(0,1);
+        refreshPageInfos(userIds,false,true,refreshOther.bind({user:user}));
+    } else {
+        for (i=0;i<dtimeCol.length;i++) {
+            var key = dtimeCol[i].getAttribute("data-time");
+            var val = winDayliTimeMap[key];
+            if (typeof(val) == "undefined") {
+                var isSetTextFlg = dtimeCol[i].getAttribute("data-isclose");
+                if (isSetTextFlg == "true") $j(dtimeCol[i]).text("");
+                else $j(dtimeCol[i]).text("0");
+            }
+            else  $j(dtimeCol[i]).text(val);
+        }
+        // 勤怠時間合計値
+        $j("#dTable span.allWorkDaysCount").each(function() {
+            $j(this).text(allWorkDaysCount);
+        });
+        delete window.allUses;
+        delete window.winDayliTimeMap;
+        delete window.allWorkDaysCount;
+        refreshScreenIcons();
+    }
+}
+// 2019/11/26 シフトCPU limit修正 by zy END
+</script>
+<!-- 2018/05/22 4000ユーザ、シフト機能対応できる改善 by zy END -->
+</apex:page>

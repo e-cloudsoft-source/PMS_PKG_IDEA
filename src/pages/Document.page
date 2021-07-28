@@ -1,0 +1,23 @@
+<!-- Upload a file and put it in your personal documents folder-->
+
+<!-- Page: -->
+<apex:page controller="documentExt" rendered="true" showHeader="true" >
+	<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+   <apex:sectionHeader title="{!$User.FirstName} {!$User.LastName}" subtitle="Uploading CSV file - Sales Account" ></apex:sectionHeader>
+    <apex:form >
+ 
+      <apex:pageBlock title="Setup Uploading CSV File ">
+ Please select CSV files on your local folder, the following files, and click Save button. Note:All files is UTF-8 code, LF(UNIX) without Traffic*.txt. <br/>
+          <apex:pageBlockSection title="1)Ttotal.csv  -  2)Ttotal02.csv  -  3)Ttend.csv  -  4)Ttend02.csv  -  5)Titem.csv  -  6)Titem02.csv  -  7)zshift01.csv  -  8)zshift0102.csv  -  9)ztotal.csv - 10)Traffic*.txt" columns="1">
+             <apex:inputFile alt="" size="128" value="{!contentFile}" filename="{!nameFile}"/>
+             <apex:commandButton value="Save" action="{!ReadFile}" id="theButton"/>
+          </apex:pageBlockSection>
+       </apex:pageBlock>
+       <apex:pageBlock title="Update sales account " rendered="false"> 
+            <apex:commandButton value="Update" action="{!UpdateforSalesforcast}" id="theButton"/>
+       </apex:pageBlock>      
+    </apex:form>
+
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

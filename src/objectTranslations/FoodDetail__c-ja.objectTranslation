@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>料理ブレイク</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計商品 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- 料理ブレイク (会計商品) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 料理明細 --></label>
+        <name>AccountMasterSubRef__c</name>
+        <relationshipLabel><!-- 料理ブレイク (料理明細) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 明細名 --></label>
+        <name>BreakName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 明細タイプ --></label>
+        <name>DetailType__c</name>
+        <picklistValues>
+            <masterLabel>お椀</masterLabel>
+            <translation><!-- お椀 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>お造り</masterLabel>
+            <translation><!-- お造り --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>デザート</masterLabel>
+            <translation><!-- デザート --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>前菜</masterLabel>
+            <translation><!-- 前菜 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>合肴</masterLabel>
+            <translation><!-- 合肴 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>焼物</masterLabel>
+            <translation><!-- 焼物 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>煮物</masterLabel>
+            <translation><!-- 煮物 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>食事</masterLabel>
+            <translation><!-- 食事 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 順番 --></label>
+        <name>OrderNo__c</name>
+    </fields>
+</CustomObjectTranslation>

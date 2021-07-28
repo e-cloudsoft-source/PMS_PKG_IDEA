@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Rollupparameter</value>
+    </caseValues>
+    <fields>
+        <label><!-- DestFieldApi --></label>
+        <name>DestFieldApi__c</name>
+    </fields>
+    <fields>
+        <label><!-- FunctionName --></label>
+        <name>FunctionName__c</name>
+        <picklistValues>
+            <masterLabel>TtendToCash</masterLabel>
+            <translation><!-- TtendToCash --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- InActive --></label>
+        <name>InActive__c</name>
+    </fields>
+</CustomObjectTranslation>

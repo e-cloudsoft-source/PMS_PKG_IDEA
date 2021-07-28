@@ -1,0 +1,1430 @@
+<apex:page sidebar="false" title="部屋レイアウト設定" showheader="{!IF($CurrentPage.Parameters.showHeader == null, true, false)}" standardStylesheets="false" controller="DesignLayoutCtrl" action="{!init}">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFile2019, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFile2019, 'styles/kendo.default.min.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/fabric.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<style>
+.container {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+.container ul li, .container ol li {
+    margin-left: 0;
+    padding-left: 0;
+}
+.container .menu>.k-menu {
+	height: 42px;
+}
+
+.container .menu>.k-menu>.k-item>.k-link {
+	padding: 0 1em;
+	line-height: 42px;
+}
+
+.container .left-panel .k-panel .k-item>.k-link {
+	padding: .8em 1.4em;
+}
+
+.container .splitter {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 42px;
+	bottom: 0;
+	border-width: 0 0 1px;
+	height: auto;
+}
+
+#diagram {
+	width: 100%;
+	height: 100%;
+	border: 0;
+}
+#diagram .km-widget.km-scroll-wrapper{
+	border-right: orange 2px solid;
+}
+.left-panel>ul.k-widget,
+.right-panel>ul.k-widget {
+	border: 0;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.item {
+	display: inline-block;
+}
+
+.left-panel .k-panel .k-item {
+	display: inline-block;
+	width: 50%;
+	float: left;
+}
+
+.left-panel span {
+	text-align: center;
+	display: block;
+}
+
+.k-panelbar .k-content ul {
+	margin: 0;
+	padding: 0;
+}
+
+.k-panelbar .k-content li {
+	text-align: right;
+	position: relative;
+	list-style: none;
+	padding: 5px 0 0;
+}
+
+.k-panelbar .k-content {
+	padding-bottom: 5px;
+}
+
+.k-panelbar .k-content li>span {
+	position: absolute;
+	display: block;
+	left: 10px;
+	top: 10px;
+}
+/* colorpricker numberbox width */
+
+.k-panelbar .k-content li>.k-widget {
+	width: 50%;
+	display: inline-block;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	text-align: left;
+	position: static;
+}
+
+.k-panelbar .k-content .k-selected-color {
+	width: 100%;
+}
+.noReadHidden{
+	visibility: hidden;
+}
+.k-list-container .k-list-scroller li.k-item{
+	white-space: nowrap;
+}
+#tempPanel,.menu>input[type=button]{
+	margin-left: 2px;
+	display: none;
+}
+span.helpClass{
+	position: relative;
+    top: 8px;
+    float: left;
+    margin-left:3px;
+}
+/* ZOOM CSS BEGIN */
+.leaflet-control-zoom span{
+	border: 2px solid #ccc;
+    box-shadow: 0 0 #ccc;
+	border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 22px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-color: #fff;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+    border-top-width:0px;
+    border-bottom-width:1px;
+    cursor: pointer;
+}
+.leaflet-control-zoom span:last-child{
+	border-bottom-width:2px !important;
+}
+.leaflet-control-zoom>span:first-child{
+	border-top-width:2px !important;
+}
+.disabled{
+	color: darkgray !important;
+}
+/* ZOOM CSS END */
+</style>
+<!-- 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN -->
+<input id="attId" type="hidden" value="{!attachmentId}" />
+<!-- 2020/02/15 予約が入っていないテーブルも選択可能に by zy END -->
+<input id="hidShopCode" type="hidden" value="{!branchShopNm}"/>
+<input id="hidLayoutJson" type="hidden" value="{!layoutJSON}"/>
+<!-- 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy BEGIN -->
+<input id="hidMobileDbClkMode" type="hidden" value="{!mobileDblClickFlg}"/>
+<!-- 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy END -->
+<div class="container noReadHidden">
+<apex:form >
+<div class="menu ">
+	<apex:selectList size="1" value="{!branchShopNm}" style="margin-left: 2px;margin-top:3px;float:left;" rendered="{!branchShopLst.size > 0}" id="branchShopCd">
+        <apex:selectOptions value="{!branchShopLst}" />
+        <apex:actionSupport event="onchange" action="{!refreshBranchShopInfo}" status="refStatusBlock"/>
+    </apex:selectList>
+    <input type="text" value="{!attachmentId}" id="attachmentDropDown" style="float:left;margin-left: 2px;width:180px;margin-top:3px;"/>
+    <span class="k-icon k-i-question helpClass" title="オーダーエントリー画面に該当レイアウト定義内容を利用する"></span>
+    <input type="button" class="k-button" name="validateBtn" onclick="layoutStatus()" style="float:left;width:100px;margin-right:5px;margin-top:3px;margin-left:20px;" value="有効"/>
+	<input type="button" class="k-button" name="unValidateBtn" onclick="layoutStatus()" style="float:left;width:100px;margin-right:5px;margin-top:3px;margin-left:20px;" value="無効"/>
+	<input type="button" class="k-button" name="updateBtn" onclick="upsertTemplate()" title="オーダーエントリー機能の部屋レイアウトが該当定義により表示する" style="background:red;color:white;float:right;width:100px;margin-right:5px;margin-top:3px;" value="確定"/>
+    <input type="button" class="k-button" name="layoutSave" onclick="Save()" style="float:right;width:100px;margin-right:5px;margin-top:3px;" value="保存"/>
+    <input type="button" class="k-button" name="tempSave" onclick="updTemplate()" style="float:right;width:100px;margin-right:5px;margin-top:3px;" value="保存"/>
+    <input type="button" class="k-button" name="tempNew" onclick="newTemplate()" style="float:right;width:100px;margin-right:5px;margin-top:3px;" value="別保存" title="新たテンプレートを作成する"/>
+    <input type="button" class="k-button" name="deleteBtn" onclick="removeTemplate()" style="float:right;width:100px;margin-right:5px;margin-top:3px;" value="削除"/>
+    
+</div>
+</apex:form>
+<div class="splitter">
+	<div class="left-panel">
+		<ul>
+			<li>
+				基本の形状
+				<ul>
+					<li>
+						<span class="item" data-shape='{"width":120,"height":120,"type":"rectangle"}'></span>
+						<span>方形</span>
+					</li>
+					<li>
+						<span class="item" data-shape='{"width":120,"height":120,"type":"circle"}'></span>
+						<span>円形</span>
+					</li>
+					<li>
+						<span class="item" data-shape='{"width":120,"height":90,"type":"rectangle"}' height="0.75"></span>
+						<span>長方形</span>
+					</li>
+					<li>
+						<span class="item" data-shape='{"width":120,"height":90,"type":"circle"}' height="0.75"></span>
+						<span>楕円</span>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<div class="centre-panel">
+		<div id="diagram" style="max-width: 970px;"></div>
+		<div class="leaflet-bottom leaflet-right" style="position: absolute; top :30%;right:0;">
+			<div class="leaflet-control-zoom leaflet-bar leaflet-control">
+				<span title="Zoom in" role="button" class="disabled" onclick="zoomChange()" name="plus">+</span>
+				<span title="rest" role="button" onclick="zoomChange()" name="rest" style="font-size: 14px">100</span>
+				<span title="Zoom out" role="button" onclick="zoomChange()" name="minus">−</span>
+			</div>
+		</div>
+	</div>
+	<div class="right-panel">
+		<ul>
+			<!--
+			<li>
+				基本の属性
+				<div>
+					<ul>
+						<li>
+							<span>背景カラー:</span>
+							<input class="colorPicker" name="baseColor" />
+						</li>
+						<li>
+							<span>横幅:</span>
+							<input type="text" class="numeric shapeWh" name="baseWidth" />
+						</li>
+						<li>
+							<span>高度:</span>
+							<input type="text" class="numeric shapeWh" name="baseHeight" />
+						</li>
+					</ul>
+				</div>
+			</li>
+			-->
+			<li>
+				輪郭の属性
+				<div id="shapeProperties">
+					<ul>
+						<li>
+							<span>背景カラー:</span>
+							<input class="colorPicker" data-attr="background" />
+						</li>
+						<li>
+							<span>横幅:</span>
+							<input type="text" class="numeric shapeWh" data-attr="width" />
+						</li>
+						<li>
+							<span>高度:</span>
+							<input type="text" class="numeric shapeWh" data-attr="height" />
+						</li>
+						<li>
+							<span>位置 X:</span>
+							<input type="text" class="numeric position" data-attr="x" />
+						</li>
+						<li>
+							<span>位置 Y:</span>
+							<input type="text" class="numeric position" data-attr="y" />
+						</li>
+						<li>
+							<span>部屋:</span>
+							<input type="text" class="DropDownList" id="roomDropDown" data-attr="room" />
+						</li>
+						<li>
+							<span>形状:</span>
+							<input type="text" class="DropDownList" id="shapeType" data-attr="type" />
+						</li>
+					</ul>
+				</div>
+			</li>
+			<li id="tempPanel">
+				テンプレートの属性
+				<div id="tempProperties">
+					<ul>
+						<li>
+							<span>テンプレート名:</span>
+							<input type="text" style="width:50%" class="k-input" id="tempName" />
+						</li>
+						<li>
+							<span>説明:</span>
+							<textarea id="tempDescribe" style="width:50%;" class="k-content k-raw-content k-textbox" maxlength="255" rows="5" cols="30"></textarea>
+						</li>
+						<li>
+							<span>作成者:</span>
+							<input type="text" style="width:50%" class="k-input" id="createBy"  readonly="readonly"/>
+						</li>
+						<li>
+							<span>更新者:</span>
+							<input type="text" style="width:50%" class="k-input" id="modifyBy" readonly="readonly" />
+						</li>
+					</ul>
+				</div>
+			</li>
+		</ul>
+	</div>
+</div>
+</div>
+<script type="text/javascript">
+kendo.culture("ja-JP");
+// import kendo diagram classes
+const {
+	Shape,
+	Connection,
+	Rectangle,
+	Point,
+	Circle,
+	Group,
+	TextBlock
+} = kendo.dataviz.diagram;
+// 形状ツール、レイアウトデフォルト情報、部屋情報
+let diagram,layout,mainRoom = {};
+// オーデーエントリーの老婆愛
+const IFRAME = (self != top);
+// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy BEGIN
+var J_LATOUT_NOLEADSEL = "{!noLeadSelFlg}" == "true";
+var J_LATOUT_NOCHKOTSEL = "{!chkoutRoomFlg}" == "true";
+// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+var J_LAYOUT_MULTISE = false;
+var J_PAGE_LOAD = false;
+// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+var isMobile = kendo.support.mobileOS;
+// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy END
+$(document).ready(function(){
+	// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+	J_PAGE_LOAD = true;
+	// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+	// 初期化
+	init();
+});
+// オーダーエンド対応
+function initDocType(type){
+	// 初期化
+	init(type);
+}
+// 初期化
+function init(type) {
+	// 画面初期化
+	resizeInit();
+	// レイアウト情報初期化
+	layoutInit();
+	
+	if (type) window.accountFlg = type == 'account';
+	else window.accountFlg = false;
+	// オーダーエンド開く
+	if(IFRAME) beforeInit(type);
+	// ページ開く
+	else {
+		// 部屋リスト取得
+		initRoomLst();
+		$(".splitter[data-load != 'false']").kendoSplitter({
+			panes: [{
+					collapsible: true,
+					size: "200px"
+				},
+				{
+					collapsible: false,
+					scrollable: false,
+				},
+				{
+					collapsible: true,
+					size: "300px"
+				}
+			]
+		});
+
+		$(".splitter[data-load != 'false'] .left-panel>ul, .splitter[data-load != 'false'] .right-panel>ul").kendoPanelBar({
+			expandMode: "multiple"
+		}).each(function(){
+			$(this).getKendoPanelBar().expand(">li", false);
+		});
+		// カラー設定
+		$(".splitter[data-load != 'false'] .colorPicker").kendoColorPicker({
+			value: "#ffffff",
+			buttons: false,
+			palette:"websafe",
+			change: onShapeChange
+		})
+		// 右側の形状設定
+		$(".splitter[data-load != 'false'] .numeric.shapeWh").kendoNumericTextBox({
+			format: '0',
+			change: onShapeChange
+		});
+		// 右側の位置設定
+		$(".splitter[data-load != 'false'] .numeric.position").kendoNumericTextBox({
+			change: onShapeChange
+		});
+		var branDropDown = $("[id$=branchShopCd]").kendoDropDownList().getKendoDropDownList();
+		if (branDropDown) branDropDown.list.css("width","auto");
+		$("#shapeType").kendoDropDownList({
+			dataTextField: "name",
+			dataValueField: "value",
+			dataSource: {
+				data:[{name:"方形",value:"rectangle"},{name:"円形",value:"circle"}]
+			},
+			select: function(e) {
+				let type = e.sender.element.data('attr');
+				e.sender.wrapper.parents('div.k-content').trigger('custom-change', {e, type});
+			}
+		});
+	}
+	var options = {
+		zoomMin: 0.2,
+		zoomMax: 1,
+		zoom:1,
+		shapeDefaults: {
+			width: layout.width,
+			height: layout.height,
+			fill: layout.color,
+			connectors: [],
+			visual: visualFun
+		},
+		itemBoundsChange: function(e){
+			if (e.item.isSelected) updateShapeProperties.call(e.sender, [e.item]);
+		},
+		select: function(e) {
+			// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+			if (J_LAYOUT_MULTISE) return;
+			// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+			if (e.selected && e.selected.length != 1) {
+					updateShapeProperties.call({shapes:[]});
+					return;
+				}
+			// 2019/12/30 オーダエントリ機能、レイアウト機能から部屋を選ぶのをダブルクリックにしたい。スワイプに反応してしまう（IPAD） by zy BEGIN
+			if (IFRAME && isMobile) return;
+			// 2019/12/30 オーダエントリ機能、レイアウト機能から部屋を選ぶのをダブルクリックにしたい。スワイプに反応してしまう（IPAD） by zy END
+			IFRAME ? customHandle.call(e.sender, e.selected) : roomfilter(e.sender, e.selected),updateShapeProperties.call(e.sender, e.selected);
+		},
+		dragEnd: function(e){
+			if (e.shapes.length != 1) {
+				updateShapeProperties.call({shapes:[]});
+				return;
+			}
+			updateShapeProperties.call(e.sender, e.shapes);
+		}
+		// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+		,click: function(e){
+			if (J_LAYOUT_MULTISE) {
+				let fill = '#ececec',layoutColor = layout.color;
+				if (layoutColor == '#ececec') layoutColor = '#1797c0';
+				let shape = e.item;
+				if (!shape.options.selectable) return;
+				if (shape.options.fill != layoutColor) {
+					shape.selectRoom = true;
+					shape.index = (new Date().getTime());
+					fill = layoutColor;
+					assignment.call([shape, shape.shapeVisual.$shapeVisual], 'redraw', {fill});
+				}
+				else {
+					shape.selectRoom = false;
+					assignment.call([shape, shape.shapeVisual.$shapeVisual], 'redraw', {fill});
+				}
+			}
+		},
+		// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+		dataBound: function(e){
+			e.sender.element.unbind('mousewheel'); updateShapeProperties.call(e.sender);
+		}
+	}
+	if (IFRAME) options.editable = {drag: false};
+	diagram = $("#diagram").kendoDiagram(options).data('kendoDiagram');
+	// コーピ対応
+	var paseFuntion = diagram.paste;
+	diagram.paste = function(){
+		// コーピの部屋削除
+		this._clipboard.forEach(function(item){
+			var roomId = item.options.roomId;
+			item.options.orgRoomId = roomId;
+			item.options.roomId = "";
+		});
+		paseFuntion.call(this);
+		// コーピの部屋削除
+		this._clipboard.forEach(function(item){
+			item.options.roomId = item.options.orgRoomId;
+			delete item.options.orgRoomId;
+		});
+		var items = this.select();
+		if (items.length > 1) updateShapeProperties.call({shapes:[]});
+		else roomfilter(this, items);
+	}
+	if(!IFRAME) {
+		// 基本形状設定
+		drawCustomImg();
+
+		$(".splitter[data-load != 'false'] .left-panel span.item").kendoDraggable({
+			hint: function() {
+				let zoomInt = diagram.zoom(),hint = this.element.clone(),imgEle = $("img",hint);
+				imgEle.css({height:imgEle.height() * zoomInt,width:imgEle.width() * zoomInt});
+				return hint;
+			}
+		});
+		$("#diagram").kendoDropTarget({
+			drop: function(e) {
+				var item, pos, transformed;
+				if(e.draggable.hint) {
+					item = e.draggable.hint.data("shape");
+					var percentHt = e.draggable.hint.attr("height");
+					var percent = percentHt || 1;
+					pos = e.draggable.hintOffset;
+					pos = new Point(pos.left, pos.top);
+					var transformed = diagram.documentToModel(pos);
+					item.x = transformed.x;
+					item.y = transformed.y;
+					item.width = layout.width;
+					item.height = layout.height * kendo.parseFloat(percent);
+					diagram.addShape(item);
+				}
+			}
+		});
+
+		$('#shapeProperties').on('custom-change', function(event, {e, type}) {
+			let $el = $('#shapeProperties').find(':input[data-attr]');
+			let data = $el.data('CURRENT_SHAPE');
+			if(!data) return true;
+			let {shapes, $data,sender,index} = data, groupShapes = shapes.map((e) => e.visual.children[0]), options = {};
+			if(type == 'room') {
+				if(shapes.length != 1) return true;
+				let { name, value, color } = e.dataItem, shape = shapes[0], item = shape.options, group = groupShapes[0];
+				if(name != undefined) options.text = name; if(color != undefined) options.fill = color;
+				if (e.dataItem.value != undefined && e.dataItem.value != null) {
+					changeRoomDs(e,item.roomId,e.dataItem.value);
+					item.roomId = e.dataItem.value; 
+				}
+				group.$textBlock.redraw(options);
+			} else if(type == 'x' || type == 'y' || type == 'width' || type == 'height') {
+				let newVal = e.sender.value(), oldVal = diagram.boundingBox(shapes)[type] || 0, diffVal = newVal - oldVal;
+				let optionLst = shapes.map(function(e){
+					let ot = {};
+					ot[type] = (e.options[type] + diffVal) || 0;
+					return ot;
+				});
+				assignment.apply([...shapes], ['redraw', ...optionLst]);
+			} else if(type == 'background' ) {
+				let fill = e.value;
+				$(this).trigger('custom-change', {type:'room',e:{dataItem:{color:getRelativeBackgroundColor(fill)}}});
+				assignment.call([shapes[0], groupShapes[0].$shapeVisual], 'redraw', {fill});
+			} else if (type == 'type') {
+				if(shapes.length != 1) return true;
+				let shapeType = e.dataItem.value;
+				sender.shapes[index].options.type = shapeType;
+				sender.shapes[index].redrawVisual({type:shapeType});
+			}
+		})
+		
+		$('#canvasProperties').on('custom-change', function(event, {e, type}){
+			if(type == 'background'){
+				diagram.element.css("background-color", e.value);
+			}
+		})
+	} else {
+		$("#diagram .km-widget.km-scroll-wrapper").css("border-right","none");
+		$(".menu").hide();
+	}
+	$(window).on('resize', function(){
+		// 画面初期化
+		resizeInit();
+	});
+	// 初期化完了、画面表示
+	$(".noReadHidden").removeClass("noReadHidden");
+}
+/*
+ * before init
+ */
+function beforeInit() {
+	let $splitter = $('.splitter');
+	$splitter.css({
+		top: 0
+	}).attr('data-load', false).children('.left-panel, .right-panel').attr('data-load', false).hide();
+	$splitter.children('.centre-panel').css({
+		height: '100%', // $(top).height()
+		width : '100%', // $(top).width()
+		'min-height': $(window).height(),
+		'min-width': $(window).width()
+	});
+	// オーダーエンドの内容取得
+	mainRoom = $.parseJSON(top.$('#mainRoom').val() || '{}');
+	// 刷新リストと指定テンプレート取得
+	refreshAttachMents(true);
+}
+// 部屋リスト取得
+function initRoomLst(){
+	var data = {
+		shopCd : $('#hidShopCode').val() || ""
+	};
+	remoteCenter('getRoomLst',JSON.stringify(data),afterGetRoomLst,true);
+}	
+// 画面初期化
+function resizeInit(){
+	var maxHt = $(window).height();
+	var containerHt = 0;
+	if ("DESLAYOU_MAXHEIGHT" in window) {
+		containerHt = DESLAYOU_MAXHEIGHT + 150;
+	}
+	if (containerHt > maxHt) maxHt = containerHt;
+	$('.container').height(maxHt);
+	var split = $(".splitter[data-load != 'false']").getKendoSplitter();
+	if (split) split.resize();
+	// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+	if (diagram != undefined) diagram.resize();
+	// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+}
+// レイアウト情報初期化
+function layoutInit(){
+	var layoutJSON = $("#hidLayoutJson").val();
+	layout = JSON.parse(layoutJSON);
+	$("input[name=baseColor]").val(layout.color);
+	$("input[name=baseWidth]").val(layout.width);
+	$("input[name=baseHeight]").val(layout.height);
+}
+// カラー無法表示対応
+function getRelativeBackgroundColor(color){
+	let c = kendo.parseColor(color), d = '#333';
+	if(c){
+		let {r, g, b} = c, nc = r << 16 | g << 8 | b;
+		if(nc < 6250335) d = '#ccc';
+	}
+	return d;
+}
+// 形状対応
+function visualFun(data) {
+	let shapeVisual, type = data.type,
+		newData = $.extend({}, data),
+		{
+			width,
+			height
+		} = newData,
+		group = new Group({
+			width,
+			height
+		});
+	delete newData['x'];
+	delete newData['y'];
+	if(type == 'rectangle') {
+		shapeVisual = new Rectangle(newData);
+	} else if(type == 'circle') {
+		shapeVisual = new Circle(newData);
+	} else if(type == 'text') {
+		shapeVisual = new TextBlock(newData);
+	} else if(type == 'image') {
+		shapeVisual = new Image(newData);
+	} else {
+		shapeVisual = new Path(newData);
+	}
+	group.append(shapeVisual);
+	group.$shapeVisual = shapeVisual;
+	return addRoomInfo.call(group, newData.roomId, newData.leadId);
+}
+
+function calcTextLen(text, width, fontSize){
+	text = text || '';
+	let i = 0, fontWidth = 0, half = fontSize / 2, newString = [];
+	while(i < text.length){
+		let code = text.charCodeAt(i);
+		let currentWidth = code <= 0xff ? half : fontSize;
+		if(fontWidth + currentWidth >= width) break;
+		fontWidth += currentWidth;
+		newString.push(text.charAt(i++));
+	}
+	return newString.join('');
+}
+
+function addRoomInfo(roomId, leadId) {
+	let { width, height } = this.options, 
+			$shapeVisual = this.$shapeVisual,
+			itemHeight = Math.max(height / 4, 10), fontSize = 12, 
+			fill = '#333', 
+			x = 2, y = 2, data = mainRoom[roomId];
+	try{
+		fill = getRelativeBackgroundColor($shapeVisual.options.fill.color);				
+	}catch(e){}
+	if(IFRAME) {
+		if(!data) return this;
+		for(let attr of ['iconType', 'roomNm', 'leadName', 'contactNm']){
+			let text = data[attr], x = 2;
+			if(y > height) break; if(!text) continue;
+			if(attr == 'iconType') {
+				if(data.iconType == 'lead' || data.iconType == 'account'){
+					let imgWidth = Math.min(16, itemHeight);
+					this.append(new kendo.dataviz.diagram.Image({x, y, width: imgWidth, height: imgWidth, source: '/img/icon/alohaProfile16.png'}));
+					x = x + imgWidth;text = data['entryTime'] || ''; width -= imgWidth + 2;
+				}
+			}
+			text = calcTextLen(text, width, fontSize);
+			this.append(new TextBlock({ text, x, y, fill, fontSize }));
+			y += itemHeight;
+		}
+	}else {
+		var name = undefined;
+		if (data != undefined) name = data.name
+		let text =  name || ' ';
+		text = calcTextLen(text, width, fontSize);
+		let textBlock = new TextBlock({ text, x, y, fill, fontSize });
+		this.append(textBlock);
+		this.$textBlock = textBlock;
+	}
+	
+	return this;
+}
+// 基本形状設定
+function drawCustomImg() {
+	// import fabric classes;
+	const {
+		Circle,
+		Rect,
+		Image,
+		Ellipse,
+		Polygon,
+		Path
+	} = fabric;
+	let $items = $(".splitter[data-load != 'false'] .left-panel span.item");
+	// return when items is empty
+	if(!$items.length) return;
+	// create a canvas tag;
+	let $div = $('<div style="display: none;"><canvas></canvas></div>').appendTo('body');
+	// instantiation fabric
+	let instance = new fabric.Canvas($div.children('canvas')[0]);
+	$items.each(function() {
+		let $this = $(this);
+		let shape = $this.data('shape') || {};
+		let type = (shape.type || "").toLowerCase(),
+			fill = shape.fill || layout.color,
+			graph, left = 0,
+			top = 0;
+		// add image
+		if(type == 'rectangle') {
+			let {
+				width,
+				height
+			} = shape;
+			graph = new Rect({
+				left,
+				top,
+				width,
+				height,
+				fill
+			});
+		} else if(type == 'circle') {
+			let {
+				width,
+				height
+			} = shape;
+			if(width == height) graph = new Circle({
+				radius: width,
+				left,
+				top,
+				fill
+			});
+			else graph = new Ellipse({
+				width,
+				height,
+				left,
+				top,
+				fill,
+				rx: width / 2,
+				ry: height / 2
+			});
+		}
+		if(!graph) return true;
+		instance.add(graph);
+		let {
+			width,
+			height
+		} = graph;
+		// export image url
+		let src = instance.toDataURL({
+			format: 'png',
+			left,
+			top,
+			width,
+			height
+		});
+		var img = $this.find("img");
+		if (img.length == 0) img = $('<img/>');
+		// create a img tag and insert it
+		img.css({
+			width: 50,
+			height: height * (50 / width)
+		}).attr({
+			src
+		}).appendTo($this);
+		// clear canvas
+		instance.clear();
+	});
+	// dispose
+	instance.dispose();
+	$div.remove();
+}
+
+/*
+	自定义方法, 操作顶层window
+*/
+function customHandle(data){
+	if(data.length == 1){
+		let shape = data[0], $data = shape.options,roomId = $data.roomId,room = mainRoom[roomId];
+		if (accountFlg){
+			top.selAccount(room.accId,room.leadId,room.orderId,room.roomId);
+			if ($data.stroke.width == 2) {
+				$data.stroke.width = 0;
+				shape.redrawVisual();
+			} else {
+				$data.stroke.color = 'orange';
+				$data.stroke.width = 2;
+				shape.redrawVisual();
+			}
+		} else {
+			top.$('input[id$=hideLeadId]').val(room ? room.leadId : '');
+			top.$('input[id$=hidRoomId]').val(roomId);
+			top.changeRoomFun();
+		}
+	}
+}
+// ドキュメント変更画面状態設定
+function changeDocmentBtnStatus(){
+	// ドキュメントId
+	var attId = $('#attId').val() || "";
+	// 有効、無効ボタン非表示
+	$("input[name=validateBtn],input[name=unValidateBtn]").hide();
+	// テンプレートの場合
+	// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+	/*
+	if (attId != "") {
+		$("input[name=deleteBtn],input[name=tempSave],input[name=tempNew],input[name=updateBtn],#tempPanel").show();
+		$("input[name=layoutSave],span.k-icon.k-i-question.helpClass").hide();
+	} else {
+	*/
+	// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+		var attchDropdown = $("#attachmentDropDown").getKendoDropDownList();
+		if (attchDropdown) {
+			var item = attchDropdown.dataItem(attchDropdown.select());
+			if ("status" in item) {
+				if (item.status) $("input[name=unValidateBtn]").show();
+				else $("input[name=validateBtn]").show();
+			}
+		}
+		$("input[name=layoutSave],input[name=tempNew],span.k-icon.k-i-question.helpClass").show();
+		$("input[name=deleteBtn],input[name=tempSave],input[name=updateBtn],#tempPanel").hide();
+	// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+	if (attId != "") $("input[name=deleteBtn]").show();
+	// }
+	// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+}
+// 部屋の変更対応
+function changeRoomDs(wrap,orgId,newId){
+	if (orgId) {
+		var roomFilters = getLayoutFilterRooms();
+		var orgIndex = $.inArray(orgId,roomFilters);
+		if (orgIndex >= 0) {
+			var item = mainRoom[orgId];
+			wrap.sender.dataSource.add(item);
+		}
+	}
+}
+// 
+function zoomChange(){
+	var target = $(event.currentTarget);
+	var name = target.attr("name");
+	var changeZoom = toFixMathZoom(diagram.zoom());
+	if (name == 'plus') {
+		changeZoom += 0.2;
+	} else if (name == 'minus') {
+		changeZoom -= 0.2;
+	} else changeZoom = 1;
+	$(".disabled").removeClass("disabled");
+	if (changeZoom >= diagram.options.zoomMax) {
+		changeZoom = diagram.options.zoomMax;
+		$(".leaflet-control-zoom.leaflet-bar.leaflet-control span[name=plus]").addClass("disabled");
+	}
+	if (changeZoom <= diagram.options.zoomMin) {
+		changeZoom = diagram.options.zoomMin;
+		$(".leaflet-control-zoom.leaflet-bar.leaflet-control span[name=minus]").addClass("disabled");
+	}
+	diagram.zoom(changeZoom);
+	$(".leaflet-control-zoom.leaflet-bar.leaflet-control span[name=rest]").text(changeZoom = kendo.parseInt(changeZoom * 100));
+}
+// 保留一位小数的四舍五入
+function toFixMathZoom(zoom){
+	return Math.round(zoom * 10) / 10;
+}
+// 形状の変更対応
+function onShapeChange(e) {
+	let type = e.sender.element.data('attr');
+	e.sender.wrapper.parents('div.k-content').trigger('custom-change', {e, type});
+}
+function roomfilter(sender, shape){
+	let $room = $("#roomDropDown").getKendoDropDownList();
+	var roomId = shape[0].roomId;
+	if (roomId == undefined) roomId = shape[0].options.roomId;
+	var ds = $room.dataSource;
+	var hadCurrentFlg = false;
+	var roomFilters = getLayoutFilterRooms();
+	var removeItems = [];
+	// 过滤存在不应该出现的房间
+	var items = ds.data().forEach(function(item){
+		if (item && $.inArray(item.value,roomFilters) >= 0) {
+			if (roomId != item.value)
+				removeItems.push(item);
+			else 
+				hadCurrentFlg = true;
+		}
+	});
+	if (removeItems.length > 0) removeItems.forEach(function(item){ds.remove(item);});
+	if (!hadCurrentFlg && roomId != undefined && (roomId in mainRoom)) 
+		ds.insert(mainRoom[roomId].idx,mainRoom[roomId]);
+}		
+/*
+	更新右侧Shape面板的值
+*/
+function updateShapeProperties(data) {
+	let $el = $('#shapeProperties').find(':input[data-attr]'),
+		$background = $el.filter('[data-attr="background"]').getKendoColorPicker(),
+		$width = $el.filter('[data-attr="width"]').getKendoNumericTextBox(),
+		$height = $el.filter('[data-attr="height"]').getKendoNumericTextBox(),
+		$x = $el.filter('[data-attr="x"]').getKendoNumericTextBox(),
+		$y = $el.filter('[data-attr="y"]').getKendoNumericTextBox(),
+		$room = $el.filter('[data-attr="room"]').getKendoDropDownList(), 
+		$type = $el.filter('[data-attr="type"]').getKendoDropDownList(), 
+		$data, $array = [$background, $width, $height, $x, $y, $room,$type];
+	$el.removeData('CURRENT_SHAPE');
+	$data = data instanceof Array && data.length > 0 ? data.length == 1 ? data[0].options : this.boundingBox(data) : {};
+	let { x, y, width, height, fill, roomId ,type} = $data;
+	var idx = this.shapes.map(function(e){return e.options.roomId}).indexOf(roomId);
+	// 選中部屋の形状情報設定
+	if(data && data.length > 0) $el.data('CURRENT_SHAPE', {shapes: data,sender:this,index:idx,$data});
+	
+	assignment.call($array, 'value', kendo.parseColor(fill), width || 0, height || 0, x || 0, y || 0, roomId || '', type || 'rectangle' );
+	assignment.call($array, 'enable', true);
+	$array = data && data.length != 0 ? data.length != 1 ? [$background, $room] : $array : $array;
+	assignment.call($array, 'enable', Boolean(data && data.length == 1));
+}
+/*
+	分配, 执行不同对象相同方法名或赋值不同对象相同属性名的值
+*/
+function assignment(command) {
+	if(this instanceof Array && command){
+		let parms = Array.from(arguments).slice(1);
+		for(let i = 0, k = this.length, j = parms.length; i < k; i++){
+			let key = this[i];
+			let val = parms[i % j];
+			if(!key) continue;
+			key[command] instanceof Function ? key[command](val) : key[command] = val;
+		}
+	}
+	return this;
+}
+// save file
+function Save() {
+	if (checkHadBlankRoom()) {
+		var errorMsg = '未割り当て部屋が存在するため、保存できません。';
+		// ドキュメントId
+		// Templateの有効の場合
+		var attId = $('#attId').val() || "";
+		if (attId != "") {
+			var attchDropdown = $("#attachmentDropDown").getKendoDropDownList();
+			if (attchDropdown) {
+				var item = attchDropdown.dataItem(attchDropdown.select());
+				if (("status" in item) && !item.status) errorMsg = '';
+			}
+		}
+		if (errorMsg != "") return alert('未割り当て部屋が存在するため、保存できません。');
+	}
+	var data = {
+		shapes: JSON.stringify(getShapes()),
+		shopCd : $('#hidShopCode').val() || ""
+		// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+		,attId : $('#attId').val() || ""
+		// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+	};
+	remoteCenter('shopSave',JSON.stringify(data),afterSaveTemp,true);
+}
+function layoutStatus(){
+	var btn = $(event.currentTarget);
+	var btnName = btn.attr("name");
+	if (btnName == 'validateBtn' && checkHadBlankRoom()) {
+		return alert('未割り当て部屋が存在するため、保存できません。');
+	}
+	var data = {
+		validate : btnName == 'validateBtn',
+		shopCd : $('#hidShopCode').val() || ""
+		// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+		,attId : $('#attId').val() || ""
+		// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+	};
+	// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+	if (data.validate) data.shapes = JSON.stringify(getShapes())
+	// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+	remoteCenter('layoutStatusChange',JSON.stringify(data),afterSaveTemp,true);
+}
+// 新規テンプレート
+function newTemplate(){
+	SaveTemplate("");
+}
+function updTemplate(){
+	var attId = $('#attId').val() || "";
+	SaveTemplate(attId);
+}
+function upsertTemplate(){
+	if (checkHadBlankRoom()) {
+		return alert('未割り当て部屋が存在するため、保存できません。');
+	}
+	var shopName = $('#hidShopCode').val() || "";
+	var label = 'オーダーエントリー機能(店舗[_shop_])が該当テンプレートを利用してよろしいですか？';
+	if (confirm(label.replace('_shop_',shopName))) {
+		var attId = $('#attId').val() || "";
+		SaveTemplate(attId,true);
+	}
+}	
+function SaveTemplate(attId,updFlg){
+	var name = '';
+	if (attId == "") {
+		name = prompt("テンプレート名を入力してください");
+		if (name || name === "") {
+			console.log(name);
+		} else {
+			return;
+		}
+	} else {
+		name = $("#tempName").val();
+	}
+	var data = {
+		shapes: JSON.stringify(getShapes()),
+		attId:attId,
+		name:name,
+		descr:$("#tempDescribe").val() || "",
+		shopCd : $('#hidShopCode').val() || ""
+	};
+	if (updFlg) data.upsertFlg = updFlg;
+	remoteCenter('templateSave',JSON.stringify(data),afterSaveTemp,true);
+}
+function removeTemplate(){
+	if (confirm("削除してよろしいですか ")) {
+		var data = {
+			attId:$('#attId').val() || "",
+			shopCd : $('#hidShopCode').val() || ""
+		};
+		remoteCenter('removeTemplate',JSON.stringify(data),afterDelTemp,true);
+	}
+}
+function getShapes(){
+	var saveDatas = diagram.save(),datas = [],maxHt;
+	saveDatas.shapes.forEach(function(shape){
+		var data = {
+			type:shape.type == 'rectangle' ? 1 : 2,
+			x:shape.x,
+			y:shape.y,
+			width:shape.width,
+			height:shape.height,
+		};
+		if (("content" in shape) && ("text" in shape.content)) data.content = shape.content;
+		if ("roomId" in shape) data.roomId = shape.roomId;
+		if (("fill" in shape) && shape.fill != layout.color) data.fill = shape.fill;
+		datas.push(data);
+	});
+	return datas;
+}
+function updateBaseSetting(typeName,val){
+	var data = {
+		shopCd : $('#hidShopCode').val() || "",
+		descr:typeName,
+		value:val,
+	}
+
+	var properties = typeName.toLowerCase();
+	layout[properties] = val;
+	if (properties == 'color') {
+		kendo.ui.progress($('body'), true);
+		properties = 'fill';
+		diagram.options.shapeDefaults[properties] = val;
+		diagram.load(getShapes());
+		kendo.ui.progress($('body'), false);
+	}
+	drawCustomImg();
+	remoteCenter('updateShopDocSetting',JSON.stringify(data),false,false,true);
+}
+// 保存時のチェック、全て形状、部屋割当済み
+function checkHadBlankRoom(){
+	var checkFlag = false;
+	var roomArr = getLayoutFilterRooms();
+	if (roomArr.length > 0) {
+		roomArr.forEach(function(roomId){
+			if (roomId == undefined || roomId == "" || roomId == null){
+				checkFlag = true;	
+			}
+		});
+		
+	}
+	return checkFlag;
+}
+//指定テンプレート取得
+function getAttachmentById(attId){
+	// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+	$('#attId').val(attId);
+	// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+	var data = {
+		attId:attId || "",
+		shopCd : $('#hidShopCode').val() || ""
+	};
+	remoteCenter('getAttachment',JSON.stringify(data),afterGetAttchs);
+}
+
+function getLayoutFilterRooms(notRoomId,template){
+	var diagram = $("#diagram").data("kendoDiagram");
+	var roomArr = [];
+	diagram.shapes.forEach(function(shape){
+		var roomId = shape.options.roomId;
+		if (template){
+			if (roomId != undefined && roomId != notRoomId)
+				roomArr.push(JSON.parse(template.replace('_room_',roomId)));
+		} else 
+			roomArr.push(roomId);
+	});
+	return roomArr;
+}
+function afterGetRoomLst(result){
+	var dropDown = $("#roomDropDown").getKendoDropDownList();
+	if (dropDown == undefined) {
+		dropDown = $("#roomDropDown").kendoDropDownList({
+			filter: "contains",
+			dataTextField: "name",
+			dataValueField: "value",
+			dataSource: {},
+			select: function(e) {
+				let type = e.sender.element.data('attr');
+				e.sender.wrapper.parents('div.k-content').trigger('custom-change', {e, type});
+			},
+			open:function(e) {
+				var wd = this.list.width();
+				this.list.css("width",wd);
+			}
+		}).getKendoDropDownList();
+		dropDown.list.css("width","auto");
+	}
+	var roomFilters = getLayoutFilterRooms();
+	var datas = [];
+	result.forEach(function(room){
+		mainRoom[room.value] = room;
+		if ($.inArray(room.value,roomFilters) < 0) datas.push(room);
+	});
+	var newDataSource = new kendo.data.DataSource({
+	  data: datas
+	});
+	dropDown.setDataSource(newDataSource);
+	dropDown.value("");
+	dropDown.enable(false);
+	// 刷新リストと指定テンプレート取得
+	refreshAttachMents(true);
+}
+// 削除テンプレート
+function afterDelTemp(result){
+	$('#attId').val("");
+	$("#attachmentDropDown").val("");
+	// 刷新指定ドキュメント
+	refreshAttachMents(true);
+}
+// 一级响应
+function afterSaveTemp(result){
+	// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+	if (typeof result === 'string') {
+	} else {
+		if (result != null && ("exitflag" in result)) {
+			alert('該当名は存在するため登録できません。');
+			SaveTemplate("");
+			kendo.ui.progress($('body'), false);
+			return;
+		}
+	// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+	if (result != null && result.Id != null) {
+		$("#attachmentDropDown").val(result.Id);
+		$('#attId').val(result.Id);
+		}
+	}
+	// 刷新指定ドキュメント
+	refreshAttachMents(true);
+}
+// 刷新指定ドキュメント（二级响应）
+function refreshAttachMents(refreshShapeFlg){
+	var data = {
+		shopCd : $('#hidShopCode').val() || "",
+		refresh : refreshShapeFlg || false,
+		attId:$('#attId').val() || ""
+	};
+	remoteCenter('refreshAttachments',JSON.stringify(data),afterRefreshAttchs);
+}
+// 刷新ドキュメントリストと刷新レイアウト
+function afterRefreshAttchs(result){
+	var datas = [];
+	if (result != null) {
+		datas = result.drop;
+	}
+	var dropDown = $("#attachmentDropDown").getKendoDropDownList();
+	if (dropDown == undefined) {
+		dropDown = $("#attachmentDropDown").kendoDropDownList({
+			dataTextField: "name",
+  			dataValueField: "id",
+  			change:function(e){
+				// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+				// $('#attId').val(this.value());
+				// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+				$("#tempName").val(this.text());
+				//指定テンプレート取得
+				getAttachmentById(this.value());
+  			}
+		}).getKendoDropDownList();
+		dropDown.list.css("width","auto");
+	}
+	var newDataSource = new kendo.data.DataSource({
+	  data: datas
+	});
+	var orgAttid = $('#attId').val();
+	dropDown.setDataSource(newDataSource);
+	var datas = dropDown.dataSource.data().filter(function(data){return data.id == orgAttid});
+	dropDown.value(datas.length > 0 ? orgAttid : "");
+	var newAttid = dropDown.value();
+	///指定テンプレート取得
+	if ("doc" in result) afterGetAttchs(result.doc);
+	else changeDocmentBtnStatus();
+}
+function afterGetAttchs(result){
+	var diag = diagram.save();
+	var shapes = [],maxHt;
+	if (result != null) {
+		var txt = result.shapes;
+		if (txt != "") {
+			try{
+				shapes = JSON.parse(txt);
+			} catch(e) {
+				shapes = JSON.parse(htmlEncodeText(txt));
+			}
+		}
+	}
+	// 既存レイアウトクリア
+	diagram.clear();
+	// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy BEGIN
+	var mobileDblFlg = getDblClickMode();
+	// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy END
+	// レイアウト内容作成
+	if (shapes.length > 0) {
+		shapes.forEach(function(shape,idx){
+			// 選択あり
+			shape.selectable = true;
+			// オーダーエンドの会計の場合
+			if (accountFlg){
+				var roomData = mainRoom[shape.roomId];
+				if (roomData.accId  == null || roomData.accId == "") {
+					shape.selectable = false;
+					shape.fill = '#ececec';
+				}
+			}
+			// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy BEGIN
+			else if (IFRAME) {
+				var roomData = mainRoom[shape.roomId];
+				if (roomData != undefined) {
+					// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy BEGIN
+					shape.selectable = true;
+					roomData.canSelectable = true;
+					// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy END
+					if ((J_LATOUT_NOLEADSEL && ("leadId" in roomData) && roomData.leadId == null) 
+						|| (J_LATOUT_NOCHKOTSEL && ("ofg" in roomData) && roomData.ofg == true)){
+						// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy BEGIN
+						roomData.canSelectable = false;
+						// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy END
+						shape.selectable = false;
+						shape.fill = '#ececec';
+					}
+						// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+					if (J_LAYOUT_MULTISE) {
+						if (("leadId" in roomData) && roomData.leadId == null) {
+							shape.selectable = true;
+						} else {
+							shape.selectable = false;
+						}
+						shape.fill = '#ececec';
+						delete roomData.canSelectable;
+					}
+					// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+				}
+			}
+			// 2019/12/30 予約の入っていないお部屋のページが開かないようになっているほうが、入力ミスが起きにくく、時間短縮になる、チェックアウト済の部屋はグレーになって、それ以上オーダーエントリーからは追加入力できなくする by zy END
+			var shopHt = shape.y + shape.height;
+			if (maxHt == undefined || maxHt < shopHt) maxHt = shopHt;
+			shape.id = idx;
+			shape.type = shape.type == 1 ? 'rectangle' : 'circle';
+		});
+		window.DESLAYOU_MAXHEIGHT = maxHt;
+		// レイアウト設定
+		diag.shapes = shapes;
+		// 画面初期化
+		diagram.load(diag);
+		// 2019/12/30 オーダエントリ機能、レイアウト機能から部屋を選ぶのをダブルクリックにしたい。スワイプに反応してしまう（IPAD） by zy BEGIN
+		if (isMobile) {
+			var onTouchFlg = false;
+			if (mobileDblFlg) {
+				diagram.element.get(0).addEventListener('touchstart', function(event) {
+					if (("mobildDblTimeout" in window) && mobildDblTimeout) clearTimeout(mobildDblTimeout);
+				});
+				diagram.element.get(0).addEventListener('touchmove', function(event) {
+					if (("mobildDblTimeout" in window) && mobildDblTimeout) clearTimeout(mobildDblTimeout);
+					onTouchFlg = false;
+				});
+			} 
+			diagram.shapes.forEach(function(shape){
+				var roomData = mainRoom[shape.options.roomId];
+				if (roomData != undefined && ("canSelectable" in roomData) && roomData.canSelectable) {
+					var shapeElement = $(shape.visual.drawingElement._observers[0].element);
+					var timeout;
+					var lastTap = 0;
+					if (shapeElement.length > 0) {
+						if (mobileDblFlg) {
+							shape.visual.drawingElement._observers[0].element.addEventListener('touchstart', function(event) {
+								event.preventDefault();
+								if (("mobildDblTimeout" in window) && mobildDblTimeout) clearTimeout(mobildDblTimeout);
+								onTouchFlg = true;
+							});
+							shape.visual.drawingElement._observers[0].element.addEventListener('touchend', function(event) {
+								event.preventDefault();
+								if (onTouchFlg) {
+									window.mobildDblTimeout = setTimeout(function() {
+										customHandle([shape]);	
+										onTouchFlg = false;
+									}, 300);
+								}
+							});
+						} else
+						shape.visual.drawingElement._observers[0].element.addEventListener('touchend', function(event) {
+							event.preventDefault();
+							var currentTime = new Date().getTime();
+							var tapLength = currentTime - lastTap;
+							clearTimeout(timeout);
+							if (tapLength < 500 && tapLength > 0) {
+								customHandle([shape]);
+								event.preventDefault();
+							} else {
+								timeout = setTimeout(function() {
+									clearTimeout(timeout);
+								}, 500);
+							}
+							lastTap = currentTime;
+						});
+					}
+				}
+			});
+		} 
+		// 2019/12/30 オーダエントリ機能、レイアウト機能から部屋を選ぶのをダブルクリックにしたい。スワイプに反応してしまう（IPAD） by zy END
+	}
+	if (result) {
+		$("#tempName").val(result.name || "");
+		// 作成者設定
+		$("#createBy").val(result.create || "");
+		// 更新者設定
+		$("#modifyBy").val(result.modify || "");
+		// 説明設定
+		$("#tempDescribe").val(result.descr || "");
+	}
+	// ドキュメント変更画面状態設定
+	changeDocmentBtnStatus();
+	resizeInit();
+}
+// HTML内容変更JSON
+function htmlEncodeText(txt){
+	return $("<div/>").html(txt).get(0).textContent
+}
+// remoteデータ取得
+function remoteCenter(type,data,callback,lockFlg,noLockFlg){
+	if (noLockFlg != true) kendo.ui.progress($('body'), true);
+	// 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.DesignLayoutCtrl.remoteCenter}", type,data, function(result, event){
+        if(event.type == 'exception') {
+        	console.log("-------error-------");
+            alert(event.message);
+        } else if(result != null){
+        	// html encode
+        	try{} catch(e){}
+        }
+        if (callback) callback(result);
+        if (lockFlg != true) kendo.ui.progress($('body'), false);
+    });
+}
+// 2019/12/30 オーダエントリ機能、レイアウト機能から部屋を選ぶのをダブルクリックにしたい。スワイプに反応してしまう（IPAD） by zy BEGIN
+function getDblClickMode(){
+	var modeFlg = $("#hidMobileDbClkMode").val();
+	return modeFlg == "false";
+}
+// 2019/12/30 オーダエントリ機能、レイアウト機能から部屋を選ぶのをダブルクリックにしたい。スワイプに反応してしまう（IPAD） by zy END
+// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+// 選択部屋取得
+function getSelectRoomArr(){
+	var roomArr = [];
+	var roomIndexMap = {};
+	// 該当部屋フィルター
+	diagram.shapes.forEach(function(shape){
+		// 選択部屋チェック
+		if (shape.selectRoom) {
+			var index = shape.index,room = mainRoom[shape.options.roomId];
+			roomIndexMap[index] = room;
+			roomArr.push(index);
+		}
+	});
+	// 時間ソート
+	roomArr.sort();
+	var sortArr = [];
+	// 時間部屋取得
+	roomArr.forEach(function(roomIndex){
+		sortArr.push(roomIndexMap[roomIndex]);
+	});
+	return sortArr;
+}
+// 複数部屋画面刷新
+function setTableSel(flag){
+	if (flag) J_LAYOUT_MULTISE = true;
+	else J_LAYOUT_MULTISE = false;
+	// 初期化
+	beforeInit();
+}
+// 画面状態チェック
+function isLoaded(){
+	return J_PAGE_LOAD;
+}
+// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+</script>
+</apex:page>

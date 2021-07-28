@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Exchange rate</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Exchange rate</value>
+    </caseValues>
+    <fields>
+        <label>Exchange rate previous</label>
+        <name>FromCurrency__c</name>
+        <picklistValues>
+            <masterLabel>JPY</masterLabel>
+            <translation><!-- JPY --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>USD</masterLabel>
+            <translation><!-- USD --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Rate date</label>
+        <name>RateDate__c</name>
+    </fields>
+    <fields>
+        <label>Rate</label>
+        <name>Rate__c</name>
+    </fields>
+    <fields>
+        <label>Exchange rate after</label>
+        <name>ToCurrency__c</name>
+        <picklistValues>
+            <masterLabel>JPY</masterLabel>
+            <translation><!-- JPY --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>USD</masterLabel>
+            <translation><!-- USD --></translation>
+        </picklistValues>
+    </fields>
+    <nameFieldLabel>Exchange rate name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

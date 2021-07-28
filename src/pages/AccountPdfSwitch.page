@@ -1,0 +1,12 @@
+<!-- // 2018/03/07 Security Check BEGIN -->
+<apex:page standardcontroller="AccountAcount__c" extensions="AccountPdfSwitch" showHeader="false" sidebar="false">
+<apex:form >
+    <apex:actionFunction name="actRedirect" action="{!redirect}"/>
+    <script>
+    window.onload = function () {
+        actRedirect();
+    };
+    </script>
+</apex:form>
+<!-- // 2018/03/07 Security Check END -->
+</apex:page>

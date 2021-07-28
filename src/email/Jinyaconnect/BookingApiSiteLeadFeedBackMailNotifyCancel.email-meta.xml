@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>ブッキングAPIから予約自動取込の連絡メール(施設へ送信)【キャンセル】</name>
+    <style>none</style>
+    <subject>Re: 元湯陣屋　【キャンセル.{!LeadIndex__c.TravelLeadNo__c}】 {!LeadIndex__c.EntryDate__c}【{!LeadIndex__c.StayPersons__c}名{!LeadIndex__c.Rooms__c}部屋】</subject>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

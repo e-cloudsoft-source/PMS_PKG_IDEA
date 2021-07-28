@@ -1,0 +1,762 @@
+<!-- ビル一括印刷 -->
+<apex:page controller="AccountPdfBulkPrintCtrl" action="{!init}" title="{!$Label.ps__msg_006_0442}" sidebar="false" showHeader="false" readOnly="true">
+
+<c:CommHeaderComp />
+
+<style>
+.imgIconStyle {
+    border: 0;
+}
+span.dateFormat{
+   display:none;
+}
+.inputDtCls{
+	font-size: 1.2em;
+	width:120px;
+	margin-left: 5px;
+	height:21px;
+	padding: 1px;
+}
+.spanRight {
+    text-align: right;
+}
+</style>
+<apex:actionStatus id="refStatusBlock"	onstart="javascript:blockUi();" onstop="unblockUi();" />	<!-- 処理中場合、画面BLOCK処理 -->
+<apex:form id="pdfBulkSearch">
+	<!-- get Open Url -->
+	<input type="hidden" value="{!JSENCODE(urlStr)}" id="urlStrHid"/>
+	<!-- 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN -->
+	<!-- 请求书 get Open Url -->
+	<input type="hidden" value="{!JSENCODE(billUrlStr)}" id="billUrlStrHid"/>
+	<!-- 2019/03/28 請求書一括印刷機能対応 WGCH END -->
+	<!-- 会計表示期間 -->
+	<!-- 条件 -->
+	<apex:pageBlock title="{!$Label.ps__msg_006_0443}">
+		<div class="toolBarExtCls">
+			<!-- 出発日 -->
+			<apex:outputLabel value="{!$ObjectType.Lead__c.Fields['Departure__c'].label}:" /> 
+			<apex:inputField value="{!selectDate.Checkinday__c}" styleClass="inputDtCls" id="gotoDate">
+				<!-- 2017/12/21 通过user记录设定 WGCH BEGIN -->
+				<apex:actionSupport event="onchange" action="{!gotoDate}" onbeforedomupdate="setSwapLayoutCookieFun()" rerender="pdfBulkAcountList" status="refStatusBlock"  oncomplete="setKendoGrid();" />
+				<!-- 2017/12/21 通过user记录设定 WGCH END -->
+			</apex:inputField>
+			<span style="margin-left: 20px">
+			<!-- 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH BEGIN -->
+			{!$Label.MSG_006_0452}&nbsp;&nbsp;
+			<apex:inputCheckbox id="noAccTran1Flg" value="{!noAccTran1Flg}"/>
+			{!$Label.MSG_006_0453}&nbsp;&nbsp;
+			<apex:inputCheckbox id="noField151Flg" value="{!noField151Flg}"/>&nbsp;&nbsp;
+			<!-- 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH END -->
+			<!-- 2017/12/21 通过user记录设定 WGCH BEGIN -->
+			<apex:commandButton action="{!gotoDate}" style="width:100px" value="{!$Label.ps__msg_006_0448}" onclick="setSwapLayoutCookieFun()" />
+			<!-- 2017/12/21 通过user记录设定 WGCH END -->
+			</span>
+		</div>
+	</apex:pageBlock>
+</apex:form>
+<!-- 会計情報 -->
+<apex:form id="pdfBulkAcountList">
+	<!-- 印刷対象 -->
+	<apex:pageBlock title="{!$Label.ps__msg_006_0446}{!roomSizeLab}">
+		<apex:pageBlockButtons >
+			<apex:outputPanel rendered="{!accountReceiptOptIsShow}">
+			<!-- 領収書表示: -->
+			<!-- 2017/11/08 33/34不显示领收书表示的chec WGCH BEGIN -->
+			<apex:outputLabel value="{!$Label.ps__msg_006_0445}" rendered="{!accPrnShowBtnFlg}"/> 
+			<input type="checkbox" style="{!IF(accPrnShowBtnFlg, '','display:none;')}" onclick="clickFun(this);" id="accountReceipt"/>
+			<!-- 2017/11/08 33/34不显示领收书表示的chec WGCH END -->
+			&nbsp;&nbsp;
+			</apex:outputPanel>
+			<!-- 2017/10/18 チェックアウト機能対応  BEGIN -->
+			<!-- ﾁｪｯｸｱｳﾄ -->
+			<input type="button" class="btn" style="{!IF(accPrintAllLst.size > 0, '','display:none;')}" onclick="_JsCheckoutFunction();" value="{!$Label.MSG_006_0450}"/>
+			<!-- 会計書 -->
+			<input type="button" class="btn" style="{!IF(accPrintAllLst.size > 0 && !fpFlg, '','display:none;')}" onclick="getCheckbulkIdFun();" value="{!$Label.MSG_006_0111}"/>
+			<!-- <input type="button" class="btn" name="inputBtn" value="キャンセル" onclick="cancelActionFun();"/> -->
+			<!-- 2017/10/18 チェックアウト機能対応  END -->
+			<!-- 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN -->
+			<input type="button" class="btn" style="{!IF(accPrintAllLst.size > 0, '','display:none;')}" onclick="openWin();" value="{!$Label.MSG_006_0215}"/>
+			<!-- 2019/03/28 請求書一括印刷機能対応 WGCH END -->
+		</apex:pageBlockButtons>
+		<apex:outputPanel rendered="{!accPrintAllLst.size > 0}">
+		<table border="0" cellpadding="0" cellspacing="0" id="grid">
+			<thead>
+				<tr>
+					<!-- 一括対象 -->
+					<th>
+						<input type="checkbox" name="allpick" style="vertical-align:middle;" checked="checked"/>
+						<label style="vertical-align:middle;">{!$Label.MSG_006_0100}</label>
+					</th>
+					<!-- お客様 -->
+					<th>
+						<span>{!$ObjectType.AccountAcount__c.Fields.relaccount__c.label}</span>
+					</th>
+					<!-- ご予約 -->
+					<th>
+						<span>{!$ObjectType.AccountAcount__c.Fields.Relreserve__c.label}</span>
+					</th>
+					<!-- Account# -->
+					<th>
+						<span>{!$ObjectType.AccountAcount__c.Fields.Name.label}</span>
+					</th>
+					<!-- お部屋 -->
+					<th>
+						<span>{!$Label.MSG_006_0101}</span>
+					</th>
+					<!-- 到着日 -->
+					<th>
+						<span>{!$ObjectType.Lead__c.Fields['EntryTime__c'].label}</span>
+					</th>
+					<!-- 出発日 -->
+					<th>
+						<span>{!$ObjectType.Lead__c.Fields['Departure__c'].label}</span>
+					</th>
+					<!-- 泊数 -->
+					<th>
+						<span>{!$Label.MSG_006_0444}</span>
+					</th>
+					<!-- 会計済 -->
+					<th>
+						<span>{!$Label.MSG_006_0106}</span>
+					</th>
+					<!-- 会計人数 -->
+					<th>
+						<span>{!$Label.MSG_006_0107}</span>
+					</th>
+					<!-- 明細件数 -->
+					<th>
+						<span>{!$Label.MSG_006_0447}</span>
+					</th>
+					<!-- 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH BEGIN -->
+					<!-- 明細数 -->
+					<th>
+						<span>{!$Label.MSG_006_0105}</span>
+					</th>
+					<!-- ご利用金額(税込) -->
+					<th>
+						<span>{!$Label.MSG_006_0108}</span>
+					</th>
+					<!-- 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH END -->
+				</tr>
+			</thead>
+			<tbody>
+				<apex:repeat value="{!accPrintAllLst}" var="accPrintLst">
+				<!-- Max 1000 Lines Data -->
+				<apex:repeat value="{!accPrintLst}" var="acc">
+					<tr>
+						<!-- 一括対象 -->
+						<td>
+							<!-- 2017/10/18 チェックアウト機能対応  BEGIN -->
+							<input type="checkbox" Class="check" accId="{!acc.bulkIdStr}" ldId="{!acc.ldIdStr}" roomNm="{!acc.roomName}" accSize="{!acc.accSize}" onclick="setCheckBoxFun(this);" checked="checked" />
+							<!-- 2017/10/18 チェックアウト機能対応  END -->
+						</td>
+						<!-- お客様 -->
+						<td>
+							<apex:outputLink value="/{!acc.relaccount}" target="_blank" >
+								<apex:outputText value="{!acc.relaccountName}"/>
+							</apex:outputLink>
+						</td>
+						<!-- ご予約 -->
+						<td>
+							<apex:outputLink value="/{!acc.relreserve}" target="_blank" >
+								<apex:outputText value="{!acc.relreserveName}"/>
+							</apex:outputLink>
+						</td>
+						<!-- Account# -->
+						<td>
+							<apex:outputLink value="/{!acc.accId}" target="_blank" >
+								<apex:outputText value="{!acc.accName}"/>
+							</apex:outputLink>
+						</td>
+						<!-- お部屋 -->
+						<td>
+							<apex:outputLink value="/{!acc.room}" target="_blank" >
+								<apex:outputText value="{!acc.roomName}"/>
+							</apex:outputLink>
+						</td>
+						<!-- 到着日 -->
+						<td>
+							<apex:outputText value="{!acc.entryTime}"/>
+						</td>
+						<!-- 出発日 -->
+						<td>
+							<apex:outputText value="{!acc.departure}"/>
+						</td>
+						<!-- 泊数 -->
+						<td>
+							<apex:outputText value="{!acc.stayNightCal}"/>
+						</td>
+						<!-- 会計済 -->
+						<td>
+							<apex:outputText value="{!acc.accountedFlgCal}" escape="false"/>
+						</td>
+						<!-- 会計人数 -->
+						<td>
+							<apex:outputText value="{!acc.field57}"/>
+						</td>
+						<!-- 明細件数 -->
+						<td>
+							<apex:outputText value="{!acc.accSize}"/>
+						</td>
+						<!-- 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH BEGIN -->
+						<!-- 明細数 -->
+						<td>
+							<apex:outputText value="{!acc.accTran1Size}"/>
+						</td>
+						<!-- ご利用金額(税込) -->
+						<td>
+							<apex:outputText value="{!acc.field151}"/>
+						</td>
+						<!-- 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH END -->
+					</tr>
+				</apex:repeat>
+				</apex:repeat>
+			</tbody>
+		</table>
+		</apex:outputPanel>
+	</apex:pageBlock>
+	<!-- 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN -->
+	<div id="printPdfWindow" class="pbSubsection" style="display:none;">
+		<table class="detailList" style="table-layout: fixed;width: 400px;" border="0" cellpadding="1" cellspacing="1">
+			<tbody>
+			<tr>
+				<td class="labelCol" width="80px"><label>発行日付</label></td>
+				<td class="data2Col first" width="320px">
+				<input id="dialog_acountdate" type="text" style="width:88%" value="{!acountdateStr}" /></td>
+			</tr>
+			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+			<apex:outputPanel rendered="{!RespectFlg}">
+			<tr>
+				<td class="labelCol"><label>敬称</label></td>
+  				<td class="data2Col first">
+	  				<apex:selectList size="1" value="{!mrStr}" id="multiselectId">
+	  					<apex:selectOptions value="{!mrTypeLst}" />
+	  				</apex:selectList>
+  				</td>
+			</tr>
+			</apex:outputPanel>
+			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+			<tr>
+				<td class="labelCol"><label>ハンコ表示</label></td>
+				<td class="data2Col first"><apex:inputCheckbox value="{!billStampIsShowFlg}" id="dialog_stampIsShowFlg" /></td>
+			</tr>
+			<tr style="vertical-align: top;">
+				<td class="labelCol"><label>コメント</label></td>
+				<td class="data2Cols">
+					<apex:selectList value="{!billComment}" multiselect="false" size="1" id="dialog_comment" style="margin-bottom:1px;width:280px;height: 20px;" rendered="{!commentOpts.size > 1}" onchange="commentSel()">
+						<apex:selectOption itemValue="" itemLabel="" />
+						<apex:selectOptions value="{!commentOpts}" />
+					</apex:selectList>
+					<textarea id="dialog_comment" rows="4" style="width: 280px;">{!billComment}</textarea><p>コメント：１行18文字、4行以内入力ください。</p>
+				</td>
+			</tr>
+			<tr style="vertical-align: top;{!IF(fixedMsgOpts.size > 0, '','display:none;')}" id="div_fixed_msg">
+				<td class="labelCol"><label>口座情報</label></td>
+				<td class="data2Col">
+					<div>
+						<div>
+							<apex:selectList value="{!fixedMsg}" multiselect="false" size="1" id="dialog_fixedmsg" style="margin-bottom:1px;width:280px;height: 20px;" rendered="{!fixedMsgOpts.size > 0}">
+								<apex:selectOption itemValue="" itemLabel="" />
+								<apex:selectOptions value="{!fixedMsgOpts}" />
+							</apex:selectList>
+						</div>
+					</div>
+				</td>
+			</tr>
+  			<!-- 2019/04/30 請求書の送付表新規作成 BY zyz BEGIN -->
+  			<tr style="vertical-align: top;{!IF(billLetterFlg, '', 'display:none;')}">
+	  			<td class="labelCol"><apex:outputLabel value="送付状あり："/></td>
+	  			<td class="data2Col">
+		  			<span class="lookupInput" >
+		  			<input type="checkbox" id="dialog_shipping" checked="checked"/>
+		  			</span>
+	  			</td>
+  			</tr>
+  			<!-- 2019/04/30 請求書の送付表新規作成 BY zyz END -->
+			<tr>
+				<td colspan="2" style="text-align: center;"><input class="btn" id="dialog_cancelBtn" style="width: 100px" type="button" onclick="closeWin();" value="キャンセル" />	<input class="btn" id="dialog_printoutBtn_bill" style="width: 100px" type="button" value="請求書作成" onclick="getCheckbulkIdFun('BILL');closeWin();" /></td>
+			</tr>
+			</tbody>
+		</table>
+	 </div>
+	 <!-- 2019/03/28 請求書一括印刷機能対応 WGCH END -->
+</apex:form>
+<script>
+$=jQuery.noConflict();
+// Lock
+function blockUi() {
+	return JINYACONNECT.blockUi();
+}
+// Lock解除
+function unblockUi() {
+	JINYACONNECT.unblockUi();
+}
+$(document).ready(function() {
+    setKendoGrid();
+});
+function setKendoGrid(){
+	// 初期化
+   	var $grid = $("table[id='grid']");
+    var $headers = $grid.find('th');
+    
+    for (i=0;i<$headers.length;i++) {
+        $headers[i].setAttribute("data-field","col_"+i);
+    }
+    $grid.kendoGrid({
+        // 滚动条
+        scrollable:false,
+        // 排序
+        sortable:true,
+        // 2017/10/10 排序问题修正 WGCH BEGIN
+        columns:[
+            {	field:"col_0", sortable: false, width:95 },
+            
+            {	field:"col_1", sortable: true, width:250,
+	            sortable: {
+	                compare: function(a, b) {
+	                    return sortableCompare(a,b,"col_1");
+	                }
+	            }
+            },
+            
+            {	field:"col_2", sortable: true, width:250,
+            	sortable: {
+	                compare: function(a, b) {
+	                    return sortableCompare(a,b,"col_2");
+	                }
+	            }
+            },
+            {	field:"col_3", sortable: true, width:110,
+            	sortable: {
+	                compare: function(a, b) {
+	                    return sortableCompare(a,b,"col_3");
+	                }
+	            }
+            },
+            {	field:"col_4", sortable: true,
+            	sortable: {
+	                compare: function(a, b) {
+	                    return sortableCompare(a,b,"col_4");
+	                }
+	            }
+            },
+            // 2017/10/10 排序问题修正 WGCH END
+            {field:"col_5", sortable: true,},
+            {field:"col_6", sortable: true,},
+            {field:"col_7", sortable: true, type:"number", attributes:{"class": "spanRight"}},
+            {field:"col_8", sortable: false,},
+            {field:"col_9", sortable: true, type:"number", attributes:{"class": "spanRight"}},
+            {field:"col_10", sortable: true, type:"number", attributes:{"class": "spanRight"}},
+            // 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH BEGIN
+            {field:"col_11", sortable: true, type:"number", attributes:{"class": "spanRight"}},
+            {field:"col_12", sortable: true, type:"number", attributes:{"class": "spanRight"}}
+            // 2017/11/30 ビル一括印刷で印刷不要な会計やすいため改善 WGCH END
+        ],
+        // 展开Icon详细数据
+        detailInit: function (e) {
+            // Css与主对齐
+            e.detailCell.eq(0).css('padding-left','0px');
+            // 获取当前行
+            var tr = $("tr[data-uid='" + e.data.uid + "']");
+            // 获取当前行checkBox DOM 
+            var $checkBox = $('input.check',tr);
+            // 2017/10/18 チェックアウト機能対応  BEGIN
+            // データ抽出日
+            var queryDt = $("[id$=':gotoDate']").val();
+            if(queryDt == ""){
+	            var url = location.search;
+	            if (url.indexOf("?") != -1) {
+		            var theRequest = new Object();
+		            var str = url.substr(1); 
+		            strs = str.split("&"); 
+		            for(var i = 0; i < strs.length; i ++) { 
+		            	theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]); 
+		            } 
+		            queryDt = theRequest["qdt"];
+	            }
+            }
+            // 2017/10/18 チェックアウト機能対応  BEGIN
+            var accPrintItemDs = new kendo.data.DataSource({ transport: {
+                    read: function (options) {
+                        // make AJAX request to the remote service
+                        Visualforce.remoting.Manager.invokeAction(
+                            // 2017/10/18 チェックアウト機能対応  BEGIN
+                            // "{!$RemoteAction.AccountPdfBulkPrintCtrl.getAccPrintItemInfo}", $checkBox.attr('accId'), $checkBox.prop('checked'), function (result, event) {
+                            "{!$RemoteAction.AccountPdfBulkPrintCtrl.getAccPrintItemInfo}", $checkBox.attr('accId'), $checkBox.prop('checked'), queryDt, function (result, event) {
+                                if (event.type == 'exception') {
+                                    alert(event.message);
+                                } else {
+                                    // 予定表明細一覧情報を引き渡す
+                                    var jsonResult = $.parseJSON(result);
+                                    // 数据源
+                                    options.success(jsonResult);
+                                }
+                                // Css 关闭等待
+                                kendo.ui.progress($("table[id$=':grid']"), false);
+                            }, {escape: false});
+                        },
+                        update: function (options) {}
+                    },
+                });
+            $("<div/>").appendTo(e.detailCell).kendoGrid({
+                dataSource: accPrintItemDs,
+                // 滚动条
+                scrollable: false,
+                // 排序
+                sortable: true,
+                columns:[
+                    // 一括対象
+                    {   
+                        field: "isChecked",
+                        title: " ",
+                        type:"boolean",
+                        sortable: false,
+                        width: 94,
+                        template:
+                                // 2017/10/18 チェックアウト機能対応  BEGIN
+                                "# if (isChecked) { #" +
+                                    '<input type="checkbox" class="itemCheck" onclick="setItemCheckBoxFun(\''+ e.data.uid +'\')" uid="'+ e.data.uid +'" accId="#= accId#" ldId="#= ldId#" checked="checked" />' +
+                                "# } else { #" +
+                                    '<input type="checkbox" class="itemCheck" onclick="setItemCheckBoxFun(\''+ e.data.uid +'\')" uid="'+ e.data.uid +'" accId="#= accId#" ldId="#= ldId#" />' +
+                                "# } #",
+                                // 2017/10/18 チェックアウト機能対応  END
+                    },
+                    // お客様
+                    {   
+                    	// 2017/10/10 排序问题修正 WGCH BEGIN
+                        field: "relaccountName",
+                        // 2017/10/10 排序问题修正 WGCH END
+                        title: "{!$ObjectType.AccountAcount__c.Fields.relaccount__c.label}",
+                        width:250,
+                        template:
+                                "# if (relaccount != null && relaccount != '') { #" +
+                                    "<a href='/#= relaccount#' target='_blank'>#= relaccountName#</a>" +
+                                "# } else { #" +
+                                    '' +
+                                "# } #",
+                    },
+                    // ご予約
+                    {   
+                    	// 2017/10/10 排序问题修正 WGCH BEGIN
+                        field: "relreserveName",
+                        // 2017/10/10 排序问题修正 WGCH END
+                        title: "{!$ObjectType.AccountAcount__c.Fields.Relreserve__c.label}",
+                        width:250,
+                        template:
+                                "# if (relreserve != null && relreserve != '') { #" +
+                                    "<a href='/#= relreserve#' target='_blank'>#= relreserveName#</a>" +
+                                "# } else { #" +
+                                    '' +
+                                "# } #",
+                    },
+                    // Account#
+                    {   
+                    	// 2017/10/10 排序问题修正 WGCH BEGIN
+                        field: "accName",
+                        // 2017/10/10 排序问题修正 WGCH END
+                        title: "{!$ObjectType.AccountAcount__c.Fields.Name.label}",
+                        width: 110,
+                        template:
+                                "# if (accId != null && accId != '') { #" +
+                                    "<a href='/#= accId#' target='_blank'>#= accName#</a>" +
+                                "# } else { #" +
+                                    '' +
+                                "# } #",
+                    },
+                    // お部屋
+                    {   
+                        field: "roomName",
+                        title: "{!$Label.MSG_006_0101}",
+                    },
+                    // 到着日
+                    {   
+                        field: "entryTime",
+                        title: "{!$ObjectType.Lead__c.Fields['EntryTime__c'].label}",
+                    },
+                    // 売上計上日
+                    {   
+                        field: "frsSalesday",
+                        title: "{!$Label.MSG_006_0103}",
+                    },
+                    // 会計日時
+                    {   
+                        field: "field148",
+                        title: "{!$Label.MSG_006_0104}",
+                    },
+                    // 明細数
+                    {   
+                        field: "accSize",
+                        title: "{!$Label.MSG_006_0105}",
+                        attributes: {
+                            style: "text-align: right;"
+                        }
+                    },
+                    // 会計済
+                    {   
+                        field: "accountedFlgCal",
+                        title: "{!$Label.MSG_006_0106}",
+                        // 识别Html语言
+                        encoded: false,
+                        sortable: false,
+                        attributes: {
+                            "class": "imgIconStyle"
+                        }
+                    },
+                    // ご利用金額(税込)
+                    {   
+                        field: "field151",
+                        title: "{!$Label.MSG_006_0108}",
+                        width: 110,
+                        attributes: {
+                            style: "text-align: right;"
+                        }
+                    },
+                ],
+                dataBound:function(e){
+                	$("td", e.sender.tbody).css("background-color", "#e6e6fa");
+                },
+            });
+        },
+    });
+    // 开启监视Allpick
+    $("[name=allpick]").on("click",function(){
+        // 所有Tr主数据的CheckBox
+        $(".check").prop("checked",$(this).prop("checked"));
+        // 所有Tr子数据 的CheckBox
+        $(".itemCheck").prop("checked",$(this).prop("checked"));
+    });
+    // 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN
+    bindKendoProjectWin();
+    // 2019/03/28 請求書一括印刷機能対応 WGCH END
+}
+// 所有Tr主数据的CheckBox事件
+function setCheckBoxFun(e) {
+    var uid = $(e).parents("tr").attr("data-uid");
+    // 对Tr子数据的CheckBox设定
+    $("input[uid='"+ uid +"']").prop("checked",$(e).prop("checked"));
+    // 对Allpick的CheckBox设定
+    setAllPickBoxFun();
+}
+// 所有Tr子数据的CheckBox事件
+function setItemCheckBoxFun(uid) {
+    var itemCheckedFlg =  $("input[uid='"+ uid +"']").length == $("input[uid='"+ uid +"']:checked").length;
+    // 当前Tr主数据的CheckBox设定
+    $("tr[data-uid='"+ uid +"'] .check").prop("checked",itemCheckedFlg);
+    // 对Allpick的CheckBox设定
+    setAllPickBoxFun();
+}
+// 对Allpick的CheckBox设定
+function setAllPickBoxFun() {
+    $("[name=allpick]").prop("checked",$(".check").length == $(".check:checked").length);
+}
+// 获取选中的会计Id
+// 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN
+var OPENMODE_BILL = "BILL";
+// function getCheckbulkIdFun() {
+function getCheckbulkIdFun(openMode) {
+// 2019/03/28 請求書一括印刷機能対応 WGCH END
+	// 锁上会计书btn
+	$(".btn").attr("disabled","disabled");
+	// blockUI Flg
+	var isCheckFlg = false;
+	// accId
+	var bulkIdStr = '';
+	// 集计groupSize
+	var groupNo = 0;
+	// 每组Size
+	var groupSize = {!groupSize};
+	// 主checkBoxSize
+	var checkBoxSize = $(".check").length - 1;
+	for(var i = 0; i <= checkBoxSize; i++){
+		var $this = $(".check").eq(i);
+		// 取到check上的AccId
+		if($this.prop("checked")){
+			bulkIdStr += $this.attr('accId') + ',';
+			groupNo++;
+		} else {
+			var uid = $this.parents("tr").attr('data-uid');
+			// oldGroupNo 转换值
+			var oldGroupNo = groupNo;
+			$("input[uid='"+ uid +"']").each(function(){
+				if($(this).prop("checked")){
+					bulkIdStr += $(this).attr('accId') + ',';
+					groupNo = oldGroupNo + 1;
+				}
+			});
+		}
+		// 有效的check Acc && ( 组员集计完成  或 最后一次循环)
+		if(bulkIdStr != '' && (groupNo == groupSize || i == checkBoxSize)){
+			bulkIdStr = bulkIdStr.substring(0, bulkIdStr.lastIndexOf(','));
+			var openUrl = $("[id='urlStrHid']").val();
+			openUrl += "&bulkid=" + bulkIdStr;
+			// 会計書の領収書欄を表示
+			var $accountReceipt = $("#accountReceipt");
+			if($accountReceipt.length > 0 && !$accountReceipt.prop("checked")) openUrl += "&noreceipt=1";
+			// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+			var MrSelectVal = $("select[id$=multiselectId]").val();
+			// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+			// 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN
+			// 置换openUrl
+			if(openMode == OPENMODE_BILL){
+				openUrl = $("[id='billUrlStrHid']").val();
+				openUrl += "&id=" + bulkIdStr.split(',')[0];
+				openUrl += "&bulkid=" + bulkIdStr;
+				openUrl += "&pdt=" + encodeURIComponent($("#dialog_acountdate").val());
+				openUrl += "&stampFlg=" + encodeURIComponent($("[id$=':dialog_stampIsShowFlg']").prop('checked'));
+				openUrl += "&&comment=" + encodeURIComponent($("#dialog_comment").val());
+				openUrl += "&fixedMsg=" + encodeURIComponent($("[id$=':dialog_fixedmsg']").val() || "");
+				// 2019/04/30 請求書の送付表新規作成 BY zyz BEGIN
+				if($("[id$=dialog_shipping]").prop("checked")) openUrl += "&letter";
+				// 2019/04/30 請求書の送付表新規作成 BY zyz END
+				// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+				if(MrSelectVal != "" && MrSelectVal != undefined) openUrl += "&mr="+MrSelectVal;
+				// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+				openUrl += "&bp=1";
+			}
+			// 2019/03/28 請求書一括印刷機能対応 WGCH END
+			window.open(openUrl);
+			// 重置
+			isCheckFlg = true;
+			bulkIdStr = '';
+			groupNo = 0;
+		}
+	}
+	if(!isCheckFlg) alert("{!$Label.MSG_006_0409}");
+	// 解锁会计书btn
+	// 2017/10/18 チェックアウト機能対応 BEGIN
+	// $(".btn").removeAttr("disabled");
+	// unblockUi();
+	_UnlockBtnFun();
+	// 2017/10/18 チェックアウト機能対応 END
+}
+// Click 联动
+function clickFun($This){
+	$('input[id="accountReceipt"]').prop("checked", $($This).prop("checked"));
+}
+// 2017/10/10 排序问题修正 WGCH BEGIN
+function sortableCompare(a, b, field) {
+     var atext = $(a[field].trim()).text();
+     var btext = $(b[field].trim()).text();
+     if (atext > btext) return 1;
+     if (atext < btext) return -1;
+     return 0;
+}
+// 2017/10/10 排序问题修正 WGCH END
+// 2017/10/18 チェックアウト機能対応 BEGIN
+function _JsCheckoutFunction() {
+    JINYACONNECT.blockUi();
+    // 锁上会计书btn
+	$(".btn").attr("disabled","disabled");
+	// ldId
+	var ldIdStr = '';
+	// 主checkBoxSize
+	var checkBoxSize = $(".check").length - 1;
+	for(var i = 0; i <= checkBoxSize; i++){
+		var $this = $(".check").eq(i);
+		// 取到check上的AccId
+		if($this.prop("checked")){
+			ldIdStr += $this.attr('ldId') + ',';
+		} else {
+			var uid = $this.parents("tr").attr('data-uid');
+			var checkedFlg = false;
+			var notLdIdFlg = true;
+			$("input[uid='"+ uid +"']").each(function(){
+				if($(this).prop("checked")){
+					checkedFlg = true;
+					if($(this).attr('ldId') != '') {
+						notLdIdFlg = false;
+						ldIdStr += $(this).attr('ldId') + ',';
+					}
+				}
+			});
+			if(checkedFlg && notLdIdFlg){
+				_UnlockBtnFun();
+    			alert('{!JSENCODE($Label.MSG_006_0451)}'.replace('XXXXXX',$this.attr('roomNm')));
+    			return;
+			}
+		}
+	}
+	ldIdStr = ldIdStr.substring(0, ldIdStr.lastIndexOf(','));
+	if(ldIdStr != ''){
+	    // CHECKOUT
+	    _CheckoutActionFun(ldIdStr);
+    } else {
+    	_UnlockBtnFun();
+    	alert("{!$Label.MSG_006_0409}");
+    }
+}
+function _CheckoutActionFun(ldIdStr){
+// CHECKOUT
+	    Visualforce.remoting.Manager.invokeAction(
+	    "{!$RemoteAction.AccountPdfBulkPrintCtrl.checkoutAction}", ldIdStr, function(result, event){
+		    if (event.type == 'exception') {
+		       alert(event.message);
+		       unblockUi();
+		    } else {
+		    	if(result[0] != '') _CheckoutActionFun(result[0]);
+		    	else {
+	                // 共同定义直接跳不跳转问题 
+	                // 複数チェックアウトが必要場合
+	                if({!coAndShowAccountWinFlg}) getCheckbulkIdFun();
+	                // 解锁会计书btn 
+	                else _UnlockBtnFun();
+                }
+		    }
+	    });
+}
+function _UnlockBtnFun() {
+	// 解锁会计书btn
+	$(".btn").removeAttr("disabled");
+	unblockUi();
+}
+// 2017/10/18 チェックアウト機能対応 END
+// 2017/12/21 通过user记录设定 WGCH BEGIN
+var userId = "{!JSENCODE(userId)}";
+var CONST_NOACCTRAN1FLG = "{!JSENCODE(CONST_NOACCTRAN1FLG)}";
+var CONST_NOFIELD151FLG = "{!JSENCODE(CONST_NOFIELD151FLG)}";
+function setSwapLayoutCookieFun(){
+	var _wkMap = new Map();
+	_wkMap.put(CONST_NOACCTRAN1FLG, $("[id$=':noAccTran1Flg']:checked").length > 0);
+	_wkMap.put(CONST_NOFIELD151FLG, $("[id$=':noField151Flg']:checked").length > 0);
+	var cookVal = "";
+	_wkMap.forEach(function(value, key) {
+		cookVal += key + ":" + value + ",";
+	});
+	// DBへ情報格納
+	JINYACONNECT.CONFIG.saveKrepConfig('NOACCFLG',cookVal,userId,'');
+}
+// 2017/12/21 通过user记录设定 WGCH END
+// 2019/03/28 請求書一括印刷機能対応 WGCH BEGIN
+function bindKendoProjectWin(){
+	var kendoWin = $("#printPdfWindow").data("kendoWindow");
+	if(kendoWin) return;
+	$("#printPdfWindow").kendoWindow({
+		title: "{!$Label.MSG_006_0215}",
+		width: "440px",
+		height: "auto",
+		actions: ["Close"],
+		visible: false,
+		close:function(e){
+			unblockUi();
+		}
+	}).data("kendoWindow").center();
+}
+function openWin(){
+	var kendoWin = $("#printPdfWindow").data("kendoWindow");
+	if(kendoWin) kendoWin.open();
+}
+function closeWin(){
+	var kendoWin = $("#printPdfWindow").data("kendoWindow");
+	if(kendoWin) kendoWin.close();
+}
+// 選択内容はコメントに設定する
+function commentSel(){
+	var comment = $("[id$=':dialog_comment']").val();
+	$("#dialog_comment").val(comment).focus();
+}
+// 2019/03/28 請求書一括印刷機能対応 WGCH END
+</script>
+<!-- 2017/12/21 通过user记录设定 WGCH BEGIN -->
+<c:UserConfigComp functiontype="KREP"/>
+<!-- 2017/12/21 通过user记录设定 WGCH END -->
+</apex:page>

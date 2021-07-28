@@ -1,0 +1,634 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Account detail</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Account detail</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計DP名 --></label>
+        <name>AccMstDPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計GP名 --></label>
+        <name>AccMstGPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計OP名 --></label>
+        <name>AccMstOPName__c</name>
+    </fields>
+    <fields>
+        <label>Address</label>
+        <name>AccountName__c</name>
+    </fields>
+    <fields>
+        <label>Details</label>
+        <name>AccountProviso__c</name>
+    </fields>
+    <fields>
+        <label>Invoice address</label>
+        <name>AccountReceiptName__c</name>
+    </fields>
+    <fields>
+        <help>$取引種別 次の文字列と一致する 00  かつ $単価 次の文字列と一致しない 0 かつ 商品種別 次の文字列と一致する M,P かつ 処理種別１ 次の文字列と一致する 1 かつ 処理種別２ 次の文字列と一致する 1 かつ 残数量 次の文字列と一致しない +000 かつ $VoidReceiptNo 次の文字列と一致する 0  かつ 集計対象外 次の文字列と一致する False
+飲み放題のときは売価?0でも集計対象とするため</help>
+        <label>$Out of sum</label>
+        <name>Accountoutside__c</name>
+    </fields>
+    <fields>
+        <label>Product process section</label>
+        <name>ActionType__c</name>
+        <picklistValues>
+            <masterLabel>前受付金</masterLabel>
+            <translation>Advances received</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>室料</masterLabel>
+            <translation>Room charge</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>朝食</masterLabel>
+            <translation>Breakfast</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation>Normal</translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- バッチ処理区分 --></label>
+        <name>BatchProcessStatusDiv__c</name>
+    </fields>
+    <fields>
+        <label>Category C</label>
+        <name>C__c</name>
+    </fields>
+    <fields>
+        <help><!-- マスタの商品コードの範囲チェック   1:賑わい亭でお食事(OPcode=会席またはお膳), 2:賑わい亭で喫茶(OPcode=一般飲料またはワンドリンク), 3:賑わい亭の入浴(OPcode=入浴料またはタオル・浴衣), 4:お部屋でお食事(OPcode=会席またはお膳,一般飲料,), 5:宿泊(OPcode=宿泊室料) --></help>
+        <label><!-- $CategoryItem --></label>
+        <name>CategoryItem__c</name>
+    </fields>
+    <fields>
+        <label>Category B</label>
+        <name>Category__c</name>
+    </fields>
+    <fields>
+        <label>Category A</label>
+        <name>Categorya__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理進捗情報 --></label>
+        <name>CookInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理メモ --></label>
+        <name>CookMemo__c</name>
+        <picklistValues>
+            <masterLabel>減塩</masterLabel>
+            <translation><!-- 減塩 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Category D</label>
+        <name>D__c</name>
+    </fields>
+    <fields>
+        <label><!-- 端末番号 --></label>
+        <name>DeviceNo__c</name>
+    </fields>
+    <fields>
+        <label>$Section</label>
+        <name>DivisionNameI__c</name>
+    </fields>
+    <fields>
+        <label>Parent menu code</label>
+        <name>Field10__c</name>
+        <relationshipLabel>Detail (Parent menu code)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Parent menu name</label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label>In company code</label>
+        <name>Field12__c</name>
+    </fields>
+    <fields>
+        <label>Sales sum link code</label>
+        <name>Field13__c</name>
+    </fields>
+    <fields>
+        <label>Take Out flag</label>
+        <name>Field14__c</name>
+    </fields>
+    <fields>
+        <label>Service fee 2(Midnight Charge) flag</label>
+        <name>Field15__c</name>
+    </fields>
+    <fields>
+        <label><!-- ＳＴ１ --></label>
+        <name>Field16__c</name>
+    </fields>
+    <fields>
+        <label><!-- ＳＴ２ --></label>
+        <name>Field17__c</name>
+    </fields>
+    <fields>
+        <label><!-- ＳＴ３ --></label>
+        <name>Field18__c</name>
+    </fields>
+    <fields>
+        <label><!-- ＳＴ４ --></label>
+        <name>Field19__c</name>
+    </fields>
+    <fields>
+        <label>Receipt No</label>
+        <name>Field1__c</name>
+        <relationshipLabel>Detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Unit price</label>
+        <name>Field20__c</name>
+    </fields>
+    <fields>
+        <label>Quantity</label>
+        <name>Field21__c</name>
+    </fields>
+    <fields>
+        <label>Remaining quantity</label>
+        <name>Field22__c</name>
+    </fields>
+    <fields>
+        <label>Total amount</label>
+        <name>Field23__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕入単価がN個の場合は、平均をとって原価となる、端数は、きりすてますよ！ --></help>
+        <label>Unit cost amount</label>
+        <name>Field24__c</name>
+    </fields>
+    <fields>
+        <label>Link DP code</label>
+        <name>Field25__c</name>
+        <relationshipLabel>Detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Link GP code</label>
+        <name>Field26__c</name>
+        <relationshipLabel>Detail</relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- ０：外税
+１：内税
+２：非課税 --></help>
+        <label>Consumer tax section</label>
+        <name>Field27__c</name>
+    </fields>
+    <fields>
+        <label>Positive and negative flag</label>
+        <name>Field28__c</name>
+    </fields>
+    <fields>
+        <label>Issue shop no</label>
+        <name>Field29__c</name>
+    </fields>
+    <fields>
+        <label>Product section</label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label>Stage/Direction status location</label>
+        <name>Field30__c</name>
+    </fields>
+    <fields>
+        <label>Direction status No</label>
+        <name>Field31__c</name>
+    </fields>
+    <fields>
+        <label>Comment No.</label>
+        <name>Field32__c</name>
+    </fields>
+    <fields>
+        <label>Discount points</label>
+        <name>Field33__c</name>
+    </fields>
+    <fields>
+        <label>Discount price</label>
+        <name>Field34__c</name>
+    </fields>
+    <fields>
+        <label>Number of promotions</label>
+        <name>Field35__c</name>
+    </fields>
+    <fields>
+        <label>Cancel link serial No</label>
+        <name>Field36__c</name>
+    </fields>
+    <fields>
+        <label>Link discount detail payment no</label>
+        <name>Field37__c</name>
+    </fields>
+    <fields>
+        <label>Service fee 1 flag</label>
+        <name>Field38__c</name>
+    </fields>
+    <fields>
+        <label>$Unit price(With Tax)</label>
+        <name>Field39__c</name>
+    </fields>
+    <fields>
+        <label>Process section 1</label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label>$Quantity</label>
+        <name>Field40__c</name>
+    </fields>
+    <fields>
+        <label>$Total (With Tax)</label>
+        <name>Field41__c</name>
+    </fields>
+    <fields>
+        <label>Daily calculation time</label>
+        <name>Field42__c</name>
+    </fields>
+    <fields>
+        <label>Daily calculation(s)</label>
+        <name>Field43__c</name>
+    </fields>
+    <fields>
+        <label>$Business Type</label>
+        <name>Field44__c</name>
+    </fields>
+    <fields>
+        <label>Sales date</label>
+        <name>Field45__c</name>
+    </fields>
+    <fields>
+        <label>$Category</label>
+        <name>Field46__c</name>
+    </fields>
+    <fields>
+        <help>原単価の金額が?0ならば、原価は売価(税抜)に目標値(%)を掛けたもの</help>
+        <label>$Unit price</label>
+        <name>Field47__c</name>
+    </fields>
+    <fields>
+        <label>$Use purpose</label>
+        <name>Field48__c</name>
+    </fields>
+    <fields>
+        <label>Comment</label>
+        <name>Field49__c</name>
+    </fields>
+    <fields>
+        <label>Process section 2</label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label>$Order time</label>
+        <name>Field50__c</name>
+    </fields>
+    <fields>
+        <label>$Unit price</label>
+        <name>Field51__c</name>
+    </fields>
+    <fields>
+        <label>$Room</label>
+        <name>Field52__c</name>
+    </fields>
+    <fields>
+        <label>Product name (Or coupon name)</label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label>Table no</label>
+        <name>Field6__c</name>
+        <relationshipLabel>Detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Product code</label>
+        <name>Field7__c</name>
+        <relationshipLabel>Detail (Product code)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Receipt No.</label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label>Order Time</label>
+        <name>Field9__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会席商品フラグ --></label>
+        <name>FoodDetailFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 税ステータスが通常のときは、原価/売価(税込)/1.05、税金のときは、原価率100%とし、利益率はゼロとなる。 --></help>
+        <label>Unit cost rate</label>
+        <name>Genkaritsu__c</name>
+    </fields>
+    <fields>
+        <help><!-- 単価ではなく、$合計金額（税込）に対して、直接税抜き計算、端数があれば切り上げ処理 --></help>
+        <label>$Total (Without Tax)</label>
+        <name>GoukeinoneTax__c</name>
+    </fields>
+    <fields>
+        <label>Invoice not display</label>
+        <name>InvoiceNoShowFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label>$Additional subjects</label>
+        <name>KanjoHojo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 勘定科目 --></help>
+        <label>$Subject</label>
+        <name>Kanjo__c</name>
+    </fields>
+    <fields>
+        <label><!-- $予約連泊情報 --></label>
+        <name>LeadInfo__c</name>
+    </fields>
+    <fields>
+        <label>Not display invoice flag</label>
+        <name>NoShowRequestFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 原価率目標値、GP codeにて、料理30%、ドリンク20%、売店50%、室料8%、飲み放題は内訳の平均値27% --></help>
+        <label><!-- $OPcode --></label>
+        <name>OPcode__c</name>
+    </fields>
+    <fields>
+        <label><!-- オプション商品グループNo（システム用） --></label>
+        <name>OptionNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- $オプション商品グループNo（システム用） --></label>
+        <name>OptionPlanKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- オーダー明細情報(PMSシステム用) --></label>
+        <name>OrderSyncInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- オーダー時間別 --></label>
+        <name>OrderTimeStmp__c</name>
+    </fields>
+    <fields>
+        <label><!-- オーダー日付 --></label>
+        <name>OrderTime__c</name>
+    </fields>
+    <fields>
+        <help><!-- POSレジ番号 --></help>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label>Parent account detail</label>
+        <name>ParentTran1Ref__c</name>
+        <relationshipLabel>Detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Payment product</label>
+        <name>PayProductRef__c</name>
+        <relationshipLabel>Detail (Payment product)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Payment type</label>
+        <name>PaymentType__c</name>
+    </fields>
+    <fields>
+        <label>Plan detail setup info</label>
+        <name>PlanDetailSyncInfo__c</name>
+    </fields>
+    <fields>
+        <label>Plan detail Non-deployed flag</label>
+        <name>PlanExpandFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当明細は既に印刷済がどうか識別フラグ --></help>
+        <label><!-- 印刷済 --></label>
+        <name>PrintedFlg__c</name>
+    </fields>
+    <fields>
+        <label>Related reservation</label>
+        <name>RelAccount__c</name>
+        <relationshipLabel>Detail</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $予約タイプ --></label>
+        <name>ReservedTypeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約タイプ --></label>
+        <name>ReservedType__c</name>
+    </fields>
+    <fields>
+        <label><!-- $お部屋名 --></label>
+        <name>RoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋名 --></label>
+        <name>RoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- RowNo. --></label>
+        <name>RowNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上日 --></label>
+        <name>RsvSalesDateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- $Seq --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label>Service charge</label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCodeCal__c</name>
+    </fields>
+    <fields>
+        <label>Special tax</label>
+        <name>SpecialTax__c</name>
+    </fields>
+    <fields>
+        <label>Installment NO</label>
+        <name>SplitGroupNo__c</name>
+        <picklistValues>
+            <masterLabel>01</masterLabel>
+            <translation><!-- 01 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>02</masterLabel>
+            <translation><!-- 02 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>03</masterLabel>
+            <translation><!-- 03 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>04</masterLabel>
+            <translation><!-- 04 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>05</masterLabel>
+            <translation><!-- 05 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>06</masterLabel>
+            <translation><!-- 06 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>07</masterLabel>
+            <translation><!-- 07 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>08</masterLabel>
+            <translation><!-- 08 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>09</masterLabel>
+            <translation><!-- 09 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10</masterLabel>
+            <translation><!-- 10 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- サブ単価 --></help>
+        <label>f Unit price (With Tax)</label>
+        <name>Subprice__c</name>
+    </fields>
+    <fields>
+        <label><!-- TableNo --></label>
+        <name>TableNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価(税抜)(増税対応)(システム用) --></label>
+        <name>TankanonetaxNew__c</name>
+    </fields>
+    <fields>
+        <help>会計マスタの税ステータスが税額そのもののときは単価（税抜）の金額は単価そのものとする、端数処理について、端数が存在すれば切り上げ処理となっている。
+***近似の0.3スライス</help>
+        <label>$Unit price(Without Tax)</label>
+        <name>Tankanonetax__c</name>
+    </fields>
+    <fields>
+        <help><!-- 画面、レポートなど使わない、システム内部利用項目 --></help>
+        <label><!-- 単価(税抜)（システム用） --></label>
+        <name>TankawithoutTaxSys__c</name>
+    </fields>
+    <fields>
+        <label>$$Unit price (Without Tax)</label>
+        <name>TankawithoutTax__c</name>
+    </fields>
+    <fields>
+        <label>Unit cost rate target value</label>
+        <name>TargetCost__c</name>
+    </fields>
+    <fields>
+        <label>Consumer tax</label>
+        <name>TaxRate__c</name>
+    </fields>
+    <fields>
+        <label>Total amount (With tax)</label>
+        <name>TotalPriceIncTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- トリガー処理対象外（システム用） --></label>
+        <name>TriggerIsStopFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $部屋タイプ名 --></label>
+        <name>TypeOfRoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>TypeOfRoomName__c</name>
+    </fields>
+    <fields>
+        <label>$ProductUnitSection</label>
+        <name>UnitPriceDefKbCal__c</name>
+    </fields>
+    <fields>
+        <label>Product unit setup section</label>
+        <name>UnitPriceDefKb__c</name>
+    </fields>
+    <fields>
+        <label><!-- $利用日 --></label>
+        <name>UseDateCal__c</name>
+    </fields>
+    <fields>
+        <label>Use date</label>
+        <name>UseDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- $VoidReceiptNo --></label>
+        <name>VoidReceiptNo__c</name>
+    </fields>
+    <fields>
+        <label>f unit price</label>
+        <name>freecost__c</name>
+    </fields>
+    <fields>
+        <label>f Unit price (Without Tax)</label>
+        <name>freeprice__c</name>
+    </fields>
+    <fields>
+        <label>f Total amount (With Tax)</label>
+        <name>freetotal1__c</name>
+    </fields>
+    <fields>
+        <label>f Total amount (Without Tax)</label>
+        <name>freetotal2__c</name>
+    </fields>
+    <fields>
+        <label>f cost unit price</label>
+        <name>freetotal3__c</name>
+    </fields>
+    <fields>
+        <help><!-- DPコードが客室または広間のときは、DPコードをそのまま返す、そうでなければ、テーブル#を返す --></help>
+        <label><!-- $GuestRoom --></label>
+        <name>guestRoom__c</name>
+    </fields>
+    <fields>
+        <label><!-- A --></label>
+        <name>inside__c</name>
+    </fields>
+    <fields>
+        <label>Out of total sum</label>
+        <name>noneaccount__c</name>
+    </fields>
+    <fields>
+        <label>Gross income rates</label>
+        <name>profit__c</name>
+    </fields>
+    <fields>
+        <label>Gross income total (Without Tax)</label>
+        <name>profitnonetax__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売価-原価、税ステータスありなら、単価(税抜)売価/1.05-原価 --></help>
+        <label>Gross income</label>
+        <name>profitt__c</name>
+    </fields>
+    <fields>
+        <label>$Tax status</label>
+        <name>rtaxsts__c</name>
+    </fields>
+    <nameFieldLabel>Account detail#</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

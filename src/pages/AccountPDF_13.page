@@ -1,0 +1,596 @@
+<apex:page standardcontroller="AccountAcount__c" extensions="AccountPDF" showHeader="false"
+	title="会計書" applyHtmlTag="false" applyBodyTag="false"
+    sidebar="false" renderAs="pdf" readonly="true" action="{!extInitAction}">
+<html>
+<head>
+ <style>
+	@page {
+    	size: 6.93in 9.84in;		/* B5 portlate size */
+        margin: 0cm;
+    }
+    body {
+        font-family: Arial Unicode MS;
+        color: {!pageFontColor};
+        top: 0.2cm;
+        left: 0.2cm;
+    }
+    .titleHeader {
+    	text-align: center;
+        font-size: 80%;
+        background-color: #CCCCCC;
+    }
+    .header {
+		height:26px;
+        font-size: 90%;
+        background-color: #CCCCCC;
+    }
+    .underline {
+    	list-style:none; 
+    	border-bottom:0.5px black solid; 
+    }
+    .splitline {
+    	list-style:none; 
+    	border-top:0.5px black solid; 
+    }
+    .rightline {
+        list-style:none; 
+        border-right:0.5px black solid; 
+    }
+    .leftline {
+        list-style:none; 
+        border-left:0.5px black solid; 
+    }
+ </style>
+</head>
+<body>
+<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+<apex:variable var="oneRoomNo" value="{!0}"/>
+<apex:repeat value="{!bulkPrintInfoLst}" var="oneRoom" >
+<apex:variable var="oneRoomNo" value="{!oneRoomNo + 1}"/>
+<apex:repeat value="{!printLoop}" var="printvar" >
+
+<apex:repeat value="{!oneRoom.allPageList}" var="onePage" >
+
+<div style="vertical-align:top ;margin-top: 10px;height:40px;{!if( onePage.isFirstPage && printvar < 2 && oneRoomNo < 2, '', 'page-break-before: always;')}">
+<div style="width: 98%;text-align: right;line-height: 50%;font-size:75%;">{!onePage.currPages} / {!oneRoom.allPageList.size}</div>
+<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+<div style="line-height:80%;text-align: center;margin-top: 10px">
+	<span style="font-size:16pt;">ご利用明細書{!IF(printvar > 1, '(控)','　')}<br/><span style="font-size:12pt;">Description</span>
+	</span>
+</div>
+</div>
+ 
+<table width="97%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px;margin-left: 10px">
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 0.1cm"></colgroup>
+	
+	<colgroup style="width: 0.8cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<colgroup style="width: 1.4cm"></colgroup>
+	<colgroup style="width: 1.4cm"></colgroup>
+	<colgroup style="width: 0.8cm"></colgroup>
+	<colgroup style="width: 2cm"></colgroup>
+	<!-- Header -->
+	<tr >
+		<!-- 左側の基本情報 -->
+		<td colspan="6" style="vertical-align: top;">
+		
+			<table	width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top: 10px;font-size:75%;">
+			 	 
+				<tr height="30px">
+					<td style="line-height: 110%;" class="underline" colspan="8">お名前<br/><span style="font-size: 0.2cm">Guest Name</span>
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+						<span style="margin-left: 8px;{!IF(isOldManModeFlg, 'font-size:16px', '')}">{!oneRoom.customer}</span>
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+					</td>
+					<td class="underline" style="text-align: right; vertical-align: bottom; width: 10px"><span style="margin-right: 2px">様</span></td>
+				</tr>
+				
+				<tr><td colspan="9"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:20px; height: 30px;"/></td></tr>
+				
+				<tr height="30px">
+					<td width="46%" style="line-height: 100%;" class="underline" colspan="2">客室番号<br/><span style="font-size: 0.2cm">Room No.</span>
+						<span style="margin-left: 18px;font-size: 110%">
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+						<apex:outputtext value="{!LEFT(oneRoom.headRoomNm,8)}"/>
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+						</span>
+					</td>
+					<td width="1%">&nbsp;</td>
+					<td width="28%" style="line-height: 100%;" class="underline" colspan="2">泊数<br/><span style="font-size: 0.2cm">Night/s</span>
+						<span style="margin-left: 15px;font-size: 110%">
+							<apex:outputtext value="{0,number,###}" >
+							      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+							      <apex:param value="{!oneRoom.headInfo.Nights__c}" />
+							      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+							</apex:outputtext>
+						</span>
+					</td>
+					<td width="1%">&nbsp;</td>
+					<td width="20%" style="line-height: 100%;" class="underline" colspan="2">人数<br/><span style="font-size: 0.2cm">Person/s</span>
+						<span style="margin-left: 15px;font-size: 110%">
+							<apex:outputtext value="{0,number,###}" >
+							      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+							      <apex:param value="{!oneRoom.accountingNums}" />
+							      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+							 </apex:outputtext>
+						</span>
+					</td>
+					<td class="underline" ></td>
+				</tr>
+				<tr><td colspan="9"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:20px; height: 30px;"/></td></tr>
+				
+				<tr height="30px">
+					<td style="line-height: 100%;" class="underline" colspan="2">ご到着日<br/><span style="font-size: 0.2cm">Arrival</span>
+						<span style="margin-left: 32px;font-size: 110%">
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+						<apex:outputField value="{!oneRoom.headInfo.EntryDate__c}" rendered="{!oneRoom.headInfo.EntryDate__c != null}"/></span>
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+					</td>
+					<td width="1%">&nbsp;</td>
+					<td style="line-height: 100%;" class="underline" colspan="6">ご出発日<br/><span style="font-size: 0.2cm">Departure</span>
+						<span style="margin-left: 30px;font-size: 110%">
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+						<apex:outputField value="{!oneRoom.headInfo.DepartureDate__c}" rendered="{!oneRoom.headInfo.DepartureDate__c != null}"/></span>
+						<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+					</td>
+				</tr>
+			</table>
+		
+		</td>
+	
+		<!-- Split Space -->
+		<td width="10px"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" :20px; height: 2px;"/></td>
+		
+		
+		<!-- 右側のロゴ情報など -->
+		<td style="line-height: 75%">
+        	<!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 BEGIN by zh -->
+        	<!-- <c:ReportTitleComp postion="top" repInfo="{!repInfo}"/> -->
+        	<c:ReportTitleComp postion="top" repInfo="{!repInfo}" accStampisShowFlg="{!accStampIsShowFlg}"/>
+    		<!-- 2018/04/27 会計書ハンコ表示・非表示機能対応 END by zh -->
+			<!-- 
+            <div style="float:right; width:255px;height:85px;">
+            <apex:outputField value="{!ReportLogo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}"/>
+            </div>
+       
+            <div style="width:100%;float:left; text-align: left; font-size: 75%;
+						display: {!IF($Setup.CommDefine__c.AccountStampIsShowFlg__c, 'block', 'none')}">
+				<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:20px; height: 84px;"/>
+			</div>
+            <div style="width:100%;float:left; text-align: left; font-size: 75%;
+            			display: {!IF($Setup.CommDefine__c.AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" style="margin-right: 0px;width: 100%;text-align: left;">
+
+	           <tr height="10px;"><td width="1%"></td><td colspan="4">{!$Organization.Name}</td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td ></td><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Setup.CommDefine__c.FacilityEmail__c),'' , 'Email')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.FacilityEmail__c}</span></td></tr>
+               <tr height="10px;"><td ></td><td>{!IF (ISBLANK($Setup.CommDefine__c.FacilityWebsite__c),'' , 'URL')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.FacilityWebsite__c}</span></td></tr>
+            </table>
+            </div>
+			 -->
+		</td>
+	</tr>
+	
+    <tr>
+        <td colspan="13" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:30px; height: 10px;"/></td>
+    </tr>
+
+	<!-- 明細データ -->
+    <tr>
+        <td colspan="13">
+
+
+<apex:pageBlock >
+<apex:dataTable value="{!onePage.onePageList}" var="t" border="0" cellspacing="0" width="100%" headerClass="header">
+   <apex:column width="5%" style="font-size:75%;">
+    <apex:facet name="header">
+     <div align="center" style="line-height:80%;font-size: 75%">
+      No.
+     </div>
+    </apex:facet>
+    <div align="center">
+     <apex:outputtext value="{0,number,}">
+      <apex:param value="{!t.rowNo}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="10%" style="font-size:75%;">
+    <apex:facet name="header" >
+     <div align="center" style="line-height:80%;font-size: 94%">
+ご利用日<br/>
+<span style="font-size: 0.2cm;">Date</span>
+     </div>
+    </apex:facet>
+    <div align="center">{!t.usedDate}</div>
+   </apex:column>
+
+
+   <apex:column width="44%" style="font-size:75%;">
+    <apex:facet name="header" >
+     <div align="center" style="line-height:80%;font-size: 94%">
+摘要／項目<br/>
+<span style="font-size: 0.2cm;">Reference</span>
+     </div>
+    </apex:facet>
+    <div align="left" style="margin-left: 2px">
+     <apex:outputtext value="{!LEFT(t.produceNm,24)}">
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="13%" style="font-size:75%;">
+    <apex:facet name="header">
+     <div align="center" style="line-height:80%;font-size: 94%">
+単価<br/>
+<span style="font-size: 0.2cm;">Price</span>
+     </div>
+    </apex:facet>
+    <div align="right" style="margin-right: 2px" >
+     <apex:outputtext value="{0,number,##,###}" rendered="{!t.isShowPrice}">
+      <apex:outputLabel value="¥ " rendered="{!t.isShowInfo}" />
+      <apex:param value="{!t.unitPrice}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="5%" style="font-size:75%;">
+    <apex:facet name="header">
+     <div align="center" style="line-height:80%;font-size: 94%">
+数量<br/>
+<span style="font-size: 0.2cm;">Q'ty</span>
+     </div>
+    </apex:facet>
+    <div align="center">
+     <apex:outputtext value="{0,number,}" rendered="{!t.isShowPrice}">
+      <apex:param value="{!t.quantity}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+
+   <apex:column width="13%" style="font-size:75%;">
+    <apex:facet name="header">
+     <div align="center" style="line-height:80%;font-size: 94%">
+ご利用金額<br/>
+<span style="font-size: 0.2cm;">Charge</span>
+     </div>
+    </apex:facet>
+    <div align="right" style="margin-right: 2px">
+     <apex:outputtext value="{0,number,##,###}" rendered="{!(t.isShowPrice && NOT(t.isPaymentInfo))}">
+     <apex:outputLabel value="▲ " rendered="{!t.isShowCircle}" />
+      <apex:outputLabel value="¥ " rendered="{!t.isShowInfo}" />
+      <apex:outputLabel value="　" rendered="{!!t.isShowInfo}" />
+      <!-- <apex:param value="{!t.unitPrice*t.quantity}" /> -->
+      <apex:param value="{!t.amount}" />
+     </apex:outputtext>
+     <apex:outputLabel value="　"  rendered="{!!t.isShowPrice}"/>
+     
+    </div>
+   </apex:column>
+
+   <apex:column width="13%" style="font-size:75%;">
+    <apex:facet name="header">
+     <div align="center" style="line-height:80%;font-size: 94%">
+     　お預り金額<br/>
+<span style="font-size: 0.2cm;">Credit</span>
+     </div>
+    </apex:facet>
+    <div align="right" style="margin-right: 2px">
+     <apex:outputtext value="{0,number,##,###}" rendered="{!t.isPaymentInfo}">
+      <apex:outputLabel value="¥ " rendered="{!t.isShowInfo}" />
+      <apex:outputLabel value="　" rendered="{!!t.isShowInfo}" />
+      <apex:param value="{!t.unitPrice*t.quantity}" />
+     </apex:outputtext>
+     <apex:outputLabel value="　"  rendered="{!!t.isPaymentInfo}"/>
+     
+    </div>
+   </apex:column>
+
+ </apex:dataTable>
+</apex:pageBlock>
+
+
+<table><tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 1px;"/></td></tr></table>
+
+<!-------------- footer BEGIN -------------->
+<!-- ************************************ -->
+<table width="100%" cellpadding="0px" cellspacing="0px" style="table-layout: fixed;font-size:75%;">
+	<colgroup style="width:24%"></colgroup>
+	<colgroup style="width:30%"></colgroup>
+	<colgroup style="width:4px"></colgroup>
+	<colgroup style="width:45%"></colgroup>
+    <tr><td colspan="4" style="font-size: 0.2cm;">
+	 		各ご利用項目の料金には消費税が含まれております。<br/>
+	    	宿泊税等が加算される場合には別途記載をいたしております。    
+    	</td>
+    </tr>
+
+    <tr>
+    	<td colspan="4" class="titleHeader" style="font-size: 130%">
+    		ご請求金額 <span style="font-size: 0.32cm">Balance Due</span> &nbsp;&nbsp;
+		     <apex:outputtext value="{0,number,##,###}" style="{!IF(isOldManModeFlg, 'font-size:16px', '')}" >
+		      <apex:outputLabel value="¥ " />
+		      <!-- 
+		      <apex:param value="{!NULLVALUE(Charge,0) - NULLVALUE(amoutIncDiscont,0) - NULLVALUE(advancesReceived,0) - NULLVALUE(amoutAllCoupon,0)}" />
+		       -->
+		      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+		      <apex:param value="{!oneRoom.requestAmount2}" />
+		      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+		     </apex:outputtext>
+    	</td>
+    </tr>
+
+    
+    <tr>
+	    <!-- 左側情報 -->
+	    <td style="vertical-align: top;">
+	    <table  style="width:98%; table-layout: fixed;" >
+	    	<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+		<tr><td style="word-break: break-all;word-wrap:break-word;vertical-align: bottom;line-height: 100%;">{!oneRoom.comment}
+		<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+			</td></tr>
+		</table>
+	    </td>
+    
+	    <!-- 中央情報 -->
+	    <td style="vertical-align: top;">
+		</td>
+    
+		<!-- Splite td -->
+		<td >&nbsp;</td>
+    
+      
+		<!-- 右側の情報 -->
+		<td style="vertical-align: top;">
+			<!-- 合計金額 -->
+			<!-- 
+			<table border="0" style="table-layout: fixed;" cellspacing="0" bordercolor="black" width="100%" align="right"> -->
+			<table style="width:100%; table-layout: fixed;" border="0" cellspacing="0" align="right" >
+			<colgroup width="72%" />
+			<colgroup width="28%" />
+			<tr>
+			    <td >
+			    <div style="margin-right: 2px;text-align: right;" >
+			     ご利用金額(税込) <span style="font-size: 0.2cm;">Total Charge*Tax included</span>
+			    </div>
+			   </td>
+			   <td >
+			    <div style="margin-right: 2px;" align="right">
+			     <apex:outputtext value="{0,number,}" >
+			      <apex:outputLabel value="¥ " />
+			      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+			      <apex:param value="{!NULLVALUE(oneRoom.charge,0)}" />
+			      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+			     </apex:outputtext>
+			    </div>
+			   </td>
+			</tr>
+			  
+			  <tr>
+			    <td >
+			    <div style="margin-right: 2px;text-align: right;" >
+			     内消費税 <span style="font-size: 0.2cm;">Tax</span>
+			    </div>
+			   </td>
+			   <td >
+			    <div style="margin-right: 2px;" align="right">
+			     <apex:outputtext value="{0,number,##,###}" >
+			      <apex:outputLabel value="¥ " />
+			      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+			      <apex:param value="{!NULLVALUE(oneRoom.tax,0)}" />
+			      <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+			     </apex:outputtext>
+			    </div>
+			   </td>
+			  </tr>
+			 </table>
+
+		</td>
+		</tr>
+		
+		</table>
+		
+		<!-- space -->
+		<!-- 
+		<table><tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 1px;"/></td></tr></table>
+		 -->
+		<!-- 署名 -->
+		<table width="100%" cellpadding="0px" cellspacing="0px" style="table-layout: fixed;font-size:75%;">
+			<colgroup style="width:40%"></colgroup>
+			<colgroup style="width:12px"></colgroup>
+			<colgroup style="width:58%"></colgroup>
+
+			<tr style="line-height: 100%;">
+			<td style="vertical-align: bottom;line-height: 80%;">
+					発行<br/> <span style="font-size: 0.2cm;">Published by</span>&nbsp;&nbsp;&nbsp;
+					{!$User.LastName}  {!$User.FirstName}<br/>
+					<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+					<span style="vertical-align: bottom;font-size: 0.3cm">日付&nbsp;{!oneRoom.dt}&nbsp;&nbsp;No.&nbsp;{!oneRoom.accountNo}</span>
+					<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+			</td>
+			<td>&nbsp;</td>
+			<td style="vertical-align: bottom;line-height: 80%;">
+				<span style="font-size: 0.5cm;">ご署名<span style="font-size: 0.3cm;"><br/>Signature</span></span>
+			</td>
+			</tr>	
+		    <!----------------- 領収書分割線 ---------------------->
+		    <tr>
+		        <td colspan="2"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 15px;"/></td>
+		        <td colspan="1"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 10px;border-top: 0.5px solid #000;"/></td>
+		    </tr>
+		    <tr>
+		        <td colspan="3">
+		    <table width="100%"><tr>
+        	<apex:repeat value="{!spliteLineLoop}" var="splitIdx" >
+        	<td class="splitline"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	<td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	<td class="splitline"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	<td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	<td class="splitline"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	<td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	</apex:repeat>
+        	<td class="splitline"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 4px; height: 5px;"/></td>
+        	</tr></table>
+		        </td>
+		    </tr>
+		    <!-- 
+
+		    -->
+		</table>
+		<!-- 署名END -->
+
+		<!-- 領収書BEGIN -->
+	<table width="100%" cellpadding="0px" cellspacing="0px" style="table-layout: fixed;font-size:75%;">	
+    <tr>
+        <td colspan="7" style="font-size: 0.5cm;">領収証 Receipt</td>
+	<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+        <td colspan="6" style="text-align:right;">日付&nbsp;{!oneRoom.accReceiptDate}&nbsp;&nbsp;No.&nbsp;{!oneRoom.accountNo}</td>
+	<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+    </tr>
+    <tr>
+        <td colspan="13"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 5px;"/></td>
+    </tr>
+    <tr style="height: 30px;font-size: 0.35cm;">
+    	<td colspan="5" class="underline">
+    	<!-- 
+    	ご芳名<br/> <span style="font-size: 0.3cm;">Guest Name</span> &nbsp;</td>
+        <td colspan="4" style="word-break: break-all;word-wrap:break-word;vertical-align: bottom;" class="underline">
+        {!AccountName}
+        -->
+			<table style="width:100%;border:0px;table-layout:fixed">
+        		<tr>
+        			<td style="line-height: 80%;width:66px;" nowrap="nowrap">
+        				ご芳名<br/> <span style="font-size: 0.3cm;">Guest Name</span>
+        			</td>
+        			<td style="word-break: break-all;word-wrap:break-word;vertical-align: bottom;">
+        				<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+					<span>{!oneRoom.accountName}</span>
+					<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+        			</td>
+        		</tr>
+        	</table>
+        </td>
+        <td colspan="1" style="text-align:right;vertical-align: bottom;" class="underline" >様</td>
+        <td colspan="7" rowspan="6" style="vertical-align: bottom;">
+        	<!-- 
+            <div style="float:right; width:255px;height:85px">
+            <apex:outputField value="{!ReportLogo.ReportLogo__c}" id="logoImg" />
+            </div>
+             -->
+             <c:ReportTitleComp postion="bottom" repInfo="{!repInfo}"/>
+             <!-- 
+            <div style="float:right; width:100%; text-align: right;font-size: 85%;
+            			display: {!IF($Setup.CommDefine__c.AccountStampIsShowFlg__c, 'none', 'block')}">
+            <table cellpadding="0" cellspacing="0" style="margin-right: 0px;width: 100%;text-align: left;">
+
+	           <tr height="10px;"><td width="100%"></td><td colspan="4">{!$Organization.Name}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td colspan="4">{!IF (ISBLANK($Organization.PostalCode),'' , '〒')}{!$Organization.PostalCode}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Organization.Phone),'' , 'Tel')}</td><td colspan="3">{!$Organization.Phone}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Organization.Fax),'' , 'Fax')}</td><td colspan="3">{!$Organization.Fax}</td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Setup.CommDefine__c.FacilityEmail__c),'' , 'Email')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.FacilityEmail__c}</span></td></tr>
+               <tr height="10px;"><td width="100%"></td><td>{!IF (ISBLANK($Setup.CommDefine__c.FacilityWebsite__c),'' , 'URL')}</td><td colspan="3"><span style="margin-left: 2px">{!$Setup.CommDefine__c.FacilityWebsite__c}</span></td></tr>
+            </table>
+            </div>
+             -->
+        </td>
+        <!-- 
+        <td colspan="1"></td>
+         -->
+    </tr>
+    <tr >
+        <td colspan="6"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 10px;"/></td>
+        <!-- <td colspan="1"></td> -->
+    </tr>
+    <tr style="height: 30px;font-size: 0.35cm;">
+        <td colspan="1" class="underline" style="line-height: 80%;">金額：<br/> <span style="font-size: 0.3cm;">Amount</span></td>
+        <td colspan="4" style="text-align:right;vertical-align:bottom; border-bottom: 0.5px solid #000;">
+         <apex:outputtext value="{0,number,#,###}" style="{!IF(isOldManModeFlg, 'font-size:16px', '')}" >
+          <apex:outputLabel value="¥ " />
+          <!-- 
+          <apex:param value="{!NULLVALUE(Charge,0)}" />
+          <apex:param value="{!NULLVALUE(Charge,0) - NULLVALUE(amoutIncDiscont,0) - NULLVALUE(advancesReceived,0) - NULLVALUE(amoutAllCoupon,0)}" />
+           -->
+	  <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+          <apex:param value="{!NULLVALUE(oneRoom.receipt,0)}" />
+	  <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+         </apex:outputtext>
+        </td>
+        <td colspan="1" rowspan="4" style="vertical-align: bottom;text-align: center;">
+        <!-- 
+        <div style="border:1px dashed #000;height: 70px;width: 70px; margin-left: 20px">
+        <img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 10px;width: 10px"/>
+        </div>
+         -->
+            <table cellpadding="0" cellspacing="0" style="height: 70px;width: 70px; margin-left: 20px" border="0">
+                <tr style="height: 10px">
+	                <td class="splitline leftline" style="width: 10px"></td>
+	                <td style="width: 10px"></td>
+	                <td class="splitline" style="width: 10px"></td>
+	                <td style="width: 10px"></td>
+	                <td class="splitline" style="width: 10px"></td>
+	                <td style="width: 10px"></td>
+	                <td class="splitline rightline" style="width: 14px"></td>
+                </tr>
+                <tr style="height: 10px"><td colspan="7"></td></tr>
+                <tr style="height: 10px"><td class="leftline"></td><td colspan="5"></td><td class="rightline"></td></tr>
+                <tr style="height: 10px"><td colspan="7"></td></tr>
+                <tr style="height: 10px"><td class="leftline"></td><td colspan="5"></td><td class="rightline"></td></tr>
+                <tr style="height: 10px"><td colspan="7"></td></tr>
+                <tr style="height: 10px">
+                    <td class="leftline underline"></td>
+                    <td ></td>
+                    <td class="underline" ></td>
+                    <td ></td>
+                    <td class="underline" ></td>
+                    <td ></td>
+                    <td class="rightline underline" ></td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr >
+        <td colspan="5"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 10px;"/></td>
+        <!--
+        <td colspan="1"></td>
+        -->
+    </tr>
+    <tr >
+        <td colspan="5" style="font-size: 0.2cm;text-align:left;">上記金額を正に領収いたしました(消費税を含みます)</td>
+        <!-- 
+        <td colspan="1" style="border-right:1px dashed #000;border-left:1px dashed #000;"></td>
+         -->
+    </tr>
+    <tr>
+        <!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+	<td colspan="5" style="text-align:left; vertical-align: bottom; font-size: 0.3cm; ">但し&nbsp;&nbsp;{!oneRoom.accountProviso}</td>
+	<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+    </tr>
+    <tr>
+        <td colspan="5" style="border-top: 0.5px solid #000;"></td>
+        <td colspan="8"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 1px;"/></td>
+    </tr>
+	</table>	
+		
+		
+		<!--  -->
+        </td>
+    </tr>
+</table>
+</apex:repeat> 
+</apex:repeat>
+<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH BEGIN -->
+</apex:repeat>
+<!-- 2017/10/18 会計書ビル一括印刷機能は33/34以外でこ印刷できるように改善対応 WGCH END -->
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,540 @@
+<apex:page showHeader="false" sidebar="false" standardController="BookingPlus__c" extensions="BookingPlus">
+<apex:tabPanel switchType="client" selectedTab="tab1"  >
+ <apex:tab label="部屋割" name="tab1" id="tabOne"  >
+ <apex:outputPanel id="Panel1" layout="block" style="overflow:auto;height:1400px;width:2048px;">
+ <html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobox/src/infobox.js"></script>
+    <script type="text/javascript" src="/soap/ajax/20.0/connection.js"></script>
+    <script type="text/javascript" src="/soap/ajax/20.0/apex.js"></script>
+    <script type="text/javascript">
+    //<![CDATA[
+    var $j = jQuery.noConflict();
+                                                                        /****** Global Variables ******/
+    var centreLat=0.0;
+    var centreLon=0.0;
+    var initialZoom=3;                                                  //Initial Zoom Level
+    var imageWraps=false;                                               //SET THIS TO false TO PREVENT THE IMAGE WRAPPING AROUND
+
+    var map;                                                            //the GMap3 itself
+    var gmicMapType;
+                                                                        /*===== JSON data =====*/
+    var recordid ={
+        id: {!RecordId},                                                // Get Current Record Id
+        getid: function() { 
+            return this.id; 
+        }
+    };
+    var ACdata ={
+        list: {!BookingData},                                           // Get All Booking data for one day
+        getAll: function() { 
+            return this.list; 
+        }
+    };
+    var Roomdata ={
+        list: {!RoomData},                                              // Get All Room data for one day
+        getAll: function() { 
+            return this.list; 
+        }
+    };
+    var acsize = ACdata.getAll().length;                                // Booking data Size
+    var rdsize = Roomdata.getAll().length;                              // Room data Size
+    
+    var arrmessage= new Array(rdsize);                                  // Popup Message Array
+    
+    var rwidth  = Number(63.45703125);                                          // Room Area Width
+    var nacllatt = Number(3.5134210456400443);                                  // Not Assigned List & Cancel List Lat Top
+    var nacllatb = Number(-74.68325030051861);                                  // Not Assigned List & Cancel List Lat Bottom
+    var nalng1l = Number(-148.359375);                                          // Not Assigned List 1 Lng Left
+    var nalng1r = Number(-85.25390625);                                         // Not Assigned List 1 Lng Right
+    var nalng2l = Number(-65.91796875);                                         // Not Assigned List 2 Lng Left
+    var nalng2r = Number(-2.63671875);                                          // Not Assigned List 2 Lng Right
+    var cllng1l = Number(16.69921875);                                          // Cancel List Lng 1 Left
+    var cllng1r = Number(80.15625);                                             // Cancel List Lng 1 Right
+    var cllng2l = Number(99.4921875);                                           // Cancel List Lng 2 Left
+    var cllng2r = Number(162.7734375);                                          // Cancel List Lng 2 Right
+    
+    var molng = Number(2.63671875);                                             // Marker Offset List Lng
+    
+    var namno = 0;                                                              // Not Assigned List Marker No.
+    var narow = 0;                                                              // Not Assigned Row
+    var clmno = 0;                                                              // Cancel List Marker No.
+    var clrow = 0;                                                              // Cancel List Row
+    
+    
+    function GMICMapType() {
+        this.Cache = Array();
+        this.opacity = 1.0;
+    }
+    
+    GMICMapType.prototype.tileSize = new google.maps.Size(256, 256);
+    GMICMapType.prototype.maxZoom = 19;
+    GMICMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
+        var c = Math.pow(2, zoom);
+        var tilex=coord.x,tiley=coord.y;
+        if (imageWraps) {
+        if (tilex<0) tilex=c+tilex%c;
+            if (tilex>=c) tilex=tilex%c;
+            if (tiley<0) tiley=c+tiley%c;
+            if (tiley>=c) tiley=tiley%c;
+        }else{
+        if ((tilex<0)||(tilex>=c)||(tiley<0)||(tiley>=c))
+        {
+            var blank = ownerDocument.createElement('DIV');
+            blank.style.width = this.tileSize.width + 'px';
+            blank.style.height = this.tileSize.height + 'px';
+            return blank;
+        }
+    }
+    var img = ownerDocument.createElement('IMG');
+        var d = tilex;
+        var e = tiley;
+        var f = "t";
+        for (var g = 0; g < zoom; g++) {
+            c /= 2;
+            if (e < c) {
+                if (d < c) { f += "q" }
+                else { f += "r"; d -= c }
+            }
+            else {
+                if (d < c) { f += "t"; e -= c }
+                else { f += "s"; d -= c; e -= c }
+            }
+        }
+        img.id = "t_" + f;
+        img.style.width = this.tileSize.width + 'px';
+        img.style.height = this.tileSize.height + 'px';
+//        img.src = "arimotolayout-tiles/"+f+".jpg"; 2012.01.22 good
+        img.src = "{!URLFOR($Resource.ArimotoLayoutZip2,'ArimotoLayout2-tiles/')}"+f+".jpg";    // Map Tiles
+        this.Cache.push(img);
+        return img;
+    }
+    GMICMapType.prototype.realeaseTile = function(tile) {
+        var idx = this.Cache.indexOf(tile);
+        if(idx!=-1) this.Cache.splice(idx, 1);
+        tile=null;
+    }
+    GMICMapType.prototype.name = "JINYA Connect";
+    GMICMapType.prototype.alt = "";
+    GMICMapType.prototype.setOpacity = function(newOpacity) {
+        this.opacity = newOpacity;
+        for (var i = 0; i < this.Cache.length; i++) {
+            this.Cache[i].style.opacity = newOpacity; //mozilla
+            this.Cache[i].style.filter = "alpha(opacity=" + newOpacity * 100 + ")"; //ie
+        }
+    }
+
+    function getWindowHeight() {
+        if (window.self&&self.innerHeight) {
+            return self.innerHeight;
+        }
+        if (document.documentElement&&document.documentElement.clientHeight) {
+            return document.documentElement.clientHeight;
+        }
+        return 0;
+    }
+
+    function resizeMapDiv() {
+        //Resize the height of the div containing the map.
+
+        //Do not call any map methods here as the resize is called before the map is created.
+        var d=document.getElementById("map");
+
+        var offsetTop=0;
+        for (var elem=d; elem!=null; elem=elem.offsetParent) {
+            offsetTop+=elem.offsetTop;
+
+        }
+        var height=getWindowHeight()-offsetTop-16;
+
+        if (height>=0) {
+            d.style.height=height+"px";
+        }
+    }
+    
+    function load() {                                                                                                       /*###### Onload function start ######*/
+        resizeMapDiv();
+        var latlng = new google.maps.LatLng(centreLat, centreLon);
+        var myOptions = {                                                                                                   //Map Options
+            zoom: initialZoom,
+            center: latlng,
+            draggable: false,
+            disableDoubleClickZoom: true,
+            panControl: false,
+            zoomControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            scrollwheel: false,
+            overviewMapControl: true,
+            backgroundColor:"white",
+            keyboardShortcuts: false,
+            mapTypeControl: false,
+            mapTypeControlOptions:{
+                mapTypeIds: ["Arimoto"],
+                style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+            },
+            mapTypeId: "Arimoto"
+        }
+        map = new google.maps.Map(document.getElementById("map"), myOptions);
+        gmicMapType = new GMICMapType();
+        map.mapTypes.set("Arimoto",gmicMapType);
+
+
+        $j.each(ACdata.getAll(), function(i, ACdata) {                                                                  /****** START ACdata jQuery.each loop ******/
+            
+                                                                                                                            /*===== Create Marker=====*/
+            latlng = new google.maps.LatLng(ACdata.cLat, ACdata.cLng);
+            var micon = '{!$Resource.Human}';                                                                               // Marker Icon
+            var marker = new google.maps.Marker({                                                                           // Create markers
+                map:map,                                                                                                    // Map on which to display Marker.
+                position: latlng,                                                                                           // Set position of assigned room or room type
+                draggable: true,                                                                                            // If true, the marker can be dragged
+                clickable: true,                                                                                            // If true, the marker receives mouse and touch events
+                raiseOnDrag: false,                                                                                         // Which animation to play when marker is added to a map.
+                visible: true,                                                                                              // If true, the marker is visible
+                icon:{                                                                                                      // Icon Setting
+                    url: micon,                                                                                             // Set icon image
+                    anchor: new google.maps.Point(14,14)                                                                    // The position of anchor
+                }
+            });
+            
+                                                                                                                            /*===== Change Marker Icon for Grouping(Shift+MouseClick)=====*/
+            var flag=0;
+            google.maps.event.addListener(marker, "click", function () {                                                
+                infobox.open(map, marker);
+                if(keyCode[16]&&flag==0){
+                    marker.setIcon({url:'{!$Resource.SelectedHuman}',anchor:new google.maps.Point(14,14)});
+                    flag=1;
+                }else if(keyCode[16]&&flag==1){
+                    marker.setIcon({url:'{!$Resource.Human}',anchor:new google.maps.Point(14,14)});
+                    flag=0;
+                }else{
+                }
+            });
+            
+                                                                                                                        /*===== InfoBox Setting=====*/
+            var boxText = document.createElement("div");
+            var boxwidth = 330;                                                                                         // Infobox Width
+            
+            boxText.style.cssText ="position: absolute; top:0px;left:0px; width: 312px;background:white;border:1px solid #777777;font:normal 14px sans-serif;overflow:hidden;height:24px;";     // Arimoto ---> 'position: absolute; top:0px;left:0px; width: 312px;' isn't exist
+            var infoboxOptions = {
+                 content: boxText
+                ,maxWidth: 0
+                ,pixelOffset: new google.maps.Size(14, -12)                                                             //InfoBox Offset
+                ,zIndex: null
+                ,boxStyle: { 
+                  //background: "url('http://google-maps-utility-library-v3.googlecode.com/svn/trunk/infobox/examples/tipbox.gif') no-repeat"
+                  opacity: 0.70
+                  ,width: boxwidth+"px"
+                  ,background: "#FFF"                                                       // Arimoto ---> ',background: "#FFF"' isn't exist
+                 }
+                ,closeBoxMargin: "-14px 0px 0px 0px"                                       // Arimoto ---> closeBoxMargin: "1px"
+                ,closeBoxURL: "http://www.google.com/intl/en_us/mapfiles/close.gif"
+                ,infoBoxClearance: new google.maps.Size(1, 1)
+                ,isHidden: false
+                ,pane: "overlayMouseTarget"
+                ,enableEventPropagation: true
+                ,disableAutoPan: true
+            };
+            
+                                                                                                                        // InfoBox Text
+            boxText.innerHTML =   '<div style="width:140px;height:20px;position:absolute;top:5px;left:3px;overflow:hidden;">'
+                                    + '<a target=\"_top\" href=\"/' + ACdata.id + '\">' + ACdata.name + '</a>'
+                                + '</div>'
+                                + '<div style="width:32px;height:20px;position:absolute;top:5px;left:148px;overflow:hidden;">'
+                                    + ACdata.persons + ((ACdata.persons != '')? '名' : '')
+                                + '</div>'
+                                + '<div style="width:130px;height:20px;position:absolute;top:5px;left:185px;overflow:hidden;">'
+                                    + ACdata.roomType + ((ACdata.roomType != '')? 'タイプ' : '')
+                                + '</div>'
+                                /*+ '<div style="width:130px;height:20px;position:absolute;top:5px;left:320px;overflow:hidden;">'
+                                    + '<form><input type="text" name="name" ></form>'
+                                + '</div>'
+                                */
+                                /*+ '<div style="width:120px;height:20px;position:absolute;top:5px;left:320px;overflow:hidden;">'
+                                    + ACdata.segment + 'から'
+                                + '</div>'
+                                + '<div style="width:95px;height:20px;position:absolute;top:5px;left:445px;overflow:hidden;">'
+                                    + ACdata.plan
+                                + '</div>'*/;
+            
+            var infobox = new InfoBox(infoboxOptions);
+            infobox.open(map, marker);
+            
+                                                                                                                        /*===== Get Marker Positions=====*/
+            var mpos = marker.getPosition();                                                                            // Get Marker Position at first
+            
+            ACdata.cLat = mpos.lat();
+            ACdata.cLng = mpos.lng();
+            
+                                                                                                                        /****************************************
+                                                                                                                        *  ACdata.flag in 32bit                 *
+                                                                                                                        *              /On the Cancel List ?    *
+                                                                                                                        *  0 0 0 0|0 0 1 0                      *
+                                                                                                                        *                 \Assigned to Room ?   *
+                                                                                                                        ****************************************/
+            
+            if(ACdata.status == "キャンセルまち"){                                                                         // On the Cancel List ?
+                ACdata.flag &= ~1;
+                ACdata.roomid = null;
+                ACdata.flag |= 2;
+                    if(clmno%2 == 0){
+                        marker.setPosition(new google.maps.LatLng(0.7031073524364909-clrow, cllng1l+molng));
+                    }else{
+                        marker.setPosition(new google.maps.LatLng(0.7031073524364909-clrow, cllng2l+molng));
+                        clrow +=5;
+                    }
+                clmno++;                                                                                                // Increase Cancel List Marker NO.
+            }else{
+                if((ACdata.roomid != "null")&&(ACdata.cLat != 0)&&(ACdata.cLng != 0)){                                                                                // Assigned to Room ?
+                    ACdata.flag |= 1;
+                }else{
+                    ACdata.flag &= ~1;
+                        if(namno%2 == 0){
+                            marker.setPosition(new google.maps.LatLng(0.7031073524364909-narow, nalng1l+molng));
+                        }else{
+                            marker.setPosition(new google.maps.LatLng(0.7031073524364909-narow, nalng2l+molng));
+                            narow +=5;
+                        }
+                    namno++;                                                                                                // Increase Not Assigned Marker NO.
+                }
+                ACdata.flag &= ~2;
+            }
+            
+                                                                                                                        /****************************************
+                                                                                                                        *  Roomdata.flag in 32bit               *
+                                                                                                                        *                                       *
+                                                                                                                        *  0 0 0 0|0 0 0 1                      *
+                                                                                                                        *                 \Assigned to Room ?   *
+                                                                                                                        ****************************************/
+            
+            $j.each(Roomdata.getAll(), function(j, Roomdata) {                                                          /*===== Room Assign =====*/
+                if((Roomdata.flag & 1) != 1){
+                    Roomdata.flag &=~1;
+                }else{
+                }
+                if(ACdata.roomid == Roomdata.id){                                                                       // Assigned to Room ?
+                    Roomdata.flag |=1;
+                }else{
+                }
+                //arrmessage[j] = "name:" + Roomdata.name + "  flag: "+Roomdata.flag+"\n";                              // Update message
+            });
+            
+            var preroomid = null;                                                                                       // Room id when drag started
+            var preroom = null;                                                                                         // Room name when drag started
+            
+            google.maps.event.addListener(marker, "dragstart", function () {                                            /*===== Get Marker Position when drag started =====*/
+                mpos = marker.getPosition();
+                prelat = mpos.lat();                                                                                    // Marker Lat when drag started
+                prelng = mpos.lng();                                                                                    // Marker Lng when drag started
+                
+                $j.each(Roomdata.getAll(), function(j, Roomdata) {
+                    if((mpos.lat() >= Roomdata.cLat1) && (mpos.lat() < Roomdata.cLat2) && (mpos.lng() > Roomdata.cLng1) && (mpos.lng() < Number(Roomdata.cLng1)+Number(rwidth))){
+                        Roomdata.flag &= ~1;
+                        ACdata.flag &= ~1;
+                        ACdata.roomid = null;
+                        ACdata.room = null;
+                        
+                        preroomid = Roomdata.id;
+                        preroom = Roomdata.name;
+                    }else{
+                        preroomid = null;
+                        preroom = null;
+                    }
+                });
+            });
+            
+            google.maps.event.addListener(marker, "dragend", function () {                                                  /*===== Get Marker Position when drag is end =====*/
+                mpos = marker.getPosition();
+                $j.each(Roomdata.getAll(), function(j, Roomdata) {                                                          /*===== Check Room Assign =====*/
+                                                                                                                            // In Room Area ?
+                    if((mpos.lat() >= Roomdata.cLat1) && (mpos.lat() < Roomdata.cLat2) && (mpos.lng() > Roomdata.cLng1) && (mpos.lng() < Number(Roomdata.cLng1)+Number(rwidth))){
+                                                                                                                            
+                        if((Roomdata.flag & 1) !=1){
+                            ACdata.roomid = Roomdata.id;                                                                    // Assign to Room
+                            ACdata.room = Roomdata.name;
+                            Roomdata.flag |= 1;
+                            ACdata.flag |= 1;
+                            marker.setPosition(new google.maps.LatLng(Roomdata.cCentreLat,Roomdata.cCentreLng));
+                            
+                        }else{
+                            
+                            marker.setPosition(new google.maps.LatLng(prelat,prelng));
+                            if(preroomid != null){
+                                ACdata.roomid = preroomid;
+                                ACdata.room = preroom;
+                                ACdata.flag |= 1;
+                            }else{
+                                ACdata.roomid = null;
+                                ACdata.room = null;
+                                ACdata.flag &= ~1;
+                            }
+                        }
+                        
+                    }else{
+                        
+                        if(ACdata.roomid == Roomdata.id){
+                            ACdata.roomid = null;
+                            ACdata.room = null;
+                            Roomdata.flag &= ~1;
+                            ACdata.flag &= ~1;
+                        }else{
+                        }
+                        
+                    }
+                    mpos = marker.getPosition();
+                    if((mpos.lat() >= Roomdata.cLat1) && (mpos.lat() < Roomdata.cLat2) && (mpos.lng() > Roomdata.cLng1) && (mpos.lng() < Number(Roomdata.cLng1)+Number(rwidth))){
+                        ACdata.roomid = Roomdata.id;                                                                    // Assign to Room
+                        ACdata.room = Roomdata.name;
+                        Roomdata.flag |= 1;
+                        ACdata.flag |= 1;
+                    }else{
+                    }
+                    
+                    arrmessage[j] = "*name:" + Roomdata.name + " flag: "+Roomdata.flag+"\n";
+                });
+                
+                if((mpos.lat() < nacllatt) && (mpos.lat() > nacllatb)){                                                             // Auto Move
+                    if((mpos.lng() > nalng1l) && (mpos.lng() < nalng1r)){                                                           // Not Assigned Area 1
+                        marker.setPosition(new google.maps.LatLng(mpos.lat() ,nalng1l+molng));
+                    }else{
+                    }
+                    if((mpos.lng() > nalng2l) && (mpos.lng() < nalng2r)){                                                           // Not Assigned Area 2
+                        marker.setPosition(new google.maps.LatLng(mpos.lat() ,nalng2l+molng));
+                    }else{
+                    }
+                    if((mpos.lng() > cllng1l) && (mpos.lng() < cllng1r)){                                                           // Cancel List Area 1
+                        marker.setPosition(new google.maps.LatLng(mpos.lat() ,cllng1l+molng));
+                        ACdata.status = "キャンセルまち";
+                        ACdata.flag |= 2;
+                    }else if((mpos.lng() > cllng2l) && (mpos.lng() < cllng2r)){                                                     // Cancel List Area 2
+                        marker.setPosition(new google.maps.LatLng(mpos.lat() ,cllng2l+molng));
+                        ACdata.status = "キャンセルまち";
+                        ACdata.flag |= 2;
+                    }else{
+                    }
+                }else{
+                }
+                
+                if(!((mpos.lat() < nacllatt) && (mpos.lat() > nacllatb) && ((mpos.lng() > cllng1l) && (mpos.lng() < cllng1r)) || ((mpos.lng() > cllng2l) && (mpos.lng() < cllng2r)))){
+                    ACdata.status = null;
+                    ACdata.flag &= ~2;
+                }else{
+                }
+                
+                ACdata.cLat = mpos.lat();
+                ACdata.cLng = mpos.lng();
+                //arrmessage[i] = ACdata.name+"様 flag: "+ACdata.flag+"\n";
+                //arrmessage[i] = "flag: "+Room.flag+"\n";
+                //alert(arrmessage[i]);
+                //infoWindow.setContent(ACdata.flag+","+ACdata.roomid);
+            });
+            
+            
+        });                                                                                                         /****** END of Marker jQuery.each loop******/
+        
+                                                                                                                    /*=====Make TestMarker(Show Position on the balloon)=====*/
+        /*
+        var testmarker = new google.maps.Marker({
+            map:map,
+            position: new google.maps.LatLng(0,0),
+            draggable: true,
+            clickable: true,
+            raiseOnDrag: false,
+            visible: true
+        });
+        var infoWindow = new google.maps.InfoWindow({
+            content: "<div style='width:300px;'>Lat:"+testmarker.getPosition().lat() + "<br>Lng:" + testmarker.getPosition().lng() + "</div>"
+            ,disableAutoPan: true
+            ,pixelOffset: new google.maps.Size(150,130)
+        });
+        infoWindow.open(map,testmarker);
+        google.maps.event.addListener(testmarker, 'click', function(){
+            infoWindow.open(map,testmarker);
+        });
+        google.maps.event.addListener(testmarker, "dragend", function () {
+            infoWindow.setContent("<div style='widt:300px;'>Lat:"+testmarker.getPosition().lat() + "<br>Lng:" + testmarker.getPosition().lng() + "</div>");
+        });
+        */
+                                                                                                                    /*===== Show Room Area =====*/
+        /*
+        $j.each(Roomdata.getAll(), function(j, Roomdata) {
+            var roomrect = new google.maps.Rectangle({
+                //bounds:new google.maps.LatLngBounds(new google.maps.LatLng(Roomdata.cLat1,Roomdata.cLng1),new google.maps.LatLng(Roomdata.cLat2,Number(Roomdata.cLng1)+Number(rwidth))),
+                bounds:new google.maps.LatLngBounds(new google.maps.LatLng(Roomdata.cLat1,Roomdata.cLng1),new google.maps.LatLng(Roomdata.cLat2,Roomdata.cLng2)),
+                clickable: false,
+                fillColor: "#00f",
+                fillOpacity: 0.3,
+                map: map,
+                strokeWeight: 1,
+                strokeOpacity: 0.3,
+                strokeColor: "#007"
+            });
+        });
+        */
+        
+    }                                                                                                               /*###### END of onLoad function ######*/
+    
+                                                                                                                    /*=====Key code setting=====*/
+    var keyCode = new Array(256);
+    for(i=0;i<256;i++){
+        keyCode[i]=0
+    }
+    function keydown(){
+        keyCode[event.keyCode] = 1;
+    }
+    function keyup(){
+        keyCode[event.keyCode] = 0;
+    }
+    document.onkeydown=keydown;
+    document.onkeyup=keyup;
+    
+                                                                                                                    /*=====Update Button Function=====*/
+    function assign(){
+        /*var message="";
+        for(var k=0; k < rdsize; k++){
+            message += arrmessage[k];
+        }
+        alert(message);
+        */
+        //alert( removeBackSlash(JSON.stringify( ACdata.getAll())));
+        var result = sforce.apex.execute('BookingPlus','setRoomAssign',{                                            //Call Webservice Method
+            recid: recordid.getid().id,
+            acdata: removeBackSlash(JSON.stringify( ACdata.getAll()))                                               // JSON data
+        });
+        if(result==1){
+            alert("{!fixedday}の予約データを更新しました");
+        }else{
+            alert("更新エラーが発生しました");
+        }
+    }
+    
+    function removeBackSlash(strTemp) { 
+        strTemp = strTemp.replace(/\\/g,"");                // ' \  ' -> ''
+        strTemp = strTemp.replace(/\"\[/g,"\[");            // ' "[ ' -> '['
+        strTemp = strTemp.replace(/\]\"/g,"\]");            // ' ]" ' -> ']'
+        return strTemp;
+    }
+    
+    //]]>
+ </script>
+</head>
+<body onresize="resizeMapDiv()" onload="load()">
+ <div id="map" style="overflow:auto;height:1300px;width:2000px;"></div>
+ <form>
+  <input type="button" value="更新" onclick="assign()" style="font:normal 24px sans-serif;height:40px;width:150px;position:fixed;top:5px;right:5px;"/>
+  <!-- <apex:commandButton value="部屋を割り当てる" style="font:normal 24px sans-serif;width:200px;position:fixed;top:5px;right:5px;"/> -->
+ </form>
+</body>
+</html>
+</apex:outputPanel>
+</apex:tab>
+ <apex:tab label="　　　" name="tab2" id="tabTwo">
+  <apex:include pageName="BookingCalendar"/>
+ </apex:tab>
+</apex:tabPanel>
+<apex:pageMessages showDetail="true" />
+</apex:page>

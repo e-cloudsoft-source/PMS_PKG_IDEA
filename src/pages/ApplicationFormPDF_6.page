@@ -1,0 +1,60 @@
+<apex:page showHeader="false" sidebar="false" action="{!initPdf}" renderas="PDF"
+    applyHtmlTag="false" applyBodyTag="false"
+    standardcontroller="Lead__c" extensions="ApplicationFormPDFExt1" readonly="true" >
+<html>
+<head>
+<title>予約確認書</title>
+<style>
+@page {
+	size: {!pageformat}/* A4 portlate size  */
+	margin: 0;
+}
+body {
+	font-family: Arial Unicode MS;
+	font-size:12px;
+}
+div,span{
+	white-space: pre-wrap;
+}
+table {
+	width: 100%;
+	border-spacing: 0px; 
+}
+table tr {
+	height: 24px;
+	vertical-align: middle;
+}
+.numClass{
+	text-align: right;
+}
+.estItemClass{
+	border:1px solid #000;
+}
+.estItemClass td{
+	padding-left: 2px;
+	border-right:1px solid #000;
+}
+.estItemClass .headRow td{
+	border-bottom: 1px solid #000;
+}
+</style>
+<style>
+	{!customeStyleStr}
+</style>
+</head> 
+<body>
+	<div style="width:100%;background: gray;"></div>
+	<apex:repeat value="{!allPageList}" var="onePage" >
+		<div style="vertical-align:top ;margin-top: 0px;{!if( onePage.isFirstPage, '', 'page-break-before: always;')}">
+			<apex:repeat value="{!onePage.pageColumns}" var="column" >
+				<apex:outputtext value="{!column.content}" escape="false" rendered="{!column.isHtml}"/>
+				<apex:outputPanel rendered="{!column.isComment}">
+					<apex:outputLabel value="{!pComment}" style="{!column.styleStr}" escape="false" rendered="{!isCommentAutoBreakFlg}"/>
+					<apex:outputField value="{!outLeadInf.QuotationComment__c}" style="{!column.styleStr}" rendered="{!!isCommentAutoBreakFlg}"/>
+				</apex:outputPanel>
+			</apex:repeat>
+		</div>
+	</apex:repeat>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Budget</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Budget</value>
+    </caseValues>
+    <fields>
+        <label>#A01_Food</label>
+        <name>A01__c</name>
+    </fields>
+    <fields>
+        <label>#A02_Beverages</label>
+        <name>A02__c</name>
+    </fields>
+    <fields>
+        <label>#A03_Shops</label>
+        <name>A03__c</name>
+    </fields>
+    <fields>
+        <label>#A04_Room charge</label>
+        <name>A04__c</name>
+    </fields>
+    <fields>
+        <label>#A05_JapaneseHotelOutsourcing</label>
+        <name>A05__c</name>
+    </fields>
+    <fields>
+        <label>#A06_BridalOutsourcing</label>
+        <name>A06__c</name>
+    </fields>
+    <fields>
+        <label>#A07_Others</label>
+        <name>A07__c</name>
+    </fields>
+    <fields>
+        <help>Cuisine + Beverage + Shop + Room charge + Outsource + Bridal + others</help>
+        <label>#A08_Total sales</label>
+        <name>A08__c</name>
+    </fields>
+    <fields>
+        <label>#B01_CostRate_Food</label>
+        <name>B01__c</name>
+    </fields>
+    <fields>
+        <label>#B02_CostRate_Beverages</label>
+        <name>B02__c</name>
+    </fields>
+    <fields>
+        <label>#B03_CostRate_Shop</label>
+        <name>B03__c</name>
+    </fields>
+    <fields>
+        <label>#B04_CostRate_RoomCharge</label>
+        <name>B04__c</name>
+    </fields>
+    <fields>
+        <label>#B05_CostRate_HotelOutsource</label>
+        <name>B05__c</name>
+    </fields>
+    <fields>
+        <label>#B06_CostRate_BridalOutsource</label>
+        <name>B06__c</name>
+    </fields>
+    <fields>
+        <label>#B07_CostRate (Overall)</label>
+        <name>B07__c</name>
+    </fields>
+    <fields>
+        <label>#C01_Electricity[kwh]</label>
+        <name>C01__c</name>
+    </fields>
+    <fields>
+        <label>#C02_Propane gas[m3]</label>
+        <name>C02__c</name>
+    </fields>
+    <fields>
+        <label>#C03_Gasoline[L]</label>
+        <name>C03__c</name>
+    </fields>
+    <fields>
+        <label>#C04_Water[m3]</label>
+        <name>C04__c</name>
+    </fields>
+    <fields>
+        <label>#D01_Regular employee</label>
+        <name>D01__c</name>
+    </fields>
+    <fields>
+        <label>#D02_Part time (DIrect recruit)</label>
+        <name>D02__c</name>
+    </fields>
+    <fields>
+        <label>#D03_Part time</label>
+        <name>D03__c</name>
+    </fields>
+    <fields>
+        <label>#D04_Part time</label>
+        <name>D04__c</name>
+    </fields>
+    <fields>
+        <help>#D02～#D04 total sales</help>
+        <label>#D05_Part time(Total)</label>
+        <name>D05__c</name>
+    </fields>
+    <fields>
+        <label>#D06_Midnight allowance</label>
+        <name>D06__c</name>
+    </fields>
+    <fields>
+        <label>#D07_Labor insurance</label>
+        <name>D07__c</name>
+    </fields>
+    <fields>
+        <help><!-- ROUNDUP(#D01+#D05+#D06+#D07, -3) --></help>
+        <label>#D08_LaborCost_Status(Total, Amount)</label>
+        <name>D08__c</name>
+    </fields>
+    <fields>
+        <label>#D11_Food section</label>
+        <name>D11__c</name>
+    </fields>
+    <fields>
+        <label>#D12_Local operation</label>
+        <name>D12__c</name>
+    </fields>
+    <fields>
+        <label>#D13SalesMarketing Department</label>
+        <name>D13__c</name>
+    </fields>
+    <fields>
+        <label>#D14_FinanaceDepartment</label>
+        <name>D14__c</name>
+    </fields>
+    <fields>
+        <help>#D11～#D14 total sales</help>
+        <label>#D15_Labor cost_Department base</label>
+        <name>D15__c</name>
+    </fields>
+    <fields>
+        <label>Date (Year month [Budget name]</label>
+        <name>Date__c</name>
+    </fields>
+    <fields>
+        <label>#E01_Regular employee</label>
+        <name>E01__c</name>
+    </fields>
+    <fields>
+        <label>#E02_Long term part timer</label>
+        <name>E02__c</name>
+    </fields>
+    <fields>
+        <label>#E03_Special part timer</label>
+        <name>E03__c</name>
+    </fields>
+    <fields>
+        <help>#E01～#E03 total sales</help>
+        <label>#E04_Employee(s)(Total)</label>
+        <name>E04__c</name>
+    </fields>
+    <fields>
+        <label>#F01_Special part timer</label>
+        <name>F01__c</name>
+    </fields>
+    <fields>
+        <label>#F02_Salary allowance</label>
+        <name>F02__c</name>
+    </fields>
+    <fields>
+        <label>#F03_Other payments</label>
+        <name>F03__c</name>
+    </fields>
+    <fields>
+        <label>#F04_Bonus reserves</label>
+        <name>F04__c</name>
+    </fields>
+    <fields>
+        <label>#F05_Retirement reserves</label>
+        <name>F05__c</name>
+    </fields>
+    <fields>
+        <label>#F06_Legal welfare expenses</label>
+        <name>F06__c</name>
+    </fields>
+    <fields>
+        <label>#F07_Welfare expense</label>
+        <name>F07__c</name>
+    </fields>
+    <fields>
+        <label>#F08_Travel expenses</label>
+        <name>F08__c</name>
+    </fields>
+    <fields>
+        <label>#F09_Communication expenses</label>
+        <name>F09__c</name>
+    </fields>
+    <fields>
+        <label>#F10_Entertainment expenses</label>
+        <name>F10__c</name>
+    </fields>
+    <fields>
+        <label>#F11_Depreciation expenses</label>
+        <name>F11__c</name>
+    </fields>
+    <fields>
+        <label>#F12_Bridal expenses</label>
+        <name>F12__c</name>
+    </fields>
+    <fields>
+        <label>#F13_Sales commission（Agent)</label>
+        <name>F13__c</name>
+    </fields>
+    <fields>
+        <label>#F14_Sales commission（Card)</label>
+        <name>F14__c</name>
+    </fields>
+    <fields>
+        <label>#F15_Insurance fee</label>
+        <name>F15__c</name>
+    </fields>
+    <fields>
+        <label>#F16_Repair cost</label>
+        <name>F16__c</name>
+    </fields>
+    <fields>
+        <label>#F17_Expendables cost</label>
+        <name>F17__c</name>
+    </fields>
+    <fields>
+        <label>#F18_Payment commission fee</label>
+        <name>F18__c</name>
+    </fields>
+    <fields>
+        <label>#F19_Marketing fee (Bridal)</label>
+        <name>F19__c</name>
+    </fields>
+    <fields>
+        <label>#F20_Marketing fee (Hotel)</label>
+        <name>F20__c</name>
+    </fields>
+    <fields>
+        <label>#F21_Promotional expenses</label>
+        <name>F21__c</name>
+    </fields>
+    <fields>
+        <label>#F22_Tableware purchase</label>
+        <name>F22__c</name>
+    </fields>
+    <fields>
+        <label>#F23_Tableware purchase</label>
+        <name>F23__c</name>
+    </fields>
+    <fields>
+        <label>#F24_Set tax dues</label>
+        <name>F24__c</name>
+    </fields>
+    <fields>
+        <label>#F25_Research fee</label>
+        <name>F25__c</name>
+    </fields>
+    <fields>
+        <label>#F26_Rent fee</label>
+        <name>F26__c</name>
+    </fields>
+    <fields>
+        <label>#F27_Land price</label>
+        <name>F27__c</name>
+    </fields>
+    <fields>
+        <label>#F28_Parking charges</label>
+        <name>F28__c</name>
+    </fields>
+    <fields>
+        <label>#F29_Lease charges</label>
+        <name>F29__c</name>
+    </fields>
+    <fields>
+        <label>#F30_Electircity charges</label>
+        <name>F30__c</name>
+    </fields>
+    <fields>
+        <label>#F31_Gas charges</label>
+        <name>F31__c</name>
+    </fields>
+    <fields>
+        <label>#F32_Water charges</label>
+        <name>F32__c</name>
+    </fields>
+    <fields>
+        <label>#F33_Cleaning charges</label>
+        <name>F33__c</name>
+    </fields>
+    <fields>
+        <label>#F34_Gardening charges</label>
+        <name>F34__c</name>
+    </fields>
+    <fields>
+        <label>#F35_Cleaning charges</label>
+        <name>F35__c</name>
+    </fields>
+    <fields>
+        <label>#F36_Newspaper library items charges</label>
+        <name>F36__c</name>
+    </fields>
+    <fields>
+        <label>#F37_Newspaper library items charges</label>
+        <name>F37__c</name>
+    </fields>
+    <fields>
+        <label>#F38_Benefit charges</label>
+        <name>F38__c</name>
+    </fields>
+    <fields>
+        <label>#F39_Other management charges</label>
+        <name>F39__c</name>
+    </fields>
+    <fields>
+        <label>#F40_Foregift charges</label>
+        <name>F40__c</name>
+    </fields>
+    <fields>
+        <label>#F41_Vehicle maintain charges</label>
+        <name>F41__c</name>
+    </fields>
+    <fields>
+        <label>#F42_Fuel charges</label>
+        <name>F42__c</name>
+    </fields>
+    <fields>
+        <label>#F43_Transfer commission charges</label>
+        <name>F43__c</name>
+    </fields>
+    <fields>
+        <label>#F44_Beverage charges</label>
+        <name>F44__c</name>
+    </fields>
+    <fields>
+        <label>#F45_Miscellaneous charges</label>
+        <name>F45__c</name>
+    </fields>
+    <fields>
+        <help>#F01～#Ｆ45 total sales</help>
+        <label>#F46_Sales management charges (Budget)</label>
+        <name>F46__c</name>
+    </fields>
+    <fields>
+        <help>Sales forecast / Sales forecast</help>
+        <label>#G01_Sales charges (Budget)</label>
+        <name>G01__c</name>
+    </fields>
+    <fields>
+        <help>Sales total - Unit price</help>
+        <label>#H01_Gross Sales</label>
+        <name>H01__c</name>
+    </fields>
+    <fields>
+        <help>Sales total profit / Sales forecast</help>
+        <label>#H02_Gross Sales percentage</label>
+        <name>H02__c</name>
+    </fields>
+    <fields>
+        <help>Sales total - Total unit price</help>
+        <label>#J01_Sales gross Sales (GOP)</label>
+        <name>J01__c</name>
+    </fields>
+    <fields>
+        <help>Sales gross sales(GOP) Budget forecast</help>
+        <label>#J02_GOP percentage</label>
+        <name>J02__c</name>
+    </fields>
+    <fields>
+        <help>Sales total * (1- Unit percentage) - Sales management total</help>
+        <label>#K01_Sales profit</label>
+        <name>K01__c</name>
+    </fields>
+    <fields>
+        <help>Sales profit forecast / Sales forecast</help>
+        <label>#K02_Sales profit percentage</label>
+        <name>K02__c</name>
+    </fields>
+    <fields>
+        <label>#L01_Revenue</label>
+        <name>L01__c</name>
+    </fields>
+    <fields>
+        <label>#L02_Expences</label>
+        <name>L02__c</name>
+    </fields>
+    <fields>
+        <help>#L01_Revenue-#L02_Fee</help>
+        <label>#L03_Loss and profit</label>
+        <name>L03__c</name>
+    </fields>
+    <fields>
+        <help>Sales total - Total unit price</help>
+        <label>#M01_Management profit</label>
+        <name>M01__c</name>
+    </fields>
+    <fields>
+        <help>Management profit / Sales forecast</help>
+        <label>#M02_Management profit percentage</label>
+        <name>M02__c</name>
+    </fields>
+    <fields>
+        <help>In order to report from April</help>
+        <label>Month</label>
+        <name>Month__c</name>
+    </fields>
+    <fields>
+        <label>#Q01_Marketing commercial fees</label>
+        <name>Q01__c</name>
+    </fields>
+    <fields>
+        <label>#S01_Personal section(Bridal) Couple(s)</label>
+        <name>S01__c</name>
+    </fields>
+    <fields>
+        <help>Wedding couple(s) * 100000</help>
+        <label>#S03_Personal section(Bridal) Sales</label>
+        <name>S03__c</name>
+    </fields>
+    <fields>
+        <label>#S06_Personal section(Bridal) Photo</label>
+        <name>S06__c</name>
+    </fields>
+    <fields>
+        <help>Photo plan couple(s) * 200,000</help>
+        <label>#S07_Personal section(Bridal) Sales</label>
+        <name>S07__c</name>
+    </fields>
+    <fields>
+        <label>#S08_Personal section(Bridal) Meeting</label>
+        <name>S08__c</name>
+    </fields>
+    <fields>
+        <help>Wedding first meeting couples * 100000</help>
+        <label>#S08_Personal section(Bridal) Sales</label>
+        <name>S10__c</name>
+    </fields>
+    <fields>
+        <label>Year</label>
+        <name>Year__c</name>
+    </fields>
+    <nameFieldLabel>Year month [Budget Name]</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

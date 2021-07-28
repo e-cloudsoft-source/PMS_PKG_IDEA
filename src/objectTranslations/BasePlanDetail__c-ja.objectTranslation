@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>ラックレート明細（プラン）</value>
+    </caseValues>
+    <fields>
+        <label><!-- プラン --></label>
+        <name>BasePlanRef__c</name>
+        <relationshipLabel><!-- ラックレート明細（プラン） --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 種別 --></label>
+        <name>GuestType__c</name>
+        <picklistValues>
+            <masterLabel>VIP</masterLabel>
+            <translation><!-- VIP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>一般</masterLabel>
+            <translation><!-- 一般 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>会員</masterLabel>
+            <translation><!-- 会員 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 設定日 --></label>
+        <name>PriceSetupDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売状態 --></label>
+        <name>SalesStatus__c</name>
+        <picklistValues>
+            <masterLabel>停止中</masterLabel>
+            <translation><!-- 停止中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>販売中</masterLabel>
+            <translation><!-- 販売中 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- SearchKey --></label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier --></label>
+        <name>Tier__c</name>
+    </fields>
+</CustomObjectTranslation>

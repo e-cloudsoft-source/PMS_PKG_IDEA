@@ -1,0 +1,1848 @@
+<apex:page controller="CashManagentInput" action="{!init}"
+	id="cash" standardStylesheets="true" showheader="true" sidebar="false">
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<meta name="viewport" content="width=1280;initial-scale=0.5;user-scalable=yes;"/>
+<!-- <c:CommHeaderComp />  -->
+<c:CommHeaderComp loadJsLib="false" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2017, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2017, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2017, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2017, 'js/kendo.all.min.js')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<apex:includeScript value="{!$Resource.CommLog}"/>
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+<c:CommProductFeeCalJsComp />
+<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+<style>
+/* Salesforce Calendar Link No Show */
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+/*
+.requiredInput {
+	width: 100px;
+}*/
+.detail_centerRow {
+	text-align: center;
+	height: 28px;
+	min-height: 28px;
+}
+.detail_headerRow {
+	text-align: center;
+	height: 28px;
+	width:36px;
+	min-width:36px;
+	background-color: green;
+}
+.bPageBlock .detailList th, .bPageBlock .detailList td {
+	vertical-align: middle;
+}
+.pbTitle .mainTitle a{
+	vertical-align: middle;
+}
+/* Kendoui Css Style */
+.lookupInput input {
+	width:100%;
+}
+.lookupInput a {
+	width: 25px;
+	height: 28px;
+	padding:0px;
+	margin-left: -25px;
+}
+.lookupIcon {
+	padding:0px;
+	margin-right:0px ;
+	margin-top: 3px;
+}
+.lookupIconOn {
+	margin-top: 3px;
+}
+/* 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN */
+.headerCss{ 
+	padding-right: 0px !important;
+}
+.k-i-filterIcon{
+	padding-right: 15px !important;
+}
+.headerDiv1{
+	width:100%;
+	display: table;
+}
+.headerDiv2{
+	display: table-cell;
+	vertical-align:middle;
+}
+.headerDiv3{
+	width: 25px;
+	float: right;
+}
+.k-i-arrow-60-up{
+	top: 1px !important;
+}
+.k-i-arrow-60-down{
+	bottom: 1px !important;
+}
+.k-state-actives {
+    background-color: peachpuff !important;
+}
+.k-numeric-wrap.k-state-invalid input{
+	color: #000 !important;
+}
+.k-numeric-wrap.k-state-invalid{
+	border-color: #c5c5c5 !important;
+}
+li.k-item.k-state-default.k-first.k-tab-on-top.k-state-active, li.k-item.k-state-default.k-last.k-tab-on-top.k-state-active, div#tabstrip-1, div#tabstrip-2{
+	border-color: #f35800;
+}
+.k-panelbar .k-tabstrip-top .k-tabstrip-items .k-state-active, .k-tabstrip-top .k-tabstrip-items .k-state-active{
+	border-bottom-color: #fff !important;
+}
+.k-grid-content.k-auto-scrollable{
+	 display: none;
+}
+.tStyle th, .tStyle td {
+	word-break:break-all;
+	white-space:inherit;
+}
+div.k-tabstrip>.k-content {
+    padding: 0.3em;
+}
+/* 2017/11/22 検索結果にFilter機能の追加 WGCH END */
+</style>
+<script>
+beenFocused = true;
+var $j = jQuery.noConflict();
+// kendo culture custome 
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = {!JSENCODE(PointLen)};
+currency.symbol = "{!JSENCODE(CurrencySybmol)}";
+currency.pattern = ["$-n","$n"];
+</script>
+<!-- Cash Managent -->     <!-- 現金入出 -->
+<apex:sectionHeader title="{!$Label.ps__msg_040_0044}" subtitle="{!$Label.ps__msg_040_0001}"/>
+
+<apex:outputPanel id="errPanel">
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<apex:pageMessages rendered="{!isShowErrorFlg}" />
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+</apex:outputPanel>
+
+<!-- Body -->
+<div id="tabstrip">
+
+	<ul>
+		<li tabKey="{!CONST_PAGE_MODE_IN}" class="{!IF(input.pageMode == CONST_PAGE_MODE_IN,'k-state-active' ,'')}"><!-- 入金 -->{!$Label.MSG_040_0002}</li>
+       	<li tabKey="{!CONST_PAGE_MODE_OU}" class="{!IF(input.pageMode == CONST_PAGE_MODE_OU,'k-state-active' ,'')}"><!-- 出金 -->{!$Label.MSG_040_0003}</li>
+	</ul>
+	
+	<div><!-- Tab1 -->
+		
+		<!-- Header -->	
+
+		
+		<!-- 入金入力情報 -->
+	    <div class="k-block k-info-colored" id="despInpDiv">
+
+			<apex:form >
+				<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+				<apex:actionFunction action="{!changeSalesDate}" name="depChangeSalesData" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,depWarningPanel,depFilterDsFormId"
+						oncomplete="depDmlCompleteEvent('0')">
+		   				<apex:param name="pageMode" value="{!CONST_PAGE_MODE_IN}" assignTo="{!input.pageMode}"/>
+				</apex:actionFunction>
+				<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				<apex:inputHidden value="{!editRowIdx}" id="hidDepEditRowIdx"/>
+				<apex:inputHidden value="{!input.pageMode}" id="hidDepPageMode"/>
+				<!-- 画面編集に切替する -->
+				<apex:actionFunction action="{!historyEdit}" name="despEditHistory" status="refStatusBlock" rerender="depInfoTable,errPanel,depFilterDsFormId"  immediate="true"
+						oncomplete="depDmlCompleteEvent('{!JSENCODE(TEXT(editRowIdx))}')">
+				   		<apex:param name="editRowIdx" value="" assignTo="{!editRowIdx}"/>
+				   		<apex:param name="pageMode" value="" assignTo="{!input.pageMode}"/>
+				</apex:actionFunction>
+				<!-- 現金入金履歴 -->
+				<apex:pageBlock title="{!$Label.ps__msg_040_0004}" id="despDataBlock">
+			    	<!-- bluk input page -->
+					<apex:pageBlockButtons location="top" id="despDataBlockBtn">
+
+					<table style="border-spacing: 0px;border-width: 0px">
+						<tr>
+						<td style="text-align: right;">
+			           	<!-- 支店 -->
+			            <apex:outputPanel style="margin-right: 10px;text-align: left;" id="depShop">
+			            <!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			            <apex:selectList value="{!input.depShopCode}" rendered="{!shopOpts.size > 0}" 
+				    			multiselect="false" size="1" styleClass="j-dropDownList" id="ShopSelect">
+				    			<!-- All -->
+				    			<apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_040_0022}"/>
+				    			<apex:selectOptions value="{!shopOpts}"/>
+			            </apex:selectList>
+			            <!--
+			            	<apex:actionRegion >
+					            <apex:selectList value="{!input.depShopCode}" rendered="{!shopOpts.size > 0}" onchange="depRefreshBranShop()"
+						    			multiselect="false" size="1" styleClass="j-dropDownList" id="ShopSelect">
+						    			<!-- All --
+						    			<apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_040_0022}"/>
+						    			<apex:selectOptions value="{!shopOpts}"/>
+						    	</apex:selectList>
+					    		<apex:actionFunction name="depRefreshBranShop" action="{!refreshBranShop}" rerender="depInfoTable,depAmount,errPanel" status="refStatusBlock" oncomplete="depDmlCompleteEvent('0')" >
+					    			<apex:param name="pageMode" value="{!CONST_PAGE_MODE_IN}" assignTo="{!input.pageMode}"/>
+					    		</apex:actionFunction>
+					    	</apex:actionRegion>
+			            -->
+			            <!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			            </apex:outputPanel>
+
+			   <!-- 2016/1/29         </td>
+			            <td style="text-align: right;min-width: 364px"> -->
+			            
+						<!-- 入金 -->
+                        <div id="depAmountBlock" style="font-size: 20px; font-weight: bold; text-align: center; vertical-align: middle; height: 30px; min-width: 170px; float:right">
+                            <span style="float: left; margin-left: 2px; line-height: 30px;"><!-- 合計： -->{!$Label.MSG_040_0005}</span>
+                            <apex:outputPanel style="float: right; margin-right: 2px;font-weight: bold; line-height: 30px;" id="depAmount">
+				    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" >
+					    		<apex:param value="{!depAmount}" />
+					    	</apex:outputtext>     	
+	                    	</apex:outputPanel>
+	                    </div>
+	                    
+			            <!-- 計上日 -->
+                        <div style="font-size: 20px; font-weight: bold; text-align: center; vertical-align: middle; height: 30px; float:right">
+                        <span style="float: left; margin-left: 2px; line-height: 30px"><!-- 計上日： -->{!$Label.MSG_040_0006}</span>
+                        <span style="float: right; margin-right: 2px; font-size: 15px;">
+                        <!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+                        <apex:inputField value="{!input.depFromDateInput.Checkinday__c}" style="width:100px;margin-left:5px;height: 28px; padding: 0; font-weight: normal;" id="depSalesFromDate" styleClass="k-textbox" />
+                        <span style="margin-left: 10px"><!-- 〜 -->{!$Label.MSG_040_0107}</span>
+                        <apex:inputField value="{!input.depToDateInput.Checkinday__c}" style="width:100px;margin-left:5px;height: 28px; padding: 0; font-weight: normal;" id="depSalesToDate" styleClass="k-textbox" />
+                        <button class="csvoutputbtn" value="" onclick="hashMapClearFun(true);depChangeSalesData();" type="button" style="width:60px;height:22px;">
+	                        {!$Label.MSG_040_0108}
+	                        <span class="k-icon k-i-search" style="width:15px;position: relative;left: 5px;"></span>
+                        </button>
+                        <!--
+			            <apex:actionRegion >
+                            <apex:inputField value="{!input.depDateInput.Checkinday__c}" style="width:100px;margin-left:5px;height: 28px; padding: 0; font-weight: normal;" id="salesDate" styleClass="k-textbox" >
+				                <apex:actionSupport event="onchange" action="{!changeSalesDate}" rerender="depInfoTable,depAmount,errPanel" status="refStatusBlock" oncomplete="depDmlCompleteEvent('0')" >
+				                	<apex:param name="pageMode" value="{!CONST_PAGE_MODE_IN}" assignTo="{!input.pageMode}"/>
+				                </apex:actionSupport>
+				            </apex:inputField>
+				        </apex:actionRegion>
+                        -->
+                        <!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			            </span>
+			            </div>
+			            
+			            </td>
+			            </tr>
+			            </table>
+
+			            
+					</apex:pageBlockButtons>
+					<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+					<apex:outputPanel id="depWarningPanel">
+						<apex:pageMessages rendered="{!depFilter.isShowWarningFlg}"/>
+					</apex:outputPanel>
+			    	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			    	<div id="existBlock1" >
+			    	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			    	<apex:pageBlockTable value="{!deposList}" var="var" width="100%" 
+			    		id="depInfoTable" styleClass="list tStyle">
+			    	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+						
+						<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+					    <apex:column headerClass="detail_headerRow" styleClass="detail_centerRow" style="width:{!depMap['削除']}">
+					    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+					    	<apex:facet name="header">
+					    	
+					    	<apex:outputPanel id="depDeleteBtnBlock">
+					    	<div id="deleteBtn" style="display: none;">
+					    	<!-- 削除 -->
+					    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+							<input type="button" value="{!$Label.MSG_040_0007}" onclick="removeContainer(true);preDeleteSubmit('{!JSENCODE(CONST_PAGE_MODE_IN)}')" class="btn"/>
+					    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+							<!-- 
+					    		<apex:actionRegion > 
+					    		<apex:commandButton value="削除" action="{!deleteData}"
+					    		onclick="preDepSubmit('0','{!JSENCODE(CONST_PAGE_MODE_IN)}')" immediate="true"
+					    		reRender="depInfoTable,depAmount,errPanel" status="refStatusBlock" oncomplete="depDmlCompleteEvent('0')"/>
+					    		</apex:actionRegion>
+					    		 -->
+					    	</div>
+					    	<div id="deleteLab" style="display: true;">
+					    		<span><!-- 削除 -->{!$Label.MSG_040_0007}</span>
+					    	</div>
+							</apex:outputPanel>
+
+					    	</apex:facet>
+					    	<apex:inputCheckbox value="{!var.isDelete}" html-rowIdx="{!var.rowIdx}" id="dataSelectChk" rendered="{!var.dep.id != null && var.isReadOnly && isCanUpdateDep}"  onclick="swithDeleteBtn('{!JSENCODE(CONST_PAGE_MODE_IN)}')"/>
+					    </apex:column>
+					    <!-- 伝票# -->
+					    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+					    <!-- <apex:column headerValue="{!$Label.ps__msg_040_0008}" style="width:90px;"> -->
+				    	<apex:column headerValue="{!$Label.ps__msg_040_0008}" style="width:{!depMap['伝票#']}">
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<apex:outputText value="{!var.processNo}"/>
+				    	</apex:column>
+				    	<!-- 扱者 -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0009}" width="90px;"> -->
+				    	<apex:column headerValue="{!$Label.ps__msg_040_0009}" style="width:{!depMap['扱者']}">
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+				    		<apex:facet name="header">
+					    		<div class="headerDiv1">
+						    		<div class="headerDiv2">
+						    			{!$Label.ps__msg_040_0009}
+						    		</div>
+						    		<div id="depCreateUserHdr" api="depCreateUser" class="headerDiv3"></div>
+			    				</div>
+		    				</apex:facet>
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    		<apex:outputText value="{!var.createUser}"/>
+				    	</apex:column>
+				    	<!-- 入金日時 -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0010}" style="width:90px;"> -->
+				    	<apex:column headerValue="{!$Label.ps__msg_040_0010}" style="width:{!depMap['入金日時']}">
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<apex:outputText value="{!var.createDate}"/>
+				    	</apex:column> 
+				    	<!-- 店舗 -->	
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0011}" rendered="{!shopOpts.size > 0}" width="15%"> -->
+				    	<apex:column headerValue="{!$Label.ps__msg_040_0011}" rendered="{!shopOpts.size > 0}" style="width:{!depMap['店舗']}">
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+							<apex:outputPanel styleClass="{!IF(var.isReadOnly,'','requiredInput')}" layout="block" >
+							<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+								<span name="wrapSpanInput_{!!var.isReadOnly}">
+						    		<apex:selectList value="{!var.dep.ShopCode__c}"  disabled="{!var.isReadOnly}" style="margin-left:0;margin-right:0; width:100%"
+					    			multiselect="false" size="1" styleClass="j-dropDownList" id="depShopSel">
+					    			<apex:selectOptions value="{!shopOpts}"/>
+					    		</apex:selectList>
+								</span>
+							</apex:outputPanel>
+				    	</apex:column>
+				    	<!-- 科目 -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column width="12%"> -->
+				    	<apex:column style="width:{!depMap['科目']}">
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+				    		<apex:facet name="header">
+					    		<div class="headerDiv1">
+						    		<div class="headerDiv2">
+						    			{!$Label.MSG_040_0012}
+						    		</div>
+						    		<div id="depKamokuHdr" api="depKamoku" class="headerDiv3"></div>
+			    				</div>
+		    				</apex:facet>
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    		<apex:outputField value="{!var.dep.Kamoku__c}" rendered="{!var.isReadOnly}"/>
+				    		<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+							<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+				    		<span name="wrapSpanInput_{!!var.isReadOnly}">					    		
+				    				<apex:inputField value="{!var.dep.Kamoku__c}" id="depKamoku" rendered="{!!var.isReadOnly}" styleClass="j-comboxInput" style="margin-left:0;margin-right:0; width:100%"/>
+				    		</span>
+				    		</apex:outputPanel>
+				    	</apex:column>
+				    	<!-- 計上日 -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column style="text-align:right;width:100px;"> -->
+					    <apex:column style="width:{!depMap['計上日']}">
+					    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+					    	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+					    	<apex:facet name="header">
+					    		<div class="headerDiv1">
+						    		<div class="headerDiv2">
+						    			{!$Label.MSG_040_0013}
+						    		</div>
+						    		<div id="depSalesDateHdr" api="depSalesDate" class="headerDiv3"></div>
+			    				</div>
+		    				</apex:facet>
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+					    	<apex:outputField value="{!var.dep.SalesDate__c}" rendered="{!var.isReadOnly}"/>
+					    	
+					    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+							<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+							<span name="wrapSpanInput_{!!var.isReadOnly}">
+							<apex:inputField value="{!var.dep.SalesDate__c}" id="depSalesDate" styleClass="k-textbox" style="width:100px"/>
+					    	</span>
+					    	</apex:outputPanel>
+					    </apex:column>
+					    <!-- 入金先 -->
+					    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+					    <!-- <apex:column width="12%"> -->
+					    <!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+				    	<apex:column style="width:{!depMap['入金先']}" rendered="{!depHideMap['入金先']}">
+				    	<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+				    		<apex:facet name="header">
+					    		<div class="headerDiv1">
+						    		<div class="headerDiv2">
+						    			{!$Label.MSG_040_0014}
+						    		</div>
+						    		<div id="depositHdr" api="depositId" class="headerDiv3"></div>
+			    				</div>
+		    				</apex:facet>
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    		<apex:outputField value="{!var.dep.deposit__c}" rendered="{!var.isReadOnly}"/>
+				    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+				    			<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+				    			<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+				    			<apex:inputField value="{!var.dep.deposit__c}" id="deposit" rendered="{!!var.isReadOnly}" styleClass="k-textbox" onchange="getAccountClick('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_IN)}',{!depHideMap['取引先']});"/>
+				    			<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+				    			<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+				    		</span>
+				    	</apex:column>
+				    	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+				    	<!-- 入金先-取引先  -->
+					    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+					    <!-- <apex:column width="12%"> -->
+					    <!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+				    	<apex:column style="width:{!depMap['取引先']}" rendered="{!depHideMap['取引先']}">
+				    	<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<apex:facet name="header">
+					    		<div class="headerDiv1">
+						    		<div class="headerDiv2">
+						    			取引先
+						    		</div>
+						    		<div id="accountDepHdr" api="accountDepId" class="headerDiv3"></div>
+			    				</div>
+		    				</apex:facet>
+				    		<apex:outputField value="{!var.dep.AccountRef__c}" rendered="{!var.isReadOnly}"/>
+				    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+				    			<apex:inputField value="{!var.dep.AccountRef__c}" id="accountDep" rendered="{!!var.isReadOnly}" styleClass="k-textbox"/>
+				    		</span>
+				    	</apex:column>
+				    	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+						<!-- 摘要 -->
+						<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0015}" > -->
+				    	<apex:column headerValue="{!$Label.ps__msg_040_0015}" style="width:{!depMap['摘要']}">
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    		<apex:outputField value="{!var.dep.deposititem__c}" rendered="{!var.isReadOnly}"/>
+				    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+				    			<apex:inputField value="{!var.dep.deposititem__c}" id="depItem" rendered="{!!var.isReadOnly}" styleClass="k-textbox" style="margin-left:0;margin-right:0; width:100%"/>
+				    		</span>
+				    	</apex:column>
+						<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+						<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+						<apex:column headerValue="{!$ObjectType.deposit__c.Fields.TaxRate__c.label}" style="width: {!depMap['消費税']};text-align: center;" rendered="{!taxOpts.size > 0 && depositTaxFlg}">
+						<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+							<apex:outputText value="{0,number,{!numberFormat}}" rendered="{!var.isReadOnly}"  >
+								<apex:param value="{!var.dep.TaxRate__c}" />
+							</apex:outputText>
+							<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+							<apex:selectList value="{!var.rateTax}" id="depSelTaxType" styleClass="j-dropDownList" onchange="taxRateChange()" multiselect="false" style="margin-left:0;margin-right:0; width:100%" size="1" rendered="{!!var.isReadOnly}">
+								<apex:selectOptions value="{!taxOpts}"/>
+							</apex:selectList>
+							<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+						</apex:column>
+						<!-- // 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+				    	<!-- 金額 -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0016}" style="text-align:right;margin-left:0;margin-right:0;width:120px;min-width:120px" > -->
+						<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+				    	<apex:column headerValue="{!$Label.ps__msg_040_0016}" style="text-align:right;margin-left:0;margin-right:0;min-width:120px;width:{!depMap['金額']};" rendered="{!!depositTaxFlg}">
+						<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+
+				    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly}" >
+				    			<apex:param value="{!var.dep.depositamount__c}" />
+				    		</apex:outputtext>
+				    		
+					    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+							<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+				    		<span name="wrapSpanInput_{!!var.isReadOnly}" >
+				    			<apex:inputField value="{!var.dep.depositamount__c}"  id="depAmount" style="width:100%" styleClass="j-numberInput" />
+				    		</span>
+				    		</apex:outputPanel>
+				    	</apex:column>
+						<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+						<!--金額(税抜)-->
+						<apex:column headerValue="{!$Label.ps__msg_040_0069}" style="text-align:right;margin-left:0;margin-right:0;width:{!depMap['金額(税抜)']};" rendered="{!depositTaxFlg}" >
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly && var.denpyokei != null}" >
+								<apex:param value="{!var.denpyokei}" />
+							</apex:outputtext>
+							<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+							<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+							<span name="wrapSpanInput_{!!var.isReadOnly}" >
+								<input value="{!var.denpyokei}"  name="denpyoukei" datatype="dep" style="width:100%;" data-olddata="{!var.denpyokei}" class="j-numberInput" />
+							</span>
+							</apex:outputPanel>
+						</apex:column>
+						<!-- 金額(税込) -->
+						<apex:column headerValue="{!$Label.ps__msg_040_0070}" style="text-align:right;margin-left:0;margin-right:0;width:{!depMap['金額(税込)']};" rendered="{!depositTaxFlg}">
+							<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly && var.denpyokeiIncTax != null}" >
+								<apex:param value="{!var.denpyokeiIncTax}" />
+							</apex:outputtext>
+							<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+							<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+							<span name="wrapSpanInput_{!!var.isReadOnly}" >
+								<input value="{!var.denpyokeiIncTax}"  name="denpyoukeiIncTax" datatype="dep" style="width:100%;" data-olddata="{!var.denpyokeiIncTax}" class="j-numberInput" />
+							</span>
+							</apex:outputPanel>
+						</apex:column>
+				    	<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+				    	<!-- Action Colnum -->
+				    	<!-- アクション -->
+				    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0017}" width="70px"> -->
+					    <apex:column headerValue="{!$Label.ps__msg_040_0017}" style="width:{!depMap['アクション']}">
+					    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+					    	<apex:outputPanel rendered="{!var.isReadOnly && isCanUpdateDep}">
+					    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+							<a href="javascript:void(0)" onclick="removeContainer(true);despEditHistory('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_IN)}', false)" ><!-- 編集 -->{!$Label.MSG_040_0018}</a>
+							<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+					    	</apex:outputPanel>
+							<!-- Button Action -->
+					    	<apex:outputPanel rendered="{!!var.isReadonly && var.dep.Id == null}" style="white-space: nowrap;">
+					    		<!-- 新規 -->
+					    		<!-- 保存 -->
+							<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+					    		<input type="button" class="btn" name="inputBtn"  value="{!$Label.MSG_040_0019}" onclick="removeContainer(true);preSaveSubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_IN)}');" />
+					    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+							<!-- 
+					    		<apex:commandButton value="保存" action="{!insertData}" reRender="depInfoTable,depAmount,errPanel" status="refStatusBlock"
+					    						onclick="preDepSubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_IN)}')"
+					    						oncomplete="depDmlCompleteEvent('0')"
+					    						/>
+					    						 -->
+					    	</apex:outputPanel>
+					    	
+					    	<apex:outputPanel rendered="{!!var.isReadonly && var.dep.Id != null}" style="white-space: nowrap;">
+								<!-- 保存 -->
+								<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+								<input type="button" class="btn" value="{!$Label.MSG_040_0019}" name="inputBtn" onclick="removeContainer(true);preSaveSubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_IN)}');" />
+								<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+								<!-- 
+					    	 	<apex:commandButton value="保存" action="{!dataUpdate}" reRender="depInfoTable,depAmount,errPanel" status="refStatusBlock"
+					    	 					onclick="preDepSubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_IN)}')"
+					    	 					oncomplete="depDmlCompleteEvent('0')"
+					    	 					/>
+					    	 					 -->
+					    	 	<!-- 取消 -->
+					    	 	<!-- 
+					    	 	<apex:commandButton value="取消" action="{!dataRollBack}" reRender="depInfoTable,depAmount,errPanel" status="refStatusBlock"
+					    	 					immediate="true"
+					    	 					oncomplete="depDmlCompleteEvent('0')"
+					    	 					/> -->
+					    	 	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+							<input type="button" class="btn" value="{!$Label.MSG_040_0020}" onclick="removeContainer(true);depBataRollBack('{!JSENCODE(CONST_PAGE_MODE_IN)}');" />
+							<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+					    	</apex:outputPanel>
+					    </apex:column>
+				    
+			    	</apex:pageBlockTable>
+			    	</div>
+			    </apex:pageBlock>
+		    </apex:form>
+	    </div>
+
+	</div>	
+	
+	
+
+	<div ><!-- Tab2 -->
+        
+        <div class="k-block k-info-colored" id="payOutDiv">
+        
+		<apex:form >
+			<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			<apex:actionFunction action="{!changeSalesDate}" name="payChangeSalesData" status="refStatusBlock" rerender="payInfoTable,payAmount,errPanel,payWarningPanel,payFilterDsFormId"
+					oncomplete="payDmlCompleteEvent('0')">
+			   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_OU}" assignTo="{!input.pageMode}"/>
+			</apex:actionFunction>
+			<apex:inputHidden value="{!editRowIdx}" id="hidPayEditRowIdx"/>
+			<apex:inputHidden value="{!input.pageMode}" id="hidPayPageMode"/>
+			<!-- button -->
+			<apex:actionFunction action="{!historyEdit}" name="payEditHistory" status="refStatusBlock" rerender="payInfoTable,errPanel,payFilterDsFormId" immediate="true"
+					oncomplete="payDmlCompleteEvent('{!JSENCODE(TEXT(editRowIdx))}')">
+			   		<apex:param name="editRowIdx" value="" assignTo="{!editRowIdx}"/>
+			   		<apex:param name="pageMode" value="" assignTo="{!input.pageMode}"/>
+			</apex:actionFunction>
+			<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			<!-- 現金出金履歴 -->
+			<apex:pageBlock title="{!$Label.ps__msg_040_0021}" id="payDataBlock">
+
+				<apex:pageBlockButtons location="top" id="payDataBlockBtn">
+					
+				<table style="border-spacing: 0px;border-width: 0px">
+					<tr>
+						<td style="text-align: right;">
+		            
+				        <!-- 出金の店舗コード -->     
+			            <apex:outputPanel style="margin-right: 10px;text-align: left;" id="payShop">
+			             	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			             	<apex:selectList value="{!input.payShopCode}" rendered="{!shopOpts.size > 0}"
+					    			multiselect="false" size="1" styleClass="j-dropDownList" id="ShopSelect">
+					    			<!-- All -->
+					    			<apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_040_0022}"/>
+					    			<apex:selectOptions value="{!shopOpts}"/>
+			             	</apex:selectList>
+			             	<!-- 
+			            	<apex:actionRegion >
+					            <apex:selectList value="{!input.payShopCode}" rendered="{!shopOpts.size > 0}" onchange="payRefreshBranShop()"
+						    			multiselect="false" size="1" styleClass="j-dropDownList" id="ShopSelect">
+						    			<!-- All --
+						    			<apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_040_0022}"/>
+						    			<apex:selectOptions value="{!shopOpts}"/>
+						    	</apex:selectList>
+					    		<apex:actionFunction name="payRefreshBranShop" action="{!refreshBranShop}" rerender="payInfoTable,payAmount,errPanel" status="refStatusBlock" oncomplete="payDmlCompleteEvent('0')" >
+					    			<apex:param name="pageMode" value="{!CONST_PAGE_MODE_OU}" assignTo="{!input.pageMode}"/>
+					    		</apex:actionFunction>
+					    	</apex:actionRegion>
+			             	-->
+			             	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			            </apex:outputPanel>
+		            
+					<!--2016/1/29	</td>
+						<td style="text-align: right;min-width: 364px"> -->
+							
+				            <!--　該当計上日にすでに合計金額 -->
+		                    <div id="payAmountBlock" style="font-size: 20px; font-weight: bold; text-align: center; vertical-align: middle; height: 30px; min-width: 170px; float:right">		                        
+		                        <span style="float: left; margin-left: 2px; line-height: 30px;"><!-- 合計： -->{!$Label.MSG_040_0005}</span>
+		                        <apex:outputPanel style="float: right; margin-right: 2px;font-weight: bold; line-height: 30px;" id="payAmount">
+					    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" >
+						    		<apex:param value="{!payAmount}" />
+						    	</apex:outputtext>     	
+		                    	</apex:outputPanel>
+		                    </div>				            
+		                    <div style="font-size: 20px; font-weight: bold; text-align: center; vertical-align: middle; height: 30px; float:right">
+		                    <span style="float: left; margin-left: 2px; line-height: 30px;"><!-- 計上日： -->{!$Label.MSG_040_0006}</span>
+		                    <span style="float: right; margin-right: 2px; font-size: 15px;">
+		                    <!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+		                    <apex:inputField value="{!input.payFromDateInput.Checkinday__c}" style="width:100px;margin-left:5px;height: 28px; padding: 0; font-weight: normal;" id="paySalesFromDate" styleClass="k-textbox" />
+		                    <span style="margin-left: 10px"><!-- 〜 -->{!$Label.MSG_040_0107}</span>
+		                    <apex:inputField value="{!input.payToDateInput.Checkinday__c}" style="width:100px;margin-left:5px;height: 28px; padding: 0; font-weight: normal;" id="paySalesToDate" styleClass="k-textbox" />
+		                    <button class="csvoutputbtn" value="" onclick="hashMapClearFun(false);payChangeSalesData();" type="button" style="width:60px;height:22px;">
+		                            {!$Label.MSG_040_0108}
+			                    <span class="k-icon k-i-search" style="width:15px;position: relative;left: 5px;"></span>
+		                    </button>
+		                    <!--
+				            	<apex:actionRegion >
+		                        <apex:inputField value="{!input.payDateInput.Checkinday__c}" style="width:100px;margin-left:5px;height: 28px; padding: 0; font-weight: normal;" id="salesDate" styleClass="k-textbox" >
+					                <apex:actionSupport event="onchange" action="{!changeSalesDate}" rerender="payInfoTable,payAmount,errPanel" status="refStatusBlock" oncomplete="payDmlCompleteEvent('0')" >
+					                	<apex:param name="pageMode" value="{!CONST_PAGE_MODE_OU}" assignTo="{!input.pageMode}"/>
+					                </apex:actionSupport>
+					            </apex:inputField>
+					            </apex:actionRegion>
+		                    -->
+		                    <!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				            </span>
+				            </div>
+				            
+						</td>
+						</tr>
+					</table>
+
+				</apex:pageBlockButtons>
+				<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+				<apex:outputPanel id="payWarningPanel">
+					<apex:pageMessages rendered="{!payFilter.isShowWarningFlg}"/>
+				</apex:outputPanel>
+				<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+		    	<!-- bluk input page -->
+		    	<div id="existBlock2" >
+		    	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+		    	<apex:pageBlockTable value="{!paymentList}" var="var" width="100%" 
+		    		id="payInfoTable" styleClass="list tStyle">
+		    	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+
+				    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    <apex:column headerClass="detail_headerRow" styleClass="detail_centerRow" style="width:{!payMap['削除']}">
+				    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    	<apex:facet name="header">
+					    	<apex:outputPanel id="payDeleteBtnBlock">
+					    	<div id="deleteBtn" style="display: none;">
+					    	<!-- 削除 -->
+					    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+							<input type="button" value="{!$Label.MSG_040_0007}" onclick="removeContainer(false);preDeleteSubmit('{!JSENCODE(CONST_PAGE_MODE_OU)}')" class="btn"/>
+							<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    			<!-- 
+				    			<apex:commandButton value="削除" action="{!deleteData}" 
+				    			onclick="prePaySubmit('0','{!JSENCODE(CONST_PAGE_MODE_OU)}')"
+				    			reRender="payInfoTable,payAmount,errPanel" status="refStatusBlock" oncomplete="payDmlCompleteEvent('0')"/>
+				    			 -->
+				    		</div>
+					    	<div id="deleteLab" style="display: true;">
+					    		<span><!-- 削除 -->{!$Label.MSG_040_0007}</span>
+					    	</div>
+				    		</apex:outputPanel>
+				    	</apex:facet>
+				    	<apex:inputCheckbox value="{!var.isDelete}" html-rowIdx="{!var.rowIdx}" id="dataSelectChk" rendered="{!var.pay.id != null && var.isReadOnly && isCanUpdatePay}" onclick="swithDeleteBtn('{!JSENCODE(CONST_PAGE_MODE_OU)}')"/>
+				    </apex:column>
+				    <!-- 伝票# -->
+				    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    <!-- <apex:column headerValue="{!$Label.ps__msg_040_0008}" style="width:90px;"> -->
+			    	<apex:column headerValue="{!$Label.ps__msg_040_0008}" style="width:{!payMap['伝票#']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<apex:outputText value="{!var.processNo}"/>
+			    	</apex:column>
+			    	<!-- 扱者 -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column style="width:90px;"> -->
+			    	<apex:column style="width:{!payMap['扱者']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			    		<apex:facet name="header">
+				    		<div class="headerDiv1">
+					    		<div class="headerDiv2">
+					    			{!$Label.ps__msg_040_0009}
+					    		</div>
+					    		<div id="payCreateUserHdr" api="payCreateUser" class="headerDiv3"></div>
+		    				</div>
+	    				</apex:facet>
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			    		<apex:outputText value="{!var.createUser}"/>
+			    	</apex:column>
+			    	<!-- 出金日時 -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0045}" style="width:90px;"> -->
+			    	<apex:column headerValue="{!$Label.ps__msg_040_0045}" style="width:{!payMap['出金日時']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<apex:outputText value="{!var.createDate}"/>
+			    	</apex:column>
+			    	<!-- 店舗 -->
+			    	<!-- 2018/11/30 出金先項目の機能追加 zyz by BEGIN -->
+			    	<!--<apex:column headerValue="{!$Label.ps__msg_040_0011}" rendered="{!shopOpts.size > 0}" width="10%">-->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0011}" rendered="{!shopOpts.size > 0}" width="15%"> -->
+			    	<apex:column headerValue="{!$Label.ps__msg_040_0011}" rendered="{!shopOpts.size > 0}" style="width:{!payMap['店舗']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    	<!-- 2018/11/30 出金先項目の機能追加 zyz by END -->
+					<apex:outputPanel styleClass="{!IF(var.isReadOnly,'','requiredInput')}" layout="block" >
+					<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+						<span name="wrapSpanOutput_{!!var.isReadOnly}">
+				    		<apex:selectList value="{!var.pay.ShopCode__c}" disabled="{!var.isReadOnly}" style="margin-left:0;margin-right:0; width:100%"
+				    			multiselect="false" size="1" styleClass="j-dropDownList" id="payShopSel">
+				    			<apex:selectOptions value="{!shopOpts}"/>
+				    		</apex:selectList>
+				    	</span>
+				    </apex:outputPanel>
+			    	</apex:column>
+			    	<!-- 科目 -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column width="12%"> -->
+			    	<apex:column style="width:{!payMap['科目']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			    		<apex:facet name="header">
+				    		<div class="headerDiv1">
+					    		<div class="headerDiv2">
+					    			{!$Label.MSG_040_0012}
+					    		</div>
+					    		<div id="payKamokuHdr" api="payKamoku" class="headerDiv3"></div>
+		    				</div>
+	    				</apex:facet>
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			    		<apex:outputField value="{!var.pay.Pkamoku__c}" rendered="{!var.isReadOnly}" />
+			    		<span name="wrapSpanOutput_{!!var.isReadOnly}">
+			    			<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+	    					<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+			    				<apex:inputField value="{!var.pay.Pkamoku__c}" id="payKamoku" rendered="{!!var.isReadOnly}" styleClass="j-comboxInput" style="margin-left:0;margin-right:0; width:100%"/>
+			    			</apex:outputPanel>
+			    		</span>
+			    	</apex:column>
+			    	<!-- 計上日 -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column style="width:100px"> -->
+			    	<apex:column style="width:{!payMap['計上日']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+			    		<apex:facet name="header">
+				    		<div class="headerDiv1">
+					    		<div class="headerDiv2">
+					    			{!$Label.MSG_040_0013}
+					    		</div>
+				    			<div id="paySalesDateHdr" api="paySalesDate" class="headerDiv3"></div>
+		    				</div>
+	    				</apex:facet>
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			    		<apex:outputField value="{!var.pay.SalesDate__c}" rendered="{!var.isReadOnly}"/>
+				    	<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+						<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+			    			<span name="wrapSpanOutput_{!!var.isReadOnly}">
+			    			<apex:inputField value="{!var.pay.SalesDate__c}" id="paySalesDate" styleClass="k-textbox" style="width:100px"/>
+			    			</span>
+			    		</apex:outputPanel>
+			    	</apex:column>
+			    	<!-- 2018/11/30 出金先項目の機能追加 zyz by BEGIN -->
+				    <!--出金先 -->
+				    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    <!-- <apex:column width="12%"> -->
+				    <!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+			    	<apex:column style="width:{!payMap['出金先']}" rendered="{!payHideMap['出金先']}">
+			    	<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<apex:facet name="header">
+				    		<div class="headerDiv1">
+					    		<div class="headerDiv2">
+					    			出金先
+					    		</div>
+					    		<div id="paymentRefHdr" api="paymentRefId" class="headerDiv3"></div>
+		    				</div>
+	    				</apex:facet>
+			    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+			    		<apex:outputField value="{!var.pay.PaymentRef__c}" rendered="{!var.isReadOnly}"/>
+			    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+			    			<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+			    			<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+			    			<apex:inputField value="{!var.pay.PaymentRef__c}" id="paymentRef" rendered="{!!var.isReadOnly}" styleClass="k-textbox" onchange="getAccountClick('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_OU)}',{!payHideMap['取引先']});"/>
+			    			<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+			    			<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+			    		</span>
+			    	</apex:column>
+			    	<!-- 2018/11/30 出金先項目の機能追加 zyz by END -->
+			    	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+			    	<!-- 出金先-取引先  -->
+				    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+				    <!-- <apex:column width="12%"> -->
+				    <!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+			    	<apex:column style="width:{!payMap['取引先']}" rendered="{!payHideMap['取引先']}">
+			    	<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<apex:facet name="header">
+				    		<div class="headerDiv1">
+					    		<div class="headerDiv2">
+					    			取引先
+					    		</div>
+					    		<div id="accountPayHdr" api="accountPayId" class="headerDiv3"></div>
+		    				</div>
+	    				</apex:facet>
+			    		<apex:outputField value="{!var.pay.AccountRef__c}" rendered="{!var.isReadOnly}"/>
+			    		<span name="wrapSpanInput_{!!var.isReadOnly}">
+			    			<apex:inputField value="{!var.pay.AccountRef__c}" id="accountPay" rendered="{!!var.isReadOnly}" styleClass="k-textbox" />
+			    		</span>
+			    	</apex:column>
+			    	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+					<!-- 摘要 -->
+					<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0015}" > -->
+			    	<apex:column headerValue="{!$Label.ps__msg_040_0015}" style="width:{!payMap['摘要']}">
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<apex:outputField value="{!var.pay.Pitem__c}" rendered="{!var.isReadOnly}"/>
+			    		<span name="wrapSpanOutput_{!!var.isReadOnly}">
+			    		<apex:inputField value="{!var.pay.Pitem__c}" id="payItem" rendered="{!!var.isReadOnly}" styleClass="k-textbox" style="margin-left:0;margin-right:0; width:100%" />
+			    		</span>
+			    	</apex:column>
+					<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+					<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+					<apex:column headerValue="{!$ObjectType.Paymentslip__c.Fields.TaxRate__c.label}" style="width: {!payMap['消費税']};text-align: center;" rendered="{!taxOpts.size > 0 && paymentTaxFlg}">
+					<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+						<apex:outputText value="{0,number,{!numberFormat}}" rendered="{!var.isReadOnly}"  >
+							<apex:param value="{!var.pay.TaxRate__c}" />
+						</apex:outputText>
+						<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN -->
+						<apex:selectList value="{!var.rateTax}" id="paySelTaxType" styleClass="j-dropDownList" onchange="taxRateChange()" multiselect="false" style="margin-left:0;margin-right:0; width:100%" size="1" rendered="{!!var.isReadOnly}">
+							<apex:selectOptions value="{!taxOpts}"/>
+						</apex:selectList>
+						<!-- 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END -->
+					</apex:column>
+					<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+			    	<!-- 金額 -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+			    	<!-- <apex:column headerValue="{!$Label.ps__msg_040_0016}" style="text-align:right;margin-left:0;margin-right:0;width:120px;" styleClass="payAmountCls"> -->
+				<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+			    	<apex:column headerValue="{!$Label.ps__msg_040_0016}" style="text-align:right;margin-left:0;margin-right:0;min-width:120px;width:{!payMap['金額']};" styleClass="payAmountCls" rendered="{!!paymentTaxFlg}">
+				<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+			    	<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+			    		<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly}">
+				    		<apex:param value="{!var.pay.Pamount__c}" />
+				    	</apex:outputtext>
+
+				    	<apex:outputPanel styleClass="requiredInput" layout="block"  rendered="{!!var.isReadOnly}">
+						<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+			    		<span name="wrapSpanOutput_{!!var.isReadOnly}">
+			    		<apex:inputField value="{!var.pay.Pamount__c}" id="payAmount" styleClass="j-numberInput" style="width:100%"/>
+			    		</span>
+			    		</apex:outputPanel>
+
+			    	</apex:column>
+					<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+					<!--金額(税抜)-->
+					<apex:column headerValue="{!$Label.ps__msg_040_0069}" style="text-align:right;margin-left:0;margin-right:0;width:{!payMap['金額(税抜)']};"  rendered="{!paymentTaxFlg}" >
+						<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly && var.denpyokei != null}" >
+							<apex:param value="{!var.denpyokei}" />
+						</apex:outputtext>
+						<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+						<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+						<span name="wrapSpanInput_{!!var.isReadOnly}" >
+							<input value="{!var.denpyokei}"  name="denpyoukei" datatype="pay" style="width:100%;" data-olddata="{!var.denpyokei}" class="j-numberInput" />
+						</span>
+						</apex:outputPanel>
+					</apex:column>
+					<!-- 金額(税込) -->
+					<apex:column headerValue="{!$Label.ps__msg_040_0070}" style="text-align:right;margin-left:0;margin-right:0;width:{!payMap['金額(税込)']};" rendered="{!paymentTaxFlg}">
+						<apex:outputtext value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!var.isReadOnly && var.denpyokeiIncTax != null}" >
+							<apex:param value="{!var.denpyokeiIncTax}" />
+						</apex:outputtext>
+						<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!!var.isReadOnly}" >
+						<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+						<span name="wrapSpanInput_{!!var.isReadOnly}" >
+							<input value="{!var.denpyokeiIncTax}"  name="denpyoukeiIncTax" datatype="pay" style="width:100%;" data-olddata="{!var.denpyokeiIncTax}" class="j-numberInput" />
+						</span>
+						</apex:outputPanel>
+					</apex:column>
+					<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+					<!-- アクション -->
+					<!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz BEGIN -->
+					<!-- <apex:column headerValue="{!$Label.ps__msg_040_0017}" width="70px"> -->
+				    <apex:column headerValue="{!$Label.ps__msg_040_0017}" style="width:{!payMap['アクション']}">
+				    <!-- 2019/07/15 現金入出に自由に幅を変更機能対応 BY zyz END -->
+				    	<apex:outputPanel rendered="{!var.isReadOnly && isCanUpdatePay}">
+				    		<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+						<a href="javascript:void(0)" onclick="removeContainer(false);payEditHistory('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_OU)}', false)" ><!-- 編集 -->{!$Label.MSG_040_0018}</a>
+						<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    	</apex:outputPanel>
+						<!-- Button Action -->
+				    	<apex:outputPanel rendered="{!!var.isReadonly && var.pay.Id == null}" style="white-space: nowrap;">
+				    		<!-- 新規 -->
+				    		<!-- 保存 -->
+						<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+				    		<input type="button" class="btn" name="outputBtn" value="{!$Label.MSG_040_0019}" onclick="removeContainer(false);preSaveSubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_OU)}');" />
+						<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    		<!-- 
+				    		<apex:commandButton value="保存" action="{!insertData}" reRender="payInfoTable,payAmount,errPanel" status="refStatusBlock"
+				    						onclick="prePaySubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_OU)}')"
+				    						oncomplete="payDmlCompleteEvent('0')"
+				    						/>
+				    		 -->
+				    	</apex:outputPanel>
+				    	
+				    	<apex:outputPanel rendered="{!!var.isReadonly && var.pay.Id != null}" style="white-space: nowrap;">
+							<!-- 保存 -->
+							<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+							<input type="button" class="btn " name="outputBtn" value="{!$Label.MSG_040_0019}" onclick="removeContainer(false);preSaveSubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_OU)}');" />
+							<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+							<!-- 
+				    	 	<apex:commandButton value="保存" action="{!dataUpdate}" reRender="payInfoTable,payAmount,errPanel" status="refStatusBlock"
+				    	 					onclick="prePaySubmit('{!JSENCODE(TEXT(var.rowIdx))}','{!JSENCODE(CONST_PAGE_MODE_OU)}')"
+				    	 					oncomplete="payDmlCompleteEvent('0')"
+				    	 					/>
+				    	 	 -->
+				    	 	<!-- 取消 -->
+				    	 	<!-- 
+				    	 	<apex:commandButton value="取消" action="{!dataRollBack}" reRender="payInfoTable,payAmount,errPanel" status="refStatusBlock"
+				    	 					immediate="true"
+				    	 					oncomplete="payDmlCompleteEvent('0')"
+				    	 					/>
+				    	 					 -->
+				    	 	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+						<input type="button" class="btn" value="{!$Label.MSG_040_0020}" onclick="removeContainer(false);payBataRollBack('{!JSENCODE(CONST_PAGE_MODE_OU)}');" />
+						<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+				    	</apex:outputPanel>
+				    </apex:column>
+
+		    	</apex:pageBlockTable>
+		    	</div>
+		    </apex:pageBlock>
+		    </apex:form>
+		</div>
+	</div>
+
+</div>
+<!-- 削除FORM -->
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<apex:form >
+	<apex:actionFunction action="{!deleteData}" name="depDeleteData" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,depWarningPanel,depFilterDsFormId" 
+			oncomplete="depDmlCompleteEvent('0')">
+	   		<apex:param name="deleteRowIdx" value="" assignTo="{!deleteRowIdxs}"/>
+	   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_IN}" assignTo="{!input.pageMode}"/>
+	</apex:actionFunction>
+	<apex:actionFunction action="{!deleteData}" name="payDeleteData" status="refStatusBlock" rerender="payInfoTable,payAmount,errPanel,payWarningPanel,payFilterDsFormId"
+			oncomplete="payDmlCompleteEvent('0')">
+	   		<apex:param name="deleteRowIdx" value="" assignTo="{!deleteRowIdxs}"/>
+	   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_OU}" assignTo="{!input.pageMode}"/>
+	</apex:actionFunction>
+</apex:form>
+<!-- 取消 -->
+<apex:form >
+	<apex:actionFunction action="{!dataRollBack}" name="depBataRollBack" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,depFilterDsFormId" 
+			oncomplete="depDmlCompleteEvent('0')">
+	   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_IN}" assignTo="{!input.pageMode}"/>
+	</apex:actionFunction>
+	<apex:actionFunction action="{!dataRollBack}" name="payBataRollBack" status="refStatusBlock" rerender="payInfoTable,payAmount,errPanel,payFilterDsFormId"
+			oncomplete="payDmlCompleteEvent('0')">
+	   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_OU}" assignTo="{!input.pageMode}"/>
+	</apex:actionFunction>
+</apex:form>
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+<!-- 保存関連情報を格納する -->
+<apex:form id="saveForm">
+	<!-- 入金 -->
+	
+	<apex:inputHidden value="{!inpData.dep.ShopCode__c}" 		id="hidDepInShopCode"/>
+	<apex:inputHidden value="{!inpData.dep.SalesDate__c}" 		id="hidDepInSalesDate"/>
+	<apex:inputHidden value="{!inpData.dep.deposit__c}" 		id="hidDepInDeposit"/>
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+	<apex:inputHidden value="{!inpData.dep.AccountRef__c}" 		id="hidDepInAccountRef"/>
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+	<apex:inputHidden value="{!inpData.dep.Kamoku__c}" 			id="hidDepInKamoku"/>
+	<apex:inputHidden value="{!inpData.dep.deposititem__c}" 	id="hidDepInItem"/>
+	<apex:inputHidden value="{!inpData.dep.depositamount__c}"	id="hidDepInPamount"/>
+	<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+	<apex:inputHidden value="{!inpData.dep.TaxRate__c}"			id="hidDepTaxRate"/>
+	<apex:inputHidden value="{!inpData.dep.depositamountExc__c}" id="hidDepExcPamount"/>
+	<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+	<!-- 出金 -->
+	
+	<apex:inputHidden value="{!inpData.pay.ShopCode__c}" 		id="hidPayInShopCode"/>
+	<apex:inputHidden value="{!inpData.pay.SalesDate__c}" 		id="hidPayInSalesDate"/>
+	<!-- 2018/11/30 出金先項目の機能追加 zyz by BEGIN -->
+	<apex:inputHidden value="{!inpData.pay.PaymentRef__c}" 		id="hidPayInPaymentRef"/>
+	<!-- 2018/11/30 出金先項目の機能追加 zyz by END -->
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+	<apex:inputHidden value="{!inpData.pay.AccountRef__c}" 		id="hidPayInAccountRef"/>
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+	<apex:inputHidden value="{!inpData.pay.Pkamoku__c}"			id="hidPayInPkamoku"/>
+	<apex:inputHidden value="{!inpData.pay.Pitem__c}" 			id="hidPayInPitem"/>
+	<apex:inputHidden value="{!inpData.pay.Pamount__c}" 		id="hidPayInPamount"/>
+	<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN -->
+	<apex:inputHidden value="{!inpData.pay.TaxRate__c}" 		id="hidPayTaxRate"/>
+	<apex:inputHidden value="{!inpData.pay.PamountExc__c}"		id="hidPayExcPamount"/>
+	<!-- 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END -->
+	<!-- 共通パラメータ -->
+	<apex:inputHidden value="{!input.pageMode}" 				id="hidInPageMode"/>
+	<apex:inputHidden value="{!editRowIdx}" 					id="hidInEditRowIdx"/>
+	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+	<apex:actionFunction action="{!dataUpsert}" name="depUpsert" rerender="errPanel,depWarningPanel" 
+			oncomplete="aftSaveSubmit()">
+	</apex:actionFunction>
+	<apex:actionFunction action="{!dataUpsert}" name="payUpsert" rerender="errPanel,payWarningPanel" 
+			oncomplete="aftSaveSubmit()">
+	</apex:actionFunction>
+	<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+</apex:form>
+<apex:form >
+<!-- データ新規・登録後、続いて処理を行う -->
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<apex:actionFunction name="rerenderDepBlock" rerender="depInfoTable,depAmount,errPanel,depFilterDsFormId" immediate="true" oncomplete="depDmlCompleteEvent('0');unblockUi ()"/>
+<apex:actionFunction name="rerenderPayBlock" rerender="payInfoTable,payAmount,errPanel,payFilterDsFormId" immediate="true" oncomplete="payDmlCompleteEvent('0');unblockUi ()"/>
+</apex:form>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="javascript:unblockUi();" id="refStatusBlock"/>
+<apex:form >
+	<!-- 入金 FilterDs -->
+	<apex:actionFunction action="{!filterDataSerch}" name="getDepFilterDs" status="refStatusBlock" rerender="depInfoTable,depAmount,errPanel,depWarningPanel,depFilterDsFormId"
+			oncomplete="depDmlCompleteEvent('0');">
+	   		<apex:param name="depDilterDsJson" value="" assignTo="{!depFilter.filterDataJson}"/>
+	   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_IN}" assignTo="{!input.pageMode}"/>
+	</apex:actionFunction>
+</apex:form>
+<apex:form >
+	<!-- 出金 FilterDs -->
+	<apex:actionFunction action="{!filterDataSerch}" name="getPayFilterDs" status="refStatusBlock" rerender="payInfoTable,payAmount,errPanel,payWarningPanel,payFilterDsFormId"
+			oncomplete="payDmlCompleteEvent('0');">
+	   		<apex:param name="payDilterDsJson" value="" assignTo="{!payFilter.filterDataJson}"/>
+	   		<apex:param name="pageMode" value="{!CONST_PAGE_MODE_OU}" assignTo="{!input.pageMode}"/>
+	</apex:actionFunction>
+</apex:form>
+<apex:form id="depFilterDsFormId" >
+	<!-- 入金 FilterDs -->
+	<apex:inputHidden value="{!depFilter.createUserDs}" 		id="hidDepCreateUserDs"/>
+	<apex:inputHidden value="{!depFilter.kamokuDs}" 	 		id="hidDepKamokuDs"/>
+	<apex:inputHidden value="{!depFilter.salesDateDs}" 	 		id="hidDepSalesDateDs"/>
+	<apex:inputHidden value="{!depFilter.depositDs}" 			id="hidDepositDs"/>
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+	<apex:inputHidden value="{!depFilter.accountDepDs}" 		id="hidaccountDepDs"/>
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+</apex:form>
+<apex:form id="payFilterDsFormId" >
+	<!-- 出金 FilterDs -->
+	<apex:inputHidden value="{!payFilter.createUserDs}" 		id="hidPayCreateUserDs"/>
+	<apex:inputHidden value="{!payFilter.kamokuDs}" 	 		id="hidPayKamokuDs"/>
+	<apex:inputHidden value="{!payFilter.salesDateDs}" 	 		id="hidPaySalesDateDs"/>
+	<!-- 2018/11/30 出金先項目の機能追加 zyz by BEGIN -->
+	<apex:inputHidden value="{!payFilter.paymentRefDs}" 			id="hidPaymentRefDsDs"/>
+	<!-- 2018/11/30 出金先項目の機能追加 zyz by END -->
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN -->
+	<apex:inputHidden value="{!payFilter.accountPayDs}" 		id="hidAccountPayDsDs"/>
+	<!-- 2019/05/15 現金入出の「取引先」項目追加 BY zyz END -->
+</apex:form>
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+<script>
+// 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN
+// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+// var depApiSet = new Set(['depCreateUser','depKamoku','depSalesDate','depositId']);
+// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+// var payApiSet = new Set(['payCreateUser','payKamoku','paySalesDate','paymentRefId']);
+// 2018/11/30 出金先項目の機能追加 zyz by END
+var depApiSet = new Set(['depCreateUser','depKamoku','depSalesDate','depositId','accountDepId']);
+var payApiSet = new Set(['payCreateUser','payKamoku','paySalesDate','paymentRefId','accountPayId']);
+// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+function setDepKendoGrid(){
+	// 入金 => Kendo模版生成对应
+	// 扱者 => Json
+	var depCreateUserJson = JSON.parse($j("[id$=':hidDepCreateUserDs']").val());
+	// 科目 => Json
+	var depKamokuJson = JSON.parse($j("[id$=':hidDepKamokuDs']").val());
+	// 計上日 => Json
+	var depSalesDateJson = JSON.parse($j("[id$=':hidDepSalesDateDs']").val());
+	// 入金先 => Json
+	var depositJson = JSON.parse($j("[id$=':hidDepositDs']").val());
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	// 入金先-取引先 => Json
+	var accountDepJson = JSON.parse($j("[id$=':hidaccountDepDs']").val());
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	// 扱者 => KendoDs
+	var depCreateUserDs = new kendo.data.DataSource({data: depCreateUserJson});
+	// 科目 => KendoDs
+	var depKamokuDs = new kendo.data.DataSource({data: depKamokuJson});
+	// 計上日 => KendoDs
+	var depSalesDateDs = new kendo.data.DataSource({data: depSalesDateJson});
+	// 入金先 => KendoDs
+	var depositDs = new kendo.data.DataSource({data: depositJson});
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	// 入金先-取引先 => KendoDs
+	var accountDepDs = new kendo.data.DataSource({data: accountDepJson});
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	
+	// 扱者 => Grid
+	setKendoGrid("depCreateUserHdr", "createUser", depCreateUserDs, 'depCreateUser');
+	// 科目 => Grid
+	setKendoGrid("depKamokuHdr", "kamoku", depKamokuDs, 'depKamoku');
+	// 計上日 => Grid
+	setKendoGrid("depSalesDateHdr", "salesDate", depSalesDateDs, 'depSalesDate');
+	// 入金先 => Grid
+	setKendoGrid("depositHdr", "deposit", depositDs, 'depositId');
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	// 入金先-取引先 => Grid
+	setKendoGrid("accountDepHdr", "accountDep", accountDepDs, 'accountDepId');
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	//
+	setFilter();
+}
+function setPayKendoGrid(){
+	// 出金 => Kendo模版生成对应
+	// 扱者 => Json
+	var payCreateUserJson = JSON.parse($j("[id$=':hidPayCreateUserDs']").val());
+	// 科目 => Json
+	var payKamokuJson = JSON.parse($j("[id$=':hidPayKamokuDs']").val());
+	// 計上日 => Json
+	var paySalesDateJson = JSON.parse($j("[id$=':hidPaySalesDateDs']").val());
+	// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+	// 出金先 => Json
+	var paymentRefJson = JSON.parse($j("[id$=':hidPaymentRefDsDs']").val());
+	// 2018/11/30 出金先項目の機能追加 zyz by END
+	// 2019/05/15 現金入出の「取引先」項目追加 zyz BEGIN
+	// 出金先-取引先 => Json
+	var accountPayJson = JSON.parse($j("[id$=':hidAccountPayDsDs']").val());
+	// 2019/05/15 現金入出の「取引先」項目追加 zyz END
+	// 扱者 => KendoDs
+	var payCreateUserDs = new kendo.data.DataSource({data: payCreateUserJson});
+	// 科目 => KendoDs
+	var payKamokuDs = new kendo.data.DataSource({data: payKamokuJson});
+	// 計上日 => KendoDs
+	var paySalesDateDs = new kendo.data.DataSource({data: paySalesDateJson});
+	// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+	// 出金先 => KendoDs
+	var paymentRefDs = new kendo.data.DataSource({data: paymentRefJson});
+	// 2018/11/30 出金先項目の機能追加 zyz by END
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	// 出金先-取引先 => KendoDs
+	var accountPayDs = new kendo.data.DataSource({data: accountPayJson});
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	
+	// 扱者 => Grid
+	setKendoGrid("payCreateUserHdr", "createUser", payCreateUserDs, 'payCreateUser');
+	// 科目 => Grid
+	setKendoGrid("payKamokuHdr", "kamoku", payKamokuDs, 'payKamoku');
+	// 計上日 => Grid
+	setKendoGrid("paySalesDateHdr", "salesDate", paySalesDateDs, 'paySalesDate');
+	// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+	// 出金先 => Grid
+	setKendoGrid("paymentRefHdr", "paymentRef", paymentRefDs, 'paymentRefId');
+	// 2018/11/30 出金先項目の機能追加 zyz by END
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	// 出金先-取引先 => Grid
+	setKendoGrid("accountPayHdr", "accountPay", accountPayDs, 'accountPayId');
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	//
+	setFilter();
+}
+function setKendoGrid(divId, gField, gDataSource, api){
+	// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+	var val = gField;
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	// if(api == 'depositId' || api == 'paymentRefId') val = api;
+	if(api == 'depositId' || api == 'paymentRefId' || api == 'accountDepId' || api == 'accountPayId') val = api;
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	// 2018/11/30 出金先項目の機能追加 zyz by END
+	$j("#" + divId ).kendoGrid({
+		columns: 
+		[{
+			field: gField,
+			title: " ",
+			filterable: {
+				multi: true ,
+				search: true,
+				dataSource: gDataSource,
+				itemTemplate: function(e) {
+					if (e.field == "all") {
+						//handle the check-all checkbox template
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' />#= all#</label></li>";
+					} else {
+						//handle the other checkboxes
+						// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+						//var val = api == 'depositId' ? api : gField;
+						// 2018/11/30 出金先項目の機能追加 zyz by END
+						return "<li class='k-item' style='margin-left:0px'><label class='k-label'><input type='checkbox' name='filter' api='"+ api +"' filter='eq' dataType='string' value='#=" + val + "#'/>#= " + gField +"#</label></li>"
+					}
+				}
+			},
+		}],
+		filterable: {
+			messages: {
+				search: "{!$Label.MSG_040_0108}", 
+				checkAll: "{!$Label.MSG_040_0109}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0110}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0111}",
+				// クリア
+				clear: "{!$Label.MSG_040_0112}"
+			}
+		},
+		filterMenuInit: function(e) {
+			if (e.field == gField) {
+				setOldCheckFun(e, api);
+			}
+		},
+		filter: function(e) {
+			getCheckDataFun(api, e.filter);
+		}
+	});
+}
+// 选择filter之后调用 数据集计 后台查询
+function getCheckDataFun(filterApi, filter){
+	// clear功能处理
+	if(filter == null){
+		// OLD hashMap 有此API数据的情况下
+		if(hashMap.Contains(filterApi)){
+			hashMap.Remove(filterApi);
+			// OLD hashMap Remove 掉当前API 之后调用后台
+			getActionFunctionFun(depApiSet.has(filterApi));
+		}
+		return;
+	}
+	// 获取所有      已经check的     有效对象
+	var $isFilterCheck = $j("[name='filter']:checked");
+	// newHashMap 新的 【目的:如过在同一个List里  原来选 1、2   现在只选 1 的情况 点Filter】
+	var newHashMap = new Map();
+	// 处理   当前   所有的   check对象
+	for(var i = 0; i < $isFilterCheck.length; i++){
+		var api = $isFilterCheck.eq(i).attr('api');
+		var val = $isFilterCheck.eq(i).val();
+		
+		if(newHashMap.containsKey(api)) newHashMap.get(api).push(val);
+		else newHashMap.put(api, [val]);
+	}
+	// 追加新数据/置换旧数据
+	newHashMap.each(function(newHashApi){
+		hashMap.Put(newHashApi, newHashMap.get(newHashApi));
+	});
+	// 调用 actionFunction 取后台最新数据
+	getActionFunctionFun(depApiSet.has(filterApi));
+}
+// 调用后台的处理
+function getActionFunctionFun(depFlg){
+	if(depFlg) getDepFilterDs(JSON.stringify(hashMap));
+	else getPayFilterDs(JSON.stringify(hashMap));
+	// 清空数据模版 div
+	removeContainer(depFlg);
+}
+// 复原 历史选中
+function setOldCheckFun(e,api){
+	var filterFormCls = depApiSet.has(api) ? "depFilterFormCls" : "payFilterFormCls";
+	e.container.addClass(filterFormCls);
+	// 定位当前所有 Name = "filter" 的标签
+	var thisCheckBox = e.container.find("[name='filter']");
+	// 复原  历史check的对象
+	for(var i = 0; i < thisCheckBox.length; i++){
+		// 判断   此值   在hashMap里是否存在
+		if($j.inArray(thisCheckBox.eq(i).val(),hashMap.Get(api)) == -1) continue;
+		// 如果满足以上条件 就选择
+		thisCheckBox[i].click();
+	}
+}
+// 清空old数据
+function hashMapClearFun(depFlg){
+	if(depFlg){
+		depApiSet.forEach(function (item) {
+		    hashMap.Remove(item.toString());
+		});
+	} else {
+		payApiSet.forEach(function (item) {
+		    hashMap.Remove(item.toString());
+		});
+	}
+	removeContainer(depFlg);
+}
+// filter标签设置背景色
+function setBgColorFun(){
+	for(var i= 0 ; i < hashMap.Size(); i++){
+		var key = hashMap.KeySet()[i];
+		$j("[api='" + key + "'] a.k-grid-filter").removeClass('k-state-actives').addClass('k-state-actives');
+	}
+}
+function setFilter(){
+	$j(".k-grid-header").addClass("headerCss");
+	$j(".k-i-filter").addClass("k-i-filterIcon");
+	// filter标签设置背景色
+	setBgColorFun();
+	// 红色感叹号去掉
+	$j("span.k-icon.k-i-warning").remove();
+}
+// 清空FilterForm表单 ps::bug
+function removeContainer(depFlg){
+	if(depFlg) $j('.depFilterFormCls').parent('div').remove();
+	else $j('.payFilterFormCls').parent('div').remove();
+}
+// 2017/11/22 検索結果にFilter機能の追加 WGCH END
+$j(document).ready(function() {
+
+	// 売上計上日はReadonly設定
+	// 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN
+	/*
+	$j("input[id$=':despDataBlockBtn:salesDate']").attr('readonly', true);
+	$j("input[id$=':payDataBlockBtn:salesDate']").attr('readonly', true);
+	*/
+	setDepKendoGrid();
+	setPayKendoGrid();
+	$j("input[id$=':despDataBlockBtn:depSalesFromDate']").attr('readonly', true);
+	$j("input[id$=':despDataBlockBtn:depSalesToDate']").attr('readonly', true);
+	$j("input[id$=':payDataBlockBtn:paySalesFromDate']").attr('readonly', true);
+	$j("input[id$=':payDataBlockBtn:paySalesToDate']").attr('readonly', true);
+	// 2017/11/22 検索結果にFilter機能の追加 WGCH END
+
+    $j("#tabstrip").kendoTabStrip({
+    	select: onSelect,
+        animation:  {
+            open: {
+                effects: "fadeIn"
+            }
+        }
+    });
+	function onSelect(e) {
+		var tabKey = $j(e.item).attr("tabkey");
+		$j(e.contentElement).find("input[id$=':pageModeKey']").val(tabKey);
+	}
+	
+	// 出金、入金のレポートリンクIDを追加する
+	var despRepId   = "{!JSENCODE(depReportId)}";
+	var despRepNm   = "{!JSENCODE(depReportNm)}";
+	var payRepId 	= "{!JSENCODE(payReportId)}";
+	var pPayRepNm 	= "{!JSENCODE(payReportNm)}";
+	if (despRepId != "" || payRepId != "") {
+		// レポート遷移用リンクを追加する
+		var $despBlockTitle = $j("[id$=':despDataBlock']").find(".mainTitle");
+		var $payBlockTitle = $j("[id$=':payDataBlock']").find(".mainTitle");
+		var htmlStr = '<a href="/$$_REPID_$$" target="_blank" title="$$_REPNM_$$" class="btn" style="text-decoration:none;padding: 4px;">&nbsp;<img src="/img/icon/reports16.png" class="imgstyle" style="vertical-align: middle;">&nbsp;$$_TITLE_$$&nbsp;</img>&nbsp;</a>';
+		var despHtmlStr = htmlStr.replace("$$_REPID_$$",despRepId);
+			despHtmlStr = despHtmlStr.replace("$$_REPNM_$$",despRepNm);
+			despHtmlStr = despHtmlStr.replace("$$_TITLE_$$",$despBlockTitle.text());
+		var payHtmlStr  = htmlStr.replace("$$_REPID_$$",payRepId);
+			payHtmlStr  = payHtmlStr.replace("$$_REPNM_$$",pPayRepNm);
+			payHtmlStr  = payHtmlStr.replace("$$_TITLE_$$",$payBlockTitle.text());
+		$despBlockTitle.html(despHtmlStr);
+		$payBlockTitle.html(payHtmlStr);
+	}
+	bindEvent();
+});
+// 保存処理前処理
+function preSaveSubmit(rowIdx, pageMode) {
+
+	//必須項目を入力してください。
+	var checkMsg = '{!$Label.MSG_040_0023}';
+	var preKey = 'cash:saveForm';
+
+	//********** CLEAR FORM **************
+	$j("input[id='" + preKey + ":hidDepInShopCode']").val("");
+	$j("input[id='" + preKey + ":hidDepInSalesDate']").val("");
+	$j("input[id='" + preKey + ":hidDepInDeposit']").val("");
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	$j("input[id='" + preKey + ":hidDepInAccountRef']").val("");
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyzEND
+	$j("input[id='" + preKey + ":hidDepInKamoku']").val("");
+	$j("input[id='" + preKey + ":hidDepInItem']").val("");
+	$j("input[id='" + preKey + ":hidDepInPamount']").val("");
+	
+	$j("input[id='" + preKey + ":hidPayInShopCode']").val("");
+	$j("input[id='" + preKey + ":hidPayInSalesDate']").val("");
+	// 2019/05/15 出金先功能未对应 BY zyz BEGIN
+	$j("input[id='" + preKey + ":hidPayInPaymentRef']").val("");
+	// 2019/05/15 出金先功能未对应 BY zyz END
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+	$j("input[id='" + preKey + ":hidPayInAccountRef']").val("");
+	// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+	$j("input[id='" + preKey + ":hidPayInPkamoku']").val("");
+	$j("input[id='" + preKey + ":hidPayInPitem']").val("");
+	$j("input[id='" + preKey + ":hidPayInPamount']").val("");	
+	// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+	$j("input[id='"+preKey+":hidDepTaxRate']").val("");
+	$j("input[id='"+preKey+":hidPayTaxRate']").val("");
+	// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+	$j("input[id='"+preKey+":hidInEditRowIdx']").val(rowIdx);
+	$j("input[id='"+preKey+":hidInPageMode']").val(pageMode);
+	
+	if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_IN)}') {
+		//var sobjId   = $j("[id$=':depInfoTable:" + rowIdx + ":hidDepInSobjId']").val();
+		//if (sobjId == "") sobjId = null;
+		var shopCode = $j("[id$=':depInfoTable:" + rowIdx + ":depShopSel']").val();
+		var salesDate= $j("[id$=':depInfoTable:" + rowIdx + ":depSalesDate']").val();
+		var deposit  = $j("[id$=':depInfoTable:" + rowIdx + ":deposit']").val();
+		var depositId= $j("[id$=':depInfoTable:" + rowIdx + ":deposit_lkid']").val();
+		if ($j.trim(deposit) == "" && depositId == "000000000000000") {
+			depositId = "";
+		}
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+		// 入金先-取引先
+		var DepAccRef = $j("[id$=':depInfoTable:" + rowIdx + ":accountDep']").val();
+		var DepAccountId = $j("[id$=':depInfoTable:" + rowIdx + ":accountDep_lkid']").val();
+		if ($j.trim(DepAccRef) == "" && DepAccountId == "000000000000000") {
+			DepAccountId = "";
+		}
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+		var kamoku   = $j("[id$=':depInfoTable:" + rowIdx + ":depKamoku']").val();
+		var item     = $j("[id$=':depInfoTable:" + rowIdx + ":depItem']").val();
+		var pamount  = $j("[id$=':depInfoTable:" + rowIdx + ":depAmount']").val();
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+		var curRow = $j("[id$=':depInfoTable'] tr.dataRow:eq(" + rowIdx + ")");
+		var pamountExc = pamount;
+		if (pamount == undefined) {
+			var payVal = $j("input[name=denpyoukei]",curRow).getKendoNumericTextBox().value();
+			if (payVal != undefined && payVal != null) pamountExc = payVal;
+			payVal = $j("input[name=denpyoukeiIncTax]",curRow).getKendoNumericTextBox().value();
+			if (payVal != undefined && payVal != null) pamount = payVal;
+		}
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+		if ($j.trim(salesDate).length == 0 ||
+			$j.trim(pamount).length == 0 ||
+			$j.trim(kamoku).length == 0) {
+			alert(checkMsg);
+			return false;
+		}
+		blockUi();
+		
+		//$j("input[id='" + preKey + ":hidDepInSobjId']").val(sobjId);
+		$j("input[id='" + preKey + ":hidDepInShopCode']").val(shopCode);
+		$j("input[id='" + preKey + ":hidDepInSalesDate']").val(salesDate);
+		$j("input[id='" + preKey + ":hidDepInDeposit']").val(depositId);
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+		// 入金先-取引先
+		$j("input[id='" + preKey + ":hidDepInAccountRef']").val(DepAccountId);
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+		$j("input[id='" + preKey + ":hidDepInKamoku']").val(kamoku);
+		$j("input[id='" + preKey + ":hidDepInItem']").val(item);
+		$j("input[id='" + preKey + ":hidDepInPamount']").val(pamount);
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+		$j("input[id='" + preKey + ":hidDepTaxRate']").val(getMasterRaxRate(curRow));
+		$j("input[id='" + preKey + ":hidDepExcPamount']").val(pamountExc);
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+		// Call Ajax Function
+		depUpsert();
+		
+	} else if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_OU)}') {
+		//var sobjId   = $j("[id$=':payInfoTable:" + rowIdx + ":hidPayInSobjId']").val();
+		//if (sobjId == "") sobjId = null;
+		var shopCode = $j("[id$=':payInfoTable:" + rowIdx + ":payShopSel']").val();
+		var salesDate= $j("[id$=':payInfoTable:" + rowIdx + ":paySalesDate']").val();
+		// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+		var mentRef= $j("[id$=':payInfoTable:" + rowIdx + ":paymentRef']").val();
+		var paymentRefId= $j("[id$=':payInfoTable:" + rowIdx + ":paymentRef_lkid']").val();
+		if ($j.trim(mentRef) == "" && paymentRefId == "000000000000000") {
+			paymentRefId = "";
+		}
+		// 2018/11/30 出金先項目の機能追加 zyz by END
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+		// 出金先-取引先
+		var PayAccRef= $j("[id$=':payInfoTable:" + rowIdx + ":accountPay']").val();
+		var PayAccountId= $j("[id$=':payInfoTable:" + rowIdx + ":accountPay_lkid']").val();
+		if ($j.trim(PayAccRef) == "" && PayAccountId == "000000000000000") {
+			PayAccountId = "";
+		}
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+		var kamoku   = $j("[id$=':payInfoTable:" + rowIdx + ":payKamoku']").val();
+		var item     = $j("[id$=':payInfoTable:" + rowIdx + ":payItem']").val();
+		var pamount  = $j("[id$=':payInfoTable:" + rowIdx + ":payAmount']").val();
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+		var curRow = $j("[id$=':payInfoTable'] tr.dataRow:eq(" + rowIdx + ")");
+		var pamountExc = pamount;
+		if (pamount == undefined) {
+			var payVal = $j("input[name=denpyoukei]",curRow).getKendoNumericTextBox().value();
+			if (payVal != undefined && payVal != null) pamountExc = payVal;
+			payVal = $j("input[name=denpyoukeiIncTax]",curRow).getKendoNumericTextBox().value();
+			if (payVal != undefined && payVal != null) pamount = payVal;
+		}
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+		if ($j.trim(salesDate).length == 0 ||
+			$j.trim(pamount).length == 0 ||
+			$j.trim(kamoku).length == 0) {
+			alert(checkMsg);
+			return false;
+		}
+		
+		blockUi();
+		
+		//$j("input[id='" + preKey + ":hidPayInSobjId']").val(sobjId);
+		$j("input[id='" + preKey + ":hidPayInShopCode']").val(shopCode);
+		$j("input[id='" + preKey + ":hidPayInSalesDate']").val(salesDate);
+		// 2018/11/30 出金先項目の機能追加 zyz by BEGIN
+		$j("input[id='" + preKey + ":hidPayInPaymentRef']").val(paymentRefId);
+		// 2018/11/30 出金先項目の機能追加 zyz by END
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+		// 出金先-取引先
+		$j("input[id='" + preKey + ":hidPayInAccountRef']").val(PayAccountId);
+		// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+		$j("input[id='" + preKey + ":hidPayInPkamoku']").val(kamoku);
+		$j("input[id='" + preKey + ":hidPayInPitem']").val(item);
+		$j("input[id='" + preKey + ":hidPayInPamount']").val(pamount);
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+		$j("input[id='" + preKey + ":hidPayTaxRate']").val(getMasterRaxRate(curRow));
+		$j("input[id='" + preKey + ":hidPayExcPamount']").val(pamountExc);
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+		// Call Ajax Function
+		payUpsert();
+	}
+}
+function aftSaveSubmit() {
+	var preKey = 'cash:saveForm';
+	//var rowIdx = $j("input[id='"+preKey+":hidInEditRowIdx']").val();
+	var pageMode = $j("input[id='"+preKey+":hidInPageMode']").val();
+	// エラー存在チェックを行う
+	if ($j("[id='cash:errPanel']").text() != "") {
+		unblockUi();
+		return false;
+	}
+	// エラーがなければ、画面Refreshする
+	if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_IN)}') {
+		rerenderDepBlock();
+	} else if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_OU)}') {
+		rerenderPayBlock();
+	}
+}
+// 削除処理前処理
+function preDeleteSubmit(pageMode) {
+	var rowIdxs = "";
+	if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_IN)}') {
+		var checkedLst = $j("#existBlock1").find("input[id$=':dataSelectChk']:checked");
+		//for (i = 0; i < checkedLst.length; i++) {
+		checkedLst.each(function() {
+			rowIdxs += $j(this).attr("rowIdx") + ",";
+		})
+		if (rowIdxs != "") rowIdxs = rowIdxs.slice(0, -1);
+		depDeleteData(rowIdxs);
+	} else if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_OU)}') {
+		var checkedLst = $j("#existBlock2").find("input[id$=':dataSelectChk']:checked");
+		//for (i = 0; i < checkedLst.length; i++) {
+		checkedLst.each(function() {
+			rowIdxs += $j(this).attr("rowIdx") + ",";
+		})
+		if (rowIdxs != "") rowIdxs = rowIdxs.slice(0, -1);
+		payDeleteData(rowIdxs);
+	}
+
+}
+// Sub前の自動判断用変数設定値を設定する
+function preDepSubmit(rowIdx, pageMode) {
+	$j("input[id$=':hidDepEditRowIdx']").val(rowIdx);
+	$j("input[id$=':hidDepPageMode']").val(pageMode)
+}
+function prePaySubmit(rowIdx, pageMode) {
+	$j("input[id$=':hidPayEditRowIdx']").val(rowIdx);
+	$j("input[id$=':hidPayPageMode']").val(pageMode)
+}
+// 指定行目の関連処理
+function depDmlCompleteEvent(pRowIdx) {
+	bindEvent('existBlock1');
+	//bindEvent('despInpDiv');
+	insertProcesComplete(pRowIdx,'{!JSENCODE(CONST_PAGE_MODE_IN)}');
+	// 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN
+	setDepKendoGrid();
+	// 2017/11/22 検索結果にFilter機能の追加 WGCH END
+}
+function payDmlCompleteEvent(pRowIdx) {
+	bindEvent('existBlock2');
+	//bindEvent('payOutDiv');
+	insertProcesComplete(pRowIdx,'{!JSENCODE(CONST_PAGE_MODE_OU)}');
+	// 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN
+	setPayKendoGrid();
+	// 2017/11/22 検索結果にFilter機能の追加 WGCH END
+}
+// 関連処理後の補足処理
+function insertProcesComplete (rowIdx, pageMode) {
+	if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_IN)}') {
+		var key1 = ':' + rowIdx + ':depShopSel';
+		var key2 = ':' + rowIdx + ':depKamoku';
+		//$j("input[id$=':hidPayEditRowIdx']").val(rowIdx);
+		$element = $j("[id$='" + key1 + "']").length > 0 
+			? $j("[id$='" + key1 + "']").data("kendoDropDownList") 
+			: $j("[id$='" + key2 + "']").data("kendoComboBox") 
+		$element.focus();
+	} else if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_OU)}') {
+		var key1 = ':' + rowIdx + ':payShopSel';
+		var key2 = ':' + rowIdx + ':payKamoku';
+		$element = $j("[id$='" + key1 + "']").length > 0 
+			? $j("[id$='" + key1 + "']").data("kendoDropDownList") 
+			: $j("[id$='" + key2 + "']").data("kendoComboBox") 
+		$element.focus();
+	}
+}
+// 削除Checkbox選択する場合
+function swithDeleteBtn(pageMode) {
+	// 入金BLOCK
+	if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_IN)}') {
+		var $deleteBtnBlock = $j("span[id$=':depDeleteBtnBlock']");
+		if ($j("#existBlock1").find("input[id$=':dataSelectChk']:checked").length > 0) {
+			$deleteBtnBlock.find("#deleteLab").hide();
+			$deleteBtnBlock.find("#deleteBtn").show();
+		} else {
+			$deleteBtnBlock.find("#deleteBtn").hide();
+			$deleteBtnBlock.find("#deleteLab").show();
+		}
+	} else if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_OU)}') {
+		var $deleteBtnBlock = $j("span[id$=':payDeleteBtnBlock']");
+		if ($j("#existBlock2").find("input[id$=':dataSelectChk']:checked").length > 0) {
+			$deleteBtnBlock.find("#deleteLab").hide();
+			$deleteBtnBlock.find("#deleteBtn").show();
+		} else {
+			$deleteBtnBlock.find("#deleteBtn").hide();
+			$deleteBtnBlock.find("#deleteLab").show();
+		}
+	}
+
+}
+// Event Bind
+function bindEvent(rootEle) {
+
+	if (rootEle) {
+		$j("#"+rootEle).find(".j-numberInput").kendoNumericTextBox({
+    		format: "c",
+    		min:0,
+    		//decimals: {!JSENCODE(PointLen)},
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+			change:inputChange,
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+		});
+		$j("#"+rootEle).find(".j-comboxInput").kendoComboBox({
+			// 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN
+			// 关闭清空图标x
+			clearButton: false,
+			// 2017/11/22 検索結果にFilter機能の追加 WGCH END
+	   		dataBound: function(e) {
+		      // handle the event
+		      e.sender.ul.css("white-space","nowrap");
+		      e.sender.list.css("width","auto");
+		      e.sender.ul.find("li").css({"overflow-x": "hidden", "padding-right": "15px"});
+		  	}
+		});
+		$j("#"+rootEle).find(".j-dropDownList").kendoDropDownList({
+	   		dataBound: function(e) {
+		      // handle the event
+		      e.sender.ul.css("white-space","nowrap");
+		      e.sender.list.css("width","auto");
+		  	}
+   		});
+	} else {
+    	$j(".j-numberInput").kendoNumericTextBox({
+    		format: "c",
+    		min:0,
+    		//decimals: {!JSENCODE(PointLen)},
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+			change:inputChange,
+		// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+    	});
+    	$j(".j-comboxInput").kendoComboBox({
+			// 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN
+    			// 关闭清空图标x
+			clearButton: false,
+			// 2017/11/22 検索結果にFilter機能の追加 WGCH END
+	   		dataBound: function(e) {
+		      // handle the event
+		      e.sender.ul.css("white-space","nowrap");
+		      e.sender.list.css("width","auto");
+		      e.sender.ul.find("li").css({"overflow-x": "hidden", "padding-right": "15px"});
+		  	}
+   		});
+    	$j(".j-dropDownList").kendoDropDownList({
+	   		dataBound: function(e) {
+		      // handle the event
+		      e.sender.ul.css("white-space","nowrap");
+		      e.sender.list.css("width","auto");
+		  	}
+   		});
+	}
+	var elementId = rootEle ? ("#" + rootEle) : "";
+	var numberInputArr = $j(elementId + " span[name='wrapSpanInput_true']");
+	$j(elementId + " span[name='wrapSpanInput_true']").keydown(function(e){
+    	if(e.keyCode == 13){
+    		var inputs = $j("span.k-numerictextbox");
+    		var idx = numberInputArr.index(this);
+    		if (idx == numberInputArr.length - 1) {
+                 $j("input[name=inputBtn]").focus(); 
+                 e.preventDefault();
+             } else {
+             	//  handles submit buttons
+                 $j(numberInputArr[idx + 1]).find("input").focus(); 
+                 
+                 $j(numberInputArr[idx + 1]).find("input").click();
+             }
+        }    
+    });	
+    var numberOutputArr = $j(elementId + " span[name='wrapSpanOutput_true']");
+	$j(elementId + " span[name='wrapSpanOutput_true']").keydown(function(e){
+    	if(e.keyCode == 13){
+    		var inputs = $j("span.k-numerictextbox");
+    		var idx = numberOutputArr.index(this);
+    		if (idx == numberOutputArr.length - 1) {
+                 $j("input[name=outputBtn]").focus(); 
+                 e.preventDefault();
+             } else {
+             	//  handles submit buttons
+                 $j(numberOutputArr[idx + 1]).find("input").focus(); 
+                 
+                 $j(numberOutputArr[idx + 1]).find("input").click();
+             }
+        }    
+    });	
+}
+// Block UI
+function blockUi() {
+ 	$j.blockUI({
+ 	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_040_0024}</h1>'
+    }); 
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j.unblockUI({ fadeOut: 200 }); 
+}
+// 2019/05/15 現金入出の「取引先」項目追加 BY zyz BEGIN
+// 修改入金先/出金先 自动获取相关联的取引先数据
+// 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz BEGIN
+function getAccountClick(rowIdx, pageMode, accHide) {
+	if(!accHide) return;
+// 2019/10/15 現金入出の項目の表示非表示を機能対応 BY zyz END
+	blockUi();
+	if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_IN)}') {
+		// 入金先
+		var deposit  = $j("[id$=':depInfoTable:" + rowIdx + ":deposit']").val();
+		var depositId= $j("[id$=':depInfoTable:" + rowIdx + ":deposit_lkid']").val();
+		// 数据清空不响应，并清空Id
+		if ($j.trim(deposit) == "") {
+			$j("[id$=':depInfoTable:" + rowIdx + ":deposit_lkid']").val("");
+			unblockUi();
+			return false;
+		}
+		// 入金先-取引先
+		Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.CashManagentInput.getAccount}", depositId, function(result, event){	
+				if (event.type == 'exception') {
+					alert(event.message);
+				} else {
+					var depName = $j("[id$=':depInfoTable:" + rowIdx + ":accountDep']").val();
+					var depAccId = $j("[id$=':depInfoTable:" + rowIdx + ":accountDep_lkid']").val();
+					if ($j.trim(depName) == "" && (depAccId == "000000000000000" || depAccId == "")) {
+						$j("[id$=':depInfoTable:" + rowIdx + ":accountDep']").val(result.accName);
+						$j("[id$=':depInfoTable:" + rowIdx + ":accountDep_lkid']").val(result.accid);
+					} else if (result.accName != ''&& result.accName != undefined && result.accid !='' && result.accid != undefined){
+						if(window.confirm("入金先に紐付く取引先で取引先項目値を更新しますか？")){
+							$j("[id$=':depInfoTable:" + rowIdx + ":accountDep']").val(result.accName);
+							$j("[id$=':depInfoTable:" + rowIdx + ":accountDep_lkid']").val(result.accid);
+						}
+					}
+				}
+				unblockUi();
+		});
+	} else if (pageMode == '{!JSENCODE(CONST_PAGE_MODE_OU)}') {
+		// 出金先
+		var mentRef= $j("[id$=':payInfoTable:" + rowIdx + ":paymentRef']").val();
+		var paymentRefId= $j("[id$=':payInfoTable:" + rowIdx + ":paymentRef_lkid']").val();
+		// 数据清空不响应，并清空Id
+		if ($j.trim(mentRef) == "") {
+			$j("[id$=':payInfoTable:" + rowIdx + ":paymentRef_lkid']").val("");
+			unblockUi();
+			return false;
+		}
+		// 出金先-取引先
+		Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.CashManagentInput.getAccount}", paymentRefId, function(result, event){	
+				if (event.type == 'exception') {
+					alert(event.message);
+				} else {
+					var payName = $j("[id$=':payInfoTable:" + rowIdx + ":accountPay']").val();
+					var payAccId = $j("[id$=':payInfoTable:" + rowIdx + ":accountPay_lkid']").val();
+					if ($j.trim(payName) == "" && (payAccId == "000000000000000" || payAccId =="")) {
+						$j("[id$=':payInfoTable:" + rowIdx + ":accountPay']").val(result.accName);
+						$j("[id$=':payInfoTable:" + rowIdx + ":accountPay_lkid']").val(result.accid);
+					} else if (result.accName != ''&& result.accName != undefined && result.accid !='' && result.accid != undefined){
+						if(window.confirm("出金先に紐付く取引先で取引先項目値を更新しますか？")){
+							$j("[id$=':payInfoTable:" + rowIdx + ":accountPay']").val(result.accName);
+							$j("[id$=':payInfoTable:" + rowIdx + ":accountPay_lkid']").val(result.accid);
+						}
+					}
+				}
+				unblockUi();
+		});
+	}
+}
+// 2019/05/15 現金入出の「取引先」項目追加 BY zyz END
+// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy BEGIN
+// 入力変更
+function inputChange(e){
+	var input = this.element;
+	var changeName = input.attr("name");
+	var roundMode = "{!roundMode}";
+	var price = this.value();
+	var curRow = this.element.closest("tr");
+	var nextElement = curRow.find("input[data-olddata].j-numberInput").not(this.element);
+	var changeInput = 0;
+	var commTaxRate = getMasterRaxRate(curRow);
+	var nextInput = nextElement.getKendoNumericTextBox();
+	if (changeName == "denpyoukeiIncTax" ) {
+		changeInput = JINYACONNECT.PRODUCT.CALNOTAXPRICE(price,commTaxRate,{!JSENCODE(PointLen)},roundMode);
+	} else {
+		changeInput = JINYACONNECT.PRODUCT.CALINCTAXPRICE(price,commTaxRate,{!JSENCODE(PointLen)},roundMode);
+	}
+	nextInput.value(changeInput);
+}
+// 消費税取得
+function getMasterRaxRate(curRow){
+	var taxDropDown = $j("[id$=depSelTaxType],[id$=paySelTaxType]",curRow).getKendoDropDownList();
+	var commTaxRate = "";
+	if (taxDropDown != undefined) {
+		var taxRate = kendo.parseFloat(taxDropDown.value());
+		if (taxRate != null) commTaxRate = taxRate;
+	}
+	return 	commTaxRate;
+}
+// 消費税変更
+function taxRateChange(e){
+	var curTarget = $j(event.currentTarget);
+	var attrId = curTarget.attr("id").replace('_listbox','');
+	var sel = $j("[id='" + attrId + "']");
+	var elementInput = getDenpyouKeiSideInput(sel);
+	if (elementInput != undefined) elementInput.trigger("change");
+}
+// 該当計算取得
+function getDenpyouKeiSideInput(sel,selector){
+	var curRow = sel.closest("tr");
+	if (selector == undefined) selector = 'input[name=denpyoukei]';
+	var elementInput = curRow.find(selector).getKendoNumericTextBox();
+	return elementInput;
+}
+// 2019/09/22 現金入出にも消費税項目を追加、税率も選べるように（仕入と同じ仕様に） by zy END
+</script>
+
+<!-- This component is added to show call register popup -->
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<c:CallRegisterPopup loadJquery="false" loadKendoLib="false" />
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+</apex:page>

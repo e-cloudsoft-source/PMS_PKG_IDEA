@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、スタッフ画面に日単位に
+	1.「予約件数と利用人數]集計情報を表示するため、集計項目と条件を定義する
+	2. 勤怠ステータスの背景とフォント色の変更設定
+     店舗毎に設定したい場合、
+　　　タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容を修正する
+書式：
+　　　SHOPCODE:        店舗コード、支店が非存在　または　各店舗は共通化する場合、空白のままに定義する
+　　　SUMMARY:     	 「予約件数と利用人數]集計情報用集計ロジックと条件を定義する
+		TITLE:		  集計種別名、内容任意
+		LOGIC:		  集計ロジックを定義する {0} AND {1} AND ({2} OR {3}) 組み合わせ指定可能、
+        CONDTION:     集計用数式、最大十個数式ロジック定義可能、順番により、{0}から{9}まで自動識別する
+        				注意：元のAPI項目タイプにより、数式設定方式が違う
+        				項目タイプ：数値、通貨の場合 APIXXXX = 比較の数値
+        			    項目タイプ：テキストの場合、 APIXXXX = '比較のテキスト'
+     WORKTIME:        勤怠情報ボタン表示色の定義
+        WORK_START:     出勤ボタン色の定義
+          BACKCOLOR:     ボタン背景色の定義
+        WORK_OUT:       外出ボタン色の定義
+          BACKCOLOR:     ボタン背景色の定義
+        WORK_IN:        入室ボタン色の定義
+          BACKCOLOR:     ボタン背景色の定義
+        WORK_END:       退勤ボタン色の定義
+          BACKCOLOR:     ボタン背景色の定義
+        WORK_TIME_EDIT: 勤務修正申請ボタン色の定義
+          BACKCOLOR:     ボタン背景色の定義
+      補足：色設定は下記URLで参照してください http://www.colordic.org/
+    APPCONFIG:		  スタッフ機能個別設定なパラメータ
+    	USER_PLUSINF:	氏名列に補足表示したいAPI名を定義する、定義省略可能、デフォルトは設定値なし
+    					カンマで複数API指定可能: APIXXXX,APIYYYY
+    					表示イメージ：氏名(API1情報　API2情報 API3情報)
+    	BUSS_STATUS_CLOSE:営業の設定内容は該当キーワードと一致すると、施設の当日の営業は休館と認識する
+    					休館日の列に対して、勤怠時間は０の場合、空白に表示する
+		SUMMARY_SHOP:	「予約件数と利用人数」集計対象店舗コード
+						 目的：スタッフ画面に、別店舗の「予約件数と利用人数」集計情報を参照したい場合、
+						     該当タグに集計したい「店舗コード」を設定すると、集計欄は自分店舗じゃない、指定の店舗の集計情報は画面に表示する
+    					　　　設定省略可、設定しないと、自分所属店舗の集計情報を表示する
+    	EVENT_TITLE:	シフト画面から作成の行動の件名は個別設定用タグ、デフォルト値：「作業」
+    	BUSS_END_DAY:	当月の最終表示日付を定義可能、定義の場合、先月の該当日付の翌日から今月の指定日付までの情報はシフト画面に表示する
+    						例：20日単位でシフトを組んでいる、当月は7月の場合、シフト画面に　6/21～7/20 の1ヶ月を画面に表示
+    	BUSS_START_DAY:	当月の開始日付を定義可能、定義の場合、今月の該当日付の翌日から翌月の指定日付までの情報はシフト画面に表示する(2017/06/15新規追加)
+    					注意：タグ:「BUSS_END_DAY、BUSS_START_DAY」を同時に定義する場合、タグ「BUSS_START_DAY」が優先
+    						例：毎月21は開始日を定義したい場合、下記ようにタグを定義すると、
+    						   当月は7月の場合、シフト画面に　7/21～8/20 の1ヶ月を画面に表示
+    						<BUSS_START_DAY>21</BUSS_START_DAY>
+    ROLECONFIG:       権限制限機能追加対応（2017/09/15 ADD)
+        EDITABLE_ROLE:  ロール名一致の同士は相手のシフト入力ができる機能有効のロール名を定義できる、カンマで複数ロール名を定義可能
+        VIEW_ROLE:      カレンダー情報は指定ロールのみ参照したいユーザ名を定義する、カンマで複数ユーザ名を定義可能
+            MEMBER_ROLE:カレンダー情報を参照できるロール名を定義する、カンマで複数ロール名を定義可能
+        注意：ロール名にカンマを含めないで定義する
+        
+2018.02.15  TASKCONFIGタグ新規追加
+2018.03.30  TASKCONFIG->QUCIKEDIT属性タグ新規追加
+2018.07.02  TASKCONFIG->TASK->REPEAT属性タグ新規追加
+2018.07.17  GANTTCONFIGタグ新規追加
+2018.11.15  GANTTCONFIG->EVENT_REMOVE タグ新規追加
+			SUMMARYEXTFIELD タグ新規追加
+2018.11.30  TASKCONFIG->TASK->GPCODE 属性タグ新規追加
+			TASKCONFIG->TASK->GPLABEL 属性タグ新規追加
+			上記タグ「GPCODE」「GPLABEL」セット定義が必要、
+			タスクグループ化定義用、画面から定義したグループ選択リストにより、該当グループのタスクのみ表示できる
+2019.02.28	WORKTIMECHECKタグ新規追加
+			GANTTCONFIG→PROJTECTSORTタグ新規追加
+2019.04.15  TASKCONFIG->QUCIKEDIT->BOTH パラメータを新規追加
+2019.07.01 	TASKCONFIG->FILTER 氏名、部署、件名、タスクテンプレート名別キーワードでタスク検索機能フラグ
+			TRUE:該当機能有効
+			FALSE:該当機能無効(デフォルト値)
+2019.10.15	TASKCONFIG->TASK->FIELD属性タグ新規追加
+			タスクテンプレートの文言を行動の任意の項目に自動で記入
+2019.12.30	TASKCONFIG->TASK->CALENDAR属性タグ新規追加
+2020.10.30  GANTTCONFIG->TITLE 属性タグ新規追加、プロジェクトがコードで照会検索できる機能
+			GANTTCONFIG->FIELDS 属性タグ新規追加、プロジェクトヘッダーをカスタマイス機能
+-->
+	<SHOP>
+		<!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+		<SHOPCODE></SHOPCODE>
+		<!-- 該当セクションに集計項目と条件を定義する 該当集計情報はスタッフ画面のヘッダ「営業」行の下に表示を行う -->
+		<SUMMARY TITLE="宿泊">
+			<LOGIC>{0}</LOGIC>
+			<COONDITION>
+				ReservedType__c in ('泊 ２食','泊 朝半','泊 夕半','泊 素','宿泊')
+			</COONDITION>
+		</SUMMARY>
+		<SUMMARY TITLE="団体">
+			<LOGIC>{0}</LOGIC>
+			<COONDITION>
+				StayPersons__c >= 10
+			</COONDITION>
+		</SUMMARY>
+		<SUMMARY TITLE="婚礼">
+			<LOGIC> {0}</LOGIC>
+			<COONDITION>
+				Segment__c in ('婚礼','フォトプラン','二次会','通常料金')
+			</COONDITION>
+		</SUMMARY>
+		<WORKTIME>
+			<WORK_START>
+				<BACKCOLOR>#afeeee</BACKCOLOR>
+			</WORK_START>
+			<WORK_REST_START>
+				<BACKCOLOR>#ffa500</BACKCOLOR>
+			</WORK_REST_START>
+			<WORK_REST_END>
+				<BACKCOLOR>#f5deb3</BACKCOLOR>
+			</WORK_REST_END>
+			<WORK_END>
+				<BACKCOLOR>#dcdcdc</BACKCOLOR>
+			</WORK_END>
+			<WORK_TIME_EDIT>	<!-- 勤務修正申請ボタン色制御の設定 -->
+				<BACKCOLOR>#90EE90</BACKCOLOR>
+			</WORK_TIME_EDIT>
+		</WORKTIME>
+		<!-- アプリ定義情報 -->
+		<APPCONFIG>
+			<!-- 氏名列に補足表示情報APIの定義、 カンマで複数API指定可能 -->
+			<USER_PLUSINF></USER_PLUSINF>
+			<!-- 営業：休館の判断キーワード -->
+			<BUSS_STATUS_CLOSE>休館</BUSS_STATUS_CLOSE>
+			<!-- 画面の集計セクションに、別の店舗の「予約件数、人数」集計情報を表示したい場合、 下記タグに、店舗コードを指定すると、スタッフ画面に、指定店舗コードの集計情報は画面に表示する 
+				設定しない場合、自分所属の店舗の集計情報を画面に表示を行う -->
+			<SUMMARY_SHOP></SUMMARY_SHOP>
+			<!-- 勤怠作業関連の行動の「件名」個別指定値、該当タグ設定しない場合、行動件名：「作業」を設定する -->
+			<EVENT_TITLE>作業</EVENT_TITLE>
+			<!-- 当月の最終表示日付を定義する -->
+			<!-- <BUSS_END_DAY>20</BUSS_END_DAY> -->
+			<!-- 当月の開始日付を定義する -->
+			<!-- <BUSS_START_DAY>21</BUSS_START_DAY> -->
+		</APPCONFIG>
+		<ROLECONFIG>
+			<!-- 該当タグにロールを定義すると、同じロールの同士はタスク入力代行可能 -->
+			<!-- <EDITABLE_ROLE>勤怠管理者</EDITABLE_ROLE> -->
+			<!-- 本人以外、指定のロールのみ、該当ユーザーの情報を参照可能設定 -->
+			<!-- 
+			<VIEW_ROLE>
+                <MEMBER_ROLE MANGER="勤怠管理者">sample01@xxxx.xxx,sample02@xxxx.xxx</MEMBER_ROLE> 
+                <MEMBER_ROLE MANGER="人事管理者">sample03@xxxx.xxx,sample04@xxxx.xxx</MEMBER_ROLE> 
+            </VIEW_ROLE>
+            -->
+		</ROLECONFIG>
+		<!-- 2018/02/15 新規追加   
+		  TASKCONFIG: マルチタスク画面の汎用タスク情報定義用
+		      COLOR:  タスクの背景色のデフォルト値
+		      QUCIKEDIT:  ダブルクリックで編集ページに移動せずにタスク名を編集する・しないフラグ
+		                  TRUE:編集できる
+		                  FALSE:詳細ページを開いて、編集する（デフォルト値）
+		                  BOTH:タスク名にリンク追加（ダブルクリックで件名編集可能、リンクをクリアすると、詳細ページを開く）(2019/04/15 追加）
+		      FILTER: 	氏名、部署、件名、タスクテンプレート名別キーワードでタスク検索機能フラグ
+		                  TRUE:有効
+		                  FALSE:無効
+		  TASK:       タスクのタイトル名
+			  ROW:    作業時間（分単位）を定義するのタスク
+			  BEG/END:作業の開始時刻と終了時刻を定義するのタスク（書式：HH:MM)
+			  COLOR:  該当作業タスクの背景色を定義する
+			  REPEAT: 定期的なタスクフラグ（TRUE:定期的なタスク)
+			  GPCODE/GPLABEL: タスクグループ化定義用、画面から定義したグループ選択リストにより、該当グループのタスクのみ表示できる
+			  FIELD: タスクのタイトル名より、行動の項目に自動で記入機能の項目API名定義用タグ属性
+						行動の項目API限定（カスタマイズ項目も含めて）、指定する場合、行動データ作成の際に、タスクのタイトル名で該当項目に設定する
+			  CALENDAR:タスクがカレンダーに表示させるか、表示させない定義属性用タグ
+					TRUE:タスクがカレンダーに表示させる（デフォルト値）
+					FALSE:タスクがカレンダーに表示させない
+		  例1：作業時間が６０分の「打ち合わせ」を定義する、背景色：pink
+		      <TASK ROW="60" COLOR="pink">打ち合わせ</TASK>
+		  例２：作業開始時刻は９時、終了時刻は１８時のタスクを定義する
+		      <TASK BEG="09:00" END="18:00" COLOR="green">作業</TASK>
+		 -->
+		<!-- 
+        <TASKCONFIG COLOR="#004080" FILTER="FALSE">
+        	<TASK ROW="60" COLOR="#004080" GPCODE="0001" GPLABEL="サポート対応" CALENDAR="TRUE">打ち合わせ</TASK>
+        	<TASK BEG="09:00" END="18:00" COLOR="green" GPCODE="0002" GPLABEL="勤怠" CALENDAR="FALSE">作業</TASK>
+        	<TASK ROW="30" COLOR="blue" GPCODE="0001" GPLABEL="サポート対応" CALENDAR="TRUE">問い合わせ</TASK>
+        	<TASK BEG="09:00" END="18:00" COLOR="gray" GPCODE="0002" GPLABEL="勤怠" CALENDAR="FALSE">有休</TASK>
+        </TASKCONFIG>
+         -->
+        <!-- 2018/07/17 新規追加   
+        	GANTTCONFIG:	プロジェクト管理画面の関連定義情報
+        		EVENT_TITLE 行動の件名は個別設定用タグ、デフォルト値：「新規行動」
+        		EVENT_REMOVE　プロジェクト管理からスケジュールを削除するとき、該当タスクはDBから削除する・しない切り替えフラグ（2018/11/15 新規追加）
+        					TRUE:DBから直接削除（デフォルト値）
+        					FALSE:プロジェクト管理からスケジュールを削除するとき、該当タスクはDBに残っていまま、プロジェクト管理対象外のタスクになる
+        		2019/02/28 新規追加
+       			PROJTECTSORT プロジェクト並べ替え定義用タグ（プロジェクトオブジェクトの項目を並び順で指定可能
+       						例1：プロジェクト名昇順したい場合： <PROJTECTSORT>name asc</PROJTECTSORT>
+       						例2：プロジェクトの開始日降順したい場合： <PROJTECTSORT>StartDt__c desc</PROJTECTSORT>
+       			2020/10/30 新規追加
+       			PROJECTCODE_API　プロジェクトがコードで照会検索できる機能，プロジェクトコード取得元項目API名を定義する（カスタムオブジェクト：プロジェクト　データ型：自動採番、テキストの項目前提）
+       						例1:プロジェクトオブジェクトに CD__c項目（データ型：自動採番）を新規カスタマイズ追加しました、その場合、下記ように定義する
+       							<GANTTCONFIG PROJECTCODE_API="CD__c">
+       			FIELDS　プロジェクトヘッダーをカスタマイス機能、書式：API名:ヘッダー名
+						項目API名凡例：
+						API名　　　　 説明
+						======================================
+						action		:Chater&ファイルアップロード列
+						no			:番号列
+						title		:件名
+						pic			:担当者
+						depart		:部署
+						progress	:進捗
+						status		:状態
+						priorty		:優先度
+						noevent		:カレンダー非表示
+						startdate	:開始
+						enddate		:終了
+						schstartdate:予定開始,
+						schenddate	:予定終了,
+						memo		:進捗メモ                  
+						例：列「番号、件名、担当者、開始、終了、進捗メモ」列はデフォルトで表示したい場合、下記ように定義する
+							<FIELDS>
+							no:番号
+							,title:件名
+							,pic:担当者
+							,startdate:開始
+							,enddate:終了
+							,memo:進捗メモ
+		                    </FIELDS> 
+        -->
+        <!-- 
+        <GANTTCONFIG  PROJECTCODE_API="ProjectRecord__c">
+			<EVENT_TITLE>新規行動</EVENT_TITLE>
+			<EVENT_REMOVE>TRUE</EVENT_REMOVE>
+			<PROJTECTSORT>name asc</PROJTECTSORT>
+			<FIELDS>
+			action:
+			,no :番号
+			,title:件名
+			,pic :担当者
+			,depart:部署
+			,account:取引先
+			,progress :進捗
+			,status:状態
+			,priority:優先度
+			,noevent:カレンダー非表示
+			,startdate :開始
+			,enddate:終了
+			,memo:進捗メモ
+			</FIELDS>
+        </GANTTCONFIG>
+        -->
+        <!-- 2018/11/15 新規追加 SUMMARYEXTFIELD マルチタスクとシフトの合計欄の表示内容のカスタマイズ 
+        SUMMARYEXTFIELD:	合計欄の表示内容のカスタマイズ用タグ
+        	FIELDS:			合計欄の表示内容の項目ＡＰＩ名（予約、お客様項目（Relcontact__r.xxxx)、複数API名をカンマ「,」で連結定義可能
+			LINKFIELD：		画面表示の項目はリンク追加の定義情報：　
+								書式：項目ＡＰＩ名(LINKされる対象ＡＰＩ):リンクのSalesforceID
+								注意：LINKFIELDに定義した「項目ＡＰＩ名」は必ずFIELDSに定義ください
+        -->
+        <!-- 例 予約名、予約人数、到着時刻、出発時刻 項目情報を表示、予約名に予約リンクを追加したい場合-->
+        <!-- 
+        <SUMMARYEXTFIELD>
+			<FIELDS>
+				Name,StayPersons__c,Field4__c,Field3__c
+			</FIELDS>
+			<LINKFIELD>
+				Name:Id
+			</LINKFIELD>
+        </SUMMARYEXTFIELD>
+		-->
+  		<!-- 2019/02/28 シフトで入っている時間の範囲しか勤怠打刻を認めない機能
+			実際の退勤時間は退勤予定時間により、差分許可の時間範囲（分単位）、この時間を超えると、チェック異常情報をＣＨＡＴＴＥＲへ反映する
+        WORKTIMECHECK:	
+        	BEGTIME_RANGE:実際出勤時間はシフトに登録した予定出勤時間により早い場合、最大許可の時間差範囲値
+			ENDTIME_RANGE:実際退勤時間はシフトに登録した予定退勤時間により遅い場合、最大許可の時間差範囲値
+		    例:	BEGTIME_RANGEは「30」、ENDTIME_RANGEは「30」で定義されている場合
+        		シフト登録予定出勤時刻：09:00 実際出勤時刻は08:30以後出勤場合、チェック結果はOK、08:30以前出勤場合(例08:29)、チェック異常になる
+        		シフト登録予定出勤時刻：18:00 実際出勤時刻は18:30以前退勤場合、チェック結果はOK、18:30以後退勤場合(例18:31)、チェック異常になる
+        -->
+		<WORKTIMECHECK>
+ 			<BEGTIME_RANGE>30</BEGTIME_RANGE>
+ 			<ENDTIME_RANGE>30</ENDTIME_RANGE>
+ 		</WORKTIMECHECK>
+	</SHOP>
+	
+</root>

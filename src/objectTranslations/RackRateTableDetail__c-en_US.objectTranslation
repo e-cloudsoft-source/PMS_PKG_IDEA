@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Rack rate detail</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Rack rate detail</value>
+    </caseValues>
+    <fields>
+        <label>Setup date</label>
+        <name>PriceSetupDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ --></label>
+        <name>RoomTypeRef__c</name>
+        <relationshipLabel><!-- ラックレート明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help>Branch office+ _ +Price setup date</help>
+        <label><!-- SearchKey --></label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label>Shop information</label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- ラックレート明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Tier --></label>
+        <name>Tier__c</name>
+    </fields>
+    <nameFieldLabel>Rack rate detail no.</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

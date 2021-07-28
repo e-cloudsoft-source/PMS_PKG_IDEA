@@ -1,0 +1,264 @@
+<!-- こよみ -->
+<apex:page controller="CalendarExtend" title="{!$Label.ps__msg_012_0236}" showHeader="true" sidebar="false" tabstyle="CalendarTab__tab">
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<!-- 2014/11/25 六曜計算追加 -->
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qreki.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/qrekiHelp.js')}" /> <!-- 和暦LIBのサポート関数 -->
+
+<style>
+/* Tool Bar */
+.toolBarExtCls {
+	height:32px;
+	/*
+	background:#C0C0C0; 
+	filter: progid:DXImageTransform.Microsoft.Gradient(startColorStr='#c1ea99',endColorStr='white',gradientType='0');
+	background: -moz-linear-gradient(top, #c1ea99, white);
+	background: -o-linear-gradient(top,#c1ea99, white);
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#c1ea99), to(white));
+	*/
+}
+.qrekispan {
+	font-size: 16px;
+}
+.cookTable tr.marginLine{
+	background: deepskyblue;
+}
+.cookTable tr.marginLine:last-child{
+	display:none;
+}
+</style>
+<script>
+    $j=jQuery.noConflict();
+    // 画面Lockする
+    function blockUi() {
+        $j.blockUI({
+	//Processing...
+             message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_012_0278}</h1>'
+        }); 
+        return true;
+    }
+    // 画面Lock解除
+    function unblock() {
+        $j.unblockUI({ fadeOut: 200 }); 
+    }
+</script>
+
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblock();" id="refStatusBlock"/>
+
+<apex:outputPanel id="calendarPanel">
+		
+		<div class="toolBarExtCls">
+			<apex:form id="dispForm">
+			<!-- 支店機能 -->
+			<div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 4px;"/></div>
+	     	<apex:outputPanel rendered="{!branchShopLst.size > 0}" style="padding-top: 10; margin-left: 10px;">
+				<apex:outputLabel value="{!$ObjectType.Room__c.Fields.BranchShopName__c.label}" for="areaName"/>
+			    <apex:selectList size="1" value="{!branchShopNm}" style="font-size: 16px" id="areaName" >
+			    	<apex:actionSupport event="onchange" action="{!gotoSwitchShop}" rerender="calendarPanel" status="refStatusBlock"/>
+				<!-- All -->
+			        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_012_0235}"/>
+			        <apex:selectOptions value="{!branchShopLst}" />
+			    </apex:selectList>
+	        </apex:outputPanel>
+	        <!-- 年月情報 -->
+	        <apex:outputPanel style="padding-top: 10; margin-left: 10px;">
+			<!-- 年月 -->
+                <apex:outputLabel value="{!$Label.ps__msg_012_0237}"/>
+				<apex:selectList size="1" value="{!thisYear}" style="font-size: 16px" id="selectYear">
+	            	<apex:actionSupport event="onchange" action="{!gotoYearMonth}" rerender="calendarPanel" status="refStatusBlock"/>
+	                <apex:selectOptions value="{!yearList}" />
+	            </apex:selectList>
+	            <apex:commandButton value="<<" action="{!toPrev}" rerender="calendarPanel" status="refStatusBlock"/>
+	            <apex:selectList size="1" value="{!thisMonth}" style="font-size: 16px" id="selectMonth">
+				<!-- 1月 -->
+                    <apex:selectOption itemValue="1" itemLabel="{!$Label.ps__msg_012_0223}"/>
+                    <!-- 2月 -->
+                    <apex:selectOption itemValue="2" itemLabel="{!$Label.ps__msg_012_0224}"/>
+                    <!-- 3月 -->
+                    <apex:selectOption itemValue="3" itemLabel="{!$Label.ps__msg_012_0225}"/>
+                    <!-- 4月 -->
+                    <apex:selectOption itemValue="4" itemLabel="{!$Label.ps__msg_012_0226}"/>
+                    <!-- 5月 -->
+                    <apex:selectOption itemValue="5" itemLabel="{!$Label.ps__msg_012_0227}"/>
+                    <!-- 6月 -->
+                    <apex:selectOption itemValue="6" itemLabel="{!$Label.ps__msg_012_0228}"/>
+                    <!-- 7月 -->
+                    <apex:selectOption itemValue="7" itemLabel="{!$Label.ps__msg_012_0229}"/>
+                    <!-- 8月 -->
+                    <apex:selectOption itemValue="8" itemLabel="{!$Label.ps__msg_012_0230}"/>
+                    <!-- 9月 -->
+                    <apex:selectOption itemValue="9" itemLabel="{!$Label.ps__msg_012_0231}"/>
+                    <!-- 10月 -->
+                    <apex:selectOption itemValue="10" itemLabel="{!$Label.ps__msg_012_0232}"/>
+                    <!-- 11月 -->
+                    <apex:selectOption itemValue="11" itemLabel="{!$Label.ps__msg_012_0233}"/>
+                    <!-- 12月 -->
+                    <apex:selectOption itemValue="12" itemLabel="{!$Label.ps__msg_012_0234}"/>
+	                <apex:actionSupport event="onchange" action="{!gotoYearMonth}" rerender="calendarPanel" status="refStatusBlock"/>
+	            </apex:selectList>
+				<apex:commandButton value=">>" action="{!toNext}" rerender="calendarPanel" status="refStatusBlock"/>
+			
+			</apex:outputPanel>
+			
+			<apex:outputPanel style="float:right;margin-right:10px;vertical-align:top">
+			<apex:selectList size="1" value="{!appOptionVal}">
+				<apex:selectOptions value="{!appOptionsLst}" />
+				<apex:actionSupport event="onchange" action="{!gotoYearMonth}" rerender="calendarPanel" status="refStatusBlock"/>
+			</apex:selectList>
+			</apex:outputPanel>
+	        </apex:form>
+	    </div>
+
+
+                     
+	    <!-- Calendar -->
+        <div class="bCalendar">
+            <table class="calendarMonthView" width="100%">
+                <tbody>
+                   <tr class="headerRow">
+                   
+                   <apex:repeat value="{!weekFormats}" var="weekStr">
+                   <th scope="col" class="calDays">{!weekStr}</th>
+                   </apex:repeat>
+                   </tr>
+
+                   <apex:repeat value="{!weeks}" var="wk" id="foreachWeek">
+                       <tr>
+                       	   <!-- 2018/08/28 献立機能追加　by　zy BEGIN -->
+                           <apex:repeat value="{!wk.days}" var="day" id="foreachday" rendered="{!!isDinnerFlag}">
+                           <!-- 2018/08/28 献立機能追加　by　zy END -->    
+                               <td class="{!day.cssClassName}" valign="top">
+                                   <div class="date">
+                                   <!-- 	
+                                   <a href="#"
+                                        title="Add Event - "><img src="/s.gif"
+                                        alt="Add Event - " class="addNewEventIcon"
+                                        title="Add Event - " /></a>
+                                    -->
+                                   <img src="/s.gif" class="addNewEventIcon" />
+                                   <apex:outputPanel layout="none" >
+                                   <a style = "font-size:16px" href="javascript:" onclick="window.open('/apex/RoomIndicatorInfo?dt={!day.dayString}')" ><span style="color: {!IF(day.isHoliday, 'tomato','black')}">{!day.dayNum}{!IF(LEN(day.holidayStr) > 0, '('+day.holidayStr+')' , '')}</span></a>&nbsp;<span class="qrekispan" dtval="{!day.dayString}"></span><br/><br/>
+                                   <!-- Download -->
+                                   <apex:outputPanel >
+                                   <input type="hidden" name="dateInfo" value="{!day.dayString}"/>
+                                   <c:CCalendarForPcaFileDownloadComp datasource="{!pcaDlSourceMap[day.dayString]}" rendered="{!isAppOptFileDownload && profileNm == $Label.ps__msg_1016}"/>
+                                   </apex:outputPanel>
+                                   <!-- こよみ -->
+                                   <apex:outputPanel rendered="{!!isAppOptFileDownload}">
+					<!-- 予約人数 -->
+                                   <center><font color="{!IF(day.isHoliday, 'tomato','darkgoldenrod')}" size = "2">[  {!$Label.MSG_012_0239}:  {!(IF(IsShowEnaki, day.enakStayPeoples, 0)) + day.bookingSummaryInf.stayPeoples}  ] {!day.tierString}</font></center>
+                                   <table cellspacing = "1" align = "center" width = "300px" class="{!day.cssClassName}">
+                                       <tr align = "center" >
+                                           <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px"><!-- 部屋 -->{!$Label.MSG_012_0240}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px"><!-- 昼 -->{!$Label.MSG_012_0241}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px"><!-- 夕 -->{!$Label.MSG_012_0242}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px"><!-- OUT -->{!$Label.MSG_012_0243}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px"><!-- IN -->{!$Label.MSG_012_0244}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px"><!-- STAY -->{!$Label.MSG_012_0245}</td>
+                                       </tr>
+                                       <tr align = "center">
+                                           <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"><!-- 客室 -->{!$Label.MSG_012_0246}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.bookingSummaryInf.noonStatus}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.bookingSummaryInf.nightStatus}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.bookingSummaryInf.outStatus}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.bookingSummaryInf.inStatus}</td>
+                                           <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.bookingSummaryInf.stayStatus}</td>
+                                       </tr>
+                                    	<apex:repeat value="{!day.enKaiInfLst}" var="enkai" rendered="{!IsShowEnaki}">
+										<tr align = "center">
+										    <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!enkai.roomName}</td>
+										    <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!enkai.noonStatus}</td>
+										    <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!enkai.nightStatus}</td>
+										    <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+										    <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+										    <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+										</tr>
+                                    	</apex:repeat>
+                                   </table>
+                                   </apex:outputPanel>
+                                   </apex:outputPanel>
+                                   </div>
+                              </td>
+                          </apex:repeat>
+                           <!-- 2018/08/28 献立機能追加　by　zy BEGIN -->
+                          <apex:repeat value="{!wk.days}" var="day" rendered="{!isDinnerFlag}">
+                               <td class="{!day.cssClassName}" valign="top">
+                                   <div class="date">
+                                   <apex:outputPanel layout="none" >
+                                   <a style = "font-size:16px" href="javascript:" onclick="window.open('/apex/RoomIndicatorInfo?dt={!day.dayString}')" >
+                                   	<span style="color: {!IF(day.isHoliday, 'tomato','black')}">{!day.dayNum}{!IF(LEN(day.holidayStr) > 0, '('+day.holidayStr+')' , '')}</span>
+                                   </a>&nbsp;
+                                   <span class="qrekispan" dtval="{!day.dayString}"></span>
+                                   <br/><br/>
+									<!-- 予約人数 -->
+                                   <table cellspacing = "1" align = "center" style="min-width: 300px;" class="{!day.cssClassName} cookTable">
+                                        <apex:repeat value="{!day.cookinfos}" var="cook" rendered="{!day.cookinfos.size > 0}">
+										<tr align = "center">
+											<td style = "padding: 3px; border-size: 1px; border:1px　dotted　black; font-size:12px;vertical-align: top;text-align: left;">会席</td>
+											<td style = "border-size: 1px; border:1px　dotted　black; font-weight: normal; font-size:12px;vertical-align: top;text-align: left;width:auto;">
+												<span style="font-size:15px;">{!cook.acc.name}</span>
+												<table style="width: 100%;">
+													<apex:repeat value="{!cook.foods}" var="food">
+														<tr>
+															<td style="white-space: nowrap;">
+																<span>{!food.BreakName__c}</span>
+															</td>
+															<td style="width:auto;">
+																<span style="text-align: right;">{!food.AccountMasterSubRef__r.name}</span>
+															</td>
+														</tr>
+													</apex:repeat>
+												</table>
+											</td>
+										</tr>
+										<tr>
+											<td style = "padding: 3px; border:1px dotted　black; font-size:12px;white-space: nowrap;"><!-- 昼 -->原材料</td>
+											<td style = "padding: 3px; border: 1px dotted　black; font-weight: normal; font-size:12px;vertical-align: top;width:auto;">{!cook.acc.Materials__c}</td>
+										</tr>
+										<tr>
+											<td style = "padding: 3px; border:1px dotted　black; font-size:12px;white-space: nowrap;"><!-- 夕 -->栄養成分</td>
+											<td style = "padding: 3px; white-space: nowrap; font-weight: normal; font-size:12px;width:auto;">
+										    	<div style="width: 100%;text-align: left;padding: 0px;border-bottom: 1px dotted black;">カロリー 
+										    		<span style="float:right;">{!ROUND(cook.acc.Calorie__c, 0)} kcal</span>
+										    	</div>
+										    	<div style="width: 100%;text-align: left;padding: 0px;border-bottom: 1px dotted black;">たんぱく質 <span style="float:right;">{!cook.acc.Protein__c} g</span></div>
+												<div style="width: 100%;text-align: left;padding: 0px;border-bottom: 1px dotted black;">
+													脂質  <span style="float:right;">{!cook.acc.Lipid__c} g</span>
+												</div>
+												<div style="width: 100%;text-align: left;padding: 0px;">炭水化物  <span style="float:right;">{!cook.acc.Carbohydrate__c} g</span></div>
+										    </td>
+										</tr>
+										<tr>
+                                           <td style = "padding: 3px; border:1px dotted　black; font-size:12px;white-space: nowrap;"><!-- OUT -->アレルギー物質</td>
+                                           <td style = "padding: 3px; font-weight: normal; font-size:12px;vertical-align: top;width:auto;">{!cook.acc.Allergy__c} </td>
+										</tr>
+										<tr class="marginLine">
+											<td colspan="2" style="padding:5px;"></td>
+										</tr>
+                                    	</apex:repeat>
+                                   </table>
+                                   </apex:outputPanel>
+                                   </div>
+                              </td>
+                          </apex:repeat>
+                           <!-- 2018/08/28 献立機能追加　by　zy END -->
+                      </tr>
+                  </apex:repeat>
+               </tbody>
+            </table>
+        </div>
+<!-- 画面更新すると、表示情報を再BINDする -->
+<script>
+$j(document).ready(function() {
+		//--------------------------
+	// 六曜計算(和暦計算表示制御共通関数呼び出し)
+	//--------------------------
+	if({!isShowQreqki})
+		QREKI.jinya.bindInstance($j, "qrekispan", "dtval");
+});
+</script>
+</apex:outputPanel>
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

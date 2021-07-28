@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>会計データをロックでも、会計情報編集できるユーザを指定する</description>
+    <fields>
+        <fullName>AdministratorsName__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <fieldManageability>DeveloperControlled</fieldManageability>
+        <inlineHelpText>ユーザのユーザ名を設定する</inlineHelpText>
+        <label>ユーザ名</label>
+        <length>255</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ShopCode__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <fieldManageability>DeveloperControlled</fieldManageability>
+        <inlineHelpText>除外者はどの店舗の会計書を編集できるの店舗コードを設定する
+空欄場合、全て店舗の会計書を編集できる
+複数設定可能、複数場合、カンマで複数店舗コードを定義する
+注：共通定義：「店舗ごとの予約・会計権限」項目設定が優先
+　　「店舗ごとの予約・会計権限」設定により、該当ユーザは指定店舗の会計書権限がない場合、
+　　該当項目に店舗コード定義しでも、会計編集不可です</inlineHelpText>
+        <label>店舗コード</label>
+        <length>255</length>
+        <required>false</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>isInvalidFlg__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <fieldManageability>DeveloperControlled</fieldManageability>
+        <label>無効</label>
+        <type>Checkbox</type>
+    </fields>
+    <label>会計ロック除外者設定</label>
+    <visibility>Public</visibility>
+</CustomObject>

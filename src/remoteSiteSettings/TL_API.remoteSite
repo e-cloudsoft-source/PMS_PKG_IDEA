@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RemoteSiteSetting xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>https://www.tl-lincoln.net/pmsservice/V1
+https://test472.tl-lincoln.net
+https://test472.tl-lincoln.net</description>
+    <disableProtocolSecurity>false</disableProtocolSecurity>
+    <isActive>true</isActive>
+    <url>https://test472.tl-lincoln.net</url>
+</RemoteSiteSetting>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>QQNAIEvent</value>
+    </caseValues>
+    <fields>
+        <label><!-- EventId --></label>
+        <name>EventId__c</name>
+    </fields>
+    <fields>
+        <label><!-- IsEntry --></label>
+        <name>IsEntry__c</name>
+    </fields>
+    <fields>
+        <label><!-- 評価リスト --></label>
+        <name>RoomState__c</name>
+    </fields>
+    <fields>
+        <label><!-- RoomsAssigned --></label>
+        <name>RoomsAssigned__c</name>
+    </fields>
+    <fields>
+        <label><!-- StateBefore --></label>
+        <name>StateBefore__c</name>
+    </fields>
+    <fields>
+        <label><!-- Time --></label>
+        <name>Time__c</name>
+    </fields>
+    <fields>
+        <label><!-- ps_LeadIndexRef --></label>
+        <name>ps_LeadIndexRef__c</name>
+    </fields>
+</CustomObjectTranslation>

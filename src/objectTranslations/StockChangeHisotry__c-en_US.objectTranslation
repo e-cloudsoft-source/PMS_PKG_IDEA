@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Room Inventory</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Room Inventory</value>
+    </caseValues>
+    <fields>
+        <label><!-- AGT --></label>
+        <name>AgtRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- 該当項目値を設定すると、該当名と一致のバッチのみ、該当在庫調整情報を連携する --></help>
+        <label><!-- 実行バッチ --></label>
+        <name>BatchRunTarget__c</name>
+        <picklistValues>
+            <masterLabel>JR</masterLabel>
+            <translation><!-- JR --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TA</masterLabel>
+            <translation><!-- TA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TL</masterLabel>
+            <translation><!-- TL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TR</masterLabel>
+            <translation><!-- TR --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 連携結果(JR) --></label>
+        <name>CooperationResultJrRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 (連携結果(JR)) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 連携結果(TL) --></label>
+        <name>CooperationResultRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 連携結果(TA) --></label>
+        <name>CooperationResultTaRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 (連携結果(TA)) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 連携結果(TR) --></label>
+        <name>CooperationResultTrRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 (連携結果(TR)) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 作成元 --></label>
+        <name>CreateSource__c</name>
+        <picklistValues>
+            <masterLabel>JR</masterLabel>
+            <translation><!-- JR --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>SFDC</masterLabel>
+            <translation><!-- SFDC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TA</masterLabel>
+            <translation><!-- TA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TL</masterLabel>
+            <translation><!-- TL --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>TR</masterLabel>
+            <translation><!-- TR --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- JR処理ログ --></label>
+        <name>JrProcessLog__c</name>
+    </fields>
+    <fields>
+        <label><!-- JR連携ステータス --></label>
+        <name>JrStatusLst__c</name>
+        <picklistValues>
+            <masterLabel>未連携</masterLabel>
+            <translation><!-- 未連携 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携NG</masterLabel>
+            <translation><!-- 連携NG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携不要</masterLabel>
+            <translation><!-- 連携不要 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携済</masterLabel>
+            <translation><!-- 連携済 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ご予約 --></label>
+        <name>LeadRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- TL処理ログ --></label>
+        <name>ProcessLog__c</name>
+    </fields>
+    <fields>
+        <label><!-- 仮データ --></label>
+        <name>Provisional__c</name>
+    </fields>
+    <fields>
+        <label><!-- 販売状態 --></label>
+        <name>SalesStatus_del__c</name>
+    </fields>
+    <fields>
+        <label><!-- 個別設定フラグ --></label>
+        <name>SettingFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- TL連携ステータス --></label>
+        <name>StatusLst__c</name>
+        <picklistValues>
+            <masterLabel>未連携</masterLabel>
+            <translation><!-- 未連携 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携NG</masterLabel>
+            <translation><!-- 連携NG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携不要</masterLabel>
+            <translation><!-- 連携不要 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携済</masterLabel>
+            <translation><!-- 連携済 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 在庫変更数 --></label>
+        <name>StockChangeCnt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 調整日付キー --></label>
+        <name>StockChangeDateKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- 調整日付 --></label>
+        <name>StockChangeDate__c</name>
+    </fields>
+    <fields>
+        <help><!-- らく通連携の際に、リクエストID情報を記録する --></help>
+        <label><!-- リクエストID --></label>
+        <name>SyncRquestNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- TA処理ログ --></label>
+        <name>TaProcessLog__c</name>
+    </fields>
+    <fields>
+        <label><!-- TA連携ステータス --></label>
+        <name>TaStatusLst__c</name>
+        <picklistValues>
+            <masterLabel>未連携</masterLabel>
+            <translation><!-- 未連携 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携NG</masterLabel>
+            <translation><!-- 連携NG --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携不要</masterLabel>
+            <translation><!-- 連携不要 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>連携済</masterLabel>
+            <translation><!-- 連携済 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Room type</label>
+        <name>TypeOfRoomRef__c</name>
+        <relationshipLabel><!-- 在庫変更履歴 --></relationshipLabel>
+    </fields>
+    <nameFieldLabel><!-- 在庫変更履歴No --></nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,266 @@
+<apex:page sidebar="false" showHeader="false" Controller="SyncStatusManagerUploadCtrl" action="{!init}"
+tabstyle="AccountAcount__c">
+<c:CommHeaderComp />
+<style>
+.gifHiddenCss{
+	vertical-align: middle;
+	visibility:hidden;
+}
+.gifVisibleCss{
+	vertical-align: middle;
+	visibility:visible;
+}
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+.btnStyle{
+	width: 100px;
+}
+</style>
+
+<apex:pageBlock title="予約再取込" >
+<!-- ログウインドウ -->
+<div id="logWindow" class="box hidden-on-narrow">
+<div id="logPanel" class="console">
+
+</div>
+</div>
+<apex:form id="search">
+<div class="toolBarExtCls">
+	<div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 2px;"/></div>
+	<apex:outputPanel rendered="{!branchShopLst.size > 0}" style="padding-top: 10; margin-left: 10px;">
+		<apex:selectList size="1" value="{!retryShopCd}" id="shopCode2">
+			<apex:selectOptions value="{!branchShopLst}" />
+	    </apex:selectList>
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!retryTargetLst.size > 0}" style="padding-top: 10; margin-left: 10px;">
+		<apex:outputLabel value="取込種別："/>
+	    <apex:selectList size="1" value="{!retryProType}" id="processType2">
+	        <apex:selectOptions value="{!retryTargetLst}" />
+	    </apex:selectList>
+	</apex:outputPanel>
+	<!-- 指定日 -->
+    <apex:outputLabel value="作成日" for="queryDate" style="margin-top: 10px; margin-left: 10px; height:22px; "/>
+    <apex:inputField value="{!begDtInput.Checkinday__c}" id="begDateInp" 
+    					style="font-size: 1.2em; width:120px;margin-left: 5px; height:21px;padding: 1px;"/>
+    					〜
+    <apex:inputField value="{!endDtInput.Checkinday__c}" id="endDateInp"
+    					style="font-size: 1.2em; width:120px;margin-left: 5px; height:21px;padding: 1px;"/>
+   	<apex:outputPanel >
+    <span class="k-icon k-i-search" style="width:15px;position: relative;left: 25px;"></span>
+	<input class="btn btnStyle" type="button" value="検索" onclick="_readDs();"/>
+    <span class="k-icon k-i-clock" style="width:15px;position: relative;left: 25px;"></span>
+	<input class="btn btnStyle" type="button" value="取込実行" onclick="_restoreFun();"/>
+    <!-- 
+    <span class="k-icon k-i-search" style="width:15px;position: relative;left: 25px;"></span>
+	<input class="btn btnStyle" type="button" value="対象外" onclick="_syncoutFun();"/>
+	 -->
+	</apex:outputPanel>
+    <div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 4px;"/></div>
+</div>
+</apex:form>
+<!-- 取り込みファイル一覧 -->
+<div id="grid" ></div>
+</apex:pageBlock>
+
+<script>
+var $j = jQuery.noConflict();
+// 元のJOB定義情報はJSONに格納する
+$j(document).ready(function() {
+
+	//$j("select[id$=':shopcode']").css({ fontSize: 14 }).kendoDropDownList();
+	//$j("select[id$=':processType']").css({ fontSize: 14 }).kendoDropDownList();
+	/*
+	// file  Upload 上传文件对应处理
+	$j("#uploadLeadXmlBtn").click(function(){
+	    var fileNameVal = "";
+	    // ファイル指定されるチェック
+	    fileNameVal = $j("input[id$=':xmlUpdFile']").val();
+	    if (fileNameVal == '') {
+	    	//対象ファイルが存在しません。
+	        alert("{!$Label.MSG_014_0012}");
+	        return false;
+	    }
+	    // ファイルタイプ
+	   	var fileType = fileNameVal.substr(fileNameVal.length-4);
+	    if(fileType != ".xml"){
+	    	alert("Please upload a file of type .xml");
+	    	return false;
+	    }
+	    $xmlUpdFile = $j("[id$='xmlUpdFile']").get(0);
+	    if($xmlUpdFile.files.length > 0 && $xmlUpdFile.files[0].size/ 1024>5130){			 
+			alert("That would allow up to 5MB approx.");
+	 		return false;	 		      
+		}
+	    // Upload File To Server
+	    //if (this.id == "saBtn_1"){
+		$j(this).attr("class","gifVisibleCss");
+		uploadLeadXmlFun();
+	});
+	*/
+	//　復旧対象データを取得する
+	initDataSource();
+	initDataGrid();
+	initLogWndow();
+});
+
+
+function initDataSource() {
+	// Report View DataSource Define
+	
+	
+	gridsDs = new kendo.data.DataSource({
+	    transport: {
+	        read: function (options) {
+	        	// 検索条件を設定する 
+				var queryArea = $j("select[id$=':shopCode2']").length > 0 ? $j("select[id$=':shopCode2']").val() : "";
+				var queryBegDate = $j("input[id$=':begDateInp']").length > 0 ? $j("input[id$=':begDateInp']").val() : "";
+				var queryEndDate = $j("input[id$=':endDateInp']").length > 0 ? $j("input[id$=':endDateInp']").val() : "";
+				var processType = $j("select[id$=':processType2']").length > 0 ? $j("select[id$=':processType2']").val() : "";
+	            // make AJAX request to the remote service
+	            Visualforce.remoting.Manager.invokeAction(
+	            "{!$RemoteAction.SyncStatusManagerUploadCtrl.getLeadRetryViewInfo}", queryArea, queryBegDate,queryEndDate,processType, function (result, event) {
+	                if (event.type == 'exception') {
+	                    alert(event.message);
+	                } else {
+	                    console.debug(result);
+						options.success(result);
+
+	                } // End else
+	            }, {escape: false});
+	        },
+	        scrollable: true,
+	    },
+	});
+}
+// Datasource Refresh
+function _readDs() {
+//jinyaConsole.log(kendo.guid() + "Refresh Data");
+	gridsDs.read();
+}
+// TA/TLネット取り込み対象
+function initDataGrid() {
+	// Setup Data To Grid
+	$j("#grid").kendoGrid({
+		dataSource: gridsDs,
+		resizable: true,
+		height: 300,
+		reorderable: true,
+        columns: [
+        	{ template: '<input type="checkbox"  class="chkbx" value="#= sfid #"/>', width: 30,
+        		headerTemplate: '<input type="checkbox" id="check-all" onclick="_callCheckAllFun(this)" /></label>'
+        	},
+        	{field: "createdDt", title: "作成時間",sortable: true, width: 130},
+        	//{field: "lastSyncDt", title: "最新更新時間",sortable: true, width: 130},
+        	{field: "fileName", title: "ファイル名",sortable: true,},
+        	{field: "status", title: "ステータス",sortable: true,},
+			{field: "errMsg", title: "エラーメッセージ",sortable: false,encoded: false}
+		],// End columns
+	});
+}
+function initLogWndow() {
+	var logWindow = $j("#logWindow");
+	if (!logWindow.data("kendoWindow")) {
+		logWindow.kendoWindow({
+		    width: "500px",
+		    height:"110px",
+		    title: "取込ログ",
+		    visible: false,
+		    actions: [
+		        "Minimize",
+		        "Maximize",
+		        "Close"
+		    ],
+		    //close: onClose
+		}).closest(".k-window").css({
+			top: 0,
+            left: 0
+		});
+	}
+}
+
+// GRID REL FUNCTION
+function _callCheckAllFun(that) {
+	$j(".chkbx").prop("checked",$j(that).prop("checked"));
+}
+function _restoreFun() {
+	var $allChecked = $j(".chkbx:checkbox:checked");
+	if ($allChecked.length == 0) {
+		alert("対象データを選択して下さい.");
+		return;
+	}
+	var coopidsArr = new Array();
+	$allChecked.each(function() {
+		coopidsArr.push(this.value);
+	});
+	//
+	var _uuid = kendo.guid();
+	// Lock
+	JINYACONNECT.blockUi();
+	// 選択の明細一覧IDを取得、SF側に更新して、再度連携を行う
+	Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.SyncStatusManagerUploadCtrl.syncRestoreStatus}",coopidsArr , function (result, event) {
+		if (event.type == 'exception') {
+			alert(event.message);
+			JINYACONNECT.unblockUi();
+		} else {
+			// 最新処理ステータスを取得する
+			JINYACONNECT.unblockUi();
+			// Call最新の処理対象
+			_readDs();
+			// ログ出力を行う
+			_outputLogWin('処理開始('+coopidsArr.length+'件)');
+			// ログウインドウを表示して、５秒単位の最新処理結果をログウインドウに出力する
+			_refreshRestoreStatusFun(coopidsArr, _uuid);
+		}
+	});
+}
+function _refreshRestoreStatusFun(copids, _uuid) {
+	// 選択の明細一覧IDを取得、SF側に更新して、再度連携を行う
+	Visualforce.remoting.Manager.invokeAction(
+        "{!$RemoteAction.SyncStatusManagerUploadCtrl.refreshRestoreStatus}",copids , function (rs, event) {
+		if (event.type == 'exception') {
+			//alert(event.message);
+			_outputLogWin('異常('+event.message+')',true);
+		} else {
+			var orgLst = rs.orgLst;
+			var waitLst = rs.waitLst;
+			// ログウインドウを表示して、５秒単位の最新処理結果をログウインドウに出力する
+			var timerKey = _uuid + '_timer';
+			var timeHandel = hashMap.Get(timerKey);
+   			if (timeHandel != undefined && timeHandel != null) {
+   				// 該当TIMERはクリアして、再度定義を行う
+   				clearTimeout(timeHandel);
+   			}
+   			// 処理まだ終わらないの場合
+   			if (waitLst.length > 0) {
+				// 最新処理結果はログウインドウに出力する
+				_outputLogWin('処理中('+rs.statusMsg+')');
+	   			// 5秒
+				var timerInterval = 5*1000;
+				timeHandel = setTimeout(function() {
+					_refreshRestoreStatusFun(orgLst, _uuid);
+				}, timerInterval);
+				hashMap.Put(timerKey,timeHandel);
+			} else {
+				// 最新処理結果はログウインドウに出力する
+				_outputLogWin('処理済('+rs.statusMsg+')',false,true);
+			}
+		}
+	});
+}
+function _outputLogWin(msg,err,success) {
+	$logWindow = $j("#logWindow").data("kendoWindow");
+	$logWindow.open();
+	var strTim = kendo.toString(new Date(), 'yyyyMMddHHmmss');
+	log = strTim + ' 予約取込(復旧):' + msg;
+	
+	if (err) jinyaConsole.error(log);
+	if (success) jinyaConsole.success(log);
+	else jinyaConsole.log(log);
+}
+</script>
+</apex:page>

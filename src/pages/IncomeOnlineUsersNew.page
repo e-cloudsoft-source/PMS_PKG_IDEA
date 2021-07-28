@@ -1,0 +1,112 @@
+<apex:page docType="html-5.0" controller="Income" title="Income"
+    sidebar="false" >
+    <html>
+    <apex:form id="fm" >
+        <apex:pageBlock id="incomPage">
+            <apex:actionPoller interval="5" reRender="fm"  oncomplete="displayUsersStyle();" />
+
+            <div class="panel-group" id="accordion">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion"
+                                href="#collapseOne">Online Members</a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse in">
+                        <div >
+                            <p>
+                            <table width="100%" cellspacing="10" >
+
+                                <tbody id="onlinemembers">
+
+
+                                    <apex:repeat value="{!Users}" var="u" >
+                                        <tr width="100%" style="background-color: #fff;">
+                                            <td style="padding: .3em; border-bottom: 1px solid #ddd"><a
+                                                href="#" class="callLink" id="callLink{!u.EmployeeCode__c}"
+                                                data-id="{!u.EmployeeCode__c}"><apex:image height="56"
+                                                        value="{!u.SmallPhotoUrl}" /></a> <a href="#"
+                                                class="callDeptLink" id="callDeptLink{!u.EmployeeCode__c}"
+                                                data-ex="1111" data-id="{!u.EmployeeCode__c}"
+                                                style="display: block; font-size: 13px; font-weight: bold;">{!u.Department}</a>                                                
+                                                <span style="display: block;">{!u.Name}</span> 
+                                                 <span style="font-weight: bold;" >Status: LoggedIn</span>
+                                                 <br/>
+                                          <span style="border-radius: 50%; display: inline-block; height: 10px; margin-left: 4px; width: 10px; background: rgb(66, 183, 42);"></span>
+
+                                            
+                                            </td>
+
+                                        </tr>
+                                    </apex:repeat>
+
+                                </tbody>
+                            </table>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </apex:pageBlock>
+
+        <apex:pageBlock id="offline"  >
+            <span style="float: right;" onclick="notifyAll()"><img
+                height="56" src="{!$Resource.Notify}" /></span>
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion"
+                        href="#collapseTwo">Offline Members</a>
+                </h4>
+            </div>
+            <div id="collapseTwo" >
+
+                <div >
+                    <p>
+                    <span>
+               
+                    <table Id="offlineUserTable" width="100%" cellspacing="10"   onfocus="alert('hi')">
+            
+                        <tbody>                                     
+                             
+                    
+                        <tr width="100%" style="background-color: #fff; display: inline-flex;" >
+                            
+      
+                                    <apex:repeat value="{!OfflineUsers}" var="u1"  >                                
+
+                                        <td style="padding: .3em;  white-space:pre ;border-bottom: 1px solid #ddd" ><a
+                                                href="#" class="callLink" id="callLink{!u1.EmployeeCode__c}"
+                                                data-id="{!u1.EmployeeCode__c}"><apex:image height="56"
+                                                        value="{!u1.SmallPhotoUrl}" /></a> <a href="#"
+                                                class="callDeptLink" id="callDeptLink{!u1.EmployeeCode__c}"
+                                                data-ex="1111" data-id="{!u1.EmployeeCode__c}"
+                                                style="display: block; font-size: 13px; font-weight: bold;">{!u1.Department}</a>
+                                                <span style="display: block;">{!u1.Name}</span><span
+                                                id='{!u1.id}' style="float: right;"
+                                                onclick="singleMessage(this.id);"><img height="56"
+                                                    src="{!$Resource.Notify}" /></span> <span style="display: block;">{!u1.EmployeeCode__c}</span>                                      
+                                                    <span style="font-weight: bold;" >Status: Away</span>
+
+                                        </td> 
+                                    </apex:repeat>                 
+
+                        </tr>
+                        </tbody>                  
+                    </table>           
+        
+                    </span>
+                    </p>
+                </div>
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">  
+   
+
+    </script>
+    </html>
+</apex:page>

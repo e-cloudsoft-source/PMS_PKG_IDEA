@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：該当XML利用して、予約確認書の出力内容を制御を行う
+2016.10.31 入湯税欄が予約確認書の合計に表示されない機能追加
+    タグ「BATHTAX」間に、定義情報は空白すると、入湯税欄が予約確認書の合計に表示されないになる
+    例：下記ように定義すると、入湯税欄が予約確認書の合計に表示されないになる
+    <BATHTAX></BATHTAX>
+2018.05.15.部屋タイプ情報は出力できるように改善（予約確認書コード2と4のみ対応）(タグ：SHOWROOMTYPE)
+2020.06.30.予約確認書の集計対象がカスタマイズできるように改善対応(タグ：LEADFILTER)
+2021.07.30.予約確認書のカスタマイズ機能新規追加
+    RESVCARD: 予約確認書のカスタマイズ機能のルートタグ
+        PAGESIZE:指定紙サイズ A3/A4/A5/B4/B5/B6
+            MARGINVERTICAL:横向き余白px値
+            MARGINHORIZONTAL:縦向き余白px値
+        VERTICAL:印刷の向き（横、縦）
+            TRUE:縦向き(デフォルト値)
+            FALSE:横向き
+        BODY:レジカードのカスタマイズ情報のタグ
+            COLSIZE:列幅属性値(px)
+            ROW:行定義タグ
+                COL:列定義タグ
+            TABLE:表定義タグ
+                ROW:行定義タグ
+                    COL:列定義タグ
+                        COLSPAN:横方向のセル結合数
+            ESTIMATETABLE:見積明細欄
+                ROWNUM:ページ毎に最大明細数、超過したものは次のページに表示（デフォルト:12行目）
+            STYLE:スタイルシート情報定義用タグ、TABLE、ROW、COLタグに有効
+    API：ご予約、ご予約インデックス、お客様の項目APIを定義可能
+        例1：お客様の年齢を出力したい場合、$$_Relcontact__r.Name_$$でカスタマイズする
+        例2：お客様名を出力したい場合、$$_Relcontact__r.Name_$$でカスタマイズする
+        例3：お客様名を出力したい場合、$$_Relcontact__r.Name_$$でカスタマイズする
+    API以外、下記キーワードも出力情報として、カスタマイズ可能
+        $$_PersonNumber_$$:予約人数
+        $$_AdultNumber_$$:大人人数
+        $$_ChildNumber_$$:子供人数
+        $$_RoomNumber_$$:部屋数
+        $$_NightNumber_$$:宿泊数
+        $$_Honorific_$$:敬称
+        $$_ShopName_$$:店舗名
+        $$_ShopAddress_$$:店舗住所
+        $$_ShopPhone_$$:店舗電話
+        $$_ShopFax_$$:店舗Fax
+        $$_ShopEmail_$$:店舗メール
+        $$_ShopWebSite_$$:店舗WebSite
+        $$_Comment_$$:コメント欄入力内容
+        $$_SystemDate_$$:システム日
+-->
+    <SHOP>
+        <SHOPCODE></SHOPCODE>
+        <HEADER>
+            <!-- 確認書タイトル漢字名 -->
+            <TITLE_KANJI>
+                ご　予　約　確　認　書
+            </TITLE_KANJI>
+            <!-- 確認書タイトル英語名 -->
+            <TILTE_ENGLISH>
+                JINYA RESERVATION CONFIRMATION
+            </TILTE_ENGLISH>
+            <!-- 注釈文言 -->
+            <!-- 注意：内容は改行をしたい場合、 該当行後ろに文字列「&lt;br/&gt;」を追加する-->
+            <TITLE_COMMENT>
+                この度はご予約承り誠にありがとうございます。&lt;br/&gt;
+                ご予約内容を下記の通り承りました。 ご確認くださいませ。
+            </TITLE_COMMENT>
+        </HEADER>
+        <BODY>
+            <FIELD_LABEL>
+                <!-- ご予約名 -->
+                <LEAD_NAME>ご予約名</LEAD_NAME>
+                <!-- 発行日(issueDate) -->
+                <ISSUE_DATE>発行日</ISSUE_DATE>
+                <!-- ご住所 -->
+                <ADDRESS>ご住所</ADDRESS>
+                <!-- 連絡電話番号 -->
+                <PHONE>連絡電話番号</PHONE>
+                <!-- 予約番号 -->
+                <LEAD_NO>予約番号</LEAD_NO>
+                <!-- ご利用日時 -->
+                <USED_DATE>ご利用日時</USED_DATE>
+                <!-- ご宿泊日数/部屋数 -->
+                <USED_INFO>ご宿泊日数/部屋数</USED_INFO>
+                <!-- ご宿泊人数 -->
+                <USED_PAXCOUNT>ご宿泊人数</USED_PAXCOUNT>
+            </FIELD_LABEL>
+            <!-- 1ページに最大表示の明細件数 -->
+            <!-- 注：「0」に設定する場合、予約明細は非表示でPDF出力する,Default:12行 -->
+            <MAX_ROWS>9</MAX_ROWS>
+            <!--画面の部屋番号セクションに最大表示できる部屋数  -->
+            <MAX_SHOWROOMS>23</MAX_SHOWROOMS>
+            <!-- 入湯税関連の会計商品コード、タグ「BATHTAX」間に、入湯税の会計商品コードを定義なかっかの場合、出力の予約確認書PDFの入湯税列を非表示する -->
+            <BATHTAX>
+                <!-- 入湯税の会計商品コード、複数定義可能 -->
+                <!--
+                <PRODCODE>5041</PRODCODE>
+                <PRODCODE>5941</PRODCODE>
+                <PRODCODE>4341</PRODCODE>
+                 -->
+            </BATHTAX>
+            <!-- キャンセル料金ルール説明文 -->
+            <!-- 注意：キャンセル内容は改行をしたい場合、 該当行後ろに文字列「&lt;br/&gt;」を追加するが必要-->
+            <CANCEL_RULE>
+                キャンセルされる場合&lt;br/&gt;
+                規定により宿泊料金に対し前日20%・当日80%・不泊100%のキャンセル料を申し受けます。
+            </CANCEL_RULE>
+            <!-- コメント欄Default情報 -->
+            <COMMENT></COMMENT>
+        </BODY>
+        <FOOTER>
+        </FOOTER>
+
+        <!-- 2018/01/31新規追加
+        SHOWUSEDATE：明細の前に利用日を表示する　TRUE:表示、FALSE：非表示（デフォルト値）
+        TAXRATELABEL：税金の部分のラベル定義用
+        -->
+        <!-- 
+        <SHOWUSEDATE>TRUE</SHOWUSEDATE>
+        <TAXRATELABEL>内税</TAXRATELABEL>
+         -->
+        <!-- 2018.05.15.部屋タイプ情報は出力できるように改善（予約確認書コード2と4のみ対応） -->
+        <!-- 
+        <SHOWROOMTYPE>TRUE</SHOWROOMTYPE>
+         -->
+        <!-- 2020.06.30.予約確認書の集計対象がカスタマイズできるように改善対応 
+        	下記例：ご予約の部屋タイプの集計対象外の予約は予約確認書に非表示
+        -->
+        <LEADFILTER>refTypeOfRooms__r.SumNotApplicableFlg__c != true</LEADFILTER>
+
+        <!-- 2021.07.30.予約確認書のカスタマイズ機能新規追加 -->
+        <RESVCARD>
+            <!-- 横向き余白:60px、MARGINHORIZONTAL:50px、印刷の向き:縦、紙サイズ:A4 -->
+            <PAGESIZE MARGINVERTICAL="60px" MARGINHORIZONTAL="50px;" VERTICAL="TRUE">A4</PAGESIZE>
+            <BODY>
+                <ROW STYLE="text-align:center;">
+                    <COL STYLE="font-size:16pt;font-weight: bold;">ご予約確認書</COL>
+                    <COL STYLE="float:right">$$_SystemDate_$$</COL>
+                </ROW>
+                <ROW>
+                    <COL STYLE="text-align:center;height:50px;word-break:break-all" >
+                        この度は「ホテル サンプル沖縄」へご宿泊のご予約を頂きまして、誠にありがとうございます。
+                        ご予約は以下の内容で承りましたので、ご確認くださいますようお願い申し上げます。
+                    </COL>
+                </ROW>
+                <ROW>
+                    <COL>ご予約は以下内容で。</COL>
+                </ROW>
+                <ROW STYLE="height:10px;" ></ROW>
+                <TABLE COLSIZE="300,300" STYLE="margin-left:5%; width:90%;border: 1px solid #000;font-size:14px;">
+                    <ROW>
+                        <COL STYLE="border-right: 1px solid #000;border-bottom: 1px solid #000;">お名前：　$$_Relcontact__r.Name_$$ 様</COL>
+                        <COL STYLE="border-bottom: 1px solid #000;">予約番号：$$_leadIndexRef__r.name_$$</COL>
+                    </ROW>
+                    <ROW>
+                        <COL STYLE="border-bottom: 1px solid #000;" COLSPAN="2">お住所：　〒$$_Relcontact__r.MailingCountry_$$ $$_Relcontact__r.MailingCity_$$ $$_Relcontact__r.MailingState_$$ $$_Relcontact__r.MailingStreet_$$</COL>
+                    </ROW>
+                    <ROW>
+                        <COL STYLE="border-bottom: 1px solid #000;" COLSPAN="2">お電話：　$$_Relcontact__r.Phone_$$</COL>
+                    </ROW>
+                    <ROW>
+                        <COL STYLE="border-bottom: 1px solid #000;">
+                            <TABLE>
+                                <ROW>
+                                    <COL>お利用日：</COL>
+                                    <COL>$$_LeadIndexRef__r.EntryDate__c_$$ $$_LeadIndexRef__r.EntryTime__c_$$</COL>
+                                    <COL >から</COL>
+                                </ROW>
+                            </TABLE>
+                        </COL>
+                        <COL STYLE="border-bottom: 1px solid #000;">
+                            $$_LeadIndexRef__r.DepartureDate__c_$$ $$_LeadIndexRef__r.DepartureTime__c_$$
+                        </COL>
+                    </ROW>
+                    <ROW>
+                        <COL COLSPAN="2">お利用人数：　大人： $$_AdultNumber_$$ 名 子供：$$_ChildNumber_$$    名</COL>
+                    </ROW>
+                </TABLE>
+                <ROW STYLE="margin-top:10px;">
+                    <COL STYLE="text-align:left;font-size:10pt;height:50px">ご予約内容</COL>
+                </ROW>
+                <ESTIMATETABLE ROWNUM="10" STYLE="width:95%;margin-left:15px;" COLSIZE="70,100,,20,80"></ESTIMATETABLE>
+                <ROW STYLE="margin-top:10px;text-align:left;font-size:10pt;height:50px">
+                    <COL STYLE="font-size:16pt">
+                        ■レストラン (ご夕食)のご案内
+                        誠に勝手ながら、ご夕食は予約制とさせていただいております。
+                        ご希望のレストラン (イタリアン、和食・夕食)とお時間(17:30~30分単位・最終入店20:30)をお知らせください。
+                        イタリアン、和食・中華のレストランが交互営業とさせて頂く期間がございます。
+                        尚、レストランの混雑状況によりましては、ご希望の時間にご案内できない場合がございます。
+                        予めご了承くださいますようお願い申し上げます。
+                    </COL>
+                </ROW>
+                <ROW STYLE="margin-top:10px;text-align:left;font-size:10pt;height:50px">
+                    <COL STYLE="font-size:16pt">■
+                        ■キャンセル料のご案内
+                        宿泊約款に基づき、キャンセル料は以下の通りとさせていただきます。
+                        ・グリーンシーズンのご宿泊:10日~2日前20% 前日50% 当日80% ご連絡なし100%
+                        ・スノーシーズンのご宿泊:1ヶ月前20% 2週間前30% 前日60% 当日ご連絡なし100%
+                        ご要望、ご不明点がございましたら、お気軽にご連絡くださいませ。
+                        お客様のお越しをスタッフ一同、心よりお待ち申し上げております。
+                    </COL>
+                </ROW>
+                <ROW STYLE="margin-top:10px;">
+                    <COL STYLE="text-align:left;font-size:10pt;height:20px"></COL>
+                </ROW>
+                <ROW STYLE="margin-top:10px;text-align:left;font-size:10pt;height:50px">
+                    ご要望、ご不明点がございましたら、お気軽にご連絡くださいませ。
+                    お客様のお越しをスタッフ一同、心よりお待ち申し上げております。
+                </ROW>
+            </BODY>
+        </RESVCARD>
+    </SHOP>
+</root>

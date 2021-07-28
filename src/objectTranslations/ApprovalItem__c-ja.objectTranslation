@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>稟議明細</value>
+    </caseValues>
+    <fields>
+        <label><!-- 数量 --></label>
+        <name>Amount__c</name>
+    </fields>
+    <fields>
+        <label><!-- $合計金額（税抜） --></label>
+        <name>GoukeinoneTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品名称（または券名称） --></label>
+        <name>ProductName__c</name>
+    </fields>
+    <fields>
+        <label><!-- RowNo. --></label>
+        <name>RowNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料(%) --></label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- #合計金額 --></label>
+        <name>SpTotal__c</name>
+    </fields>
+    <fields>
+        <label><!-- $単価(税抜) --></label>
+        <name>Tankanonetax__c</name>
+    </fields>
+    <fields>
+        <help><!-- 画面、レポートなど使わない、システム内部利用項目 --></help>
+        <label><!-- 単価(税抜)（システム用） --></label>
+        <name>TankawithoutTaxSys__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>TaxRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計商品単価定義区分 --></label>
+        <name>UnitPriceDefKbCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計商品単価定義区分 --></label>
+        <name>UnitPriceDefKb__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価(税込) --></label>
+        <name>UnitPriceTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価 --></label>
+        <name>UnitPrice__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品名 --></label>
+        <name>refAccountMaster__c</name>
+        <relationshipLabel><!-- 稟議明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 稟議 --></label>
+        <name>refApproval__c</name>
+        <relationshipLabel><!-- 稟議明細 --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

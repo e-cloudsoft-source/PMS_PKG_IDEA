@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>予約見積明細</value>
+    </caseValues>
+    <fields>
+        <help><!-- このレコードは集計の対象に含まれています --></help>
+        <label><!-- A --></label>
+        <name>A__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計DP名 --></label>
+        <name>AccMstDPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計GP名 --></label>
+        <name>AccMstGPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計OP名 --></label>
+        <name>AccMstOPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $集計対象外 --></label>
+        <name>AccountOutside__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品処理種別 --></label>
+        <name>ActionType__c</name>
+        <picklistValues>
+            <masterLabel>前受付金</masterLabel>
+            <translation><!-- 前受付金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 商品の数量を入力してください --></help>
+        <label><!-- 数量 --></label>
+        <name>Amount__c</name>
+    </fields>
+    <fields>
+        <label><!-- バッチ処理区分 --></label>
+        <name>BatchProcessStatusDiv__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理進捗情報 --></label>
+        <name>CookInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- #DP --></label>
+        <name>DPChange__c</name>
+        <relationshipLabel><!-- 会計マスタ (#DP) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 商品名称（英） --></label>
+        <name>EnProductName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 小計割引／割増 --></label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label><!-- ﾌﾘｰ宣言 --></label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品コード --></label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label><!-- リンクＤＰコード --></label>
+        <name>Field4__c</name>
+        <relationshipLabel><!-- 会計マスタ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- ｻﾌﾞ単価 --></label>
+        <name>Field6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 原価 --></label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価2 --></label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label><!-- ｾｯﾄ宣言 --></label>
+        <name>Field9__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会席商品フラグ --></label>
+        <name>FoodDetailFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 集計先変更定義 --></help>
+        <label><!-- #GP --></label>
+        <name>GPChange__c</name>
+        <relationshipLabel><!-- 会計マスタ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $合計金額（税抜） --></label>
+        <name>GoukeinoneTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- ラックレート明細（プラン種別） --></label>
+        <name>GuestType__c</name>
+        <picklistValues>
+            <masterLabel>VIP</masterLabel>
+            <translation><!-- VIP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>一般</masterLabel>
+            <translation><!-- 一般 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>会員</masterLabel>
+            <translation><!-- 会員 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 請求書非表示 --></label>
+        <name>InvoiceNoShowFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 非表示手動請求フラグ --></label>
+        <name>NoShowRequestFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- このレコードを集計の対象としない場合は、チェックを入れてください --></help>
+        <label><!-- 集計対象外 --></label>
+        <name>NoneAccount__c</name>
+    </fields>
+    <fields>
+        <label><!-- OES用ﾒﾆｭｰ --></label>
+        <name>OES__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計OP --></label>
+        <name>OP__c</name>
+        <relationshipLabel><!-- 会計マスタ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- オプション商品グループNo（システム用） --></label>
+        <name>OptionNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- $オプション商品グループNo（システム用） --></label>
+        <name>OptionPlanKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- オプション商品合計金額（システム用） --></label>
+        <name>OptionTotal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発注日 --></label>
+        <name>OrderDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発注者 --></label>
+        <name>Orderer__c</name>
+        <relationshipLabel><!-- 予約見積明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- PLUｺｰﾄﾞ --></label>
+        <name>PLU__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親予約見積明細 --></label>
+        <name>ParentBookingItemRef__c</name>
+        <relationshipLabel><!-- 予約見積明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 支払種別 --></label>
+        <name>PaymentType__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン明細情報定義(システム用) --></label>
+        <name>PlanBrkInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン明細個別設定情報 --></label>
+        <name>PlanDetailSyncInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン明細自動展開(システム用) --></label>
+        <name>PlanRefreshFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品名称（または券名称） --></label>
+        <name>ProductName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 見積宛名 --></label>
+        <name>QuotationName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $予約タイプ --></label>
+        <name>ReservedTypeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約タイプ --></label>
+        <name>ReservedType__c</name>
+    </fields>
+    <fields>
+        <label><!-- $お部屋名 --></label>
+        <name>RoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋名 --></label>
+        <name>RoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- RowNo. --></label>
+        <name>RowNo__c</name>
+    </fields>
+    <fields>
+        <help><!-- セットメニューのインデックス番号、セットメニュー群は最大50個まで --></help>
+        <label><!-- SCP(5) --></label>
+        <name>SCP_5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 食事 --></label>
+        <name>SelectFoodt__c</name>
+        <picklistValues>
+            <masterLabel>夕</masterLabel>
+            <translation><!-- 夕 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>昼</masterLabel>
+            <translation><!-- 昼 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>朝</masterLabel>
+            <translation><!-- 朝 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 食事時間 --></label>
+        <name>SelectFoodtime__c</name>
+        <picklistValues>
+            <masterLabel>10:00</masterLabel>
+            <translation><!-- 10:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10:30</masterLabel>
+            <translation><!-- 10:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:00</masterLabel>
+            <translation><!-- 11:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11:30</masterLabel>
+            <translation><!-- 11:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:00</masterLabel>
+            <translation><!-- 12:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12:30</masterLabel>
+            <translation><!-- 12:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:00</masterLabel>
+            <translation><!-- 13:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13:30</masterLabel>
+            <translation><!-- 13:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14:00</masterLabel>
+            <translation><!-- 14:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14:30</masterLabel>
+            <translation><!-- 14:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15:00</masterLabel>
+            <translation><!-- 15:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15:30</masterLabel>
+            <translation><!-- 15:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:00</masterLabel>
+            <translation><!-- 16:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16:30</masterLabel>
+            <translation><!-- 16:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:00</masterLabel>
+            <translation><!-- 17:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17:30</masterLabel>
+            <translation><!-- 17:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:00</masterLabel>
+            <translation><!-- 18:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18:30</masterLabel>
+            <translation><!-- 18:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19:00</masterLabel>
+            <translation><!-- 19:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19:30</masterLabel>
+            <translation><!-- 19:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20:00</masterLabel>
+            <translation><!-- 20:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20:30</masterLabel>
+            <translation><!-- 20:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21:00</masterLabel>
+            <translation><!-- 21:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6:00</masterLabel>
+            <translation><!-- 6:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6:30</masterLabel>
+            <translation><!-- 6:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7:00</masterLabel>
+            <translation><!-- 7:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7:30</masterLabel>
+            <translation><!-- 7:30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8:00</masterLabel>
+            <translation><!-- 8:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9:00</masterLabel>
+            <translation><!-- 9:00 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9:30</masterLabel>
+            <translation><!-- 9:30 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- サービス料(%) --></label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCodeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- #合計金額 --></label>
+        <name>SpTotal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 特別税 --></label>
+        <name>SpecialTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 分割NO --></label>
+        <name>SplitGroupNo__c</name>
+        <picklistValues>
+            <masterLabel>01</masterLabel>
+            <translation><!-- 01 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>02</masterLabel>
+            <translation><!-- 02 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>03</masterLabel>
+            <translation><!-- 03 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>04</masterLabel>
+            <translation><!-- 04 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>05</masterLabel>
+            <translation><!-- 05 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>06</masterLabel>
+            <translation><!-- 06 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>07</masterLabel>
+            <translation><!-- 07 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>08</masterLabel>
+            <translation><!-- 08 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>09</masterLabel>
+            <translation><!-- 09 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 発注先 --></label>
+        <name>Supplier__c</name>
+        <relationshipLabel><!-- 予約見積明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- プラン一括選択数量(システム用) --></label>
+        <name>SysSelBasePlanNums__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価(税抜)(増税対応)(システム用) --></label>
+        <name>TankanonetaxNew__c</name>
+    </fields>
+    <fields>
+        <label><!-- $単価(税抜) --></label>
+        <name>Tankanonetax__c</name>
+    </fields>
+    <fields>
+        <help><!-- 画面、レポートなど使わない、システム内部利用項目 --></help>
+        <label><!-- 単価(税抜)（システム用） --></label>
+        <name>TankawithoutTaxSys__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>TaxRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- $合計金額(税込) --></label>
+        <name>Total__c</name>
+    </fields>
+    <fields>
+        <label><!-- トリガー処理対象外（システム用） --></label>
+        <name>TriggerIsStopFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $部屋タイプ名 --></label>
+        <name>TypeOfRoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>TypeOfRoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計商品単価定義区分 --></label>
+        <name>UnitPriceDefKbCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計商品単価定義区分 --></label>
+        <name>UnitPriceDefKb__c</name>
+    </fields>
+    <fields>
+        <help><!-- 空欄のまま保存すると、会計商品で定義した単価が設定されます --></help>
+        <label><!-- 単価 --></label>
+        <name>UnitPrice__c</name>
+    </fields>
+    <fields>
+        <label><!-- $利用日 --></label>
+        <name>UseDateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 利用日 --></label>
+        <name>UseDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称1(ｶﾅ) --></label>
+        <name>X1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称2(漢1) --></label>
+        <name>X2_1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称3(漢2) --></label>
+        <name>X3_2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称4(漢3) --></label>
+        <name>X4_3__c</name>
+    </fields>
+    <fields>
+        <help><!-- 商品を選択して下さい --></help>
+        <label><!-- 商品名 --></label>
+        <name>refAccountMaster__c</name>
+        <relationshipLabel><!-- 予約見積明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- ご予約 --></label>
+        <name>refBooking__c</name>
+        <relationshipLabel><!-- 予約見積明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $単価(税込) --></label>
+        <name>unitPriceIncTaxCal__c</name>
+    </fields>
+</CustomObjectTranslation>

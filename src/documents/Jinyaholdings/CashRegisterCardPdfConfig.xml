@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>	
+<!--
+概要：レジカード出力のとき、客室係記入ページのメモ欄へ自動印字項目の関連定義情報
+	下記設定は全店舗共通、店舗ごとの定義ができません
+	<SHOP>
+		<SHOPCODE></SHOPCODE>			店舗コード、空欄のまま、変更しないください
+		<MEMO_OUTPUTFIELD>				レジカードのメモ欄へ自動印字項目の情報定義
+			<LEAD>						ご予約、お客様関連の自動印字項目(ご予約、お客様項目)情報を定義する(カマで複数項目を定義できる)
+										定義書式：　API名＋「:」ラベル名（ラベル名の定義省略可能、ラベル名を定義すると、メモ欄自動印字するとき、「XXXX(ラベル名)：YYYYYYYY(項目情報)の方式で印字する」）
+			<YADOCHOU>					宿帳関連の自動印字項目情報を定義する(カマで複数項目を定義できる)
+		<YADOTYO_INPUT_UI>				宿帳入力画面にお客様の入力項目のカスタム情報を定義する
+			<FIELDS>					入力項目API（お客様の項目のみて定義できる）
+										書式：項目ＡＰＩ名:画面に表示ラベル（ラベル定義省略可）
+			<COLNUMSIZE>				項目の横幅サイズ定義する
+	                            		書式：項目ＡＰＩ名:サイズ（例：100px or 10%)
+	    								注意：「項目ＡＰＩ名」はFIELDSタグに定義しているAPI名
+	    <YADOTYO_BULK_PDF>				レジカード一括印刷の場合、PDF化される宿帳の制限条件を定義する(2017/05/30新規追加)
+	    	<FILTER>					制限条件内容を定義する
+	    <YADOTYO_CUSTOME_DEF>           PDF出力内容：「■ ご宿泊の趣旨」〜 「チェックイン」間の出力内容をカスタム情報定義(レジカード４)
+	       <LINE_NUMBER>                カスタマイズ内容により、レジカードに出力したお客様情報行数調整用タグ
+	       <ROWS>                       カスタマイズ内容タグ
+	           <ROW>                    一行目出力内容定義用タグ
+	               <COL>                該当行目に出力列定義用タグ
+	                   <UNDERLINE>      アンダーライン出力定義用タグ
+	                   <SQUARE>         正方形出力定義用タグ
+例：ご予約の「料理補足」、お客様の「アレルギーの内容」、宿帳の「特記事項」をレジカードのメモ欄に自動印字したいとき
+　　XMLは下記様に定義を行う
+			<LEAD>
+			Field354__c:料理補足,							→ご予約の「料理補足」をメモ欄に自動印字する
+			Relcontact__r.DetailedAllergy__c:アレルギー	→お客様項目「アレルギーの内容」をメモ欄に自動印字する
+			</LEAD>
+			<YADOCHOU>
+				Field13__c:特記事項						→宿帳の「特記事項」をメモ欄に自動印字する
+			</YADOCHOU>
+2017.03.31 宿帳登録画面に、お客様項目をカスタムできるように改善対応
+			注：お客様項目「住所(郵送先)、住所(その他)」項目APIはそのまま使えません、下記ようにAPIで定義が必要
+				住所(郵送先)	->	MailingPostalCode
+								MailingState
+								MailingCity
+								MailingStreet
+				住所(その他)	->	OtherPostalCode
+								OtherState
+								OtherCity
+								OtherStreet
+			例：ひらがな、電話、メール、性別、性別、郵便番号、住所を宿帳入力画面に入力したい場合、下記ように定義を行う
+			<YADOTYO_INPUT_UI>
+				<FIELDS>
+					 Katakana__c:ひらがな
+					,Phone:電話
+					,Email:メール
+					,gender__c:性別
+					,MailingPostalCode:郵便番号
+					,MailingState:都道府県
+					,MailingCity:市区郡
+					,MailingStreet:町名・番地
+				</FIELDS>
+				<COLNUMSIZE>
+					Email:100px
+					,gender__c:50px
+				</COLNUMSIZE>			
+			</YADOTYO_INPUT_UI>
+2017.05.30 レジカード一括印刷の場合、PDF化される宿帳の制限条件を定義できる機能の新規追加
+		例：ご予約の予約タイプが「宿泊」のみPDF化したい場合、下記例で定義できる
+		<YADOTYO_BULK_PDF>
+			<FILTER>
+				Field1__r.ReservedType__c = '宿泊'
+			</FILTER>
+		</YADOTYO_BULK_PDF>
+2017.11.21 レジカード新規レイアウト追加（レジカードコード：6/7 A5サイズ、代表者のみ、国籍情報あり）
+        PDFの項目(Nationality 国籍、Passport number、Arrived from 前泊地、Next Destination)値はXMLから情報取得元APIをカスタマイズ
+        指定しない場合、PDFの該当項目は空っぽまま
+        書式：
+            ご予約:    XXXAPI、
+            お客様:    Relcontact__r.XXXAPI
+        
+        NATIONALITY（XMLタグ）：    Nationality 国籍(PDF出力項目)
+        PASSPORT（XMLタグ）：       Passport number(PDF出力項目)
+        ARRIVEDFROM（XMLタグ）：    Arrived from 前泊地(PDF出力項目)
+        NEXTDESTINATION（XMLタグ）：Next Destination(PDF出力項目)
+2018.04.17 メモ欄の出力項目のタイトル常に出力する・しないフラグ追加
+        ALWAYSTITLE:
+            TRUE:タイトル常に出力する
+            FALSE:項目値存在場合のみタイトル出力する
+2018.11.30  一ページに複数印刷の場合、ページ間隔の高さを設定要タグ追加
+		STAYCARD_6→PAGESPLITHEIGHT
+2018.12.31 
+		1.レジカードのタイプ6/7、項目の差し替えできるように改善
+			カスタムできるセクション（電話番号行目から〜Next Destination行目まで）
+			STAYCARD_6→CUSTOMタグ新規追加（出力可能対象項目、宿帳、お客様、ご予約オブジェクトの項目）
+			書式：API名:ラベル	例：お客様電話を出力場合：Field15__r.Phone:Phone number&lt;br/&gt;電話番号
+			注：1.今回のラベルは	[	Phone number
+									電話番号		]改行出力が必要場合、[&lt;br/&gt;]で文字間に記載が必要
+			注：２.該当タグを定義される場合、該当タグのカスタマイズ内容は優先でPDFに出力を行う
+		2.レジカードのタイプ４、レイアウトに、予約/お客様の項目（例：お客様特記事項）を埋め込みできるように改善対応
+			YADOTYO_CUSTOME_DEF→ROWS→ROW→COL→$$_API名_$$
+			指定箇所に出力したい項目APIをタグに定義可能
+			書式：$$_API名_$$、例：お客様のアレルギー内容を出力したい場合
+				<ROW>
+					<COL>■ アレルギー</COL>
+				</ROW>
+				<ROW>
+				    <COL STYLE="position:relative;">
+	        			<UNDERLINE STYLE="height:20px;width:90%;" REPEAT="3">$$_Field15__r.DetailedAllergy__c_$$</UNDERLINE>
+					</COL>
+				</ROW>
+2019.03.15
+	STAYCARD_6→CUSTOM_SIGNATURE レジカード６、７下部の署名欄の文言をカスタマイズ用タグ(レジカード６、７用)
+		注１.複数文言を定義して、複数行文言を改行が必要場合、「　&lt;br/&gt;　」で改行定義する
+		注２.署名欄の内容をクリアしたい場合、タグ間空欄定義する
+		注３.最大４行まで文言を定義できる
+2019.05.15
+	YADOTYO_CUSTOME_DEF→PLANINFO_NOSHOW_FLG レジカード4のプラン名を表示・非表示に切り替え用タグ
+		TRUE:明細を非表示
+		FALSE:明細を表示する(デフォルト値）
+	YADOTYO_CUSTOME_DEF→ESTITEM_NOSHOW_FLG レジカード4の明細を表示・非表示切り替え用タグ
+		TRUE:明細を非表示
+		FALSE:明細を表示する(デフォルト値）
+	注：ESTITEM_NOSHOW_FLG をTRUEに設定される場合、下記に空白が出てくる、LINE_NUMBERの定義値を修正方法で推奨です(5->7変更など)
+2019.06.15
+	YADOTYO_CUSTOME_DEF→ROOMMEMO_NOPRINT_FLG レジカード4の２ページ目情報出力する・しないに切り替えフラグ
+		TRUE:2ページ目を非表示
+		FALSE:2ページ目を表示する(デフォルト値）
+2019.07.19
+	STAYCARD_6→LOGO_POS_TOPLEFT_FLG　レジカード７、ロゴが左上に小さく表示フラグ（表示サイズ指定可能）
+			WIDTH：ロゴの横幅サイズ
+			HEIGHT：ロゴの縦幅サイズ（最大縦幅：130px)
+		TRUE:ロゴが左上に小さく表示する
+		FALSE:ロゴが下部に表示する（デフォルト値）
+2019.12.30
+	STAYCARD_8 レジカード８カスタマイズ用タグ
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<!-- レジカードのメモ欄へ出力情報項目 -->
+		<MEMO_OUTPUTFIELD>
+			<!-- ご予約、お客様オブジェクトの自動印字項目定義 -->
+			<LEAD>
+			Field354__c:料理補足
+			</LEAD>
+			<!-- 宿帳オブジェクトの自動印字項目定義 -->
+			<YADOCHOU>
+			Field13__c:特記事項
+			</YADOCHOU>
+		</MEMO_OUTPUTFIELD>
+		<!-- 宿帳入力のカスタム項目定義 -->
+		<!-- 
+		<YADOTYO_INPUT_UI>
+			<FIELDS>
+				 Katakana__c:ひらがな
+				,Phone:電話
+				,Email:メール
+				,gender__c:性別
+				,MailingPostalCode:郵便番号
+				,MailingState:都道府県
+				,MailingCity:市区郡
+				,MailingStreet:町名・番地
+			</FIELDS>
+			<COLNUMSIZE>
+				Phone:100px
+				,Email:100px
+				,gender__c:50px
+				,MailingPostalCode:70px
+				,MailingState:70px
+			</COLNUMSIZE>			
+		</YADOTYO_INPUT_UI>
+		 -->
+		<!-- レジカード一括印刷の場合、PDF化される宿帳の制限条件を定義できる 
+		例：ご予約の予約タイプが「宿泊」のみPDF化したい場合、下記例で定義できる
+		-->
+		<!--
+		<YADOTYO_BULK_PDF>
+			<FILTER>
+				Field1__r.ReservedType__c = '宿泊'
+			</FILTER>
+		</YADOTYO_BULK_PDF>
+		-->
+		<!-- レジカード４のみ、PDF出力内容：「■ ご宿泊の趣旨」〜 「チェックイン」間の出力内容をカスタムできるように改善対応 -->
+		<!-- レジカード４、レイアウトに、予約/お客様の項目（例：お客様特記事項）を埋め込みできるように改善対応 -->
+		<!-- 
+		<YADOTYO_CUSTOME_DEF>
+			<LINE_NUMBER>5</LINE_NUMBER>
+			<ROWS>
+				<ROW>
+					<COL STYLE="width:135px;display:inline-block;">■ ご宿泊の趣旨</COL>
+					<COL STYLE="width:125px;display:inline-block;">お祝い（</COL>
+					<COL STYLE="width:275px;display:inline-block;">　） ビジネス　観光　その他（　</COL>
+					<COL STYLE="display:inline-block;">　）</COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="width:135px;display:inline-block;">■ ご利用の経緯</COL>
+					<COL STYLE="width:164px;display:inline-block;">当館のホームページをみて</COL>
+					<COL STYLE="width:236px;display:inline-block;">知人の紹介（ご紹介者</COL>
+					<COL STYLE="display:inline-block;">　）</COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="width:135px;display:inline-block;"></COL>
+					<COL STYLE="width:67px;display:inline-block;">旅行代理店</COL>
+					<COL STYLE="width:333px;display:inline-block;">その他（　</COL>
+					<COL STYLE="display:inline-block;">　）</COL>
+				</ROW>
+				<ROW STYLE="height:5px"><COL></COL></ROW>
+				<ROW>
+					<COL STYLE="width:237px;display:inline-block;">■ DMをお送りしてもよろしいですか。</COL>
+					<COL STYLE="display:inline-block;">可 （メール・郵送）　・不可</COL>
+				</ROW>
+				<ROW>
+					<COL>■ アレルギー</COL>
+				</ROW>
+				<ROW>
+				    <COL STYLE="position:relative;">
+	        			<UNDERLINE STYLE="height:20px;width:90%;" REPEAT="3">$$_Field15__r.DetailedAllergy__c_$$</UNDERLINE>
+					</COL>
+				</ROW>
+				<ROW>
+					<COL>■ その他ご要望ございましたらご記入くださいませ。</COL>
+				</ROW>
+				<ROW>
+				    <COL STYLE="position:relative;">
+	        			<UNDERLINE STYLE="height:28px;width:90%;" REPEAT="3"/>
+						<SQUARE STYLE="height:38px; width:38px; position:absolute;right:0;bottom:0;"></SQUARE>
+					</COL>
+				</ROW>
+			</ROWS>
+			<PLANINFO_NOSHOW_FLG>FALSE</PLANINFO_NOSHOW_FLG>
+			<ESTITEM_NOSHOW_FLG>FALSE</ESTITEM_NOSHOW_FLG>
+			<ROOMMEMO_NOPRINT_FLG>FALSE</ROOMMEMO_NOPRINT_FLG>
+		</YADOTYO_CUSTOME_DEF>
+		-->
+		<!-- 2017.11.21 NEW ADD  -->
+        <STAYCARD_6>
+            <!-- Nationality 国籍:お客様の「国(郵送先)」を指定したい場合 -->
+            <NATIONALITY>
+                <LEAD>Relcontact__r.MailingCountry</LEAD>
+            </NATIONALITY>
+            <!-- Passport number -->
+            <PASSPORT>
+                <LEAD></LEAD>
+            </PASSPORT>
+            <!-- Arrived from 前泊地 -->
+            <ARRIVEDFROM>
+                <LEAD></LEAD>
+            </ARRIVEDFROM>
+            <!-- Next Destination -->
+            <NEXTDESTINATION>
+                <LEAD></LEAD>
+            </NEXTDESTINATION>
+            <!-- 2018/11/30 新規追加 
+            	一ページに複数印刷の場合、ページ間隔の高さを設定要タグ  -->
+            <PAGESPLITHEIGHT>15px</PAGESPLITHEIGHT>
+            <!-- 2018/12/31 レジカード6/７、レイアウトもカスタマイズできるように改善 -->
+            <!-- 
+            例：３行目カスタマイズを行う[CUSTOMタグ]
+            	１行目は２列、項目はお客様の電話番号とお客様の国籍（国籍は空白欄で出力）
+            	２行目は２列、項目はお客様のメールとパスポート番号（パスポート番号は空白欄で出力）
+            	３行目は１列、項目はお客様のアレルギー情報
+             -->
+            <!-- 
+            <CUSTOM>
+            	<ROW>
+                    <COL>Field15__r.Phone:Phone number&lt;br/&gt;電話番号</COL>
+                    <COL>:Nationality&lt;br/&gt;国籍</COL>
+            	</ROW>
+            	<ROW>
+                    <COL>Field15__r.Email:Email&lt;br/&gt;メールアドレス</COL>
+                    <COL>:Passport&lt;br/&gt;number</COL>
+            	</ROW>
+            	<ROW>
+                    <COL>Field15__r.DetailedAllergy__c:アレルギーの内容</COL>
+            	</ROW>
+            </CUSTOM>
+            -->
+			<!-- 2019/03/15 レジカード6/７、署名欄内の文言をカスタマイズ機能追加 -->
+			<!-- 例１：２行文言を定義したい場合 -->
+			<!-- 
+			<CUSTOM_SIGNATURE>
+			* I hereby agree and sign here that I/We will follow your hotel rules.&lt;br/&gt;私は当館のルールに同意しここに署名します。
+			</CUSTOM_SIGNATURE>
+			 -->
+			<!-- 例２：署名欄の文言をクリアしたい場合 -->
+			<!-- 
+			<CUSTOM_SIGNATURE></CUSTOM_SIGNATURE>
+			-->
+			<!-- 2019/07/15 レジカード4の２ページ目情報出力する・しないに切り替えフラグ -->
+			<LOGO_POS_TOPLEFT_FLG WIDTH="245px" HEIGHT="70px">FALSE</LOGO_POS_TOPLEFT_FLG>
+        </STAYCARD_6>
+        
+        <!-- レジカード８カスタマイズ用タグ 
+        STAYCARD_8
+			PAGESIZE:指定紙サイズ A3/A4/A5/B4/B5/B6 
+				VERTICAL:属性タグ、印刷方向値
+					TRUE:縦向き
+					FALSE:横向き(デフォルト値)
+			HEADER:レジカードのヘッダー情報を定義する　
+				ROW:行定義タグ
+					COL:列定義タグ、レジカード項目API(関連の予約、お客様項目も定義可能)、または　固定文字列を定義する
+						STYLE:属性タグ、列のCSS(カスケーディングスタイルシート)
+			BODY:レジカードのボディ情報を定義する
+				COLSIZE:属性タグ、列の幅属性値を定義する
+				ROW:行定義タグ
+					COL:列定義タグ(最大８列定義可能）、レジカード項目API(関連の予約、お客様項目も定義可能)、または　固定文字列を定義する
+						STYLE:属性タグ、列のCSS(カスケーディングスタイルシート)
+						COLSPAN::属性タグ、水平方向のセルの結合数(最大８指定可能）
+			FOOTER:レジカードのフッター情報を定義する　
+				ROW:行定義タグ
+					COL:列定義タグ、レジカード項目API(関連の予約、お客様項目も定義可能)、または　固定文字列を定義する
+						STYLE:属性タグ、列のCSS(カスケーディングスタイルシート)
+			下記特殊キーワードで個別機能対応する
+				$_BR_$:強制改行用		(HEADER、BODY、FOOTER利用可能）
+				$_LOGO_$:店舗ロゴ表示	(HEADER、FOOTER利用可能)
+		-->
+		<!--  -->
+		<STAYCARD_8>
+			<PAGESIZE VERTICAL="FALSE">A5</PAGESIZE>
+			<HEADER>
+				<ROW>
+					<COL STYLE="text-align:left;height: 36px;"></COL>
+					<COL STYLE="font-size:18pt;height: 36px;">STAY CARD 宿泊者カード</COL>
+					<COL STYLE="text-align:right;vertical-align: bottom;">$$_Field1__r.LeadReceiptDate__c_$$</COL>
+				</ROW>
+			</HEADER>
+			<BODY COLSIZE="17%,10%,13%,10%,17%,10%,13%,10%">
+				<ROW>
+					<COL STYLE="text-align:center;" >Name$_BR_$お名前</COL>
+					<COL STYLE="" COLSPAN="7">$$_Field1__r.name_$$</COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="text-align:center;height:50px;" >Address$_BR_$住所</COL>
+					<COL STYLE="" COLSPAN="7">$$_Field15__r.mailingCountry_$$ $$_Field15__r.MailingPostalCode_$$ $_BR_$ $$_Field15__r.MailingAddress_$$
+					</COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="text-align:center;" >Sex$_BR_$性別</COL>
+					<COL STYLE="text-align:center;" >$$_Field15__r.gender__c_$$</COL>
+					<COL STYLE="text-align:center;" >Age$_BR_$年齢</COL>
+					<COL STYLE="text-align:center;" >$$_Field15__r.Age__c_$$</COL>
+					<COL STYLE="text-align:center;" >Occupation$_BR_$職業</COL>
+					<COL STYLE="text-align:center;" COLSPAN="3">$$_Field15__r.Title_$$</COL>
+				</ROW>
+				<ROW >
+					<COL STYLE="text-align:center;" >Phone number$_BR_$電話番号</COL>
+					<COL COLSPAN="3">$$_Field15__r.Phone_$$</COL>
+					<COL STYLE="text-align:center;" >Nationality$_BR_$国籍</COL>
+					<COL STYLE="text-align:center;" COLSPAN="3"></COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="text-align:center;" >Email$_BR_$メールアドレス</COL>
+					<COL COLSPAN="3">$$_Field15__r.Email_$$</COL>
+					<COL STYLE="text-align:center;" >Passport$_BR_$number</COL>
+					<COL COLSPAN="3"></COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="text-align:center;" >Arrived from$_BR_$前泊地</COL>
+					<COL COLSPAN="3"></COL>
+					<COL STYLE="text-align:center;" >Next$_BR_$Destination</COL>
+					<COL COLSPAN="3"></COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="text-align:center;" >Arrival Date$_BR_$到着日</COL>
+					<COL COLSPAN="3" STYLE="text-align:center;" >$$_Field1__r.EntryTime__c_$$</COL>
+					<COL STYLE="text-align:center;" >Departure Date$_BR_$出発日</COL>
+					<COL COLSPAN="3" STYLE="text-align:center;" >$$_Field1__r.Departure__c_$$</COL>
+				</ROW>
+				<ROW>
+					<COL STYLE="text-align:center;" >Signature$_BR_$署名</COL>
+					<COL COLSPAN="7" STYLE="vertical-align:top;text-align:center;height:70px;" >* I hereby agree and sign here that I/We will follow your hotel rules.$_BR_$私は当館のルールに同意しここに署名します。</COL>
+				</ROW>
+			</BODY>
+			<FOOTER>
+				<ROW>
+					<COL STYLE="text-align:center;">$_LOGO_$</COL>
+				</ROW>
+			</FOOTER>
+		</STAYCARD_8>
+		
+	</SHOP>
+</root>

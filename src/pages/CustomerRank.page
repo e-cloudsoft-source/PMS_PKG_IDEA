@@ -1,0 +1,118 @@
+<apex:page controller="CustomerRank" sidebar="false">
+    
+<!-- Load jQuery -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+
+    <apex:form >
+       <apex:pageBlock id="pblock">  
+         <br/><br/> 
+          <center>
+          
+       <div style="width: 1050px; height: 130px; background-color: #D8D8D8; -moz-border-radius: 20px;-moz-border-radius: 20px;-webkit-border-radius: 15px;border-radius: 15px;">
+          <table border="0" cellspacing="0" cellpadding="0" >                       
+                <tr>
+                    <td width="100%" align="center" colspan="3">
+                        <br/>
+                        <u><b><apex:outputLabel style="font-size:16px;"><!-- Search Criteria -->{!$Label.ps__msg_013_0030}</apex:outputLabel></b></u>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td width="25%" align="right" >
+                        <br/>
+                        &nbsp;&nbsp;<apex:outputLabel ><!-- Usage Count -->{!$Label.ps__msg_013_0031}</apex:outputLabel> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       <apex:selectList value="{!Condition1}" size="1">
+                       		<!-- Equal To -->
+                            <apex:selectOption itemValue="Equal To" itemLabel="{!$Label.ps__msg_013_0032}"/>
+                            <!-- Greater Than Or Equal To -->
+                            <apex:selectOption itemValue="Greater Than Or Equal To" itemLabel="{!$Label.ps__msg_013_0033}"/>
+                            <!-- Lesser Than Or Equal To -->
+                            <apex:selectOption itemValue="Lesser Than Or Equal To" itemLabel="{!$Label.ps__msg_013_0034}"/>
+                        </apex:selectList>  
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                       <!-- <apex:inputText value="{!UsageCount}" style="width:60px;"/> -->
+                        <br/>                     
+                    </td>
+                    <td width="8%" >
+                        
+                    </td>
+                    <td width="30%" align="left" >
+                        <br/>
+                        &nbsp;&nbsp;<apex:outputLabel ><!-- Usage Charge -->{!$Label.ps__msg_013_0035}</apex:outputLabel>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       <apex:selectList value="{!Condition2}" size="1">
+                            <!-- Equal To -->
+                            <apex:selectOption itemValue="Equal To" itemLabel="{!$Label.ps__msg_013_0032}"/>
+                            <!-- Greater Than Or Equal To -->
+                            <apex:selectOption itemValue="Greater Than Or Equal To" itemLabel="{!$Label.ps__msg_013_0033}"/>
+                            <!-- Lesser Than Or Equal To -->
+                            <apex:selectOption itemValue="Lesser Than Or Equal To" itemLabel="{!$Label.ps__msg_013_0034}"/>
+                        </apex:selectList>  
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                       <!-- <apex:inputText value="{!UsageCharge}" style="width:70px;" /> -->
+                        <br/>                     
+                    </td>
+                </tr>
+                <tr >
+                    <td width="100%" align="center" colspan="3">
+                       <br/>
+                           <apex:outputLabel ><!-- Check In Day Range -->{!$Label.ps__msg_013_0036}</apex:outputLabel>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <apex:outputLabel ><!-- From -->{!$Label.ps__msg_013_0037}</apex:outputLabel>
+                           &nbsp;&nbsp;&nbsp;&nbsp;                           
+                           <apex:inputField value="{!StartDate.SearchDate__c}"/>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <apex:outputLabel ><!-- To -->{!$Label.ps__msg_013_0038}</apex:outputLabel>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <apex:inputField value="{!EndDate.SearchDate__c}"/>
+                          
+                    </td>
+                </tr>
+                                                       
+             </table>
+            </div> 
+             </center>
+           <br/>
+           
+           <!-- Serach -->
+            <center><apex:commandButton value="{!$Label.ps__msg_013_0039}" action="{!QueryRecords}" rerender="pblock" status="status"/></center> 
+           <center>
+              <apex:actionStatus id="status" style="align:center;" startText="Searching..."></apex:actionStatus>
+           </center>
+           <br/><br/><center><u><b><apex:outputLabel style="font-size:16px;"><!-- Search Results -->{!$Label.ps__msg_013_0040}</apex:outputLabel></b></u></center>
+         
+           <br/><apex:pageBlockTable value="{!InnserClassList}" var="s" style="width:86%;-moz-border-radius: 20px;-webkit-border-radius: 13px;border-radius: 13px;" align="center" rendered="{!ShowResult}">
+               <apex:column width="15%" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- Rank -->{!$Label.ps__msg_013_0041}</apex:facet>
+                   <apex:inputField value="{!s.customerRank.RANK__c}"/>
+               </apex:column>
+               <apex:column style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- Customer Name -->{!$Label.ps__msg_013_0042}</apex:facet>
+                   <apex:commandlink value="{!s.ContactName.FirstName} {!s.ContactName.LastName}" action="/{!s.ContactName.id}" target="_blank"/>
+               </apex:column>
+               <apex:column value="{!s.UsageCount}" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- Usage Count -->{!$Label.ps__msg_013_0031}</apex:facet>
+               </apex:column>
+               <apex:column style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- Usage Charge -->{!$Label.ps__msg_013_0035}</apex:facet>
+                   <apex:outputText value="{0, number,00.00}">
+                       <apex:param value="{!s.UsageCharge}" />
+                   </apex:outputText>
+
+               </apex:column>
+           </apex:pageBlockTable>
+           
+           <center><apex:outputLabel rendered="{!!ShowResult}"><!-- There Are No Records For Your Search Criteria -->{!$Label.ps__msg_013_0043}</apex:outputLabel></center>
+           
+          <br/><center><apex:commandButton value="Save" action="{!SaveRecords}" status="savestatus" rerender="pblock,tableid" rendered="{!ShowResult}"/></center>   
+           
+           <br/><center>
+           		<!-- Saving....... -->
+              <apex:actionStatus id="savestatus" style="align:center;color:green;" startText="{!$Label.ps__msg_013_0044}" ></apex:actionStatus>
+           </center>
+             
+       </apex:pageBlock>
+    </apex:form>  
+    <c:CallRegisterPopup ></c:CallRegisterPopup>  
+</apex:page>

@@ -1,0 +1,10 @@
+{!CooperationResult__c.ProcessingType__c}在庫連携バッチ処理エラーが発生しましたのでお知らせいたします。
+
+エラー内容：{!CooperationResult__c.ErrorContent__c}
+
+詳細URL：　https://login.salesforce.com/{!CooperationResult__c.Id}
+
+処理ログ：
+{!CooperationResult__c.ProcessLog__c}
+
+JinyaConnect Enterprise system R&D team.

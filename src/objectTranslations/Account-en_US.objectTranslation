@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <label>Type</label>
+        <name>AccountType__c</name>
+        <picklistValues>
+            <masterLabel>旅行会社</masterLabel>
+            <translation><!-- 旅行会社 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Active --></label>
+        <name>Active__c</name>
+        <picklistValues>
+            <masterLabel>No</masterLabel>
+            <translation><!-- No --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Yes</masterLabel>
+            <translation><!-- Yes --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- ネットエージェントのサビース利用する場合、サビース料金計算用レート --></help>
+        <label><!-- エージェント販売手数料 --></label>
+        <name>AgtSaleRate__c</name>
+    </fields>
+    <fields>
+        <label>Name</label>
+        <name>AliasName__c</name>
+    </fields>
+    <fields>
+        <label>Account number</label>
+        <name>BankAccountNo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 半角カタカナを入力してください --></help>
+        <label>Branch name (Kana)</label>
+        <name>BankBranchNameKana__c</name>
+    </fields>
+    <fields>
+        <label>Branch name</label>
+        <name>BankBranchName__c</name>
+    </fields>
+    <fields>
+        <label>Branch number</label>
+        <name>BankBranchNumber__c</name>
+    </fields>
+    <fields>
+        <help><!-- 半角カタカナを入力してください --></help>
+        <label>Financial institution name (Kana)</label>
+        <name>BankNameKana__c</name>
+    </fields>
+    <fields>
+        <label>Financial institution name</label>
+        <name>BankName__c</name>
+    </fields>
+    <fields>
+        <label>Financial institution number</label>
+        <name>BankNumber__c</name>
+    </fields>
+    <fields>
+        <help><!-- ご予約キャンセル料が発生する場合、該当キャンセル料金に対して、販売手数料を自動計算する・しないフラグ
+TRUE:キャンセル料の販売手数料を計算しない
+FALSE:キャンセル料の販売手数料を計算する（デフォルト値） --></help>
+        <label><!-- キャンセル料の手数料フラグ --></label>
+        <name>CancelChargeCalFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計支払はカードで支払する場合、該当カードの手数料計算用レート --></help>
+        <label>card charges</label>
+        <name>CardSalesRate__c</name>
+    </fields>
+    <fields>
+        <help><!-- 手数料集計単位は月単位の場合、前月の該当日の翌日から今月の該当日まで利用金額の合計して、手数料計算を行う --></help>
+        <label><!-- 手数料集計日 --></label>
+        <name>ChargeCalDateLst__c</name>
+        <picklistValues>
+            <masterLabel>01</masterLabel>
+            <translation><!-- 01 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>02</masterLabel>
+            <translation><!-- 02 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>03</masterLabel>
+            <translation><!-- 03 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>04</masterLabel>
+            <translation><!-- 04 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>05</masterLabel>
+            <translation><!-- 05 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>06</masterLabel>
+            <translation><!-- 06 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>07</masterLabel>
+            <translation><!-- 07 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>08</masterLabel>
+            <translation><!-- 08 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>09</masterLabel>
+            <translation><!-- 09 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10</masterLabel>
+            <translation><!-- 10 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>11</masterLabel>
+            <translation><!-- 11 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>12</masterLabel>
+            <translation><!-- 12 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>13</masterLabel>
+            <translation><!-- 13 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>14</masterLabel>
+            <translation><!-- 14 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>15</masterLabel>
+            <translation><!-- 15 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>16</masterLabel>
+            <translation><!-- 16 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>17</masterLabel>
+            <translation><!-- 17 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>18</masterLabel>
+            <translation><!-- 18 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>19</masterLabel>
+            <translation><!-- 19 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>20</masterLabel>
+            <translation><!-- 20 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>21</masterLabel>
+            <translation><!-- 21 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>22</masterLabel>
+            <translation><!-- 22 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>23</masterLabel>
+            <translation><!-- 23 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>24</masterLabel>
+            <translation><!-- 24 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>25</masterLabel>
+            <translation><!-- 25 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>26</masterLabel>
+            <translation><!-- 26 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>27</masterLabel>
+            <translation><!-- 27 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>28</masterLabel>
+            <translation><!-- 28 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>29</masterLabel>
+            <translation><!-- 29 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>30</masterLabel>
+            <translation><!-- 30 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>31</masterLabel>
+            <translation><!-- 31 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>月末</masterLabel>
+            <translation><!-- 月末 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 手数料集計単位：
+会計単位：毎日会計単位の手数料を計算して、手数料情報は仕入データへ反映する
+月単位：項目「手数料集計日」定義日付まで一ヶ月間利用金額から手数料計算して、手数料情報は仕入データへ反映する --></help>
+        <label><!-- 手数料集計単位 --></label>
+        <name>ChargeCalKbnLst__c</name>
+        <picklistValues>
+            <masterLabel>会計単位</masterLabel>
+            <translation><!-- 会計単位 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>月単位</masterLabel>
+            <translation><!-- 月単位 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 契約状態 --></label>
+        <name>ContractStatus__c</name>
+        <picklistValues>
+            <masterLabel>有効</masterLabel>
+            <translation><!-- 有効 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>無効</masterLabel>
+            <translation><!-- 無効 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Guest Priority</label>
+        <name>CustomerPriority__c</name>
+        <picklistValues>
+            <masterLabel>High</masterLabel>
+            <translation><!-- High --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Low</masterLabel>
+            <translation><!-- Low --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Medium</masterLabel>
+            <translation><!-- Medium --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Deposit items</label>
+        <name>DepositsType__c</name>
+        <picklistValues>
+            <masterLabel>当座</masterLabel>
+            <translation><!-- 当座 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>貯蓄</masterLabel>
+            <translation><!-- 貯蓄 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ID --></label>
+        <name>ID__c</name>
+    </fields>
+    <fields>
+        <label><!-- Number of Locations --></label>
+        <name>NumberofLocations__c</name>
+    </fields>
+    <fields>
+        <label>Fee payment</label>
+        <name>PayChargeFlg__c</name>
+    </fields>
+    <fields>
+        <label>Person (Kana)</label>
+        <name>RegisteredHolderKana__c</name>
+    </fields>
+    <fields>
+        <label>Round off classification</label>
+        <name>RoundType__c</name>
+        <picklistValues>
+            <masterLabel>切り上げ</masterLabel>
+            <translation><!-- 切り上げ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>切り捨て</masterLabel>
+            <translation><!-- 切り捨て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>四捨五入</masterLabel>
+            <translation><!-- 四捨五入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- SLA Expiration Date --></label>
+        <name>SLAExpirationDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- SLA Serial Number --></label>
+        <name>SLASerialNumber__c</name>
+    </fields>
+    <fields>
+        <label><!-- SLA --></label>
+        <name>SLA__c</name>
+        <picklistValues>
+            <masterLabel>Bronze</masterLabel>
+            <translation><!-- Bronze --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Gold</masterLabel>
+            <translation><!-- Gold --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Platinum</masterLabel>
+            <translation><!-- Platinum --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Silver</masterLabel>
+            <translation><!-- Silver --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- メール取り込み機能、旅行会社→営業所情報識別コード --></help>
+        <label><!-- 旅行会社営業所コード_EMAIL --></label>
+        <name>SalesOfficeCodeEmail__c</name>
+    </fields>
+    <fields>
+        <label>Travel company sales code_JR</label>
+        <name>SalesOfficeCodeJR__c</name>
+    </fields>
+    <fields>
+        <label>Travel company sales code_TA</label>
+        <name>SalesOfficeCodeTA__c</name>
+    </fields>
+    <fields>
+        <label>Travel company sales code_TL</label>
+        <name>SalesOfficeCodeTL__c</name>
+    </fields>
+    <fields>
+        <label>Travel company sales code_TR</label>
+        <name>SalesOfficeCodeTR__c</name>
+    </fields>
+    <fields>
+        <label>Travel company sales code</label>
+        <name>SalesOfficeCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- メール取り込み機能旅行会社識別コード --></help>
+        <label><!-- 旅行会社コード_EMAIL --></label>
+        <name>SalesOfficeCompanyCodeEmail__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_API_JR</label>
+        <name>SalesOfficeCompanyCodeJRAPI__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_JR</label>
+        <name>SalesOfficeCompanyCodeJR__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_API_TA</label>
+        <name>SalesOfficeCompanyCodeTAAPI__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_TA</label>
+        <name>SalesOfficeCompanyCodeTA__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_API_TL</label>
+        <name>SalesOfficeCompanyCodeTLAPI__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_TL</label>
+        <name>SalesOfficeCompanyCodeTL__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_API_TR</label>
+        <name>SalesOfficeCompanyCodeTRAPI__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code_TR</label>
+        <name>SalesOfficeCompanyCodeTR__c</name>
+    </fields>
+    <fields>
+        <label>Travel company code</label>
+        <name>SalesOfficeCompanyCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 旅行会社分類 --></label>
+        <name>SalesOfficeCompanyType__c</name>
+        <picklistValues>
+            <masterLabel>ネット</masterLabel>
+            <translation><!-- ネット --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>リアル</masterLabel>
+            <translation><!-- リアル --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <help><!-- 振込には所定の手数料がかかります
+ご依頼人さま：振込金額と手数料をご指定の出金口座から引き落とします。
+お受取人さま：振込金額から手数料を除いた金額がお受取人さまに入金されます。 --></help>
+        <label>Bank transfer chargers bearer</label>
+        <name>TransferChargeKbn__c</name>
+        <picklistValues>
+            <masterLabel>先方負担</masterLabel>
+            <translation><!-- 先方負担 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>自社負担</masterLabel>
+            <translation><!-- 自社負担 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Upsell Opportunity --></label>
+        <name>UpsellOpportunity__c</name>
+        <picklistValues>
+            <masterLabel>Maybe</masterLabel>
+            <translation><!-- Maybe --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>No</masterLabel>
+            <translation><!-- No --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Yes</masterLabel>
+            <translation><!-- Yes --></translation>
+        </picklistValues>
+    </fields>
+    <webLinks>
+        <label>Merge</label>
+        <name>AcountMerge</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Billing --></label>
+        <name>Billing</name>
+    </webLinks>
+</CustomObjectTranslation>

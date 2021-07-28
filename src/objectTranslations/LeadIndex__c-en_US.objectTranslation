@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Reservation index</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Reservation index</value>
+    </caseValues>
+    <fields>
+        <label><!-- APPNAME --></label>
+        <name>APPNAME__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品明細 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- 予約インデックス --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Auto create flag</label>
+        <name>AutoCreateFlgCbl__c</name>
+    </fields>
+    <fields>
+        <label><!-- ブッキングAPIメール本文 --></label>
+        <name>BookingApiMailBody__c</name>
+    </fields>
+    <fields>
+        <label><!-- ブッキングAPIメール送信フラグ --></label>
+        <name>BookingApiSendMailFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- リザプリ電文 --></label>
+        <name>BookingApiTelegramData__c</name>
+    </fields>
+    <fields>
+        <label><!-- 一画面のレイアウトNo --></label>
+        <name>BookingFlexAppLayoutNo__c</name>
+    </fields>
+    <fields>
+        <label>ReservationChannel</label>
+        <name>Channel__c</name>
+    </fields>
+    <fields>
+        <label>SpecialInstruction</label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様住所 --></label>
+        <name>ContactAddressCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様Email --></label>
+        <name>ContactEmailCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様ひらがな --></label>
+        <name>ContactKatakanaCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様ひらがな --></label>
+        <name>ContactKatakana__c</name>
+    </fields>
+    <fields>
+        <label>Guest</label>
+        <name>ContactNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様Phone --></label>
+        <name>ContactPhoneCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様郵便番号 --></label>
+        <name>ContactPostalCodeCal__c</name>
+    </fields>
+    <fields>
+        <label>DataClass</label>
+        <name>DataClassification__c</name>
+    </fields>
+    <fields>
+        <label>Departure</label>
+        <name>DepartureDate__c</name>
+    </fields>
+    <fields>
+        <label>Out</label>
+        <name>DepartureTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約通知料金明細 --></label>
+        <name>EmailBody__c</name>
+    </fields>
+    <fields>
+        <label>Arrival</label>
+        <name>EntryDate__c</name>
+    </fields>
+    <fields>
+        <label>In</label>
+        <name>EntryTime__c</name>
+    </fields>
+    <fields>
+        <label>EventSource</label>
+        <name>EventSource__c</name>
+    </fields>
+    <fields>
+        <label>ExtraBedChk(E/B)</label>
+        <name>ExtraBedChk__c</name>
+    </fields>
+    <fields>
+        <label><!-- ID --></label>
+        <name>ID__c</name>
+    </fields>
+    <fields>
+        <label>ReservationName</label>
+        <name>LeadName__c</name>
+    </fields>
+    <fields>
+        <label>ReservationNo</label>
+        <name>LeadNo__c</name>
+    </fields>
+    <fields>
+        <label>+AddPoint</label>
+        <name>MemberAddPoint__c</name>
+    </fields>
+    <fields>
+        <label>+UsedPoint(s)</label>
+        <name>MemberUsePoint__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberAddr</label>
+        <name>MemberUserAddr__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberCompany</label>
+        <name>MemberUserCorp__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberBday</label>
+        <name>MemberUserDateOfBirth__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberDepartment</label>
+        <name>MemberUserDep__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberEmergencyContact</label>
+        <name>MemberUserEmergencyPhoneNumber__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberGender</label>
+        <name>MemberUserGendar__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberID</label>
+        <name>MemberUserID__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberNameKana</label>
+        <name>MemberUserKana__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberEmail</label>
+        <name>MemberUserMailAddr__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberName</label>
+        <name>MemberUserName__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberTelephone</label>
+        <name>MemberUserTel__c</name>
+    </fields>
+    <fields>
+        <label>+ MemberType</label>
+        <name>MemberUserType__c</name>
+    </fields>
+    <fields>
+        <label>+MemberZipCode</label>
+        <name>MemberUserZip__c</name>
+    </fields>
+    <fields>
+        <label>Night(s)</label>
+        <name>Nights__c</name>
+    </fields>
+    <fields>
+        <label><!-- 旧ID --></label>
+        <name>OrgID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親部屋明細フラグ --></label>
+        <name>ParentFlg__c</name>
+    </fields>
+    <fields>
+        <label>ParentIndex</label>
+        <name>ParentLeadIndxRef__c</name>
+        <relationshipLabel>ReservationIndex</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Payment</label>
+        <name>Payment__c</name>
+    </fields>
+    <fields>
+        <label>PlanDetailSync</label>
+        <name>PlanDetailSyncInfo__c</name>
+    </fields>
+    <fields>
+        <label>Plan</label>
+        <lookupFilter>
+            <errorMessage>You cannot select plans that is setup</errorMessage>
+        </lookupFilter>
+        <name>PlanRef__c</name>
+        <relationshipLabel>ReservationIndex</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 予約キャンセルメール通知日時 --></label>
+        <name>PmsEmailDelDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約新規・変更メール通知日時 --></label>
+        <name>PmsEmailInsUpdDateTime__c</name>
+    </fields>
+    <fields>
+        <label>RoomType</label>
+        <name>RoomTypeRef__c</name>
+        <relationshipLabel>ReservationIndex</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Room(s)</label>
+        <name>Rooms__c</name>
+    </fields>
+    <fields>
+        <label>SalesPrice</label>
+        <name>SalesPrice__c</name>
+    </fields>
+    <fields>
+        <label>Segment</label>
+        <name>Segment__c</name>
+    </fields>
+    <fields>
+        <label>StatusLst</label>
+        <name>StatusLst__c</name>
+        <picklistValues>
+            <masterLabel>キャンセル</masterLabel>
+            <translation><!-- キャンセル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>StayPerson(s)</label>
+        <name>StayPersons__c</name>
+    </fields>
+    <fields>
+        <help><!-- Ver16.50以後仕様、該当フラグは在庫調整ロジック対象データするがどうか判断用、TRUEすると、処理対象 --></help>
+        <label><!-- 在庫調整ロジック対象(システム用) --></label>
+        <name>StockLogicProcessFlg__c</name>
+    </fields>
+    <fields>
+        <label>+Invoice amount</label>
+        <name>TotalAccommodationCharge__c</name>
+    </fields>
+    <fields>
+        <label>+Cancel date</label>
+        <name>TravelAgencyBookingDelDateTime__c</name>
+    </fields>
+    <fields>
+        <label>+Reservation date and time</label>
+        <name>TravelAgencyBookingInsDateTime__c</name>
+    </fields>
+    <fields>
+        <label>+Change date and time</label>
+        <name>TravelAgencyBookingUpdDateTime__c</name>
+    </fields>
+    <fields>
+        <label>+Travel agent reservation No</label>
+        <name>TravelLeadNo__c</name>
+    </fields>
+    <fields>
+        <label>Guest</label>
+        <name>contactRef__c</name>
+        <relationshipLabel>ReservationIndex</relationshipLabel>
+    </fields>
+    <nameFieldLabel>Reservation name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,38 @@
+<!-- 
+	登録済みグループ情報更新ページ
+	
+	ChatterとRECAIUSのグループ情報の更新をする
+
+	Copyright (c) 2018 TOSHIBA CORPORATION,  All Rights Reserved.
+-->
+<apex:page Controller="RecaiusUserInfo" action="{!RecaiusGroupSetInit}" >
+    <apex:include pageName="RecaiusUserInfoCss"/>
+    <div id="vf-page">
+        <apex:pageMessage title="Recaius Error" summary="{!warningMsg}" severity="error" strength="3" rendered="{!loginErrorFlg}" />
+        <apex:pageBlock title="RECAIUS投稿グループ情報更新" >
+            <apex:form > 
+                <apex:pageMessages />
+                <p>契約ID<br /><apex:inputText value="{!userInfo.ContactId__c}" disabled="true" /></p>
+                <p>ユーザーID<br /><apex:inputText value="{!userInfo.UserId__c}" disabled="true" /></p>
+            	<p>パスワード<br /><apex:inputText value="{!userInfo.Password__c}" disabled="true" /></p>
+            
+            	<p>Chatter group<br />
+                	<apex:selectList value="{!selectValue}" size="1" style="width:220px;">
+            			<apex:selectOptions value="{!options}"/>                                        
+        			</apex:selectList>    
+            	</p>
+            	<p>RECAIUSグループ<br />            
+            	
+                	<apex:selectList value="{!selectValue2}" size="1" style="width:220px;"  >
+            			 <apex:selectOptions value="{!options2}"/> 
+                    	<apex:actionSupport event="onchange" action="{!change}" reRender="regr" />
+        			</apex:selectList>  
+            	</p>
+                
+            	<apex:commandButton action="{!updateInfo}" value="更新" />
+            	<apex:commandButton action="{!GroupSet_cancel}" value="キャンセル" />
+            	
+            </apex:form>        
+        </apex:pageBlock>
+    </div>     
+</apex:page>

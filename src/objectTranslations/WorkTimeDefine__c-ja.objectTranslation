@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>終業規則</value>
+    </caseValues>
+    <fields>
+        <help><!-- 1日所定労働時間(時単位)
+例：7時30分の場合、定義情報は 7 * 60 + 30 = 450 で定義値に設定する --></help>
+        <label><!-- 1日所定労働時間(分単位) --></label>
+        <name>DayOfRegularWorkTime__c</name>
+    </fields>
+    <fields>
+        <help><!-- 深夜残業終了時間 書式： HH:MM 
+例：5時まで深夜残業を定義したい場合、「05：00」で設定する --></help>
+        <label><!-- 深夜残業終了時間（HH:MM) --></label>
+        <name>LateNightEndTime__c</name>
+    </fields>
+    <fields>
+        <help><!-- 深夜残業開始時間 書式： HH:MM 
+例：22時から深夜残業を定義したい場合、「22：00」で設定する --></help>
+        <label><!-- 深夜残業開始時間（HH:MM) --></label>
+        <name>LateNightStartTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCode__c</name>
+    </fields>
+</CustomObjectTranslation>

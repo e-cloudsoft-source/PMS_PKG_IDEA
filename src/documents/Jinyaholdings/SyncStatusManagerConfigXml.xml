@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、組織の2way連携と監視バッチ機能の有効、無効を定義する
+	下記設定は全店舗共通、店舗ごとの定義ができません
+	該当機能アクセスURL：/apex/ps__SyncStatusManager
+	注意：!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		監視復旧機能ページから2wayバッチを停止すると、必ず監視復旧機能ページから復旧をしてください
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+書式：
+　　　SHOPCODE:        	店舗コード、空欄のまま、変更しないください
+　　　TLIMPJOBCONFIG:		TL2wayの取り込み機能有効、無効情報を定義する
+		BATCHLABEL		監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+		BATCHOPEN		該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+　　　TLSTOCKJOBCONFIG:	TL2wayの在庫調整機能有効、無効情報を定義する
+		BATCHLABEL		監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+		BATCHOPEN		該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+　　　TAIMPJOBCONFIG:		TA2wayの取り込み機能有効、無効情報を定義する
+		BATCHLABEL		監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+		BATCHOPEN		該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+　　　TASTOCKJOBCONFIG:	TA2wayの取り込み機能有効、無効情報を定義する
+		BATCHLABEL		監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+		BATCHOPEN		該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+　　　JRIMPJOBCONFIG:    JR2wayの取り込み機能有効、無効情報を定義する
+        BATCHLABEL      監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+        BATCHOPEN       該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+　　　JRSTOCKJOBCONFIG:  JR2wayの取り込み機能有効、無効情報を定義する
+        BATCHLABEL      監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+        BATCHOPEN       該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+　　　WATCHBATCHCONFIG:	監視バッチ機能有効、無効情報を定義する
+		BATCHLABEL		監視と復旧画面に表示のバッチ機能名、任意ですが、分かりやすい名を推奨する
+		BATCHOPEN		該当機能は監視と復旧画面に制御できるがどうかフラグ（TRUE：停止と復旧できる、FALSE：停止と復旧できない）
+		INTERVAL		監視バッチのインターバル値（分単位）(最小5分単位)
+						数字[0]を定義する場合、日１回のみチェックを行う
+		APEXJOBNAME		監視バッチ機能起動の場合、該当バッチスケジールの「ジョブ名」
+						
+						注1:手動で、SFのAPEXのスケジール機能で監視バッチ起動したい場合、「ジョブ名」項目内容は該当タグに定義内容と一致ください
+						注2:監視バッチからバッチスケジールの状態は異常する場合、
+						①「共通定義→チャターグループ名→2way連携結果通知用グループ名にChatterポストする
+						②「一画面」の右メニューバーの「警告メッセージ」ウインドウに送信する
+						③「SENDMAIL」タグをTRUEに設定される場合、共通定義項目「バッチスケジュール結果送信宛」のメールアドレスに送信する
+						
+		SENDMAIL		2wayバッチ状態が異常の場合、共通定義項目「バッチスケジュール結果送信宛」のメールアドレスに送信する、しないフラグ
+						TRUE:送信する、FALSE：送信しない(デフォルト値）
+						
+2017.03.31 機能新規追加
+	例：該当組織にTL2way(ネット取込、在庫調整）両方とも利用する、TLA2way機能を利用しないの場合、下記手順でXML修正と監視バッチを起動する
+		STEP1:XML修正を行う、
+		1-1. TL2way機能利用するため、「TLIMPJOBCONFIG」「TLSTOCKJOBCONFIG」の「BATCHOPEN」タグは「TRUE」に変更
+		1-2. TA2way機能利用しないため、「TAIMPJOBCONFIG」「TASTOCKJOBCONFIG」の「BATCHOPEN」タグは「FALSE」に変更
+		1-3. URL(https://xxxxxxxxxx/apex/ps__SyncStatusManager)で、監視復旧画面に遷移する
+		1-4. 監視バッチの行目の「復旧」ボタンをクリックして、監視バッチを起動する
+		<TLIMPJOBCONFIG>
+			<BATCHLABEL>TL予約取込</BATCHLABEL>
+			<BATCHOPEN>TRUE</BATCHOPEN>
+		</TLIMPJOBCONFIG>
+		<TLSTOCKJOBCONFIG>
+			<BATCHLABEL>TL在庫調整</BATCHLABEL>
+			<BATCHOPEN>TRUE</BATCHOPEN>
+		</TLSTOCKJOBCONFIG>
+		<TAIMPJOBCONFIG>
+			<BATCHLABEL>TA予約取込</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</TAIMPJOBCONFIG>
+		<TASTOCKJOBCONFIG>
+			<BATCHLABEL>TA在庫調整</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</TASTOCKJOBCONFIG>
+		<WATCHBATCHCONFIG>
+			<BATCHLABEL>監視バッチ</BATCHLABEL>
+			<BATCHOPEN>TRUE</BATCHOPEN>
+			<INTERVALHOUR>1</INTERVALHOUR>
+			<APEXJOBNAME>2way監視バッチ</APEXJOBNAME>
+		</WATCHBATCHCONFIG>
+
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<!-- TL取り込み -->
+		<TLIMPJOBCONFIG>
+			<BATCHLABEL>TL予約取込</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</TLIMPJOBCONFIG>
+		<!-- TL在庫調整 -->
+		<TLSTOCKJOBCONFIG>
+			<BATCHLABEL>TL在庫調整</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</TLSTOCKJOBCONFIG>
+		<!-- TA取り込み -->
+		<TAIMPJOBCONFIG>
+			<BATCHLABEL>TA予約取込</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</TAIMPJOBCONFIG>
+		<!-- TA在庫調整 -->
+		<TASTOCKJOBCONFIG>
+			<BATCHLABEL>TA在庫調整</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</TASTOCKJOBCONFIG>
+		<!-- JR取り込み -->
+		<JRIMPJOBCONFIG>
+			<BATCHLABEL>JR予約取込</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</JRIMPJOBCONFIG>
+		<!-- JR在庫調整 -->
+		<JRSTOCKJOBCONFIG>
+			<BATCHLABEL>JR在庫調整</BATCHLABEL>
+			<BATCHOPEN>FALSE</BATCHOPEN>
+		</JRSTOCKJOBCONFIG>
+		<WATCHBATCHCONFIG>
+			<BATCHLABEL>監視バッチ</BATCHLABEL>
+			<BATCHOPEN>TRUE</BATCHOPEN>
+			<!-- 監視バッチのインターバル値（分単位）(最小5分単位)
+				 数字[0]を定義する場合、日１回のみチェックを行う -->
+			<INTERVAL>60</INTERVAL>
+			<!-- APEXのスケジール機能でバッチ定義する場合、「ジョブ名」項目内容は該当タグに定義する -->
+			<APEXJOBNAME>2way監視バッチ</APEXJOBNAME>
+			<!-- 監視異常の場合、メール通知する・しないフラグ -->
+			<SENDMAIL>FALSE</SENDMAIL>
+		</WATCHBATCHCONFIG>
+	</SHOP>
+</root>

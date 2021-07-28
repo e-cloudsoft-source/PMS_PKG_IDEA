@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<!-- TruncatedDQNとPropertiesタグの設定内容は変更しないください -->
+	<TruncatedDQN>
+		<BatchSize>40</BatchSize>
+		<DiscountFactor>0.9</DiscountFactor>
+		<MseThreshold>0</MseThreshold>
+		<PendingBatches>1000</PendingBatches>
+		<IsActive>true</IsActive>
+		<Comment>001 First AI</Comment>
+		
+		<NeuralNetwork>
+			<!-- InputCount = number of rooms (including null) + 4 -->
+			<InputCount>5</InputCount>
+			<LayerCount>1</LayerCount>
+			<LearningRate>0.0001</LearningRate>
+			<Layer>
+				<LayerId>0</LayerId>
+				<LearningRate>-1</LearningRate>
+				<IsOutput>true</IsOutput>
+				<!-- NeuronCount = number of rooms  (including null) -->
+				<NeuronCount>1</NeuronCount>
+			</Layer>
+		</NeuralNetwork>
+	</TruncatedDQN>
+	<Properties>
+		<Property key="soql_deleted" value="削除" />
+		<Property key="soql_cancelled" value="キャンセル" />
+		<Property key="soql_noshow" value="NO SHOW" />
+	</Properties>
+	
+	<!-- 下記内容を変更可能です -->
+	<!-- データ学習対象予約件数制限値（デファルト10000）　-->
+	<!-- 
+	<TRAINLIMIT>20000</TRAINLIMIT>
+	 -->
+	<!-- データ学習対象部屋制限用部屋タイプのSEQ定義値、カンマで複数定義可能 -->
+	<!-- 
+	<ROOMTYPESEQ>100,200,300,400</ROOMTYPESEQ>
+	 -->
+</Configuration>

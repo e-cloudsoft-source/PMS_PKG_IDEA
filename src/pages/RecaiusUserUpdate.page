@@ -1,0 +1,31 @@
+<!-- 
+	登録済みユーザ情報更新ページ
+	
+	RECAIUSユーザ情報の更新をする
+
+	Copyright (c) 2018 TOSHIBA CORPORATION,  All Rights Reserved.
+-->
+<apex:page Controller="RecaiusUserInfo" action="{!test}">
+    <apex:include pageName="RecaiusUserInfoCss"/>
+    <div id="vf-page">
+        <apex:pageMessage title="Recaius Error" summary="{!warningMsg}" severity="error" strength="3" rendered="{!loginErrorFlg}" />
+        <apex:pageBlock title="RECAIUS情報更新" >
+    		<apex:form >
+      		
+                <p>契約ID<apex:inputField value="{!userInfo.ContactId__c}"  /></p>
+                <p>ユーザID<apex:inputField value="{!userInfo.UserId__c}" /></p>                
+                <p>パスワード</p>
+                <apex:inputSecret value="{!userInfo.Password__c}" id="theSecretInput" /><br/>
+                <apex:commandButton action="{!invokeInitialRequest}" value="次へ" reRender="dummy" oncomplete="checkup();" />
+                <apex:actionFunction action="{!updateUserInfo}" name="updateAF" />
+                
+                <apex:commandButton action="{!updatecansel}" value="cancel" immediate="true" />
+            </apex:form>
+        </apex:pageBlock>
+    </div>
+    <script>
+    function checkup(){
+        updateAF();        
+    }   
+    </script>
+</apex:page>

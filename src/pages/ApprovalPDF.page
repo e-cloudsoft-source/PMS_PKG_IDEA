@@ -1,0 +1,288 @@
+<apex:page showHeader="false" title="稟議書" sidebar="false" renderas="PDF"
+	applyHtmlTag="false" applyBodyTag="false"
+    readonly="true" standardcontroller="Approvaldocuments__c" extensions="ApprovalPDFCtrl">
+<html>
+<head>
+<title>稟議書</title>
+<style>
+@page {
+    size: 5.83in 8.27in;        /* B5 portlate size margin:0.4cm*/
+    margin: 0.4cm 0.4cm 0.4cm 0.4cm;
+}
+body {
+    font-family: Arial Unicode MS;
+    font-size:12px;
+    top: 0.2cm;
+    left: 0.2cm;
+}
+.soldBorderTd {
+    font-size: 1.1em;
+}
+table {
+    border-spacing: 0px;
+    cellpadding: 0px; 
+    cellspacing: 0px;
+}
+
+table tr {
+    height: 24px;
+    vertical-align: middle;
+}
+table tr td {
+    padding: 0px;
+    height: 24px;
+}
+.odd {
+	border-bottom: 1px solid #000;
+	padding: 1px 1px 2px 2px;
+	font-size: 100%;
+}
+.even {
+	border-bottom: 1px solid #000;
+	background-color: #CCCCCC;/*控制颜色*/
+	padding: 1px 1px 2px 2px;
+	font-size: 100%;
+}
+.header {
+	height:24px;
+	background-color: #CCCCCC;
+}
+td.centerTd {
+    text-align: center;
+}
+
+.stampbox {
+   display: flex;                 /* flexコンテナ化 */
+   flex-direction: row-reverse;  /* 横向きに配置 */
+   min-height: 85px;
+   margin-right: 1px;
+}
+.stampbox table { width: 100%;}/*margin: 4px*/
+
+.tdWidth1{
+	width:20%;
+	text-align: center;
+}
+.tdWidth2{
+	width:30%;
+	text-align: center;
+}
+.headerRow{
+	text-align: center;
+}
+/* 表格线控制 BEGIN */
+/* 上左右 */
+.tableborder {
+	border-top:1px solid #000;
+	border-left:1px solid #000;
+	border-right:1px solid #000;
+	//border-bottom:1px solid #000;
+}
+/* 上右 */
+.tableborderright {
+	border-top:1px solid #000;
+	//border-left:1px solid #000;
+	border-right:1px solid #000;
+	//border-bottom:1px solid #000;
+}
+/* 全部 */
+.tableborderall{
+	border-top:1px solid #000;
+	//border-left:1px solid #000;
+	border-right:1px solid #000;
+	border-bottom:1px solid #000;
+}
+.borderHide{
+	border-top:1px solid #000;
+	border-right:1px solid #000;
+}
+.borderHideright{
+	border-right:1px solid #000;
+}
+.borderHideall{
+	border-top:1px solid #000;
+	height:1px;
+}
+/* 表格线控制 END */
+ </style>
+</head> 
+<body>
+<table class="soldBorderTd" style="width: 100%; border-spacing: 0px; margin-top: 9px;">
+    <tr class ="">
+        <td class="centerTd" style="text-align: center;">
+            <span style="font-size:18pt">稟議書</span>
+        </td>
+    </tr>
+</table>
+<table style="width:100%;height:3px;">
+<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 1px;"/></td></tr>
+</table>
+<apex:variable var="idx" value="{!0}"/>
+<apex:repeat value="{!allPageLst}" var="val">
+<div style="vertical-align:top ;margin-top: 4px;height:4px;{!if( idx == 0, '', 'page-break-before: always;')}"></div>
+<table width="100%"><tr><td style="text-align:right; margin-right: 4px;">{!val.currPages} / {!allPageLst.size}</td>
+</tr></table>
+<table border="1" style="width:100%;{!if(val.isFirstPage, 'display:true', 'display:none')}" >
+	<tr>
+		<td class="tdWidth1">No.</td>
+		<td class="tdWidth2"><apex:outputField value="{!val.sobj.RowNo__c}"/></td>
+		<td class="tdWidth1">起案日</td>
+		<td class="tdWidth2"><apex:outputField value="{!val.sobj.DraftDt__c}"/></td>
+	</tr>
+	<tr>
+		<td class="tdWidth1">部署</td>
+		<td class="tdWidth2"><apex:outputField value="{!val.sobj.DraftDepart__c}"/></td>
+		<td class="tdWidth1">起案者</td>
+		<td class="tdWidth2"><apex:outputField value="{!val.sobj.DraftUser__r.Name}"/></td>
+	</tr>
+	<tr>
+		<td colspan="4" class="centerTd" style="height: 31px;"><apex:outputField value="{!val.sobj.Name}"/></td>
+	</tr>
+</table>
+<table style="width:100%;height:3px;{!if(val.isFirstPage, 'display:true', 'display:none')}">
+<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 1px;"/></td></tr>
+</table>
+<table border="1" style="width:100%;{!if(val.isFirstPage, 'display:true', 'display:none')}" >
+	<tr row="8">
+		<td style="word-break: break-all;word-wrap:break-word;height:220px;width:100%;overflow: hidden;">
+			<table style="width:100%;height:100%;">
+				<tr>
+					<td style="vertical-align: top;width:6%;">趣旨:</td>
+					<td style="vertical-align: top;"><apex:outputText value="{!val.sobj.Purpose__c}" escape="false"/></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+<table style="width:100%;height:3px;{!if(val.isFirstPage, 'display:true', 'display:none')}">
+<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 1px;"/></td></tr>
+</table>
+<!-- 数据明细 -->
+<table class="odd,even" border="0" cellpadding="1" width="100%" headerClass="header">
+	<colgroup style="width: 5%"></colgroup>
+	<colgroup style="width: 59%"></colgroup>
+	<colgroup style="width: 15%"></colgroup>
+	<colgroup style="width: 6%"></colgroup>
+	<colgroup style="width: 15%"></colgroup>
+	<tr style="text-align: center;display:{!if(val.isFirstPage,'','none')}"><td colspan="5" class="tableborder">購入品目</td></tr>
+	<tr class="headerRow even">
+		<th class="tableborder">No.</th>
+		<th class="tableborderright">品名</th>
+		<th class="tableborderright">単価</th>
+		<th class="tableborderright">数量</th>
+		<th class="tableborderright">小計</th>
+	</tr>
+	<apex:variable var="bgColor" value="even"/>
+	<apex:repeat value="{!val.onePageList}" var="t">
+	<apex:variable var="bgColor" value="{!IF(bgColor == 'even', 'odd', 'even')}"/>
+		<tr class="{!bgColor}">
+			<td class="tableborder" style="text-align: center;">
+					<apex:outputtext value="{0,number,{!NumberFormat}}">
+						<apex:param value="{!t.rowNo}"></apex:param>
+					</apex:outputtext>
+			</td>
+			<td class="tableborderright" style="text-align: left;">
+				<span style="margin-left:2px;">
+					<apex:outputtext value="{!t.AccName}"/>
+				</span>
+			</td>
+			<td class="tableborderright" style="text-align: right;">
+				<span style="margin-right:2px;">
+					<apex:outputtext value="{!CurrencySybmol} {0,number,{!NumberFormat}}" rendered="{!t.isAccountMasterFlg}">
+						<apex:param value="{!t.unitPrice}"></apex:param>
+					</apex:outputtext>
+				</span>
+			</td>
+			<td class="tableborderright" style="text-align: center;">
+					<apex:outputtext value="{0,number}" rendered="{!t.isAccountMasterFlg}">
+						<apex:param value="{!t.quantity}"></apex:param>
+					</apex:outputtext>
+			</td>
+			<td class="tableborderright" style="text-align: right;">
+				<span style="margin-right:2px;">
+					<apex:outputtext value="{!CurrencySybmol} {0,number,{!NumberFormat}}"  rendered="{!t.isAccountMasterFlg}">
+						<apex:param value="{!t.amout}"></apex:param>
+					</apex:outputtext>
+				</span>
+			</td>
+		</tr>
+	</apex:repeat>
+	<tr style="width:100%;height:1px;display:{!if(val.isFirstPage,'none','')}"><td colspan="5" class="borderHideall"></td></tr>
+	<tr style="width:100%;display:{!if(val.isFirstPage,'','none')}">
+		<td colspan="2" class="borderHide"></td>
+		<td colspan="3" class="tableborderright">
+			<table style="width:100%">
+				<tr>
+					<td style="width:35%;text-align: right;"><span style="margin-right:2px;">合計</span></td>
+					<td style="width:65%;text-align: right;">
+						<span style="margin-right:2px;">
+							<apex:outputtext value="{!CurrencySybmol} {0,number,{!NumberFormat}}">
+								<apex:param value="{!amountExc}"></apex:param>
+							</apex:outputtext>
+						</span>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr style="width:100%;display:{!if(val.isFirstPage,'','none')}">
+		<!-- 2019/09/27 パラメータ切り替え WGCH BEGIN -->
+		<!-- <td colspan="2" class="borderHideright"></td> -->
+		<td colspan="2" class="borderHideright" style="text-align: left;"><apex:outputtext value="{!$Label.ps__msg_006_0458}" rendered="{!isReducedTaxFlg}"/></td>
+		<!-- 2019/09/27 パラメータ切り替え WGCH END -->
+		<td colspan="3" class="tableborderall">
+			<table style="width:100%">
+				<tr>
+					<td style="width:35%;text-align: right;"><span style="margin-right:2px;">内消費税</span></td>
+					<td style="width:65%;text-align: right;">
+						<span style="margin-right:2px;">
+							<apex:outputtext value="{!CurrencySybmol} {0,number,{!NumberFormat}}">
+								<apex:param value="{!Tax}"></apex:param>
+							</apex:outputtext>
+						</span>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+<table style="width:100%;height:3px;{!if(val.isFirstPage, 'display:true', 'display:none')}">
+<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 1px;"/></td></tr>
+</table>
+<!-- 承认申请 -->
+<table border="1" style="width:100%;{!if(val.isFirstPage, 'display:true', 'display:none')}" cellpadding="0px" cellspacing="0px">
+	<tr>
+	<td style="height:86px;text-align: center;width: 9%;">印</td>
+	<td style="display: {!IF(val.stampLst.size < 5, '', 'none')};table-layout:fixed ;width: 18%;height:86px;"></td>
+	<td style="display: {!IF(val.stampLst.size < 4, '', 'none')};table-layout:fixed ;width: 18%;height:86px;"></td>
+	<td style="display: {!IF(val.stampLst.size < 3, '', 'none')};table-layout:fixed ;width: 18%;height:86px;"></td>
+	<td style="display: {!IF(val.stampLst.size < 2, '', 'none')};table-layout:fixed ;width: 18%;height:86px;"></td>
+	<td style="display: {!IF(val.stampLst.size < 1, '', 'none')};table-layout:fixed ;width: 18%;height:86px;"></td>
+	<td colspan="{!val.stampLst.size}" style="display:{!if(val.stampLst.size > 0,'','none')}">
+		<div class="stampbox" >
+			<!--循环显示td -->
+			<apex:repeat value="{!val.stampLst}" var="use">
+				<table style="float:right;table-layout:fixed ;height: 84px;width: 91px;text-align: center;background:url({!URLFOR($Resource.queryfiles, 'ApprovalImg/stampImg.png')});{!if(use.indexNo == 1,'margin-right: 0px;','border-right:1px solid #000;')}">
+					<tr style="height:27px;">
+						<td valign="bottom" style="width:100%;text-align: center;">{!if(use.indexNo == val.stampLst.size,'最終承認','承認')}</td>
+					</tr>
+					<tr style="height:23px;">
+						<td style="width:100%;text-align: center;"><span style="font-size:7pt"><apex:outputText value="{!use.dateStr}"/></span></td>
+					</tr>
+					<tr>
+						<td valign="top" style="width:100%;text-align: center;"><span style="font-size:{!IF(LEN(use.nameStr) > 5 , '8pt', '')};"><apex:outputText value="{!use.nameStr}"/></span></td>
+					</tr>
+				</table>
+				<table style="float:right;table-layout:fixed ;height: 1px;width: 1px;">
+					<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 1px;"/></td></tr>
+				</table>
+			</apex:repeat>
+		</div>
+	</td>
+    </tr>
+</table>
+<apex:variable var="idx" value="{!idx + 1}"/>
+</apex:repeat>
+</body>
+</html>
+</apex:page>

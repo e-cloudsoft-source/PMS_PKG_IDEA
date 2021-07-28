@@ -1,0 +1,1526 @@
+<!-- 署名機能 -->
+<apex:page showHeader="false" title="{!$Label.ps__msg_012_0230}" sidebar="false" 
+	applyHtmlTag="false" applyBodyTag="false" action="{!pdf4Init}"
+	readonly="true" standardcontroller="Yadochou__c" extensions="CashRegisterCardPDF">
+<c:CommHeaderComp />
+<!-- 2017/09/06 署名欄署名対応 zyz BEGIN-->
+<apex:outputPanel rendered="{!signaType}">
+<apex:includeScript value="{!$Resource.SignatureHelper}"/>
+</apex:outputPanel>
+<!-- 2017/09/06 署名欄署名対応 zyz END -->
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+<apex:includeScript value="{!$Resource.html2canvas}"/>
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+<!--//2017/04/26  署名機能レビュー　by zy BEGIN-->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<!--//2017/04/26  署名機能レビュー　by zy END-->
+<meta name="screen-orientation" content="portrait" />
+<meta id="view_id" name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0"/>
+<!-- 2017/04/12 署名 zyz END -->
+<html>
+<head>
+<style>
+@page {
+	size: 6.93in 9.84in;       
+	margin: 0.4cm 0.4cm 0.4cm 0.4cm;
+} /* B5 portlate size renderas="PDF"*/
+body {
+	font-family: Arial Unicode MS;
+	top: 0cm;
+	color: black;
+	font-size: 0.30cm;
+	/*background-color: #000000;*/
+}
+body td{
+    font-family: Arial Unicode MS !important;
+}
+.titleHeader {
+	text-align: center;
+	font-size: 100%;
+	background-color: #CCCCCC;
+}
+/*
+.header {
+	height:30px;
+	font-size: 100%;
+	background-color: #CCCCCC;
+}
+.underline {
+	list-style:none;
+	border-bottom:1px black solid;
+}*/
+.underlinesmall {
+	list-style:none;
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+	border-bottom:1px black solid;
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+}
+/*
+.splitline {
+	list-style:none;
+	border-top:0.5px black solid;
+}
+.rightline {
+	list-style:none;
+	border-right:0.5px black solid;
+}
+.leftline {
+	list-style:none;
+	border-left:0.5px black solid;
+}*/
+/* 2017/05/04 署名 zyz BEGIN */
+/* 签名框  */
+canvas {
+	left:5%;
+	top:5%;
+	z-index:102;
+	background: white;
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+	{!IF(signaTypePage,'','margin-left:3px;border:1px solid #000000;')}
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+}
+#signa_id{
+	/*position:fixed;*/
+	width:100%;
+	height:100%;
+	/*top:0;
+	left:0;*/
+	z-index:101;
+	/* 2017/09/20 署名欄署名対応/全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN*/
+	{!if(signaType,'',IF(signaTypePage,'position:absolute;top:5px;background: rgba(0,0,0,0);','position:fixed;top:0;left:0;background: rgba(244,244,244,1);'))}
+	/*2017/09/20 署名欄署名対応/全画面サイン、画像ファイルに保存の改善対応 zyz END */
+}
+#signa_back{
+	z-index: 100;
+	border: none;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.6;
+    position: fixed;
+    text-align: center;
+    cursor: pointer;
+    display:none;
+}
+.transformClass{
+	transform: rotate(90deg);
+}
+.transform270{
+	transform: rotate(270deg);
+}
+/* 2017/05/04 署名 zyz END */
+/* 2017/05/29 canvas and button revise BEGIN*/
+.divpadd{
+	text-align:center;
+	padding:10px 0px 0px;
+}
+.buttonclass{
+   border-top: 1px solid #e8e8e9;
+   /*background: #e8e8e9;*/
+   background: -webkit-gradient(linear, left top, left bottom, from(#e8e8e9), to(#e8e8e9));
+   background: -webkit-linear-gradient(top, #e8e8e9, #e8e8e9);
+   background: -moz-linear-gradient(top, #e8e8e9, #e8e8e9);
+   background: -ms-linear-gradient(top, #e8e8e9, #e8e8e9);
+   background: -o-linear-gradient(top, #e8e8e9, #e8e8e9);
+   padding: 5px 10px;
+   -webkit-border-radius: 4px;
+   -moz-border-radius: 4px;
+   border-radius: 4px;
+   /* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+   {!IF(signaTypePage,'','-webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;')}
+   /* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   /*box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;*/
+   color: #000000;
+   /* 2017/09/06 署名欄署名対応 zyz BEGIN */
+   /*font-size: 14px;*/
+   {!if(signaType,'font-size: 0.3cm;','font-size: 14px;')}
+   /* 2017/09/06 署名欄署名対応 zyz END */
+   /*font-family: Helvetica, Arial, Sans-Serif;*/
+   text-decoration: none;
+   vertical-align: middle;
+}
+.buttonclass:hover {
+   border-top-color: #ccc;
+   background: #ccc;
+   color: #36a0fe;
+}
+.buttonclass:active {
+   border-top-color: #e8e8e9;
+   background: #e8e8e9;
+}
+/* 2017/05/29 canvas and button revise END*/
+.printInfo {
+    display: none;
+}
+@media print {
+	.printInfo {
+	    display: inline;
+	}
+	/* 2017/09/06 署名欄署名対応 zyz BEGIN */
+	.dobtn{
+		display: none;
+	}
+	.buttonclass{
+		/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+		display:{!IF(signaTypePage,'inline;','none;')}
+		/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+	}
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+	#clearbtn{
+		display: none;
+	}
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+	/* 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN */
+	#giveupbtn{
+		display: none;
+	}
+	/* 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END */
+}
+#canvassample{
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+	{!IF(signaTypePage,'background: inherit;','')};
+	{!if(signaType,'border:0;','border:1;')}
+	/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+}
+/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN */
+.img_display{
+	{!if(pageSignaTureFlg && signaTypePage , 'display:none', '')}
+}
+/* 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END */
+/* 2017/09/06 署名欄署名対応 zyz END */
+</style>
+
+<script>
+$ = jQuery.noConflict();
+</script>
+</head>
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+<body style="text-align: -webkit-center;">
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+<!--  -->
+<!-- 2017/04/12 署名 zyz BEGIN -->
+<!-- 2017/09/06 署名欄署名対応 zyz BEGIN -->
+<apex:outputPanel rendered="{!!signaType}">
+<!-- 2017/09/06 署名欄署名対応 zyz END -->
+<div id="signa_back"></div>
+<div id="signa_id" style="display:none;" curYadoId="">
+	<canvas id="canvassample"></canvas>
+<!-- 2017/05/29 canvas and button revise zyz BEGIN -->
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+	<apex:outputPanel rendered="{!if(signaTypePage,'false','true')}" >
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+	<div style="height: 20px">&nbsp;</div>
+	<table style="width: 100%"><tr><td style="text-align: center;">
+		<div class="divpadd" >
+			<button type="button" class="buttonclass" id="save" onclick="chgImg()" style="width:120px;height:30px;" value="1">保存</button>&nbsp;&nbsp;&nbsp;
+			<button type="button" class="buttonclass" onclick="undo()" style="width:120px;height:30px;">戻る</button>&nbsp;&nbsp;&nbsp;
+			<button type="button" class="buttonclass" onclick="redo()" style="width:120px;height:30px;">進む</button>
+		</div>
+	</td></tr>
+	<tr><td style="text-align: center;">
+		<div class="divpadd">
+			<button type="button" class="buttonclass" id="clear" onclick="clearCanvasflg()" style="width:120px;height:30px;">クリア</button>&nbsp;&nbsp;&nbsp;
+			<button type="button" class="buttonclass" onclick="giveupWin()" style="width:120px;height:30px;">スキップ</button>&nbsp;&nbsp;&nbsp;
+			<button type="button" class="buttonclass" id="clear" onclick="closeSignWin()" style="width:120px;height:30px;">閉じる</button>
+		</div>
+	</td></tr></table>
+<!-- 2017/05/29 canvas and button revise zyz END -->
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+	</apex:outputPanel>
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+</div>
+<div id="sign_cut"></div>
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+<div class="div_add" style="display:none;position:fixed;right:0px;bottom: 50px;opacity: 0.75;z-index:103;">
+	<button type="button" class="buttonclass" id="save" onclick="canvasImg()" style="width:95px;height:30px;border: 0px;" value="1">保存</button><br/><div style="height:3px"></div>
+	<button type="button" class="buttonclass" onclick="undo()" style="width:95px;height:30px;border: 0px;">戻る</button><br/><div style="height:3px"></div>
+	<button type="button" class="buttonclass" onclick="redo()" style="width:95px;height:30px;border: 0px;">進む</button><br/><div style="height:3px"></div>
+	<button type="button" class="buttonclass" id="clear" onclick="clearCanvasflg()" style="width:95px;height:30px;border: 0px;">クリア</button><br/><div style="height:3px"></div>
+	<button type="button" class="buttonclass" id="clear" onclick="closeSignWin()" style="width:95px;height:30px;border: 0px;">キャンセル</button><div style="height:3px"></div>
+</div>
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+<script>
+// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+var signatures;
+var pageSignas;
+var pageSizes;
+var _singtypePage = {!signaTypePage};// 全ページサインの場合
+// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+$(document).ready(function() {
+    checkMobileOs();
+    // 2019/02/28 pdf4签名页面自定义为空BUG修正，特殊处理 BY zyz BEGIN
+    customizeDiv();
+    // 2019/02/28 pdf4签名页面自定义为空BUG修正，特殊处理 BY zyz END
+    // 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+    // 获取署名或者ページ署名字段值，用于处理判断
+	signatures = document.getElementById("Signature").value;
+	pageSignas = document.getElementById("PageSignature").value;
+	// 数据页数取得
+	pageSizes = document.getElementById("pageSize").value;
+	btnType(pageSignas,signatures);
+    // 署名有值，ページ署名无值，不继续执行
+    if (signatures == 'true' && pageSignas == "false") return;
+    // mode3 执行程序
+    if (_singtypePage) signaTrue();
+    // 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+    
+});
+// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+// mode3 判断按钮显示
+function btnType(pageSignaflg,Signaflg){
+	// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+	if (Signaflg =="true" && !_singtypePage){
+    	$(".div_clear").css({'display':'block'});
+		$("#clearbtn").css({'display':'none'});
+		$("#giveupbtn").css({'-webkit-box-shadow':'none'});
+	}
+	// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+	if (!_singtypePage) return;
+	// 初期値 署名或者ページ署名字段不为空
+	if(Signaflg =="true" || pageSignaflg =="true") {
+		// 隐藏保存、前进、后退、清除、关闭画板按钮
+		$(".div_add").css({'display':'none'});
+		// 显示再署名按钮
+		$(".div_clear").css({'display':'block'});
+	}else {
+		// 显示保存、前进、后退、清除、关闭画板按钮
+		$(".div_add").css({'display':'block'});
+		// 隐藏再署名按钮
+		$(".div_clear").css({'display':'none'});
+	}
+}
+// mode3 再署名按钮的onclick事件
+function clearSigna(){
+	// 循环清除署名欄内图片内容
+	$("tr.lastRow").each(function(){
+		//怎么隐藏掉div里的内容，显示留下
+		//$("#signPanel",this).hide();
+		$("[id$=':signaVal']",this).hide();
+	});
+	// 显示保存、前进、后退、清除、关闭画板按钮
+	$(".div_add").css({'display':'block'});
+	// 隐藏再署名按钮
+	$(".div_clear").css({'display':'none'});
+	// 隐藏全屏签名图片
+	$(".pageImg").css({'display':'none'});
+	// 显示数据内容
+	$(".img_display").css({'display':'grid'});
+	// 显示画板
+	$("#canvassample").css({'display':'block'});
+	// 设置署名和全屏签名为false值
+	signatures ="false";
+	pageSignas ="false";
+	// 执行显示全屏画板
+	signaTrue();
+}
+var line = 10;
+//var SignaTypeInt = document.getElementById('SignaTypeInt').value;
+if (_singtypePage)line = 2;
+// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+//Writing board
+var canvas = document.getElementById("canvassample");
+var ctx = canvas.getContext("2d");
+var color = "#000000";
+// 2017/04/25 戻る / 進む BEGIN
+var record_index = 0;
+var recordArray = new Array();
+var lineRecords = new Array();
+var cav_x,cav_y;
+var Xmax,Xmin,Ymax,Ymin;
+var JS_SYS_DEVICE_MOBILE_FLG = kendo.support.mobileOS;
+var JS_SYS_CHANGE_FLAG = false;
+// PC対応
+canvas.addEventListener("mousedown", touchStartHandler, false);
+canvas.addEventListener("mouseup", touchEndHandler, false);
+// スマホ対応
+canvas.addEventListener("touchstart", touchStartHandler, false);
+canvas.addEventListener("touchend", touchEndHandler, false);
+window.addEventListener('orientationchange', doOnOrientationChange);
+var deviceType = '';
+function checkMobileOs(){
+	if (deviceType != '') return;
+	var ua = navigator.userAgent.toLowerCase();	
+	if (ua.match(/ipad/i)) deviceType = "ipad";
+	if (ua.match(/iphone os/i)) {
+		deviceType = "iphone";
+		$("#view_id").attr('content',"width=device-width, minimum-scale=0.5, maximum-scale=0.5, initial-scale=0.5;");
+	}
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+	if (ua.match(/android/i)) {
+		deviceType = "android";
+		if (_singtypePage) $("#view_id").attr('content',"width=device-width, minimum-scale=0.9, maximum-scale=0.9, initial-scale=0.9");
+	}
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+}
+// 2017/04/25 戻る / 進む END
+//Click the signature box to pop up the WordPad
+function signaTrue() {
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+	if(_singtypePage){
+		// 全屏签名图片存在值显示图片
+		if (pageSignas =='true') {
+			$("tbody:first").append(pageImg);
+			$("#pageImg").show();
+		// 全屏签名图片不存在值显示画板
+		} else if (pageSignas =='false') {
+			$("tbody:first").append(signa_id);
+			$("#signa_id").show();
+		}
+	// mode1时显示画板
+	} else {
+		$("#signa_id").show();
+	}
+	checkMobileOs();
+	if (_singtypePage){
+		// 共同参数设置为3的情况处理画板
+		if(JS_SYS_DEVICE_MOBILE_FLG){
+			canvasSizeType();
+		} else {
+			var heightStr = $("#canvas_id").height();
+			var widthStr = $("tbody:first").width();
+			$("#signa_id").css({width:widthStr,height:heightStr});
+			//画布设定
+			canvas.width = $("#signa_id").width();
+			canvas.height = $("#signa_id").height() + 6;
+		}
+	} else {
+		$("#signa_back").show();
+		if(JS_SYS_DEVICE_MOBILE_FLG){
+			drawCanvasSize();
+		} else {
+			var widthStr = document.body.clientWidth;
+			// 2017/05/29 canvas and button revise zyz BEGIN
+			$("#signa_id").css({width:widthStr,height:'520px'});
+			// 2017/05/29 canvas and button revise zyz END
+			var senderLeft = ($(window).width() - $("#signa_id").width())/2;
+			var senderTop = ($(window).height() - $("#signa_id").height())/2;
+			$("#signa_id").css({top:senderTop,left:senderLeft});
+			//画布设定
+			canvas.width = $("#signa_id").width()-10;
+			// 2017/05/29 canvas and button revise zyz BEGIN
+			canvas.height = $("#signa_id").height()*0.76;
+			// 2017/05/29 canvas and button revise zyz END
+		}
+	}
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+	//Open the canvas to clear the content
+	clearCanvas();
+	// 2017/04/25 戻る / 進む clear BEGIN
+	record_index = 0;
+	recordArray = new Array();
+	// 2017/04/25 戻る / 進む clear END
+}
+
+// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+// MODE3 保存
+function canvasImg(){
+	// 抓图的宽度获取
+	var heightStr = $("#canvas_id").height();
+	var widthStr = $("tbody:first").width();
+	var topval = "6px";
+	$("#signa_id").css({'top':topval});
+	// 2019/12/30 部分电脑截图不显示格线问题处理 BY zyz BEGIN
+	$(".underlinesmall").css({'border-bottom':'1.1px solid #000',});
+	// 2019/12/30 部分电脑截图不显示格线问题处理 BY zyz END
+	html2canvas($("#canvas_id"), {
+		onrendered: function(can) {
+			chgImg();
+			// 抓图显示打印
+			var dataURL = can.toDataURL('image/png');
+			var pngimg = $("<img id='orgSingImage' alt='' src='"+dataURL+"' style='width: inherit;height: inherit;' />");
+			$("#sign_cut").html(pngimg);
+			$("#sign_cut").hide();
+		},
+		width:widthStr + 1,
+		height:heightStr + 12,
+	});
+}
+// 监听窗口改变大小，画板重置
+$(window).resize(function(){
+	if(!JS_SYS_DEVICE_MOBILE_FLG){
+    	if (_singtypePage) {
+    		// 打印状态下，监听窗口改变不执行
+			var displayVal = $(".div_clear").css('display');
+			if(displayVal !="none") return;
+			// 画板重置
+    		signaTrue();
+    	}
+    }
+});
+// mode3 移动端对应
+function canvasSizeType(){
+	$(".buttonclass").css({"width":"100px","height":"30px"});
+	var zoomLevel = $(document).width() / window.innerWidth;
+	//放大后缩放
+	$(window).scrollLeft(0);
+	$(window).scrollTop(0)
+	var scale = 1;
+	heightStr =  $(document).height() ;
+	//JS_SYS_CHANGE_FLAG  = false;
+	//$(".underlinesmall").css({'border-bottom':'1px black solid'});
+	heightStr = $("#canvas_id").height();
+	widthStr = $("tbody:first").width();
+	$("#signa_id").css({width:widthStr,height:heightStr});
+	canvas.width = $("#signa_id").width();
+	canvas.height = $("#signa_id").height() + 2;
+}
+// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+// PC対応 BEGIN
+function touchStartHandler(e) {
+	e.preventDefault();
+	getTouchPoint(e);
+	ctx.beginPath();
+	ctx.lineCap = "round";
+	ctx.lineJoin = "round";
+	ctx.moveTo(cav_x, cav_y);
+	if (JS_SYS_DEVICE_MOBILE_FLG) {
+		canvas.addEventListener("touchmove", touchMoveHandler, false);
+	} else {
+		canvas.addEventListener("mousemove", touchMoveHandler, false);
+	}
+	// 2017/04/25 戻る / 進む BEGIN
+	//座標初期化
+	lineRecords = new Array();
+	//座標を配列に保存				
+	lineRecords.push(getLine(cav_x,cav_y));
+	// 2017/04/25 戻る / 進む END
+}
+function getLine(x,y,color){
+	return {
+		x:x,
+		y:y,
+		color:color
+	}
+}
+function touchMoveHandler(e) {
+	e.preventDefault();
+	getTouchPoint(e);
+	ctx.lineWidth = line; //線の太さ
+	ctx.strokeStyle = color; //線の色
+	ctx.lineTo(cav_x, cav_y);
+	ctx.stroke();
+	// 2017/04/25 戻る / 進む BEGIN
+	//座標を配列に保存				
+	lineRecords.push(getLine(cav_x, cav_y,color));
+	// 2017/04/25 戻る / 進む END
+}
+
+function touchEndHandler(e) {
+	e.preventDefault();
+	ctx.closePath();
+	// 2017/04/25 戻る / 進む BEGIN
+	//履歴を記録
+	recordArray[record_index] = lineRecords;
+	//座標初期化
+	lineRecords = new Array();
+	//履歴を更新された場合最新の
+	record_index++;
+	if(record_index < recordArray.length){
+		recordArray.splice(record_index,recordArray.length);
+	}
+	if (JS_SYS_DEVICE_MOBILE_FLG) {
+		canvas.removeEventListener("touchmove", touchMoveHandler, false);
+	} else {
+		canvas.removeEventListener("mousemove", touchMoveHandler, false);
+	}
+	// 2017/04/25 戻る / 進む END
+	
+}
+
+function getTouchPoint(e) {
+	if (JS_SYS_DEVICE_MOBILE_FLG) {
+		var touch = e.touches[0];
+		// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+		if (_singtypePage){
+			var divTop = $("#canvas_id").offset().top;
+			var divleft = $("#canvas_id").offset().left;
+	        cav_x = touch.clientX - divleft + document.body.scrollLeft;
+	        cav_y = touch.clientY - divTop + $(window).scrollTop();
+		}else{
+			var divTop = $("#signa_id").offset().top;
+			cav_x = touch.clientX + $(window).scrollLeft();
+			cav_y = touch.clientY - divTop + $(window).scrollTop();
+        }
+	} else {
+		cav_x = e.offsetX;//-4;
+		cav_y = e.offsetY;//-4;
+        // 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+	}
+	if (Xmax == undefined && Xmin == undefined && Ymax == undefined && Ymin == undefined) {
+		Xmax = cav_x;
+		Xmin = cav_x;
+		Ymax = cav_y;
+		Ymin = cav_y;
+	}
+	if(Xmax < cav_x) Xmax = cav_x;
+	if(Xmin > cav_x) Xmin = cav_x;
+	if(Ymax < cav_y) Ymax = cav_y;
+	if(Ymin > cav_y) Ymin = cav_y;
+}
+
+// スマホ対応 END
+// 保存
+function chgImg(){
+	blockUi();
+	var pngs = this.canvas.toDataURL('image/png');
+	var png = $("<img id='orgSingImage' alt='' src='"+pngs+"' style='width: inherit;height: inherit;' />");
+	$("#sign_cut").html(png);
+	// 2017/05/26 署名 → PDF4 BEGIN
+	$("#signa_id").hide();
+	//2017/05/26 署名 → PDF4 END
+	// 2017/05/26 署名保存は、書き込みに対応していません BEGIN
+	if (Xmax == undefined && Xmin == undefined && Ymax == undefined && Ymin == undefined) {
+		Xmax = canvas.width;
+		Xmin = 0;
+		Ymax = canvas.height;
+		Ymin = 0;
+	}
+	// 2017/05/26 署名保存は、書き込みに対応していません END
+	setTimeout(function(){
+		var source = document.getElementById('orgSingImage');
+		if(Xmin <= 10){
+			Xmin = 0;
+		}else{
+			Xmin = Xmin - 10;
+		}
+		if(Ymin <= 10){
+			Ymin = 0;
+		}else{
+			Ymin = Ymin - 10;
+		}
+		if(Xmax > canvas.width) Xmax = canvas.width;
+		if(Ymax > canvas.height) Ymax = canvas.height;
+		var cutwidth = Xmax - Xmin;
+		var cutHeight = Ymax - Ymin;
+		// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+		// mode3情况下截取图片
+		if(_singtypePage){
+			var yadoId = "{!yadochouId}";
+			// 需要截取画板的显示高度、宽度设定
+			var canWidthStr = $("tbody:first").width();
+			var table1 = $("#table_1").height();
+			var table2 = $("#table_2").height();
+			var canHeightStr = table1 + 20 + table2;
+			// 截取后画板高度宽度设定
+			canvas.width = canWidthStr;
+			canvas.height = canHeightStr;
+			// 截取开始的Y坐标
+			var canvasY = 0;
+			// 存储截取后的图片
+			var imgArr = [];
+			// pageSizes表示数据页数，用于循环截取签名版
+			for (var i = 0; i < pageSizes;i++){
+				// 每次循环清空画板
+				clearCanvas();
+				// 循环截取的Y坐标设定
+				var Y_i = pageSizes *1;
+				if(i != 0 ) canvasY += canHeightStr ;
+				// 截取html2canvas画板，drawImage内的七个参数表示：1：截取的图片，2：开始截取的X，3：开始截取的Y，4：截取宽度，5：截取高度，6：放置的X点，7：放置的Y点，8：显示宽度，9：显示高度
+				ctx.drawImage(source, 0,canvasY, canWidthStr, canHeightStr, 0, 0, canWidthStr, canHeightStr);
+				// 输出图片
+				var html2Draw = this.canvas.toDataURL('image/png');
+				var png = "<img id='pngimg' alt='' src='"+html2Draw+"' style='height: inherit;width: inherit;' />";
+				imgArr.push(png);
+			}
+			// 存储图片
+			Visualforce.remoting.Manager.invokeAction(
+				"{!$RemoteAction.CashRegisterCardPDF.refreshCanvasInfo}", yadoId, imgArr, function(result, event){
+					if (event.type == 'exception') {
+						alert(event.message);
+					} else {
+						// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+						/*
+						var openUrl = "{!URLFOR('/apex/CashRegisterCardPDFSwitch')}"+"?id="+yadoId;
+						if ({!isShowPrice}) {
+							openUrl += "&smy=1"; 
+						}
+						window.location.href = openUrl;
+						*/
+						window.location.reload();
+						// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+					}
+					unblockUi();
+				});
+		} else {
+			// mode1情况下截取图片
+			canvas.width = cutwidth;
+			canvas.height = cutHeight;
+			ctx.drawImage(source, Xmin,Ymin, cutwidth, cutHeight, 0, 0, cutwidth, cutHeight);
+			beforeCheck();
+		}
+		// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+	},1000);
+}
+function beforeCheck() {
+	$("#sign_cut").html(png);
+	var pngs = this.canvas.toDataURL('image/png');
+	var yadoId = "{!yadochouId}";
+	var png = "<div style='height: 48px; width: 280px; float: right;' align='center'><img alt='' src='"+pngs+"' style='height: inherit;' /></div>";
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.CashRegisterCardPDF.refreshsignatureInfo}", yadoId , png , function(result, event){
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+				// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+				/*
+				//document.getElementById("signaid").src = pngs;
+				var openUrl = "{!URLFOR('/apex/CashRegisterCardPDFSwitch')}"+"?id="+yadoId;
+				// 2017/05/25 PDF4金額を表示機能 zyz BEGIN
+				if ({!isShowPrice}) {
+					openUrl += "&smy=1"; 
+				}
+				// 2017/05/25 PDF4金額を表示機能 zyz END
+				window.location.href = openUrl;
+				*/
+				window.location.reload();
+				// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+			}
+			//2017/04/26  署名機能レビュー　by zy BEGIN
+			closeSignWin();
+			unblockUi();
+			//2017/04/26  署名機能レビュー　by zy END
+		});
+}
+//Empty the WordPad function
+function clearCanvas() {  
+	ctx.beginPath();  
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+	if (_singtypePage){
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+	}else{
+		ctx.fillStyle="#FFFFFF";
+		ctx.fillRect(0,0,canvas.width,canvas.height);
+	}
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+	ctx.closePath();
+}
+function closeSignWin(){
+	clearCanvasflg();
+	$("#signa_back").hide();
+	$("#signa_id").hide();
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+	// mode3时，キャンセル按钮
+	if (_singtypePage){
+		// 全ページ署名字段是否为空
+		if ({!pageSignaTureFlg}){
+			// 显示再署名按钮
+			$(".div_clear").css({'display':'block'});
+			// 显示全屏签名图片
+			$(".pageImg").css({'display':'block'});
+			// 隐藏数据内容
+			$(".img_display").css({'display':'none'});
+			// 隐藏保存、前进、后退、清除、关闭画板按钮
+			$(".div_add").css({'display':'none'});
+			// 隐藏画板
+			$("#canvassample").css({'display':'none'});
+		} else {
+			// 全ページ署名字段为空，署名字段是否为空
+			if({!SignaTureFlg}){
+				// 显示再署名按钮
+				$(".div_clear").css({'display':'block'});
+				// 显示署名欄内容
+				$("tr.lastRow").each(function(){
+					$("[id$=':signaVal']",this).show();
+				});
+				// 隐藏保存、前进、后退、清除、关闭画板按钮
+				$(".div_add").css({'display':'none'});
+				// 隐藏画板
+				$("#canvassample").css({'display':'none'});
+			} else {
+				// 画板重新打开
+				$("#signa_id").show();
+			}
+		}
+	}
+	// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+}
+function clearCanvasflg() {  
+	clearCanvas();
+	record_index = 0;
+	recordArray = [];
+}
+// 2017/04/25 戻る / 進む BEGIN
+// 戻る
+function undo() {
+	if(record_index > 0) {
+		record_index--;
+		//キャンバスを初期化
+		clearCanvas();
+		drawCurrentArr();
+	}
+}
+// 進む
+function redo(){
+	if(record_index < recordArray.length){
+		record_index++;
+		//キャンバスを初期化
+		clearCanvas();
+		drawCurrentArr();
+	}
+}
+//根据现有存储画图
+function drawCurrentArr(scale){
+	//キャンバスを初期化
+	//clearCanvas();
+	for(var i=0; i < record_index; i++){
+		var record = recordArray[i];
+		for(var v=0; v<record.length; v++){
+			if(typeof record[v] == "object"){
+				var xy = record[v];
+				if (scale) {
+					xy.x = xy.x*scale;
+					xy.y = xy.y*scale;
+				}
+				//描画処理
+				draw(v,xy.x,xy.y,color);
+			}
+		}
+	}
+}
+function draw(num,x,y,color){
+	var mx = x;
+	var my = y;
+	if(num == 0){
+		oldx = mx -1;
+		oldy = my -1;
+	}
+	ctx.beginPath();
+	ctx.moveTo(oldx,oldy);
+	ctx.lineTo(mx,my);
+	ctx.strokeStyle = color;
+	ctx.stroke();
+	oldx = mx;
+	oldy = my;
+}
+function drawCanvasSize(){
+	// 2017/05/29 canvas and button revise zyz BEGIN
+	$(".buttonclass").css({"width":"200px","height":"80px","font-size":"20px"});
+	// 2017/05/29 canvas and button revise zyz END
+	// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+	$("#giveupbtn").css({"width":"95px","height":"30px","border":"0px","font-size":"14px"});
+	// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+	var zoomLevel = $(document).width() / window.innerWidth;
+	//放大后缩放
+	$(window).scrollLeft(0);
+	$(window).scrollTop(0)
+	var scale = 1;
+	heightStr =  $(document).height() ;
+	JS_SYS_CHANGE_FLAG  = false;
+	//ios侧对应
+	if (deviceType == 'ipad') {
+		//竖屏
+		if (window.orientation == 0 || window.orientation == 180){
+			JS_SYS_CHANGE_FLAG  = true;
+			widthStr = window.screen.width - 10;
+			// 表示キャンバスには、アドレスバーの問題を扱う判断した場合
+			heightStr = window.screen.height;
+			var heightloc =  window.innerHeight + 115;
+			if(heightStr == heightloc){
+				heightStr = window.screen.height - 115;
+			}else{
+				heightStr = window.screen.height - 10;
+			}
+			$("#signa_id").css({width:widthStr,height:heightStr});
+			scale = window.screen.width/window.screen.height;
+		//横屏
+		} else {
+
+			widthStr = window.screen.height - 30;
+			// 表示キャンバスには、アドレスバーの問題を扱う判断した場合
+			heightStr = window.screen.width;
+			var widthloc =  window.innerHeight + 115;
+			if(heightStr == widthloc){
+				heightStr = window.screen.width - 115;
+			}else{
+				heightStr = window.screen.width - 30;
+			}
+			$("#signa_id").css({width:widthStr,height:heightStr});
+			scale = window.screen.height/window.screen.width;
+		}
+		//画布设定
+		var width = $("#signa_id").width();
+		var height = $("#signa_id").height();
+		//The height and width of the tablet
+		canvas.width = width - 10;
+		// 2017/05/29 canvas and button revise zyz BEGIN
+		canvas.height = height*0.5;
+		// 2017/05/29 canvas and button revise zyz END
+	} else if ( deviceType == 'iphone') {
+		//竖屏
+		if (window.orientation == 0 || window.orientation == 180){
+			JS_SYS_CHANGE_FLAG  = true;
+			widthStr = window.screen.width*2 - 5;
+			heightStr = window.screen.height*2 - 150;
+			$("#signa_id").css({width:widthStr,height:heightStr});
+			//画布设定
+			var width = $("#signa_id").width();
+			var height = $("#signa_id").height();
+			//The height and width of the tablet
+			canvas.width = width*0.99;
+			// 2017/05/29 canvas and button revise zyz BEGIN
+			canvas.height = height*0.6;
+			// 2017/05/29 canvas and button revise zyz END
+			scale = window.screen.height/window.screen.width;
+		//横屏
+		} else {
+			widthStr = window.screen.height*2- 50;
+			// 表示キャンバスには、アドレスバーの問題を扱う判断した場合
+			heightStr = window.screen.width*2;
+			var widthloc =  window.innerHeight + 152;
+			if(heightStr == widthloc){
+				heightStr = window.screen.width*2 - 152;
+			}else{
+				heightStr = window.screen.width*2 - 50;
+			}
+			$("#signa_id").css({width:widthStr,height:heightStr});
+			//画布设定
+			var width = $("#signa_id").width();
+			var height = $("#signa_id").height();
+			//The height and width of the tablet
+			canvas.width = width*0.99;
+			// 2017/05/29 canvas and button revise zyz BEGIN
+			canvas.height = height*0.6;
+			// 2017/05/29 canvas and button revise zyz END
+			scale = window.screen.width/window.screen.height;
+		}
+	//andriod
+	} else {
+		//竖屏
+		if ( window.orientation == 0 || window.orientation == 180){
+			JS_SYS_CHANGE_FLAG  = true;
+			widthStr = window.screen.width -10;
+			// 表示キャンバスには、アドレスバーの問題を扱う判断した場合
+			heightStr = window.screen.height;
+			var heightloc =  window.innerHeight + 168;
+			if(heightStr == heightloc){
+				heightStr = window.screen.height - 168;
+			}else{
+				heightStr = window.screen.height - 80;
+			}
+			$("#signa_id").css({width:widthStr,height:heightStr});
+		//横屏
+		} else {
+			widthStr = window.screen.width - 10;
+			// 表示キャンバスには、アドレスバーの問題を扱う判断した場合
+			heightStr = window.screen.height;
+			var widthloc =  window.innerHeight + 168;
+			if(heightStr == widthloc){
+				heightStr = window.screen.height - 168;
+			}else{
+				heightStr =  window.screen.height - 70;
+			}
+			$("#signa_id").css({width:widthStr,height:heightStr});
+		}
+		// 2017/05/29 canvas and button revise zyz BEGIN
+		//画布设定
+		canvas.width = $("#signa_id").width()*0.99;
+		canvas.height = $("#signa_id").height()*0.5;
+		scale = canvas.height/canvas.width;
+		// 2017/05/29 canvas and button revise zyz END
+	}
+	return scale;
+}
+// 2017/04/25 戻る / 進む END
+function doOnOrientationChange(){
+	if (recordArray.length == 0) {
+		// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+		if (_singtypePage){
+			var scale = canvasSizeType();
+		} else { var scale = drawCanvasSize();}
+		// 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END
+		ctx.lineWidth = line; //線の太さ
+		drawCurrentArr(scale);
+	}
+}
+
+function scaleForward(){
+	if(!JS_SYS_CHANGE_FLAG) return;
+	ctx.save();
+	ctx.restore();
+	//var scale = drawCanvasSize();
+	var scale = 400/canvas.height;
+	$("#signa_id").css({width:widthStr,height:heightStr});
+	//画布设定
+	canvas.width = 400;
+	canvas.height = 400;
+	ctx.lineWidth = line; //線の太さ
+	drawCurrentArr(scale);
+}
+// 2019/02/28 pdf4签名页面自定义为空BUG修正，特殊处理 BY zyz BEGIN
+function customizeDiv(){
+	// 循环自定义的所有tr
+	$(".divBlank").each(function() {
+		var divInlineFlg = true;
+		// 循环自定义的tr内的所有div
+		$("div",this).each(function () {
+			if($(this).text() != "") divInlineFlg = false;
+		});
+		// tr下的div内不存在值,去除display属性
+		if(divInlineFlg){
+			$("div",this).css({'display':''});
+		}
+	});
+}
+// 2019/02/28 pdf4签名页面自定义为空BUG修正，特殊处理 BY zyz END
+</script>
+<!-- 2017/09/06 署名欄署名対応 zyz BEGIN -->
+</apex:outputPanel>
+<!-- 2017/09/06 署名欄署名対応 zyz END -->
+<!-- 2017/04/12 署名 zyz END -->
+<!-- 一括印刷 -->
+<apex:repeat value="{!bulkAllPageList}" var="oneCard">
+	<div style="vertical-align:top ;margin-top: 4px;height:4px;{!if( oneCard.isFirstPage, '', 'page-break-before: always;')} "></div>
+<!--2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN-->
+<div id="canvas_id" align="center" style="width:640px;" class="canvas_id">
+<!--2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END-->
+<!-- border space  -->
+<apex:repeat value="{!oneCard.allPageList}" var="onePage" >
+    
+    <!-- １ページ内容を出力する -->
+	<!--2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN-->
+   <input type="hidden" value="{!pageSize}" id="pageSize" />
+   <input type="hidden" value="{!pageSignaTureFlg}" id="PageSignature" />
+   <input type="hidden" value="{!!ISBLANK(onePage.footer4.signa.Signature__c)}" id="Signature" />
+   <div class="pageImg" style="background: white;top: 12px;display:{!if(pageSignaTureFlg && signaTypePage, 'block', 'none')}" id="pageImg">
+        <apex:outputtext value="{!onePage.signaImg}" escape="false" />
+   </div>
+   <table id="table_1" style="width:640px;" align="center" cellpadding="0px" cellspacing="0px">
+        <tr class="img_display">
+            <td colspan="8" height="5"><!-- コネクト印刷面（表） --></td>
+        </tr>
+        <tr class="img_display">
+            <td  colspan="8">
+                <div style="height: 80px; float: right; overflow: hidden;">
+                    <!-- <apex:outputField value="{!reportInfo.ReportLogo__c}" /> -->
+                    <img src="data:image/png;base64,{!image}" />
+                </div>
+            </td>
+        </tr>
+        <tr class="img_display">
+            <td colspan="8" style="font-size: 12px;">{!$Label.MSG_012_0103}</td>
+            <!-- <td colspan="2" style="text-align:right;">{!usedDate}</td> -->
+        </tr>
+        <tr class="img_display">
+        <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+        <td colspan="8">
+        <table style="border-spacing: 0px;line-height:14px">
+	        <tr height="18px">
+	            <td colspan="3" class="titleHeader" style="height: 13px;font-size: 12px;width: 150px;" >{!$Label.MSG_012_0104}</td>
+	            <td width="2px" rowspan="100" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 16px;width: 2px;"/></td>
+	            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 100px">{!$Label.MSG_012_0105}</td>
+	            <td width="2px" rowspan="100" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 16px;width: 2px;"/></td>
+	            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 360px">{!$Label.MSG_012_0106}</td>
+	        </tr>
+            <apex:repeat value="{!onePage.onePageList}" var="g" >
+            <tr>
+                <td colspan="3" rowspan="4" style="height: 22px;" class="underlinesmall">
+                    <table border="0"  cellpadding="0px" cellspacing="0px" style="width: 100%">
+                        <tr style="vertical-align: top;">
+                            <td ><apex:outputtext value="{!if(g.isFirstShow, $Label.ps__msg_012_0129, '　')}" /></td>
+                            <td colspan="2" align="right" valign="top" style="white-space:nowrap;">{!g.gender}</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" valign="top"  width="150px" height="45px" ><apex:outputLabel value="{!IF(ISBLANK(g.guestName),'', g.guestName + '<br/>')}{!g.hiragana}" escape="false"/></td>
+                            <td align="right" valign="bottom" style="white-space:nowrap;" ><div>{!$Label.MSG_012_0115}</div></td>
+                        </tr>
+                    </table>
+                </td>
+                <td style ="text-align:center;">{!IF(g.age = 0 , '', g.age)}</td>
+                <td >{!$Label.MSG_012_0130}<span  style="margin-left: 2px">{!g.post}</span></td>
+            </tr>
+            <tr >
+                <td></td>
+                <td style="word-break: break-all;word-wrap:break-word;height: 17px;" rowspan="2">
+                	<span style="width:360px; display: block; white-space:nowrap; overflow: hidden;">
+                		<apex:outputLabel value="{!g.address1}{!g.address2}" />
+            		</span>
+                </td>
+            </tr>
+            <tr><td></td></tr>
+            <tr >
+                <td class="underlinesmall" valign="bottom" style ="text-align:right;font-size: 10px;">{!g.birthDate2}</td>
+                <td class="underlinesmall" >
+                    <table style="width:100%;border: 0px;border-spacing: 0px;table-layout: fixed;" cellpadding="0px" cellspacing="0px">
+                        <tr>
+                            <td width="36%" >
+                                {!$Label.MSG_012_0131}<span style="margin-left: 2px;">{!g.phone}</span>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td width="64%" >
+                                <div style="width: 240px;overflow: hidden;white-space: nowrap;">
+                                {!$Label.MSG_012_0132}<span style="margin-left: 2px;overflow: hidden;">{!g.email}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                
+            </tr>
+            
+        </apex:repeat>
+        </table>
+        </td></tr>
+    </table>
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+    <div class="img_display">
+    <!-- space -->
+    <!-- <table style="width:640px;" cellpadding="0px" cellspacing="0px"><tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width: 2px;"/></td></tr></table> -->
+    <table style="width:640px;height:20px;" cellpadding="0px" cellspacing="0px"><tr><td>&nbsp;</td></tr></table>
+    <!-- PDF FOOTER -->
+    <table id="table_2" style="width:640px;line-height: 19px;font-size: 100%" align="center" cellpadding="0px" cellspacing="0px">
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+	<!--2017/08/30 XML定义显示修正 zyz BEGIN-->
+	<!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+	<!--<apex:outputPanel rendered="{!ISBLANK(customizeHtml)}">-->
+	<apex:outputPanel rendered="{!ISBLANK(oneCard.layoutCardlst.autoHtml)}">
+	<!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+	<!--2017/08/30 XML定义显示修正 zyz END-->
+        <tr>
+        <td>
+            <table border="0" cellpadding="0px" cellspacing="0px" width="100%" >
+            	<colgroup style="width: 125px"/>
+            	<colgroup style="width: 460px"/>
+            	<tr>
+            		<td  valign="top" >
+            			<span>{!$Label.MSG_012_0108}</span>
+            		</td>
+            		<td >{!$Label.MSG_012_0109}</td>
+            	</tr>
+            	<tr>
+            		<td  valign="top" rowspan="2">
+            			<span>{!$Label.MSG_012_0110}</span>
+            		</td>
+            		<td >{!$Label.MSG_012_0111}</td>
+            	</tr>
+            	<tr>
+
+            		<td >{!$Label.MSG_012_0112}</td>
+            	</tr>
+            </table>
+        
+        </td></tr>
+        <tr>
+        	<td valign="bottom" height="30px">{!$Label.MSG_012_0113}</td>
+        </tr>
+        <tr>
+        	<td>{!$Label.MSG_012_0114}</td>
+        </tr>
+        <tr>
+        	<td>
+        		<table border="0" cellpadding="0px" cellspacing="0px" width="100%">
+			        <tr>
+			        	<td height="30px" style="border-bottom: solid 1px #848689;width: 90%;"></td>
+			        	<td rowspan="3" valign="bottom"><div  style="height: 38px; width: 38px; float: right; border:1px solid #000000;"></div></td>
+			        </tr>
+			        <tr>
+			        	<td height="30px" style="border-bottom: solid 1px #848689;width: 90%;"></td>
+			        </tr>
+			        <tr>
+			        	<td height="30px" style="border-bottom: solid 1px #848689;width: 90%;"></td>
+			        </tr>
+
+        		</table>
+        	</td>
+        </tr>
+        <!--2017/08/30 XML定义显示修正 zyz BEGIN-->
+        </apex:outputPanel>
+        <!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz BEGIN-->
+        <!--
+    	<apex:outputPanel rendered="{!!ISBLANK(customizeHtml)}">
+    	<tr><td>
+        	<table border="0" cellpadding="0px" cellspacing="0px" width="100%;">
+        		<apex:outputtext value="{!customizeHtml}" escape="false"></apex:outputtext>
+        	</table>
+    	</td></tr>
+    	</apex:outputPanel>
+    	-->
+    	<!--2017/08/30 XML定义显示修正 zyz END-->
+    	<apex:outputPanel rendered="{!!ISBLANK(oneCard.layoutCardlst.autoHtml)}">
+    	<tr><td>
+        	<table border="0" cellpadding="0px" cellspacing="0px" width="100%;">
+        		<apex:outputtext value="{!oneCard.layoutCardlst.autoHtml}" escape="false"></apex:outputtext>
+        	</table>
+    	</td></tr>
+    	</apex:outputPanel>
+    	<!--2018/12/30 レジカード４、お客様情報以下のセクションはカスタマイズできるように改善 BY zyz END-->
+        <tr>
+        	<td height="20px" valign="bottom">
+        		<div style="background-color:#CCCCCC; height: 13px; color: #FFFFFF;"></div>
+
+        	</td>
+        </tr>
+        <tr>
+        	<td>
+        	<table style="width: 97%;">
+				<tr>
+					<td colspan="2">
+                        <table border="0" cellpadding="0px" cellspacing="0px" width="100%">
+                            <tr style="white-space: nowrap;">
+                                <td >・{!$Label.MSG_012_0120}</td>
+                                <td >{!onePage.footer4.ciTime}</td>
+                                <td style="min-width: 20px"></td>
+                                <td align="right">{!$Label.MSG_012_0121}</td>
+                                <td align="right">{!onePage.footer4.coTime}</td>
+                                <!-- 2019/09/27 パラメータ切り替え WGCH BEGIN -->
+                                <td style="min-width: 45px;display:{!IF(isReducedTaxFlg && !planFlg, true, 'none')}"></td>
+                                <td style="min-width:200px;text-align:right ;display:{!IF(isReducedTaxFlg && !planFlg, true, 'none')}">
+                                	<apex:outputtext value="{!$Label.ps__msg_006_0458}" rendered="{!isReducedTaxFlg}"/>
+                                </td>
+                                <!-- 2019/09/27 パラメータ切り替え WGCH END -->
+                            </tr>
+                        </table>
+                    </td>
+				</tr>
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz BEGIN -->
+				<tr style="display:{!if(planFlg,'none;','')}">	
+					<td>{!$Label.MSG_012_0122}</td>
+					<td>
+						<table border="0" cellpadding="0px" cellspacing="0px" width="100%">
+							<tr>
+								<td width="55%"><span style="white-space:nowrap; ">{!onePage.footer4.planName}</span></td>
+								<td align="right">{!$Label.MSG_012_0123}&nbsp;{!onePage.footer4.roomName}</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr style="display:{!if(planFlg,'','none;')}">	
+					<td  width="66px" >・{!$Label.MSG_012_0123}</td>
+					<td>{!onePage.footer4.roomName}</td>
+				</tr>
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz END -->
+				<!-- 予約明細 -->
+				<apex:variable var="count" value="{!0}"/>
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz BEGIN -->
+				<apex:repeat value="{!onePage.estItems}" var="d1" rendered="{!!clearnessFlg}" >
+				<!-- 2019/05/15 レジカードのタイプ４には自動的に見積明細が記載非表示にする設定がで BY zyz END -->
+				<tr height="20px">
+					<td>{!IF(count = 0, $Label.MSG_012_0127, '　')}</td>
+					<td>
+						<table border="0" cellpadding="0px" cellspacing="0px" width="100%">
+							<tr>
+								<td>
+									<span style="display: block; width:360px; white-space:nowrap; overflow: hidden;">{!d1.productNm}</span>
+								</td>
+								<td width="{!IF(isShowPrice, '60','0')}px" align="right">
+									<apex:outputtext value="{!currencySybmol}{0,number,{!numberFormat}}" rendered="{!AND(isShowPrice,d1.isDtShowFlg)}">
+										<apex:param value="{!d1.unitPrice}"></apex:param>
+									</apex:outputtext>
+								</td>
+								<td width="30px" align="right" style="display: {!IF(d1.isDtShowFlg, '', 'none;')}">
+									<apex:outputtext value="{0,number,}">
+										<apex:param value="{!d1.unitNums}"></apex:param>
+									</apex:outputtext>
+								</td>
+								<td width="{!IF(isShowPrice, '75','135')}px" align="right">
+									<apex:outputtext value="{!currencySybmol}{0,number,{!numberFormat}}" rendered="{!AND(isShowPrice,d1.isDtShowFlg)}">
+										<apex:param value="{!d1.dTotal}"></apex:param>
+									</apex:outputtext>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<apex:variable var="count" value="{!count+1}"/>
+				</apex:repeat>
+				
+				
+			</table>
+			</td>
+        </tr>
+        <tr>
+        	<td>
+        		<table border="0">
+        			<tr class="lastRow">
+	        			<apex:outputText rendered="{!isShowPrice}">
+							<td colspan="2" style="width: 350px;">{!$Label.ps__msg_012_0124}<img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 40px; height: 1px;"/>
+							<apex:outputtext value="{!currencySybmol}{0,number,{!numberFormat}}">
+								<apex:param value="{!onePage.footer4.estimateTotal}"></apex:param>
+							</apex:outputtext><hr /></td>
+	        			</apex:outputText>
+	        			<apex:outputText rendered="{!!isShowPrice}">
+							<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+							<td colspan="2" style="width: 350px;height:30px">&nbsp;<!-- <img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 1px; height: 30px;"/> --></td>
+							<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+	        			</apex:outputText>
+						<!-- <td>¥ 109,680</td> --><!-- zyz 署名栏 -->
+						<!-- 2017/09/06 署名欄署名対応 zyz BEGIN -->
+						<apex:outputpanel rendered="{!!signaType}">
+        				<!-- 2017/09/06 署名欄署名対応 zyz END -->
+						<td rowspan="2" valign="bottom" align="right">{!$Label.MSG_012_0125}</td>
+						<!-- <td rowspan="2"><div  style="height: 50px; width: 280px; float: right; border:1px solid #000000;"></div></td> -->
+						<td rowspan="2">
+							<a href="javascript:signaTrue()">
+								<div id="signPanel" style="height: 50px; width: 280px; float: right; border:1px solid #000000;" align='center'>
+								<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+								<apex:outputField value="{!onePage.footer4.signa.Signature__c}" id="signaVal"/>
+								<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+								</div>
+							</a>
+						</td>
+						<!-- 2017/09/06 署名欄署名対応 zyz BEGIN -->
+						</apex:outputpanel>
+						<apex:outputPanel rendered="{!signaType}">
+						<td valign="bottom" width="50px">
+							<button class="dobtn" id="dobtn" type="button" style="display:{!if(onePage.footer4.signa.Signature__c != null, '', 'none')};" onclick="reSigna()">再署名</button>
+						</td>
+						<!-- <td rowspan="2"><div  style="height: 50px; width: 280px; float: right; border:1px solid #000000;"></div></td> -->
+						<td rowspan="2" style="position:relative;width:280px">
+							
+								<div id="signPanel" style="height: 50px; width: 280px; float: right; border:1px solid #000000;display:{!if(onePage.footer4.signa.Signature__c != null, 'block', 'none')};" align='center'>
+									<apex:outputField value="{!onePage.footer4.signa.Signature__c}"/>
+								</div>
+								<div id="signa_id" style="height: 50px; width: 280px; float: right;display:{!if(onePage.footer4.signa.Signature__c != null, 'none', 'block')};" align='center'>
+									<canvas id="canvassample"></canvas>
+									<div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 3px;width: 2px;"/></div>
+									<div id="divfoo" style="display:none;" class="divfoo">
+										<button type="button" class="buttonclass" onclick="saveImg(this)" style="width:60px;height:25px;">保存</button>&nbsp;
+										<button type="button" class="buttonclass" onclick="undo(this)" style="width:60px;height:25px;">戻る</button>&nbsp;
+										<button type="button" class="buttonclass" onclick="redo(this)" style="width:60px;height:25px;">進む</button>&nbsp;
+										<button type="button" class="buttonclass" onclick="clearCanvasflg(this)" style="width:60px;height:25px;">クリア</button>
+									</div>
+								</div>
+						</td>
+						</apex:outputpanel>
+						<!-- 2017/09/06 署名欄署名対応 zyz END -->
+					</tr>
+					<tr>
+						<td width="45px" style="white-space: nowrap;">{!$Label.MSG_012_0126}</td>
+						<td>{!usedDate}</td>
+						<!-- 2017/09/06 署名欄署名対応 zyz BEGIN -->
+						<apex:outputPanel rendered="{!signaType}">
+						<td valign="bottom" width="50px">{!$Label.ps__msg_012_0125}</td>
+						</apex:outputpanel>
+						<!-- 2017/09/06 署名欄署名対応 zyz END -->
+					</tr>
+				</table>
+        	</td>
+        </tr>
+    </table>
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+    </div>
+    <div style="vertical-align:top ;{!if(signaTypePage , 'margin-top: 0px;height:0px', 'margin-top: 4px;height:4px')};page-break-before: always;"></div>
+    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+</apex:repeat>
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+</div>
+<div class="div_clear" style="display:none;position: fixed;bottom: 50px;right: 0px;opacity: 0.75;">
+	<!-- 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN -->
+	<button class="buttonclass" id="clearbtn" type="button" onclick="clearSigna()" style="width:95px;height:30px;border: 0px;">再署名</button><div style="height:3px"></div>
+	<button class="buttonclass" id="giveupbtn" type="button" onclick="giveupWin()" style="width:95px;height:30px;border: 0px;">次へ</button>
+	<!-- 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END -->
+</div>
+<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+    <!-- 既存印刷面（裏） -->
+
+ <div class="printInfo">
+    <table style="width:640px;" align="center" cellpadding="0px" cellspacing="0px">
+        <tr>
+            <td  >
+                <div style="height: 80px; float: right; overflow: hidden; border:1px solid #FFFFFF;">
+                    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+                    <!--<apex:outputField value="{!reportInfo.ReportLogo__c}" />-->
+                    <img src="data:image/png;base64,{!image}" />
+                    <!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+                </div>
+            </td>
+        </tr>
+    </table>
+    <table style="width:640px;" align="center" cellpadding="0px" cellspacing="0px">
+    <tr><td>
+    <table style="width:100%" cellpadding="0px" cellspacing="0px">
+        <tr>
+            <td style="text-align: center; border-bottom: solid 1px #000000;width: 100%;height: 30px">＜客室係記入欄＞</td>
+        </tr>
+        <tr>
+            <td height="15px" >
+                <!-- <hr/> -->
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table style="float: right;"  cellpadding="0px" cellspacing="0px">
+                    <tr>
+                        <td width="300px"></td>
+                        <td style="text-align: left; border-bottom: solid 1px #000000;width: 200px;">お着き案内者</td>
+                        <td><div  style="height: 38px; width: 38px; float: right; border:1px solid #000000;font-size: 5px;valign:top;" >入力チェック</div></td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+        <tr>
+            <td height="30px" ></td>
+        </tr>
+        <tr>
+            <td >
+                <table  cellpadding="0px" cellspacing="0px">
+                    <tr>
+                        <td>料理内容　　　　　　　　　　　　最終利用日 :　　　　　　　　　　　　利用回数 : </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td height="32px"></td>
+        </tr>
+        <tr>
+            <td style="text-align: left;">
+                <table  cellpadding="0px" cellspacing="0px">
+                    <tr>
+                        <td width="110" height="22px">夕食時刻</td>
+                        <td  >（　　　　　　　）　　17:00 　17:30 　18:30 　19:00 　19:30 　20:00</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">アレルギー</td>
+                        <td >なし・あり（　　　　　　　　　　　　　　　　　　　　　　　　）　</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">料理リクエスト</td>
+                        <td >（　　　　　　　　　　　　　　　　　　　　　　　　　　　　　）</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">連泊情報</td>
+                        <td >外出（掃除）　　　　　　　　　お菓子</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">お車の場合</td>
+                        <td >車種　　　　　　　　　　　ナンバー</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">&nbsp;</td>
+                        <td >&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">喫煙</td>
+                        <td >あり　なし</td>
+                    </tr>
+                    <tr>
+                        <td height="22px">その他趣向</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td height="40px"></td>
+        </tr>
+        <tr>
+            <td>
+                <apex:outputpanel rendered="{!oneCard.extInf.memoList.size == 0 }">
+                    <table style="width: 100%;">
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;">メモ</td></tr>
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;"></td></tr>
+                    </table>
+                </apex:outputpanel>
+                <apex:outputpanel rendered="{!oneCard.extInf.memoList.size > 0 }">
+                    <table style="width: 100%;">
+                        <tr><td height="25px" style="border-bottom: solid 1px #848689;width: 100%;">メモ</td></tr>
+                        <apex:repeat value="{!oneCard.extInf.memoList}" var="memo" rows="10">
+                            <tr>
+                                <td height="25px" style="border-bottom: solid 1px #848689;width: 100%;">
+                                    <div style="width: 570px; text-align: left; valign: top; whitespace: nowrap;">
+                                        <apex:outputText value="{!memo}" escape="false"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </apex:repeat>
+                        <apex:outputpanel rendered="{!oneCard.extInf.memoList.size > 10 }">
+                            <tr><td style="width: 100%;">···</td></tr>
+                        </apex:outputpanel>
+                    </table>
+                </apex:outputpanel>
+            </td>
+        </tr>
+    </table>
+    </td></tr></table>
+</div>
+</apex:repeat>
+	
+<script>
+// 2017/09/06 署名欄署名対応 zyz BEGIN
+$(document).ready(function() {
+    // 直接署名機能有効の場合
+	if({!signaType}){
+        var signaVal = document.getElementById("Signature").value;
+        // 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+        if (signaVal == "false") {
+        	reSigna();
+        } else {
+        	$(".div_clear").css({'display':'block'});
+			$("#clearbtn").css({'display':'none'});
+			$("#giveupbtn").css({'-webkit-box-shadow':'none'});
+        }
+        // 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+    }
+});
+// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+$('.dobtn').on('click',function(e){ $("#giveupbtn").css({'display':'none'});});
+function giveupWin(){
+	var yadoId = "{!yadochouId}";
+	var openUrl = "{!URLFOR('/apex/CashRegisterCardPDFSwitch')}"+"?id="+yadoId;
+	if ({!isShowPrice}) {
+		openUrl += "&smy=1"; 
+	}
+	// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+	openUrl +='{!JSENCODE(CashLogoStr)}';
+	// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+	window.location.href = openUrl;
+}
+// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+function saveImg(that){
+	var curSigna = $(that).closest("#signa_id");
+	var canvas = $("#canvassample",curSigna).get(0);
+	var pngs = canvas.toDataURL('image/png');
+	var png = "<div style='height: 48px; width: 280px; float: right;' align='center'><img alt='' src='"+pngs+"' style='height: inherit;' /></div>";
+	var yadoId = "{!yadochouId}";
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.CashRegisterCardPDF.refreshsignatureInfo}", yadoId , png , function(result, event){
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+				// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz BEGIN
+				/*
+				document.getElementById('signPanel').innerHTML = png;
+				var openUrl = "{!URLFOR('/apex/CashRegisterCardPDFSwitch')}"+"?id="+yadoId;
+				// 2017/05/25 PDF4金額を表示機能 zyz BEGIN
+				if ({!isShowPrice}) {
+					openUrl += "&smy=1"; 
+				}
+				// 2017/05/25 PDF4金額を表示機能 zyz END
+				window.location.href = openUrl;
+				*/
+				window.location.reload();
+				// 2017/10/17 レジカードサイン機能改善（サイン後、サイン結果ページ追加） zyz END
+			}
+		});
+}
+// 2017/09/06 署名欄署名対応 zyz END
+//2017/04/26  署名機能レビュー　by zy BEGIN
+function blockUi() {
+    $.blockUI({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_005_0067}</h1>'
+    }); 
+    return true;
+}
+// 画面Lock解除
+function unblockUi() {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+//2017/04/26  署名機能レビュー　by zy END
+</script>
+</body>
+</html>
+</apex:page>

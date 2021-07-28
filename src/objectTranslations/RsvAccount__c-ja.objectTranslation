@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>売上</value>
+    </caseValues>
+    <fields>
+        <help><!-- 客室（広間を除く）のみのADR、
+Average Daily Rate：[客室別]合計／販売客室数 --></help>
+        <label><!-- ADR --></label>
+        <name>ADR__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A_出勤者合計 --></label>
+        <name>Agoukei__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B10_ゲストリレーション --></label>
+        <name>B10__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B11_洗い場 --></label>
+        <name>B11__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B12_経理＆設備＆デザイン --></label>
+        <name>B12__c</name>
+    </fields>
+    <fields>
+        <label><!-- #D1_社員 --></label>
+        <name>B1__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B2_長助さん --></label>
+        <name>B2__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B3_助さん --></label>
+        <name>B3__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B4_調理補助 --></label>
+        <name>B4__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B5_接待 --></label>
+        <name>B5__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B6_配膳会 --></label>
+        <name>B6__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B7_番頭 --></label>
+        <name>B7__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B8_掃除 --></label>
+        <name>B8__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B9_フロント＆庭掃除 --></label>
+        <name>B9__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売店 --></label>
+        <name>BaitenFree__c</name>
+    </fields>
+    <fields>
+        <label><!-- #B_パート人件費合計 --></label>
+        <name>Bgoukei__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C1_深夜手当 --></label>
+        <name>C1__c</name>
+    </fields>
+    <fields>
+        <label><!-- #C2_労働保険 --></label>
+        <name>C2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売店(税込) --></label>
+        <name>Chargeofbaiten__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理(税込) --></label>
+        <name>Chargeofmeal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入浴料(税込) --></label>
+        <name>Chargeofonsen__c</name>
+    </fields>
+    <fields>
+        <label><!-- その他(税込) --></label>
+        <name>Chargeofother__c</name>
+    </fields>
+    <fields>
+        <label><!-- 室料(税込) --></label>
+        <name>Chargeofroom__c</name>
+    </fields>
+    <fields>
+        <label><!-- メディア種別 --></label>
+        <name>Chart__c</name>
+    </fields>
+    <fields>
+        <label><!-- 子供 --></label>
+        <name>Childs__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- クレジット計(税込) --></label>
+        <name>CreditKkomi__c</name>
+    </fields>
+    <fields>
+        <label><!-- クーポン計(税込) --></label>
+        <name>CuponKomi__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入金伝票の合計金額税込みです、レストランでの伝票発行はなしを前提 --></help>
+        <label><!-- 入金（税込） --></label>
+        <name>Depositwithtax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 割引値引合計 --></label>
+        <name>Discount2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 割引値引合計(税込) --></label>
+        <name>Discount__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ドリンク-原単価計（累計） --></label>
+        <name>DrinkGenkaRuikei__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ドリンク-合計金額（税抜）（累計） --></label>
+        <name>DrinkGoukeinoneTaxRuikei__c</name>
+    </fields>
+    <fields>
+        <label><!-- #E1_調理部門 --></label>
+        <name>E1__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F1_接客 --></label>
+        <name>F1__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F2_サービス管理 --></label>
+        <name>F2__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F3_フロント --></label>
+        <name>F3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-客単価 --></label>
+        <name>FRestrunt9__c</name>
+    </fields>
+    <fields>
+        <label><!-- #F_現場オペレーション部門合計 --></label>
+        <name>Fgoukei__c</name>
+    </fields>
+    <fields>
+        <label><!-- 現金計 --></label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <label><!-- クレジット計 --></label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約日 --></label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-クレジット(税込) --></label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label><!-- 稼働率[部屋食] --></label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 損益 --></label>
+        <name>Field6__c</name>
+        <relationshipLabel><!-- 売上 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_飲料（税抜） --></label>
+        <name>FinalInventoryBeverage__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_ブライダル（税抜） --></label>
+        <name>FinalInventoryBridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_材料（税抜） --></label>
+        <name>FinalInventoryMaterial__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_室料（税抜） --></label>
+        <name>FinalInventoryRoom__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_売店（税抜） --></label>
+        <name>FinalInventoryStand__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上計3の金額が¥0のときは、売上予測の金額を、そうでないときは、売上計3の金額を設定する、金額は税抜きとなる。 --></help>
+        <label><!-- $売上予測 --></label>
+        <name>FutureAccount__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約台帳の見積合計の積み上げ集計値 --></help>
+        <label><!-- 売上予測 --></label>
+        <name>FutureYen__c</name>
+    </fields>
+    <fields>
+        <label><!-- #G1_ブライダル --></label>
+        <name>G1__c</name>
+    </fields>
+    <fields>
+        <label><!-- #G2_営業 --></label>
+        <name>G2__c</name>
+    </fields>
+    <fields>
+        <label><!-- #G3_その他 --></label>
+        <name>G3__c</name>
+    </fields>
+    <fields>
+        <help><!-- 料理仕入高（累計）/ 料理売上高（累計） --></help>
+        <label><!-- 料理原価率（累計） --></label>
+        <name>GenkaritsuRuikei__c</name>
+    </fields>
+    <fields>
+        <label><!-- 現金計(税込) --></label>
+        <name>GenkinkeiKomi__c</name>
+    </fields>
+    <fields>
+        <label><!-- #G_営業・マーケテイング部門合計 --></label>
+        <name>Ggoukei__c</name>
+    </fields>
+    <fields>
+        <label><!-- #H1_経理部門 --></label>
+        <name>H1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-客数内訳 --></label>
+        <name>HonkanCustomersGraph__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_飲料（税抜） --></label>
+        <name>InitialInventoryBeverage__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_ブライダル（税抜） --></label>
+        <name>InitialInventoryBridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_材料（税抜） --></label>
+        <name>InitialInventoryMaterial__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_室料（税抜） --></label>
+        <name>InitialInventoryRoom__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_売店（税抜） --></label>
+        <name>InitialInventoryStand__c</name>
+    </fields>
+    <fields>
+        <label><!-- ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- #B_パート人件費合計 +#D1_社員 +#C1_深夜手当 +#C2_労働保険 --></help>
+        <label><!-- #J_全人件費合計 --></label>
+        <name>Jgoukei__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update #B_パート人件費合計 の累計 --></help>
+        <label><!-- #K1_パート人件費累計 --></label>
+        <name>K1ruikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update #J_全人件費合計 の累計 --></help>
+        <label><!-- #K2_全人件費累計 --></label>
+        <name>K2ruikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- #K2_全人件費累計 / 売上計6(税抜) 累計 --></help>
+        <label><!-- #K3_人件費率累計 --></label>
+        <name>K3ruikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上計6(税抜) / #B_パート人件費合計 --></help>
+        <label><!-- #K4_売上高/パート人件費 --></label>
+        <name>K4__c</name>
+    </fields>
+    <fields>
+        <help><!-- 15＜#K4_売上高/パート人件費　　: 良い
+10＜#K4_売上高/パート人件費≦15 : 普通
+　 　#K4_売上高/パート人件費≦10 : 悪い --></help>
+        <label><!-- #K5_パート運用効率判定 --></label>
+        <name>K5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 掛計(税込) --></label>
+        <name>KakeKeiKomi__c</name>
+    </fields>
+    <fields>
+        <label><!-- クーポン計 --></label>
+        <name>Kuupon__c</name>
+    </fields>
+    <fields>
+        <help><!-- 月の最終日なら１そうでないときは０ --></help>
+        <label><!-- 月末最終日フラグ --></label>
+        <name>LastDayofMonthFlag__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロック状態 --></label>
+        <name>LockStatus__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update 料理売上高（日別）の累計 --></help>
+        <label><!-- 料理売上高（累計） --></label>
+        <name>MealSalesfreeRuikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update 会計明細のSUM($合計金額(税抜)) - (入湯税 + 乗馬) AND 集計対象 AND カテゴリA = A1_料理関連 --></help>
+        <label><!-- 料理売上高（日別） --></label>
+        <name>MealSalesfree__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理 --></label>
+        <name>Mealfree__c</name>
+    </fields>
+    <fields>
+        <help><!-- 営業日付の月 --></help>
+        <label><!-- 月 --></label>
+        <name>Month__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入浴料 --></label>
+        <name>NyuuyokuFree__c</name>
+    </fields>
+    <fields>
+        <label><!-- 広間-[昼]稼働率 --></label>
+        <name>OccHallHiru__c</name>
+    </fields>
+    <fields>
+        <label><!-- 広間-[夕]稼働率 --></label>
+        <name>OccHallYuu__c</name>
+    </fields>
+    <fields>
+        <label><!-- 広間-稼働率 --></label>
+        <name>OccHall__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋昼食のOccupancy Ratio --></help>
+        <label><!-- 客室-[昼]稼働率 --></label>
+        <name>OccHiru__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客室-稼働率 --></label>
+        <name>OccRoom__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋宿泊のOccupancy Ratio --></help>
+        <label><!-- 稼働率[宿泊] --></label>
+        <name>Occnights__c</name>
+    </fields>
+    <fields>
+        <label><!-- 稼働率 --></label>
+        <name>Occupy__c</name>
+    </fields>
+    <fields>
+        <help><!-- 部屋夕食のOccupancy Ratio --></help>
+        <label><!-- 客室-[夕]稼働率 --></label>
+        <name>Occyuu__c</name>
+    </fields>
+    <fields>
+        <help><!-- 入浴料を支払った人数（大人、子供） --></help>
+        <label><!-- 入浴人数 --></label>
+        <name>Osenpersons__c</name>
+    </fields>
+    <fields>
+        <label><!-- その他 --></label>
+        <name>Otherfree__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A2_パート --></label>
+        <name>Part__c</name>
+    </fields>
+    <fields>
+        <help><!-- 出金伝票の合計金額税込みです、レストランでの伝票発行はなしを前提 --></help>
+        <label><!-- 出金（税込） --></label>
+        <name>Paymentwithtax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客数 --></label>
+        <name>Persons__c</name>
+    </fields>
+    <fields>
+        <label><!-- [昼]人数 --></label>
+        <name>Pofhiru__c</name>
+    </fields>
+    <fields>
+        <label><!-- [泊]人数 --></label>
+        <name>Pofnights__c</name>
+    </fields>
+    <fields>
+        <label><!-- [夕]人数 --></label>
+        <name>Pofyuu__c</name>
+    </fields>
+    <fields>
+        <label><!-- #A1_社員 --></label>
+        <name>Proper__c</name>
+    </fields>
+    <fields>
+        <label><!-- 飲料仕入高（日別） --></label>
+        <name>PurchaseBeverage__c</name>
+    </fields>
+    <fields>
+        <label><!-- ブライダル仕入高（日別） --></label>
+        <name>PurchaseBridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 旅館外注費仕入高（日別） --></label>
+        <name>PurchaseExpenses__c</name>
+    </fields>
+    <fields>
+        <label><!-- 室料仕入高（日別） --></label>
+        <name>PurchaseRoom__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update 料理仕入高（日別）の累計 --></help>
+        <label><!-- 料理仕入高（累計） --></label>
+        <name>PurchaseRuikei__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売店仕入高（日別） --></label>
+        <name>PurchaseStand__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理仕入高（日別） --></label>
+        <name>Purchase__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-ドリンク(税込) --></label>
+        <name>RChargeofdrink__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-料理(税込) --></label>
+        <name>RChargeofmeal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-[昼]人数 --></label>
+        <name>RPofhiru__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-[夕]人数 --></label>
+        <name>RPofyuu__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-男性 --></label>
+        <name>Restrunt10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-女性 --></label>
+        <name>Restrunt11__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-子供 --></label>
+        <name>Restrunt12__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-客数 --></label>
+        <name>Restrunt15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-割引値引合計(税込) --></label>
+        <name>Restrunt16__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-割引値引合計 --></label>
+        <name>Restrunt17__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-内金(税込) --></label>
+        <name>Restrunt18__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-クーポン(税込) --></label>
+        <name>Restrunt19__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-現計 --></label>
+        <name>Restrunt1free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-売上計3(税抜) --></label>
+        <name>Restrunt25__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-消費税 --></label>
+        <name>Restrunt26__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-掛計 --></label>
+        <name>Restrunt2free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-内金 --></label>
+        <name>Restrunt3free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-クレジット --></label>
+        <name>Restrunt4free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-クーポン --></label>
+        <name>Restrunt5free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-客単価(税込) --></label>
+        <name>Restrunt8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-客数内訳 --></label>
+        <name>RestruntCustomersGraph__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-ドリンク --></label>
+        <name>RestruntDrinkfree__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-料理 --></label>
+        <name>RestruntMealfree__c</name>
+    </fields>
+    <fields>
+        <help><!-- 客室（広間を除く）のみのRevPAR
+Revenue Per Available Room：[客室別]合計／販売可能客室数 --></help>
+        <label><!-- RevPAR --></label>
+        <name>RevPAR__c</name>
+    </fields>
+    <fields>
+        <label><!-- 室料 --></label>
+        <name>RoomCfree__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客単価(税込) --></label>
+        <name>SalesAverageKomi__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客単価 --></label>
+        <name>SalesAverage__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計上日(重複チェック) --></label>
+        <name>SalesDateDupCheck__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU --></label>
+        <name>SalesDateNum__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上計上日 --></help>
+        <label><!-- 営業日付 --></label>
+        <name>Salesday__c</name>
+    </fields>
+    <fields>
+        <label><!-- $売店-原単価計（累計） --></label>
+        <name>ShopGenkaRuikei__c</name>
+    </fields>
+    <fields>
+        <label><!-- $売店-合計金額（税抜）（累計） --></label>
+        <name>ShopGoukeinoneTaxRuikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計明細の最大消費税率 --></help>
+        <label><!-- 消費税率 --></label>
+        <name>TaxRateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>Taxfee__c</name>
+    </fields>
+    <fields>
+        <label><!-- 内金(税込) --></label>
+        <name>UchikinKomi__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update 売上計6(税抜)の累計 --></help>
+        <label><!-- 売上計6(税抜) 累計 --></label>
+        <name>Uriage6Total__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update      会計明細のSUM($合計金額(税抜)) - (入湯税 + 乗馬) AND 集計対象 --></help>
+        <label><!-- 売上計6(税抜) --></label>
+        <name>Uriage6__c</name>
+    </fields>
+    <fields>
+        <help><!-- POSレジ日計精算売上III（割引後税抜き金額）と一致 --></help>
+        <label><!-- 売上計3(税抜) --></label>
+        <name>UriageHon__c</name>
+    </fields>
+    <fields>
+        <help><!-- 前年度の今日の売上 --></help>
+        <label><!-- 前年度の売上 --></label>
+        <name>UriageLastYear__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計4(税込) --></label>
+        <name>Uriagetaxfee__c</name>
+    </fields>
+    <fields>
+        <label><!-- 掛計 --></label>
+        <name>Urikakekei__c</name>
+    </fields>
+    <fields>
+        <label><!-- 年度 --></label>
+        <name>Year__c</name>
+    </fields>
+    <fields>
+        <help><!-- $売上予測-前年度の売上 --></help>
+        <label><!-- 売上前年比 --></label>
+        <name>Zennenhi__c</name>
+    </fields>
+    <fields>
+        <help><!-- 経理部門の売上を入力、forceとの差額を！ --></help>
+        <label><!-- 経理売上 --></label>
+        <name>accountingsection__c</name>
+    </fields>
+    <fields>
+        <help><!-- FF9904&quot;&amp;chm=c,FF8C00,0,-1,6&quot; --></help>
+        <label><!-- Booking Curves --></label>
+        <name>booking__c</name>
+    </fields>
+    <fields>
+        <label><!-- 女性 --></label>
+        <name>femails__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-クーポン(税込) --></label>
+        <name>fornt2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-客数 --></label>
+        <name>front10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-男性 --></label>
+        <name>front13__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-女性 --></label>
+        <name>front14__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-子供 --></label>
+        <name>front15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-割引値引合計(税込) --></label>
+        <name>front16__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-割引値引合計 --></label>
+        <name>front17__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-売上計4(税込) --></label>
+        <name>front1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-現計 --></label>
+        <name>front1free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-売上計3(税抜) --></label>
+        <name>front25__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-消費税 --></label>
+        <name>front26__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-掛計 --></label>
+        <name>front2free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-掛計(税込) --></label>
+        <name>front3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-内金 --></label>
+        <name>front3free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-クレジット --></label>
+        <name>front4free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-クーポン --></label>
+        <name>front5free__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-内金(税込) --></label>
+        <name>front6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-現計(税込) --></label>
+        <name>front7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-客単価(税込) --></label>
+        <name>front8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 本館-客単価 --></label>
+        <name>front9__c</name>
+    </fields>
+    <fields>
+        <label><!-- 客数内訳 --></label>
+        <name>graphCustomers__c</name>
+    </fields>
+    <fields>
+        <label><!-- 男性 --></label>
+        <name>males__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入湯税の金額 --></label>
+        <name>nyuutouM__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入湯税の人数 --></label>
+        <name>nyuutouzeiP__c</name>
+    </fields>
+    <fields>
+        <label><!-- pointofbooking --></label>
+        <name>pointofbooking__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-売上計4(税込) --></label>
+        <name>restraunt1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-現計(税込) --></label>
+        <name>restraunt2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-クレジット(税込) --></label>
+        <name>restraunt3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 賑亭-掛計(税込) --></label>
+        <name>restraunt4__c</name>
+    </fields>
+    <webLinks>
+        <label><!-- CustomLink1 --></label>
+        <name>CustomLink1</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- RsvLockBtn --></label>
+        <name>RsvLockBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- UnRsvLockBtn --></label>
+        <name>UnRsvLockBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- updaterevenue --></label>
+        <name>updaterevenue</name>
+    </webLinks>
+</CustomObjectTranslation>

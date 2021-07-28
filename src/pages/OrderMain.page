@@ -1,0 +1,4375 @@
+<apex:page sidebar="false"  showheader="false" applyHtmlTag="false" language="{!currentLanguage}" title="オーダーエントリ"
+           applyBodyTag="false" standardStylesheets="false" controller="OrderMainCtrl" action="{!initAction}">
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes" />   
+<meta name="apple-mobile-web-app-capable" content="yes" />  
+<meta name="format-detection" content="telephone=no" />  
+
+<title>ｵｰﾀﾞｰｴﾝﾄﾘｰ</title>
+<style type="text/css">
+	html{
+		background: white;
+	}
+	#description h1{
+		white-space: nowrap;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	    width: 370px;
+	}
+	tr.orderRow{
+		background: lightsalmon;
+	}
+	tr.cancelRow{
+		background: lightgrey;
+	}
+	tr.endRow{
+		background: lightblue;
+	}
+	tr.orderRow td{
+		font-size: 15px;
+	    color: #2e2e2e;
+	    line-height: 1em;
+	    text-transform: uppercase;
+	}
+	tr.prodRow td {
+	    border-bottom: 1px solid #dadada;
+	    padding: 0;
+	}
+	#header{
+		padding-bottom: 0px; 
+		border-bottom: 1px solid #535353;
+		position:relative;
+		height:65px;
+	}
+	.selectSpan{
+		position: relative; 
+		text-transform: uppercase;
+		padding: 0 10px 0 10px;
+		display: inline-block;
+	    background: rgb(214,0,65);
+	    background: -moz-linear-gradient(top, rgba(214,0,65,1) 0%, rgba(169,0,64,1) 100%);
+	    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(214,0,65,1)), color-stop(100%,rgba(169,0,64,1)));
+	    background: -webkit-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -o-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -ms-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: linear-gradient(to bottom, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d60041', endColorstr='#a90040',GradientType=0 );
+	    font-size: 14px;
+	    color: #fff;
+	    cursor: pointer;
+	}
+	.selectSpan:hover{
+		background: linear-gradient(to top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	}
+	.historySpan{
+		position: relative; 
+		padding: 0 10px 0 0;
+		display: inline-block;
+	    background: rgb(214,0,65);
+	    background: -moz-linear-gradient(top, rgba(214,0,65,1) 0%, rgba(169,0,64,1) 100%);
+	    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(214,0,65,1)), color-stop(100%,rgba(169,0,64,1)));
+	    background: -webkit-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -o-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -ms-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: linear-gradient(to bottom, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d60041', endColorstr='#a90040',GradientType=0 );
+	    font-size: 14px;
+	    color: #fff;
+	    cursor: pointer;
+	}
+	.historySpan:hover{
+		background: linear-gradient(to top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	}
+	.readdClass{
+		cursor: pointer;
+	}
+	/* 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy BEGIN
+	<apex:repeat value="{!tabLst}" var="tab">
+		.{!tab.tabName}{
+			display:{!tab.tabDisStr};
+		}
+	</apex:repeat>
+	2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy */
+	span.product-name{
+		white-space: nowrap;
+    	overflow: hidden;
+    	text-overflow: ellipsis;
+    	max-width: 300px;
+    }
+    span.tabParSpan{
+    	border-color: #c5c5c5;
+	    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+	    background-position: 50% 50%;
+	    background:rgba(214,0,65,1);
+		position: relative;
+	    border-style: solid;
+	    border-width: 1px 1px 0;
+	    margin: 0 24px 0 0;
+	    padding: 7px;
+	    text-transform: uppercase;
+	    line-height: 26px;
+	    vertical-align: middle;
+	    font-size: 14px;
+	    color: #fff;
+	    cursor: pointer;
+    }
+    
+    span.tabParSpan:not(:last-child)::after{
+    	content: "";
+	    display: block;
+	    position: absolute;
+    	border-top: 14px solid black !important;
+	    border-left: 14px solid black !important;
+	    border-right: 14px solid transparent;
+	    border-bottom: 14px solid transparent;
+	    position: absolute;
+	    top: 0;
+	    right:-27px;
+    }
+    .tab_Par{
+    	background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+	    background: rgba(214,0,65,1);
+	    display: inline-flex;
+	    height: 27px;
+    }
+    .tabBtn1{
+	    height: 28px;
+	    line-height: 28px;
+	    vertical-align: middle;
+	    font-size: 10px;
+	    text-transform: uppercase;
+	    color: #fff;
+	    padding-right: 10px;
+    }
+    .tabBtn1 .tabChild1{
+    	display: inline-block;
+	    background: rgb(214,0,65);
+	    background: -moz-linear-gradient(top, rgba(214,0,65,1) 0%, rgba(169,0,64,1) 100%);
+	    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(214,0,65,1)), color-stop(100%,rgba(169,0,64,1)));
+	    background: -webkit-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -o-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -ms-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: linear-gradient(to bottom, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d60041', endColorstr='#a90040',GradientType=0 );
+	    position: relative;
+	    padding: 0 30px 0 10px;
+	    margin: -2px;
+	    cursor: pointer;
+    }
+    .tabBtn1 .tabChild1:last-child{
+    	padding: 0 10px 0 10px;
+    }
+    .curSelectPlan{
+    	background: black !important;
+    }
+    .curSelectPlan::before{
+    	content: "";
+	    display: block;
+	    width: 0;
+	    height: 0;
+	    position: absolute;
+	    right: 0;
+	    top: 0;
+	    border-top: 13px solid #000;
+	    border-right: 13px solid #000 !important;
+    	border-bottom: 13px solid #000 !important;
+	    border-left: 13px solid #000;
+    }
+    .tabChild1:not(:last-child)::after{
+    	content: "";
+	    display: block;
+	    width: 0;
+	    height: 0;
+	    position: absolute;
+	    right: 0;
+	    top: 0;
+	    border-top: 13px solid transparent;
+	    border-right: 13px solid rgba(214,0,65,1);
+	    border-bottom: 13px solid rgba(214,0,65,1);
+	    border-left: 13px solid transparent;
+    }
+    .tabChild1:not(:first-child)::before{
+    	content: "";
+	    display: block;
+	    width: 0;
+	    height: 0;
+	    position: absolute;
+	    left: -24px;
+	    top: 0;
+	    border-top: 13px solid transparent;
+	    border-right: 13px solid rgba(214,0,65,1);
+	    border-bottom: 13px solid rgba(214,0,65,1);
+	    border-left: 13px solid transparent;
+    }
+    .tabChild1:not(:last-child):hover::after{
+    	content: "";
+	    display: block;
+	    width: 0;
+	    height: 0;
+	    position: absolute;
+	    right: 0;
+	    top: 0;
+	    border-top: 13px solid #000;
+	    border-right: 13px solid transparent;
+	    border-bottom: 13px solid transparent;
+	    border-left: 13px solid #000;
+    }
+    .tabChild1:not(:first-child):hover::before{
+    	content: "";
+	    display: block;
+	    width: 0;
+	    height: 0;
+	    position: absolute;
+	    left: -24px;
+	    top: 0;
+	    border-top: 13px solid transparent;
+	    border-right: 13px solid #000;
+	    border-bottom: 13px solid #000;
+	    border-left: 13px solid transparent;
+    }
+    .tabChild1:hover{
+    	background: black;
+    }
+    span.userBtn{
+    	border-color: #c5c5c5;
+	    background-image: none,linear-gradient(to bottom,rgba(255,255,255,.6) 0,rgba(255,255,255,.0) 100%);
+	    background-position: 50% 50%;
+	    background:rgba(214,0,65,1);
+		position: relative;
+	    border-style: solid;
+	    border-width: 1px 1px 0;
+	    margin: 0 5px 0 0;
+	    padding: 7px;
+	    text-transform: uppercase;
+	    line-height: 26px;
+	    vertical-align: middle;
+	    font-size: 14px;
+	    color: #fff;
+	    top:-29px;
+	    cursor: pointer;
+    }
+    .disBtn{
+    	background: #c5c5c5 !important;
+    }
+    #total-checkout em{
+    	font-size: 14px;
+    }
+    #total-rate{
+    	font-size: 14px;
+	    color: #787878;
+	    padding-right: 100px;
+	    text-align: right;
+	    line-height: 1em;
+	    text-transform: uppercase;
+    }
+    #total-rate em{
+	    font-style: normal;
+	    font-weight: normal;
+	    display: inline-block;
+	    padding-right: 13px;
+    }
+    .cancel-order{
+    	margin-top: 10px;
+    }
+    .order-now{
+    	margin-top: 10px;
+    }
+    #nutrition-info{
+    	width:194px;
+    }
+    .infoContent{
+    	word-wrap: break-word;
+    	width: 170px !important;
+    	height: 145px;
+	    overflow: hidden;
+	    vertical-align:top;
+	    text-align:left !important;
+	    text-overflow: ellipsis;
+    }
+    /* 2017/04/20 staff 画面対応　by　zy BEGIN*/
+    .layout-top{
+    	border-style: solid;
+	    _border-style: dashed;
+	    border-width: 5px;
+	    border-color: transparent;
+	    border-top-width: 0;
+	    border-bottom: 9px solid rgba(214,0,65,1);
+	    width: 0;
+	    height: 0;
+	    font-size: 0;
+	    line-height: 0;
+	    position: absolute;
+	    top: -9px;
+	    left: 6px;
+    }
+    .layoutTable{
+    	width:55px;
+   	    position: relative;
+	    /* display: none; */
+	    overflow: visible!important;
+	    background: #fff;
+	    border: 1px solid #bbb;
+	    box-sizing: border-box;
+	    -moz-box-sizing: border-box;
+	    -webkit-box-sizing: border-box;
+	    padding: 5px;
+	    margin: 0;
+	    -webkit-box-shadow: 0 2px 4px 0 rgba(0,0,0,.13);
+	    -moz-box-shadow: 0 2px 4px 0 rgba(0,0,0,.13);
+	    box-shadow: 0 2px 4px 0 rgba(0,0,0,.13);
+	    -ms-user-select: none;
+	    zoom: 1;
+	    -webkit-transform: translate3d(0,0,0);
+    }
+    .layoutTable tr{
+    	text-transform: uppercase;
+	    line-height: 26px;
+	    vertical-align: middle;
+	    font-size: 14px;
+	    cursor: pointer;
+	    text-align: left;
+    }
+    .layoutTable tr:hover{
+    	background: rgba(214,0,65,1);
+    }
+    /* 2017/04/20 staff 画面対応　by　zy END*/
+    #nutrition-info h2 {
+    	padding: 12px 12px 3px;
+    }
+    #details-checkout img {
+	    padding-right: 20px;
+	}
+	/*2017/04/20 staff 画面対応　by　zy BEGIN */
+	#roomFloatMessage{
+		position: absolute;
+    	top: 28px;
+	    white-space: nowrap;
+	    margin-left: 20px;
+	}
+	#settingIcon{
+		position:absolute;margin-top: 6px; margin-bottom: 6px; right: 0px; top: -26px;
+	}
+	#floatUserInf{
+		position:absolute;
+    	max-width: 384px;
+		right: 15px; 
+		top: -20px;
+	}
+	#roomLstWrap{
+		display:none;
+		position:absolute;
+		overflow: scroll;
+		background: white;
+	}
+	#heya{
+		padding:0px;
+		background: rgb(212,212,212);
+	}
+	.roomRow{
+		line-height: 26px;
+	    font-size: 14px;
+	    font-family:consolas;
+	}
+	.innerRoom{
+		background:white;
+		width:98%;
+		height:97%;
+	}
+	.accountLstDiv{
+		background:white;
+		width:98%;
+		height:20px;
+	}
+	.mainRoom{
+		background-color: #d60041 !important;
+	    color: #fff;
+	}
+	#empty-cart{
+		font-size: 15px;
+	}
+	#checkout{
+		font-size: 15px;
+	}
+	/*2017/04/20 staff 画面対応　by　zy END */
+	.floatClass{
+		float:right;height: 28px; line-height: 28px; vertical-align: middle; font-size: 10px;border-left: 1px solid white;
+	}
+	/* 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN */
+	td.orderCol,th.cartPrice{
+		position: relative;
+	}
+	.userBtn[name=removeOrder] {
+		position: absolute;
+		top:0px;
+		padding: 0px 7px;
+    		margin: 1px 4px;
+		/* 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN */
+		/*width: 20%;*/
+		width: 30px;
+		/* 2020/02/15 会計の簡易レイアウトを変更 by zy END */
+	}
+	.cancelSpan{
+		text-transform: uppercase;
+	    background: rgb(214,0,65);
+	    background: -moz-linear-gradient(top, rgba(214,0,65,1) 0%, rgba(169,0,64,1) 100%);
+	    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(214,0,65,1)), color-stop(100%,rgba(169,0,64,1)));
+	    background: -webkit-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -o-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: -ms-linear-gradient(top, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    background: linear-gradient(to bottom, rgba(214,0,65,1) 0%,rgba(169,0,64,1) 100%);
+	    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#d60041', endColorstr='#a90040',GradientType=0 );
+	    font-size: 14px;
+	    color: #fff;
+		padding: 2px;
+	    cursor: pointer;
+	    text-align: center;
+	}
+	/* 2019/03/29 オーダーエントリー改善 取消機能 by zy END */
+	/* 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN */
+	.titleTab{
+		background:  rgba(214,0,65,1);
+		color: white;
+		cursor: pointer;
+		position: relative;
+		padding: 4px;
+	}
+	.titleTab:not(:first-child){
+		left: -10px;
+	}
+	.titleTab:hover,.titleTab.curSelect{
+		background: #000;
+		color: #bababa;
+	}
+	#historyRecipt{
+		display: none;
+		margin-bottom: 20px;
+	}
+	#historyRecipt tr.orderRow>td{
+		position: relative;
+	}
+	#historyRecipt.expand tr.prodRow{
+		display: none;
+	}
+	.reciptFunClass{
+		position: absolute;
+		display: none;
+	}
+	.reciptFunClass select{
+		text-align: center;
+    	text-align-last: center;
+	}
+	.reciptPanel{
+		background: #cac4c4;
+	    width: calc(100% - 200px);
+	    position: absolute;
+	    height: 30px;
+	    margin: 0px 100px;
+	    top:110px;
+	    display: none;
+	}
+	#reciptFuncLst{
+		right: 0px;
+		top: 5px;
+	}
+	#orderFunLst{
+		left:5px;
+		top:5px;
+	}
+	#reciptTotal{
+    	text-align: right;
+	    font-size: 15px;
+	    background: #ececec;
+	    width: 100%;
+    }
+	.reciptFunClass .cancelSpan{
+		padding: 5px 15px;
+	}
+	#orderFunLst>.expendSpan,#orderFunLst.expand>.collapseSpan{
+		display: none;
+	}
+	#orderFunLst.expand .expendSpan{
+		display: inline;
+	}
+	#historyRecipt.expand .orderRow>td{
+		border-bottom:1px solid #dadada;
+	}
+	#historyRecipt span.total{
+		position: absolute;
+		right: 0px;
+		top: 20%;
+	}
+	.expendSpan,.collapseSpan{
+		margin-left: 2px;
+	}
+	input[name=reciptCheck]{
+		width: 1.3em;
+	    height: 1.3em;
+	    left: 5px;
+	    position: absolute;
+	    top: 1px;
+	}
+	input[name=hisPntChk]{
+	    left: 5px;
+	    width: 1.3em;
+	    height: 1.3em;
+	    position: absolute;
+	    top: 1px;
+	}
+	.inputDt{
+	    border: 1px solid #ececec;
+    	width: 80px;
+    	font-size: 14px;
+    }
+    tr.orderRow span.title{
+    	white-space: normal;
+	    width: calc(100% - 100px);
+	    word-break: break-all;
+	    display: inline-block;
+	    margin-left: 1.6em;
+    	padding: 2px;
+	}
+	/* 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END */
+	/* 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN */
+	.selectClass .innerRoom{
+		background:orange;
+	}
+	/* 2020/02/15 予約が入っていないテーブルも選択可能に by zy END */
+	/* 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN */
+	#groupTabs{
+		/*display: inline-table;*/
+		width:100%;
+	}
+	.groupTab{
+		background:  rgba(214,0,65,1);
+		color: white;
+		cursor: pointer;
+		padding: 4px;
+		margin-left:1px;
+		font-size: 1.3em;
+	}
+	.groupTab:hover,.groupTab.curSelect{
+		background: #000;
+		color: #bababa;
+	}
+	/* 2020/02/15 会計商品のリストを多層構造化 by zy END */
+</style>
+<!-- 2017/04/20 staff 画面対応　by　zy BEGIN  -->
+<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy BEGIN -->
+<apex:outputpanel id="tabpanel">
+<style>
+<apex:repeat value="{!tabLst}" var="tab" >
+		.{!tab.tabName}{
+			display:{!tab.tabDisStr} !important;
+		}
+	</apex:repeat>
+</style>
+</apex:outputpanel>
+<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy END -->
+<apex:outputpanel rendered="{!if(currentLanguage== 'en',if(modeType == 'COMMON',true,false) ,false)}">
+<style>
+#shop-list{
+	width:750px;
+}
+#shopping-cart{
+ 	width:250px;
+ }
+ #checkout{
+ 	width: 106px;
+ }
+ #empty-cart{
+ 	width:115px;
+ }
+ .roomFunBtn{
+ 	width:100px !important;
+ }
+ /* 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN */
+.userBtn[name=removeOrder] {
+	width: auto;
+}
+/* 2019/03/29 オーダーエントリー改善 取消機能 by zy END */
+</style>
+</apex:outputpanel>
+<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN-->
+<apex:outputpanel rendered="{!if(currentLanguage== 'en',if(modeType == 'SIMPLE' || modeType == 'SIMPLE_UP',true,false) ,false)}">
+<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END-->
+<style>
+#shop-list{
+	width:720px;
+}
+#shopping-cart{
+ 	width:280px;
+ }
+ .roomFunBtn{
+ 	width:100px !important;
+ }
+ #checkout{
+ 	width: 106px;
+ }
+ #empty-cart{
+ 	width:115px;
+ }
+</style>
+</apex:outputpanel>
+<apex:outputPanel rendered="{!!isDomainFlag}">
+<style>
+.domenClass{
+	display:none;
+}
+/* 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN */
+.userBtn[name=cancelButton]{
+	display: none;
+}
+/* 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END */
+</style>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!modeType == 'COMMON'}">
+<style>
+	/* 通常模式 by zy BEGIN*/
+	#historyOrderDiv{
+		width:1000px;
+	}
+	#historyOrder{
+		padding-left: 100px;
+	}
+	.proNameClass{
+		width:400px;
+	}
+	.historyTitle{
+		font-size: 36px; color: #2e2e2e; padding-top: 50px; padding-left: 100px; padding-bottom: 53px; text-align: left;
+	}
+</style>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!modeType == 'SIMPLE' || modeType == 'SIMPLE_UP'}">
+<style>
+	/* 简易模式 by zy BEGIN*/
+	.products{
+		background: white;
+	}
+	.cartPrice{
+		text-align: right;
+	}
+	.historyTitleDiv{
+		width:550px;
+	}
+	.products strong{
+		font-size:{!fontSize};
+	}
+	.simpleProducts{
+		padding-bottom: 0px;
+		margin-bottom:0px;padding-left: 5px; 
+		padding-right: 5px;
+		width:{!simpleWidth};
+	}
+	.simpleBtn{
+		padding-top: 5px;
+	    background: #e8e8e9;
+	    border: 1px solid #b5b5b5;
+	    border-bottom-color: #7f7f7f;
+	    -moz-border-radius: 3px;
+	    -webkit-border-radius: 3px;
+	    border-radius: 3px;
+	}
+	.simpleBtn:hover {
+	 	background-color: #d60041;
+	    color: #fff;
+	    cursor: pointer;
+	}
+	#historyOrderDiv{
+		width:55%;
+	}
+	#historyOrder{
+		padding: 0px;
+	}
+	#historyOrder tr.headTr th:nth-child(3){
+		width:30px;
+	}
+	#historyOrder tr.headTr th:nth-child(4){
+		width:88px;
+	}
+	.historyTitle{
+		font-size: 36px; color: #2e2e2e; padding-top: 50px; padding-bottom: 53px; text-align: left;
+	}
+	.proNameClass{
+		width:200px;
+	}
+	.productName{
+      display: inline-block;
+      color: #ab7829;
+      font-size: 21px;
+      font-weight: normal;
+      padding-top: 25px;
+      padding-bottom: 5px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      text-align: center;
+      width: 100%;
+	  }
+  	.backgroundCream{
+	    display: none;
+	    position:absolute;
+	    background-color: rgba(0,0,0,0.75);
+	      background-image: url(images/arrow-right.png);
+	      background-repeat: no-repeat;
+	      background-position: 50% 50%;
+	      cursor: pointer;
+	  }
+	  #shopping-cart{
+	  	width:280px;
+	  }
+	  #checkout{
+	  	width:133px;
+	  }
+	.item-price{
+	  font-size: 17px;
+	    display: inline-block;
+	    line-height: 1em;
+	    text-transform: uppercase;
+	}
+	/* 简易模式 by zy END*/
+	#floatShopInfo{
+		margin-right:15px;
+	}
+	/* 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN */
+	#shop-info{
+		overflow: inherit;
+	}
+	/* 2019/03/29 オーダーエントリー改善 取消機能 by zy END */
+	/* 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN */
+	.reciptHistory #historyOrderDiv,.reciptHistory li:nth-child(1) ,.reciptHistory .historyTitleDiv{
+		width: auto !important;
+	}
+	.reciptHistory li:nth-child(2){
+		display: none;
+	}
+	.reciptHistory #historyRecipt{
+		padding-left: 0px;
+		table-layout: fixed;
+	}
+	.reciptHistory .reciptPanel{
+		width: calc(100% - 100px);
+	    margin-left: 0px;
+	}
+	/* 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END */
+</style>
+</apex:outputPanel>
+<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN-->
+<apex:outputpanel rendered="{!modeType == 'SIMPLE_UP'}">
+<style>
+	#content ul li{
+		float:left;
+	}
+	.simpleLayout{
+        position:absolute;
+        width: 100%;
+        top:0px;
+        text-align: right;
+        background: #000000;
+    	}
+	#historyOrderDiv,.historyTitleDiv{
+		width: auto;
+	}
+	.reciptPanel{
+		width: 100%;
+    	margin: 0;
+	}
+	#historyRecipt{
+		padding:0px;
+	}
+</style>
+</apex:outputPanel>
+<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END-->
+<!-- 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw BEGIN -->
+<apex:outputpanel id="fontSizePanel" rendered="{!menuZoomFlag != null}">
+<apex:variable var="fontSize" value="{!menuZoomFlag}" />
+<style>
+	.innerWrap {
+		overflow: hidden;
+		height: auto !important;		
+	}
+	.tabBtn1 .tabChild1 {
+		/*width: 100px;*/
+		height: 2em;
+		line-height: 2em !important;
+		font-size: {!fontSize}px !important;
+		padding-right: 2em;
+	}
+	.tabBtn1 .tavChild1:not(:last-child) {
+		padding-right: 2em !important;
+	}
+	.tabBtn1 .tabChild1:not(:first-child)::before {
+		left: -2em;
+		border-top: 0 solid transparent;
+	    border-right: 0 solid rgba(214,0,65,1);
+	    border-bottom: 2em solid rgba(214,0,65,1);
+	    border-left: 2em solid transparent;
+	}
+	.tabBtn1 .curSelectPlan::before {
+		border-top: 0 solid transparent;
+	    border-right: 0 solid #000 !important;
+    	border-bottom: 2em solid #000 !important;
+	    border-left: 2em solid transparent;
+	}
+	.tabBtn1 .tabChild1:not(:first-child):hover::before {
+		left: -2em;
+	   	border-top: 0 solid transparent;
+	    border-right: 0 solid #000;
+	    border-bottom:2em solid #000;
+	    border-left: 2em solid transparent;
+	}
+	.tabBtn1 .tabChild1 {
+		margin: 1px -2px !important;
+	}
+	.tabBtn1 .tabChild1:not(:last-child)::after {
+	   	border-top: 0 solid transparent;
+	    border-right: 0 solid rgba(214,0,65,1);
+	    border-bottom:2em solid rgba(214,0,65,1);
+	    border-left: 2em solid transparent;
+	}
+	#cart-info, .floatClass,.logoImg,#cart-info span span {
+		height: 2em !important;
+		line-height: 2em !important;
+		font-size: {!fontSize}px;
+	}
+	#cart-info span:before {
+		border-top: 0 solid #000;
+	    border-right: 0 solid transparent;
+	    border-bottom: 2em solid transparent;
+	    border-left: 1em solid #000;
+	}
+	.historySpan, .selectSpan {
+		padding: 0 15px 0 15px;
+		font-size: {!fontSize}px;
+	}
+	.layoutTable td {
+		padding: 5px 15px;
+	}
+	.layoutTable tr {
+		font-size: {!fontSize}px !important;
+	}
+	#languageDiv .layoutTable {
+		width: auto !important;
+	}
+	.tabBtn1 .tabChild1:not(:last-child):hover::after {
+		border-top: 0 solid transparent;
+	    border-right: 0 solid #000 !important;
+	    border-bottom: 2em solid #000 !important;
+	    border-left: 2em solid transparent;
+	}
+	.roomFunBtn {
+		width: auto !important;
+	}
+	#header {
+		height:auto !important;
+	}
+	#roomFloatMessage{
+		position: unset;
+	}
+</style>
+</apex:outputpanel>
+<!-- 2019/02/15 オーダーエントリー改善（文字サイズをカスタマイズとレイアウト自由カスタマイズ機能） by cxw BEGIN -->
+<apex:outputpanel id="roomSizePanel" rendered="{!roomZoomFlag != null}">
+<apex:variable var="fontSize" value="{!roomZoomFlag['fontSize']}" />
+<apex:variable var="width" value="{!roomZoomFlag['width']}" />
+<apex:variable var="height" value="{!roomZoomFlag['height']}" />
+<style>
+	#roomLstWrap .innerWrap, #selRoomType, #roomLstWrap .br > span, #roomLstWrap .innerRoom > div, #roomLstWrap .accountBtn {
+		{!IF(ISBLANK(fontSize), '', 'font-size: ' + fontSize + 'px;')}
+	}
+	
+	#roomLstWrap .roomLstClass {
+		{!IF(ISBLANK(width), '', 'width: ' + width + 'px;')}
+		{!IF(ISBLANK(height), '', 'height: ' + height + 'px;')}
+	}
+	#roomLstWrap .accountBtn {
+		height: 100%;
+		width: 100%;
+		
+	}
+	
+	#roomLstWrap .innerWrap {
+		overflow: auto;
+		min-height: 3em;
+	}
+	
+	#roomLstWrap .innerRoom > div {
+		height: 20%;
+		overflow: hidden;
+	}
+	
+	#roomLstWrap .floatRoomRow {
+		max-width: 98%;
+	}
+	
+	#selRoomType {
+		padding: 2px;
+	}
+	
+	#roomLstWrap .br {
+		display: block;
+		margin-left: 20px;
+	}
+	
+	#roomLstWrap .br > span {
+		margin-right: 2px;
+	}
+	
+	#roomLstWrap .roomFunBtn {
+		width: auto;
+	}
+	
+	#roomLstWrap .floatClass {
+		height: 2em !important;
+		line-height: 2em !important;
+	}
+	
+</style>
+</apex:outputpanel>
+<!-- 2019/02/15 オーダーエントリー改善（文字サイズをカスタマイズとレイアウト自由カスタマイズ機能） by cxw END -->
+<!--2017/04/20 staff 画面対応　by　zy END -->
+<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/kendo.rtl.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/kendo.default.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/kendo.dataviz.min.css')}"/>
+
+<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/kendo.dataviz.default.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/style.css')}"/>
+
+
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/jquery.min.js')}"/>
+<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/kendo.custom.min.2016.3.1028.js')}"/>
+-->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+<!-- 
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/kendo.ui.core.min.js')}"/>
+ -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/main.js')}"/>
+<!-- 2017/02/22 打印とip 機能独立化　by　zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/process.js')}"/>
+<!--
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/print.js')}"/>
+-->
+<!-- 2017/02/22 打印とip 機能独立化　by　zy END -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/PrintJs.js')}"/>
+<c:CommHeaderComp loadJsLib="false"/>
+<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN-->
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!-- JSで単価金額計算ロジック -->
+<c:CommProductFeeCalJsComp />
+<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy END -->
+</head>
+<body>
+<!-- 処理ステータス制御する -->
+	<apex:actionStatus onstart="javascript:JINYACONNECT.blockUi();" onstop="JINYACONNECT.unblockUi();" id="refStatusBlock"/>
+	<!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+	<apex:form id="LoadForm">
+		<!-- ACTION FUNCTION BEGIN -->
+		<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+		<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy BEGIN -->
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN -->
+		<apex:actionFunction name="initOrderFun" action="{!initFun}"
+			status="refStatusBlock" reRender="LoadForm,headPanel,tabpanel" oncomplete="InitFun();refreshLoadMsg();beforeOpenRoomWin();"/>
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END -->
+		<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy END -->
+		<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+		<!--2017/04/20 staff 画面対応　by　zy END -->    	
+	    <apex:actionFunction name="changeEnLange" action="{!changeEnLanguage}" status="refStatusBlock" />
+	    <apex:actionFunction name="changeJpLange" action="{!changeJpLanguage}" status="refStatusBlock" />
+	    <!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+		<apex:actionFunction name="changLayout" action="{!changelayout}" status="refStatusBlock" />
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN -->
+	    <apex:actionFunction name="changeRoomFun" action="{!changeCurrentRoom}" status="refStatusBlock" reRender="LoadForm,headPanel" oncomplete="changeLocalRoomId();refreshLoadMsg();initLayout();"/>
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN -->
+		<!-- <apex:actionFunction name="refreshRoomFun" action="{!refreshRoomLst}" status="refStatusBlock" reRender="innerHeadPanel,LoadForm" oncomplete="resizeWindow();initLocalStorage();refreshLoadMsg();"/> -->
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN -->
+		<apex:actionFunction name="refreshRoomAftFun" action="{!refreshRoomLst}" status="refStatusBlock" reRender="innerHeadPanel,LoadForm"  oncomplete="afterRefreshLead();"/>
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END -->
+	    <!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+	    <!-- 会計済みの機能　-->
+	    <apex:actionFunction name="accountDomainFun" action="{!accountDomain}" status="refStatusBlock" reRender="LoadForm,headPanel" oncomplete="changeLocalRoomId();refreshLoadMsg();"/>
+	    <!-- 内部の注文　-->
+	    <apex:actionFunction name="processOrderDomainFun" action="{!processOrderDomain}" reRender="LoadForm,innerHeadPanel" oncomplete="afterProcess()"/>
+	   	<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy END -->
+	   	<!-- 2017/07/05 多店舗対応選択リスト　by　zy　BEGIN -->
+	   	<apex:actionFunction name="chgShopCodeFun" action="{!chgShopCodeFun}"
+	    	status="refStatusBlock"/>
+	    <!-- 2017/07/05 多店舗対応選択リスト　by　zy　END -->
+	   	<!-- ACTION FUNCTION END -->
+	   	<!-- HIDDEN PARAMETER BEGIN -->
+	   	<!--2017/04/20 staff 画面対応　by　zy END -->
+	   	<apex:inputHidden value="{!localIp}" id="hidLocalIp" /> 
+	   	<apex:inputHidden value="{!roomId}" id="hidRoomId" /> 
+	   	<!-- 2017/02/22 source整理 by zy BEGIN
+	   	<apex:inputHidden value="{!statusUrl}" id="hidStatusUrl" /> 
+	   	<apex:inputHidden value="{!prinUrl}" id="hidPrintUrl" /> 
+	   	<apex:inputHidden value="{!repiceLayout}" id="hidRepiceLayout" /> 
+	   	<apex:inputHidden value="{!curPno}" id="hidCurPno" /> 
+	   	<apex:inputHidden value="{!curRoomName}" id="hidCurRoomName" /> 
+	   	 2017/02/22 source整理 by zy END -->
+	   	 <!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+	   	 <apex:inputHidden value="{!modeType}" id="hideType"/>
+	   	<apex:inputHidden value="{!demoDate}" id="hidDemoDate" /> 
+	   	<!-- 2017/04/20 多店舗機能対応　by　zy BEGIN -->
+	   	<apex:inputHidden value="{!oShopCode}" id="hidShopCode" />
+	   	<!-- 2017/04/20 多店舗機能対応　by　zy END -->
+	   	<input type="hidden" id="hidLocalProcessFlag" />
+	   	<input type="hidden" value="{!curRoomJson}" id="hidCurRoomMsg" />
+	   	<input type="hidden" value="{!curUserInfo}" id="hidUserInfo" />
+	   	<!-- 2017/07/05 多店舗対応選択リスト　by　zy　BEGIN -->
+	   	<input type="hidden" value="{!curShopName}" id="hidShopName" />
+	   	<!-- 2017/07/05 多店舗対応選択リスト　by　zy　END -->
+	   	<!--2017/04/20 staff 画面対応　by　zy END -->
+	   	<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+	   	<input type="hidden" value="{!curSequenceInfo}" id="hidSequenceInfo" />
+	   	<!-- 交互用json字符 -->
+	   	<apex:inputHidden value="{!reqJson}" id="hidReqJson" /> 
+		<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy END -->
+		<!-- HIDDEN PARAMETER END -->
+		<!-- 2017/09/11 印刷リスト機能　by　zy　BEGIN -->
+		<!-- 日期切换 -->
+		<apex:inputHidden value="{!queryDate}" id="hidQueryDate" />
+		<input type="hidden" value="{!hadDeviceFlag}" id="hidDeviceFlag" />
+		<!-- 2017/10/14 部屋の予約別の機能追加　by　zy　BEGIN -->
+		<apex:inputHidden id="hideLeadId" value="{!roomLeadId}"/>
+		<!-- 2017/10/14 部屋の予約別の機能追加　by　zy　END -->
+		<!-- 2017/09/11 印刷リスト機能　by　zy　END -->
+		<!--2018/02/07 オーダーエントリー画面の英語対応 by zy BEGIN  -->
+		<apex:inputHidden id="hidLanguage" value="{!currentLanguage}"/>
+		<!--2018/02/07 オーダーエントリー画面の英語対応 by zy END  -->
+		<!-- 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN -->
+		<input type="hidden" id="hidAccountId"/>
+		<!-- 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END -->
+		<!-- 2020/02/15 初期画面を「テーブル選択画面」にする by zy BEGIN -->
+		<input type="hidden" id="hidRoomOpen" value="{!roomPageOpenFlg}" />
+		<input type="hidden" id="hidFrameMode" value="{!iframeMode}" />
+		<!-- 2020/02/15 初期画面を「テーブル選択画面」にする by zy END -->
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN -->
+		<apex:inputHidden id="hidLayoutType" value="{!curType}"/>
+		<!-- 選択場所Id-->
+		<apex:inputHidden id="hidLocationId" value="{!selLocationId}"/>
+		<!-- 選択場所のレイアウトId-->
+		<apex:inputHidden id="hidlayoutId" value="{!selLocLayoutId}"/>
+		<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END -->
+		<!-- 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN-->
+		<input type="hidden" id="hidSelRoomFlg" value="{!selLeadRoomFlg}"/>
+		<!-- 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END-->
+		<!-- 2020/04/30  複数部屋だと問題なく予約が作成される by zy BEGIN-->
+		<input type="hidden" id="hidMulitRoomFlg" value="{!multiRoomFlg}"/>
+		<!-- 2020/04/30  複数部屋だと問題なく予約が作成される by zy END-->
+	</apex:form>
+	<div style="display:none;">
+		<span id="msg" style="font-family:consolas;" >Try to connect web socket.</span>
+		<div id="listmessage" style="overflow:auto;line-height:15px;border:1px red solid;height:120px;width:100%;"></div>
+	</div>
+	<!--					<a>
+						<select>
+							
+							<option value="ja">{!$Label.MSG_060_0018}</option>
+							
+							<option value="en">{!$Label.MSG_060_0017}</option>
+						</select>
+					</a>
+-->
+<!--日本語--><!--英語-->
+	<div id="application"></div>
+		<script type="text/x-kendo-template" id="head-template">
+			<span id="settingIcon" class="k-icon k-i-custom" title="{!$Label.MSG_060_0023}" onclick="redictMessage()"></span>
+					<span id="floatUserInf"><span  id="floatShopInfo"></span><span id="floatUserInfo"></span></span>
+					<a href="{!if(isDomainFlag,'/home/home.jsp','#/')}"><img src="{!LogoIcon}" alt="banner" class="logoImg" style="height:50px;" /></a>
+					<!-- 2017/05/26 様式整合　by zy BEGIN -->
+					<a class="floatClass">
+						<span class="selectSpan" onmouseenter="showLayoutWin(this,'languageDiv')" onclick="showLayoutWin(this,'languageDiv')" onmouseleave="hideLanguageWin(this,'languageDiv')">
+							<span class="k-icon k-i-arrow-s" style="position: relative; left: -2px;"></span>
+							{!$Label[currentLanguageLabelMap[currentLanguage]]}
+						</span>
+					</a>
+                    <a class="floatClass"  href= "#/history" >
+					<!-- 2017/05/26 様式整合　by zy END -->	
+						<span class="historySpan">
+							<span class="k-icon k-i-clock " style="width:17px;margin-left: 6px;"></span>
+								<!--履歴-->
+								{!$Label.MSG_060_0014}	
+						</span>
+					</a>
+					<a id="cart-info" href="#">
+						<!--注文商品-->
+						{!$Label.MSG_060_0002}
+						<span>
+							<span data-bind="text: cart.contentsCount"></span> 
+							<!--件-->
+							{!$Label.MSG_060_0003}
+						</span>
+					</a>
+					<!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+					<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+					<span class="domenClass floatClass" onmouseenter="showLayoutWin(this,'printDiv')" onclick="showLayoutWin(this,'printDiv')" onmouseleave="hideLanguageWin(this,'printDiv')">
+						<!--印刷-->
+						<span class="selectSpan">{!$Label.MSG_060_0031}</span>
+					</span>
+					<span class="domenClass floatClass" onmouseenter="showLayoutWin(this,'layoutDiv')" onclick="showLayoutWin(this,'layoutDiv')" onmouseleave="hideLanguageWin(this,'layoutDiv')">
+						<span class="selectSpan">{!$Label.MSG_060_0024}</span>
+					</span>
+					<!-- 2017/04/20 多店舗機能対応　by　zy BEGIN -->
+					<span class="domenClass floatClass" style="display:{!if(shopCodeLst.size>1,'','none')}" onmouseenter="showLayoutWin(this,'shopLstDiv')" onclick="showLayoutWin(this,'shopLstDiv')" onmouseleave="hideLanguageWin(this,'shopLstDiv')">
+						<span class="selectSpan">{!$Label.MSG_060_0039}</span>
+					</span>
+					<!-- 2017/04/20 多店舗機能対応　by　zy END -->
+					<span class="domenClass floatClass" onclick="beforeOpen('account');showRoomLst('account')">
+					<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy END -->	
+						<a href="#">	
+<!-- 2017/05/30 ラベル改修　by zy BEGIN -->	
+						<!-- 会計 -->
+						<span class="selectSpan">{!$Label.MSG_060_0036}</span>
+<!-- 2017/05/30 ラベル改修　by zy END -->	
+						</a>
+					</span>
+					<span class="domenClass floatClass" onclick="beforeOpen();showRoomLst();">
+					<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy END -->	
+						<a href="#">	
+						<span class="selectSpan">{!$Label.MSG_060_0027}</span>
+						</a>
+					</span>
+					<span id="roomFloatMessage" >
+						<div style="overflow:hidden;width:307px;">
+							<div style='height:20px;' id="roomMess"> </div>
+						</div>
+						<div id="leadMess"></div>
+					</span>
+		</script>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE'}">
+		 <script type="text/x-kendo-template" id="layout-template">
+              <div id="wrapper">
+                  <div id="header"></div>
+				  <div id="main-section">
+					<a class="tabBtn1" href="#">
+						<span>
+							<apex:repeat value="{!tabLst}" var="tab">
+								<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy BEGIN -->
+								<span class="{!if(tab.isCurClass,'curSelectPlan','')} {!tab.tabName} tabChild1" onclick="showCurClass('{!tab.tabName}',this);clearOrgHistory()" style="line-height: 26px; font-size: 14px;">
+								<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy END -->	
+									{!tab.tabName}
+								</span>
+							</apex:repeat>
+						</span>
+					</a>
+					<!-- 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN-->
+					<div id="groupTabs"></div>
+					<!-- 2020/02/15 会計商品のリストを多層構造化 by zy END-->
+            	  <ul class="orderPanel" >
+              		<li style="width:55%;overflow:hidden;">
+                    	<section id="content"></section>
+              		</li>
+             		 <li  style="width:45%;padding-top:20px;" data-template="cart-preview-template">
+                		<section id="pre-content"></section>
+             		 </li></ul>
+                  </div>
+              </div>
+          </script>
+		  <!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE_UP'}">
+			<script type="text/x-kendo-template" id="layout-template">
+				<div id="wrapper">
+					<div id="header"></div>
+					<div id="main-section">
+						<a class="tabBtn1" href="#">
+							<span>
+								<apex:repeat value="{!tabLst}" var="tab">
+									<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy BEGIN -->
+									<span class="{!if(tab.isCurClass,'curSelectPlan','')} {!tab.tabName} tabChild1" onclick="showCurClass('{!tab.tabName}',this);clearOrgHistory()" style="line-height: 26px; font-size: 14px;">
+									<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy END -->	
+										{!tab.tabName}
+									</span>
+								</apex:repeat>
+							</span>
+						</a>
+					</div>
+					<!-- 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN-->
+					<div id="groupTabs"></div>
+					<!-- 2020/02/15 会計商品のリストを多層構造化 by zy END-->
+					<ul class="orderPanel" >
+					<li style="overflow:hidden;margin-bottom:{!bottomHt}">
+						<section id="content"></section>
+					</li>
+						<li style="padding-top:20px;position:fixed;bottom:0px;width:1000px;" data-template="cart-preview-template">
+						<section id="pre-content" style="position:relative;padding-top:3em;background: #000000;"></section>
+						</li>
+					</ul>
+				</div>
+			</script>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE'}">
+		<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+          <script type="text/x-kendo-template" id="cart-preview-template">
+        	<div id="shop-info" style="height:auto" data-bind="attr: { class: cartContentsClass }">
+				<span id="curPrintLayout" style="font-size: 21px;color:white;float:right;"/>
+            	<table style=" padding: 0px 0px 0px 5px;    color: #fff; background: #2e2e2e;" data-role="listview" data-bind="source: cart.contents" data-template="cart-item3">
+            	</table>
+                    <div id="shopping-cart" style="height:auto;" >
+             			 <!--注文商品-->
+                        <h3>{!$label.MSG_060_0002}</h3>
+                        <p class="total-price" data-bind="html: totalPrice"></p>
+              			<!--注文取消-->
+              			<!--注文-->
+						<a id="empty-cart" href="#" data-bind="click: emptyCart">{!$Label.MSG_060_0005}</a><a id="checkout" href="#" data-bind="click: proceed">{!$label.MSG_060_0013}!</a>
+                    </div>
+                </div>    
+          </script>
+		<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE_UP'}">
+			<script type="text/x-kendo-template" id="cart-preview-template">
+				<span id="curPrintLayout" style="font-size: 21px;color:white;" class="simpleLayout"></span>
+				<div id="shop-info" style="height:auto;min-height:160px;max-height:{!bottomHt};margin-bottom: 0px;overflow:scroll;" data-bind="attr: { class: cartContentsClass }">
+					<table style=" padding: 0px 0px 0px 5px;color: #fff; background: #2e2e2e;float:left;width:calc(100% - 280px); " >
+						<thead>
+							<tr>
+								<!--商品-->
+								<th style="color:white">{!$Label.MSG_060_0008}</th>
+							  	<!--数量-->
+								<th style="color:white;width:80px;">{!$Label.MSG_060_0009}</th>
+							  	<!--金額-->
+								<th style="color:white">{!$Label.MSG_060_0010}</th>
+								<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+								<th style="width:50px;color:white;"></th>
+								<!-- 順番 -->
+								<th style="width:50px;color:white;text-align:center;">{!$LABEL.MSG_060_0079}</th>
+								<!-- 備考 -->
+								<th style="color:white;text-align:center;">{!$LABEL.MSG_060_0080}</th>
+								<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+								<tbody style="color: #fff; background: #2e2e2e; " data-role="listview" data-bind="source: cart.contents" data-template="cart-item3">
+								</tbody>
+							</tr>
+						</thead>
+					</table>
+					<!-- 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN-->
+					<div id="mulitSelLeadRoom">
+						<span class="multiSelRoomPanel" style="display:none;position:absolute;right:0px;color:white;font-size:14px;">
+							部屋付け
+							<input id="multiSelRoomDropDown" style="width:200px;"/>
+						</span>
+					</div>
+					<!-- 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END-->
+					<div id="shopping-cart" style="height:auto;position:absolute;bottom:15px;right:0px;" >
+              			<!--注文商品-->
+                        <h3>{!$label.MSG_060_0002}</h3>
+                        <p class="total-price" data-bind="html: totalPrice"></p>
+              			<!--注文取消-->
+              			<!--注文-->
+						<!-- 2020/06/30 6522 bug fixed by zy BEGIN -->
+						<a id="empty-cart" href="#" data-bind="click: emptyCart">{!$Label.MSG_060_0005}</a><a id="checkout" href="#history" data-bind="click: proceed">{!$label.MSG_060_0013}!</a>
+						<!-- 2020/06/30 6522 bug fixed by zy END -->
+                    </div>
+				</div>
+			</script>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE' || modeType == 'SIMPLE_UP'}">
+		<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+           <script type="text/x-kendo-template" id="index-template">
+        	<ul data-role="listview" data-bind="source: items" data-template="item" style="padding-top: 20px;" id="main"></ul>
+          </script>
+          <script type="text/x-kendo-template" id="item">
+	      <!-- 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN-->
+              <li class="products simpleProducts #:category#" group="#:groupName#" data-bind="click: addToCart">
+	      <!-- 2020/02/15 会計商品のリストを多層構造化 by zy END--> 
+                  <strong class="simpleBtn" title="#: name #" data-bind="text: name" style="padding-top:5px;"></strong>
+              </li>
+          </script>
+		  <!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE'}">
+		<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+          <script type="text/x-kendo-template" id="cart-item3">
+      		<tr style="line-height: 32px;font-size:17px;">
+			<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+        		<th style="width:55%;"><span style="display: block; white-space: nowrap;  overflow: hidden; text-overflow: ellipsis;max-width:290px;"  title="#=item.name#" data-bind="text: item.name"></span></th>
+                	<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+                <th><input type="text" data-format="n0" data-role="numerictextbox" data-min="0" data-max="999" style="width:70px;font-size: 12px;" data-bind="value: quantity"></th>
+					<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN -->
+					<!-- 2020/06/30 6545 bug fixed by zy BEGIN -->
+					<th class="cartPrice">
+						<p class="item-price" data-bind="text: itemPrice" style="{!if(isPriceInputFlg,'display:none;','')}" ></p>
+						<input class="item-price k-input" style="width:80px;text-align:right;{!if(!isPriceInputFlg,'display:none;','')}"  data-bind="value:item.price" onchange="priceChange()"/>
+					</th>
+					<!-- 2020/06/30 6545 bug fixed by zy END -->
+					<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy END -->
+				<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+				<th>
+					<div class="cancelSpan" onclick="removeOrder()">{!$label.MSG_060_0012}</div>
+				</th>
+      			<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+				</tr>
+			</script>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!modeType == 'SIMPLE_UP'}">
+			<script type="text/x-kendo-template" id="cart-item3">
+				<tr style="line-height: 32px;font-size:17px;">
+					<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+					<th style="width:40%;"><span style="display: block; white-space: nowrap;  overflow: hidden; text-overflow: ellipsis;max-width:290px;"  title="#=item.name#" data-bind="text: item.name"></span></th>
+					<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+					<th><input type="text" data-format="n0" data-role="numerictextbox" data-min="0" data-max="999" style="width:70px;font-size: 12px;" data-bind="value: quantity"></th>
+					<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN -->
+					<!-- 2020/06/30 6545 bug fixed by zy BEGIN -->
+					<th class="cartPrice">
+						<p class="item-price" data-bind="text: itemPrice" style="{!if(isPriceInputFlg,'display:none;','')}" ></p>
+						<input class="item-price k-input" style="width:80px;text-align:right;{!if(!isPriceInputFlg,'display:none;','')}"  data-bind="value:item.price"  onchange="priceChange()"/>
+					</th>
+					<!-- 2020/06/30 6545 bug fixed by zy END -->
+					<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy END -->
+					<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+					<th style="width: 40px;">
+						<div class="cancelSpan" onclick="removeOrder()">{!$label.MSG_060_0012}</div>
+					</th>
+					<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+					<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+					<th style="padding:0px 2px;"><input type="text" name="selNow" style="width:60px;"/></th>
+					<th><select style="width:98%;" name="selDesc">
+						<option></option>
+						<apex:repeat value="{!cookDescOpts}" var="cook">
+							<option>{!cook.label}</option>
+						</apex:repeat>
+						</select>
+					</th>  
+		<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+      		</tr>
+        	</script>
+         </apex:outputPanel>
+         <apex:outputPanel rendered="{!modeType == 'COMMON'}">
+         	<script type="text/x-kendo-template" id="layout-template">
+            <div id="wrapper">
+                <div id="header"></div>
+                <!--2017/04/20 staff 画面対応　by　zy END -->
+				<!--
+                <p data-bind="visible: cart.cleared"> Thank you for your order!</p>
+				-->
+                <div id="main-section">
+					<a class="tabBtn1" href="#">
+						<span>
+							<apex:repeat value="{!tabLst}" var="tab">
+								<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy BEGIN -->
+								<span class="{!if(tab.isCurClass,'curSelectPlan','')} tabChild1 {!tab.tabName}" onclick="showCurClass('{!tab.tabName}',this)" style="line-height: 26px; font-size: 14px;">
+								<!-- 2019/02/15 オーダーエントリー画面のボタン表示内容を端末ごとに変更したい by zy END -->	
+									{!tab.tabName}
+								</span>
+							</apex:repeat>
+						</span>
+					</a>
+                    <section id="pre-content"></section>
+                    <section id="content"></section>
+                </div>
+            </div>
+        </script>
+        <script type="text/x-kendo-template" id="cart-preview-template">
+            <div id="shop-info" data-bind="attr: { class: cartContentsClass }">
+
+                <ul data-role="listview" data-bind="source: cart.contents" data-template="cart-item" id="shop-list"></ul>
+
+                <div id="shopping-cart">
+					<!--注文商品-->
+                    <h3>{!$label.MSG_060_0002}</h3>
+                    <p class="total-price" data-bind="html: totalPrice"></p>
+					<!--注文取消-->
+					<!--注文-->
+                    <a id="empty-cart" href="#" data-bind="click: emptyCart">{!$Label.MSG_060_0005}</a><a id="checkout" href="#/checkout">{!$Label.MSG_060_0006}</a>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/x-kendo-template" id="index-template">
+				<!-- 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN-->
+				<div id="groupTabs"></div>
+				<!-- 2020/02/15 会計商品のリストを多層構造化 by zy END-->
+            <ul data-role="listview" data-bind="source: items" data-template="item" id="main"></ul>
+        </script>
+        <!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+        <script type="text/x-kendo-template" id="item">
+				<!-- 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN-->
+				<li class="products #:category#" group="#:groupName#">
+				<!-- 2020/02/15 会計商品のリストを多層構造化 by zy END-->
+                <a class="view-details" href="\\#/menu/#: id #">
+                    <img class="main-image" src="#= image #"  alt="#: name#" title="#: name #" />
+                    <strong title="#: name #" data-bind="text: name"></strong>
+                    <span class="price"><span data-bind="text: itemPrice"></span>
+					<span style="font-size:10px;">({!kbnLabel})</span>
+					</span>
+                </a>
+				<!--選択-->
+                <button class="add-to-cart" data-bind="click: addToCart">{!$label.MSG_060_0004}</button>
+            </li>
+        </script>
+     </apex:outputPanel>
+     <!--2017/04/20 staff 画面対応　by　zy END -->
+        <script type="text/x-kendo-template" id="detail-template">
+            <div id="details-top-image">
+            </div>
+
+            <div id="details">
+                <a data-bind="attr: {href: previousHref }" id="navigate-prev"></a><div
+                id="detail-info"><img class="main-image"
+                data-bind="attr: { src: imgUrl }" alt="Selected Product" title="Selected Product"/><div
+                id="description">
+                        <h1 data-bind="text: current.name"></h1>
+                        <p data-bind="text: current.description"></p>
+                        <div id="details-total">
+                            <p id="price-quantity" data-bind="text: price"></p>
+							<!--選択-->
+                            <button class="buy" data-bind="click: addToCart">{!$label.MSG_060_0004}</button>
+                        </div>
+                    </div>
+                </div>
+				<div id="nutrition-info" >
+						<!--商品説明 -->
+						<h2>{!$ObjectType.AccountMaster__c.Fields.Descript__c.label}</h2>
+						<dl>
+							<dd class="infoContent" data-bind="text: current.infoContent"> </dd>
+						</dl>
+						
+                </div><a data-bind="attr: { href: nextHref }" id="navigate-next"></a>
+            </div>
+
+            <div id="details-bottom-image"></div>
+        </script>
+        <script type="text/x-kendo-template" id="large-cart-item">
+            <tr>
+                <td> <div class="cart-image-wrapper"><img class="main-image" src="#= item.image #" style="width: 100px; height: 100px;" /></div> <span class="product-name" title="#=item.name#" data-bind="text: item.name"></span></td>
+                <td><input type="text" data-format="n0" data-role="numerictextbox" data-min="0" data-max="999" style="width:70px;" data-bind="value: quantity"></td>
+                <!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+				<td class="orderCol" style="width:130px;"><p class="table-price" data-bind="text: itemPrice" ><p> <span class="userBtn" name="removeOrder" onclick="removeOrder()">{!$label.MSG_060_0012}</span></td>
+            	<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+                <td style="padding:0px 2px;"><input type="text" name="selNow" style="width:60px;"/></td>
+				<td><select style="width:98%;" name="selDesc">
+                    <option></option>
+                    <apex:repeat value="{!cookDescOpts}" var="cook">
+                        <option>{!cook.label}</option>
+                    </apex:repeat>
+                    </select>
+				</td>
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+            </tr>
+        </script>
+        <!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+		<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN -->
+		<apex:outputPanel rendered="{!!isDomainFlag}">
+        <script type="text/x-kendo-template" id="large-cart-item1">
+            <tr>
+                <td><span style="display: inline-block;max-width: 550px;"  title="#=item.name#" data-bind="text: item.name"></span></td>
+                <td><input type="text" data-format="n0" data-role="numerictextbox" data-min="0" data-max="999" style="width:70px;" data-bind="value: quantity"></td>
+                <!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+                <td class="orderCol" style="width:130px;"><p class="table-price" data-bind="text: itemPrice" ><p> <span class="userBtn" name="removeOrder" onclick="removeOrder()">{!$label.MSG_060_0012}</span></td>
+            	<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+                <td></td>
+					<!-- 2020/02/28 SITE機能対応　by zy BEGIN -->
+					<td style="padding:0px 2px;width:50px;{!if(isDomainFlag,'','display:none;')}"><input type="text" name="selNow" style="width:60px;"/></td>
+					<td style="width:70px;{!if(isDomainFlag,'','display:none;')}"><select style="width:98%;" name="selDesc">
+					<!-- 2020/02/28 SITE機能対応　by zy END -->
+                    <option></option>
+                    <apex:repeat value="{!cookDescOpts}" var="cook">
+                        <option>{!cook.label}</option>
+                    </apex:repeat>
+                    </select>
+				</td>
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+            </tr>
+        </script>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!isDomainFlag}">
+			<script type="text/x-kendo-template" id="large-cart-item1">
+				<tr>
+					<td><span style="display: inline-block;max-width: 550px;"  title="#=item.name#" data-bind="text: item.name"></span></td>
+					<td><input type="text" data-format="n0" data-role="numerictextbox" data-min="0" data-max="999" style="width:70px;" data-bind="value: quantity"></td>
+					<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN -->
+					<td class="orderCol" style="width:130px;">
+						<!-- 2020/06/30 6545 bug fixed by zy BEGIN -->
+						<p class="item-price" data-bind="text: itemPrice" style="{!if(isPriceInputFlg,'display:none;','')}" ></p>
+						<input class="table-price" data-bind="value:item.price" style="{!if(!isPriceInputFlg,'display:none;','text-align:right;')}" onchange="priceChange()" /> 
+						<!-- 2020/06/30 6545 bug fixed by zy END -->
+						<span class="userBtn" name="removeOrder" onclick="removeOrder()">{!$label.MSG_060_0012}</span></td>
+					<!-- 2019/03/29 オーダーエントリー改善 取消機能 by zy END -->
+					<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+					<td></td>
+					<td style="padding:0px 2px;width:50px;"><input type="text" name="selNow" style="width:60px;"/></td>
+					<td style="width:70px;"><select style="width:98%;" name="selDesc">
+						<option></option>
+						<apex:repeat value="{!cookDescOpts}" var="cook">
+							<option>{!cook.label}</option>
+						</apex:repeat>
+						</select>
+					</td>
+					<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+				</tr>
+			</script>
+		</apex:outputPanel>
+		<!-- 2020/06/30 オーダエンドリーでの金額入力 by zy END -->
+		<!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+        <script type="text/x-kendo-template" id="cart-item">
+            <li class="selected-products-list">
+                <a data-bind="click: removeFromCart" class="view-selected-items"><img
+                    width="100" height="100"
+                    src="#= item.image #"  /></a>
+                <span class="selected-image-price"><span data-bind="text: quantity"></span>x<span data-bind="text: itemPrice"></span>
+				</span>
+            </li>
+        </script>
+        
+    	<script type="text/x-kendo-template" id="history-template">
+            <div id="historyOrderDiv">
+ 				<div class="historyTitleDiv" style="position: relative; background: white; ">
+						<!--注文履歴-->
+						<!-- 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN -->
+						<h1 class="historyTitle">
+							<span class="titleTab curSelect" onclick="changeHistory()">{!$Label.MSG_060_0001}</span>
+							<!-- レーシト履歴 -->
+							<span class="titleTab" onclick="changeHistory()" style="{!if(!isDomainFlag,'display:none;','')}" >
+								{!$Label.MSG_060_0065}
+							</span>
+						</h1>
+						<div class="reciptPanel">
+						<div class="reciptFunClass" id="reciptFuncLst">
+							<!-- 印刷 -->
+							<span class="cancelSpan" style="width:100px;" onclick="printLst()">
+							{!$Label.MSG_060_0075}</span>
+						</div>
+						<div class="reciptFunClass" id="orderFunLst">
+							<!-- 並べ替え -->
+							<span>{!$Label.MSG_060_0057}</span>
+								<select id="orderBySel">
+									<!-- 注文順 -->
+									<option value="1">{!$Label.MSG_060_0066}</option>
+									<!-- お客様順 -->
+									<option value="2">{!$Label.MSG_060_0067}</option>
+									<!-- 部屋順 -->
+									<option value="3">{!$Label.MSG_060_0068}</option>
+								</select>
+								<select id="sortSel">
+								<!--降順-->
+								<option value="desc">{!$Label.MSG_060_0058}</option>
+								<!--昇順-->
+								<option value="asc">{!$Label.MSG_060_0059}</option>
+							</select>
+							<!--指定日 -->
+							{!$Label.MSG_060_0060}
+							<input type="text" class="inputDt" readonly="readonly" name="queryDt" value="{!queryDate}"/>
+							<!-- 会計別 -->
+							{!$label.MSG_060_0061}
+							<input type="checkbox" name="accountId" checked/>
+							<!-- 検索 -->
+							<span class="cancelSpan" onclick="queryHistory()">
+							{!$Label.MSG_060_0062}
+							</span>
+							<!-- 詳細の表示 -->
+							<span class="cancelSpan expendSpan" onclick="expandRow()">
+								{!$label.MSG_060_0064}
+							</span>
+							<!-- 詳細を非表示 -->
+							<span class="cancelSpan collapseSpan" onclick="collapseRow()">
+							{!$label.MSG_060_0063}</span>
+							</div>
+						</div>
+ 						<table class="parClass" style="table-layout: fixed;" id="historyOrder">
+ 						<!-- 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END -->	
+ 							<thead>
+	 							<tr class="headTr" style="text-align: left; color: #4a4a4a; font-size: 13px;">
+									<!--商品-->
+	 								<th colspan="2" style="width:230px;">{!$label.MSG_060_0008}</th>
+									<th class="proNameClass" ></th>
+									<!--数量-->
+	 								<th style="text-align: left;">{!$label.MSG_060_0009}</th>
+									<!--金額-->
+	 								<th style="text-align: right;">{!$label.MSG_060_0010}</th>
+	 							</tr>
+ 							</thead>
+ 						</table>
+						<!-- 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN -->
+						<table class="parClass" id="historyRecipt">
+							<thead>
+								<tr class="headTr" style="text-align: left; color: #4a4a4a; font-size: 13px;">
+									<!--商品-->
+									<th colspan="3" style="position: relative;"><input type="checkbox" name="reciptCheck" onclick="checkAll()" />
+										<span style="margin-left:25px">{!$label.MSG_060_0008}</span></th>
+									<!--数量-->
+									<th style="text-align: left;width:85px;">{!$label.MSG_060_0009}</th>
+									<!--金額-->
+									<th style="text-align: right;width:85px;">{!$label.MSG_060_0010}</th>
+								</tr>
+ 							</thead>
+ 						</table>
+						<!-- 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END -->
+ 				</div>
+ 			</div>
+        </script>
+       	<!--2017/04/20 staff 画面対応　by　zy BEGIN -->
+        <script type="text/x-kendo-template" id="checkout-template">
+            <div id="details-checkout">
+          		<!--注文詳細-->
+          		<!--2017/05/26 印刷レーアウト選択する　by zy BEGIN -->
+				<h1>{!$Label.MSG_060_0007}<span id="curPrintLayout" style="font-size: 21px;background: white;"/>
+				<!-- 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN-->
+				<span class="multiSelRoomPanel" style="display:none;float:right;margin-top:16px;font-size:14px;">
+					部屋付け
+					<input id="multiSelRoomDropDown" style="width:200px;"/>
+				</span>
+				<!-- 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END-->
+				</h1>
+                <!--2017/05/26 印刷レーアウト選択する　by zy END -->
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+				<table style="padding:0px;">
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+                      <thead>
+                          <tr>
+                			<!--商品-->
+                            <th>{!$Label.MSG_060_0008}</th>
+							<!--数量-->
+                            <th>{!$Label.MSG_060_0009}</th>
+							<!--金額-->
+                            <th>{!$Label.MSG_060_0010}</th>
+							<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN -->
+							<th style="width:50px;"></th>
+							<!-- 順番 -->
+							<!-- 2020/02/28 SITE機能対応　by zy BEGIN -->
+							<th style="width:50px;{!if(isDomainFlag,'','display:none;')}">{!$LABEL.MSG_060_0079}</th>
+							<!-- 備考 -->
+							<th style="width:160px;{!if(isDomainFlag,'','display:none;')}">{!$LABEL.MSG_060_0080}</th>
+							<!-- 2020/02/28 SITE機能対応　by zy END -->
+							<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END -->
+                          </tr>
+                      </thead>
+                      <tbody data-role="listview" data-bind="source: cart.contents" data-template="large-cart-item1">
+                      </tbody>
+                  </table>
+         	 	  <!--小計-->
+                  <p id="total-checkout" style="padding-right:0px;"><em>{!$Label.MSG_060_0011}:</em><span data-bind="text: totalIncPrice"></span></p>
+          		  <!--内消費税-->
+				  <p id="total-rate" style="padding-right:0px;"><em>{!$Label.MSG_060_0016}:</em><span data-bind="text: totalRate"></span></p>
+				  <!--注文取消-->
+				  <!--注文確定-->
+                  <a class="cancel-order" href="#" data-bind="click: emptyCart">{!$label.MSG_060_0005}</a><button class="order-now" data-bind="click: proceed" style="margin-right:0px;">{!$label.MSG_060_0013}!</button>
+              </div>
+      	  </script>
+      	  <!--2017/04/20 staff 画面対応　by　zy END -->
+ <script>
+var currency = kendo.culture().numberFormat.currency;
+currency.decimals = JINYACONNECT.NumberPointLen;
+currency.symbol = JINYACONNECT.CurrencySybmol;
+currency.pattern = ["$-n","$n"];
+// models / data
+var datasource = JSON.parse("{!JSENCODE(oProdMapsJson)}");
+var JS_SYS_DEVICE_MOBILE_FLG = kendo.support.mobileOS;
+// 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw BEGIN
+var mobileFlag = {!mobileFlag};
+// 2019/02/15 オーダーエントリー改善（文字サイズをカスタマイズとレイアウト自由カスタマイズ機能） by cxw BEGIN 
+if (mobileFlag && !JS_SYS_DEVICE_MOBILE_FLG) $("[id$=fontSizePanel],[id$=roomSizePanel]").html("");
+// 2019/02/15 オーダーエントリー改善（文字サイズをカスタマイズとレイアウト自由カスタマイズ機能） by cxw END
+// 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw END
+//2017/02/22 source整理 by zy BEGIN
+//var shopPhone ,shopAdd ,shopNm,curPno,roomName;
+//2017/02/22 source整理 by zy END
+var endpoint_comm,endpoint_mess,repicaLayout;
+var domanFlag = {!isDomainFlag};
+// <!--再び注文-->
+// <!--取消-->
+// 2020/06/30 6519 bug fix by zy BEGIN
+var rowHtml = '<tr class="prodRow" leadindex="$leadindex$" price="$price$" name="$id$" tranid="$tranid$" orderid="$order$"><td colspan="2" prodId="$prodId$" findKey="$findkey$" class="readdClass" style="width:100px;" ><span class="userBtn" onclick="reAdd(this)">{!$label.MSG_060_0015}</span><span class="userBtn" name="cancelButton" onclick="cancelTran(this)">{!$label.MSG_060_0012}</span> <img src="$proImg$" style="width:70px;height:70px;" /></td><td><div class="prodName">   $prodNm$ </div></td><td><div class="prodNum">$prodCnt$</div></td> <td style="text-align:right"><div class="prodPrice">$prodPri$</div></td> </tr>';
+// 2020/06/30 6519 bug fix by zy END
+var items = new kendo.data.DataSource({
+    schema:  { },
+    data : datasource
+});
+var indexModel = kendo.observable({
+    items: items,
+    cart: cart,
+    itemPrice:function(e){
+    	return kendo.format("{0:c}", e.price);
+    },
+    addToCart: function(e) {
+        cart.add(e.data);
+    }
+});
+var index = new kendo.View("index-template", { model: indexModel });
+// 2020/02/15 会計商品のリストを多層構造化 by zy BEGIN
+let orgShowCurClass = showCurClass;
+showCurClass = function(a,b){
+	orgShowCurClass(a,b);
+	var prods = $(".products." + a);
+	var groups = [];
+	var groupMap = {};
+	var firstGroup = '';
+	var userBtnTemp = '<span class="groupTab" group="_group_" onclick="changeGroup(\'_group_\',\'' + a +'\')">_label_</span>';
+	prods.each(function(){
+		var group = $(this).attr("group");
+		var groupLabel = group == "" ? '{!$LABEL.MSG_060_0081}' : group; // その他
+		if (firstGroup == "") firstGroup = group;
+		if (!(group in groupMap)) {
+			groupMap[group] = true;
+			groups.push(userBtnTemp.replace(/_group_/g,group).replace('_label_',groupLabel));
+		} 
+	});
+	if (groups.length > 1) {
+		$("#groupTabs").html(groups.join(''));
+		changeGroup(firstGroup,a);
+	} else $("#groupTabs").html('');
+}
+function changeGroup(group,tab){
+	if ($("#historyOrderDiv").is(":visible")) {
+		$(".curSelectPlan").click();
+	}
+	$(".products").hide();
+	$(".groupTab.curSelect").removeClass("curSelect");
+	$(".groupTab[group='" + group + "']").addClass("curSelect");
+	$(".products." + tab + "[group='" + group + "']").show();
+	
+}
+// 2020/02/15 会計商品のリストを多層構造化 by zy END
+// Routing
+sushi.route("/", function() {
+    //console.log("router root route")
+    viewingDetail = false;
+    // 2019/03/15 JINYABUG-1495 bug fix by zy BEGIN
+    layout.showIn("#content", index);
+    layout.showIn("#pre-content", cartPreview);
+    var curPlan = $(".curSelectPlan");
+    // 該当タブ非表示の場合
+    if (!curPlan.is(":visible")) {
+    	// 変更その他表示タブ
+    	curPlan.removeClass("curSelectPlan");
+    	curPlan = $(".tabChild1:visible:first");
+    }
+    var curClass = curPlan.text().trim();
+    showCurClass(curClass,curPlan);
+    // layout.showIn("#content", index);
+    // layout.showIn("#pre-content", cartPreview);
+    // 2019/03/15 JINYABUG-1495 bug fix by zy END
+    //2017/02/14 check process by zy beign
+    //2017/05/26 印刷レーアウト選択する　by zy BEGIN
+    // 2020/04/30  複数部屋だと問題なく予約が作成される by zy BEGIN
+	/*
+    //购物车无商品的时候 注文键灰色
+    if (cart.contentsCount() == 0) $("#checkout").css("background","gray");
+    var roomId = window.localStorage["jinya_order_roomId"];
+    if (!domanFlag){
+	    if(roomId == "" || roomId == null){
+	    	sushi.disabled = true;
+	    	$("#checkout").css("background","gray");
+	    	$("#checkout").attr("disabled","disabled");
+	    	$("#checkout").attr("href","#");
+	    	$("#checkout").unbind("click");
+	    }
+	//2017/05/26 印刷レーアウト選択する　by zy END
+    }	
+	*/
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+	// 内部動作
+	if (domanFlag) {
+		refreshCartStatus();	
+	}
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+    // 2020/04/30  複数部屋だと問題なく予約が作成される by zy END
+    //2017/02/14 check process by zy end
+    if(!JS_SYS_DEVICE_MOBILE_FLG){
+    	$(".tab_Par span").css("padding","7px");
+    }
+    if(JS_SYS_DEVICE_MOBILE_FLG ){
+		$("#roomLstWrap").css("font-size","7px");
+	}
+	// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN
+	clearOrgHistory();
+	// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END
+});
+
+$(function() {
+	//2017/02/22 ipad侧対応　by zy BEGIN
+	var setIp = $("input[id$=hidLocalIp]").val();
+	if (setIp == ""){
+		if(window.localStorage["jinya_order_setIp"] != undefined){
+			setIp = window.localStorage["jinya_order_setIp"];
+		}
+	} else {
+		window.localStorage["jinya_order_setIp"] = setIp;
+	}
+		console.log(setIp);
+	if (setIp != "" && setIp != undefined && setIp != null) {
+		$("input[id$=hidLocalIp]").val(setIp);
+		initOrderFun();
+		return;
+	}
+	//2017/02/22 ipad侧対応　by zy END
+	try{
+		//if(window.localStorage["jinya_order_roomId"] == undefined || window.localStorage["jinya_order_roomId"] == ""){
+		window.localStorage["jinya_order_roomId"] = "";
+		var hadProcessedFlag = true;
+		// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+		var listenGetIpId = setTimeout(function(){
+			$("input[id$=hidLocalIp]").val(setIp);
+			if (hadProcessedFlag && setIp == "") initOrderFun();
+		},1000);
+		// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+		getIPs(function(ip){
+			// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+			setIp = ip;
+			// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+			console.log(ip);
+			if (hadProcessedFlag) {
+				// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+				$("input[id$=hidLocalIp]").val(setIp);
+				// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+				hadProcessedFlag = false;
+				initOrderFun();
+			}
+		});
+			
+		//}
+	} catch(err){
+		//2017/02/28 ip設定更新　by　zy BEGIN
+		initOrderFun();
+		//2017/02/28 ip設定更新　by　zy END
+		console.log(err);
+	}
+});
+var cacheItemMap;
+function makeOrder(){
+	//2017/05/26　無予約の部屋データ作成機能追加　by zy BEGIN
+	if (cart.contentsCount() == 0) return;
+	//内部
+	if ( domanFlag ) {
+		// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+		// 保存事前処理、小部屋作成チェック、複数部屋作成チェック
+		if (preMakeOrder()) return;
+		// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+		processDomain();
+	// サイト
+	} else {
+		processSite();
+	}
+}
+//外部注文
+function processSite(){
+//2017/05/26　無予約の部屋データ作成機能追加　by zy END
+	var roomId = window.localStorage.jinya_order_roomId;
+    if (roomId == "") {
+    	return;
+    }
+	JINYACONNECT.blockUi();
+	var orderMessage = '';
+	/*
+	var order = new Object();
+    var timeStmp = (new Date()).getTime();
+    order[timeStmp] = new Array();
+    var orderMessage = '';
+    */
+    cacheItemMap = new Object();
+    
+    for (var i = 0 ; i < cart.contents.length ; i++){
+    	var proItem = cart.contents[i];
+    	//order[timeStmp].push(proItem);
+    	if (proItem.quantity > 0){
+    		cacheItemMap[proItem.item.prodId] = proItem;
+			// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+			orderMessage += proItem.item.prodId + ':' + proItem.quantity;
+			if (proItem.item.posName != null) orderMessage += ':' + proItem.item.posName;
+			orderMessage += ',';
+			// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+    	}
+    }
+    /*
+    $("input[id$=hidOrderMessage]").val(orderMessage);
+    $("input[id$=hidSelectStmp]").val(timeStmp);
+    saveOrder();
+    */
+    var localIp = $("input[id$=hidLocalIp]").val();
+    //2017/04/20 多店舗機能対応　by　zy BEGIN
+    var shopCode = $("input[id$=hidShopCode]").val();
+    //2017/04/20 多店舗機能対応　by　zy END
+    // 2018/02/07 オーダーエントリー画面の英語対応 by zy BEGIN
+    var isEnLangeFlag = $("input[id$=hidLanguage]").val() == "en";
+    // 2018/02/07 オーダーエントリー画面の英語対応 by zy END
+     //2017/01/10 demo mode by zy BEGIN
+     Visualforce.remoting.Manager.invokeAction(
+     // 2018/02/07 オーダーエントリー画面の英語対応 by zy BEGIN
+     "{!$RemoteAction.OrderMainCtrl.processOrder}", orderMessage,roomId,getDemoDateVal(),localIp,shopCode,isEnLangeFlag, function(result, event){
+     // 2018/02/07 オーダーエントリー画面の英語対応 by zy END
+      //2017/01/10 demo mode by zy END
+         if(event.type == 'exception') {
+             alert(event.message);
+         } else {
+         	if(result.error != "") {
+         		alert(result.error);
+         		//2017/04/19 分部屋履歴対応　by　zy BEGIN
+         		window.localStorage["jinya_order_" + roomId] = "";
+         		//2017/04/19 分部屋履歴対応　by　zy END
+         	} else {
+         		//2017/05/26　無予約の部屋データ作成機能追加　by zy BEGIN
+         		afterProcess(result);
+         		//2017/05/26　無予約の部屋データ作成機能追加　by zy END
+            }
+         }
+         // 画面解除する
+         JINYACONNECT.unblockUi();
+     });
+}
+//2017/05/26　無予約の部屋データ作成機能追加　by zy BEGIN
+function afterProcess(result){
+	if (result == undefined) {
+		var resultJson = $("input[id$=hidReqJson]").val();
+		if (resultJson != "") {
+			result = JSON.parse(resultJson);
+			var roomId = $("input[id$=hidRoomId]").val();
+		}
+	}
+	var roomId = $("input[id$=hidRoomId]").val();
+	// 2017/10/14 履歴の予約別の対応　by　zy BEGIN
+	if (domanFlag) {
+		roomId = createDomainKey(roomId);
+		// 2017/10/16 bug-35 fix by zy BEGIN
+		clearAllHistory();
+		// 2017/10/16 bug-35 fix by zy END
+	}
+	// 2017/10/14 履歴の予約別の対応　by　zy END
+	if(result.error != "") {
+       	alert(result.error);
+       	//2017/04/19 分部屋履歴対応　by　zy BEGIN
+       	window.localStorage["jinya_order_" + roomId] = "";
+       	//2017/04/19 分部屋履歴対応　by　zy END
+       	// 画面解除する
+        JINYACONNECT.unblockUi();
+    } else {
+    	if (domanFlag) {
+    		//没有房间但是有会计id
+    		// 2019/05/31 JINYABUG-1764 bug fix by zy BEGIN
+    		if (roomId == "" &&  result.accId != "" &&  result.accId != null) {
+    		// 2019/05/31 JINYABUG-1764 bug fix by zy END
+    			var url = "/apex/BillInputSwitch?id="+ result.accId +"&retURL=/apex/OrderMain";
+    			window.location.href = url; //(url);
+    			return;
+    		}
+    		// 2017/10/24 多印刷メッセージ放出機能追加 by zy BEGIN
+    		try {
+			// 2020/04/30  複数部屋だと問題なく予約が作成される by zy BEGIN
+			refreshLoadMsg();
+			// 2020/04/30  複数部屋だと問題なく予約が作成される by zy END
+	    		getHistoryByMessage();
+	    		setPrintInfo(result);
+    		} catch(error){
+    			console.log(error);
+    			JINYACONNECT.unblockUi();
+    		}
+			// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+			// 画面変更単価商品クリア
+			clearPrice();
+			// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+			return;
+			// 2017/10/24 多印刷メッセージ放出機能追加 by zy END
+    	}
+	 	//2017/04/19 分部屋履歴対応　by　zy BEGIN
+		var localStr = window.localStorage["jinya_order_" + roomId];
+	 	//2017/04/19 分部屋履歴対応　by　zy END
+	 	if (localStr === undefined) {
+	 		//2017/04/19 分部屋履歴対応　by　zy BEGIN
+	 		window.localStorage["jinya_order_" + roomId] = "";
+	 		//2017/04/19 分部屋履歴対応　by　zy END
+	 		localStr = "";
+	 	}
+		var resultArr = result.prodObj;
+		nowTimeStmp = result.curTimeStmp;
+		for ( var i = 0 ; i < resultArr.length ; i++ ) {
+			var res = resultArr[i];
+			var cah = cacheItemMap[res.prodId];
+			var chkId =  result.accId ;
+			if ( chkId == "" || chkId == undefined) chkId =result.leadIndexId;
+			var message =  nowTimeStmp + ':' + res.tranId + ':' + res.prodId + ':' + res.qty + ':' + cah.item.id + ':' + chkId + ';';
+		 	localStr += message;
+		}
+		try{
+			//2017/04/19 分部屋履歴対応　by　zy BEGIN
+			window.localStorage["jinya_order_" + roomId] = localStr;
+		 	//2017/04/19 分部屋履歴対応　by　zy END
+		 	console.log(localStr);
+			// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+		 	//clearHistory(result.accId);
+			// showHistory();
+			getHistoryByMessage();
+			// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+		 	setPrintInfo(result);
+		} catch(error) {
+	 		console.log(error);
+		}
+	}
+}
+//2017/05/26　無予約の部屋データ作成機能追加　by zy END
+//2017/05/26　商品は多印刷設備　by zy BEGIN
+function setPrintInfo(result){
+	if (result.child.length > 0 ){
+		for ( var i = 0 ; i < result.child.length ; i++) {
+			var res = result.child[i];
+			// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+			callPrintFuns(res.printInfo,res.statusUrl,res.printUrl,result.accId);
+			// 2017/07/26 4）ログ情報はDBに記載する by zy END
+		}
+	} else {
+		// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+		callPrintFuns(result.printInfo,result.statusUrl,result.printUrl,result.accId);
+		// 2017/07/26 4）ログ情報はDBに記載する by zy END
+	}
+}
+function callPrintFun(info,status,print){
+	//2017/02/13 new layout by zy BEGIN
+ 	var htmlCode = $("<div/>").html(info);
+ 	//2017/02/22 source整理 by zy BEGIN
+ 	if (endpoint_comm == "" || endpoint_comm == undefined) {
+ 		endpoint_comm = print;
+ 		endpoint_mess = status;
+ 	}
+	//2017/02/22 source整理 by zy END
+	var arr = JSON.parse(htmlCode.text());
+	for (var i = 0 ; i < arr.length ; i++) {
+		pntInfo = arr[i];
+		console.log(JSON.stringify(pntInfo));
+		printCallBack(JSON.stringify(pntInfo));
+	}
+	//2017/02/13 new layout by zy END
+}
+//2017/05/26　商品は多印刷設備　by zy END
+function cancelTran(that){
+	if($(that).hasClass("disBtn")) return;
+	JINYACONNECT.blockUi();
+	var curRow = $(that).closest("tr");
+	var tranId = curRow.attr("tranid");
+	var spcd =  $("input[id$=hidShopCode]").val();
+	if (spcd == undefined) spcd = '';
+	// 2019/05/31 オーダーエントリーでの一枠でまとまるようにして頂けないでしょうか。by zy BEGIN
+	var orderId = curRow.attr("orderid");
+	var obj = {
+		shopCd : spcd,
+		orderId : orderId
+	}
+	spcd = JSON.stringify(obj);
+	// 2019/05/31 オーダーエントリーでの一枠でまとまるようにして頂けないでしょうか。by zy END
+	 Visualforce.remoting.Manager.invokeAction(
+     "{!$RemoteAction.OrderMainCtrl.cancelTran}", tranId,spcd, function(result, event){
+         if(event.type == 'exception') {
+             alert(event.message);
+         } else {
+         	if(result != "") {
+				// 2020/03/31 会計ロック機能 by zy BEGIN
+				// alert(result.error);
+				alert(result);
+				 // 2020/03/31 会計ロック機能 by zy END
+         	} else {
+         		var trans = window.localStorage["jinya_order_delete"];
+         		if (window.localStorage["jinya_order_delete"] == undefined){
+         			window.localStorage["jinya_order_delete"] = "";
+         			trans = "";
+         		}
+            	$(that).removeAttr("tranid");
+             	$(that).addClass("disBtn");
+             	$(".prodName",curRow).css("text-decoration","line-through");
+             	$(".prodNum",curRow).css("text-decoration","line-through");
+             	$(".prodPrice",curRow).css("text-decoration","line-through");
+             	window.localStorage["jinya_order_delete"] += tranId + ',';
+             	showHistory();
+            }
+         }
+         // 画面解除する
+         JINYACONNECT.unblockUi();
+     });
+}
+//2017/05/26　無予約の部屋データ作成機能追加　by zy BEGIN
+function getHistoryTimestmp() {
+	//内部
+	if ( domanFlag ) {
+		// 2017/10/24 多印刷メッセージ放出機能追加 by zy BEGIN
+		// 履歴共用
+		//getHistoryDomain();
+		JINYACONNECT.blockUi();
+		getHistoryByMessage();
+		// 2017/10/24 多印刷メッセージ放出機能追加 by zy END
+	// サイト
+	} else {
+		// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+		// getHistorySite();
+		JINYACONNECT.blockUi();
+		getHistoryByMessage();
+		// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+	}
+}
+function getHistorySite(){
+//2017/05/26　無予約の部屋データ作成機能追加　by zy END
+	var roomId = $("input[id$=hidRoomId]").val();
+	if (roomId == "") {
+		if (window.localStorage.jinya_order_roomId != "" && window.localStorage.jinya_order_roomId != undefined) roomId = window.localStorage.jinya_order_roomId;
+		else {
+			sushi.navigate("/");
+			return;
+		}
+	}
+	nowTimeStmp = 0;
+	JINYACONNECT.blockUi();
+	//2017/01/10 demo mode by zy BEGIN
+	 Visualforce.remoting.Manager.invokeAction(
+     "{!$RemoteAction.OrderMainCtrl.getBeginStmp}", roomId,getDemoDateVal(), function(result, event){
+     //2017/01/10 demo mode by zy END
+         if(event.type == 'exception') {
+             //alert(event.message);
+             console.log('history-error:' + result.error);
+          	 showHistory();
+          	 JINYACONNECT.unblockUi();
+         } else {
+         	if (result.error != "") {
+         		//alert(result.error);
+         		console.log('history-error:' + result.error);
+         		showHistory();
+         		// 画面解除する
+         		JINYACONNECT.unblockUi();
+         	}else {
+         		//2017/05/26　無予約の部屋データ作成機能追加　by zy BEGIN
+         		afterShowHistory(roomId,result.curTimeStmp,result.leadIndexId);
+            	//2017/05/26　無予約の部屋データ作成機能追加　by zy END
+            }
+         }
+         // 画面解除する
+         JINYACONNECT.unblockUi();
+     });
+}
+//2017/05/26　無予約の部屋データ作成機能追加　by zy BEGIN
+function afterShowHistory(roomId,nowTimeStmp,chkId){
+	// 2017/10/14 部屋の予約別の機能追加　by　zy　BEGIN
+	// roomId = createDomainKey(roomId);
+	if ("createDomainKey" in window) roomId = createDomainKey(roomId);
+	// 2017/10/14 部屋の予約別の機能追加　by　zy　END
+	//2017/04/19 分部屋履歴対応　by　zy BEGIN
+    if (window.localStorage["jinya_order_" + roomId] != undefined) {
+    	var jinyaOrder = window.localStorage["jinya_order_" + roomId];
+    	//2017/04/19 分部屋履歴対応　by　zy END
+    	var orderLst = jinyaOrder.split(";");
+ 		var jinyaOrderStr = '';
+ 		for (var i = 0; i < orderLst.length ; i++) {
+ 			if (orderLst[i] != ""){
+ 				var orderMessage = orderLst[i];
+ 				var curMsgArr = orderMessage.split(":");
+ 				try{
+ 					//var curLeadIndex = curMsgArr[5];
+  					//if(curLeadIndex == chkId) {
+  						jinyaOrderStr += orderMessage + ';';
+  					//}
+ 				}catch(error){
+ 					console.log(error);
+ 				}
+ 			}
+ 		}
+		console.log(jinyaOrderStr);
+		//2017/04/19 分部屋履歴対応　by　zy BEGIN
+		if (jinyaOrderStr == "" ) {
+			window.localStorage.removeItem(["jinya_order_" + roomId]);
+		} else {
+			window.localStorage["jinya_order_" + roomId] = jinyaOrderStr;
+		}
+		//2017/04/19 分部屋履歴対応　by　zy END
+		showHistory();
+    }
+}
+//2017/05/26　無予約の部屋データ作成機能追加　by zy END
+var nowTimeStmp = 0;
+ //刷新历史订单
+function autoCancelFun(curTimeStmp){
+	var autoStemp = {!autoStemp};
+	if (autoStemp > 0 ){
+		var curDateitime = nowTimeStmp;
+		var totalStmp = autoStemp*60000;
+		var difLongTime = curDateitime - kendo.parseFloat(curTimeStmp);
+        var curTimStmp = 0;
+        if (typeof(difLongTime) == "number") curTimStmp = difLongTime;
+        if (curTimStmp > totalStmp){
+        	$("tr[name='" + curTimeStmp + "']").each(function(){
+	         	$(".userBtn[name='cancelButton']",this).addClass("disBtn");
+	         	$(".userBtn[name='cancelButton']",this).attr("disabled","disabled");
+	        });
+        } else {
+        	var otherStmp = totalStmp - curTimStmp;
+        	setTimeout(function(){
+		        $("tr[name='" + curTimeStmp + "']").each(function(){
+		         	$(".userBtn[name='cancelButton']",this).addClass("disBtn");
+	         		$(".userBtn[name='cancelButton']",this).attr("disabled","disabled");
+		        });
+			 }, otherStmp);
+        }
+	}
+}
+
+//2017/01/10 demo mode by zy BEGIN
+function getDemoDateVal() {
+	var demoDate = $("input[id$=hidDemoDate]").val();
+    if (demoDate == undefined || demoDate == null) demoDate = "";
+    return demoDate;
+}
+//2017/01/10 demo mode by zy END
+//2017/02/23 ipad側対応 by zy BEGIN
+function redictMessage(){
+	delete window.localStorage["jinya_order_roomId"];
+	//清空local中ip
+	delete window.localStorage["jinya_order_setIp"];
+	var urlBack = window.location.href;
+	//2017/02/28 ip設定更新　by　zy BEGIN
+	//window.location.href = 'http://test.salesforce.com?startURL=/apex/IpSetup?back=' + urlBack;
+	if (domanFlag) {
+		window.location.href = "/apex/IpSetup?back=/apex/OrderMain";
+	} else {
+		window.location.href = 'http://login.salesforce.com?startURL=/apex/{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}IpSetup?back=' + urlBack;
+	}
+	//2017/02/28 ip設定更新　by　zy END
+}
+//2017/02/23 ipad側対応 by zy END
+// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+var clearImg = '<img src="/img/permissions_deny16.gif" style=" position: relative;top: 3px;cursor: pointer;" id="clearIcon" onclick="emptyDomainRoom();changeLayoutName();multiSelectCancel();refreshBlankDropDown();"/>' ;
+// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+//部屋と予約関係メーセッジ対応
+function refreshLoadMsg(){
+	// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+    // var clearImg = '<img src="/img/permissions_deny16.gif" style=" position: relative;top: 3px;cursor: pointer;" id="clearIcon" onclick="emptyDomainRoom();changeLayoutName()"/>' ;
+    // 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+	var warningImg = '<img src="/img/msg_icons/warning16.png" style=" position: relative;top: 3px;">';
+    var curJson = $("#hidCurRoomMsg").val();
+    //2017/07/05 多店舗対応選択リスト　by　zy　BEGIN
+    if (curJson != "" && curJson != undefined && curJson != null) {
+	    var curRoom = JSON.parse(curJson);
+	    var message =  '{!$ObjectType.Room__c.Fields['Name'].label}：' + curRoom.roomNm ;
+	    //2017/04/21 无客户和到着日信息则不显示 by zy BEGIN
+	    var leadMes =  '';
+	    if (curRoom.contactNm != null && curRoom.contactNm != ""){
+	        leadMes += ' {!$ObjectType.Lead__c.Fields['Relcontact__c'].label}：' + curRoom.contactNm ;
+	    }
+	    if (curRoom.enterTime != null && curRoom.enterTime != "") {
+	        leadMes += '　{!$ObjectType.Lead__c.Fields['EntryTime__c'].label} ：' + curRoom.enterTime ;
+	    }
+	    if (curRoom.errorMesage != null && curRoom.errorMesage != ""){
+	        leadMes += warningImg + '<span class="errormsgClass">' + curRoom.errorMesage + '</span>';
+	    }
+	    if (domanFlag){
+	        message = clearImg + message;
+	    }
+	    $("#roomMess").html(message);
+	    $("#leadMess").html(leadMes);
+		// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN
+		$("#hidAccountId").val(curRoom.accId);
+		// 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END
+    }
+    //2017/07/05 多店舗対応選択リスト　by　zy　END
+    //2017/04/21 无客户和到着日信息则不显示 by zy END
+    //2017/07/05 多店舗対応選択リスト　by　zy　BEGIN
+    var curInfo = '';
+    var shopName = $("#hidShopName").val();
+    if (shopName == null || shopName==undefined ) {
+    	shopName = '';
+    }
+    $("#floatShopInfo").text(shopName);
+    var hidUserInfo = $("#hidUserInfo").val();
+    if (hidUserInfo != "") {
+        curInfo += '	{!$Label.MSG_060_0028} ：' + hidUserInfo;
+    }
+    $("#floatUserInfo").text(curInfo);
+	//2017/07/05 多店舗対応選択リスト　by　zy　END
+	// domain の場合　機能不存在
+    if ("changeLayoutName" in window) changeLayoutName();
+	// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+	refreshBlankDropDown();
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+}
+//2017/05/26　商品は多印刷設備　by zy BEGIN
+// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN
+function callPrintFuns(info,status,print,accid,callback){
+// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END
+// 2017/07/26 4）ログ情報はDBに記載する by zy END
+	var htmlCode = $("<div/>").html(info);
+	var htmlContent = htmlCode.text();
+	var arr = [];
+	if (htmlContent != "" ) arr = JSON.parse(htmlContent);
+	if (arr.length == 0 ) return;
+	var accountMessPnt = $.WebPrint({
+		webComm:status
+	});
+	var curSeq = JSON.stringify(arr[0]);
+	var accountCommPnt = $.WebPrint({
+		// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+		//ログ保存アド
+		remoteSaveLog:"{!$RemoteAction.OrderMainCtrl.savePrintLodToDb}",
+		// 2017/07/26 4）ログ情報はDBに記載する by zy END
+		webComm:print,
+		isDebug:true,
+		callBackSeqArr:[curSeq],
+		sendMesssage:function(e){
+			try{
+				accountMessPnt.disconnect();
+				accountCommPnt.disconnect();
+			}catch(err){
+			}
+		}
+	});
+	// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN
+	// 印刷成功後対応
+	if (callback) {
+		// 閉じる折り返し
+		accountCommPnt.afterClose = callback;
+		// エラー折り返し
+		accountCommPnt.addError = callback;
+	}
+	// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END
+	// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+	var roomId = $("input[id$=hidRoomId]").val();
+	accountCommPnt.baseInfo = '****オーダーエンドリー会計ID：' + accid + '****\n' 
+							+ '****部屋ID：' + roomId + '****\n';
+	// 2017/07/26 4）ログ情報はDBに記載する by zy END
+	accountCommPnt.nextStep();
+	accountMessPnt.connect();
+}
+//2017/05/26　商品は多印刷設備　by zy END
+// 2017/09/11 印刷リスト機能　by　zy　BEGIN
+function afterRefreshLead(){
+	if (!$("#roomLstWrap").is(":visible")) {
+        var pos = $("#header").position();
+        $("#roomLstWrap").css({left:pos.left,top:pos.top + 52,width:$("#header").width()});
+        $("#roomLstWrap").slideDown();
+    }
+	resizeWindow();
+	initLocalStorage();
+	refreshLoadMsg();
+	clearRoomMsg();
+	// 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy BEGIN
+	refreshDesignLayout(true);
+	// 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy END
+}
+// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+function refreshBlankDropDown(closeflg){
+	// 機能閉じる
+	if ($("#hidSelRoomFlg").val() != "true") return;
+	// 処理対象なしの場合
+	if ($("#multiSelRoomDropDown").length == 0) return;
+	// 該当レイアウトタイプ
+	var layoutType = $("input[id$=hideType]").val();
+	// チェックタイプ
+	if (layoutType == "SIMPLE_UP" || layoutType == 'COMMON'){
+		// 部屋Id
+		var roomId = $("input[id$=hidRoomId]").val();
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+		if (("J_ROOMARR" in window) && J_ROOMARR.length > 0) roomId = J_ROOMARR[0];
+		// 指定部屋Id
+		if (roomId != "") {
+			//  既存予約
+			var leadId = $("[id$=hideLeadId]").val();
+			// 未割り当て予約チェック
+			var room = $("li.roomLstClass.noleadClass").filter("[data-roomid='" + roomId + "']");
+			if (room.length > 0 && closeflg != true && leadId == "") {
+				var combox = $("#multiSelRoomDropDown").getKendoComboBox();
+				if (combox == undefined) {
+					combox = $("#multiSelRoomDropDown").kendoComboBox({
+						dataSource:{
+							transport: {
+								read: function (options) {
+									var queryDt = $("input[id$=hidQueryDate]").val();
+									// 複数テープル予約作成
+									remoteCenter('getCuurentLeads',JSON.stringify({shopCd:$("input[id$=hidShopCode]").val(),queryDate:queryDt}),afterGetLeads.bind({opts:options}),true);
+								}
+							}
+						},
+						animation: false,
+						dataTextField: "name",
+						filter: "contains",
+						dataValueField: "id"
+					}).getKendoComboBox();
+				// 既存データ刷新
+				} else combox.dataSource.read();
+				$(".multiSelRoomPanel").show();
+				combox.wrapper.show();
+				combox.value("");
+				return;
+			}
+		}
+		$(".multiSelRoomPanel").hide();
+		var combox = $("#multiSelRoomDropDown").getKendoComboBox();
+		if (combox != undefined) combox.wrapper.hide(),combox.value("");
+	}
+}
+// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+// 清理页面信息
+function clearRoomMsg(){
+	$("#gotoDate").data("date","");
+	$("#gotoDate").blur();
+	$(".printClass .selectSpan").css("background","");
+	$("span.selectSpan.startPrint").css("background","");
+	$("span.selectSpan.endPrint").css("background","");
+}
+function printBatch(that){
+	//$(that).css("background","gray");
+	var shopCode = $("input[id$=hidShopCode]").val();
+	// 窗口打开
+	openKendoWin();
+	kendo.ui.progress($("#printWindow"), true);
+	var localIp = getCurIp();
+	// 获取当前日期
+	var gotoDate = $("#gotoDate").val();
+	var printType = 'mitumori';
+	if ($("input:checkbox[name='yoyakuChk']").is(":checked")) printType = 'ryouri';
+	window.localStorage.jinya_order_yoyakuType = printType;
+	// 取消选中,点开始也没用了
+	$("input:checkbox[name=printCheck]").prop("checked",false);
+	var curLanguage = $("input[id$=hidLanguage]").val();
+	if (curLanguage == undefined) curLanguage = '';
+	var reqInfo = {shopCd:shopCode,localIp:localIp,queryDate:gotoDate,processType:printType,language:curLanguage};
+	var requstStr = JSON.stringify(reqInfo);
+	Visualforce.remoting.Manager.invokeAction(
+     "{!$RemoteAction.OrderMainCtrl.getOneDayCook}", requstStr, function(result, event){
+      //2017/01/10 demo mode by zy END
+         if(event.type == 'exception') {
+             alert(event.message);
+         } else {
+         	if (result.prints != undefined && result.prints != null) {
+         		// 打印信息作成
+				$("#printWindow").data("printUrl",result.printUrl);
+				$("#printWindow").data("status",result.statusUrl);	 
+				$("#printWindow").data("printInfo",JSON.stringify(result.print));
+				// 2017/10/24 多印刷メッセージ放出機能追加 by zy BEGIN
+				$("#printWindow").data("posMap",JSON.stringify(result.posMap));
+         		// 2017/10/24 多印刷メッセージ放出機能追加 by zy END
+         		// 窗口内容作成
+         		makeDetailByJsons(result.prints);
+         	} else if (result.error != "") {
+         		setWindowTitle(result.error,'warn');
+         	}
+         }
+         kendo.ui.progress($("#printWindow"), false);
+     });
+}
+// 初期化印刷機能
+if (typeof JINYACONNECT === "undefined") {
+	JINYACONNECT = {};
+}
+if (typeof JINYACONNECT.PRINT === "undefined") {
+	JINYACONNECT.PRINT = {};
+}
+// 状態印刷設備作成
+// flag :true: 单例模式只返回既存一个对象,false：每次返回新对象
+function getPrintStatus(flag){
+	if (flag && JINYACONNECT.PRINT.status != undefined ) return JINYACONNECT.PRINT.status;
+	var accountMessPnt = $.WebPrint({
+		webComm:status,
+		cashDrawer:false,
+	 	cashError:'',
+	 	cashWarning:'',
+		connectMessage:function(e){}
+	});
+	if (flag)  JINYACONNECT.PRINT.status = accountMessPnt;
+	return accountMessPnt;
+}
+function getPrintPnt(flag){
+	if (flag && JINYACONNECT.PRINT.print != undefined ) return JINYACONNECT.PRINT.print;
+	var accountCommPnt = $.WebPrint({
+		// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+		//ログ保存アド
+		remoteSaveLog:"{!$RemoteAction.OrderMainCtrl.savePrintLodToDb}",
+		// 2017/07/26 4）ログ情報はDBに記載する by zy END
+		isDebug:true,
+	});
+	if (flag)  JINYACONNECT.PRINT.print = accountCommPnt;
+	return accountCommPnt;
+}
+// 2017/10/24 多印刷メッセージ放出機能追加 by zy BEGIN
+function getHistoryByMessage(){
+	clearAllHistory();
+	var curRoomId = $("input[id$=hidRoomId]").val();
+	// 連携のデータ取得
+	var accid = '';
+	if ("{!isDomainFlag}" == "true") accid = getAccountIdByRoomId(curRoomId);
+	else accid = $("#hidAccountId").val();
+	var reqInfo = {accId : accid};
+	var response = JSON.stringify(reqInfo);
+	//JINYACONNECT.blockUi();
+	Visualforce.remoting.Manager.invokeAction(
+     "{!$RemoteAction.OrderMainCtrl.getTransDetail}", response, function(result, event){
+         if(event.type == 'exception') {
+             console.log(event.message);
+         } else {
+         	if(result.error != "") {
+         	} else {
+         		renderHistory(accid,result.prodObj,result.curTimeStmp);
+            }
+         }
+         // 画面解除する
+         JINYACONNECT.unblockUi();
+     });
+}
+// 履歴内容作成
+function renderHistory(accId,orderDetails,timeStmpKey){
+	viewingDetail = false;
+	// ツールの履歴画面設定
+    layout.showIn("#content", historyView);
+	// 履歴元素取得
+	var tbody = $("#historyOrder");
+	var needClearFlag = false;
+	// １つ注文のテンプレート
+    var orderHtml = '<tr data-uuid="$uuid$" leadindex="$leadindex$" class="orderRow"><td colspan="2">$curDate$</td><td></td><td></td><td class="total"></td></tr>';
+	// 前回追加行元素
+   	var beforELement = '';
+	//　会計明細LOOP
+    for (var i = 0; i < orderDetails.length ; i++){
+    	var orderMessage = orderDetails[i];
+    	if (orderMessage != ""){
+    		var curdateTime = orderMessage.orderTime + '（' + orderMessage.posNo + '）';
+    		//kendo.toString(new Date(kendo.parseFloat()),JINYACONNECT.DateTmFormat) + '(' + orderMessage.posNo + ')';
+    		// 2017/10/30 オーダー区分　by　zy BEGIN
+    		//var uuid = curdateTime;
+    		var uuid = curdateTime + orderMessage.orderMinute;
+    		// 2017/10/30 オーダー区分　by　zy END
+    		var curItem = getItemById(orderMessage.prodId);
+    		if ( curItem == null ) continue;
+    		var insertRow = $("tr[data-uuid='" + uuid + "']");
+    		if (insertRow.length == 0) {
+    			var curRowHtml = orderHtml.replace("$uuid$",uuid)
+    									  .replace("$curDate$",curdateTime)
+                                          .replace("$leadindex$",accId);
+                if (tbody.find("tr:first").length > 0){
+                	tbody.find("tr:first").after($(curRowHtml));
+                } else {
+                   tbody.append($(curRowHtml));
+                }
+                insertRow = $("tr[data-uuid='" + uuid + "']");
+                beforELement = insertRow;
+            // 2019/05/31 オーダーエントリーでの一枠でまとまるようにして頂けないでしょうか。by zy BEGIN
+			} else {
+				var prevRow = beforELement.prevUntil("",".orderRow:first");
+				var befData = prevRow.attr("data-uuid");
+				if (uuid != befData) {
+					beforELement = insertRow.nextUntil("tr.orderRow",":first");
+				}
+			}
+	    	// 2019/05/31 オーダーエントリーでの一枠でまとまるようにして頂けないでしょうか。by zy END
+            var totalPrice = 0;
+            var prodCnt = kendo.parseInt(orderMessage.qty);
+            var totalSum = orderMessage.totalInc;
+            var tranId = orderMessage.tranId;
+            //console.log(curItem);
+            var curHtml = rowHtml.replace("$proImg$",curItem.image)
+                .replace("$prodNm$", curItem.name)
+                .replace("$prodCnt$",prodCnt)
+                .replace("$prodId$", curItem.prodId)
+                .replace("$findkey$",curItem.id)
+                .replace("$tranid$", tranId)
+                .replace("$id$",     uuid)
+                .replace("$leadindex$",accId)
+                .replace("$prodPri$",kendo.format("{0:c}",totalSum))
+				// 2020/06/30 6519 bug fix by zy BEGIN
+				// 単価変更
+				.replace("$price$",orderMessage.price)
+				// 2020/06/30 6519 bug fix by zy END
+                // 2019/05/31 オーダーエントリーでの一枠でまとまるようにして頂けないでしょうか。by zy BEGIN
+				.replace("$order$",orderMessage.orderId);
+				// 2019/05/31 オーダーエントリーでの一枠でまとまるようにして頂けないでしょうか。by zy END
+            var addRow = $(curHtml);
+            beforELement.after(addRow);
+            beforELement = addRow;
+            if (orderMessage.isDelete){
+                needClearFlag = true;
+                addRow.find("[name='cancelButton']").addClass("disBtn");
+                addRow.find(".prodName").css("text-decoration","line-through");
+                addRow.find(".prodNum").css("text-decoration","line-through");
+                addRow.find(".prodPrice").css("text-decoration","line-through");
+            }
+       }
+   }
+   // 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN
+   clearOrgHistory();
+   // 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END
+}
+// 2017/10/24 多印刷メッセージ放出機能追加 by zy END
+// 2019/03/29 オーダーエントリー改善 取消機能 by zy BEGIN
+function removeOrder(){
+	// 該当行
+	var curRow = $(event.currentTarget).closest("tr");
+	// 内容取消
+	var item = cart.contents[curRow.index()];
+	if (item) cart.remove(item);
+	// カートの商品は空の場合、画面戻る
+	if (cart.contents.length == 0) sushi.navigate("/");
+}
+// 2019/03/29 オーダーエントリー改善 取消機能 by zy END
+// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN
+// tips変更
+function changeHistory(){
+	// 当前Title
+	var curTab = $(event.currentTarget);
+	var idx = curTab.index();
+	//  表示内容切り替え
+	var tables = $("table.parClass","#historyOrderDiv");
+	// 指定テープル
+	var showTbl = tables.filter(":eq('" + idx + "')").show();
+	// 未指定その他テープル
+	tables.not(":eq('" + idx + "')").hide();
+	// 未選中テープルのClass削除
+	$(".titleTab.curSelect").removeClass("curSelect");
+	// 選中テープルのClass追加
+	curTab.addClass("curSelect");
+	// レーシト履歴の場合
+	if (showTbl.attr("id") == "historyRecipt") {
+		var queryDtInput = $("input[name=queryDt]");
+		if (!queryDtInput.hasClass("hasDatepicker")) {
+			queryDtInput.jinyaDatePicker();
+			// 最小日制御消去
+			queryDtInput.datepicker( "option", "minDate" ,"");
+			// 選択後機能消去
+			queryDtInput.datepicker( "option", "onClose" ,function(){});
+			// 選択日期書式変更
+			queryDtInput.datepicker( "option", "onSelect" ,function(){});
+		}
+		if ($("tfoot",showTbl).length == 0) queryHistory();
+		// 機能リスト表示
+		$("div.reciptFunClass,div.reciptPanel").show();
+		$("#main-section").addClass("reciptHistory");
+	// その他の場合
+	} else {
+		// 機能リスト非表示
+		$("div.reciptFunClass,div.reciptPanel").hide();
+		$("#main-section").removeClass("reciptHistory");
+	}
+}
+// 降順と昇順変更対応
+function queryHistory(){
+	// 履歴対象
+	var historyRecipt = $("#historyRecipt");
+	// 内容削除
+	$("tfoot",historyRecipt).remove();
+	var queryDt = $("input[name=queryDt]").val();
+	queryDt = kendo.toString(kendo.parseDate(queryDt),JINYACONNECT.DateFormat);
+	var accFlag = $("input[name=accountId]").is(":checked");
+	// 画面LOCK
+	JINYACONNECT.blockUi();
+	// 連携情報
+	// 並べ順変更対応
+	var sort = $("#orderBySel").val();
+	var order = $("#sortSel").val();
+	// 店舗コード
+	var spcd = $("input[id$=hidShopCode]").val();
+	var obj = {
+		// 並べ順
+		orderSort:sort,
+		// 順序
+		order:order,
+		// 指定日
+		queryDate:queryDt,
+		// 会計のみ
+		accFlg:accFlag,
+		// 店舗コード
+		shopCd:spcd
+	};
+	// 連携開始
+	remoteCenter('printHistory',JSON.stringify(obj),selfPrintHistory);
+}
+// テープル内容作成
+function selfPrintHistory(result){
+	if (result != null) {
+		var accFlag = $("input[name=accountId]").is(":checked");
+		var posLst = [];
+		var posSet = {};
+		var orderHead = '<tr class="orderRow"><td colspan="5"><input type="checkbox" style="" name="hisPntChk" value="$orderIds$" onclick="refreshPrint()"/><span class="title">$curDate$</span><span class="total"></span></td></tr>';
+		var orderHtml = '<tr class="prodRow" id="_id_"><td style="width:60px;"><div class="cancelSpan" style="width: 45px;" onclick="rePrint()">{!$Label.MSG_060_0075}</span></td><td colspan="4" class="contentClass"></td> </tr>';
+		// 合計
+		var lastTotal = '<tr><td colspan="5"><div id="reciptTotal">{!$Label.MSG_060_0074}：<span class="totalSpan"></span></div></td></tr>'
+		// 初期化
+		if ($("#historyRecipt>tfoot").length == 0) $("#historyRecipt").append("<tfoot/>");
+		// 当日金額総計
+		var todayTotal = 0;
+		// 履歴内容作成
+		for (var i = 0 ; i < result.length ; i++) {
+			// 該当情報
+			var res = result[i];
+			// 既存履歴
+			var prodRow = $("#" + res.id);
+			// 内容書式変更
+			var printInfo = res.info;
+			var porNo = '';
+			// 新規の場合
+			if (prodRow.length == 0) {
+				var curRow = orderHtml.replace('_id_',res.id);
+				if (res.posNo != undefined && res.posNo != '') porNo = '(' + res.posNo + ')';
+				var titleInfo = kendo.toString(new Date(res.time),JINYACONNECT.DateTmFormat) + porNo;
+				// 頭部内容作成
+				// お部屋
+				if (res.room != undefined && res.room != "") titleInfo += '	' + LABEL.roomNm + '：' + res.room;
+				// お客様
+				if (res.contact != undefined && res.contact != "") titleInfo += ' ' + LABEL.contact + '：' + res.contact;
+				var headRow = orderHead.replace('$curDate$',titleInfo).replace('$orderIds$',res.ids);
+				var headRowEl = $(headRow);
+				// 行作成
+				$("#historyRecipt>tfoot").append(headRowEl);
+				headRowEl.after($(curRow));
+				prodRow = $("#" + res.id);
+			}
+			// 明細内容作成
+			var htmlRes = getInfoHtml(res.prods);
+			$(".contentClass",prodRow).html(htmlRes.html);
+			// 総計金額設定
+			prodRow.prev().find(".total").text(kendo.toString(htmlRes.total,"c"));
+			todayTotal += htmlRes.total;
+			// 注文情報
+			prodRow.attr("orderIds",res.orderIds);
+			// 会計情報
+			prodRow.attr("accId",res.accId);
+			// 印刷情報設定
+			prodRow.data("printInfo",printInfo);
+			if (accFlag) {
+				res.prints.forEach(function(printName){
+					if (!(printName in posSet)) {
+						posSet[printName] = true;
+						posLst.push(printName);
+					}
+				});
+			}
+		}
+		var morePos = $("<select id='morePos'></select>");
+		$("#morePos").remove();
+		if (posLst.length > 1) {
+			posLst.forEach(function(item){
+				morePos.append($("<option>" + item + "</option>"))
+			});
+			$("#reciptFuncLst").prepend(morePos);
+		}
+		// 合計行作成
+		$("#historyRecipt>tfoot").append($(lastTotal));
+		// 合計設定
+		$("#reciptTotal .totalSpan").text(kendo.toString(todayTotal,"c"));
+		// レイアウト変更
+		if (result.length > 0) $("#historyRecipt").css("table-layout","auto");
+		else $("#historyRecipt").css("table-layout","fixed");
+	}
+	// チェックボックス初期化
+	refreshPrint();
+}
+// 明細内容作成
+function getInfoHtml(prods){
+	var itemHtml = '<tr><td style="width:90px;"><img src="$proImg$" style="width:70px;height:70px;" /></td><td><div class="prodName">$prodNm$</div></td><td style="width:85px;"><div class="prodNum">$prodCnt$</div></td> <td style="text-align:right;width:85px;"><div class="prodPrice">$prodPri$</div></td></tr>';
+	var htmlCode = '<table style="table-layout:fixed;padding:0px;"><thead>';
+	// 総計金額
+	var total = 0;
+	// 明細あり
+	if (prods) {
+		var idx = 0;
+		// 印刷明細リスト
+		prods.forEach(function(prod){
+			// 既存会計商品取得
+			var prodItem = createAndGetProdInfo(prod.id);
+			if (prodItem) {
+				var prodName = prodItem.name;
+				var imgSrc = prodItem.image;
+				var qty = prod.cnt;
+				htmlCode += itemHtml.replace("$prodNm$", prodName)
+							.replace("$proImg$", imgSrc)
+							.replace("$prodCnt$",qty)
+							// 2019/06/14 JINYABUG-1820 bug fix by zy BEGIN
+							//.replace("$prodPri$",kendo.toString(kendo.parseFloat(prod.price),"c"));
+							.replace("$prodPri$",kendo.toString(kendo.parseFloat(prod.total),"c"));
+							// 2019/06/14 JINYABUG-1820 bug fix by zy END
+				total += kendo.parseFloat(prod.total);
+			}
+		});
+	}
+	if (htmlCode != "") htmlCode += '</thead></table>';
+	return {html:htmlCode,total:total};
+}
+// 連携機能
+function remoteCenter(type,req,callback,unLockWin){
+	Visualforce.remoting.Manager.invokeAction(
+     "{!$RemoteAction.OrderMainCtrl.remoteCenter}", type,req, function(result, event){
+         if(event.type == 'exception') {
+             alert(event.message);
+         } else {}
+         // 画面解除する
+		 // 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+         if (unLockWin != true) JINYACONNECT.unblockUi();
+		 // 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+         if (callback) callback(result);
+     });
+}
+// 既存会計商品取得
+function createAndGetProdInfo(prodid){
+	// 初期化
+	if (!("JINYA_ORDER_PROD" in window)) window.JINYA_ORDER_PROD = {};
+	// 会計商品取得
+	if (!(prodid in JINYA_ORDER_PROD)) {
+		datasource.forEach(function(prod){
+			JINYA_ORDER_PROD[prod.prodId] = prod;
+			if (prod.prodId == prodid) return;
+		});
+	}
+	return JINYA_ORDER_PROD[prodid];
+}
+// 明細非表示
+function expandRow(){
+	$("#historyRecipt").removeClass("expand");
+	$("#orderFunLst").removeClass("expand");
+	var hideType = $("input[id$=hideType]").val();
+	if (hideType == 'SIMPLE') 
+		$("#historyRecipt").css("table-layout","auto");
+}
+// 明細表示
+function collapseRow(){
+	$("#orderFunLst").addClass("expand");
+	$("#historyRecipt").addClass("expand");
+	var hideType = $("input[id$=hideType]").val();
+	if (hideType == 'SIMPLE') 
+		$("#historyRecipt").css("table-layout","fixed");
+}
+// 履歴クリア
+function clearOrgHistory(){
+	$("#historyRecipt tfoot").remove();
+	$(".titleTab").eq(0).addClass("curSelect");
+	$(".titleTab").eq(1).removeClass("curSelect");
+	$("#historyRecipt").removeClass("rendered").hide();
+	$("#orderFunLst,#reciptFuncLst,div.reciptPanel").hide();
+	$("#main-section").removeClass("reciptHistory");
+	$("#historyOrder").show();
+}
+// 全て選択
+function checkAll(){
+	var currentChk = $(event.currentTarget);
+	$("input[name=hisPntChk]").prop("checked",currentChk.is(":checked"));
+}
+// 全て選択チェック
+function refreshPrint(){
+	// 履歴総計
+	var totalLen = $("input[name=hisPntChk]").length;
+	// 選択履歴総計
+	var chkLen = $("input[name=hisPntChk]:checked").length;
+	var checkFlag = totalLen > 0 && totalLen == chkLen;
+	// 全て選択状態更新
+	$("input[name=reciptCheck]").prop("checked",checkFlag);
+}
+// 再印刷
+function rePrint(info){
+	var obj;
+	var callBack = setPrintInfo;
+	if (!info) {
+	var curRow = $(event.currentTarget).closest("tr");
+	JINYACONNECT.blockUi();
+		var printName = curRow.data("printInfo");
+		var seq = window.localStorage.jinya_order_sequence;
+		var accId = curRow.attr("accId");
+		var orderIds = curRow.attr("orderIds").split(',');
+		var setIp = $("input[id$=hidLocalIp]").val();
+		var spcd = $("input[id$=hidShopCode]").val();
+		obj = {
+			accId:accId,
+			orderIds:orderIds,
+			sequene:seq,
+			localIp:setIp,
+			// 店舗コード
+			shopCd:spcd,
+			printName:printName,
+		}
+	} else {
+		obj = info;
+		callBack = morePrintFun;
+	}
+	// 連携開始
+	remoteCenter('rePrintOrder',JSON.stringify(obj),callBack);
+}
+function morePrintFun(result){
+	if (result != null) {
+		// 印刷行く
+		callPrintFuns(result.printInfo,result.statusUrl,result.printUrl,result.accId,callBackPrint);
+	// エラーの場合
+	} else callBackPrint(false,false);
+}
+// 印刷開始
+function printLst(){
+	// 印刷情報作成
+	var printArr = [];
+	var posName = $("#morePos").val();
+	var accFlag = $("input[name=accountId]").is(":checked");
+	// 2019/05/31 JINYABUG-1752 bug fix by zy BEGIN
+	// 店舗コード
+	var shopCode = $("input[id$=hidShopCode]").val();
+	// 2019/05/31 JINYABUG-1752 bug fix by zy END
+	$("input[name=hisPntChk]:checked").each(function(){
+		var orderRow = $(this).closest("tr.orderRow");
+		var curRow = orderRow.next();
+		var res = {};
+		// 指定印刷情報
+		if (accFlag) {
+			if (posName == undefined) posName = curRow.data("printInfo");
+			res.printName = posName;
+		} else res.printName = curRow.data("printInfo");
+		// 印刷内容
+		var title = $(".title",orderRow).text();
+		res.title = title;
+		// 印刷注文リスト
+		res.orderIds = curRow.attr("orderids").split(',');
+		// 印刷会計
+		res.accId = curRow.attr("accid");
+		// 2019/05/31 JINYABUG-1752 bug fix by zy BEGIN
+		// 指定店舗コード
+		res.shopCd = shopCode;
+		// 2019/05/31 JINYABUG-1752 bug fix by zy END
+		printArr.push(res);
+	});
+	// 印刷情報を選択してください
+	if (printArr.length == 0) return alert('{!$Label.MSG_060_0072}');
+	// 画面起動
+	openPrintWindow(printArr);
+}
+// 履歴印刷ウィンドウ開く
+function openPrintWindow(prints){
+	// ウィンドウ表示
+	var printWrap = $(".printWrap");
+	$(".printWinLock").show();
+	printWrap.addClass("process");
+	// 印刷成功件数
+	$(".successCnt",printWrap).text(0);
+	// 印刷総件数
+	$(".totalCnt",printWrap).text(prints.length);
+	// 印刷情報リスト初期化
+	printWrap.data("prints",prints);
+	// 印刷起動
+	callBackPrint(true);
+}
+// 履歴印刷ウィンドウ閉じる
+function closePrintWin(){
+	// 背景非表示
+	$(".printWinLock").hide();
+	// ウィンドウ表示
+	var printWrap = $(".printWrap");
+	printWrap.removeClass("process");
+}
+// 印刷後動作
+function callBackPrint(printFlg,errorFlag){
+	var printCheck = $("input[name=hisPntChk]:checked:first");
+	// 選中消去
+	if (printCheck.length > 0) {
+		if (printFlg != true) printCheck.prop("checked",false);
+	}
+	// ウィンドウ表示d
+	var printWrap = $(".printWrap");
+	// 画面開くチェック
+	if (printWrap.is(":visible")) {
+		// 印刷情報あり
+	var printArr = printWrap.data("prints");
+	if (printArr && printArr.length > 0) {
+			// エラーの場合
+			if (errorFlag) console.log("error");
+			// 該当印刷情報取得
+		var res = printArr[0];
+			// 次印刷情報
+			printArr = printArr.splice(1);
+			// 印刷リスト更新
+			printWrap.data("prints",printArr);
+			// 処理数更新
+		var sucessWrap = $(".successCnt",printWrap);
+		var success = kendo.parseInt(sucessWrap.text());
+		success += 1;
+		sucessWrap.text(success);
+			// 該当印刷情報明細
+			$(".statusClass",printWrap).text(res.title);
+			rePrint(res);
+	} else {
+			// 履歴印刷ウィンドウ閉じる
+			closePrintWin();
+		}
+	}
+	// 全て選択チェック
+	refreshPrint();
+}
+// 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END
+// 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy BEGIN
+function beforeOpen(type){
+	var isIframe = {!iframeMode};
+	$("#roomFilterWrap").show();
+	if (isIframe) {
+		if (type != 'account') $("#roomFilterWrap").hide();
+	}
+}
+// 2020/04/30 layout表示优化　by　zy BEGIN
+function refreshDesignLayout(isInitFlg){
+// 2020/04/30 layout表示优化　by　zy END
+	var type = $("#roomLstWrap").data("type");
+	if (type == 'account'){
+		$("iframe[name=layoutSet]").hide();
+	} else {
+		var isIframe = {!iframeMode};
+		if (isIframe) {
+			$("ul[name=roomWrap]").hide();
+			$("iframe[name=layoutSet]").show();
+			// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+			// 房间自设定画面初始化功能调用
+			var layoutIframe = $("iframe[name=layoutSet]");
+			// 判断iframe页面是否loading结束
+			if (!("isLoaded" in window.frames.layoutSet) || !window.frames.layoutSet.isLoaded()){
+				// 添加load监听，loading结束后重新调用当前功能
+					// 回调当前函数
+				setTimeout(() => {
+					refreshDesignLayout();
+				}, 200);
+			} else {
+				// 外框高度适应iframe高度
+				$("#roomLstWrap .innerWrap").css("height","auto");
+				// locationの場合
+				if (isLocationMode()) {
+					// 予約のフィルター機能非表示
+					$("#roomFilterWrap").hide();
+					// 会計済みボタン非表示
+					$(".clearClass").hide();
+					// 一括会計表示
+					$(".printClass").show();
+					// 選択レイアウト機能
+					// 2020/04/30 layout表示优化　by　zy BEGIN
+					if (isInitFlg) selLayoutId();
+					// 2020/04/30 layout表示优化　by　zy END
+				// 初期設定
+				// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+				} else if (isInitFlg) window.frames.layoutSet.beforeInit();
+				// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+			}
+			// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+		}
+	}
+}
+function selAccount(accId,leadId,orderId,roomId){}
+// 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy END
+// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+// カート処理対応
+function beforeSave(){
+	// 順番と備考情報追加
+    getCookOhterInfo(cart.contents);
+}
+// カートの会計商品追加
+let cartAdd = cart.add;
+// カートの会計商品追加のカスタム対応
+cart.add = function(item){
+	// カート処理対応
+    beforeSave();
+	// 2020/07/30 6933 bug fixed by zy BEGIN
+	// 去掉内存公用
+	item = $.extend({},item);
+	// 2020/07/30 6933 bug fixed by zy END
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+	// 該当商品単価変更なし
+	if (!("J_CHG_PRICE_DATA" in window) || !(item.id in J_CHG_PRICE_DATA)) {
+		//　商品原単価保持
+		if (item.price != item.chgPrice) {
+			// 単価変更と情報刷新
+			changePriceAndSetInfo(item,item.chgPrice);
+			// 単価変更
+			item.price = item.chgPrice;
+		}
+		//　商品原単価の税保持
+		if (!("chgTax" in item )) item.chgTax = item.tax;
+	}
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+	// 2020/06/30 6906 bug fixed by zy BEGIN
+	// 再び注文対応
+	if ("J_REORDER_PRICE" in window) {
+		// 再び注文の対象取得
+		var reOrderPrice = window.J_REORDER_PRICE;
+		//　再び注文商品的价格与上一次的价格是否一致
+		// 如果不一致则需要重新设定价格
+		if (item.price != reOrderPrice) {
+			// 単価変更と情報刷新
+			changePriceAndSetInfo(item,reOrderPrice);
+			item.set("price",reOrderPrice);
+			// 2020/06/30 6923 bug fixed by zy BEGIN
+			// 該当レイアウトタイプ「通常」チェック
+			// カートの商品取得（商品Id）
+			var cartItem = getCartItemByProdId(item.prodId);
+			// カートの商品有効チェック
+			if (cartItem != null)
+				cartItem.set("itemPrice",kendo.toString(item.price,"c"));
+			// 2020/06/30 6923 bug fixed by zy END
+			// 商品単価変更設定
+			if (!("J_CHG_PRICE_DATA" in window)) window.J_CHG_PRICE_DATA = {};
+			J_CHG_PRICE_DATA[item.id] = item;
+		}	
+		// 一次有効
+		delete window.J_REORDER_PRICE;
+	}
+	// 2020/06/30 6906 bug fixed by zy END
+	// 原追加機能処理
+    cartAdd.call(cart,item);
+	// 備考と順番対応
+    simpleProcess();
+}
+// カートの会計商品削除
+let cartRemove = cart.remove;
+// カートの会計商品削除のカスタム対応
+cart.remove = function(item){
+    if (item != undefined) {
+		// カート処理対応
+        beforeSave();
+		// 原削除機能処理
+        cartRemove.call(cart,item);
+		// 備考と順番対応
+        simpleProcess();
+		// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+		// 該当削除商品、単価変更した
+		if (("J_CHG_PRICE_DATA" in window) && item.item.id in J_CHG_PRICE_DATA) {
+			// 原単価の商品の消費税保持
+			backOrgTax(item.item);
+			// 変更単価の商品の消費税削除
+			// 2020/07/30 6932 bug fixed by zy BEGIN
+			// 画面変更単価商品クリア
+			clearPrice(item.item.id);
+			// delete J_CHG_PRICE_DATA[item.item.id];
+			// 2020/07/30 6932 bug fixed by zy END
+    }
+		// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+	}
+}
+// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+// カートクリア
+let cartEmpty = cart.empty;
+// カートクリア機能カスタム対応
+cart.empty = function(item){
+	// 変更単価商品あり
+	if ("J_CHG_PRICE_DATA" in window) {
+		// カートの全部内容
+		if (cart.contents.length > 0)
+			cart.contents.forEach(function(item){
+				// 該当削除商品、単価変更した、原単価の商品の消費税保持
+				if (item.item.id in J_CHG_PRICE_DATA) backOrgTax(item.item);
+			});
+	}
+	// 原クリア機能処理
+	cartEmpty.call(cart);
+	// 画面変更単価商品クリア
+	clearPrice();
+}
+//　传输值对象機能あり
+if ("getReqInfo" in window) {
+	// 原機能関数
+var beforeReq = getReqInfo;
+	// 注文情報作成
+getReqInfo = function(prods,seq,accId,leadId,orderId,trans,comment){
+		// 順番と備考情報追加
+		// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+		getCookOhterInfo(prods,true);
+		// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+		// 原機能関数処理
+    var req = beforeReq(prods,seq,accId,leadId,orderId,trans,comment);
+    return req;
+	}
+}
+// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+// レイアウト変更
+var showIn = layout.showIn;
+layout.showIn = function(e, t, i) {
+	// 原レイアウト変更
+    showIn.call(this,e,t,i);
+	// レイアウト「通常」のチェックアウトの場合
+    if (t.content == 'checkout-template') {
+		// 遍历被变更的商品情報
+		// 2020/07/30 7062 bug fix by zy BEGIN
+		if ("J_CHG_PRICE_DATA" in window) {
+			cart.contents.forEach(function(cartIem){
+				if (cartIem.item.id in J_CHG_PRICE_DATA) {
+					var changeItem = J_CHG_PRICE_DATA[cartIem.item.id];
+					//　商品単価変更
+					if (cartIem.price != changeItem.price) {
+						// 単価変更と情報刷新
+						changePriceAndSetInfo(cartIem,changeItem.chgPrice);
+						// 単価変更
+						cartIem.set("price",cartIem.chgPrice);
+					}
+				}
+			});
+		}
+		// 2020/07/30 7062 bug fix by zy END
+		// 備考と順番対応
+        simpleProcess();
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+		refreshBlankDropDown();
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+    }
+};
+// 順番と備考情報追加
+// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+function getCookOhterInfo(datas,priceFlg){
+// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+	// 備考対象
+    var sels = $("select[name=selDesc]");
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+	// 順番対象
+	var selNows = $("input[name=selNow]");
+	// 単価対象
+	var tablePrices = $("input.table-price,input.item-price");
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+	// 予約新規の場合
+    if ("J_CONTENTS" in window) {
+		datas.forEach(function(data,idx){
+			var item = cart.contents[idx];
+			if (item != undefined) {
+				if (item.cookDesc != undefined && item.cookDesc != null && item.cookDesc != "" ) data.cookDesc = item.cookDesc;
+				if (item.cookRow != undefined && item.cookRow != null && item.cookRow != "" ) data.cookRow = item.cookRow;
+			}
+		});
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+	} else if (selNows.length > 0){
+		selNows.each(function(idx){
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+			var data = datas[idx];
+			if (this.value != null && this.value != "") data.cookRow = this.value;
+			var cooDes = sels.eq(idx).val();
+			if (cooDes != null && cooDes != "")
+				data.cookDesc = cooDes;
+		});
+	}
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+	// 単価対応の場合
+	if (priceFlg == true) {
+		// 変更単価設定
+		datas.forEach(function(data,idx){
+			// カートの情報取得
+			var item = cart.contents[idx];
+			if (item != undefined) {
+				data.price = item.item.price;
+			}
+		});
+	}
+	// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+}
+// 備考と順番対応
+function simpleProcess(){
+    var indexArr = [];
+    var maxInt = 1;
+    for (var i = 0 ; i < cart.contents.length; i++) {
+        let data = cart.contents[i]; 
+        if (("cookRow" in data) && data.cookRow > maxInt) {
+            maxInt = data.cookRow;
+        }
+    }
+    maxInt = maxInt > cart.contents.length ? maxInt : cart.contents.length;
+	var curJson = $("#hidCurRoomMsg").val();
+	if (curJson == "") curJson = "{}";
+	var curRoom = JSON.parse(curJson || "{}");
+	var begInt = curRoom.orderCnt || 0;
+    for (var i = 1 ; i <= maxInt; i++) {
+		indexArr.push(begInt + i);
+	}
+    $("input[name=selNow]").each(function(idx){
+        var data = cart.contents[idx];
+        var dropDown = $(this).kendoDropDownList({dataSource:{data:indexArr}}).getKendoDropDownList();
+        if ("cookRow" in data) dropDown.value(data.cookRow);
+        else {
+			var currentIdx = idx + begInt + 1;
+            dropDown.value(currentIdx);
+            data.cookRow = currentIdx;
+        }
+    });
+    $("select[name=selDesc]").each(function(idx){
+        var data = cart.contents[idx];
+        var multiSel = $(this).getKendoComboBox();
+        if (multiSel == undefined) {
+            var multiSel = $(this).kendoComboBox({
+                animation: false,
+                dataTextField: "name",
+                dataValueField: "id",
+                dataBound: onDataBound
+            }).getKendoComboBox();
+        }
+        if ("cookDesc" in data) multiSel.value(data.cookDesc);
+    });
+}
+function onDataBound(e) {
+    $('#pre-content .k-multiselect .k-input').unbind('keyup');
+    $('#pre-content .k-multiselect .k-input').on('keyup', onClickEnter);
+}
+function onClickEnter(e) {
+    if (e.keyCode === 13) {
+        if (!("currentId" in window)) window.currentId = 1
+        var multiSel = $(e.currentTarget).closest("div.k-widget").find("select");
+        var widget = multiSel.getKendoMultiSelect();
+        var dataSource = widget.dataSource;
+        var input = $('.k-multiselect .k-input');
+        var value = input.val().trim();
+        if (!value || value.length === 0) {
+            return;
+        }
+        var newItem = {
+            id: currentId ++,
+            name: value
+        };
+        dataSource.add(newItem);
+        var newValue = newItem.id;
+        widget.value(widget.value().concat([newValue]));
+    }
+}
+// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+// 2020/04/30  複数部屋だと問題なく予約が作成される by zy BEGIN
+// bug fix 6195
+function getLeadIdByRoom(roomId){
+	// 如果隐藏域有直接用
+	var hideLeadId = $("input[id$=hideLeadId]").val();
+	if ( hideLeadId != undefined && hideLeadId != "")  return hideLeadId;
+	// 查住房间
+	if (roomId != undefined) {
+		 var mainRoom = $("li.roomLstClass[data-roomid=" + roomId + "]");
+	    // 部屋の多予約対応
+	    if (mainRoom.length > 1) mainRoom = mainRoom.eq(0);
+		hideLeadId = mainRoom.data("leadid");
+	}
+	return hideLeadId;
+}
+// 複数選択フラグ
+function getMulitRoomFlg(){
+	return $("#hidMulitRoomFlg").val() == "true";
+}
+// 2020/04/30  複数部屋だと問題なく予約が作成される by zy END
+// 2020/06/30 オーダエンドリーでの金額入力 by zy BEGIN
+// 保存事前処理、小部屋作成チェック、複数部屋作成チェック
+function preMakeOrder(){
+	var makeOrderFlag = false;
+	if (domanFlag) {
+		var blankLeadId = getBlankLeadId(), //「部屋付け」
+				blankIdFlg = blankLeadId == "", mainRoomId = $("input[id$=hidRoomId]").val(),leadId = getLeadIdByRoom(mainRoomId) //「部屋付け」なし、部屋Id
+					moreRoomFlg = (("J_ROOMARR" in window) && window.J_ROOMARR.length > 0), //複数部屋あり
+						blankLeadRoomFlg = mainRoomId != "" && blankIdFlg && leadId == ""　&& getMulitRoomFlg(); //選択部屋あり
+		// 2020/04/30  複数部屋だと問題なく予約が作成される by zy END
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+		// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+		// 2020/04/30 １部屋だけ選択するとCREATEINFOを定義していても予約��作成されず今まで通りの挙動になる by zy BEGIN
+		// if (("J_ROOMARR" in window) && window.J_ROOMARR.length > 0){
+		// 複数部屋と選択予約と部屋ありご予約なしの場合
+		if (moreRoomFlg || !blankIdFlg || blankLeadRoomFlg){
+		// 2020/04/30 １部屋だけ選択するとCREATEINFOを定義していても予約が作成されず今まで通りの挙動になる by zy END
+			// 画面Loading
+			JINYACONNECT.blockUi();
+			// 料理メッセージ設定
+			beforeSave();
+			// カート設定
+			window.J_CONTENTS = cart.contents.toJSON();
+			// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+			// 2020/04/30 １部屋だけ選択するとCREATEINFOを定義していても予約が作成されず今まで通りの挙動になる by zy BEGIN
+			var obj = {shopCd:$("input[id$=hidShopCode]").val()};
+			if (!blankIdFlg) obj.leadId = blankLeadId;
+			if (moreRoomFlg) obj.orderIds = J_ROOMARR;
+			else if (blankLeadRoomFlg || !blankIdFlg) obj.orderIds = [mainRoomId];
+			var spcd = $("input[id$=hidShopCode]").val();
+			var localIp = $("input[id$=hidLocalIp]").val();
+			// 店舗コード
+			obj.shopCd = spcd;
+			obj.localIp = localIp;
+			// 2020/04/30 １部屋だけ選択するとCREATEINFOを定義していても予約が作成されず今まで通りの挙動になる by zy END
+			// 複数テープル予約作成
+			remoteCenter('createLeadByRooms',JSON.stringify(obj),afterRoomArrProcess,true);
+			// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+			makeOrderFlag = true;
+		}
+	}
+	return makeOrderFlag;
+}
+// 画面変更単価商品クリア
+// 2020/07/30 6932 bug fixed by zy BEGIN
+function clearPrice(prodIndex){
+// 2020/07/30 6932 bug fixed by zy END
+	// 関数あり
+	// 2020/07/30 6930 bug fixed by zy BEGIN
+	// 画面显示商品中存在价格变更
+	if ("J_CHG_PRICE_DATA" in window) {
+		if (prodIndex != undefined) {
+			if (prodIndex in J_CHG_PRICE_DATA) {
+				// 画面の商品取得
+				var item = items.get(prodIndex)
+				//　商品単価変更
+				if (item.price != item.chgPrice) {
+					// 単価変更と情報刷新
+					changePriceAndSetInfo(item,item.chgPrice);
+					// 単価変更
+					item.set("price",item.chgPrice);
+				}
+				// 関数クリア
+				delete J_CHG_PRICE_DATA[prodIndex];
+			}
+		} else {
+			// 遍历被变更的商品情報
+			for (var itemId in J_CHG_PRICE_DATA) {
+				// 商品Id
+				if (itemId) {
+					// 画面の商品取得
+					var item = items.get(itemId)
+					//　商品単価変更
+					if (item.price != item.chgPrice) {
+						// 単価変更と情報刷新
+						changePriceAndSetInfo(item,item.chgPrice);
+						// 単価変更
+						item.set("price",item.chgPrice);
+					}
+				}
+			}
+			// 関数クリア
+			delete window.J_CHG_PRICE_DATA; 
+		}
+	}
+	// 2020/07/30 6930 bug fixed by zy END
+}
+// 金額変更
+function priceChange(){
+	// 金額変更の明細行
+	var curRow = $(event.currentTarget).closest("tr");
+	// 該当金額
+	var price = kendo.parseFloat($(event.currentTarget).val());
+	// 注文詳細テーブル
+	var curTbls = $(event.currentTarget).closest("table");
+	var tbody = curTbls.find("tbody");
+	if (tbody.length > 0) curTbls = tbody;
+	// 金額計算
+	if (cart.contents.length > 0 ){
+		// 該当明細行のカートの商品取得
+		var curItem = cart.contents[curTbls.find("tr").index(curRow)];
+		// 金額格式不正
+		if (price == null || price < 0) {
+			price = curItem.item.chgPrice;
+			$(event.currentTarget).val(price);
+		}
+		// 金額変更の場合、関連情報計算
+		var res = JINYACONNECT.PRODUCT.PROCESS(price, 1, curItem.item.taxcal, curItem.item.serv || 0, JINYACONNECT.PRODUCT.CAL.PRICE_KBN);
+		// 税込の金額
+		curItem.item.priceInc = res.priceIncTax;
+		// 毎一商品の税
+		curItem.item.tax = res.priceIncTax - res.priceExcTax;
+		// 6516 bug fixed by zy BEGIN
+		// 該当レイアウトタイプ取得
+		if (getLayoutType() == 'COMMON') curItem.set("itemPrice",kendo.toString(price,"c"));
+		// 6516 bug fixed by zy END
+	}
+	// 注文明細の金額変更保持
+	// 関数「J_CHG_PRICE_DATA」用于保存变更价格的商品，结构{商品index:商品}
+	if (!("J_CHG_PRICE_DATA" in window)) window.J_CHG_PRICE_DATA = {};
+	J_CHG_PRICE_DATA [curItem.item.id] = curItem.item ;
+}
+// 原単価の商品の消費税保持
+function backOrgTax(item){
+	// 該当レイアウトタイプ取得
+	if (getLayoutType() != 'COMMON') return;
+	// 該当商品の消費税変更の場合
+	if ("chgTax" in item ) {
+		// 原単価の消費税変更
+		item.tax = item.chgTax;
+		// 変更単価の消費税クリア
+		delete item.chgTax;
+	}
+}
+// 該当レイアウトタイプ取得
+function getLayoutType(){
+	return $("input[id$=hideType]").val();
+}
+// 2020/06/30 6906 bug fixed by zy BEGIN
+let orgReAdd = reAdd;
+reAdd = function(el){ 
+	// 該当ボタン情報
+	let curRow = $(el).closest("tr"),
+	// 2020/06/30 6519 bug fix by zy BEGIN
+	// 会計明細の注文時の単価取得
+	price = kendo.parseFloat(curRow.attr("price"));
+	// 会計明細の単価設定、此参数用于商品追加，是否重新计算（単価、合計金額、消費税）
+	window.J_REORDER_PRICE = price;
+	// 2020/06/30 6519 bug fix by zy END
+	// 商品追加
+	orgReAdd.call(this,el);
+}
+// 単価変更と情報刷新
+function changePriceAndSetInfo(item,chgPrice){
+	// 金額変更の場合、関連情報計算
+	var res = JINYACONNECT.PRODUCT.PROCESS(chgPrice, 1, item.taxcal, item.serv || 0, JINYACONNECT.PRODUCT.CAL.PRICE_KBN);
+	// 消費税
+	item.tax = res.priceIncTax - res.priceExcTax;
+	// 消費税の金額
+	item.priceInc = res.priceIncTax;
+}
+// カートの商品取得（商品Id）
+function getCartItemByProdId(prodId){
+	// 結果情報
+	var result = null;
+	// カートの全て商品
+	cart.contents.forEach(function(item){
+		// 指定商品チェック
+		if (item.item.prodId == prodId) {
+			// 指定商品設定
+			result = item;
+			// 循環中止
+			return false;
+		}
+	});
+	return result;
+}
+// 2020/06/30 6906 bug fixed by zy END
+// 2020/06/30 オーダエンドリーでの金額入力 by zy END
+</script>
+</body>
+<!-- 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy BEGIN -->
+<apex:outputpanel rendered="{!!isDomainFlag}">
+<script>
+function clearAllHistory(){
+	// 2017/10/16 bug-35 fix by zy BEGIN
+	// 清空原来的数据
+	if (historyView.element != undefined) {
+		var lastHistoryRows = historyView.element.find("#historyOrder tr:not('.headTr')");
+		if ( lastHistoryRows.length > 0 ) lastHistoryRows.remove();
+	}
+	// 2017/10/16 bug-35 fix by zy END
+}
+//　画面の商品情報取得（商品Id）
+function getItemById(prodId){
+	// 画面全て商品情報
+	var datas = items.data();
+	// 指定商品取得
+	for ( var i = 0 ; i < datas.length ; i++ ) {
+		var data = datas[i];
+		// 商品Idチェック
+		if ( data.prodId == prodId ) {
+			return data;
+		}
+	}
+	return null;
+}
+</script>	
+</apex:outputpanel>
+<!-- 2019/07/31 オーダーエンドリーのIPAD印刷連携機能 by zy END -->
+<apex:outputPanel id="headPanel" rendered="{!isDomainFlag}">
+	<apex:stylesheet value="{!URLFOR($Resource.OrderLib, 'css/domain.css')}"/>
+	<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/domain.js')}"/>
+	<c:DatePickerComp beginToday="true" callbackFun="dateCallbackFun()"/>
+  	<style>
+  		.floatRoomRow{
+  			height:20px;
+  			max-width:{!roomDivWidth}px;
+  			overflow: hidden;
+  			text-align: center;
+  		}
+  		.account.hadAccountClass .innerRoom{
+  			background: gray;
+  		}
+  		.account.canAccountEnd .innerRoom{
+  			background: white;
+  		}
+  		.account.canAccountEnd .innerRoom:hover,.lead .innerRoom:hover{
+		    background-color: #d60041;
+		    color: #fff;
+		    cursor: pointer;
+		}
+		.accountBtn{
+			cursor: pointer;
+		}
+		.curSelect{
+			background: rgba(214,0,65,1);
+		}
+		.k-window-title img{
+			margin-left: 10px;
+			margin-right:5px;
+    		width: 12px;
+		}
+		#title{
+			background: lightblue;
+    		line-height: 22px;
+    		font-size: 15px;
+		}
+		.k-i-sort-desc-sm {
+			background-position: 0px -33px;
+		}
+		.k-i-sort-asc-sm:before {
+		}
+		/* 2017/10/14 部屋の予約別の機能追加　by　zy　BEGIN */
+		.roomLstdiv{
+			display: none;
+		}
+		.otherLeadClass,.hadAccountClass{
+			display: none;
+		}
+		table.ui-datepicker-calendar tbody td:first-child + td + td{
+			width: auto;
+		}
+		/* 2017/10/14 部屋の予約別の機能追加　by　zy　END */
+  	</style>
+  	<script>
+  		// 2017/09/11 印刷リスト機能　by　zy　BEGIN
+  		var LABEL = {
+ 			search: "{!$Label.MSG_040_0058}", 
+			checkAll: "{!$Label.MSG_040_0095}",
+			selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+			// フィルター
+			filter: "{!$Label.MSG_040_0103}",
+			// クリア
+			clear: "{!$Label.MSG_040_0106}",
+			//印刷中。。。
+			printing:'{!$Label.MSG_060_0042}',
+			//予約名
+			leadNm:'{!$Label.MSG_060_0043}',
+			//お客様名
+			contact:'{!$Label.MSG_060_0044}',
+			//お部屋名
+			roomNm:'{!$Label.MSG_060_0045}',
+			// 時刻
+			entryTime:'{!$Label.MSG_060_0046}',
+			// 状態
+			status:'{!$Label.MSG_060_0047}',
+			// 印刷リスト
+			printTitle:'{!$Label.MSG_060_0048}',
+			// 昼
+			leadstatus:'{!$Label.MSG_060_0049}',
+			// リンク接続不正
+			errCantConnect:'{!$Label.MSG_060_0052}'
+  		}
+  		$(document).ready(function(){
+  			$("#gotoDate").unbind("focus");
+  			$("#gotoDate").bind("focus",function(){
+  				var curDate = $(this).data("date");
+  				var textDate = $(this).val();
+  				// 第一次focus
+  				if (curDate == undefined || curDate == "") {
+  					$(this).data("date",textDate);
+  				}
+  			});
+  			$("#gotoDate").jinyaDatePicker();
+  			//鼠标滚轮事件  
+	        var isFirefox = navigator.userAgent.indexOf("Firefox") != -1;  
+	        //Firefox事件：DOMMouseScroll、IE/Opera/Chrome事件：mousewheel  
+	        var mousewheel = isFirefox ? "DOMMouseScroll" : "mousewheel";
+  			document.addEventListener(mousewheel,windowScroll,false); 
+  			
+  		});
+  		function dateCallbackFun(){
+  			var $this = $("#gotoDate");
+  			var curDate =$this.data("date");
+  			var textDate = $this.val();
+  			if (curDate == textDate) return; 
+  			var printStatus = $("#printWindow").data("print");
+			if ( printStatus == 'begin' ) {
+				if (confirm(LABEL.printing)){
+					printEnd();
+					printStop($(".endPrint").get(0));
+					// 更改日期
+					$("input[id$=hidQueryDate]").val($this.val());
+					changePrintDetails();
+				}
+			} else {
+				// 更改日期
+				$("input[id$=hidQueryDate]").val($this.val());
+				// 刷新预约列表
+				changePrintDetails();
+			}
+			$this.data("date","");
+  		}
+  		function windowScroll(){
+			 if ($("#printWindow").hasClass("mouseIn")) {
+			 	$(".gridDetails").addClass("noScroll");
+			 }
+  		}
+  		// 2017/09/11 印刷リスト機能　by　zy　END
+  		//清空房间会计
+		 function clearRoom(that){
+		    if ($(that).hasClass("unClickClass")) return ;
+		    if (confirm("{!$label.MSG_060_0037}")){
+		        var trans = [];
+		        $("li.roomSelect").each(function(){
+		            var mainLi = $(this);
+		            var orderId = mainLi.data("orderid");
+		            var leadId = mainLi.data("leadid");
+		            var accoId = mainLi.data("accid");
+		            var roomId = mainLi.data("roomid");
+		            var historyKey = createDomainKey(roomId);
+		            //会計ずみの場合、履歴データ削除する
+		            window.localStorage.removeItem("jinya_order_" + historyKey);
+		            $("#historyOrder tr[leadindex='" + accoId + "']").remove();
+	            	var prodInfo = getReqInfo([],"",accoId,leadId,orderId);
+	            	prodInfo.roomId = roomId;
+	            	trans.push(prodInfo);
+		        });
+		        $("input[id$=hideLeadId]").val("");
+		        var reqJson = JSON.stringify(trans);
+		        $("input[id$=hidReqJson]").val(reqJson);
+		        accountDomainFun();
+		    }
+		 }
+		 function showLstByMode(type){
+		    $("li.roomLstClass").show();
+		    if (type == 'account') {
+		        //会計タブ
+		        $(".accountLstDiv").show();
+		        // 会計済み
+		        $(".clearClass").show();
+		        //部屋タブ
+		        $(".roomLstdiv").hide();
+		        $("li.roomLstClass:not('.hadAccountClass')").hide();
+		        $("li.roomLstClass.hadAccountClass:not('.canAccountEnd')").attr("title","{!$label.MSG_060_0038}");
+		        $("#roomLstWrap").data("type","account");
+		        //　会計モード
+		        $("li.roomLstClass").addClass("account");
+		        // 予約モード
+		        $("li.roomLstClass").removeClass("lead");
+		        // 2017/09/11 印刷リスト機能　by　zy　BEGIN
+		        // 日付非表示
+		        //$("span.dateOnlyInput").hide();
+		        // すべて予約非表示
+		        //$("span#allLeads").hide();
+		        // 2017/09/11 印刷リスト機能　by　zy　END
+				// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+				$(".layoutClass").hide();
+				// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+		    } else if (type == 'lead'){
+		        $(".accountLstDiv").hide();
+		        $(".roomLstdiv").show();
+		        $(".roomSelect").removeClass("roomSelect");
+		        $(".clearClass").hide();
+		        $("#roomLstWrap").data("type","lead");
+		        $("li.roomLstClass").addClass("lead");
+		        $("li.roomLstClass").removeClass("account");
+		        $("li.roomLstClass.hadAccountClass:not('.canAccountEnd')").removeAttr("title");
+		        // 2017/09/11 印刷リスト機能　by　zy　BEGIN
+		        // 日付表示
+		        //$("span.dateOnlyInput").show();
+		        // 2017/09/11 印刷リスト機能　by　zy　END
+		       	//2017/10/14 部屋の予約別の機能追加　by　zy　BEGIN
+		        showMainRoom();
+		        //2017/10/14 部屋の予約別の機能追加　by　zy　END
+				// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+				$(".layoutClass").show();
+				// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+		    }
+		}
+		function changeSpcd(spcd,that){
+			if (!$(that).hasClass("curSelect")) {
+				$("input[id$=hidShopCode]").val(spcd);
+				chgShopCodeFun();
+			}
+		}
+		// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN
+		// 該当レイアウト刷新
+		function chgLayout(){
+			$("input[id$=hidLocationId]").val($("#selLocation").val());
+			// 場所初期化
+			initLayout();
+			// 選択レイアウト機能
+			selLayoutId();
+		}
+		// 場所初期化
+		function initLayout(){
+			$("#selLocation").val($("[id$=hidLocationId]").val());
+			// 該当場所のレイアウト情報取得
+			var layoutJson = $("#selLocation").val();
+			// レイアウト情報取得あり
+			if (layoutJson != "") {
+				// 初期化レイアウト情報
+				var arr = JSON.parse(layoutJson);
+				if (arr.length > 0) {
+					var selArr = [];
+					arr.forEach(function(layout){
+						// 該当時間指定レイアウト
+						var checked = (("select" in layout) && layout.select) ? 'selected="selected"' : '';
+						// レイアウト追加
+						selArr.push("<option value='" + layout.id + "' time='" + layout.time + "' " + checked +">" + layout.name + "</option>");
+					});
+					// 全部オプション追加
+					$("#selLayouts").html(selArr.join(''));
+					var layoutId = $("input[id$=hidlayoutId]").val();
+					if (layoutId != "" && $("#selLayouts").has("[value=" + layoutId + ']').length > 0) {
+						$("#selLayouts").val(layoutId);
+					}
+				}
+			}
+		}
+		// 選択レイアウト機能
+		function selLayoutId(){
+			if (!("J_LAYOUT_LOAD" in window)) {
+				refreshRoomFun();
+			} else {
+				// 選択レイアウトId取得
+				var layoutId = $("#selLayouts").val();
+				$("input[id$=hidlayoutId]").val(layoutId);
+				// 初期設定
+				window.frames.layoutSet.beforeInit();
+				// レイアウト画面内容変更
+				window.frames.layoutSet.getAttachmentById(layoutId);
+				delete window.J_LAYOUT_LOAD;
+			}
+		}
+		// 部屋刷新
+		function refreshRoomFun(){
+			// 場所の場合
+			if (isLocationMode() && !("J_LAYOUT_LOAD" in window)) {
+				// 選択レイアウト項目
+				var selOpt = $("#selLayouts option:checked");
+				// 選択項目の時間取得
+				var timeVal = selOpt.attr("time");
+				// タイプ保持
+				$("[id$=hidLayoutType]").val(timeVal);
+				// 画面ロック
+				window.J_LAYOUT_LOAD = true;
+			}
+			// カートクリア
+			cart.clear();
+			refreshRoomAftFun();
+		}
+		// 部屋リスト初期開くフラグ
+		function isRoomOpenFlg(){
+			return $("#hidRoomOpen").val() == "true";
+		}
+		// レイアウトフラグ
+		function isIframeMode(){
+			return $("#hidFrameMode").val() == "true";
+		}
+		// 事前部屋ウインドウ開く
+		function beforeOpenRoomWin(){
+			// locationの場合
+			if (isLocationMode()) {
+				initLayout();
+			}
+			// 部屋ページ表示予約モード
+			var isNoLeadShowFlag = true;
+			// 既存ユーザー設定予約モード
+			if ("jinya_order_leadShow" in window.localStorage) isNoLeadShowFlag = window.localStorage.jinya_order_leadShow == "true";
+			// チェック場所有効のみ
+			if (isRoomOpenFlg()){
+				// 部屋ウインドウ表示
+				$("#roomLstWrap").show();
+				// 部屋位置指定
+				var pos = $("#header").position();
+        		$("#roomLstWrap").css({left:pos.left,top:pos.top + 52,width:$("#header").width()});
+				// 事前処理
+				beforeOpen();
+				// レイアウト画面刷新
+				if (isLocationMode() || isIframeMode()) refreshDesignLayout();
+				else {
+					if (!("jinya_order_leadShow" in window.localStorage)) isNoLeadShowFlag = false;
+					$("#leadChk").prop("checked",isNoLeadShowFlag);
+					showLstByMode('lead');
+					chgShowType($("#leadChk"));
+				}
+			} else $("#leadChk").prop("chceked",isNoLeadShowFlag);
+		}
+		// チェック場所有効のみ
+		function isLocationMode(){
+			return $("#selLocation option").length > 0;
+		}
+		// 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END
+		// 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN
+		// 複数テープル対応
+		function multiSelectTable(){
+			// 機能ボタン表示
+			$(".multiSelPanel").show();
+			// 複数テープル非表示
+			$("span[name=mutiSelTable]").hide();
+			if (isLocationMode() || isIframeMode()) {
+				// 複数機能起動
+				window.frames.layoutSet.setTableSel(true);
+			} else {
+				window.J_ORGCHANGE_ROOM = changeRoom;
+				changeRoom = function(){
+					var roomLi = $(event.currentTarget);
+					if (roomLi.hasClass("noleadClass")) {
+						roomLi.toggleClass("selectClass");
+						if (!("J_ROOMARR" in window)) window.J_ROOMARR = []; 
+						J_ROOMARR.push(roomLi.attr("data-roomid"));
+					}
+				};
+			}
+		}
+		// 機能ボタン表示
+		function multiSelectDone(){
+			var roomArr = [];
+			if (isLocationMode() || isIframeMode()) {
+				// 選択複数テープル取得
+				roomArr = window.frames.layoutSet.getSelectRoomArr();
+			} else {
+				var romMap = {};
+				J_ROOMARR.forEach(function(roomId){
+					if (!(roomId in romMap)) {
+						romMap[roomId] = true;
+						var room = $("li.roomLstClass.selectClass").filter("[data-roomid='" + roomId + "']");
+						if (room.length > 0) roomArr.push({roomNm:$(".name",room).text(),roomId:room.attr("data-roomid")});
+					}
+				});
+			}
+			// 複数テープル設定初期化
+			multiSelectCancel();
+			// 部屋画面閉じる
+			hideWindow();
+			// 選択複数テープル情報処理
+			if (roomArr.length > 0) {
+				// 選択複数テープルの部屋名
+				var roomName = [],roomMap = {};
+				// 選択複数テープル対象処理指定
+				window.J_ROOMARR = [];
+				// 選択複数テープル情報処理開始
+				roomArr.forEach(function(room){
+					// 選択複数テープルの部屋名
+					roomName.push(room.roomNm);
+					// 選択複数テープルの部屋ID
+					J_ROOMARR.push(room.roomId);
+					// 部屋情報
+					roomMap[room.roomId] = room;
+				});
+				// Titleの部屋のメッセージ刷新
+				// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+				var clearImg = '<img src="/img/permissions_deny16.gif" style=" position: relative;top: 3px;cursor: pointer;" id="clearIcon" onclick="emptyDomainRoom();changeLayoutName();multiSelectCancel();refreshBlankDropDown();"/>' ;
+				$("#roomMess").html(clearImg + '{!$ObjectType.Room__c.Fields['Name'].label}：' + roomName.join(','));
+				// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+				// Titleの予約のメッセージ刷新
+				$("#leadMess").html('');
+				// クリア既存予約選択
+				$("[id$=hideLeadId]").val("");
+				// 单一部屋设定取消
+				window.localStorage.jinya_order_roomId = J_ROOMARR[0];
+				// オーダーエンドの内容取得
+				let mainRoom = $.parseJSON($('#mainRoom').val() || '{}');
+				// 部屋情報取得
+				let roomInfo = mainRoom[J_ROOMARR[0]] || roomMap[J_ROOMARR[0]];
+				$("#hidCurRoomMsg").val(JSON.stringify(roomInfo));
+				// レイアウト名刷新
+				changeLayoutName();
+				// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+				refreshBlankDropDown();
+				// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+			}
+		}
+		// 複数テープル機能取消
+		function multiSelectCancel(){
+			// 複数テープル機能ボタン表示
+			$("span[name=mutiSelTable]").show();
+			// 機能ボタン非表示
+			$(".multiSelPanel").hide();
+			// レイアウトモード
+			if (isLocationMode() || isIframeMode()) {
+			// レイアウト画面刷新
+			window.frames.layoutSet.setTableSel(false);
+			// 通常モード
+			} else if ("J_ORGCHANGE_ROOM" in window) {
+				// 選択部屋機能復旧
+				changeRoom = J_ORGCHANGE_ROOM;
+				// 函数クリア
+				delete window.J_ORGCHANGE_ROOM;
+				// 部屋選択状態クリア
+				$("li.roomLstClass.selectClass").removeClass("selectClass");
+			}
+			// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+			if ("J_ROOMARR" in window) 
+				delete window.J_ROOMARR; // 複数用関数クリア
+			// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+		}
+		// 複数テープル予約作成後
+		function afterRoomArrProcess(result){
+			var roomElement = $("li.roomLstClass[data-roomid=" + result.roomId + "]");
+			roomElement.data("leadid",result.leadId);
+			// 該当処理部屋設定
+			$("input[id$=hidRoomId]").val(result.roomId);
+			cart.set("contents",J_CONTENTS);
+			var htmlCode = $("<div/>").html(result.printInfo);
+			var htmlContent = htmlCode.text();
+			$("#hidCurRoomMsg").val(htmlContent);
+			// 2020/04/30  複数部屋だと問題なく予約が作成される by zy BEGIN
+			// エラー表示
+			if (result.error != "") {
+				alert(result.error);
+				// 備考と順番対応
+				simpleProcess();
+				refreshCartStatus();
+				JINYACONNECT.unblockUi();
+				return;
+			}
+			// 2020/04/30  複数部屋だと問題なく予約が作成される by zy END
+			refreshLoadMsg();
+			// 注文作成
+			processDomain();
+			// 複数用関数クリア
+			delete window.J_ROOMARR;
+			delete window.J_CONTENTS;
+			cart.clear();
+		}
+		//　ページ設定保持
+		function saveStorge(name,type){
+			if (type == 'bln') window.localStorage[name] = $(event.currentTarget).is(":checked");
+		}
+		// 2020/02/15 予約が入っていないテーブルも選択可能に by zy END
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy BEGIN
+		function afterGetLeads(result){
+			if (result != null) this.opts.success(result);
+			else this.opts.error();
+		}
+		function getBlankLeadId(){
+			// 2020/04/30 １部屋だけ選択するとCREATEINFOを定義していても予約が作成されず今まで通りの挙動になる by zy BEGIN
+			return $("#multiSelRoomDropDown").length > 0 ? $("#multiSelRoomDropDown").val() : "";
+			// 2020/04/30 １部屋だけ選択するとCREATEINFOを定義していても予約が作成されず今まで通りの挙動になる by zy END
+		}
+		// 2020/04/15 空のテーブルを選んだ場合のみ、「部屋付け」が確定ボタンの上に表 by zy END
+		// 2020/04/30  複数部屋だと問題なく予約が作成される by zy BEGIN
+		function refreshCartStatus(){
+			//购物车无商品的时候 注文键灰色
+			if (cart.contentsCount() == 0) $("#checkout").css("background","gray");
+			else $("#checkout").css("background","");
+			var roomId = window.localStorage["jinya_order_roomId"];
+			if (!domanFlag){
+				if(roomId == "" || roomId == null){
+					sushi.disabled = true;
+					$("#checkout").css("background","gray");
+					$("#checkout").attr("disabled","disabled");
+					$("#checkout").attr("href","#");
+					$("#checkout").unbind("click");
+				}
+			//2017/05/26 印刷レーアウト選択する　by zy END
+			}	
+			//2017/02/14 check process by zy end
+		}
+		// 2020/04/30  複数部屋だと問題なく予約が作成される by zy END
+  	</script>
+  	<div id="roomLstWrap">
+  		<div class="innerWrap">
+  			<!-- 2017/05/26 様式整合　by zy BEGIN -->
+	  		<div style="width:100%; clear: both; overflow: hidden; padding-bottom: 5px;">
+	  			<!-- 閉じる -->
+	  			<a class="floatClass">
+					<span class="selectSpan roomFunBtn"  onclick="hideWindow()" >
+						<span class="k-icon k-i-close" style="position: relative; left: -2px;"></span>
+						{!$label.MSG_060_0029}
+					</span>
+				</a>
+				<!-- 更新する -->
+	  			<a class="floatClass">
+	  			<!-- 2017/05/26 様式整合　by zy END -->
+					<span class="selectSpan roomFunBtn" onclick="refreshRoomFun()" >
+						<span class="k-icon k-i-refresh" style="position: relative; left: -2px;"></span>
+						{!$label.MSG_060_0030}
+					</span>
+				</a>
+				<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+				<!-- 会計済み -->
+	  			<a class="floatClass clearClass" style="margin-right: 30px;">
+					<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy BEGIN -->
+					<span class="selectSpan roomFunBtn" onclick="clearRoom(this)" style="text-align: center;">
+					<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy END -->
+						<!-- 会計済み -->
+						{!$Label.MSG_060_0032}
+					</span>
+				</a>
+				<!-- 一括印刷 -->
+	  			<a class="floatClass printClass" style="margin-right: 30px;display:none;">
+					<span class="selectSpan roomFunBtn" onclick="printBatch(this)" style="text-align: center;  width: auto!important;">
+						{!$Label.MSG_060_0041}<span class="msgSpan"></span>
+					</span>
+				</a>
+				<!-- 2020/02/15 予約が入っていないテーブルも選択可能に by zy BEGIN -->
+				<apex:outputPanel rendered="{!multiRoomFlg}">
+					<span class="layoutClass" style="margin-left: 20px;height: 28px;line-height: 28px;">
+					<span class="selectSpan roomFunBtn" name="mutiSelTable" onclick="multiSelectTable()" style="text-align: center;  width: auto!important;">
+						{!$Label.ps__msg_060_0076}
+					</span>
+					<span class="multiSelPanel" style="display:none;">
+						<span class="selectSpan roomFunBtn" onclick="multiSelectDone()" style="text-align: center;  width: auto!important;">
+							{!$Label.ps__msg_060_0077}
+						</span>
+						<span class="selectSpan roomFunBtn" onclick="multiSelectCancel()" style="text-align: center;  width: auto!important;">
+							{!$Label.ps__msg_060_0012}
+						</span>
+					</span>
+					</span>
+				</apex:outputPanel>
+				<!-- 2020/02/15 予約が入っていないテーブルも選択可能に by zy END -->
+				<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy BEGIN -->
+				<apex:outputPanel rendered="{!deslayoutOpts.size > 0 || iframeMode}">
+				<span class="layoutClass" style="margin-left: 20px;">
+					<span style="{!if(deslayoutOpts.size > 0 ,'','display:none;')}">
+					{!$Label.ps__msg_060_0078}
+					<select id="selLocation" onchange="chgLayout()" value="{!selLocationId}">
+						<apex:repeat value="{!deslayoutOpts}" var="opt">
+							<option value="{!opt.value}">
+								{!opt.label}
+							</option>
+						</apex:repeat>
+					</select>
+					<select id="selLayouts" onchange="selLayoutId()"></select>
+				</span>
+				</span>
+				</apex:outputPanel>
+				<!-- 2020/01/30 レイアウトを複数作成できるようにし、「朝昼夕」と「レストラン毎」に画面を切り替えられるように by zy END -->
+				<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy BEGIN -->
+				<span id="roomFilterWrap"> 
+				<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy END -->
+				<!-- 部屋タイプ  -->
+				<select id="selRoomType" onchange="chgRoomType(this)" style="margin-left: 20px;">
+					<apex:repeat value="{!roomTypeOpts}" var="opt" >
+						<option value="{!opt.id}">
+							{!opt.name}
+		 				</option>
+					</apex:repeat>
+				</select>
+				<!-- 予約ありとなし -->
+				<!-- 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw BEGIN -->
+				<!-- 2019/02/15 オーダーエントリー改善（文字サイズをカスタマイズとレイアウト自由カスタマイズ機能） by cxw BEGIN -->
+				<span class="br">
+					<span id="checkInput" >
+					<!-- 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw END -->
+						<!-- アサイン部屋のみ -->
+						<input type="checkbox" id="leadChk" onclick="chgShowType(this);saveStorge('jinya_order_leadShow','bln')" checked="checked"/>{!$Label.MSG_060_0035}
+					</span>
+		  			<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy END -->
+		  			<!--2017/10/14 部屋の予約別の機能追加　by　zy　BEGIN-->
+					<!-- 予約ありとなし -->
+					<!-- 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw BEGIN -->
+					<span  title="{!$Label.MSG_060_0056}">
+					<!-- 2019/01/15 オーダーエントリー改善（メニューサイズ自動調整）by cxw END -->
+						<!-- 全て -->
+						<input type="checkbox" id="allLeadChk" onclick="moreLeadClick(this)" />{!$Label.MSG_060_0055}
+					</span>
+				</span>
+				<!-- 2019/02/15 オーダーエントリー改善（文字サイズをカスタマイズとレイアウト自由カスタマイズ機能） by cxw END -->
+				<!--2017/10/14 部屋の予約別の機能追加　by　zy　END-->
+				<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy BEGIN -->
+				</span> 
+				<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy END -->
+	  		</div>
+	  		<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy BEGIN -->
+  			<apex:outputpanel layout="block" rendered="{!iframeMode}">
+	  			<div>
+					<iframe name="layoutSet" src="{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'DesignLayout')}?&spcd={!oShopCode}&showHeader=false&layoutId={!curLayoutId}" style="width: 100%; height: 600px; border: 0;display: none;"></iframe>
+	  			</div>	  			
+  			</apex:outputpanel>
+			<!-- 2019/06/30 レイアウトカスタマイズ機能が必要場合、レイアウトをカスタマイズ用VF作成が必要そうです by zy END -->
+	  		<apex:outputpanel id="innerHeadPanel" >
+	  			<input type="hidden" value="{!jsonMainRoom}" id="mainRoom"/>
+		  		<ul name="roomWrap" style="margin-left: 20px;">
+		  			<!--2017/10/14 部屋の予約別の機能追加　by　zy　BEGIN-->
+		  			<apex:repeat value="{!floatRoomLst.rowInfs}" var="rmLst" >
+		  				<apex:repeat value="{!rmLst.infos}" var="info" >
+		  					<apex:repeat value="{!info.allIds}" var="rmKey" >
+				  				<!-- 2017/05/26 無予約の部屋データ作成機能追加　by zy BEGIN -->
+				  				<li class="roomLstClass {!if(mainRoomMap[rmKey].noLeadFlag,'noleadClass','')} {!if(mainRoomMap[rmKey].hadAccFlag,'hadAccountClass','')} {!if(mainRoomMap[rmKey].oneDayFlag,'canAccountEnd','')} {!if(mainRoomMap[rmKey].moreLeadFlag,'otherLeadClass','')}" data-orderid="{!mainRoomMap[rmKey].orderId}" 
+				  						data-accid='{!mainRoomMap[rmKey].accId}' data-leadid='{!mainRoomMap[rmKey].leadId}' 
+				  						data-leadindex='{!mainRoomMap[rmKey].leadIndex}'
+				  						data-roomid="{!mainRoomMap[rmKey].roomId}" data-roomtype="{!mainRoomMap[rmKey].roomType}" 
+				  						style="display:{!if(mainRoomMap[rmKey].noLeadFlag,'none','true')};" 
+				  						name="{!mainRoomMap[rmKey].leadindex}" onmouseleave="hideLi()" 
+				  						onmouseenter="showSameLeadLi('{!mainRoomMap[rmKey].leadindex}')" 
+				  						onclick="changeRoom(this,'{!mainRoomMap[rmKey].roomId}')">
+				  					<div class="innerRoom" style="{!if(mainRoomMap[rmKey].moreLeadFlag,'background:gray','')}">
+				  						<!-- 部屋模式 -->
+				  						<div class="floatRoomRow">
+				  							<div class="yoyakuClass" style="display:{!if(mainRoomMap[rmKey].iconType == 'lead','true','none')}">
+				  								<img class="timeIconClass" src="/img/icon/alarmClock16.png" />{!mainRoomMap[rmKey].entryTime}
+				  							</div>
+				  							<div class="accountClass" style="display:{!if(mainRoomMap[rmKey].iconType == 'account','true','none')}">
+												<img class="peopleIconClass" src="/img/icon/alohaProfile16.png" />{!mainRoomMap[rmKey].entryTime}
+											</div>
+				  						</div>
+				  						<div class="floatRoomRow name">{!mainRoomMap[rmKey].roomNm}</div>
+				  						<div class="floatRoomRow">{!mainRoomMap[rmKey].leadName}</div>
+				  						<div class="floatRoomRow roomLstdiv">{!mainRoomMap[rmKey].contactNm}</div>
+				  						<!-- 会計モード -->
+				  						<div class="accountRow accountLstDiv" style="display:{!if(mainRoomMap[rmKey].hadAccFlag,'true','none')}"> 
+				  							<!-- 2019/01/30 JINYABUG-1347 BUG FIX by zy BEGIN -->
+				  							<input type="button" class="accountBtn" value="会計" onclick="account('{!mainRoomMap[rmKey].accId}','{!mainRoomMap[rmKey].orderId}','{!mainRoomMap[rmKey].leadId}',event,'{!currentLanguage}');"/>
+											<!-- 2019/01/30 JINYABUG-1347 BUG FIX by zy END -->
+										</div>
+				  					</div>
+				  				</li>
+				  			</apex:repeat>
+				  		<!--2017/10/14 部屋の予約別の機能追加　by　zy　END-->
+		  				</apex:repeat>
+					</apex:repeat>
+		  		</ul>
+		  		</apex:outputpanel>
+	  		<div style="width:100%;height:20px;">
+	  		</div>
+	  	</div>
+	 </div>
+  </apex:outputPanel>
+  <apex:outputPanel id="layoutPanel" rendered="{!isDomainFlag}">
+  	<div id="layoutDiv" style="position: absolute;display: none;text-align: center;z-index:1" onmouseenter="mouseIn(this)" onmouseleave="hideLayoutWin(this,'layoutDiv')">
+	 	<div class="layout-top" ></div>
+	 	<table id="layoutTable"  class="layoutTable"  style="width:auto;">
+	 		<thead>
+	 			<tr>
+					<!--通常-->
+	 				<td onclick="changeCurrentLayout('COMMON')">{!$Label.MSG_060_0025}</td>
+	 			</tr>
+	 			<tr>
+					<!--簡易-->
+	 				<td onclick="changeCurrentLayout('SIMPLE')">{!$Label.MSG_060_0026}</td>
+	 			</tr>
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy BEGIN-->
+				<tr>
+					<!--料理-->
+					<td onclick="changeCurrentLayout('SIMPLE_UP')">{!$Label.MSG_060_0082}</td>
+				</tr>
+				<!-- 2020/02/15 会計の簡易レイアウトを変更 by zy END-->
+	 			</thead>
+	 	</table>
+	</div>
+	<div id="printDiv" style="position: absolute;display: none;text-align: center;z-index:1" onmouseenter="mouseIn(this)" onmouseleave="hideMouseLanguageWin(this)">
+	 	<div class="layout-top" ></div>
+	 	<table  class="layoutTable" style="width:auto;">
+	 		<thead>
+	 			<tr>
+					<!--会計ﾚｲｱｳﾄ-->
+	 				<td name='1' onclick="changeCurrentPrint('1')">{!$Label.MSG_060_0033}</td>
+	 			</tr>
+	 			<tr>
+					<!--注文ﾚｲｱｳﾄ-->
+	 				<td name='2' onclick="changeCurrentPrint('2')">{!$Label.MSG_060_0034}</td>
+	 			</tr>
+	 			</thead>
+	 	</table>
+	</div>
+	<div id="printWindow" onMouseenter="addCurClass(this)" onMouseleave="removeCurClass(this)">
+		<div class="content" style="display: none;">
+			<div class="printTitle">
+				<span class="printError"></span>
+			</div>
+			<div id="title">
+				<!-- 料理のみ -->
+				<input type="checkbox" name="yoyakuChk" style="margin-left: 8px;" onclick="changePrintDetails(this)"/> {!$label.MSG_060_0050} <span style="margin-left:5px;">IP：</span><span id="curIp"></span> &nbsp;{!$Label.MSG_060_0054}：
+				<!-- 日付選択 -->
+				<span>
+					<apex:outputPanel styleClass="dateOnlyInput">	
+						<input type="text" value="{!queryDate}" id="gotoDate"/>
+					</apex:outputPanel>
+				</span>
+			</div>
+			<div class="gridDetails">
+			</div>
+			<span class="selectSpan roomFunBtn startPrint" onclick="printBegin()" style="text-align: center;">
+				<!-- 開始 -->
+				{!$label.MSG_060_0051}<span class="msgSpan"></span>
+			</span>
+			<span class="selectSpan roomFunBtn endPrint" onclick="printStop(this)" style="text-align: center;display:none;">
+				<!-- 中止 -->
+				{!$label.MSG_060_0040}<span class="msgSpan"></span>
+			</span>
+		</div>
+	</div>
+	<!-- インメジリスト -->
+	<div class="statusImage" style="display:none;">
+		<img class="timeIcon statusIcon" src="/img/icon/dashboards16.png" />
+		<img class="connectIcon statusIcon" src="/img/msg_icons/confirm16.png" />
+		<img class="errorIcon statusIcon" src="/img/msg_icons/error16.png" />
+		<img class="loadIcon statusIcon" style="width:16px;" src="/img/loading32.gif" />
+		<img class="waitIcon statusIcon" src="/img/staleValue.gif" />
+		<img class="warnIcon statusIcon" src="/img/msg_icons/warning16.png" />
+		<span class="printIcon statusIcon"></span>
+	</div>
+  </apex:outputPanel>
+  <!-- 2017/04/20 staff 画面対応　by　zy BEGIN -->
+  <div id="languageDiv" style="position: absolute;display: none;text-align: center;z-index:1" onmouseenter="mouseIn(this)" onmouseleave="hideMouseLanguageWin(this)">
+	<!-- 2017/04/20 staff 画面対応　by　zy BEGIN -->
+	<div class="layout-top" ></div>
+ 	<table id="layout" class="layoutTable">
+ 	<!-- 2017/04/20 staff 画面対応　by　zy END -->
+ 		<thead>
+ 			<tr>
+			<!--英語-->
+ 				<td onclick="changeEnLange()">{!$Label.MSG_060_0017}</td>
+ 			</tr>
+ 			<tr>
+			<!--日本語-->
+ 				<td onclick="changeJpLange()">{!$Label.MSG_060_0018}</td>
+ 			</tr>
+ 			</thead>
+ 	</table>
+ 	<!-- 2017/04/20 staff 画面対応　by　zy BEGIN -->
+  </div>
+  <!-- 2017/07/05 多店舗対応選択リスト　by　zy　BEGIN -->
+  <div id="shopLstDiv" style="position: absolute;display: none;text-align: center;z-index:1" onmouseenter="mouseIn(this)" onmouseleave="hideMouseLanguageWin(this)">
+  	  <div class="layout-top" ></div>
+ 	  <table class="layoutTable" style="width:auto;">
+ 	      <thead>
+ 			 <apex:repeat value="{!shopCodeLst}" var="spcd">
+ 			    <tr>
+ 					<td onclick="changeSpcd('{!spcd.value}',this)" class="{!if(oShopCode == spcd.value,'curSelect' ,'')}">{!spcd.label}</td>
+ 				</tr>
+ 			  </apex:repeat>
+ 		  </thead>
+ 	  </table>
+  </div>
+  <!-- 2017/07/05 多店舗対応選択リスト　by　zy　BEGIN -->
+  <!-- 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy BEGIN -->
+  <style>
+	  .printWinLock {
+		position: fixed;
+		width: 100%;
+		background: #989393;
+		opacity: 0.8;
+		height: 100%;
+		cursor: wait;
+		top:0;
+		display: none;
+	  }
+	  .printWrap{
+		position: fixed;
+		top:35%;
+		width: 390px;
+    	left: calc(50% - 195px);
+		background: white;
+		border-radius: 3px 3px 0px 0px; 
+		display: none;
+	  }
+	  .printTitle{
+		background: #ececec;
+		font-size: 14px;
+		padding: 3px;
+		border-radius: 3px 3px 0px 0px;
+		border-bottom: 2px solid lightgray;
+	  }
+	  .printContent,.printPanel{
+		padding: 2px;
+	  }
+	  .printPanel div{
+		text-align: center;
+		border-radius: 5px;
+		width: 98%;
+		margin-left: 2px;
+		font-size: 18px;
+	  }
+	  .printWrap.process .printBtn,.printWrap .stopBtn{
+		display:none;
+	  }
+	  .printWrap.process .stopBtn,.printWrap.process{
+		  display: block;
+	  }
+	  .statusContent{
+	  	border-top: 2px solid #ececec;
+	  }
+  </style>
+  <!-- 背景 -->
+  <div class="printWinLock"></div>
+  <!-- 履歴印刷ウィンドウ -->
+  <div class="printWrap">
+  		<!-- 印刷状態 -->
+		<div class="printTitle">{!$Label.MSG_060_0071}</div>
+		<div class="printContent">
+			<table style="padding: 0px;">
+				<thead>
+					<tr>
+						<td style="width: 32px;">
+				<img class="loadIcon statusIcon" style="margin:10px;" src="/img/loading32.gif" />
+						</td>
+						<td>
+					<!-- 進捗 -->
+					<span>{!$Label.MSG_060_0069}</span>
+					<span class="successCnt">
+					</span>/
+					<span class="totalCnt">
+					</span>
+							<div class="statusContent">
+						<span class="statusClass">
+						</span>
+					</div>
+						</td>
+					</tr>
+				</thead>
+			</table>
+		</div>
+		<div class="printPanel">
+			<!-- 停止 -->
+			<div class="cancelSpan stopBtn" onclick="closePrintWin()">{!$Label.MSG_060_0070}</div>
+			<!-- 閉じる -->
+			<div class="cancelSpan printBtn" onclick="closePrintWin()">{!$Label.MSG_060_0029}</div>
+		</div>
+	</div>
+  <!-- 2019/03/29 オーダーエントリー改善レシート再出力機能 by zy END -->
+</html>
+</apex:page>

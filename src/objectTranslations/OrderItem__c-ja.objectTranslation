@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>注文明細</value>
+    </caseValues>
+    <fields>
+        <label><!-- 商品属性情報 --></label>
+        <name>AccountMasterPropRef__c</name>
+        <relationshipLabel><!-- 注文明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 会計商品 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- 注文明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 合計 --></label>
+        <name>Amount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 手数料 --></label>
+        <name>Charge__c</name>
+    </fields>
+    <fields>
+        <label><!-- Expo組織情報ID --></label>
+        <name>ExpoOrgInfoRefCal__c</name>
+    </fields>
+    <fields>
+        <help><!-- お客様側から注文際に、該当商品メモ情報を格納する --></help>
+        <label><!-- メモ --></label>
+        <name>Memo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 受注日 --></label>
+        <name>OrderDateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価金額（税抜） --></label>
+        <name>PriceNoTax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 数量 --></label>
+        <name>Qty__c</name>
+    </fields>
+    <fields>
+        <label><!-- 注文 --></label>
+        <name>RefParOrder__c</name>
+        <relationshipLabel><!-- 注文明細 (注文) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 注文サブ --></label>
+        <name>RefSubOrder__c</name>
+        <relationshipLabel><!-- 注文明細 (注文サブ) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 定期購入フラグ --></label>
+        <name>RepeaterFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 定期払い方式 --></label>
+        <name>RepeaterPayType__c</name>
+        <picklistValues>
+            <masterLabel>年払</masterLabel>
+            <translation><!-- 年払 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>月払</masterLabel>
+            <translation><!-- 月払 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 人材単価フラグ --></label>
+        <name>StaffPriceFlg__c</name>
+        <picklistValues>
+            <masterLabel>人材ではない</masterLabel>
+            <translation><!-- 人材ではない --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>日給</masterLabel>
+            <translation><!-- 日給 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>時給</masterLabel>
+            <translation><!-- 時給 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 単位 --></label>
+        <name>StockUnit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 契約日と契約時間帯 --></label>
+        <name>WorkContractFilter__c</name>
+    </fields>
+    <fields>
+        <label><!-- 契約期間 --></label>
+        <name>WorkContractRange__c</name>
+    </fields>
+    <fields>
+        <help><!-- 契約開始日（契約系利用） --></help>
+        <label><!-- 契約開始日 --></label>
+        <name>WorkContractStartDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期間 --></label>
+        <name>WorkContractTerm__c</name>
+    </fields>
+</CustomObjectTranslation>

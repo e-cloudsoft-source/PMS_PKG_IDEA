@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>会計支払</value>
+    </caseValues>
+    <fields>
+        <label><!-- $会計DP名 --></label>
+        <name>AccMstDPNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計DP名 --></label>
+        <name>AccMstDPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計GP名 --></label>
+        <name>AccMstGPNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計GP名 --></label>
+        <name>AccMstGPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計OP名 --></label>
+        <name>AccMstOPNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計OP名 --></label>
+        <name>AccMstOPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計明細（前受金）ID --></label>
+        <name>ArTranId__c</name>
+    </fields>
+    <fields>
+        <label><!-- カード種別 --></label>
+        <name>CardTypeLst__c</name>
+        <picklistValues>
+            <masterLabel>American Express</masterLabel>
+            <translation><!-- American Express --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>China UnionPay</masterLabel>
+            <translation><!-- China UnionPay --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Diners Club International</masterLabel>
+            <translation><!-- Diners Club International --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Discover Card</masterLabel>
+            <translation><!-- Discover Card --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JCB</masterLabel>
+            <translation><!-- JCB --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>MasterCard</masterLabel>
+            <translation><!-- MasterCard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>UATP</masterLabel>
+            <translation><!-- UATP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Visa</masterLabel>
+            <translation><!-- Visa --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 消込日時 --></label>
+        <name>ClearDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込フラグ --></label>
+        <name>ClearFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込ログ --></label>
+        <name>ClearLog__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込者 --></label>
+        <name>ClearName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込済金額 --></label>
+        <name>ClearPayment__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金券種別 --></label>
+        <name>CouponTypeLst__c</name>
+        <picklistValues>
+            <masterLabel>H.I.Sクーポン</masterLabel>
+            <translation><!-- H.I.Sクーポン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>H.I.Sポイント</masterLabel>
+            <translation><!-- H.I.Sポイント --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JTBクーポン</masterLabel>
+            <translation><!-- JTBクーポン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JTBポイント</masterLabel>
+            <translation><!-- JTBポイント --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>楽天クーポン</masterLabel>
+            <translation><!-- 楽天クーポン --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>楽天ポイント</masterLabel>
+            <translation><!-- 楽天ポイント --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 値引／割引種別 --></label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 対象ＰＬＵコード --></label>
+        <name>Field13__c</name>
+    </fields>
+    <fields>
+        <label><!-- 値引／割引ステータス --></label>
+        <name>Field14__c</name>
+    </fields>
+    <fields>
+        <label><!-- 値割引対象額 --></label>
+        <name>Field15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価 --></label>
+        <name>Field16__c</name>
+    </fields>
+    <fields>
+        <label><!-- 枚数 --></label>
+        <name>Field17__c</name>
+    </fields>
+    <fields>
+        <label><!-- 残枚数 --></label>
+        <name>Field18__c</name>
+    </fields>
+    <fields>
+        <label><!-- 預かり　金額 --></label>
+        <name>Field19__c</name>
+    </fields>
+    <fields>
+        <label><!-- レシートＮｏ． --></label>
+        <name>Field1__c</name>
+        <relationshipLabel><!-- 会計支払 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 支払　金額 --></label>
+        <name>Field20__c</name>
+    </fields>
+    <fields>
+        <label><!-- 釣銭（差額）金額 --></label>
+        <name>Field21__c</name>
+    </fields>
+    <fields>
+        <label><!-- 釣銭（差額）種別 --></label>
+        <name>Field22__c</name>
+    </fields>
+    <fields>
+        <label><!-- 企業コード --></label>
+        <name>Field23__c</name>
+    </fields>
+    <fields>
+        <label><!-- 有効期限 --></label>
+        <name>Field24__c</name>
+    </fields>
+    <fields>
+        <label><!-- メディア毎消費税額 --></label>
+        <name>Field25__c</name>
+    </fields>
+    <fields>
+        <label><!-- 対象メニューコード --></label>
+        <name>Field26__c</name>
+        <relationshipLabel><!-- 会計支払 (対象メニューコード) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 対象ＤＰコード --></label>
+        <name>Field27__c</name>
+        <relationshipLabel><!-- 会計支払 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $預かり　金額 --></label>
+        <name>Field28__c</name>
+    </fields>
+    <fields>
+        <label><!-- $支払　金額 --></label>
+        <name>Field29__c</name>
+    </fields>
+    <fields>
+        <label><!-- メディア種別 --></label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label><!-- $釣銭（差額）金額 --></label>
+        <name>Field30__c</name>
+    </fields>
+    <fields>
+        <label><!-- 日計精算時刻 --></label>
+        <name>Field31__c</name>
+    </fields>
+    <fields>
+        <label><!-- 日計精算回数 --></label>
+        <name>Field32__c</name>
+    </fields>
+    <fields>
+        <label><!-- $支払金額(税抜き) --></label>
+        <name>Field33__c</name>
+    </fields>
+    <fields>
+        <label><!-- 営業日付 --></label>
+        <name>Field34__c</name>
+    </fields>
+    <fields>
+        <label><!-- $取引種別 --></label>
+        <name>Field35__c</name>
+    </fields>
+    <fields>
+        <label><!-- メディア名称 --></label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 処理　種別１ --></label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label><!-- 処理　種別２ --></label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 明細　種別 --></label>
+        <name>Field6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 券種コード --></label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 券名称 --></label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発行店番 --></label>
+        <name>Field9__c</name>
+    </fields>
+    <fields>
+        <label><!-- 請求書非表示 --></label>
+        <name>InvoiceNoShowFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $予約連泊情報 --></label>
+        <name>LeadInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- $集計対象外 --></label>
+        <name>OutSideAccount__c</name>
+    </fields>
+    <fields>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計商品名 --></label>
+        <name>PayProductName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 支払商品 --></label>
+        <name>PayProductRef__c</name>
+        <relationshipLabel><!-- 会計支払 (支払商品) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $$支払　金額 --></label>
+        <name>PaymentSummaryCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- $$支払金額(税抜き) --></label>
+        <name>PaymentSummaryNoTaxCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 支払種別 --></label>
+        <name>PaymentType__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当明細は既に印刷済がどうか識別フラグ --></help>
+        <label><!-- 印刷済 --></label>
+        <name>PrintedFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金日 --></label>
+        <name>ReceiptDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約会計 --></label>
+        <name>RelAccount__c</name>
+        <relationshipLabel><!-- 会計支払 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $予約タイプ --></label>
+        <name>ReservedTypeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約タイプ --></label>
+        <name>ReservedType__c</name>
+    </fields>
+    <fields>
+        <label><!-- $お部屋名 --></label>
+        <name>RoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋名 --></label>
+        <name>RoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- RowNo. --></label>
+        <name>RowNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCodeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 分割NO --></label>
+        <name>SplitGroupNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- A --></label>
+        <name>Taishou__c</name>
+    </fields>
+    <fields>
+        <label><!-- $メディア毎消費税額 --></label>
+        <name>Taxfee__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価と数量連結格納 --></label>
+        <name>TempSaveExtInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- $部屋タイプ名 --></label>
+        <name>TypeOfRoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>TypeOfRoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $利用日 --></label>
+        <name>UseDateCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 利用日 --></label>
+        <name>UseDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 集計対象外 --></label>
+        <name>noneaccount__c</name>
+    </fields>
+</CustomObjectTranslation>

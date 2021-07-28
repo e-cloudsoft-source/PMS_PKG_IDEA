@@ -1,0 +1,3941 @@
+<!-- 予定表 -->
+<apex:page controller="K_ScheduleReport" sidebar="false" readOnly="true" showHeader="true" id="rep" title="{!$Label.ps__msg_041_0001}">
+
+<meta name="viewport" content="width=1960;initial-scale=0.5;user-scalable=yes;"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+<!-- 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN -->
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+<!-- 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/encode.js')}"/>
+<!-- 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}"/>
+<!-- 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END -->
+<apex:includeScript value="{!URLFOR($Resource.csvexport,'kendoCsv/Blob.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.csvexport,'kendoCsv/FileSaver.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.csvexport,'kendoCsv/encoding.js')}"/>
+<!-- 2015/12/10 KeyDefine追加 -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="false"/>
+<script>beenFocused = true;</script>
+
+<!-- Report Content View Data Show -->
+<style>
+.imgIconStyle {
+    border: 0;
+}
+td.imgIconStyle img {
+	width: 30px;
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+.k-grid  .k-grid-header  .k-header  .k-link {
+    height: auto;
+}
+.k-grid  .k-grid-header  .k-header {
+    white-space: normal;
+    font-size: small;
+}
+.k-dropdown .k-dropdown-wrap .k-input{
+    height: 19px;
+
+}
+.k-dropdown .k-dropdown-wrap .k-select{
+    height: 19px;
+}
+/* Salesforce Calendar Link No Show */
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+/* Tool Bar */
+.toolBarExtCls {
+	min-height:32px;
+	/*
+	background:#C0C0C0; 
+	filter: progid:DXImageTransform.Microsoft.Gradient(startColorStr='#c1ea99',endColorStr='white',gradientType='0');
+	background: -moz-linear-gradient(top, #c1ea99, white);
+	background: -o-linear-gradient(top,#c1ea99, white);
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#c1ea99), to(white));
+	*/
+}
+/* 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN */
+div.groupHeaderCls {
+    display:block; 
+    word-break:keep-all;/* 改行せず */
+    white-space:nowrap;/* 改行せず */
+    overflow:hidden;/* 内容自動隠す */
+    text-overflow:ellipsis;/* 隠される場合、...表示する */
+}
+/* 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END */
+.k-widget {
+	background-color:#FFFFFF;{!IF(WatermarkRate, 'filter:alpha(opacity=85);-moz-opacity:0.85;-khtml-opacity:0.85;opacity:0.85;', '')}
+}
+@media screen and (max-width: 699px) {
+        .km-phone .km-android .k-grid table
+        {
+            width: 600px;
+        }
+}
+/* 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH BEGIN */
+a.k-state-active {
+	background-color: peachpuff !important;
+}
+/* 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH END */
+/* 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN */
+.toolBarExtCls .k-widget.k-dropdown.k-header .k-dropdown-wrap.k-state-default{
+	height:22px;
+}
+/* 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END */
+/* 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN */
+.j-autoWdPopup.k-list-container.k-popup{
+	min-width: 50px;
+	width: auto !important;
+}
+.j-autoWdPopup.k-list-container.k-popup li.k-item{
+	white-space: nowrap;
+}
+.j-autoWdPopup.ui-multiselect-menu.ui-widget{
+	width: auto!important;
+}
+.j-autoWdPopup.ui-multiselect-menu.ui-widget li{
+	white-space: nowrap;
+}
+/* 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END */
+</style>
+<!-- 
+<input type="button" onclick='readDs();' value="Refresh"/>
+ -->
+
+<!-- 2019/05/15 予定表指定日にて、連絡事項を表示する機能対応 WGCH BEGIN -->
+ <!-- 2014/11/27 CKEDITOR追加 -->
+<apex:includeScript value="{!URLFOR($Resource.ckeditor, 'ckeditor.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.ckeditor, 'util.js')}" />
+<script>
+$j = jQuery.noConflict();
+// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+CKEDITOR && (CKEDITOR.config.height = 80);
+// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+// Block Action Window
+function blockUi(){
+	JINYACONNECT.DATALOCK.BlockUi();
+}
+// Lock解除
+function unblockUi(){
+	JINYACONNECT.DATALOCK.UnblockUi();
+}
+</script>
+<apex:outputPanel rendered="{!($Setup.CommDefine__c.ReportKScheduleMessageIsShowFlg__c)}">
+<apex:form id="messageForm">
+<apex:actionStatus onstart="javascript:blockUi();" onstop="javascript:unblockUi();" id="refStatusBlock"/>
+<apex:actionFunction name="messagInfoFun" action="{!setMessageItem}" status="refStatusBlock" reRender="messagitemcomp">
+	<apex:param name="messageDt" assignTo="{!messageDt}" value="" />
+	<apex:param name="messageSpCd" assignTo="{!messageSpCd}" value="" />
+</apex:actionFunction>
+</apex:form>
+<!--連絡事項情報FORM -->
+<apex:variable var="cnt" value="{!1}"/>
+<apex:repeat value="{!MsgCompSpLst}" var="spcd">
+<c:MessageItemComp yyyymmddStr="{!messageObj.name}" maxRows="{!$Setup.CommDefine__c.MessageRows__c}" id="messagitemcomp"
+refreshMessageFunName="_messageComp_refreshMessage" container="m_{!spcd}" shopcode="{!spcd}" idx="{!cnt}" rendered="{!isShowMessageCompFlg}" ckeditor="{!$Setup.CommDefine__c.ReportKScheduleMessageIsRichTextFlg__c}"/>
+<apex:variable var="cnt" value="{!cnt + 1}"/>
+</apex:repeat>
+</apex:outputPanel>
+<!-- 2019/05/15 予定表指定日にて、連絡事項を表示する機能対応 WGCH END -->
+<script>$=jQuery.noConflict();</script>
+<apex:form id="search">
+<div class="toolBarExtCls">
+	<div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 2px;"/></div>
+	<apex:outputPanel rendered="{!branchShopLst.size > 0}" style="padding-top: 10; margin-left: 10px;">
+		<apex:outputLabel value="{!$ObjectType.Room__c.Fields.BranchShopName__c.label}" for="areaName"/>
+	    <apex:selectList size="1" value="{!branchShopNm}" id="areaName" style="font-size: 16px">
+		<!-- All -->
+	        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_041_0002}"/>
+	        <apex:selectOptions value="{!branchShopLst}" />
+	        <!-- 2019/06/14 予定表の表示期間対応 WGCH BEGIN -->
+	        <!-- <apex:actionSupport event="onchange" action="{!gotoSwitchShop}" onsubmit="unDatalock('{!JSENCODE(branchShopNm)}')"/> -->
+	         <!-- 对应SF内部处理BUG -->
+	        <apex:actionSupport event="onchange" action="{!gotoSwitchShop}" onsubmit="setOldTermDates();unDatalock('{!JSENCODE(branchShopNm)}')"/>
+	        <!-- 2019/06/14 予定表の表示期間対応 WGCH END -->
+	    </apex:selectList>
+	</apex:outputPanel>
+	<!-- 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN -->
+	<apex:outputPanel rendered="{!roomTypeLst.size > 0}">
+		 <apex:inputHidden value="{!multiRoomTypeIds}" id="multiRoomTypeIds"/>
+		 <c:MultiSelectComp dataSourceId="roomTypeSelectId" assingTargetId="multiRoomTypeIds" callBackFunction="void" selectedValue="{!roomTypeNm}" rendered="{!roomTypeLst.size > 0}" />
+		 <apex:selectList size="1" value="{!roomTypeNm}" rendered="{!roomTypeLst.size > 0}" id="roomTypeSelectId" html-multiple="multiple">
+			 <!-- All -->
+			 <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_008_0003}"/>
+			 <apex:selectOptions value="{!roomTypeLst}" />
+		 </apex:selectList>
+	</apex:outputPanel>
+	 <!-- 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END -->
+	 <!-- 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN -->
+	<apex:outputPanel rendered="{!roomOpts.size > 0 && isMultiRoomFlg}">   
+	    <apex:inputHidden value="{!selRoomIds}" id="hidSelRoomIds"/>
+	    <c:MultiSelectComp dataSourceId="roomSelectId" assingTargetId="hidSelRoomIds" callBackFunction="afterRoomSel" selectedValue="{!selRoomIds}" rendered="{!roomTypeLst.size > 0}" popupMaxScreenHtFlag="true"/>
+	    <apex:selectList size="1" value="{!selRoomIds}" rendered="{!roomOpts.size > 0}" id="roomSelectId" html-multiple="multiple">
+	    	<!-- All -->
+	        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_008_0003}"/>
+	        <apex:selectOptions value="{!roomOpts}" />
+	    </apex:selectList>
+	</apex:outputPanel>
+	<!-- 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END -->
+	<!-- 2021/05/31 予定表のレイアウトを複数パターンから切り替えられるようにしたいユーザ単位で保存できるように by zy BEGIN -->
+	<input type="hidden" value="{!layoutOptJson}" id="hidLayoutOptJson"/>
+    <select id = "layoutSel" value="{!currLayoutId}" class="widgetClass" style="display: none;"/>
+    <apex:inputHidden value="{!currLayoutId}" id="hidCurrLayoutVal"/>
+    <apex:actionFunction name="changeLayout" action="{!changeLayout}"/>
+    <!-- 2021/05/31 予定表のレイアウトを複数パターンから切り替えられるようにしたいユーザ単位で保存できるように by zy END -->
+	<!-- 2019/02/28 「前日」「今日」「翌日」ボタンをつけることは改善対応 WGCH BEGIN -->
+	<apex:outputPanel rendered="{!dayButtonShow}">
+	<!-- 前日 -->
+	<input type="button" class="k-button" style="margin-left: 10px; width:90px;" value="{!$Label.ps__msg_041_0072}" onclick="javascript:dateSwitchFun(-1)" />
+	<!-- 今日 -->
+	<input type="button" class="k-button" style="width:90px;" value="{!$Label.ps__msg_041_0074}" onclick="javascript:dateSwitchFun(0)" />
+	<!-- 翌日 -->
+	<input type="button" class="k-button" style="width:90px;" value="{!$Label.ps__msg_041_0073}" onclick="javascript:dateSwitchFun(1)" />
+	</apex:outputPanel>
+	<!-- 2019/02/28 「前日」「今日」「翌日」ボタンをつけることは改善対応 WGCH END -->
+    
+	<!-- 指定日 -->
+    <apex:outputLabel value="{!$Label.ps__msg_041_0003}" for="queryDate" style="margin-top: 10px; margin-left: 10px; height:22px; "/>
+    <apex:inputField value="{!timeTable.Checkinday__c}" styleClass="k-input" id="queryDate" 
+    					style="font-size: 1.2em; width:120px;margin-left: 5px; height:21px;padding: 1px;"/>
+	<!-- から -->
+    <apex:outputLabel value="{!$Label.ps__msg_041_0004}" style="margin-top: 10px; margin-left: 5px; margin-right: 5px; "/>
+    	<!-- 2019/06/14 予定表の表示期間対応 WGCH BEGIN -->
+    	<!-- 对应SF内部处理BUG -->
+    	<apex:inputHidden value="{!oldTermDates}" id="hidOldTermDates" />
+    	<!-- 2019/06/14 予定表の表示期間対応 WGCH END -->
+    	<apex:selectList size="1" id="termDatesLst" value="{!termDates}">
+			<!-- 2019/06/14 予定表の表示期間対応 WGCH BEGIN -->
+			<!--
+			<apex:selectOption itemValue="1" itemLabel="1"/>
+			<apex:selectOption itemValue="2" itemLabel="2"/>
+			<apex:selectOption itemValue="3" itemLabel="3"/>
+			<apex:selectOption itemValue="4" itemLabel="4"/>
+			<apex:selectOption itemValue="5" itemLabel="5"/>
+			<apex:selectOption itemValue="6" itemLabel="6"/>
+			<apex:selectOption itemValue="7" itemLabel="7"/>
+			-->
+			<apex:selectOptions value="{!termDatesLst}" />
+			<!-- 2019/06/14 予定表の表示期間対応 WGCH END -->
+    	</apex:selectList>
+	<!-- 日間予定情報 -->	
+    <apex:outputLabel value="{!$Label.ps__msg_041_0005}" style="margin-top: 10px; margin-left: 5px; height:22px; "/>
+    <apex:outputPanel id="assignRoomIsShowPanel" style="margin-left: 10px; ">
+	<!-- アサイン部屋表示:予約ありのみ部屋表示 -->
+    	<apex:selectList size="1" 
+    		onchange="javascript:swithRoomView(this);"
+    		title="{!$Label.ps__msg_041_0006}"
+    		id="roomDataSwitchBtn" value="{!roomViewFlg}">
+    		<apex:selectOptions value="{!roomViewLst}" />
+    	</apex:selectList>
+    	
+    	
+    </apex:outputPanel>
+    <!-- 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH BEGIN -->
+    <apex:outputPanel id="groupAbleIsShowPanel" style="margin-left: 10px;" rendered="{!xmlGroupAbleFlg}">
+    	<apex:selectList size="1" id="groupAbleBtn" value="{!groupAbleFlg}" onchange="gotoSwitchGroupType('{!JSENCODE(branchShopNm)}');">
+    		<apex:selectOptions value="{!groupAbleLst}" />
+    	</apex:selectList>
+    </apex:outputPanel>
+    <!-- 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH END -->
+	<!-- Excel出力 -->
+        <input type="button" class="k-button" style="width:100px" value="{!$Label.MSG_041_0007}" onclick="javascript:exportCsv()" />
+	<!-- 2017/10/10 WGCH BEGIN -->
+	<!-- PDF出力 -->
+        <input type="button" class="k-button" style="width:100px;{!IF(IsAllShopFlg, 'display:none;', '')}" value="{!$Label.MSG_041_0058}" onclick="javascript:openPDF()" />
+	<!-- 2017/10/10 WGCH END -->
+    <!-- 2018/02/05 手書き zyz BEGIN  -->
+    <input type="button" class="k-button" style="display:{!IF(canvasMode != '0', 'inline', 'none')}" value="{!$Label.MSG_041_0059}" id="handwrit" onclick="javascript:canvasStart(true)" />
+    <!-- 2018/02/05 手書き zyz END -->
+    <!-- 2019/11/15 更新ボタンの機能を追加 BY zyz BEGIN -->
+    <input type="button" class="k-button" style="width:100px;" id="reloadId" value="更新" onclick="javascript:reloadFun(this)" />
+    <!-- 2019/11/15 更新ボタンの機能を追加 BY zyz END -->
+    <div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 2px;"/></div>
+</div>
+</apex:form>
+
+<apex:outputPanel >
+<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height:2px; width: 100%"/>
+</apex:outputPanel>
+
+<div id="grid" ></div> 
+
+<div id="sumaryWindow" ><div id="summaryGrid" ></div><div id="summaryGrid2" style="display:{!IF(cookInfoSplitShow,'blcok','none')}"></div></div>
+
+
+<input type="hidden" id="currentUid"/>
+<input type="hidden" id="splitLen" value="{!splitLen}"/>
+<input type="hidden" id="reportMode" value="{!reportMode}"/> 
+<input type="hidden" value="{!editColumStr}" id="hidEditColumStr"/>
+<input type="hidden" value="{!jsonColumType}" id="hidColumType"/>
+
+<script type="text/x-kendo-template" id="editButton">
+	<a class="k-button k-button-icontext k-grid-edit" href="javascript:" onclick="editCommand()" style="{!IF(isCanUpdateLead,'','display:none')}"> 
+		<span class="k-icon k-edit"></span>{!$Label.MSG_041_0008_01}<!-- Edit-->
+	</a>
+	<a class="k-button k-button-icontext " href="javascript:" id="historyShow" showflag="#=historyShowFlg#" onclick="historyShow(this)"> 
+		<span class="k-icon k-i-clock"></span>#=showHistoryText#
+	</a>
+	<!-- 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN -->
+	<a class="k-button k-button-icontext " href="javascript:" id="isGroupBtn" style="#=autoGroupStyle#" showflag="#=isCollapseGroupFlg#" onclick="expandGroupFun(this)"> 
+		<span class="k-icon #=autoGroupBtn#"></span>#=groupText#
+	</a>
+	<!-- 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END -->
+	<!-- 2019/08/15 予定表上にも、ルームインジケータのような検索欄が欲しい by zy BEGIN-->
+	<!-- 2020/12/30 予定表の検索欄修正　by zy BEGIN -->
+	<input type="text" value="" name="inputFilter" class="k-input" style="width:700px;border-radius: 4px;height: 17px; top: 1px; position: relative;" onkeyup="inputBlurFilter()" placeholder="{!$Label.MSG_008_0124} ({!$Label.INF_0002})" />
+	<!-- 2020/12/30 予定表の検索欄修正　by zy END -->
+	<!-- 2019/08/15 予定表上にも、ルームインジケータのような検索欄が欲しい by zy END-->
+</script>
+<script type="text/x-kendo-template" id="onUpdate">
+		<!--Update-->
+	<a class="k-button k-button-icontext k-grid-update" href="javascript:" onclick="editUpdateBtnFun()"><span class="k-icon k-update"></span>{!$Label.MSG_041_0029}</a>
+	<!--Cancel-->
+	<a class="k-button k-button-icontext k-grid-cancel" href="javascript:" onclick="editCancelBtnFun();readDs()"><span class="k-icon k-cancel"></span>{!$Label.MSG_041_0030}</a>
+	<a class="k-button k-button-icontext " href="javascript:" id="historyShow" showflag="#:isShowHistory#" onclick="historyShow(this)" > 
+		<span class="k-icon k-i-clock"></span>#:showHistoryText#
+	</a>
+	<!-- 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN -->
+	<a class="k-button k-button-icontext " href="javascript:" id="isGroupBtn" style="#=autoGroupStyle#" showflag="#=isCollapseGroupFlg#" onclick="expandGroupFun(this)"> 
+		<span class="k-icon #=autoGroupBtn#"></span>#=groupText#
+	</a>
+	<!-- 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END -->
+</script>
+<script>
+	// 2017/03/13 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応 BEGIN
+	var colorJsonSobj;
+	// 2017/03/13 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応 End
+	// テーブル表示用データ情報を格納する（JSON)
+	var gridsDs;
+	var summaryDs, summaryDs2,showModel,localItem,summaryDsDetail,summaryDs2Detail,
+	//ご予約履歴表示
+	showHistoryText = '{!$Label.MSG_041_0008}',
+	isUpdate = false,
+	isNeedLoad = true,
+	isShowHistory = false,
+	offsetMiliseconds = {!JSENCODE(timeZoneMiliseconds)},
+	leadIds = new Array(),
+	listArray = new Array(),
+	numArray = new Array(),
+    strArray = new Array(),
+    dateArray = new Array(),
+	boolArray = new Array();
+	var editable = false;
+	// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 BEGIN
+	// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+	// groupAble功能开关
+	var groupAbleFlg = {!groupAbleFlg},
+	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+	foodSumIsShowProdFlg = {!foodSumIsShowProdFlg},
+	foodSumIsShowFlg = {!foodSumIsShowFlg},
+	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+	grpTitlInfoMap,
+	// 予約番号
+	_SECOND_GPKEY = '{!JSENCODE($Label.MSG_041_0054)}',
+	// すべて展開
+	expandGroup = '{!JSENCODE($Label.MSG_041_0055)}',
+	// すべて折りたたむ
+	collapseGroup = '{!JSENCODE($Label.MSG_041_0056)}',
+	collapseGroupFlg = isCollapseGroupFlg = {!collapseGroupFlg},
+	autoGroupBtn = isCollapseGroupFlg ? 'k-i-expand' : 'k-i-collapse',
+	autoGroupStyle = groupAbleFlg ? '' : 'display:none',
+	// 获取初期化显示的信息
+	groupText = isCollapseGroupFlg ? expandGroup : collapseGroup;
+	// 2017/09/18 予定表を表示のとき、部屋順で表示できる改善対応 WGCH BEGIN
+	var SORTAPI_NOLEAD = "{!JSENCODE(SORTAPI_NOLEAD)}";
+	// 2017/09/18 予定表を表示のとき、部屋順で表示できる改善対応 WGCH END
+	// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+	// 2019/09/15 Security Check BY zyz BEGIN
+	var timerInterval = 1*{!JSENCODE(intervalTime)}*1000;
+	// 2019/09/15 Security Check BY zyz END
+	var intervalId = null;
+	// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 END
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+	var foodGroupAbleFlg = {!foodGroupAbleFlg},
+	opInfoMap;
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+	// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+	var unitpriceColShow = {!foodSummaryInfo.unitpriceColShow};
+	// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+	// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+	var opLabel = "{!opLabel}";
+	var opColIsShowFlg = {!opColIsShowFlg};
+	// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+	// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH BEGIN
+	var summaryFilterConfigFlg = {!foodSummaryInfo.summaryFilterConfigFlg};
+	// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH END
+	function historyShow(that)
+	{
+		var showflg = ($(that).attr("showflag") ==='true');
+		//|| $(that).text().trim() == showHistoryText
+		if(showflg)
+		{
+			//ご予約履歴表示
+			showHistoryText = '{!$Label.MSG_041_0008}';
+			$(that).text(showHistoryText);
+			$(that).attr("showFlag",false);
+			$(".k-detail-history").hide();
+			isShowHistory = false;
+		}else
+		{
+			//ご予約履歴非表示
+			showHistoryText = '{!$Label.MSG_041_0009}';
+			$(that).text(showHistoryText);
+			$(that).attr("showFlag",true);
+			$(".k-detail-history").show();
+			isShowHistory = true;
+		}
+	}
+	function createHistoryTable()
+	{
+		var grid = $("#grid").data("kendoGrid");
+		$(".k-detail-history").remove();
+		var data = grid.dataSource.data();
+		for(var i = 0 ; i < data.length;i++){
+			var dataItem = data[i];
+			// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+			var dataUid = dataItem.uid;
+			// 此功能有效无效Flg
+			if(groupAbleFlg){
+				var tr = grid.tbody.find("tr[data-uid='" + dataUid + "']");
+				// 2017/09/18 予定表を表示のとき、部屋順で表示できる改善対応 WGCH BEGIN
+				var ldIndexNmKey = getLdIndexNmKeyFun(dataItem[_SECOND_GPKEY].split('__')[1], dataItem.{!$Label.MSG_041_0017});
+				tr.attr("ldIndexNmKey", ldIndexNmKey);
+				// 2017/09/18 予定表を表示のとき、部屋順で表示できる改善対応 WGCH END
+			}
+			// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+			if(dataItem.history.histories.length > 0){
+				var history = dataItem.history;
+				// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+				//var dataUid = dataItem.uid;
+				// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+				//日付
+				//ユーザ
+				//アクション
+		    	var html  = "<table style='width:100%' class='list' border='0' cellpadding='0' cellspacing='0' >" +
+		    				"<colgroup><col style='width:10%'><col style='width:15%'><col style='width:75%'><col></colgroup>" +
+		    				"<thead class='k-grid-header'><tr><th class='k-header'>{!$Label.MSG_041_0010}</th><th class='k-header'>{!$Label.MSG_041_0011}</th><th class='k-header'>{!$Label.MSG_041_0012}</th></tr></thead>";
+				
+				var tabStrBody = "<tBody>";
+		        var tabStrFoot = "</tBody></table>";
+				for (var j = 0; j < history.histories.length; j++) {
+					var element = history.histories[j];
+					if(element != undefined)
+					{
+						tabStrBody += "<tr style='background-color:#e6e6fa'><td >" + element.theDate + "</td>";
+						tabStrBody += '<td style="text-align: left;">' + element.who + '</td>';
+			    		tabStrBody += "<td style='text-align: left;'>" + element.action + "</td></tr>";
+		    		}
+				}
+		    	html += tabStrBody + tabStrFoot;
+		    	var lengthInt = grid.tbody.find("tr[data-uid='" + dataUid + "'] td[role='gridcell']:visible").length;
+		    	var $tr = $("<tr class='k-detail-row k-detail-history' />");
+		    	var $td = $("<td colspan='" + lengthInt + "' style='padding-left:30px;'></td>").append(html).appendTo($tr);
+		    	$("<td class='k-group-cell'>&nbsp;</td>").appendTo($tr);
+		    	$td.appendTo($tr);
+		    	grid.table.find("tr[data-uid='" + dataUid + "'] ").after($tr);
+		    	if(isShowHistory)$tr.show();
+		    	else $tr.hide();
+		    	//.html(editTemplate(templateDate))
+			}
+		}
+	}
+    function setTypeArray(){
+    	var columnTypes = JSON.parse($('#hidColumType').val());
+    	var editColumStr = $('#hidEditColumStr').val();
+    	for(var p in columnTypes){ 
+         if(typeof(columnTypes[p])!="function"){ 
+            if(columnTypes[p] == 'list')
+            	listArray.push(p);
+           	else if(columnTypes[p] == 'string' && editColumStr.indexOf(p) >= 0)
+           		strArray.push(p);
+           	else if(columnTypes[p] == 'number')
+           		numArray.push(p);
+           	else if (columnTypes[p] == 'boolean')
+           		boolArray.push(p);
+           	else if (columnTypes[p] == 'date')
+           		dateArray.push(p);
+         } 
+     } 
+    }
+    // Datasource Refresh
+    function readDs() {
+    	if(isNeedLoad) gridsDs.read();
+    }
+    
+    // HTML "<" / ">" replace
+    function replaceHtmlBreakKey(e) {
+    	var replaceFin = e.replace(new RegExp("&\lt;", "g"), "<").replace(new RegExp("&\gt;", "g"), ">").replace(new RegExp("&\quot;", "g"), '"');
+    	return replaceFin;
+    }
+    // CheckBoxHTML作成
+    function generCheckImgHtml(e) {
+    	if (e != null && e == true) {
+	//チェック
+    		return '<img src="/img/checkbox_checked.gif" alt="{!$Label.MSG_041_0013}" width="16" height="16" class="checkImg" />';
+    	} else {
+    	//チェックなし
+    		return '<img src="/img/checkbox_unchecked.gif" alt="{!$Label.MSG_041_0014}" width="16" height="16" class="checkImg" />';
+    	}
+    }
+    // 数量合計処理
+    function generFoodSummaryHtml(dsData,field) {
+    	var sumRs = 0;
+    	var dsLen = dsData.length;
+    	for (i=0; i<dsLen; i++) {
+    		//console.debug(dsData[i][field]);
+    		sumRs = commUtils.mathNumAdd(sumRs, dsData[i][field]);
+    	}
+		return sumRs;
+    }
+    // 料理明細一覧を表示用テーブル
+    // 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN
+    //function generSubHtml(subdata, strStyle) {
+    function generSubHtml(subdata, strStyle, isNoShowHeader) {
+   	// 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END
+    	if (subdata.length == 0) return '';
+    	// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+    	/*
+    	var html  = "<table style='width:100%' class='list' border='0' cellpadding='0' cellspacing='0'>" +
+    				"<colgroup><col style='width:75%'><col style='width:46px'><col></colgroup>" +
+				//料理
+    				//数量
+    				"<thead class='k-grid-header'><tr><th class='k-header'>{!$Label.MSG_041_0015}</th><th class='k-header'>{!$Label.MSG_041_0016}</th></tr></thead>";
+		*/
+		var html  = "<table style='width:100%' class='list' border='0' cellpadding='0' cellspacing='0'>";
+			// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+			// html += "<colgroup><col style='width:75%'>";
+			if(!opColIsShowFlg) html += "<colgroup><col style='width:75%'>";
+			else {
+				html += "<colgroup><col style='width:45%'>";
+				html += "<col style='width:30%'>";
+			}
+			// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+			if(unitpriceColShow) html += "<col style='width:75px'>";
+			html += "<col style='width:46px'><col></colgroup>";
+			// 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN
+			if (!isNoShowHeader) {
+			// 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END
+			//料理
+			//数量
+			html += "<thead class='k-grid-header'><tr><th class='k-header'>{!$Label.MSG_041_0015}</th>";
+			// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+			// OP
+			if(opColIsShowFlg) html += "<th class='k-header'>"+ opLabel +"</th>";
+			// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+			//単価
+			if(unitpriceColShow) html += "<th class='k-header'>{!$Label.MSG_041_0071}</th>";
+			html += "<th class='k-header'>{!$Label.MSG_041_0016}</th></tr></thead>";
+			// 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ BEGIN
+			}
+			// 2019/04/30 料理項目列のタイトルを表示・非表示切り替えフラグ WSQ END
+		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+		var tabStrBody = "<tBody>";
+        var tabStrFoot = "</tBody></table>";
+		for (var i = 0; i < subdata.length; i++) {
+			element = subdata[i];
+    		tabStrBody += "<tr style='background-color:#e6e6fa'><td ><span style='"+strStyle+"'>" + element.productName + "</span></td>";
+    		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+    		if(opColIsShowFlg) tabStrBody += "<td style='text-align: right;'><span style='"+strStyle+"'>" + element.productOpName + "</span></td>";
+    		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+    		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+    		if(unitpriceColShow) tabStrBody += "<td style='text-align: right;'><span style='"+strStyle+"'>" + element.unitPrice + "</span></td>";
+    		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+    		tabStrBody += "<td style='text-align: right;'><span style='"+strStyle+"'><div style='"+ element.style +"' >" + element.amount + '</div></span></td></tr>';
+		}
+    
+    	html += tabStrBody + tabStrFoot;
+    	return html;
+    }
+    // 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN
+    // 料理明細一覧を表示用テーブル
+    function generGuestHtml(guestData, strStyle) {
+    	if (guestData.length == 0) return '';
+    	
+    	var html  = "<table style='width:100%' class='list' border='0' cellpadding='0' cellspacing='0'>";
+		
+        var tabStrBody = "<tBody>";
+        var tabStrFoot = "</tBody></table>";
+		for (var i = 0; i < guestData.length; i++) {
+			element = guestData[i];
+    		tabStrBody += "<tr style='background-color:#e6e6fa'><td>";
+    		tabStrBody += "<span style='"+strStyle+"' id='" + element.contactId + "'>" + element.contactName + "</span>";
+    		tabStrBody += "<span style='"+strStyle+"'><div>" + element.contactApiInfo + "</div></span></td></tr>";
+		}
+    
+    	html += tabStrBody + tabStrFoot;
+    	return html;
+    } 
+    // 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END
+    function generLinkHtml(linkId, linkLabel, linkStyle) {
+    	if (linkId == null) return '';
+    	//<a href='/" + "#=leadId #" + "' target='_blank'>" + "#=leadNo#" + "</a>"
+    	if (linkStyle != null && linkStyle != "") {
+    		return "<a href='/" +linkId+"' target='_blank'><span style='"+linkStyle+"'>" +linkLabel+"</span></a>";
+    	} else {
+    		return "<a href='/" +linkId+"' target='_blank'>" +linkLabel+"</a>";
+    	}
+    }
+    // 2017/03/13 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応 BEGIN
+    function generColorHtml(apiTxt,leadId,api) {
+		if (apiTxt == null) apiTxt = '';
+		if (leadId == null) return apiTxt;
+		var fontColor = '';
+		var bgColor = '';
+		var leadIdKey = 'history_' + leadId;
+		var colorSobj = colorJsonSobj[leadIdKey];
+		if(colorSobj == undefined) return apiTxt;
+		colorSobj = colorSobj[api];
+		if(colorSobj == undefined) return apiTxt;
+		fontColor = colorSobj.fontColor;
+		bgColor = colorSobj.bgColor;
+		if (apiTxt == "") apiTxt = "　";
+		return "<div style='width:100%;background-color:"+ bgColor +"'><font color="+ fontColor +">" + apiTxt + "</font></div>";
+    }
+    // 2017/03/13 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応 End
+    function generSubTemp(currentId){
+    	 var grid = $("#grid").data("kendoGrid");
+		//grid.table.find("tr[data-uid='" + gridMsg[1] + "'] td:last").html(editTemplate(templateDate))
+    	var dataItem = grid.dataSource.getByUid(currentId);
+    	//var detail = dataItem.detailList||dataItem.models[0].detailList
+    	var subTemplate = kendo.template($("#editButton").html());
+		var templateDate = {Id:dataItem.Id,uid:currentId}; 
+	    return subTemplate(templateDate);
+    }
+    function generEditableHtml(){
+	    var template = kendo.template($("#editButton").html());
+	    return template({historyShowFlg:isShowHistory,showHistoryText:showHistoryText});
+    }
+    
+    // DataSource Init
+    function initDataSource() {
+        // Report View DataSource Define
+        showModel =  kendo.data.Model.define(<apex:outputText escape="true" value="{!modelJson}" />);
+        gridsDs = new kendo.data.DataSource({
+            transport: {
+                read: function (options) {
+                	// 検索条件を設定する 
+					var queryArea = $("select[id$=':areaName']").length > 0 ? $("select[id$=':areaName']").val() : "";
+					var queryDate = $("input[id$=':queryDate']").length > 0 ? $("input[id$=':queryDate']").val() : "";
+					var queryTerm = $("select[id$=':termDatesLst']").length > 0 ? $("select[id$=':termDatesLst']").val() : "";
+					// 2014/06/26 ADD 
+					var roomViewFlg = $("select[id$=':roomDataSwitchBtn']").val();
+					// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+					var foodSumArr = _jsGetFoodSumDataFun();
+					// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+					// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH BEGIN
+					var isGroupAbleFlg = $("select[id$=':groupAbleBtn']").length > 0 ? $("select[id$=':groupAbleBtn']").val() : 'false';
+					// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH END
+					// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN
+					var data = {types:$j("input[id$=':multiRoomTypeIds']").val(),filter:$("input[name=inputFilter]").val()
+						// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN 
+						// 2021/05/31 #11008 bug fixed by zy BEGIN
+						,roomIds: getSelRoomIds()
+						// 2021/05/31 #11008 bug fixed by zy END
+						, layout: getLayoutId()
+						// 2021/05/31 #11229 bug fixed by zy BEGIN
+						, spcd : getShopCode()
+						// 2021/05/31 #11229 bug fixed by zy END
+						// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END 
+					},otherInfo = JSON.stringify(data);
+					// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END
+                    // make AJAX request to the remote service
+                    Visualforce.remoting.Manager.invokeAction(
+                    // 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH BEGIN
+                    // 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN
+		    		"{!$RemoteAction.K_ScheduleReport.getReportViewInfo}", queryArea, queryDate,queryTerm,roomViewFlg,foodSumArr,isGroupAbleFlg,otherInfo, function (result, event) {
+                    // 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END
+		    		// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH END
+                        if (event.type == 'exception') {
+                            alert(event.message);
+                            // 2020/12/30 予定表の検索欄修正　by zy BEGIN
+                            var fitlerInput = $("input[name=inputFilter]").val();
+                            if (fitlerInput != "") grid._progress(false);
+                            // 2020/12/30 予定表の検索欄修正　by zy END
+                        } else {
+							// 予定表明細一覧情報を引き渡す
+                            var jsonResult = $.parseJSON(result);
+                            // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+                            if(groupAbleFlg){
+                            	grpTitlInfoMap = jsonResult.grpTitlInfoMap;
+                            }
+                            // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+                            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+                            if(foodGroupAbleFlg){
+                            	opInfoMap = jsonResult.opInfo;
+                            }
+                            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+                            // 2017/03/13 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応 BEGIN
+                            colorJsonSobj = jsonResult.colorJsonMap;
+                            // 2017/03/13 予定表の変更履歴が色でわかるように、色も一色ではなくN色自動対応 End
+                           	// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+							_jsSetFoodSumDataFun(jsonResult);
+							// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+                            // 日付・時間項目はLocal時間に変換する
+							leadIds = new Array();
+							jsonResult.detailRep.filter(function(item){
+								if(item.Id != null)
+								{
+									leadIds.push(item.Id);
+									for(var i = 0 ; i < dateArray.length; i++)
+	                            	{
+	                            		var fieldName = dateArray[i];
+	                            		if(item[fieldName] != '' && item[fieldName] != null )
+	                            		{
+	                            			// 2017/10/16 WGCH BEGIN
+	                            			//var orgDate = new Date(item[fieldName]);
+	                            			var orgDate = kendo.parseDate(item[fieldName]);
+	                            			// 2017/10/16 WGCH END
+	                            			//var tempDt = new Date(orgDate.getTime() + offsetMiliseconds);
+	                            			//item[fieldName] = tempDt;
+	                            			item[fieldName] = orgDate;
+	                            		}
+	                            	}
+                            	}
+							});
+							options.success(jsonResult.detailRep);
+					        // 料理集計情報を引き渡して、最新情報を更新を行う
+							summaryDs.data(jsonResult.summaryRep);
+							if(jsonResult.summaryDsDetail){
+								summaryDsDetail.data(jsonResult.summaryDsDetail);
+								$("#summaryGridDetail").show();
+							} 
+							else $("#summaryGridDetail").hide();
+							if(jsonResult.summaryDs2Detail){
+								summaryDs2Detail.data(jsonResult.summaryDs2Detail);
+								$("#summary2GridDetail").show();
+							} else $("#summary2GridDetail").hide();
+							summaryDs2.data(jsonResult.summaryRep2);
+							// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH BEGIN
+							setOldCheckFun(CUST_DIVID_GRID, jsonResult.gridVal);
+							setOldCheckFun(CUST_DIVID_SUMMARYGRID, jsonResult.summaryVal);
+							setOldCheckFun(CUST_DIVID_SUMMARYGRIDDETAIL, jsonResult.summaryDetlVal);
+							setOldCheckFun(CUST_DIVID_SUMMARY2GRID, jsonResult.summary2Val);
+							setOldCheckFun(CUST_DIVID_SUMMARYGRIDDETAIL, jsonResult.summary2DetlVal);
+							// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH END
+							kendo.ui.progress($("#grid"), false);
+                        } // End else
+                        // Event Complete
+                        gridDsReadComplete();
+                    }, {escape: false});
+                },
+                update: function (options) {}
+            },
+            change: function(){
+            	var sort = this.sort();
+				// Ver4.67から　項目Sort機能無効不具合対応 BEGIN
+				var chgFlg = false;	// 並び替え項目変更あり・なし標識フラグ
+			   	if (sort.length <= 1) {
+			   		if (sort.length == 0) {
+			   			sort.push({field: "rowindex", dir: "asc"});
+			   			chgFlg = true;
+			   		}
+			   	} else {
+			    	for (i = 0; i < sort.length; i++) {
+			    		var thissort = sort[i];
+			    		if (thissort.field == "rowindex") {
+			    		sort.remove(thissort);
+			    		chgFlg = true;
+			    		}
+			    	}
+			   	}
+			   	if (chgFlg) this.sort(sort);
+   				// Ver4.67から　項目Sort機能無効不具合対応 End
+   				
+            	if(sort && !isNeedLoad){
+            		editCancelBtnFun();
+            	}
+            },
+            batch: true,
+            aggregate: <apex:outputText escape="true" value="{!avgColnumJson}" />,
+            schema: {
+            	model: showModel
+            },
+            // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+            // group: [{field: "{!$Label.MSG_041_0017}"}],
+            group: <apex:outputText escape="true" value="{!groupColnumJson}" />,
+            // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END		
+            sort:  {field: "rowindex", dir: "asc" },  
+        });
+        
+        // Report Summary View DataSource Define
+        summaryDs = new kendo.data.DataSource({
+			sort: [
+			    // sort by "middayIcon" in descending order and then by "sortKey" in ascending order
+			    { field: "middayIcon", dir: "desc" },
+			    { field: "sortKey", dir: "asc" }
+			],
+            schema: {
+                model: {
+                    fields: {
+                        productSummy: {
+                            type: "number"
+                        }
+					}
+				}
+			},
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+			group: <apex:outputText escape="true" value="{!foodGroupColnumJson}" />,
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            change: function(){
+            	var sort = this.sort();
+		   		if (sort.length == 0) {
+		   			sort.push({ field: "middayIcon", dir: "desc" },{ field: "sortKey", dir: "asc" });
+		   			this.sort(sort);
+		   		}
+            },
+            aggregate: [{
+                    field: "productSummy",
+                    aggregate: "sum"
+                }
+            ],
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+        });
+        // Report Summary View DataSource Define
+        summaryDsDetail = new kendo.data.DataSource({
+			sort: [
+			    // sort by "middayIcon" in descending order and then by "sortKey" in ascending order
+			    { field: "middayIcon", dir: "desc" },
+			    { field: "sortKey", dir: "asc" }
+			],
+            schema: {
+                model: {
+                    fields: {
+                        productSummy: {
+                            type: "number"
+                        }
+					}
+				}
+			},
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            change: function(){
+            	var sort = this.sort();
+		   		if (sort.length == 0) {
+		   			sort.push({ field: "middayIcon", dir: "desc" },{ field: "sortKey", dir: "asc" });
+		   			this.sort(sort);
+		   		}
+            },
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+            // group: { field: "keyDate", aggregates: [ { field: "productSummy", aggregate: "sum" }] },
+            group: [{field: "keyDate", aggregates: [ { field: "productSummy", aggregate: "sum" }]} , <apex:outputText escape="true" value="{!detFoodGroupColnumJson}" />]
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+        });
+        summaryDs2Detail = new kendo.data.DataSource({
+			sort: [
+			    // sort by "middayIcon" in descending order and then by "sortKey" in ascending order
+			    { field: "middayIcon", dir: "desc" },
+			    { field: "sortKey", dir: "asc" }
+			],
+            schema: {
+                model: {
+                    fields: {
+                        productSummy: {
+                            type: "number"
+                        }
+					}
+				}
+			},
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            change: function(){
+            	var sort = this.sort();
+		   		if (sort.length == 0) {
+		   			sort.push({ field: "middayIcon", dir: "desc" },{ field: "sortKey", dir: "asc" });
+		   			this.sort(sort);
+		   		}
+            },
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+            // group: { field: "keyDate", aggregates: [ { field: "productSummy", aggregate: "sum" }] },
+            group: [{field: "keyDate", aggregates: [ { field: "productSummy", aggregate: "sum" }]} , <apex:outputText escape="true" value="{!detFoodGroupColnumJson}" />]
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+        });
+        // Report Summary View DataSource Define
+        summaryDs2 = new kendo.data.DataSource({
+			sort: [
+			    // sort by "middayIcon" in descending order and then by "sortKey" in ascending order
+			    { field: "middayIcon", dir: "desc" },
+			    { field: "sortKey", dir: "asc" }
+			],
+            schema: {
+                model: {
+                    fields: {
+                        productSummy: {
+                            type: "number"
+                        }
+					}
+				}
+			},
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+			group: <apex:outputText escape="true" value="{!foodGroupColnumJson}" />,
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            change: function(){
+            	var sort = this.sort();
+		   		if (sort.length == 0) {
+		   			sort.push({ field: "middayIcon", dir: "desc" },{ field: "sortKey", dir: "asc" });
+		   			this.sort(sort);
+		   		}
+            },
+            aggregate: [{
+                    field: "productSummy",
+                    aggregate: "sum"
+                }
+            ],
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+        });
+    }
+    // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+    function setFoodGroupAbleTitleFun(e){
+	    if(!foodGroupAbleFlg) return;
+	    e.sender.tbody.find(".k-grouping-row").each(function(){
+	    	var newTitleStr = '{!$Label.MSG_041_0067} ';
+	    	$this = $(this);
+	    	var $querStrDom = $this.find('p');
+	    	var titleStr = $querStrDom.text();
+	    	var titleArr = titleStr.split(":");
+	    	var titleKey = "";
+	    	if(titleArr.length == 2 && titleArr[0] == 'op'){
+		    	titleKey = titleArr[1].replace(/(^\s*)|(\s*$)/g, "");
+		    	if (titleKey != "" && opInfoMap != undefined) {
+		    		newTitleStr += kendo.htmlEncode(opInfoMap[titleKey]);
+		    	}
+		    	repHtml = '<span title=\'' + newTitleStr + '\'>' + newTitleStr +  '</span>';
+		    	$querStrDom.html('<div class="groupHeaderCls" style="display:inline-block" >'+$querStrDom.html().replace(titleStr, repHtml)+'</div>');
+		    }
+	    });
+    }
+    function setCsvGroupAbleTitleFun(groupRowData){
+    	var csv = '';
+    	var lab = groupRowData.field == 'op' ? '{!$Label.MSG_041_0067} ' : '';
+    	var val = groupRowData.value != "" && opInfoMap != undefined ? opInfoMap[groupRowData.value] : '';
+    	csv += lab + val;	// 会計OP
+    	csv += '\n';
+    	return csv;
+    }
+    // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+    var lineHtml = "<div class='line' style='width:200%; border-bottom: 1px solid #c5c5c5; margin-left: -10px;'></div>";
+    function setFooterFun(e){
+    	if(!foodSumIsShowFlg){
+    		e.sender.footer.remove(); // 删除合计行
+    		return;
+    	} else if(foodSumIsShowProdFlg){
+    		dataMap = new Map(); // 合计数据集
+    		for(var i = 0; i < e.sender._data.length; i++){
+    			// 数据作成~防止地址共存
+    			var data = {	sortKey : e.sender._data[i].sortKey,
+    							productName : e.sender._data[i].productName,
+    							productSummy : e.sender._data[i].productSummy,
+    						}
+    			// 根据sortKey合计商品数量
+    			if(!dataMap.get(data.sortKey)) dataMap.set(data.sortKey, data);
+    			else{
+    				var oldData = dataMap.get(data.sortKey);
+    				oldData.productSummy += data.productSummy;
+    			}
+    		}
+    		for(var i = 0; i < e.sender._data.length; i++){ // 根据当前顺序遍历
+    			var sortKey = e.sender._data[i].sortKey;
+    			if(!dataMap.get(sortKey)) continue;
+    			var data = dataMap.get(sortKey); // 根据sortKey取当前商品对应的数据集
+    			if(data.productSummy == 0) continue; // 数据集内数量为0过滤掉
+    			$("div#prodNmDivId", e.sender.footer).append("<div style='width:100%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;' title='" + data.productName + "'>" + data.productName + "</div>"); // add商品名列
+    			$("div#prodSummyDivId", e.sender.footer).append("<div style='width:100%; text-align: right;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;'>" + data.productSummy + "</div>"); // add商品数量列
+    			$("div#prodNmDivId, div#prodSummyDivId", e.sender.footer).append(lineHtml); // add下划线Css
+    			dataMap.delete(sortKey); // 删掉该商品数据集~防止二次追加
+    		}
+    	}
+    }
+    function setGroupFooterFun(e){
+    	var keyDateArr = [], // 到着日数组
+    	dataMap = new Map(), // 合计数据集
+    	keyDateOpSet = new Set(); // 所有OP
+    	keyDateOpMap = new Map(); // Key:到着日;Val:OpId;
+    	for(var i = 0; i < e.sender._data.length; i++){
+    		// 数据作成~防止地址共存
+    		var data = {	
+    						groupKey : e.sender._data[i].keyDate + e.sender._data[i].sortKey,
+    						keyDate : e.sender._data[i].keyDate,
+    						sortKey : e.sender._data[i].sortKey,
+    						op : e.sender._data[i].op,
+    						productName : e.sender._data[i].productName,
+    						productSummy : e.sender._data[i].productSummy,
+    					}
+    		// 根据groupKey合计商品数量
+    		if(!dataMap.get(data.groupKey)) dataMap.set(data.groupKey, data);
+    		else{
+    			var oldData = dataMap.get(data.groupKey);
+    			oldData.productSummy += data.productSummy;
+    		}
+    		keyDateOpSet.add(data.keyDate + data.op);
+    		if(!keyDateOpMap.get(data.keyDate)){
+    			keyDateArr.push(data.keyDate); // 目的保持到着日顺序
+    		}
+    		// PS:(keyDateOpSet.size + keyDateArr.length - 1) => (每天op数集合Set + 天数ArrSize - 1) = 下标数
+    		keyDateOpMap.set(data.keyDate, (keyDateOpSet.size + keyDateArr.length - 1)); // 集计该到着日内的OP
+    	}
+    	if(!foodSumIsShowFlg){
+    		for(var n = 0; n < keyDateArr.length; n++){
+    			var keyDate = keyDateArr[n]; // 按顺序取该到着日
+    			var size = foodGroupAbleFlg ? keyDateOpMap.get(keyDateArr[n]) : n; // 如果OPGroup有效是对应append下标位置
+    			$("tr.k-group-footer", e.sender.element).eq(size).hide(); // 删除合计行
+    		}
+    		e.sender.footer.remove(); // 删除合计行
+    		return;
+    	} else if(foodSumIsShowProdFlg){ /*PS 所有的处理都是按顺序来的, 以后修改内一定注意数据顺序 */
+    		$("div.prodNmDivCls", e.sender.element).parent("td").css('border-width','1px');
+    		for(var n = 0; n < keyDateArr.length; n++){
+    			var keyDate = keyDateArr[n]; // 按顺序取该到着日
+    			var size = foodGroupAbleFlg ? keyDateOpMap.get(keyDate) : n; // 如果OPGroup有效是对应append下标位置
+    			for(var i = 0; i < e.sender._data.length; i++){ // 根据当前顺序遍历
+    				var groupKey = e.sender._data[i].keyDate + e.sender._data[i].sortKey;
+    				if(!dataMap.get(groupKey)) continue;
+    				var data = dataMap.get(groupKey); // 根据sortKey取当前商品对应的数据集
+    				if(data.productSummy == 0 || keyDate != e.sender._data[i].keyDate) continue; // 数据集内数量为0过滤掉
+    				$("div.prodNmDivCls", e.sender.element).eq(size).append("<div style='width:100%;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;' title='" + data.productName + "'>" + data.productName + "</div>"); // add商品名列
+    				$("div.prodSummyDivCls", e.sender.element).eq(size).append("<div style='width:100%; text-align: right;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;'>" + data.productSummy + "</div>"); // add商品数量列
+    				// add下划线Css
+    				$("div.prodNmDivCls", e.sender.element).eq(size).append(lineHtml);
+    				$("div.prodSummyDivCls", e.sender.element).eq(size).append(lineHtml);
+    				dataMap.delete(groupKey); // 删掉该商品数据集~防止二次追加
+    			}
+    		}
+    	}
+    }
+    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+
+	// ** 画面起動 **/
+    $(document).ready(function () {
+    
+    	var wH = $(window).height();
+    	var wW = $(window).width();
+        var p = $("#grid");
+        var position = p.offset();
+		// Grid Table Size AutoSetup
+        $('#grid').css('height', (wH - position.top - 20) + 'px');
+        // Bind Query Condition
+		//$("select[id$=':areaName']").change( function () { readDs(); });
+		$("input[id$=':queryDate'],select[id$=':termDatesLst']").change( function () { 
+				// 2017/04/27 料理数目变更之后变颜色对应 BEGIN By Wgch
+				_clearFoodSumMapFun();
+				_gridsDsReadFun();
+				// 2019/05/15 予定表指定日にて、連絡事項を表示する機能対応 WGCH BEGIN
+				try{
+					// sp
+					var queryArea = $("select[id$=':areaName']").length > 0 ? $("select[id$=':areaName']").val() : "";
+					// dt
+					var queryDate = $("input[id$=':queryDate']").length > 0 ? $("input[id$=':queryDate']").val() : "";
+					messagInfoFun(queryDate, queryArea);
+				} catch (e) {}
+				// 2019/05/15 予定表指定日にて、連絡事項を表示する機能対応 WGCH END
+				// 2019/09/15 指定日自动记忆機能対応 WGCH BEGIN
+				setCheckInDayCookieFun();
+				// 2019/09/15 指定日自动记忆機能対応 WGCH END
+				//readDs(); 
+				/*
+				if(isNeedLoad) gridsDs.read();
+				else{
+					editCancelBtnFun();
+					gridsDs.read(); 
+				} 
+				*/
+				// 2017/04/27 料理数目变更之后变颜色对应 END By Wgch
+		});
+					
+        // Condtion Filter Readoly
+        $("input[id$=':queryDate']").attr('readonly', true);
+        
+        //** DataSource Init **/
+        initDataSource();
+        
+		//** column type array 作成**/
+		setTypeArray();
+		
+        // Setup Data To Grid
+        $("#grid").kendoGrid({
+            dataSource: gridsDs,
+			reorderable: false,
+            resizable: true,
+            // 2017/04/26 列幅サイズ自動記憶機能対応 BEGIN
+			columnResize: function(e) {
+			    // 該当APIの最新サイズはCOOKIEへ反映を行う
+			    // APEX画面から起動する場合、該当サイズは定義情報へ反映を行う
+			    var shopCode = getShopCode();
+			    var cookKey = shopCode+'_K_ScheduleReport_ColResize';
+			    var extInf = _getCookie(cookKey);
+			    var defInfArr = extInf.split(",");
+			    var _wkMap = new Map();
+			    defInfArr.forEach(function(val){
+			    	var _apidef = val.split(":");
+			    	if (_apidef.length > 1) _wkMap.set(_apidef[0],_apidef[1]);
+			    });
+			    _wkMap.put(e.column.field, e.newWidth);
+			    var cookVal = "";
+			    _wkMap.forEach(function(value, key) {
+			    	cookVal += key + ":" + value + ",";
+			    });
+			    _setCookie(cookKey, cookVal);
+                // DBへ情報格納
+                JINYACONNECT.CONFIG.saveKrepConfig('RESIZE',cookVal,userId,shopCode);
+			},
+			// 2017/04/26 列幅サイズ自動記憶機能対応 END
+			// 2017/09/23 列表示・非表示自動記憶機能対応 WGCH BEGIN
+			columnShow: function(e) {
+				setColumnHidCookieFun(e.column.field, false); // displays the field of the hidden column
+				//console.log("SHOW="+e.column.field); 
+			},
+			columnHide: function(e) {
+				setColumnHidCookieFun(e.column.field, true); // displays the field of the hidden column
+				//console.log("HIDD="+e.column.field); 
+			},
+			// 2017/09/23 列表示・非表示自動記憶機能対応 WGCH END
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 BEGIN
+            //filterable: true,
+			filterable: {
+				operators: {
+					number: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値より以上
+						gte: "{!$Label.MSG_041_0043}",
+						// 指定の値より大きい
+						gt: "{!$Label.MSG_041_0044}",
+						// 指定の値より以下
+						lte: "{!$Label.MSG_041_0045}",
+						// 指定の値より小さい
+						lt: "{!$Label.MSG_041_0046}",
+					},
+					string: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値で始まる
+						startswith: "{!$Label.MSG_041_0035}",
+						// 指定の値を含む
+						Contains: "{!$Label.MSG_041_0036}",
+						// 指定の値を含まない
+						doesnotcontain: "{!$Label.MSG_041_0037}",
+						// 指定の値で終わる
+						endswith: "{!$Label.MSG_041_0038}",
+					},
+					// 2021/06/31 #11707 bug fixed by zy BEGIN
+					list: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値で始まる
+						startswith: "{!$Label.MSG_041_0035}",
+						// 指定の値を含む
+						Contains: "{!$Label.MSG_041_0036}",
+						// 指定の値を含まない
+						doesnotcontain: "{!$Label.MSG_041_0037}",
+						// 指定の値で終わる
+						endswith: "{!$Label.MSG_041_0038}",
+					}
+					// 2021/06/31 #11707 bug fixed by zy END
+				},
+				messages: {
+					// フィルター:
+					info: "{!$Label.MSG_041_0032}",
+					// および
+					and: "{!$Label.MSG_041_0039}",
+					// または
+					or: "{!$Label.MSG_041_0040}",
+					// フィルター
+					filter: "{!$Label.MSG_041_0041}",
+					// クリア
+					clear: "{!$Label.MSG_041_0042}",
+			    }
+			},
+			// 2017/02/06 料理集計の条件設定を日本語化 機能対応 END
+			sortable: {
+                 mode: "multiple",
+                 allowUnsort: true
+			},
+			dataBound:function(e){
+				/*
+				//e.sender.tbody.find(".k-grouping-row").replace('queryDate','到着日');
+				 e.sender.tbody.find(".k-grouping-row").each(function(){
+					var querStrDom = $(this).find('p');
+					//到着日
+					querStrDom.html(querStrDom.html().replace('queryDate','{!$Label.MSG_041_0017}'));
+				 });*/
+				 // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+				 if(groupAbleFlg){
+					 var keyDate;
+					 var tdMaxWidth = null;
+					 e.sender.tbody.find(".k-grouping-row").each(function(){
+					 	$this = $(this);
+						var $querStrDom = $this.find('p');
+						var titleStr = $querStrDom.text();
+						var titleArr = titleStr.split(":");
+						if (tdMaxWidth == null) {
+					 		tdMaxWidth = $querStrDom.parent().width();
+						}
+						// 取到着日Key
+						if(titleArr.length == 2 && titleArr[0] == '{!JSENCODE($Label.MSG_041_0017)}') keyDate = titleArr[1].replace(/(^\s*)|(\s*$)/g, "");
+						// 予約番号 处理
+						if(titleArr.length == 2 && titleArr[0] == _SECOND_GPKEY && grpTitlInfoMap != undefined){
+					 		var ldIndexNm = titleArr[1].replace(/(^\s*)|(\s*$)/g, "");
+							// 2017/09/18 予定表を表示のとき、部屋順で表示できる改善対応 WGCH BEGIN
+					 		var repHtml = $querStrDom.text();
+					 		//var noLeadNo = "{!JSENCODE(SORTAPI_NOLEAD)}";
+					 		if(ldIndexNm == SORTAPI_NOLEAD) repHtml = repHtml.replace(SORTAPI_NOLEAD, '');
+					 		else ldIndexNm = ldIndexNm.split("__")[1];
+							// 2017/09/18 予定表を表示のとき、部屋順で表示できる改善対応 WGCH END
+							var ldIndexNmKey = getLdIndexNmKeyFun(ldIndexNm, keyDate);
+					 		// Icon里加属性
+							$thisLink =  $this.find('a');
+							$thisLink.attr("onclick", "iconOnclickFun(this,'" + ldIndexNmKey + "')");
+							$thisLink.attr("ldIndexNmKey", ldIndexNmKey);
+							// 取到当前title行的数据源
+							var grpItem = grpTitlInfoMap[ldIndexNmKey];
+							if (grpItem) {
+								var grpTitlInfo = (grpItem == undefined ? '' : grpItem.grpTitlInfo);
+								// 合成置换信息
+								// 2017/09/18 カスタマイズ定義のLINKあり項目は自動リンクを付ける対応 WGCH BEGIN
+								repHtml = '<span title=\'' + kendo.htmlEncode(grpTitlInfo) + '\'>';
+								repHtml += _SECOND_GPKEY +": <a href='/" + grpItem.ldIndexId + "/e' target='_blank'>" + ldIndexNm + "</a>　" + grpTitlInfo;//kendo.htmlEncode(grpTitlInfo);
+								// 2017/09/18 カスタマイズ定義のLINKあり項目は自動リンクを付ける対応 WGCH END
+								repHtml += '</span>';
+							}
+					 		$querStrDom.html('<div class="groupHeaderCls" style="display:inline-block" >'+$querStrDom.html().replace(titleStr, repHtml)+'<div>');
+						}
+					 });
+					 if (tdMaxWidth != null) $(".groupHeaderCls").css("max-width",((tdMaxWidth-20)+"px"));
+				 }
+				 // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+				 createHistoryTable();
+				 // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+				 if(groupAbleFlg) {
+				 	if(olgStatus.size > 0) setOlgStatusFun();
+				 	else if(collapseGroupFlg) $j('.k-i-collapse[onclick]').click();
+				 }
+				 // 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+			},	
+		    toolbar: generEditableHtml,
+		    // 2017/02/15 料理集計の条件設定を日本語化 機能対応 BEGIN
+            //columnMenu: true,
+            columnMenu: {
+				messages: {
+					title:false,
+					// 昇順
+					sortAscending: "{!$Label.MSG_041_0051}",
+					// 降順
+					sortDescending: "{!$Label.MSG_041_0052}",
+					// 列
+					columns: "{!$Label.MSG_041_0053}",
+					// フィルター	
+					filter: "{!$Label.MSG_041_0041}",
+				}
+			},
+			// 2017/02/15 料理集計の条件設定を日本語化 機能対応 END
+            columns: <apex:outputText escape="true" value="{!colnumJson}" />,
+            editable: "true",
+        });
+
+		// 料理集計情報を格納する
+        $("#summaryGrid").kendoGrid({
+            dataSource: summaryDs,
+            //resizable: true,
+			scrollable: true,
+			//height : 540,
+			width : {!JSENCODE(foodSummaryInfo.strWindowMaxWidth)},
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            sortable: true,
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 BEGIN
+            //filterable:true,
+            filterable: {
+				operators: {
+					string: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値で始まる
+						startswith: "{!$Label.MSG_041_0035}",
+						// 指定の値を含む
+						Contains: "{!$Label.MSG_041_0036}",
+						// 指定の値を含まない
+						doesnotcontain: "{!$Label.MSG_041_0037}",
+						// 指定の値で終わる
+						endswith: "{!$Label.MSG_041_0038}",
+					}
+				},
+				messages: {
+					// フィルター:
+					info: "{!$Label.MSG_041_0032}",
+					// かつ
+					and: "{!$Label.MSG_041_0039}",
+					// または
+					or: "{!$Label.MSG_041_0040}",
+					// フィルタ
+					filter: "{!$Label.MSG_041_0041}",
+					// クリア
+					clear: "{!$Label.MSG_041_0042}",
+			    }
+			},
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 END
+			
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+            dataBound:function(e){
+            	setFoodGroupAbleTitleFun(e);
+            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+            	setFooterFun(e);
+            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+            },
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+            columns: [
+				{
+                    field: "middayIcon", // 昼
+                    title: "{!$ObjectType.Lead__c.Fields.Field278__c.label}",
+                    filterable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+                    sortable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+					width: {!JSENCODE(foodSummaryInfo.strMiddayIconWidth)},
+                    attributes: {
+                        "class": "imgIconStyle",
+                        style: "{!JSENCODE(foodSummaryInfo.strMiddayIconStyle)}"
+                    },
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+					encoded: false,
+					/*
+                    //template: "<image src='" + "#=middayIcon#" + "' width='30px' heigth='20px'/>"
+                    template:     	"# if (middayIcon != '') { #" +
+								        "<image src='" + "#=middayIcon#" + "' width='30px' heigth='20px'/>" +
+								    "# } else { #" +
+								        "# middayIcon #" +
+								    "# } #"*/
+                }, {
+                    field: "productName",
+                    //料理
+                    title: "{!$Label.MSG_041_0015}",
+                    width: {!JSENCODE(foodSummaryInfo.strProductNameWidth)},
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+                   	attributes: {
+                        style: "{!JSENCODE(foodSummaryInfo.strProductNameStyle)}"
+                    },
+                    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+                    footerTemplate: "<div id='prodNmDivId'></div><div style='width:100%;'>　</div>" // 全角空格:目的占位
+                    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+                }, {
+                    field: "unitPrice",
+                    title: "{!$Label.MSG_041_0071}",
+                    filterable: false,
+                    sortable: false,
+                    hidden: !unitpriceColShow,
+                    width: {!JSENCODE(foodSummaryInfo.strUnitpriceWidth)},
+                    attributes: {
+                    	style: "{!JSENCODE(foodSummaryInfo.strUnitpriceStyle)}"
+                    },
+                    headerAttributes: {
+                    	style: "font-size: 14px"
+                    },
+                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+                }, {
+                    field: "productSummy",
+                    //数量
+                    title: "{!$Label.MSG_041_0016}",
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+                    filterable: false,
+                    sortable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+                    width: {!JSENCODE(foodSummaryInfo.strProductSummyWidth)},
+					attributes: {
+						style: "{!JSENCODE(foodSummaryInfo.strProductSummyStyle)}"
+				    },
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+					// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+					template: kendo.template($("#productSummy").html()),
+					// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+					// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+					// footerTemplate: "<div style='width:100%; text-align: right'> #= sum # </div>"
+					footerTemplate: "<div id='prodSummyDivId'></div><div style='width:100%; text-align: right'>#= sum #</div>"
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+					// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+					, groupFooterTemplate: "<div style='width:100%; text-align: right'> #= sum # </div>"
+					// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+					//footerTemplate: "<div style='width:100%; text-align: right' class='footSummaryGrid'> #= generFoodSummaryHtml(summaryDs.data(), 'productSummy') # </div>"
+                	// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+                },
+            ]
+        });
+        var summaryWidth = parseInt({!JSENCODE(foodSummaryInfo.strWindowMaxWidth)}) - 50;
+        $("<div id='summaryGridDetail' />").appendTo($("#summaryGrid")).kendoGrid({
+        	dataSource: summaryDsDetail,
+			scrollable: true,
+			width : summaryWidth,
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            sortable: true,
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 BEGIN
+            //filterable:true,
+            filterable: {
+				operators: {
+					string: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値で始まる
+						startswith: "{!$Label.MSG_041_0035}",
+						// 指定の値を含む
+						Contains: "{!$Label.MSG_041_0036}",
+						// 指定の値を含まない
+						doesnotcontain: "{!$Label.MSG_041_0037}",
+						// 指定の値で終わる
+						endswith: "{!$Label.MSG_041_0038}",
+					}
+				},
+				messages: {
+					// フィルター:
+					info: "{!$Label.MSG_041_0032}",
+					// かつ
+					and: "{!$Label.MSG_041_0039}",
+					// または
+					or: "{!$Label.MSG_041_0040}",
+					// フィルタ
+					filter: "{!$Label.MSG_041_0041}",
+					// 閉じる
+					clear: "{!$Label.MSG_041_0042}",
+			    }
+			},
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 END
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+            dataBound:function(e){
+            	setFoodGroupAbleTitleFun(e);
+            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+            	setGroupFooterFun(e);
+            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+            },
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+            columns: [
+				{
+                    field: "middayIcon", // 昼
+                    title: "{!$ObjectType.Lead__c.Fields.Field278__c.label}",
+                    filterable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+                    sortable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+                    attributes: {
+                        "class": "imgIconStyle",
+                        style: "{!JSENCODE(foodSummaryInfo.strMiddayIconStyle)}"
+                    },
+                    width: {!JSENCODE(foodSummaryInfo.strMiddayIconWidth)},
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+					encoded: false,
+                }, {
+                    field: "productName",
+                    //料理
+                    title: "{!$Label.MSG_041_0015}",
+                    //width: {!JSENCODE(foodSummaryInfo.strProductNameWidth)},
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+                   	attributes: {
+                        style: "{!JSENCODE(foodSummaryInfo.strProductNameStyle)}"
+                    },
+                    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+                    groupFooterTemplate: "<div class='prodNmDivCls'></div><div style='width:100%;'>　</div>" // 全角空格:目的占位
+                    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+                }, {
+                    field: "unitPrice",
+                    title: "{!$Label.MSG_041_0071}",
+                    filterable: false,
+                    sortable: false,
+                    hidden: !unitpriceColShow,
+                    width: {!JSENCODE(foodSummaryInfo.strUnitpriceWidth)},
+                    attributes: {
+                    	style: "{!JSENCODE(foodSummaryInfo.strUnitpriceStyle)}"
+                    },
+                    headerAttributes: {
+                    	style: "font-size: 14px"
+                    },
+                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+                }, {
+                    field: "productSummy",
+                    //数量
+                    title: "{!$Label.MSG_041_0016}",
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+                    filterable: false,
+                    sortable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+					attributes: {
+						style: "{!JSENCODE(foodSummaryInfo.strProductSummyStyle)}"
+				    },
+				    width: {!JSENCODE(foodSummaryInfo.strProductSummyWidth)},
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+					// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+					template: kendo.template($("#productSummy").html()),
+					// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+					// groupFooterTemplate: "<div style='width:100%; text-align: right' class='footSummaryGrid'> #= sum #</div>"
+					groupFooterTemplate: "<div class='prodSummyDivCls'></div><div style='width:100%; text-align: right' class='groupFoodSum'>#= sum #</div>"
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+                },{
+                    field: "keyDate",
+                    hidden: true,
+                    //到着日
+                    title: "{!$Label.MSG_041_0017}",
+					headerAttributes: {
+						style: "font-size: 14px"
+					}
+                }
+            ]	
+        });
+        $("#summaryGrid2").kendoGrid({
+            dataSource: summaryDs2,
+            //resizable: true,
+			scrollable: true,
+			//height : 540,
+			width : {!JSENCODE(foodSummaryInfo.strWindowMaxWidth)},
+			// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+            sortable: true,
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 BEGIN
+            //filterable:true,
+            filterable: {
+				operators: {
+					string: {
+						// 指定の値に等しい
+						eq: "{!$Label.MSG_041_0033}",
+						// 指定の値に等しくない
+						neq: "{!$Label.MSG_041_0034}",
+						// 指定の値で始まる
+						startswith: "{!$Label.MSG_041_0035}",
+						// 指定の値を含む
+						Contains: "{!$Label.MSG_041_0036}",
+						// 指定の値を含まない
+						doesnotcontain: "{!$Label.MSG_041_0037}",
+						// 指定の値で終わる
+						endswith: "{!$Label.MSG_041_0038}",
+					}
+				},
+				messages: {
+					// フィルター:
+					info: "{!$Label.MSG_041_0032}",
+					// かつ
+					and: "{!$Label.MSG_041_0039}",
+					// または
+					or: "{!$Label.MSG_041_0040}",
+					// フィルタ
+					filter: "{!$Label.MSG_041_0041}",
+					// 閉じる
+					clear: "{!$Label.MSG_041_0042}",
+			    }
+			},
+            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 END
+            // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+            dataBound:function(e){
+            	setFoodGroupAbleTitleFun(e);
+            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+            	setFooterFun(e);
+            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+            },
+            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+            columns: [
+				{
+                    field: "middayIcon", // 昼
+                    title: "{!$ObjectType.Lead__c.Fields.Field278__c.label}",
+                    filterable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+                    sortable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+					width: {!JSENCODE(foodSummaryInfo.strMiddayIconWidth)},
+                    attributes: {
+                        "class": "imgIconStyle",
+                        style: "{!JSENCODE(foodSummaryInfo.strMiddayIconStyle)}"
+                    },
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+					encoded: false,
+					/*
+                    //template: "<image src='" + "#=middayIcon#" + "' width='30px' heigth='20px'/>"
+                    template:     	"# if (middayIcon != '') { #" +
+								        "<image src='" + "#=middayIcon#" + "' width='30px' heigth='20px'/>" +
+								    "# } else { #" +
+								        "# middayIcon #" +
+								    "# } #"*/
+                }, {
+                    field: "productName",
+                    //料理
+                    title: "{!$Label.MSG_041_0015}",
+                    width: {!JSENCODE(foodSummaryInfo.strProductNameWidth)},
+                    attributes: {
+                        style: "{!JSENCODE(foodSummaryInfo.strProductNameStyle)}"
+                    },
+					headerAttributes: {
+						style: "font-size: 14px"
+					}
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+					, footerTemplate: "<div id='prodNmDivId'></div><div style='width:100%;'>　</div>" // 全角空格:目的占位
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+                }, {
+                    field: "unitPrice",
+                    title: "{!$Label.MSG_041_0071}",
+                    filterable: false,
+                    sortable: false,
+                    hidden: !unitpriceColShow,
+                    width: {!JSENCODE(foodSummaryInfo.strUnitpriceWidth)},
+                    attributes: {
+                    	style: "{!JSENCODE(foodSummaryInfo.strUnitpriceStyle)}"
+                    },
+                    headerAttributes: {
+                    	style: "font-size: 14px"
+                    },
+                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+                }, {
+                    field: "productSummy",
+                    //数量
+                    title: "{!$Label.MSG_041_0016}",
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+                    filterable: false,
+                    sortable: false,
+                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+                    width: {!JSENCODE(foodSummaryInfo.strProductSummyWidth)},
+					attributes: {
+				     	style: "{!JSENCODE(foodSummaryInfo.strProductSummyStyle)}"
+				    },
+					headerAttributes: {
+						style: "font-size: 14px"
+					},
+					// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+					template: kendo.template($("#productSummy").html()),
+					// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+					// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+					// footerTemplate: "<div style='width:100%; text-align: right'> #= sum # </div>"
+					footerTemplate: "<div id='prodSummyDivId'></div><div style='width:100%; text-align: right'>#= sum #</div>"
+					// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+					// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+					, groupFooterTemplate: "<div style='width:100%; text-align: right'> #= sum # </div>"
+					// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+					//footerTemplate: "<div style='width:100%; text-align: right'> #= generFoodSummaryHtml(summaryDs2.data(), 'productSummy') # </span>"
+                	// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+                },
+            ]
+        });
+        if($("#summaryGrid2").css("display") != "none"){
+	        $("<div id='summary2GridDetail'/>").appendTo($("#summaryGrid2")).kendoGrid({
+	        	dataSource: summaryDs2Detail,
+				scrollable: true,
+				width : {!JSENCODE(foodSummaryInfo.strWindowMaxWidth)},
+				// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+				sortable: true,
+				// 2017/02/06 料理集計の条件設定を日本語化 機能対応 BEGIN
+	            //filterable:true,
+	            filterable: {
+					operators: {
+						string: {
+							// 指定の値に等しい
+							eq: "{!$Label.MSG_041_0033}",
+							// 指定の値に等しくない
+							neq: "{!$Label.MSG_041_0034}",
+							// 指定の値で始まる
+							startswith: "{!$Label.MSG_041_0035}",
+							// 指定の値を含む
+							Contains: "{!$Label.MSG_041_0036}",
+							// 指定の値を含まない
+							doesnotcontain: "{!$Label.MSG_041_0037}",
+							// 指定の値で終わる
+							endswith: "{!$Label.MSG_041_0038}",
+						}
+					},
+					messages: {
+						// フィルター:
+						info: "{!$Label.MSG_041_0032}",
+						// かつ
+						and: "{!$Label.MSG_041_0039}",
+						// または
+						or: "{!$Label.MSG_041_0040}",
+						// フィルタ
+						filter: "{!$Label.MSG_041_0041}",
+						// 閉じる
+						clear: "{!$Label.MSG_041_0042}",
+				    }
+				},
+	            // 2017/02/06 料理集計の条件設定を日本語化 機能対応 END
+				// 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+	            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+	            dataBound:function(e){
+	            	setFoodGroupAbleTitleFun(e);
+	            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+	            	setGroupFooterFun(e);
+	            	// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+	            },
+	            // 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+	            columns: [
+					{
+	                    field: "middayIcon", // 昼
+	                    title: "{!$ObjectType.Lead__c.Fields.Field278__c.label}",
+	                    filterable: false,
+	                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+	                    sortable: false,
+	                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+	                    attributes: {
+	                        "class": "imgIconStyle",
+	                        style: "{!JSENCODE(foodSummaryInfo.strMiddayIconStyle)}"
+	                    },
+	                    width: {!JSENCODE(foodSummaryInfo.strMiddayIconWidth)},
+						headerAttributes: {
+							style: "font-size: 14px"
+						},
+						encoded: false,
+	                }, {
+	                    field: "productName",
+	                    //料理
+	                    title: "{!$Label.MSG_041_0015}",
+	                    //width: {!JSENCODE(foodSummaryInfo.strProductNameWidth)},
+						headerAttributes: {
+							style: "font-size: 14px"
+						},
+	                   	attributes: {
+	                        style: "{!JSENCODE(foodSummaryInfo.strProductNameStyle)}"
+	                    },
+	                    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+	                    groupFooterTemplate: "<div class='prodNmDivCls'></div><div style='width:100%;'>　</div>" // 全角空格:目的占位
+	                    // 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+	                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+	                }, {
+	                    field: "unitPrice",
+	                    title: "{!$Label.MSG_041_0071}",
+	                    filterable: false,
+	                    sortable: false,
+	                    hidden: !unitpriceColShow,
+	                    width: {!JSENCODE(foodSummaryInfo.strUnitpriceWidth)},
+	                    attributes: {
+	                    	style: "{!JSENCODE(foodSummaryInfo.strUnitpriceStyle)}"
+	                    },
+	                    headerAttributes: {
+	                    	style: "font-size: 14px"
+	                    },
+	                // 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+	                }, {
+	                    field: "productSummy",
+	                    //数量
+	                    title: "{!$Label.MSG_041_0016}",
+	                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 BEGIN
+	                    filterable: false,
+	                    sortable: false,
+	                    // 2017/01/13 予定表の料理カラムでもフィルタやソート機能対応 END
+						attributes: {
+							style: "{!JSENCODE(foodSummaryInfo.strProductSummyStyle)}"
+					    },
+					    width: {!JSENCODE(foodSummaryInfo.strProductSummyWidth)},
+						headerAttributes: {
+							style: "font-size: 14px"
+						},
+						// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+						template: kendo.template($("#productSummy").html()),
+						// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+						// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH BEGIN
+						// groupFooterTemplate: "<div style='width:100%; text-align: right' class='footSummaryGrid'> #= sum #</div>"
+						groupFooterTemplate: "<div class='prodSummyDivCls'></div><div style='width:100%; text-align: right' class='groupFoodSum'>#= sum #</div>"
+						// 2018/10/15 料理集計に合計の表記がございますが機能対応 WGCH END
+	                },{
+	                    field: "keyDate",
+	                    hidden: true,
+	                    //到着日
+	                    title: "{!$Label.MSG_041_0017}",
+						headerAttributes: {
+							style: "font-size: 14px"
+						}
+	                }
+	            ]	
+	        });
+        }
+        // 料理情報を表示するＷＩＮＤＯＷ
+		var summaryWindow = $("#sumaryWindow");
+
+		if (!summaryWindow.data("kendoWindow")) {
+			var summaryWindowWidth = 1 * {!JSENCODE(foodSummaryInfo.strWindowMaxWidth)} + 20;
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+			if(foodGroupAbleFlg) summaryWindowWidth += 30;
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+			var sumheigh = wH - position.top - 30;
+            summaryWindow.kendoWindow({
+            	width: summaryWindowWidth,
+                actions: ["Minimize"],
+                //料理集計
+                title: "{!$Label.MSG_041_0018}"
+                // 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 BEGIN
+                //,resize: function() {
+				//	resizeSummaryWindow();	
+				//}
+				,maxHeight: sumheigh
+				// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 END
+            });
+            //summaryWindow.data("kendoWindow").center();
+            //var sumheigh = wH - position.top - 20
+            $("#summaryWindow").css({
+			    //height: sumheigh
+			});
+			var leftPos = summaryWindowWidth + 30;
+            $("#sumaryWindow").closest(".k-window").css({
+			    top: 158,		// 2014/08/22 CSV出力対応するため、料理情報の表示位置を変更する
+			    left: wW - leftPos
+			});
+			// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 BEGIN
+			//summaryWindow.data("kendoWindow").wrapper.css("height",sumheigh - 20);
+			// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 END
+            summaryWindow.data("kendoWindow").minimize();
+         }
+         
+         // Selectの外観は修正する
+        var roomDataSwitchBtn = $("select[id$=':roomDataSwitchBtn']").css({ fontSize: 14 }).kendoDropDownList();
+        setDropDropDownWidth($(roomDataSwitchBtn));
+		$("select[id$=':areaName']").css({ fontSize: 14 }).kendoDropDownList();
+        $("select[id$=':termDatesLst']").css({ fontSize: 14,width:60}).kendoDropDownList(); 
+       	// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH BEGIN
+       	var $groupableBtn = $("select[id$=':groupAbleBtn']");
+       	if ($groupableBtn.length > 0) {
+	       	var groupAbleBtn = $groupableBtn.css({ fontSize: 14 }).kendoDropDownList({
+	       	    open: function(){
+	       	        $('.k-window').css({zIndex: '10000'});
+	       	    }
+	       	});
+	       	setDropDropDownWidth($(groupAbleBtn));
+       	}
+       	// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH END
+		// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN 
+       	var layoutSel = $("select[id$=layoutSel]");
+       	var layoutJson = $("#hidLayoutOptJson").val();
+       	var data = JSON.parse(layoutJson);
+       	if (data.length > 0) {
+	       	var curLayoutId = $("input[id$=hidCurrLayoutVal]").val();
+	       	data = [{name:"",code:""}].concat(data);
+	       	var drop = layoutSel.css({ fontSize: 14,width:60}).kendoDropDownList({
+	       		dataTextField: "name",
+	    		dataValueField: "code",
+	       		dataSource: {
+	       			data:data
+	       		},
+	       		change:function(){
+	       			$("input[id$=hidCurrLayoutVal]").val(this.value());
+	       			changeLayout();
+	       		}
+	       	}).getKendoDropDownList(); 
+	       	drop.popup.element.addClass("j-autoWdPopup");
+	       	drop.value(curLayoutId);
+	    } else {
+	    	layoutSel.hide();
+	    }
+		// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END 
+       	/* Window:F5 / Ctrl+R  Mac:Command+R 対応[2015/12/10 ADD] */
+		var $key = key.noConflict();
+		$key.filter = function(event){
+			// 全画面から画面更新可能
+			return true;
+		}
+		$key('command+r, ctrl+r, f5', function(e){ 
+			// 2017/04/27 料理数目变更之后变颜色对应 BEGIN By Wgch
+			//$("input[id$=':queryDate']").change();
+			_gridsDsReadFun();
+			// 2017/04/27 料理数目变更之后变颜色对应 END By Wgch
+			e.preventDefault();
+			return false;
+		});
+		// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH BEGIN
+		setBindFilterFun();
+		// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH END
+		// 2018/02/05 手書き zyz BEGIN
+		processHandWrite();
+		// 2018/02/05 手書き zyz END
+		// 2019/06/14 予定表の表示期間対応 WGCH BEGIN
+		$("[id*=':termDatesLst'] li").css({ "margin-left": "0em" });
+		// 2019/06/14 予定表の表示期間対応 WGCH END
+		// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN
+		initMulitiRoomType();
+		// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END
+		// 2019/11/15 更新ボタンの機能を追加 BY zyz BEGIN
+		initload();
+		// 2019/11/15 更新ボタンの機能を追加 BY zyz END
+    });
+// 2016/01/28 Window Height Auto Resize BEGIN
+/*
+function resizeSummaryWindow() {
+	var _summaryWindow = $("#sumaryWindow");
+	var _summaryWindowWrapper = _summaryWindow.closest(".k-window");
+	var maxHeight = $("#grid").height()-30;
+    var windowHeight = _summaryWindowWrapper.height();
+    var scrollHeight = parseInt(_summaryWindow.prop('scrollHeight'), 10); 
+    if (scrollHeight > maxHeight && windowHeight >= parseInt(_summaryWindowWrapper.css("min-height"), 10)) {
+        _summaryWindowWrapper.height(maxHeight);
+    } else if (maxHeight >= scrollHeight) {
+        _summaryWindowWrapper.height("");
+    }
+}*/
+// 2016/01/28 Window Height Auto Resize END
+// Edit Content Update Function
+function editUpdateBtnFun() {
+	// Display progress
+	var grid = $("#grid").data("kendoGrid");
+    var shopCode = getShopCode();
+	JINYACONNECT.DATALOCK.BeforeUpdate(shopCode,true,checkUpdateSuccess,checkUpdateFailure);
+	// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 BEGIN
+	stopRunning();
+	// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 END
+}
+function editCancelBtnFun() {
+	 var grid = $("#grid").data("kendoGrid");
+	 unDatalock();
+	 isNeedLoad = true;
+	 grid.cancelChanges();
+     changeTemplate(false);
+}
+function changeTemplate(isUpdate){
+	var grid = $("#grid").data("kendoGrid");
+	if(isUpdate){
+	 	/**  bindUpdateButton **/
+		var updateTemplate = kendo.template($("#onUpdate").html());
+	   	grid.wrapper.find(".k-toolbar").html(updateTemplate);
+    }else{
+    	/**  bindEditButton **/
+		var editTemplate = kendo.template($("#editButton").html());
+	   	grid.wrapper.find(".k-toolbar").html(editTemplate({historyShowFlg:isShowHistory,showHistoryText:showHistoryText}));
+	   
+    }
+}
+function editCommand(){
+	JINYACONNECT.DATALOCK.BlockUi();
+	isNeedLoad = false;
+	var shopCode = getShopCode();
+	JINYACONNECT.DATALOCK.BeforeEdit(shopCode,false,checkEditSuccess,checkEditFailure);
+
+}
+function editRows(){
+	var editRows = $("#grid").data("kendoGrid").tbody.find(">tr[role='row']");
+    var showlength = 5;
+    var benginIndex = 0;
+    var fieldMap = {};
+    var endIndex = showlength;
+    var product = new showModel();
+    var editRowIndexArr = new Array();   
+	syncFunction(editRows,benginIndex,endIndex,showlength,fieldMap,product,editRowIndexArr);
+}
+function syncFunction(editRows,benginIndex,endIndex,showlength,fieldMap,product,editRowIndexArr)
+{
+	
+	setTimeout(function() {
+		if(benginIndex < editRows.length)
+		{
+		  var showIndex = editRows.length > endIndex ? endIndex : editRows.length;
+		  var editRowsLst = editRows.slice(benginIndex,endIndex);
+		  benginIndex = endIndex;
+		  endIndex += showlength;
+		  changeRowCanEdit(editRowsLst,editRowIndexArr,fieldMap,product);
+		  syncFunction(editRows,benginIndex,endIndex,showlength,fieldMap,product,editRowIndexArr);
+		}
+	}, 0);
+}
+function changeRowCanEdit(editRowsLst,editRowIndexArr,fieldMap,product)
+{
+	var that = $("#grid").data("kendoGrid");
+    editRowsLst.each(function(){
+	    //grid.editRow($(this));
+	    var column,
+            cell,
+            command,
+            fields = []; 
+	    var row = $(this);
+	    var model = that._modelForContainer(row);
+	    //2014/09/12 コーデの
+	    if(model != null && model.Id != null){
+	    	if(editRowIndexArr.length == 0)
+	    	{
+	    		row.children(":not(.k-group-cell,.k-hierarchy-cell)").each(function() {
+	                cell = $(this);
+	                var cellIndex = that.cellIndex(cell);
+	                column = that.columns[cellIndex];
+	                if (column.field && (!model.editable || model.editable(column.field)))
+	                {
+	                	editRowIndexArr.push(cellIndex);
+	                	// String editbox
+					    if($.inArray(column.field, strArray) >= 0)
+					    	fieldMap[column.field] = 'String';
+					    // boolean editbox
+					    else if($.inArray(column.field, boolArray) >= 0)
+					    	fieldMap[column.field] = 'boolean';
+				         // list editbox
+				        else if($.inArray(column.field, listArray) >= 0)
+				         	fieldMap[column.field] = 'list';
+						else if($.inArray(column.field, numArray) >= 0) 
+							fieldMap[column.field] = 'number';
+						// 日付タイプ
+						else if($.inArray(column.field, dateArray) >= 0)
+							fieldMap[column.field] = 'date';
+	                	makeColumnEditMode(model,column,cell,fields,product,fieldMap);
+	                }
+	            });
+	    	}else
+	    	{
+	    			    		
+	    		for(var i = 0 ; i < editRowIndexArr.length ; i++)
+	    		{
+	    			var index = editRowIndexArr[i];
+	    			cell = row.children(":not(.k-group-cell,.k-hierarchy-cell)").get(index);
+	    			column = that.columns[index];
+	    			makeColumnEditMode(model,column,$(cell),fields,product,fieldMap);
+	    		}
+	    		
+	    	}
+		}
+	 });
+}
+function makeColumnEditMode(model,column,cell,fields,product,fieldMap)
+{
+	var columnValue = model.get(column.field);
+    if($.inArray(column.field, strArray) >= 0)
+    	columnValue = Encoder.htmlDecode(columnValue);
+    
+    fields.push({ field: column.field, format: column.format, editor: column.editor, values: columnValue });
+    cell.attr(kendo.attr("container-for"), column.field);
+    cell.empty();
+    var defValue = columnValue;
+    var param = column.field;
+    var $input = $('<input name="' + param +'" data-uid="' + model.uid + '" data-bind="value:' + param + '" />');
+    
+	    		
+     if(fieldMap[column.field] == 'String')
+     {
+     	defValue=defValue.replace(/"/g,'&quot;');
+    	var textinput = $('<input type="text" class="k-textbox" name="' + param +'" data-uid ="' + model.uid + '" data-bind="value:' + param + '" value="' + defValue + '" onchange="setTextChange(this)"/>');
+        textinput.appendTo(cell);
+     }
+     else if(fieldMap[column.field] == 'boolean')
+     {
+     	var checkedStr = (defValue == true ? " checked " : "");
+		var textinput = $('<input type="checkbox"' + checkedStr + 'name="' + param +'" data-uid ="' + model.uid + '" data-bind="value:' + param + '" value="' + defValue + '" onchange="swithcCheckBox(this)"/>');
+        textinput.appendTo(cell);
+     }
+     else if(fieldMap[column.field] == 'list')
+     {
+     	var selectData = JSON.stringify(product.defaults[param]);
+		var usedata = $.parseJSON(selectData);
+	    $input.appendTo(cell)
+	    	.kendoDropDownList({
+				dataSource:usedata,
+				dataTextField: "value",
+				dataValueField: "key",
+				dataBound: resizeDropDown,
+				optionLabel: {
+					key: " ",
+					value: " "
+				},
+				change: function(e) {
+					putObjectToMap(this.element.attr('data-uid'), this.value(),this.element.attr('name'));
+				},
+				value: defValue
+	    	});
+     }else if(fieldMap[column.field] == 'number')
+     {
+     	var columWidth = cell.width();
+			columWidth = columWidth > 30 ? columWidth : (55);
+           	$input.appendTo(cell).kendoNumericTextBox({
+					min: 0,
+					value: defValue,
+					change: function() {
+            				putObjectToMap(this.element.attr('data-uid'), this.value(),this.element.attr('name'));
+					}
+			}).closest("span.k-numerictextbox").width(columWidth);
+     }else if(fieldMap[column.field] == 'date')
+     {
+     	$input.appendTo(cell).kendoDatePicker({
+					value: new Date(defValue),
+					format: JINYACONNECT.DateFormat,
+					change: function() {
+						putObjectToMap(this.element.attr('data-uid'), this.value(),this.element.attr('name'));
+					}
+					}).bind("click", function(){
+   						$(this).data("kendoDatePicker").open();                    
+					}).closest("span.k-datepicker").width(136);
+     }
+}
+
+function setTextChange(obj){
+	putObjectToMap($(obj).attr('data-uid'), $(obj).val(),$(obj).attr('name'));
+}
+function swithcCheckBox(obj) {
+	putObjectToMap($(obj).attr('data-uid'), ($(obj).val() == "false" ? true : false),$(obj).attr('name'));
+}
+
+function putObjectToMap(uid,value,param){
+	if(hashMap.Contains(uid)){
+		var obj = hashMap.Get(uid);
+		obj[param] = value;
+		hashMap.Put(uid,obj);
+	}else{
+		var obj = new Object;
+		obj[param] = value;
+		hashMap.Put(uid,obj);
+	}
+}
+// 予定表一括編集（UPDATE処理機能）
+function save(){
+	
+	var grid = $("#grid").data("kendoGrid"),
+	editColumn = $("input[id=hidEditColumStr]").val(),
+	columnType = $("input[id=hidColumType]").val(),
+	editDatas = editColumn.split(','),
+	resultArray = new Array();
+	for(var i= 0 ; i < hashMap.Size(); i++)
+	{
+		var key = hashMap.KeySet()[i];
+		var dataItem = grid.dataSource.getByUid(key);
+		var obj = hashMap.Get(key);
+		obj['Id'] = dataItem.get('Id');
+		resultArray.push(obj);
+	}
+	/*
+	hashMap.KeySet().forEach(function(key){ 
+		var dataItem = grid.dataSource.getByUid(key);
+		var obj = hashMap.Get(key);
+		obj['Id'] = dataItem.get('Id');
+		resultArray.push(obj);
+	});
+	*/
+	var data = JSON.stringify(resultArray);
+	//UPDATEの条件
+	if(editDatas.length > 0){
+		// データ更新
+   		Visualforce.remoting.Manager.invokeAction(
+         "{!$RemoteAction.K_ScheduleReport.updateLeadMsg}", data,editColumn,columnType, function (result, event) {
+             if (event.type == 'exception') {
+             	alert(event.message);
+             	kendo.ui.progress($("#grid"), false);
+             } else {
+             	isNeedLoad = true;
+             	kendo.ui.progress($("#grid"), false);
+                gridsDs.read();
+             } // End else
+         }, {escape: false});
+   	}
+}
+var resizeDropDown = function (e) {
+    var $dropDown = $(e.sender.element),
+    dataWidth = $dropDown.data("kendoDropDownList").list.width(),
+    listWidth = dataWidth + 20,
+    containerWidth = listWidth + 10;
+    // Set widths to the new values
+    $dropDown.data("kendoDropDownList").list.width(listWidth);
+    //$dropDown.data("kendoDropDownList").list.width("auto");
+    $dropDown.closest(".k-widget").width(containerWidth);
+}
+
+function exportCsv () {
+	// 編集の場合、CSV出力できません
+	if (!isNeedLoad) {
+		//予定表が編集中でロックされてるため、Excel出力は使用できません
+		alert("{!$Label.MSG_041_0019}");
+		return false;
+	}
+	// Export Csv File Name
+	var queryDate = $("input[id$=':queryDate']").length > 0 
+					? kendo.parseDate($("input[id$=':queryDate']").val(), JINYACONNECT.DateFormat)
+					: new Date();
+	//予定表
+	var fileName = '{!$Label.ps__msg_041_0001}(' + kendo.toString(queryDate, "yyyy_MM_dd" ) + ')_'+ kendo.toString(new Date(), "yyyy_MM_dd_HH_mm_ss") + ".csv";
+	//fileName = fileName || 'download.csv';
+	// 予定表情報
+	var gridCsv = generalCsvContentGrid('grid');
+	// 料理情報1
+	var summaryCsv1 = generalCsvContentSummary('summaryGrid');
+	
+	var summaryCsv1Detail = generalCsvDetailContentSummary('summaryGridDetail');
+	
+	var cookInfoFlg = {!cookInfoSplitShow};
+	var summaryCsv2 = cookInfoFlg ? generalCsvContentSummary('summaryGrid2') : '';
+	
+	var summaryCsv2Detail = cookInfoFlg ? generalCsvDetailContentSummary('summary2GridDetail') : '';
+	
+	//料理集計:
+	var csv = gridCsv + '\n' + '{!$Label.MSG_041_0020}\n' + summaryCsv1 + '\n' + summaryCsv1Detail + '\n' + summaryCsv2 + '\n' + summaryCsv2Detail;
+	// UTF8-SJISに変更
+	var array = str2array(csv);
+	var sjis_array = Encoding.convert(array, "SJIS", "UNICODE");
+	var uint8_array = new Uint8Array(sjis_array);
+	// Blob Create
+	var blob = new Blob([uint8_array], { type: 'text/csv' }); //Blob.js
+    //EXPORT TO BROWSER
+    saveAs(blob, fileName); //FileSaver.js
+}
+// 文字列を配列に
+var str2array = function(str) {
+    var array = [],i,il=str.length;
+    for (i=0; i<il; i++) array.push(str.charCodeAt(i));
+    return array;
+};
+// 予定表詳細情報CSV内容を作成する
+function generalCsvContentGrid(gridId) {
+	var grid = $("#" + gridId).data("kendoGrid"),
+		showFoodHeader = false,
+	    data = grid.dataSource.view(),
+	    headcsv = '';
+	    contentcsv = '',
+		mode = $("#reportMode").val();
+	// 料理は	画面に表示のCOLNUMのPOSTION
+    var foodColPostion = -1;
+    // 料理モード
+    var CONST_FOOD_VIEW_2 = '2';
+    // 料理のFieldのAPI
+    var CONST_FOOD_API = "detailList";
+    //add the header row
+	//ご予約履歴		
+	if(isShowHistory) headcsv += '{!$Label.MSG_041_0021},';					
+	for (var i = 0; i < grid.columns.length; i++) {
+		var colnum = grid.columns[i];
+		//var field = grid.columns[i].field;
+		//var title = grid.columns[i].title || field;
+		var field = colnum.field;
+		var title = colnum.title || field;
+		//NO DATA
+		if (!field || colnum.hidden) continue;
+		if(field == CONST_FOOD_API && mode == CONST_FOOD_VIEW_2) {
+			foodColPostion = i;	// 料理表示のPOSTION
+			continue;
+		}
+		title = title.replace(/"/g, '""');
+		headcsv += '"' + title + '"';
+		if (i < grid.columns.length - 1) {
+             headcsv += ',';
+		}
+		
+	}
+
+	// Filed Type Define
+	//var fieldTypeStr = $j("#hidColumType").val();
+	//var fieldTypeObj = $j.parseJSON(fieldTypeStr);
+	
+	//add each row of data
+    for (var gpindex in data) {			// 指定日のグループ
+    
+        for (var row in data[gpindex].items) {	// 1日分予定表データ
+    	//for (var row in data) {    
+        	// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+        	//var rowData = data[gpindex].items[row];	// 1行目の予約データ情報
+        	var oneDayRowData = data[gpindex].items[row];    // 1行目の予約データ情報
+        	// GROUP化の場合
+        	var oneDayItems = null;
+        	if (oneDayRowData.items) {
+        	   oneDayItems = oneDayRowData.items;
+        	   // 2017/09/22 予約番号キー個別処理を行う
+        	   var secKeyVal = oneDayRowData.value;
+        	   if(secKeyVal == SORTAPI_NOLEAD) secKeyVal = "";
+        	   else {
+        	   	var secKeyVals = secKeyVal.split("__");
+        	   	if (secKeyVals.length > 1) secKeyVal = secKeyVals[1];
+        	   }
+        	   contentcsv += '"' + data[gpindex].field + ':'+ data[gpindex].value + '","' + oneDayRowData.field + ':'+secKeyVal+'"\r\n';
+        	} else {
+        	   oneDayItems = new Array();
+        	   oneDayItems.push(oneDayRowData);
+        	}
+        	for (var oneRow in  oneDayItems) {
+        		var rowData = oneDayItems[oneRow];
+        	// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END	   
+        	//var rowData = data[row];	// 1行目の予約データ情報
+        	if (commUtils.isFunction(rowData)) continue;
+			var foodInfo = "";
+			
+			if(isShowHistory) {
+					var info = '';
+					var his = rowData.history.histories;
+					if (his.length > 0) {
+					//日付
+					//アクション
+					//ユーザ
+						info += "{!$Label.MSG_041_0010}   					{!$Label.MSG_041_0011}					 	{!$Label.MSG_041_0012}\r\n";
+		            	info += "--------------------------------------------------------\r\n";
+			            for (var idx = 0; idx < his.length; idx++) {
+			            	info += his[idx].theDate + "    " + his[idx].action + "    " + his[idx].who;
+			            	if (idx < his.length - 1)  info += "\r\n";
+			            }
+					}
+					contentcsv += '"' + info + '",';   
+            } 
+	    	// 項目設定情報により、各項目内容はCSVへ出力する
+	    	for (var i = 0; i < grid.columns.length; i++) {
+	    		var colnum = grid.columns[i];
+				var fieldName = colnum.field;
+				
+            	//VALIDATE COLUMN
+            	if (!fieldName || ( colnum.hidden || false )) continue;
+            	var value = '';
+            	if (fieldName.indexOf('.') >= 0) {
+	                var properties = fieldName.split('.');
+	                var value = rowData || '';
+	                for (var j = 0; j < properties.length; j++) {
+	                    var prop = properties[j];
+	                    value = value[prop] || '';
+	                }
+            	}
+            	else {
+           			value = rowData[fieldName] || '';
+            	}
+				
+	            // 料理項目の場合
+				if (fieldName == CONST_FOOD_API ) {
+	            	if(mode != CONST_FOOD_VIEW_2)
+	            	{
+		            	if (value.length > 0) {
+		            		//料理
+		            		//数量
+		            		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+		            		// foodInfo += "{!$Label.MSG_041_0015}    {!$Label.MSG_041_0016}\r\n";
+		            		foodInfo += "{!$Label.MSG_041_0015}    ";
+		            		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+		            		// OP
+		            		if(opColIsShowFlg) foodInfo += opLabel + "    ";
+		            		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+		            		//単価
+		            		if(unitpriceColShow) foodInfo += "{!$Label.MSG_041_0071}    ";
+		            		foodInfo += "{!$Label.MSG_041_0016}\r\n";
+		            		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+		            		foodInfo += "----------\r\n";
+			            	for (foodIdx = 0; foodIdx < value.length; foodIdx++) {
+			            		//foodInfo += "商品:" + value[foodIdx].productCode + ":" + value[foodIdx].productName + " 数量:" + value[foodIdx].amount
+			            		//foodInfo += "料理:" + value[foodIdx].productName + " 数量:" + value[foodIdx].amount
+			            		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+			            		// foodInfo += value[foodIdx].productName + "    " + value[foodIdx].amount;
+			            		foodInfo += value[foodIdx].productName + "    ";
+			            		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+			            		// OP
+			            		if(opColIsShowFlg) foodInfo +=  value[foodIdx].productOpName + "    ";
+			            		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+			            		if(unitpriceColShow) foodInfo +=  value[foodIdx].unitPrice + "    ";
+			            		foodInfo += value[foodIdx].amount;
+			            		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+			            		if (foodIdx < value.length - 1)  foodInfo += "\r\n";
+			            	}
+		            	}
+		            	value = foodInfo;
+	            	} else {
+	            		// 該当料理項目のHeader情報を表示する
+	            		showFoodHeader = true;
+	            		// 料理モード：２
+	            		for (foodIdx = 0; foodIdx < value.length; foodIdx++) {
+		            		if(foodIdx != 0) foodInfo +=  ",";
+		            		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+		            		// foodInfo += '"' + value[foodIdx].productName + '","' + value[foodIdx].amount + '"';
+		            		foodInfo += '"' + value[foodIdx].productName + '","';
+		            		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+		            		// OP
+		            		if(opColIsShowFlg) foodInfo +=  value[foodIdx].productOpName + '","';
+		            		// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+		            		if(unitpriceColShow) foodInfo += value[foodIdx].unitPrice + '","';
+		            		foodInfo += value[foodIdx].amount + '"';
+		            		// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+			            }
+	            	}
+	            } else {
+
+	            	// 項目タイプ確認：日付の場合、書式変換が必要
+	            	//var fieldType = fieldTypeObj[fieldName] || '';
+	            	var fieldType = rowData.fields[fieldName].type.toLowerCase();
+	            	if (fieldType === "date" && value != "") {
+	            		// 日付情報を変換する
+	            		value = kendo.toString(kendo.parseDate(value,JINYACONNECT.DateFormat), JINYACONNECT.DateFormat );
+	            	} else {
+						// IMGの場合、イメージのALTでCSVに出力する
+						var regex = /<img.*?alt="(.*?)"/;
+						var img = regex.exec(value);
+						if (img != null) { 
+							value = img[1];
+						} else if (fieldType === "string"){
+							// HTMLのタグを外す、HTMLのTEXT情報を吐き出す
+							//value = value.replace(/(<br>)|(<br \/>)|(<p>)|(<\/p>)/g, "\n");
+							var html = $.parseHTML( value );
+							value = $.trim(SplitRowByParameter(($.trim($(html).text()))));
+						}
+						
+			            value = value.toString().replace(/"/g, '""');
+			            // 改行処理
+			            value = value.replace(/\r\n|\n|\r/g, '\r\n');
+		            }
+	            }
+	            
+	            if(mode == CONST_FOOD_VIEW_2 && fieldName == CONST_FOOD_API) continue;
+	            // 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH BEGIN
+	            if(fieldName == 'contactList'){
+	            	value = '';
+	            	var contactInfo = rowData[fieldName];
+	            	for(var row = 0;  row < contactInfo.length; row++){
+	            		var contactItem = contactInfo[row];
+	            		var contactTitle = contactItem.contactName + '\r\n';
+	            		var info = contactItem.contactApiInfo.replaceAll('<br/>', '\r\n') || '';
+	            		value += contactTitle + info;
+	            		if(row < (contactInfo.length - 1)) value += '\r\n';
+	            	}
+	            }
+	            // 2018/06/05 同伴のお客様のお客様重要事項を合わせて予定表に表示できるように改善 WGCH END
+           		contentcsv += '"' + value + '"';
+           		if (i < grid.columns.length - 1) contentcsv += ',';
+			} // end for (var i = 0; i < grid.columns.length; i++)
+			// Mode Type 2の場合、料理情報を行の最後に追加表示する
+			var splitComma = foodColPostion == (grid.columns.length - 1) ? '' : ',';
+			
+			if(mode == CONST_FOOD_VIEW_2) contentcsv += splitComma + foodInfo;
+			contentcsv += '\n';
+		// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN	
+		} // end for (var oneRow in  oneDayItems) {
+		// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+        } // end for (var row in data[gpindex].items)
+    } // end for (var gpindex in data)
+    
+    if(showFoodHeader){
+    	var splitComma = foodColPostion == (grid.columns.length - 1) ? '' : ',';
+    	//料理
+    	//数量
+    	// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH BEGIN
+    	// headcsv += splitComma + '"{!$Label.MSG_041_0015}","{!$Label.MSG_041_0016}", \r\n';
+    	headcsv += splitComma + '"{!$Label.MSG_041_0015}",';
+    	// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH BEGIN
+    	// OP
+    	if(opColIsShowFlg) headcsv += '"'+ opLabel +'",';
+    	// 2019/06/14 「料理」列に「会計OP」を表示したい对应 WGCH END
+    	//単価
+    	if(unitpriceColShow) headcsv += '"{!$Label.MSG_041_0071}",';
+    	headcsv += '"{!$Label.MSG_041_0016}", \r\n';
+    	// 2019/02/28 予定表の料理と料理集計に単価も表記させてほしい对应 WGCH END
+	}
+    else headcsv += '\r\n';
+	return headcsv + contentcsv;
+}
+function SplitRowByParameter(valueStr)
+{
+	var splitLen = parseInt($("#splitLen").val());
+	// サイズは０の場合、折り返し処理をSKIPする
+	if (splitLen == 0) return valueStr;
+	
+	var returnVal = '',startInt = 0,endInt = 0;
+	var cycIndex = commUtils.mathNumDiv(valueStr.length, splitLen);
+	if(cycIndex > 1)
+	{
+		for(var i = 0;i <= cycIndex; i++)
+		{
+			endInt += splitLen;
+			if(valueStr.length < endInt) endInt = valueStr.length;
+			returnVal += valueStr.substring(startInt,endInt) + "\r\n";
+			startInt = endInt;
+		}
+		  
+	}else
+		returnVal = valueStr ;
+	return returnVal;
+	
+}
+// 集計結果情報はCSVへ反映する
+function generalCsvContentSummary(gridId) {
+
+	var grid = $("#" + gridId).data("kendoGrid");
+
+	var csv = '';
+
+	var data = grid.dataSource.view();
+
+    //add the header row
+	for (var i = 0; i < grid.columns.length; i++) {
+         var field = grid.columns[i].field;
+         var title = grid.columns[i].title || field;
+
+         //NO DATA
+         if (!field) continue;
+
+         title = title.replace(/"/g, '""');
+         csv += '"' + title + '"';
+         if (i < grid.columns.length - 1) {
+             csv += ',';
+         }
+	}
+     
+	csv += '\n';
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+	var dataLen = 1;
+	if(foodGroupAbleFlg) dataLen = data.length;
+	for (var z = 0 ; z < dataLen; z++) {
+		var groupRowData = data;	// 1行目の予約データ情報
+   		if(foodGroupAbleFlg){
+	       	groupRowData = data[z].items;
+	       	csv += setCsvGroupAbleTitleFun(data[z]);
+       	}
+		// for (var row in data) {
+		for (var row in groupRowData) {
+   	
+			// var rowData = data[row];	// 1行目の予約データ情報
+			var rowData = groupRowData[row];	// 1行目の予約データ情報
+			// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+			// 項目設定情報により、各項目内容はCSVへ出力する
+			for (var i = 0; i < grid.columns.length; i++) {
+		           	var fieldName = grid.columns[i].field;
+		           	var template = grid.columns[i].template;
+		           	var exportFormat = grid.columns[i].exportFormat;
+		
+		           	//VALIDATE COLUMN
+		           	if (!fieldName) continue;
+		           	var value = '';
+		           	if (fieldName.indexOf('.') >= 0)
+		           	{
+		                var properties = fieldName.split('.');
+		                var value = rowData || '';
+		                for (var j = 0; j < properties.length; j++) {
+		                    var prop = properties[j];
+		                    value = value[prop] || '';
+		                }
+		           	}
+		           	else{
+		               
+						value = rowData[fieldName] || '';
+		           	}
+		            // 料理項目の場合
+					// IMGの場合、イメージのALTでCSVに出力する
+					var regex = /<img.*?alt="(.*?)"/;
+					var img = regex.exec(value);
+					// 2018/07/30 料理集計 WGCH BEGIN
+					var regexDiv = /<div.*?alt="(.*?)"/;
+					var div = regexDiv.exec(value);
+					// 2018/07/30 料理集計 WGCH END
+					if (img != null) { value = img[1]}
+					// 2018/07/30 料理集計 WGCH BEGIN
+					else if (div != null) { value = div[1];}
+					// 2018/07/30 料理集計 WGCH END
+					
+		            value = value.toString().replace(/"/g, '""');
+		
+		            csv += '"' + value + '"';
+		            if (i < grid.columns.length - 1) 
+		            {
+		                csv += ',';
+		            }
+				}
+				csv += '\n';
+	       }
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+	}
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+	return csv;
+}
+// 集計明細結果情報はCSVへ反映する
+function generalCsvDetailContentSummary(gridId) {
+
+	var grid = $("#" + gridId).data("kendoGrid");
+
+	var csv = '';
+	// 2017/09/27 CSV出力BUG修订 WGCH BEGIN
+	if(grid.dataSource.view().length <= 0 || grid.element[0].style.display == "none") return csv;
+	// 2017/09/27 CSV出力BUG修订 WGCH END
+	var data = grid.dataSource.view();
+	var columns = new Object();
+    //add the header row
+    var titleCsv = '';
+	for (var i = 0; i < grid.columns.length; i++) {
+         var field = grid.columns[i].field;
+         var title = grid.columns[i].title || field;
+
+         //NO DATA
+         if (!field) continue;
+         title = title.replace(/"/g, '""');
+         columns[field] = title;
+         if(grid.columns[i].hidden) continue;
+         titleCsv += '"' + title + '"';
+         if (i < grid.columns.length - 1) {
+             titleCsv += ',';
+         }
+	}
+	titleCsv += '\n';
+   	for (var z = 0 ; z < data.length; z++) {
+   		
+       	var groupRowData = data[z];	// 1行目の予約データ情報
+       	csv += columns[groupRowData.field] + ':' + groupRowData.value;	// 到着日
+       	csv += '\n';
+       	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+       	var groupRowDataLen = 1;
+       	if(foodGroupAbleFlg){
+       		groupRowData = groupRowData.items;
+       		groupRowDataLen = groupRowData.length;
+       	}
+       	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+       	csv += titleCsv;	// タイトル
+       	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+       	for(var m = 0; m < groupRowDataLen; m++){
+       		var wkGroupRowData = groupRowData;
+       		if(foodGroupAbleFlg){
+       			wkGroupRowData = groupRowData[m];
+       			csv += setCsvGroupAbleTitleFun(wkGroupRowData);
+       		}
+       	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+	       	// 明細データの出力
+	       	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+	       	// for(var j = 0; j < groupRowData.items.length; j++){
+	       	//	var rowData = groupRowData.items[j];
+	       	for(var j = 0; j < wkGroupRowData.items.length; j++){
+	       		var rowData = wkGroupRowData.items[j];
+	       	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+	    		// 項目設定情報により、各項目内容はCSVへ出力する
+		    	for (var i = 0; i < grid.columns.length; i++) {
+		           	var fieldName = grid.columns[i].field;
+		           	var template = grid.columns[i].template;
+		           	var exportFormat = grid.columns[i].exportFormat;
+		
+		           	//VALIDATE COLUMN
+		           	if (!fieldName) continue;
+		           	if(grid.columns[i].hidden) continue;
+		           	var value = '';
+		           	if (fieldName.indexOf('.') >= 0)
+		           	{
+		                var properties = fieldName.split('.');
+		                var value = rowData || '';
+		                for (var j = 0; j < properties.length; j++) {
+		                    var prop = properties[j];
+		                    value = value[prop] || '';
+		                }
+		           	}
+		           	else{
+		               
+						value = rowData[fieldName] || '';
+		           	}
+		            // 料理項目の場合
+					// IMGの場合、イメージのALTでCSVに出力する
+					var regex = /<img.*?alt="(.*?)"/;
+					var img = regex.exec(value);
+					// 2018/07/30 料理集計 WGCH BEGIN
+					var regexDiv = /<div.*?alt="(.*?)"/;
+					var div = regexDiv.exec(value);
+					// 2018/07/30 料理集計 WGCH END
+					if (img != null) { value = img[1]}
+					// 2018/07/30 料理集計 WGCH BEGIN
+					else if (div != null) { value = div[1];}
+					// 2018/07/30 料理集計 WGCH END
+					
+		            value = value.toString().replace(/"/g, '""');
+		
+		            csv += '"' + value + '"';
+		            if (i < grid.columns.length - 1) 
+		            {
+		                csv += ',';
+		            }
+				}
+				csv += '\n';
+				
+			}
+		}
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH BEGIN
+	}
+	// 2018/02/22 会計OP単位で料理表示できるように改善対応 WGCH END
+       
+
+	return csv;
+}
+// 2014/07/10 画面表示情報ステータス切り替え
+function swithRoomView (obj) {
+	//$this = $(obj);
+	//$this.attr("disabled", "disabled");
+	gridsDs.read();
+}
+function gridDsReadComplete() {
+	//$("select[id$=':roomDataSwitchBtn']").removeAttr("disabled");
+	// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 BEGIN
+	//resizeSummaryWindow();
+	startRunning();
+	// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 END
+}
+
+//cancel button use unlock data
+function unDatalock(orgShopCode){
+	var shopCode = (typeof(orgShopCode) !='undefined') ? orgShopCode : getShopCode();
+	JINYACONNECT.DATALOCK.unLockOrChangeLock(true,shopCode);
+}
+//update function success callback
+function checkUpdateSuccess(){
+	save();
+	changeTemplate(false);
+	JINYACONNECT.DATALOCK.UnblockUi();
+}
+//update function failure callback
+function checkUpdateFailure(){
+	//isNeedLoad = true;
+	editCancelBtnFun();
+}
+//edit function success callback
+function checkEditSuccess(){
+	changeTemplate(true);
+	editRows();
+	hashMap.Clear();
+	JINYACONNECT.DATALOCK.UnblockUi();
+}
+//edit function failure callback
+function checkEditFailure(){
+	 isNeedLoad = true;
+	 JINYACONNECT.DATALOCK.UnblockUi();
+}
+function getShopCode()
+{
+	return $("select[id$=areaName]").length > 0 ? $("select[id$=areaName]").val() : '';
+}
+// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 BEGIN
+function stopRunning() {
+	clearTimeout(intervalId);
+}
+function startRunning() {
+	// Timer Define
+	clearTimeout(intervalId);
+	intervalId = setTimeout(readDs, timerInterval);
+}
+// 2016/01/28 インターバルタイマ定義は定義XMLに指定可能の対応 END
+// 2016/04/25 英語対応 BEGIN
+// set kendo comobx width
+function setDropDropDownWidth(el) {
+	if (el.length == 0) return;
+	var d = el;
+	var p = d.data("kendoDropDownList").popup.element;
+	var w = p.css("visibility","hidden").show().outerWidth();
+	p.hide().css("visibility","visible");
+	d.closest(".k-widget").width(w+30);
+}
+// 2016/04/25 英語対応 END
+
+
+// 2017/04/27 料理数目变更之后变颜色对应 BEGIN By Wgch
+// 2017/04/27  料理数目变更之后变颜色对应 BEGIN By Wgch
+// 在JSMAP里 每行料理Data的Key
+var _g_perFoodSumKey = 'perSumaryMap_';
+// 在JSMA里 料理合计第一板块Data的Key
+var _g_foodsumKey = 'sumaryMap_';
+// 在JSMA里 料理合计第二板块Data的Key
+var _g_foodSum2Key = 'sumary2Map_';
+// 在JSMA里 料理合计第二板块明细Data的Key
+var _g_foodSumDetailKey = 'sumaryDetailMap_';
+// 在JSMA里 料理合计第二板块明细Data的Key
+var _g_foodSumDetail2Key = 'sumaryDetail2Map_';
+// 料理集計情報格納
+var _g_oldFoodSumAllMap = new Map();
+// 2017/04/27  料理数目变更之后变颜色对应 END By Wgch
+function _jsSetFoodSumDataFun(jsonResult) {
+	if(!_g_oldFoodSumAllMap.containsKey(_g_perFoodSumKey)) {
+		_g_oldFoodSumAllMap.put(_g_perFoodSumKey	, (jsonResult.perSumaryMap  	? JSON.stringify(jsonResult.perSumaryMap)	: ''));
+		_g_oldFoodSumAllMap.put(_g_foodsumKey		, (jsonResult.summaryRep  		? JSON.stringify(jsonResult.summaryRep)		: ''));
+		_g_oldFoodSumAllMap.put(_g_foodSum2Key		, (jsonResult.summaryRep2  		? JSON.stringify(jsonResult.summaryRep2)	: ''));
+		_g_oldFoodSumAllMap.put(_g_foodSumDetailKey , (jsonResult.summaryDsDetail	? JSON.stringify(jsonResult.summaryDsDetail)	: ''));
+		_g_oldFoodSumAllMap.put(_g_foodSumDetail2Key, (jsonResult.summaryDs2Detail	? JSON.stringify(jsonResult.summaryDs2Detail)	: ''));
+	}
+}
+function _jsGetFoodSumDataFun() {
+	var jsonArr = ['', '', '', '', ''];
+	if(_g_oldFoodSumAllMap.containsKey(_g_perFoodSumKey)) {
+		jsonArr[0] = (_g_oldFoodSumAllMap.get(_g_perFoodSumKey));
+		jsonArr[1] = (_g_oldFoodSumAllMap.get(_g_foodsumKey));
+		jsonArr[2] = (_g_oldFoodSumAllMap.get(_g_foodSum2Key));
+		jsonArr[3] = (_g_oldFoodSumAllMap.get(_g_foodSumDetailKey));
+		jsonArr[4] = (_g_oldFoodSumAllMap.get(_g_foodSumDetail2Key));
+	}
+	return jsonArr;
+}
+// 料理集計情報クリック
+function _clearFoodSumMapFun(){
+	_g_oldFoodSumAllMap.clear();
+}
+// 最新データREAD
+function _gridsDsReadFun(){
+	if(isNeedLoad) gridsDs.read();
+	else {
+		editCancelBtnFun();
+		gridsDs.read();
+	}
+}			
+// 2017/04/27 料理数目变更之后变颜色对应 END By Wgch
+// 2017/04/26 列幅サイズ自動記憶機能対応 BEGIN
+var gCookieApexPrefix="apex__";
+function _setCookie(cname, cvalue) {
+	// JS -> Apex Cookie
+	cname = gCookieApexPrefix+cname;
+	var d = new Date();
+    d.setTime(d.getTime() + (10*365*24*60*60*1000));
+    var expires = "expires="+ d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires;
+}
+function _getCookie(cname){
+	// JS -> Apex Cookie
+	var name = gCookieApexPrefix+cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i < ca.length; i++){
+  		var c = ca[i].trim();
+  		if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+	}
+	return "";
+}
+// 2017/04/26 列幅サイズ自動記憶機能対応 END
+// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH BEGIN
+var CUST_DIVID_GRID = "#grid";
+	CUST_DIVID_SUMMARYGRID = "#summaryGrid";
+	CUST_DIVID_SUMMARYGRIDDETAIL = "#summaryGridDetail";
+	CUST_DIVID_SUMMARY2GRID = "#summary2Grid";
+	CUST_DIVID_SUMMARYGRIDDETAIL = "#summary2GridDetail";
+var gridFilterData,
+	summaryFilterData,
+	summaryDetlFilterData,
+	summary2FilterData,
+	summary2DetlFilterData;
+// 重置Filter函数
+function setBindFilterFun(){
+	if(!summaryFilterConfigFlg) return;
+	try{
+		$j("#grid").data("kendoGrid").dataSource.filter = function(e) {
+			return filter(e, this, "GRID");
+		}
+		$j("#summaryGrid").data("kendoGrid").dataSource.filter = function(e) {
+			return filter(e, this, "SUMMARY");
+		}
+		$j("#summaryGridDetail").data("kendoGrid").dataSource.filter = function(e) {
+			return filter(e, this, "SUMMARYDETL");
+		}
+		$j("#summaryGrid2").data("kendoGrid").dataSource.filter = function(e) {
+			return filter(e, this, "SUMMARY2");
+		}
+		$j("#summary2GridDetail").data("kendoGrid").dataSource.filter = function(e) {
+			return filter(e, this, "SUMMARY2DETL");
+		}
+	} catch (e) {}
+}
+// 重置Filter函数
+function filter(e, that, key) {
+	if (e === undefined) {
+		return that._filter;
+	}
+	that.trigger('reset');
+	that._query({
+		filter: e,
+		page: 1
+	});
+	setFilterCookFun(key, e);
+}
+// 设定最新筛选条件
+function setFilterCookFun(key, e){
+	if(!summaryFilterConfigFlg) return;
+	var shopCode = getShopCode();
+	var cookVal = JSON.stringify(e);
+	// 设定选中后的css
+	if(key == "GRID") setFilterFun(CUST_DIVID_GRID, e);
+	// DBへ情報格納
+	JINYACONNECT.CONFIG.saveKrepConfig(key,cookVal,userId,shopCode);
+}
+// 恢复历史筛选条件
+function setOldCheckFun(div, oldData){
+	if(!summaryFilterConfigFlg) return;
+	try{
+		var divGrid = $j(div).data("kendoGrid").dataSource;
+		var oldFilterDate = JSON.parse(oldData);
+		if(!divGrid.filter()){
+			divGrid.filter(oldFilterDate);
+			// 设定选中后的css
+			setFilterFun(div, oldFilterDate);
+		}
+	} catch (e) {}
+}
+// 设定选中后的css
+function setFilterFun(div, filterDate){
+	if(div != CUST_DIVID_GRID) return;
+	// 清空所有css
+	$j("th[data-field] a.k-header-column-menu", div).css("background-color", "");
+	if(!filterDate || !filterDate.filters) return;
+	for(var i = 0; i < filterDate.filters.length; i++){
+		var sobj = filterDate.filters[i];
+		if(sobj.logic) sobj = sobj.filters[0];
+		$j("th[data-field='" + sobj.field +"'] a.k-header-column-menu", div).css("background-color", "peachpuff");
+	}
+}
+// 2019/06/14 フィルターを各アカウント毎に保持できる様にして欲しい対応 WGCH END
+// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH BEGIN
+// 总展开Btn 按钮事件响应
+function expandGroupFun(that){
+	JINYACONNECT.DATALOCK.BlockUi();
+	var showflg = ($(that).attr("showflag") ==='true');
+	var grid = $("#grid").data("kendoGrid");
+	if(showflg) {
+		// 展开Group
+		groupText = collapseGroup;
+		autoGroupBtn = 'k-i-collapse';
+		$(that).html('<span class="k-icon k-i-collapse"></span>' + groupText);
+		$(that).attr("showFlag", false);
+		$j('.k-i-expand[onclick]').click();
+		isCollapseGroupFlg = false;
+	} else {
+		// 收起Group
+		groupText = expandGroup;
+		autoGroupBtn = 'k-i-expand';
+		$(that).html('<span class="k-icon k-i-expand"></span>' + groupText);
+		$(that).attr("showFlag", true);
+		$j('.k-i-collapse[onclick]').click();
+		isCollapseGroupFlg = true;
+	}
+	JINYACONNECT.DATALOCK.UnblockUi();
+}
+// 存放刷新前的最后的状态
+var olgStatus = new Map();
+// 予約番号  按钮事件响应
+function iconOnclickFun(e, ldIndexNmKey){
+	if($j(e).hasClass('k-i-collapse')) $j("tr[ldIndexNmKey = '"+ ldIndexNmKey +"']").hide();
+	else if($j(e).hasClass('k-i-expand')) $j("tr[ldIndexNmKey = '"+ ldIndexNmKey +"']").show();
+	// true => 表示纪录的状态是 隐藏状态
+	olgStatus.put(ldIndexNmKey, $j(e).hasClass('k-i-collapse'));
+}
+// 恢复刷新前的展开状态
+function setOlgStatusFun(){
+	// 获取总展开Btn状态
+	var isGroupBtnFlg = $j('span', $j('#isGroupBtn')).hasClass("k-i-expand");
+	// 获取到所有的展开   予約番号 的 a标签
+	$j(".k-icon[onclick]").each(function(){
+		// 获取的ldIndexNmKey
+		var ldIndexNmKey = $j(this).attr("ldIndexNmKey");
+		// 根据 历史纪录 上次的状态 进行设定   ; ** 如果历史没有纪录行就按默认设定的状态设定  例如: 默认是展开 ,就设置展开 
+		if(olgStatus.containsKey(ldIndexNmKey)){
+			if(olgStatus.get(ldIndexNmKey)) $j(this).click();
+		}
+		else if(isGroupBtnFlg) $j(this).click();
+	});
+}
+// 用预约IndexNm And API 合成Key
+function getLdIndexNmKeyFun(ldIndexNm, keyDate){
+	return ldIndexNm + '__' + keyDate;
+}
+// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH BEGIN
+// 該当APIの最新サイズはCOOKIEへ反映を行う
+// APEX画面から起動する場合、該当サイズは定義情報へ反映を行う
+// 2017/09/27 同一个电脑,不同USER_COOKIE对应 WGCH BEGIN
+var userId = "{!JSENCODE(userId)}";
+// 2017/09/27 同一个电脑,不同USER_COOKIE对应 WGCH END
+function setGpAbFlgCookieFun(){
+	if ($("select[id$=':groupAbleBtn']").length > 0) {
+		var shopCode = getShopCode();
+		// 2017/09/27 同一个电脑,不同USER_COOKIE对应 WGCH BEGIN
+		var cookKey = userId + shopCode + '_K_ScheduleReport_GpAbFlg';
+		// 2017/09/27 同一个电脑,不同USER_COOKIE对应 WGCH END
+		// todo: 以后有可能没有这个btn要注意
+		var cookVal = $("select[id$=':groupAbleBtn']").val();
+		_setCookie(cookKey, cookVal);
+        // DBへ情報格納
+        JINYACONNECT.CONFIG.saveKrepConfig('GROUPTYPE',cookVal,userId,shopCode);
+	}
+}
+function gotoSwitchGroupType(spcd) {
+    // 画面切替対応
+    JINYACONNECT.blockUi();
+    // COOKIE
+    setGpAbFlgCookieFun();
+    // UNLOCK
+    unDatalock(spcd);
+    // 画面REPLACE表示
+	// 検索条件を設定する 
+	var queryArea = $("select[id$=':areaName']").length > 0 ? $("select[id$=':areaName']").val() : "";
+	var queryDate = $("input[id$=':queryDate']").length > 0 ? $("input[id$=':queryDate']").val() : "";
+	var queryTerm = $("select[id$=':termDatesLst']").length > 0 ? $("select[id$=':termDatesLst']").val() : "";
+	var roomViewFlg = $("select[id$=':roomDataSwitchBtn']").val();
+	var isGroupAbleFlg = $("select[id$=':groupAbleBtn']").length > 0 ? $("select[id$=':groupAbleBtn']").val() : '';
+    var url = "{!$Page.K_ScheduleReport}?sp="+queryArea+"&qt="+queryDate+"&term="+queryTerm+"&rvflg="+roomViewFlg;
+    if (isGroupAbleFlg != "") url+= "&gpflg="+isGroupAbleFlg;
+    //location.reload();
+    window.location.href = url;
+    //JINYACONNECT.unblockUi();
+}
+// 2017/09/18 一回のみ切替すると、常に維持する対応 WGCH END
+// 2017/09/23 列表示・非表示自動記憶機能対応 WGCH BEGIN
+function setColumnHidCookieFun(field, flg){
+	var shopCode = getShopCode();
+	// 2017/09/27 同一个电脑,不同USER_COOKIE对应 WGCH BEGIN
+	var cookKey = userId + shopCode + '_K_ScheduleReport_ColumnHidFlg';
+	// 2017/09/27 同一个电脑,不同USER_COOKIE对应 WGCH END
+	var extInf = _getCookie(cookKey);
+	var defInfArr = extInf.split(",");
+	var _wkMap = new Map();
+	defInfArr.forEach(function(val){
+		var _apidef = val.split(":");
+		if (_apidef.length > 1) _wkMap.set(_apidef[0],_apidef[1]);
+	});
+	_wkMap.put(field, flg);
+	var cookVal = "";
+	_wkMap.forEach(function(value, key) {
+		cookVal += key + ":" + value + ",";
+	});
+	_setCookie(cookKey, cookVal);
+	// DBへ情報格納
+	JINYACONNECT.CONFIG.saveKrepConfig('HIDCOL',cookVal,userId,shopCode);
+}
+// 2017/09/23 列表示・非表示自動記憶機能対応 WGCH END
+
+// 2017/09/13 予定表画面、複数予約時(予約インデックスが同じ)にはまとまって表示できるように改善対応 WGCH END
+// 2017/10/10 WGCH BEGIN
+function openPDF(){
+	// sp
+	var queryArea = $("select[id$=':areaName']").length > 0 ? $("select[id$=':areaName']").val() : "";
+	// dt
+	var queryDate = $("input[id$=':queryDate']").length > 0 ? $("input[id$=':queryDate']").val() : "";
+	// から
+	var queryTerm = $("select[id$=':termDatesLst']").length > 0 ? $("select[id$=':termDatesLst']").val() : "";
+	var openUrl = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'K_ScheduleReportPdf')}?sp=" + queryArea + "&dt=" + queryDate + "&pdf=1&term=" + queryTerm;
+	// 2017/10/27 GROUP功能对应 WGCH BEGIN
+	// gpflg
+	var isGroupAbleFlg = $("select[id$=':groupAbleBtn']").length > 0 ? $("select[id$=':groupAbleBtn']").val() : 'false';
+	// group展开Flg
+	var isGroupBtnFlg = $j('span', $j('#isGroupBtn')).hasClass("k-i-expand");	
+	if(isGroupAbleFlg == "true") openUrl += "&gpflg=1";
+	if(isGroupBtnFlg) openUrl += "&expand=1";
+	// 2017/10/27 GROUP功能对应 WGCH END
+	// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN
+	var typeIds = $("input[id$=multiRoomTypeIds]").val();
+	if (typeIds != undefined && typeIds != "" && typeIds != null) openUrl += "&type=" + typeIds;
+	// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END
+	// 2021/05/31 #11007 bug fixed by zy BEGIN
+	var layoutId = getLayoutId();
+	if (layoutId != "") {
+		openUrl += "&layout=" + layoutId;
+	}
+	var roomIds = getSelRoomIds();
+	if (roomIds != "") {
+		openUrl += "&roomids=" + roomIds;
+	}
+	// 2021/05/31 #11007 bug fixed by zy END
+	// 2019/08/15 予定表上にも、ルームインジケータのような検索欄が欲しい by zy BEGIN
+	var filterStr = $("input[name=inputFilter]").val();
+	if (filterStr != undefined && filterStr != "") openUrl += "&filter=" + filterStr;
+	// 2019/08/15 予定表上にも、ルームインジケータのような検索欄が欲しい by zy END
+	window.open(openUrl);
+}
+// 2017/10/10 WGCH END
+// 2019/02/28 「前日」「今日」「翌日」ボタンをつけることは改善対応 WGCH BEGIN
+function dateSwitchFun(days){
+	var queryDate = $("input[id$=':queryDate']").length > 0 && days != 0
+					? kendo.parseDate($("input[id$=':queryDate']").val(), JINYACONNECT.DateFormat)
+					: new Date();
+	// 86400000=24小时*60分*60秒+1000毫秒=1天
+	queryDate = new Date(queryDate.getTime() + 86400000 * days);
+	$("input[id$=':queryDate']").val(kendo.toString(queryDate, JINYACONNECT.DateFormat)).change();
+}
+// 2019/02/28 「前日」「今日」「翌日」ボタンをつけることは改善対応 WGCH END
+// 2019/06/14 予定表の表示期間対応 WGCH BEGIN
+// 对应SF内部处理BUG
+function setOldTermDates(){
+	var $Term = $("select[id$=':termDatesLst']");
+	var queryTerm = $Term.length > 0 ? $Term.val() : "";
+	// 先把已经选中的值存起来
+	$("input[id$=':hidOldTermDates']").val(queryTerm);
+	// 重置处理-防止selectList数组越界
+	$Term.val("1");
+}
+// 2019/06/14 予定表の表示期間対応 WGCH END 
+// 2018/02/05 手書き zyz BEGIN
+function processHandWrite(){
+	var writeMode = $j("#hidWriteMode").val();
+	if(writeMode != "0"){
+		// 初始化
+		checkMobileOs();
+		$("#canvasPanel").jinyaCanvas({
+			signid:"signa_id",
+			canvasid:"canvassample",
+			afterBegin:afterBegin,
+			deviceType:deviceType,
+			// 设备区分
+			isMobile:kendo.support.mobileOS,
+		});
+		// 签名功能
+		JINYA_CANVAS = $("#canvasPanel").data("jinyaCanvas");
+	}
+}
+// 启动予定表按钮获取全部图片显示在页面
+function canvasStart(autoFlag){
+	// 编辑状态下不响应
+    if (!isNeedLoad) {
+        //予定表が編集中でロックされてるため、Excel出力は使用できません
+        alert("{!$Label.MSG_041_0019_01}");
+        return false;
+    }
+	var writeMode = $j("#hidWriteMode").val();
+	if(writeMode != "0"){
+		$(".toolBar").show();
+		stopRunning();
+		// 遮挡头部功能
+		var headBar = $("#headerBar");
+		var headToolBar = $(".toolBarExtCls");
+		var headTop = $("#grid .k-grid-content").offset().top;
+		var headBarHt = headTop - headToolBar.offset().top;
+		headBar.show();
+		headBar.css({width:headToolBar.width(),height:headBarHt});
+		headBar.offset({left:headToolBar.offset().left,top:headToolBar.offset().top});
+		if (writeMode == '2') {
+			// 行数据取得
+			var gridsImgKeys = gridsDs.data();
+			if (gridsImgKeys.length > 0) {
+				JINYACONNECT.DATALOCK.BlockUi();
+				// 获取既存图片
+				getRemote();
+			} else JINYACONNECT.DATALOCK.UnblockUi();
+		} else if (autoFlag) {
+			$("#grid div.k-grid-content table[role='grid']").bind("mousedown",function(){
+				onMouseCanvas(this);
+			});
+			expandGrid();
+			$("#canvasPanel").addClass("warningBorder");
+			beforeImgShow();
+			// 画板显示
+			canvasShow();
+		} 
+	}
+}
+// 取消按钮
+function canvasEnd(saveFlg){
+	// 对应画板现在内容作成图片再显示
+	if($(".k-canvas-img").length > 0){
+		var orgKey = getImgKey($(".k-canvas-img:first").data("uid"));
+		$("#"+orgKey).show();
+	}
+	$("#grid div.k-grid-content table[role='grid']").unbind("mousedown");
+	if(!saveFlg) {
+		$(".k-canvas-img").bind("mousedown",function(){
+			onMouseDownImg(this);
+		});
+		$(".k-canvas-img").removeClass("k-canvas-img");
+	}
+	var writeMode = $j("#hidWriteMode").val();
+	if(writeMode != "0"){
+		if (writeMode == '2') {
+			$("#grid tr[data-uid]").not("[hadImg]").unbind("mousedown");
+			$(".floatImg").remove();
+		}
+	}
+	$("#headerBar").hide();
+	$("#canvasPanel").hide();
+	$(".toolBar").hide();
+	collapse();
+	startRunning();
+}
+// 2018/02/05 手書き zyz END
+// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy BEGIN
+function initMulitiRoomType(){
+	var roomTypeDropDown = $j("select[id$='roomTypeSelectId']").css({ fontSize: 13, height:24, padding:0})
+		.multiselect({ 
+		// 2018/07/24 显示高度改善 WGCH BEGIN
+		classes: 'roomTypeMaxHeight',
+		// 2018/07/24 显示高度改善 WGCH END
+		selectedList: 4,
+		header: false,
+		click: function(event, ui){
+			//  2017/02/13 页面自动刷新功能 by wx begin 
+			stopRunning();
+			//  2017/02/13 页面自动刷新功能 by wx end
+			$this= $j(this);
+			$thisLable= event.currentTarget.parentElement;
+			$allLable= $j("select[id$='roomTypeSelectId']").multiselect("widget").find("ul.ui-multiselect-checkboxes li");
+			if(ui.checked) $j($thisLable).addClass("k-state-selected").className= "ui-corner-all ui-state-hover k-state-selected";
+			else $thisLable.className= "ui-corner-all ui-state-hover";
+			// All Selected
+			if (ui.value == "") {
+				$this.multiselect("uncheckAll");
+				$this.val("");
+				$this.multiselect("widget").find("input")[0].checked= true;
+				if($allLable.children("label").hasClass("k-state-selected")) $allLable.children("label").removeClass("k-state-selected"); 
+				$allLable.children("label:first").addClass("k-state-selected");
+				$this.multiselect("close");
+			} else {
+				var length = $this.multiselect("widget").find("input:checked").length;
+				if (length == 0) {
+					$this.multiselect("widget").find("input")[0].checked= true;
+					$allLable.children("label:first").addClass("k-state-selected");
+				} else {
+					$this.multiselect("widget").find("input")[0].checked= false;
+					if($allLable.children("label:first").hasClass("k-state-selected")) $allLable.children("label:first").removeClass("k-state-selected");
+				}
+			}	
+		},
+		beforeopen: function(){
+			$roomTypeSelectIdWidget = $j("select[id$='roomTypeSelectId']").multiselect("widget")
+			$allChecked= $roomTypeSelectIdWidget.find("input")[0].checked;
+			$allLable= $roomTypeSelectIdWidget.children("ul").children("li").children("label:first");
+			if($allChecked) $allLable.addClass("k-state-selected");
+			else if(!$allChecked && $allLable.hasClass("k-state-selected")) $allLable.removeClass("k-state-selected");
+		},
+		open: function(){
+			$this = $j(this);
+			var orgVal = getRoomTypeNameVals($this);
+			$this.attr("orgVal", orgVal);
+			// 2018/07/24 显示高度改善 WGCH BEGIN
+			var multiselectHt = $j(window).height() > 400 ? $j(window).height() - 300 : 100;
+			$j("div.roomTypeMaxHeight ul.ui-multiselect-checkboxes").css("height","");
+			$j("div.roomTypeMaxHeight ul.ui-multiselect-checkboxes").css("max-height", multiselectHt + "px");
+			// 2018/07/24 显示高度改善 WGCH END
+		},
+		close: function(){
+			$this = $j(this);
+			var orgVal = $this.attr("orgVal");
+			var selectVal = getRoomTypeNameVals($this);
+			if (orgVal != selectVal) {
+				$j("input[id$=':multiRoomTypeIds']").val(selectVal);
+				// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN 
+				refreshRoomlist(selectVal);
+				// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END 
+				gridsDs.read();
+			//  2017/02/13 页面自动刷新功能 by wx begin	
+			}else{
+				startRunning();
+			//  2017/02/13 页面自动刷新功能 by wx end	
+			}
+		},
+	});
+	$roomTypeDropDown=$j(roomTypeDropDown);
+	$roomTypeDropDown.multiselect("widget").css("width","auto");
+	// 2021/05/31 #11001 bug fixed by zy BEGIN
+	var roomTypeDropDownWidth = $roomTypeDropDown.width() + 26;
+	// 2021/05/31 #11001 bug fixed by zy END
+	$roomTypeDropDown.multiselect({minWidth:roomTypeDropDownWidth});
+	// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN 
+	// 2019/01/15 タイムテーブルを開いた際、デフォルトで表示される部屋タイプを指定できるようにする by zy BEGIN
+	var typeIds = $j("input[id$=multiRoomTypeIds]").val();
+	initDepartmentSel($roomTypeDropDown,typeIds);
+	// 2019/01/15 タイムテーブルを開いた際、デフォルトで表示される部屋タイプを指定できるようにする by zy END
+	refreshRoomlist(typeIds);
+	// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END 
+	let id = roomTypeDropDown.attr('id');
+	$j("span", `button[id^="${id}"]`).eq(0).addClass("spanIco");
+	$j("span", `button[id^="${id}"]`).eq(1).addClass("spanText").css("width",roomTypeDropDownWidth - 30);
+	//2019/2/15 ルームインジケータの部屋タイプ絞り込み機能を、タイムテーブルと同じように、複数タイプ指定できるようにして欲しい by cxw END
+}
+// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN 
+function refreshRoomlist(selectVal){
+	var $el = $j("select[id$='roomSelectId']");
+	var $mui = $el.multiselect("widget");
+	var options = $el.find("option");
+	var dataOpts = $el.data("options");
+	if (dataOpts != undefined) {
+		options = dataOpts;
+	}
+	if (typeof selectVal === "string") {
+		selectVal = selectVal.split(',');
+	}
+	if (selectVal[0] === "") {
+		selectVal = selectVal.slice(1);
+	}
+	if (selectVal.length > 0) {
+		var typeSelect = ['[value=""]'];
+		var roomArr = (getRoomTypeNameVals($el) || "" ).split(',');
+		var contactArr = [];
+		selectVal.forEach(function(typeId){
+			typeSelect.push('[value$="_' + typeId +'"]');
+			var newArr = roomArr.filter(function(value){
+				return value.includes(typeId);
+			});
+			if (newArr.length > 0) {
+				contactArr = contactArr.concat(newArr);
+			}
+		});
+		$el.data("options",options);
+		var validateOpts = options.filter(typeSelect.join(','));
+		$el.find("option").remove();
+		$el.append(validateOpts);
+		var roomIds = contactArr.join(',');
+		$j("input[id$=hidSelRoomIds]").val(roomIds);
+		$el.val(roomIds);
+		initDepartmentSel($el,roomIds);
+	// 2021/05/31 #11005 bug fixed by zy BEGIN
+	} else {
+		if (dataOpts != undefined){
+			var orgOptions = $el.find("option");
+			if (orgOptions.length != options.length) {
+				orgOptions.remove();
+				$el.append(options);
+			}
+		}
+		initDepartmentSel($el,$el.val());
+	}
+	// 2021/05/31 #11005 bug fixed by zy END
+}
+function afterRoomSel(){
+	gridsDs.read();
+}
+// 2019/09/15 指定日自动记忆機能対応 WGCH BEGIN
+var isChkInDayFlg = {!isChkInDayFlg};
+function setCheckInDayCookieFun(){
+	if(!isChkInDayFlg) return;
+	var cookVal = $("input[id$=':queryDate']").length > 0 ? $("input[id$=':queryDate']").val() : "";
+	// DBへ情報格納
+	JINYACONNECT.CONFIG.saveKrepConfig('CHECKINDAY', cookVal, userId, '');
+}
+// 2019/09/15 指定日自动记忆機能対応 WGCH END
+function initDepartmentSel(muliteSel,values){
+	// ツール　と　選択部署　あり
+	if (muliteSel) {
+		values = values || "";
+		// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy BEGIN 
+		var departArr = [];
+		if (typeof values === "object") {
+			departArr = values;
+		} else {
+			departArr = values.split(',');
+		}
+		// 2021/05/31 部屋タイプでの絞り込みと追加で部屋でも絞り込めるようにし、 ユーザ単位で保存できるように by zy END 
+		if (departArr.length > 0) {
+			var selector = [];
+			departArr.forEach(function(depart){
+				if (depart != "") selector.push("option[value='" + depart + "']");
+			});
+			if (selector.length > 0) { 
+				var $el = muliteSel.find(selector.join(','));
+				if($el.length) $el.prop("selected","selected");
+				else muliteSel.find('option[value=""]').prop("selected","selected");
+			} else {
+				muliteSel.find('option[value=""]').prop("selected","selected");
+			}
+			muliteSel.multiselect('refresh');
+		}
+	}
+}
+function getRoomTypeNameVals($this) {
+	return ($this.val() == null ? "" : $this.val().join(","));
+}
+// 2019/08/15 予定表の部屋タイプ絞り込みは予定表内のフィルター機能が改善ほしい by zy END
+// 2019/08/15 予定表上にも、ルームインジケータのような検索欄が欲しい by zy BEGIN
+// 入力フィルター対応
+function inputBlurFilter(){
+	let element = $(event.currentTarget), 		// 処理対象
+		txt = element.val(),			  		// 入力内容
+			grid = $("#grid").getKendoGrid(),	// kendoツール
+				orgVal = element.attr("org");	// 前回入力内容
+	// 2020/12/30 予定表の検索欄修正　by zy BEGIN
+	if (txt.length == 1) return;
+	// 2020/12/30 予定表の検索欄修正　by zy END
+	// 画面ロック
+	if (grid != undefined) grid._requestStart();
+	// 画面延期反応クリア
+	if (window.gridTimeoutId) clearTimeout(gridTimeoutId);
+	// 画面延期反応設定
+	window.gridTimeoutId = setTimeout(function(){
+		// フィルター内容チェック
+		if (orgVal != txt) gridsDs.read();
+		// 2020/12/30 予定表の検索欄修正　by zy END
+		// 画面ロック解除
+		else grid._progress(false);
+		// 前回入力内容設定
+		element.attr("org",txt);
+	},600);
+}
+// 2019/08/15 予定表上にも、ルームインジケータのような検索欄が欲しい by zy END
+// 2019/11/15 更新ボタンの機能を追加 BY zyz BEGIN
+function initload(){
+	var _JS_SYS_DEVICE_MOBILE = kendo.support.mobileOS;
+	if(_JS_SYS_DEVICE_MOBILE) return ;
+	$("#reloadId").css({'display':'none'});
+}
+function reloadFun(e){
+	_gridsDsReadFun();
+	e.preventDefault();
+}
+// 2019/11/15 更新ボタンの機能を追加 BY zyz END
+// 2021/05/31 #11008 bug fixed by zy BEGIN
+function  getSelRoomIds(){
+	var roomIds = $("select[id$=roomSelectId]").val() || "";
+	if (typeof roomIds === "object") {
+		if (roomIds[0] === ""){
+			roomIds = roomIds.slice(1);
+		}
+		roomIds = roomIds.join(',');
+	}
+	return roomIds;
+}
+// 2021/05/31 #11008 bug fixed by zy END
+function getLayoutId(){
+	return $("input[id$=hidCurrLayoutVal]").val() || "";
+}
+</script>
+<!-- 2017/04/27 料理数目变更之后变颜色对应 BEGIN By Wgch -->
+<script id="productSummy" type="text/x-kendo-template">
+	<div style='#: style #'> #: productSummy # </div>
+</script>
+<!-- 2017/04/27 料理数目变更之后变颜色对应 END By Wgch -->
+<c:UserConfigComp functiontype="KREP"/>
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+<c:SobjectLockComp isNeedIncludeBlockUI="true" LockAppName="K_ScheduleReport" NS="{!$Setup.CommDefine__c.AppNS__c}"></c:SobjectLockComp>
+<!-- 2018/02/05 手書き zyz BEGIN -->
+<!-- 添加共同定义或者XML指定控制的flg,是否使用手书内容和手书功能 -->
+<input type="hidden" value="{!canvasMode}" id="hidWriteMode" />
+<input type="hidden" value="{!userStr}" id="hiduserStr" />
+<apex:outputPanel rendered="{!canvasMode != '0'}">
+<apex:includeScript value="{!$Resource.html2canvas}"/>
+<apex:includeScript value="{!URLFOR($Resource.HandWriteLib,'js/handWrite.js')}"/>
+<!-- 
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.mobile.min.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.all.min.js')}"/>
+ -->
+<meta name="screen-orientation" content="portrait" />
+<!-- Report Content View Data Show -->
+<script>
+var JS_APPNS = "{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+// 横竖屏区分
+var JS_SYS_CHANGE_FLAG = false;
+// 匹配移动端
+var deviceType = '';
+function afterBegin(){
+	// 画笔颜色
+	kendo.init($("#example"));
+	var colorpicker = $("#colorpicker").kendoColorPicker({
+       toolIcon: "colorIcon",
+       messages: {
+	    apply: "{!$Label.MSG_041_0066}"
+	    ,cancel: "{!$Label.MSG_041_0030}"
+	  }
+    }).data("kendoColorPicker");
+    colorpicker.bind("change", function(e) {
+    	JINYA_CANVAS.line = $("#bihuadaxiao").val();
+      	JINYA_CANVAS.color = e.value;
+    });
+    $("#pen").click(function(){
+   		JINYA_CANVAS.ctx.globalCompositeOperation='source-over';
+   		JINYA_CANVAS.line = $("#bihuadaxiao").val();
+    });
+	// 画笔粗细
+	$("#bihuadaxiao").click(function(){
+		JINYA_CANVAS.line = $("#bihuadaxiao").val();
+	});
+}
+// 读取数据库
+function getRemote(){
+	var curDiv = $j("<div/>");
+	var imgkeyArr = [];
+	var gridsImgKeys = gridsDs.data();
+	for(var i = 0 ; i < gridsImgKeys.length ; i++ ){
+		var imgkey = gridsImgKeys[i].imgKeys;
+		imgkeyArr.push(imgkey);
+	}
+	if (imgkeyArr.length == 0) {
+		JINYACONNECT.DATALOCK.UnblockUi();
+		return;
+	}
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.K_ScheduleReport.getImg}", imgkeyArr, function(result, event){	
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+				var widthVal = getVisibleRowWidth();
+				for(var i in result){
+					// 获取行
+					var row = getRowByKey(i);
+					// 往每一行放置图片
+					renderImgByRow(i,result[i][JS_APPNS+'HandWriteImg__c'],widthVal,result[i][JS_APPNS+'ImgSize__c']);
+					var paseHtml = $j.parseHTML(result[i][JS_APPNS+'Trajectory__c']);
+					curDiv.html(paseHtml[0].textContent);
+					row.data("imgobj",curDiv.text());
+				}
+				bindMouseEvent();
+			}
+			// 给页面数据添加mousedown事件
+			JINYACONNECT.DATALOCK.UnblockUi();
+	});
+}
+// 给页面数据添加mousedown事件
+function bindMouseEvent(){
+	$("#grid tr[data-uid]").not("[hadImg]").unbind("mousedown");
+	$("#grid tr[data-uid]").not("[hadImg]").bind("mousedown",function(){
+		onMouseDownImg(this);
+	});
+}
+// 点击行响应事件
+function onMouseDownImg(el){
+	//画面打开之前处理
+	beforeImgShow();
+	var curRow = $(el);
+	if (el.nodeName == 'IMG') curRow = getRowByKey(el.id);
+	var recObj = curRow.data("imgobj");
+	// 再绘画缩放比例
+	var scaleVal = curRow.data("scale");
+	// 画板显示
+	imgBorderShow(curRow,event);
+	// 内容重新绘制
+	if (recObj != undefined && recObj != "") JINYA_CANVAS.replay(JSON.parse(recObj),scaleVal);
+	// 对应重画后，开始绘画报错
+	JINYA_CANVAS.touchStartHandler(event);
+}
+//画面打开之前处理
+function beforeImgShow(){
+	// 判断画板是否已经打开
+	if($(".k-canvas-img").length > 0){
+		var orgKey = getImgKey($(".k-canvas-img:first").data("uid"));
+		drawOver(orgKey);
+		$(".k-canvas-img:first").data("imgobj",JINYA_CANVAS.records());
+		$(".k-canvas-img").removeClass("k-canvas-img");
+	}
+	// 清空记录值
+	JINYA_CANVAS.clear(true);
+}
+// 画板打开状态，存储画板内容
+function drawOver(imgId){
+	var imgSizeStr = $("#canvasPanel").width();
+	var imgobj = getImgById(imgId);
+	// 往每一行放置图片
+	renderImgByRow(imgId,imgobj);
+	saveImg(imgId,imgobj,JINYA_CANVAS.records(),imgSizeStr);
+}
+// 保存数据到数据库
+function saveImg(imgId,imgobj,imgArr,imgSize){
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.K_ScheduleReport.saveImg}", imgId, imgobj, imgArr,imgSize, function(result, event){
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+			}
+	});
+}
+var maxSize = {!maxHeight};
+// 画板显示mode1
+function canvasShow(){
+	var curTbl = $("#grid div.k-grid-content table[role='grid']");
+	var tblOffset = curTbl.offset();
+	//var borderStr = 1;border:borderStr
+	var heightStr = curTbl.height();
+	var widthVal = curTbl.width();
+	if (heightStr > maxSize) {
+		//alert('{!$Label.MSG_041_0061}');
+		heightStr = maxSize;
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+		//$("#canvasPanel").css({'border-bottom':'2px solid red'});
+		$("#canvasPanel").addClass("redBorder");
+	}else {$("#canvasPanel").removeClass("redBorder");}
+	// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+	var canvasPanel = JINYA_CANVAS.panel;
+	$("div.k-grid-content:first").append(canvasPanel);
+	$("#signa_id").css({'left':'0px'});
+	$(canvasPanel).show();
+	$(canvasPanel).css({width:widthVal-3,height:heightStr});
+	JINYA_CANVAS.canvas.width = widthVal-3;
+	JINYA_CANVAS.canvas.height = heightStr;
+	// 2019/05/15 jinyabug1701 fix by zy BEGIN
+	var isMessageFlag = "{!($Setup.CommDefine__c.ReportKScheduleMessageIsShowFlg__c)}";
+	if (isMessageFlag == "true") {
+		var maxScrollTop = $j("#grid .k-grid-toolbar").offset().top - $j(window).scrollTop();
+		$j(".toolBar").css({top:maxScrollTop});
+		$j(window).unbind("scroll");
+		$j(window).bind("scroll",function(){
+			var curTop = $j(this).scrollTop();
+			var top = $j("#grid .k-grid-toolbar").offset().top - curTop;
+			if (top < 0) top = 0;
+			$j(".toolBar").css({top:top});
+		});
+	}
+	// 2019/05/15 jinyabug1701 fix by zy END
+}
+// 画板显示mode2
+function imgBorderShow(el,mouseEvent){
+	$(el).addClass("k-canvas-img");
+	$(el).unbind("mousedown");
+	var imgId = getImgKey($(el).data("uid"));
+	if($("#" + imgId).length > 0)  $("#" + imgId).hide();
+	var firstTd = $("td[role='gridcell']:visible:first",el);
+	var canvasPanel = JINYA_CANVAS.panel;
+	firstTd.append(canvasPanel);
+	firstTd.addClass("firstImg");
+	var heightStr = $(el).height();
+	var widthVal = getVisibleRowWidth();
+	canvasPanel.show();
+	canvasPanel.css({width:widthVal - 5,height:heightStr,top:-2,left:-2});
+	JINYA_CANVAS.canvas.width = widthVal - 5;
+	JINYA_CANVAS.canvas.height = heightStr;
+	// 鼠标位置调整
+	JINYA_CANVAS.cav_x = mouseEvent.pageX - JINYA_CANVAS.panel.offset().left;
+	JINYA_CANVAS.cav_y = mouseEvent.offsetY;
+	if (mouseEvent.offsetY > JINYA_CANVAS.panel.offset().top) JINYA_CANVAS.cav_y = mouseEvent.offsetY - JINYA_CANVAS.panel.offset().top;
+}
+// 往每一行放置图片
+function renderImgByRow(key,imgSrc,width,imgSize){
+	var scale = 1;
+	if(imgSize) scale = width/imgSize;
+	var row = getRowByKey(key);
+	if (row == undefined) return;
+	var rowHt = row.height();
+	if (!row.is(":visible")) {
+		row.css({visibility:"hidden"});
+		row.show();
+		rowHt = row.height();
+		row.hide();
+		row.css("visibility","");
+	}
+	var curUid = row.data("uid");
+	var curItem = gridsDs.getByUid(curUid);
+	var roomSeq = curItem.imgKeys;
+	if($("#" + roomSeq).length > 0)  $("#" + roomSeq).remove();
+	var png = $('<img class="floatImg" src="' + imgSrc + '" id="'+roomSeq+'" onmousedown="onMouseDownImg(this)"/>');
+	var firstColumnIdx = $("#grid thead:first th[role='columnheader']:visible:first").index();
+	var firstTd = row.find("td").eq(firstColumnIdx);
+	firstTd.append(png);
+	firstTd.addClass("firstImg");
+	var top = firstTd.offset().top;
+	png.css({top:0,height:rowHt});
+	if (width) png.width(width-10);
+	png.data("uid",curUid);
+	row.data("scale",scale);
+}
+// 获取每一行的key
+function getRowByKey(key){
+	var curDatas = gridsDs.data();
+	var curUid;
+	for (var i = 0 ; i < curDatas.length ; i++) {
+		var curDt = curDatas[i];
+		if (curDt["imgKeys"] == key){
+			curUid = curDt.uid;
+			break;
+		}
+	}
+	if (curUid != undefined) return $("tr[data-uid='" + curUid + "']");
+}
+// 获取key
+function getImgKey(uid){
+	var key = gridsDs.getByUid(uid).imgKeys;
+	return key;
+} 
+// 根据key存储图片
+function getImgById(key){
+	var imgobj = {};
+	imgobj[key] = JINYA_CANVAS.canvas.toDataURL('image/png');
+	return imgobj[key];
+}
+function saveThisImg(){
+	if($(".k-canvas-img").length > 0){
+		var orgKey = getImgKey($(".k-canvas-img:first").data("uid"));	
+		drawOver(orgKey);
+	}
+}
+// 展开grid
+function expandGrid(){
+	var tableHt = $("#grid .k-grid-content table[role='grid']").height();
+	var wrapHt = $("#grid div.k-grid-content").height();
+	if (tableHt > wrapHt) {
+		var firstContent = $("div.k-grid-content:first");
+		firstContent.data("orght",firstContent.height());
+		firstContent.css({height:'auto'});
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+		if(JINYA_CANVAS.isMobile){
+			$(".km-scroll-container").css({transform:'none'});
+		}
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+		var contentHt = $("div.k-grid-content:first").height();
+		var toolHt = $("div.k-grid-toolbar:first").height();
+		var headerHt = $("div.k-grid-header:first").height();
+		var footerHt = $("div.k-grid-footer:first").height();
+		$("#grid").data("orght",$("#grid").height());
+		$("#grid").css({height:$("div.k-grid-footer:first").position().top + footerHt + 60});
+	}
+}
+function collapse(){
+	var orght = $("#grid").data("orght");
+	var content = $("div.k-grid-content:first").data("orght");
+	$("#grid").height(orght);
+	$("div.k-grid-content:first").height(content);
+}
+// 打印画板
+function overPrint(){
+	JINYACONNECT.DATALOCK.BlockUi();
+	// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+	//$(".toolBar").hide();		// 画笔工具栏隐藏
+	var heightStr = $("#grid div.k-grid-content table[role='grid']").height();
+	// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+	// 当前写入模式
+	var writeMode = $j("#hidWriteMode").val();
+	//滚动到顶部
+	document.body.scrollTop = document.documentElement.scrollTop = 0;
+	if(writeMode =='2'){
+		saveThisImg();
+		expandGrid();
+		$("#canvasPanel").hide();
+	}else if(writeMode =='1') {
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+		$("#canvasPanel").removeClass("warningBorder");//画板外框的边框
+		$("#canvasPanel").removeClass("redBorder");
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+	}
+	// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+	//$("#headerBar").hide();		//画板的DIV
+	// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+	html2canvas($("#grid").get(0)).then(function(canvas){
+		var imgs  = canvas.toDataURL('image/png');
+		var datablob = dataURLtoBlob(imgs);
+		var fileURL = URL.createObjectURL(datablob);
+		// 打开图片 / 下载图片
+		if(JINYA_CANVAS.isMobile){
+			// 移动端打开图片
+			// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+			//window.location.href = imgs;
+			window.open(imgs);
+			// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+		} else {
+			window.open(fileURL);
+		}
+		JINYACONNECT.DATALOCK.UnblockUi();
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN
+		// mode2情况下，打印页面后，在继续显示画板
+		if(writeMode =='2'){
+			if($(".k-canvas-img").length > 0){
+				var orgKey = getImgKey($(".k-canvas-img:first").data("uid"));
+				$("#" + orgKey).css({'display':'none'});
+			}
+			$("#canvasPanel").show();		// 打印后画板显示
+			collapse();						// 打印后恢复默认高度
+		}else if(writeMode =='1') {
+			$("#canvasPanel").addClass("warningBorder");//画板外框的边框
+			if (heightStr > maxSize) {
+				$("#canvasPanel").addClass("redBorder");
+			}
+		}
+		//canvasEnd(true);
+		// 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END
+	});
+}
+
+// 图片转换Blob
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(',');
+    var mime = arr[0].match(/:(.*?);/)[1];
+    var bstr = atob(arr[1]);
+    var n = bstr.length;
+    var u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
+// 戻る
+function undo() {
+	JINYA_CANVAS.undo();
+}
+// 進む
+function redo(){
+	JINYA_CANVAS.redo();
+}
+// クリア
+function clearCanvasflg(){
+	JINYA_CANVAS.clear(true);
+}
+function getVisibleRowWidth(){
+	var tdCols = $("#grid thead:first th[role='columnheader']:visible");
+	if (tdCols.length == 0) return 0;
+	return tdCols.last().position().left + tdCols.last().outerWidth() - tdCols.first().position().left;
+}
+function checkMobileOs(){
+	if (deviceType != '') return;
+	var ua = navigator.userAgent.toLowerCase();	
+	if (ua.match(/ipad/i)) deviceType = "ipad";
+	if (ua.match(/iphone os/i)) {
+		deviceType = "iphone";
+		$("#view_id").attr('content',"width=device-width, minimum-scale=0.5, maximum-scale=0.5, initial-scale=0.4;");
+	}
+	if (ua.match(/android/i)) {
+		deviceType = "android";
+		if (_singtypePage) $("#view_id").attr('content',"width=device-width, minimum-scale=0.9, maximum-scale=0.9, initial-scale=0.9");
+	}
+}
+// 手書きできる範囲を超えました。赤い線以下のセクションに手書き入力はできません
+function onMouseCanvas(){
+	alert('{!$Label.MSG_041_0061}');
+}
+</script>
+<style>
+canvas {
+	border:1px solid #000000;
+	z-index:102;
+	background: white;
+}
+#signa_id{
+	position:absolute;
+	width:100%;
+	height:100%;
+	top:-2px;
+	left:-2px;
+	background: rgba(244,244,244,1);
+	z-index:101;
+}
+.licolor{
+	opacity:0;
+}
+#canvassample{
+	background: inherit;
+	width:100%;
+	height:100%;
+	border: 0;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 12px;
+  border: 1px solid black;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 10px;
+  width: 10px;
+  left: 1px;
+   top: 1px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(17px);
+  -ms-transform: translateX(17px);
+  transform: translateX(17px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+.colorIcon{
+	background-position: -29px 5px;
+}
+.k-widget.k-colorpicker.k-header{
+	width:25px;
+}
+.k-picker-wrap .k-select{
+	display: none;
+}
+.lintIcon{
+	background-position: -69px -301px;
+}
+.k-i-refresh{
+	padding: 0px !important;
+    margin-top: 5px;
+    margin-left: 4px !important;
+}
+.floatImg{
+	position: absolute;
+	left: 0px;
+}
+.firstImg{
+	position:relative;
+	overflow:visible !important;
+}
+#canvasPanel{
+	position: absolute;
+    top: 0;
+    left: 0;
+    display:none;
+}
+.warningBorder{
+	border: 2px solid #FDD017;
+}
+/* 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz BEGIN */
+.redBorder{
+	border-bottom:2px solid red;
+}
+/* 2018/03/09 手書きPDF出力のとき、別ページを開くように変更対応 zyz END */
+.toolBar{
+	z-index: 102;
+	position: fixed;
+	background: #c5c5c5;
+	height: 38px;
+    top: 200px;
+    left:50px;
+    display:none;
+}
+.k-colorpicker .k-selected-color{
+	display:none;
+}
+.k-button.apply,.k-button.cancel{
+	width:auto !important;
+}
+#headerBar{
+	background:rgba(234,234,234,0.4);
+	position:absolute;
+	z-index:1;
+}
+</style>
+<div id="headerBar"></div>
+<div class="toolBar"> 
+	<div id="example" style="margin:5px;">
+		<span class="k-widget k-colorpicker k-header" tabindex="0" id="pen">
+			<input class="colorIcon" id="colorpicker" value="#000" data-role="colorpicker" style="display: none;" />
+		</span>
+		<span class="k-widget k-dropdown k-header" style="width:61px;">
+			<select size="1" id="bihuadaxiao" style="height:24px;" class="k-dropdown-wrap k-state-default">
+				<option value="1" >1</option>
+				<option value="2" >2</option>
+				<option value="3" >3</option>
+				<option value="4" >4</option>
+				<option value="5" >5</option>
+				<option value="6" >6</option>
+				<option value="7" >7</option>
+				<option value="8" >8</option>
+				<option value="9" >9</option>
+				<option value="10" >10</option>
+			</select>
+		</span>
+		<input type="button" class="k-button" value="{!$Label.MSG_041_0062}" onclick="javascript:undo()" />
+		<input type="button" class="k-button" value="{!$Label.MSG_041_0063}" onclick="javascript:redo()" />
+		<input type="button" class="k-button" value="{!$Label.MSG_041_0064}" onclick="javascript:clearCanvasflg()" />
+        <input type="button" class="k-button" value="{!$Label.MSG_041_0065}" onclick="javascript:canvasEnd()" />
+        <input type="button" class="k-button" value="{!$Label.MSG_041_0060}" onclick="javascript:overPrint()" />
+	</div>
+</div>
+<div id="canvasPanel" class="warningBorder">
+	<div id="signa_id" style="background: rgba(0,0,0,0);">
+		<canvas id="canvassample"></canvas>
+	</div>
+</div>
+</apex:outputPanel>
+<!-- 2018/02/05 手書き zyz END -->
+</apex:page>

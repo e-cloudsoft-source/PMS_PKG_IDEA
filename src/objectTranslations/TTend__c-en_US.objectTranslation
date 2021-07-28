@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Account payment</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Account payment</value>
+    </caseValues>
+    <fields>
+        <label><!-- $会計DP名 --></label>
+        <name>AccMstDPNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計DP名 --></label>
+        <name>AccMstDPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計GP名 --></label>
+        <name>AccMstGPNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計GP名 --></label>
+        <name>AccMstGPName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $会計OP名 --></label>
+        <name>AccMstOPNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計OP名 --></label>
+        <name>AccMstOPName__c</name>
+    </fields>
+    <fields>
+        <label>Slip (Advance payment) ID</label>
+        <name>ArTranId__c</name>
+    </fields>
+    <fields>
+        <label>CardType</label>
+        <name>CardTypeLst__c</name>
+        <picklistValues>
+            <masterLabel>American Express</masterLabel>
+            <translation><!-- American Express --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>China UnionPay</masterLabel>
+            <translation><!-- China UnionPay --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Diners Club International</masterLabel>
+            <translation><!-- Diners Club International --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Discover Card</masterLabel>
+            <translation><!-- Discover Card --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JCB</masterLabel>
+            <translation><!-- JCB --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>MasterCard</masterLabel>
+            <translation><!-- MasterCard --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>UATP</masterLabel>
+            <translation><!-- UATP --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Visa</masterLabel>
+            <translation><!-- Visa --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 消込日時 --></label>
+        <name>ClearDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込フラグ --></label>
+        <name>ClearFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込ログ --></label>
+        <name>ClearLog__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込者 --></label>
+        <name>ClearName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消込済金額 --></label>
+        <name>ClearPayment__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label>CouponType</label>
+        <name>CouponTypeLst__c</name>
+        <picklistValues>
+            <masterLabel>H.I.Sクーポン</masterLabel>
+            <translation>H.I.S Coupon(s)</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>H.I.Sポイント</masterLabel>
+            <translation>H.I.S Point(s)</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JTBクーポン</masterLabel>
+            <translation>JTB Coupon(s)</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>JTBポイント</masterLabel>
+            <translation>JTB Point(s)</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>楽天クーポン</masterLabel>
+            <translation>Rakuten Coupon(s)</translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>楽天ポイント</masterLabel>
+            <translation>Rakuten point(s)</translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Price down/ Discount type</label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label>Target_PLU_Code</label>
+        <name>Field13__c</name>
+    </fields>
+    <fields>
+        <label>Price down/ Discount status</label>
+        <name>Field14__c</name>
+    </fields>
+    <fields>
+        <label>Price down/ Discount target amount</label>
+        <name>Field15__c</name>
+    </fields>
+    <fields>
+        <label>UnitPrice</label>
+        <name>Field16__c</name>
+    </fields>
+    <fields>
+        <label>Number of sheets</label>
+        <name>Field17__c</name>
+    </fields>
+    <fields>
+        <label>Remaining sheets</label>
+        <name>Field18__c</name>
+    </fields>
+    <fields>
+        <label>Deposit amount</label>
+        <name>Field19__c</name>
+    </fields>
+    <fields>
+        <label>ReceiptNo．</label>
+        <name>Field1__c</name>
+        <relationshipLabel>Payment</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Pay amount</label>
+        <name>Field20__c</name>
+    </fields>
+    <fields>
+        <label>Change (Price difference）amount</label>
+        <name>Field21__c</name>
+    </fields>
+    <fields>
+        <label>Change (Price difference）status</label>
+        <name>Field22__c</name>
+    </fields>
+    <fields>
+        <label>Company code</label>
+        <name>Field23__c</name>
+    </fields>
+    <fields>
+        <label>Expiration date</label>
+        <name>Field24__c</name>
+    </fields>
+    <fields>
+        <label>Consumption tax base on Media</label>
+        <name>Field25__c</name>
+    </fields>
+    <fields>
+        <label>Target menu code</label>
+        <name>Field26__c</name>
+        <relationshipLabel>Payment (Target menu code)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Target_DP_Code</label>
+        <name>Field27__c</name>
+        <relationshipLabel>Payment</relationshipLabel>
+    </fields>
+    <fields>
+        <label>$ Deposit Amount</label>
+        <name>Field28__c</name>
+    </fields>
+    <fields>
+        <label>$Payment amount</label>
+        <name>Field29__c</name>
+    </fields>
+    <fields>
+        <label>MediaType</label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label>$Change（Difference）Amount</label>
+        <name>Field30__c</name>
+    </fields>
+    <fields>
+        <label>Day calculate time</label>
+        <name>Field31__c</name>
+    </fields>
+    <fields>
+        <label>Day calculate number</label>
+        <name>Field32__c</name>
+    </fields>
+    <fields>
+        <label>$Pay amount(Without Tax)</label>
+        <name>Field33__c</name>
+    </fields>
+    <fields>
+        <label>Sales date</label>
+        <name>Field34__c</name>
+    </fields>
+    <fields>
+        <label>$Transaction type</label>
+        <name>Field35__c</name>
+    </fields>
+    <fields>
+        <label>Media Name</label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label>Process Type１</label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label>Process Type 2</label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label>Slip status</label>
+        <name>Field6__c</name>
+    </fields>
+    <fields>
+        <label>Ticket code</label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label>Ticket name</label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label>Issue shop number</label>
+        <name>Field9__c</name>
+    </fields>
+    <fields>
+        <label>Invoice not display</label>
+        <name>InvoiceNoShowFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- $予約連泊情報 --></label>
+        <name>LeadInfo__c</name>
+    </fields>
+    <fields>
+        <label>$ Aggregate excluded</label>
+        <name>OutSideAccount__c</name>
+    </fields>
+    <fields>
+        <label><!-- POSNo. --></label>
+        <name>POSNo__c</name>
+    </fields>
+    <fields>
+        <label>Product name</label>
+        <name>PayProductName__c</name>
+    </fields>
+    <fields>
+        <label>Payment product</label>
+        <name>PayProductRef__c</name>
+        <relationshipLabel>Payment (Payment products)</relationshipLabel>
+    </fields>
+    <fields>
+        <label>$Payment amount</label>
+        <name>PaymentSummaryCal__c</name>
+    </fields>
+    <fields>
+        <label>$Pay amount(Without Tax)</label>
+        <name>PaymentSummaryNoTaxCal__c</name>
+    </fields>
+    <fields>
+        <label>Payment type</label>
+        <name>PaymentType__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当明細は既に印刷済がどうか識別フラグ --></help>
+        <label><!-- 印刷済 --></label>
+        <name>PrintedFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入金日 --></label>
+        <name>ReceiptDt__c</name>
+    </fields>
+    <fields>
+        <label>Related reservation</label>
+        <name>RelAccount__c</name>
+        <relationshipLabel>Payment</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- $予約タイプ --></label>
+        <name>ReservedTypeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約タイプ --></label>
+        <name>ReservedType__c</name>
+    </fields>
+    <fields>
+        <label><!-- $お部屋名 --></label>
+        <name>RoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋名 --></label>
+        <name>RoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- RowNo. --></label>
+        <name>RowNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCodeCal__c</name>
+    </fields>
+    <fields>
+        <label>Split No.</label>
+        <name>SplitGroupNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- A --></label>
+        <name>Taishou__c</name>
+    </fields>
+    <fields>
+        <label>$Consumer Tax amount base on media</label>
+        <name>Taxfee__c</name>
+    </fields>
+    <fields>
+        <label>Unit price and quantity combine</label>
+        <name>TempSaveExtInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- $部屋タイプ名 --></label>
+        <name>TypeOfRoomNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ名 --></label>
+        <name>TypeOfRoomName__c</name>
+    </fields>
+    <fields>
+        <label><!-- $利用日 --></label>
+        <name>UseDateCal__c</name>
+    </fields>
+    <fields>
+        <label>Use date</label>
+        <name>UseDate__c</name>
+    </fields>
+    <fields>
+        <label>Aggregate excluded</label>
+        <name>noneaccount__c</name>
+    </fields>
+    <nameFieldLabel>Account payment#</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>SalesTaxRate</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>SalesTaxRate</value>
+    </caseValues>
+    <fields>
+        <label>Effective start date</label>
+        <name>BeginDate__c</name>
+    </fields>
+    <fields>
+        <label>Effective end date</label>
+        <name>EndDate__c</name>
+    </fields>
+    <fields>
+        <label>TaxRate</label>
+        <name>TaxRate__c</name>
+    </fields>
+    <nameFieldLabel>Sales Tax Name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

@@ -1,0 +1,32 @@
+----------------------------------------------------------------------- 
+※本メールは、自動的に配信しています。 
+こちらのメールは送信専用のため、直接ご返信いただいてもお問い合わせには 
+お答えできませんので、あらかじめご了承ください。 
+----------------------------------------------------------------------- 
+
+{!ps__LeadIndex__c.ps__contactRef__c}様
+ご予約頂きまして、誠にありがとう御座います。ご予約についての変更を承りました。
+ご予約の新規・変更内容をお知らせします。
+
+予約Ｎｏ：{!ps__LeadIndex__c.Name}
+			
+【宿泊代表者氏名】 {!ps__LeadIndex__c.ps__contactRef__c}様({!ps__LeadIndex__c.ps__ContactKatakanaCal__c}) 
+【電話番号】 {!ps__LeadIndex__c.ps__ContactPhoneCal__c} 
+【メールアドレス】 {!ps__LeadIndex__c.ps__ContactEmailCal__c} 
+【住所】 〒{!ps__LeadIndex__c.ps__ContactPostalCodeCal__c} {!ps__LeadIndex__c.ps__ContactAddressCal__c} 
+
+{!ps__LeadIndex__c.ps__EmailBody__c}
+
+{!ps__LeadIndex__c.ps__contactRef__c}様のお越しを心よりお待ち申し上げております。
+※満席等の場合は、改めてご連絡させていただくことも御座います。
+
+鶴巻温泉　元湯陣屋
+フロント　予約係
+TEL：０４６３−７７−１３００
+
+陣屋ではFacebookへのご感想、コメントをお願いしています。
+陣屋での思い出、発見などどんなことでも結構です。
+心温まるHAPPYなコメントはスタッフの励みにもなります。
+
+http://www.facebook.com/TsurumakiOnsenJinya
+陣屋（鶴巻温泉　元湯　陣屋）　フェイスブック推進チーム

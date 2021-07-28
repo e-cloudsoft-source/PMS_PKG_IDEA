@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>権限設定</value>
+    </caseValues>
+    <fields>
+        <help><!-- 会計新規・変更不可フラグ
+TRUE：新規・変更不可
+FALSE:新規・変更可 --></help>
+        <label><!-- 会計新規変更不可 --></label>
+        <name>NoEditAccount__c</name>
+    </fields>
+    <fields>
+        <help><!-- 清掃ページに清掃ステータスを変更可／不可フラグ
+TRUE:清掃ページに清掃ステータスを変更不可 
+FALSE:清掃ページに清掃ステータスを変更可 --></help>
+        <label><!-- 清掃状態編集不可 --></label>
+        <name>NoEditCleanStatusFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 予約新規・変更不可フラグ
+TRUE：新規・変更不可
+FALSE:新規・変更可 --></help>
+        <label><!-- 予約新規変更不可 --></label>
+        <name>NoEditLead__c</name>
+    </fields>
+</CustomObjectTranslation>

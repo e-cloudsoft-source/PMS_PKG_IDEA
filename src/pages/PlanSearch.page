@@ -1,0 +1,267 @@
+<!-- プラン選択 -->
+<apex:page title="{!$Label.ps__msg_009_0044} " controller="PlanSearchCtrl" sidebar="false" showHeader="false" tabStyle="Plan__c" action="{!init}">
+<c:CommHeaderComp />
+<style>
+.span1Css{
+	min-width:74px;
+	word-break: break-all;
+}
+.span2Css{
+    min-width:30px;
+ 	word-break: break-all;
+ }
+ .span3Css{
+    min-width:115px;
+ 	word-break: break-all;
+</style>   
+<script type="text/javascript">
+$=jQuery.noConflict();
+
+var gPointLen = JINYACONNECT.NumberPointLen;
+var gTaxPointLen = JINYACONNECT.TaxNumberPointLen;
+function bindEvent() {
+	// Insert And UPDの場合、最新情報から親画面へ設定を行う
+	$("a[id$=':selectLink']").click(function() {
+		var rooter = $(this).parent();		
+		var outId = rooter.find("[id='id']").val();
+		var outNm = rooter.find("[id='name']").val();
+		//var outPrice = rooter.find("[id='price']").val();
+		//outPrice = commUtils.deleteRightZero(outPrice, gPointLen);
+		//var outTaxRate = rooter.find("[id='taxRate']").val();
+		//outTaxRate = commUtils.deleteRightZero(outTaxRate, gTaxPointLen);
+		//var outRoomFlag = rooter.find("[id='roomFlag']").val();	
+		//selectItem($, outId, outNm, outPrice, outTaxRate);
+		selectItem($, outId, outNm);
+	});
+}
+
+//function selectItem($, idVal, nameVal, priceVal, taxVal) {
+function selectItem($, idVal, nameVal) {
+    if(opener){
+        if(typeof(window.opener.document)=='unknown' || typeof(window.opener.document) == 'undefined' ){ 
+            // Opener Window Is Closed
+            top.window.close();
+        }else{
+            //var taxValLabel = (　taxVal == "" ? "0%" : taxVal + "%");
+            //var serviceLabel = (　serviceVal == "" ? "0%" : serviceVal + "%");
+            //specialVal = (specialVal == "" ? "0" : specialVal);
+			//objs = new Array(nameVal, idVal, nameVal, priceVal, 1, taxValLabel, taxVal);
+			objs = new Array(idVal, nameVal);
+			commUtils.popupSetter(objs);
+			window.opener.focus();
+			top.window.close();
+        } 
+    }else{ 
+        // Opener Window Is Closed
+        top.window.close();
+    }
+}
+/*
+// 画面Lockする
+function blockUi() {
+    $.blockUI({
+        baseZ: 60000,
+        //Processing...
+        message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" />{!$Label.MSG_009_0017}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $.unblockUI({ fadeOut: 200 }); 
+}*/
+</script>   
+
+<apex:form id="searchUserInfo" >
+<!-- プラン -->
+<apex:pageblock title="{!$Label.ps__msg_009_0045} ">
+	<apex:pageMessages />
+    <apex:pageBlockButtons location="bottom">
+        <!-- 検索  -->
+        <apex:commandButton action="{!queryInfo}" style="width:100px" value="{!$Label.ps__msg_009_0019}" id="theEditButton"/>
+        <!-- 新規 -->
+        <!--<apex:commandButton action="{!insertInit}" style="width:100px" value="{!$Label.MSG_009_0020}" id="theInsButton"/>-->
+    </apex:pageBlockButtons>
+    <!-- 検索条件 -->
+    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_009_0021}" >
+        <apex:outputPanel id="condtionPanel" >
+        <span class="lookupInput">
+        <!-- プラン名 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.Name.label}" />
+            <apex:inputText value="{!c_planNm}" id="productName" style="width:170px"/>
+        </apex:pageblockSectionItem>
+        <!--　店舗情報 -->
+        <apex:pageblockSectionItem >
+            <apex:outputlabel value="{!$ObjectType.Plan__c.Fields.ShopInfoRef__c.label}" style="margin-left: 10px"/>
+            <apex:selectList value="{!branchShopNm}" multiselect="false" size="1">
+				<apex:selectOption itemValue="" itemLabel="ALL"/>
+				<apex:selectOptions value="{!branchShopLst}"/>
+			</apex:selectList>
+        </apex:pageblockSectionItem>
+        <!-- カテゴリ -->
+        <apex:pageblockSectionItem >
+			<apex:outputlabel value="{!$ObjectType.Plan__c.Fields.DpRef__c.label}" style="margin-left: 10px" />
+			<apex:selectList value="{!c_dpId}" multiselect="false" size="1">
+				<apex:selectOption itemValue="" itemLabel=""/>
+				<apex:selectOptions value="{!dpOptionLst}"/>
+			</apex:selectList>
+        </apex:pageblockSectionItem>
+        <!-- 部門 -->
+        <apex:pageblockSectionItem >
+        	<apex:outputlabel value="{!$ObjectType.Plan__c.Fields.GpRef__c.label}" style="margin-left: 10px" />
+			<apex:selectList value="{!c_gpId}" multiselect="false" size="1">
+				<apex:selectOption itemValue="" itemLabel=""/>
+				<apex:selectOptions value="{!gpOptionLst}"/>
+			</apex:selectList>
+        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+
+    </apex:pageBlockSection>
+</apex:pageblock>
+</apex:form>
+
+<apex:form id="resultForm" >
+<!-- プラン -->
+<apex:pageblock id="userInfoList" >
+<script>
+$(document).ready(function($) {
+	bindEvent();
+});
+</script>
+
+	<apex:pageBlockButtons >
+		<apex:outputpanel style="float: right;" id="changePanel">
+		<!-- of -->    <!-- items -->
+          <apex:outputLabel value="{!pageCtrl.StartRsNo} - {!pageCtrl.EndRsNo} {!$Label.ps__msg_009_0029} {!pageCtrl.TotalRs} {!$Label.ps__msg_009_0030}"/>
+          <apex:commandLink action="{!firstPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 10px">
+          		<span class="k-icon k-i-seek-w"></span>
+          </apex:commandLink>
+          <apex:commandLink action="{!previousPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-w"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!nextPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-arrow-e"></span>
+          </apex:commandLink> 
+          <apex:commandLink action="{!lastPage}" status="JINYACONNECT_LOADINGSTATUS" 
+          	reRender="userInfoList" styleclass="k-button" style="margin-left: 2px">
+          		<span class="k-icon k-i-seek-e"></span>
+          </apex:commandLink> 
+    	</apex:outputpanel>
+    </apex:pageBlockButtons>
+    
+    <apex:pageBlockTable value="{!oPlanLst}" var="plan" styleClass="list" width="100%" id="rstable">
+        <apex:column >
+              <apex:facet name="header"></apex:facet>
+              <apex:outputLink value="#" id="selectLink"><!-- 選択 -->{!$Label.ps__msg_009_0026}</apex:outputLink>
+              <input type="hidden" value="{!plan.id}" id="id"/>
+              <input type="hidden" value="{!plan['name']}" id="name"/>
+              <input type="hidden" value="{!plan['Price__c']}" id="price"/>
+              <input type="hidden" value="{!plan['JmstRef__c']}" id="taxRate" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header">{!$ObjectType.Plan__c.Fields.Name.label}</apex:facet>
+              <div class="span3Css">
+	          	<span class="span3Css" >
+              		<apex:outputField value="{!plan['Name']}" />
+              	</span>
+              </div>
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- パッケージコード-->	 {!$ObjectType.Plan__c.Fields.PackageCode__c.label}</apex:facet>
+              <div class="span1Css">
+	              <span class="span1Css" >
+	              	<apex:outputField value="{!plan['PackageCode__c']}"/> 
+	              </span>
+              </div>
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- PlanNo -->  {!$ObjectType.Plan__c.Fields.PlanNo__c.label}</apex:facet>
+              <apex:outputField value="{!plan['PlanNo__c']}" style="min-width:55px"/>
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- サービス料(%) -->	  {!$ObjectType.Plan__c.Fields.ServiceRate__c.label}</apex:facet>
+              <apex:outputField value="{!plan['ServiceRate__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- 消費税 -->	{!$ObjectType.Plan__c.Fields.JmstRef__c.label}</apex:facet>
+              <!-- 2017/03/16 消費税显示格式 Fix BEGIN by zh -->
+              <!-- <apex:outputField value="{!plan['JmstRef__r.TaxRate__c']}" /> -->
+              <apex:outputText value="{0,number,{!TaxNumberFormat}}">
+	            <apex:param value="{!plan['JmstRef__r.TaxRate__c']/100}" />
+			  </apex:outputText>
+			  <!-- 2017/03/16 消費税显示格式 Fix END by zh -->
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- カテゴリ -->  {!$ObjectType.Plan__c.Fields.DpRef__c.label}</apex:facet>
+              <apex:outputField value="{!plan['DpRef__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- 部門 -->  {!$ObjectType.Plan__c.Fields.GpRef__c.label}</apex:facet>
+              <apex:outputField value="{!plan['GpRef__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- ベースプラン -->  {!$ObjectType.Plan__c.Fields.BasePlanFlg__c.label}</apex:facet>
+              <apex:outputField value="{!plan['BasePlanFlg__c']}" />
+        </apex:column>
+        <apex:column >
+              <apex:facet name="header"><!-- AGT -->  {!$ObjectType.Plan__c.Fields.client__c.label}</apex:facet>
+              <div class="span2Css" >
+	              <span class="span2Css" >
+	              	<apex:outputField value="{!plan['client__c']}"/>
+	              </span>
+              </div>
+        </apex:column>
+        <!--<apex:column >
+        	<apex:facet name="header">--><!-- 店舗情報 -->	   <!-- {!$ObjectType.Plan__c.Fields.ShopInfoRef__c.label}</apex:facet>
+              <apex:outputField value="{!plan['ShopInfoRef__c']}" />
+        </apex:column>-->
+        <apex:column >
+              <apex:facet name="header"><!-- プラン金額 -->  {!$ObjectType.Plan__c.Fields.Price__c.label}</apex:facet>
+              <apex:outputText value="{0,number,{!numberFormat}}" id="priceLabel">
+              	<apex:param value="{!plan['Price__c']}" />
+              </apex:outputText>
+        </apex:column>
+        <!-- 2017/03/16 非公開列不显示 Fix BEGIN by zh -->
+        <!-- <apex:column >
+              <apex:facet name="header"><!-- 非公開   {!$ObjectType.Plan__c.Fields.IsClosed__c.label}</apex:facet>
+              <apex:outputField value="{!plan['IsClosed__c']}" />
+        </apex:column> -->
+        <!-- 2017/03/16 非公開列不显示 Fix END by zh -->
+    </apex:pageBlockTable>
+
+</apex:pageblock>
+</apex:form>
+
+<!-- 登録画面BLOCK -->
+<!--<apex:form id="InfoForm">
+<apex:pageblock id="accMstNewPage" rendered="{!isIns}">
+	<apex:pageMessages />
+    <apex:pageBlockButtons location="bottom">-->
+        <!-- 保存  -->
+        <!-- <apex:commandButton value="{!$Label.MSG_009_0027}" style="width:100px" action="{!insertData}" status="JINYACONNECT_LOADINGSTATUS" id="save"/>-->
+        <!-- キャンセル -->
+        <!--<apex:commandButton value="{!$Label.MSG_009_0028}" style="width:100px" action="{!cancelAct}" status="JINYACONNECT_LOADINGSTATUS"  id="cancel" immediate="true"/>-->
+    <!--</apex:pageBlockButtons>
+	<apex:pageBlockSection columns="1" >
+		<apex:inputField value="{!newAccMst.Name}" required="true" />
+		<apex:inputField value="{!newAccMst.Price__c}" />
+		<apex:inputField value="{!newAccMst.JmstRef__c}" />
+		<apex:inputField value="{!newAccMst.ServiceRate__c}" />
+	</apex:pageBlockSection>
+
+</apex:pageblock>
+<apex:outputPanel id="updInfo" rendered="{!isUpd}">
+     <apex:inputHidden value="{!newAccMst.Id}" id="id"/>
+     <apex:inputHidden value="{!newAccMst.Name}" id="name"/>
+     <apex:inputHidden value="{!newAccMst.Price__c}" id="price"/> 
+     <apex:inputHidden value="{!newAccMst.JmstRef__c}" id="taxRate"/>
+     <apex:inputHidden value="{!newAccMst.ServiceRate__c}" id="serviceRate"/>
+</apex:outputPanel>
+</apex:form> --> 
+ 
+</apex:page>

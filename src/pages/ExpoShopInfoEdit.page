@@ -1,0 +1,395 @@
+<apex:page controller="ExpoShopInfoEditCtrl" id="ExpoShopInfoPage" action="{!initAct}" showHeader="false" standardStylesheets="false" title="店舗情報" docType="html-5.0" cache="false" >
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/kendo.common-bootstrap.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/kendo.bootstrap.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/styles.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.default.min.css')}"/>
+
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/loader.js')}"/>
+<c:CommHeaderComp loadJsLib="false"/>
+<style>
+h3 {
+	font-size: 1.5rem;
+	position: relative;
+	background: #f5f5f5;
+	font-weight: bold;
+	border-left: 3px solid #1ea22a;
+	padding: 5px 5px;
+	margin-bottom: 10px;
+}
+/* 多选框设定 */
+.k-multiSelect{
+	vertical-align: middle;
+	display: inline-block;
+}
+/* 多选内容显示的颜色 */
+.k-multiselect .k-button {
+	 border-color: #d5d5d5;
+	 background-color: #d5d5d5;
+}
+.boxDiv{
+	border: 3px solid #e3e3e3;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+.titleDiv{
+	background-color:#5e82a3;
+	text-align:left;
+	margin-bottom: 0px;
+}
+/* 必填项Css */
+.hide{
+	display: none;
+}
+.span-input > *{
+	width: 100%;
+}
+.infoDiv{
+	margin: 5px;
+}
+.ui-autocomplete {
+	max-height: 260px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.k-checkbox-label{
+	vertical-align: text-top;
+}
+.parent{
+	position: relative;
+}
+.child{
+	border-left: 3px solid #c00;
+	width: 3px;
+	margin-left: -4px;
+	position: absolute;
+	top: 25%;
+	bottom: 25%;
+}
+.requiredExample {
+	border-left: 3px solid #c00;
+	font-size: 80%;
+	vertical-align: 1px;
+	width: 90px;
+	text-align: left;
+	position: absolute;
+	top: 5px;
+	right: 0px;
+	font-weight: bold;
+}
+</style>
+<header id="header">
+	<c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}" />
+</header>
+<div id="bodyDiv" style="min-width:{!IF(expo.custTrWidthMax > 1024 , (expo.custTrWidthMax + 40), '')}px">
+	<apex:form id="mainForm" styleClass="k-mainForm" >
+		<div class="boxDiv">
+		<div class="infoDiv" align="center">
+		<table align="center" style="width: 100%; font-weight: bold;" cellpadding="0" cellspacing="0" html-table="main">
+			<apex:repeat value="{!expo.custSectionInfoLst}" var="section">
+			<tr><td colspan="{!expo.custColMax}"><div class="titleDiv parent"><h3>{!JSENCODE(section.sctnTitle)} </h3> <div class="requiredExample">&nbsp; = 必須情報</div></div></td></tr>
+			<apex:repeat value="{!section.sctnColLst}" var="sectionItem">
+				<tr style="line-height:{!expo.custHeight};height:{!expo.custHeight};">
+					<apex:variable var="tdNo" value="{!0}"/>
+					<apex:repeat value="{!sectionItem}" var="api">
+						<apex:repeat value="{!expo.custFieldInfoMap[api]}" var="item">
+						<td style="width:{!expo.custTdWidthMaxMap[tdNo]}px">
+						<apex:variable var="tdNo" value="{!tdNo + 1}"/>
+						<span style="float: left; width:{!IF(expo.isDefFlg || (expo.custColMax == 1), '35%', expo.custLabWidth)}" ><span style="margin-right:20px;float: right;">{!item.fieldLab}</span></span>
+						<span style="float: left; width:{!IF(expo.isDefFlg || (expo.custColMax == 1), '32%', item.fieldWidPx)}" class="span-input parent">
+							<span class="{!IF(item.fieldReq && !item.fieldRom,'child','hide')}"></span>
+								<apex:input type="text" html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}" html-maxlength="{!item.fieldLen}"
+												html-req="{!item.fieldReq}"
+												disabled="{!item.fieldRom}"
+												html-oldVal="{!item.fieldVal}" value="{!item.fieldVal}"
+												onblur="valOnchangeFun(this);"
+												rendered="{!IF(((item.fieldTyp == 'STR' ||
+														item.fieldTyp == 'INT' ||
+														item.fieldTyp == 'DBL' ||
+														item.fieldTyp == 'DBL' ||
+														item.fieldTyp == 'EMAIL' ||
+														item.fieldTyp == 'CURR'  ||
+														item.fieldTyp == 'PCT'  ||
+														item.fieldTyp == 'DT'  ||
+														item.fieldTyp == 'DTTM') && 
+														!item.fieldImg ), TRUE, FALSE)}"
+															
+												styleClass="{!IF(item.fieldTyp == 'STR' || item.fieldTyp == 'EMAIL', 'k-textbox', '')}
+														{!IF(item.fieldTyp == 'INTE' || item.fieldTyp == 'DBL' || item.fieldTyp == 'CURR' || item.fieldTyp == 'PCT', 'k-numberbox', '')}
+														{!IF(item.fieldTyp == 'DT', 'k-datebox', '')}
+														{!IF(item.fieldTyp == 'DTTM', 'k-dateTimebox', '')}
+														{!IF(item.fieldRom, 'ec-disabled', '')} "/>
+							<apex:outputPanel styleClass="span-input" rendered="{!IF((item.fieldTyp == 'CPLST'), TRUE, FALSE)}" >
+							<input id="inputId" type="text" api="{!item.fieldApi}" typ="{!item.fieldTyp}" maxlength="{!item.fieldLen}"
+										req="{!item.fieldReq}"
+										oldVal="{!item.fieldVal}" value="{!item.fieldVal}"
+										onchange="valOnchangeFun(this);"
+										/>
+							</apex:outputPanel>
+							<!-- 单选下拉列表 -->
+							<apex:selectList html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}"
+											html-req="{!item.fieldReq}"
+											disabled="{!item.fieldRom}"
+											html-oldval="{!item.fieldVal}" value="{!item.fieldVal}"
+											onchange="valOnchangeFun(this);"
+											multiselect="false"
+											rendered="{!IF(item.fieldTyp == 'PLST', TRUE, FALSE)}" styleClass="k-dropDownList">
+								<apex:selectOption itemValue="" itemLabel=""/>
+								<apex:selectOptions value="{!item.fieldPLst}"/>
+							</apex:selectList>
+							<!-- 多选下拉列表 -->
+							<apex:selectList html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}"
+											html-req="{!item.fieldReq}"
+											disabled="{!item.fieldRom}"
+											html-oldval="{!item.fieldVal}" value="{!item.fieldVal}"
+											onchange="valOnchangeFun(this);"
+											multiselect="true"
+											rendered="{!IF(item.fieldTyp == 'MPLST', TRUE, FALSE)}" styleClass="k-multiSelect">
+											
+								<apex:selectOptions value="{!item.fieldPLst}"/>
+							</apex:selectList>
+							<!-- 参照下拉列表 -->
+							<apex:selectList html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}" html-ref="{!item.fieldRef}"
+											html-req="{!item.fieldReq}"
+											disabled="{!item.fieldRom}"
+											html-oldval="{!item.fieldVal}" value="{!item.fieldVal}"
+											onchange="valOnchangeFun(this);"
+											multiselect="false"
+											rendered="{!IF(item.fieldTyp == 'REF', TRUE, FALSE)}" styleClass="k-comboBox">
+								<apex:selectOption itemValue="" itemLabel=""/>
+								<apex:selectOptions value="{!item.fieldPLst}"/>
+							</apex:selectList>
+							<!-- BOOLEAN型 -->
+							<apex:inputCheckbox html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}"
+											html-req="{!item.fieldReq}"
+											html-oldVal="{!item.fieldVal}" value="{!item.fieldVal}"
+											style="display: none;"
+											onchange="valOnchangeFun(this);"
+											rendered="{!IF(item.fieldTyp == 'BLN', TRUE, FALSE)}" Id="box" styleClass="k-checkbox"/>
+							<apex:outputLabel for="box" rendered="{!IF(item.fieldTyp == 'BLN', TRUE, FALSE)}" styleClass="k-checkbox-label"/>
+						</span>
+						</td>
+						</apex:repeat>
+					</apex:repeat>
+				</tr>
+			</apex:repeat>
+			</apex:repeat>
+		</table>
+		<table align="center" style="width: 100%; font-weight: bold;{!if(dataId == '','display:none;','')}" cellpadding="0" cellspacing="0" html-table="main">
+			<tr><td><div class="titleDiv parent"><h3>ロゴの詳細 </h3> <div class="requiredExample">&nbsp; = 必須情報</div></div></td></tr>
+			<tr>
+				<td>
+					<span style="float: left; width:{!IF(expo.isDefFlg || (expo.custColMax == 1), '35%', expo.custLabWidth)}" >
+						<span style="margin-right:20px;float: right;">ロゴ</span>
+					</span>
+					<span style="float: left;" class="span-input parent">
+						<apex:outputfield value="{!SpcdLog.ReportLogo__c}" rendered="{!SpcdLog.Id != null}"/>
+						<apex:outputPanel rendered="{!SpcdLog.Id == null}" >
+							<img  style="height:38px" src="{!SpcdLog.ReportLogo__c}"/>
+						</apex:outputPanel>
+						<br/>
+						<!-- 2019/09/15 Security Check BY zyz BEGIN -->
+						<input type="button" value="ロゴの置き換え" class="btn bc-gy" onclick="openUrl('{!JSENCODE(dataId)}',false)"/>
+						<!-- 2019/09/15 Security Check BY zyz END -->
+					</span>
+				</td>
+			</tr>
+		</table>
+		</div>
+		</div>
+		<div class="md-buttons">
+			<a class="btn bc-gy" href="{!URLFOR($Page.ExpoShopInfoView, null,[sid=sessionId], false)}" >キャンセル</a>
+			<!-- 2019/09/15 Security Check BY zyz BEGIN -->
+			<a href="javascript:void(0);" class="btn bc-bl" onclick="saveDataFun('{!JSENCODE(dataId)}');" style="margin-left: 50px;">保存</a>
+			<!-- 2019/09/15 Security Check BY zyz END -->
+		</div>
+	</apex:form>
+</div>
+<footer id="footer">
+	<c:ExpoFooterComp />
+</footer>
+<script>
+$(document).ready(function() {
+	setKendoUIFun();
+	$(".k-textbox[typ='EMAIL']").blur(function(){
+		var $me = $(this);
+		$me.css('border','');
+		$me.attr('qualified', 'true');
+		$me.attr('title', '使用できます。');
+		if($me.val() == '') return;
+		var reg = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/g;
+		if(!reg.test($me.val())){
+			$me.css('border','solid 1px #ff00006b');
+			$me.attr('qualified', 'false');
+			$me.attr('title', '有効なメールアドレスを入力してください');
+		}
+	});
+});
+function setKendoUIFun(){
+	kendo.culture("ja-JP");
+	$(".k-datebox").kendoDatePicker({ format: "{!expo.DATEFORMAT}" });
+	$(".k-dateTimebox").kendoDateTimePicker({ format: "{!expo.DATETIMEFORMAT}" });
+	// int
+	$(".k-numberbox[typ='INTE']").kendoNumericTextBox({
+		format: "n0",
+		min:0,
+	});
+	// double
+	$(".k-numberbox[typ='DBL']").kendoNumericTextBox({
+		format: "n",
+		min:0,
+	});
+	// Currency
+	$(".k-numberbox[typ='CURR']").kendoNumericTextBox({
+		decimals: JINYACONNECT.NumberPointLen,
+		format: "c" + JINYACONNECT.NumberPointLen,
+		min: 0
+	});
+	// Percent
+	$(".k-numberbox[typ='PCT']").kendoNumericTextBox({
+		format: "p0",
+		step: 0.1,
+		min: 0
+	});
+	$(".k-dropDownList").kendoDropDownList();
+	$(".k-multiSelect").kendoMultiSelect({
+		autoClose: false,
+	});
+	
+	// 多选类型值处理
+	multiselectFun();
+	var comboBox = $("select.k-comboBox[api]");
+	comboBox.kendoComboBox({
+		dataTextField: "parentName",
+		dataValueField: "parentId",
+		filter: "contains",
+	}).prev().children('span:last').one("click",function(){
+		var select = $(this).parent().next("select");
+		var ref = select.attr("ref") || "";
+		// 获取参照字段的API参照名
+		var refApi = select.attr("api") || "";
+		if(ref != "" && refApi != ""){
+			var value = select.data("kendoComboBox").value();
+			Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.ExpoShopInfoEditCtrl.getRefDs}", ref, function(result, event){
+				if(event.type == 'exception') {
+					alert(event.message);
+				} else if(result != null){
+					// 根据API参照名对应数据，防止一个表内两个API参照同一个object
+					//$(".k-comboBox[ref='" + ref + "']").data("kendoComboBox").setDataSource(result);
+					$("select.k-comboBox[api='" + refApi + "']").data("kendoComboBox").setDataSource(result);
+					select.data("kendoComboBox").readonly(false);
+					select.data("kendoComboBox").select(function(dataItem){
+						return dataItem.value === value;
+					});
+					select.data("kendoComboBox").open();
+				}
+			});
+		}
+	});
+	comboBox.each(function(index, element){
+		var $el = $(element);
+		$el.data("kendoComboBox") && $el.data("kendoComboBox").readonly();	
+	});
+	/*
+	// 级联特殊字段处理
+	if($("[api='demomin__c']").length > 0 && $("[api='democ__c']").length > 0){
+		$("[api='demomin__c']").kendoDropDownList({
+		  	optionLabel: "--なし--",
+			dataTextField: "parentName",
+			dataValueField: "parentId",
+			dataSource: {!parentDsJson},
+		});
+		$("[api='democ__c']").kendoDropDownList({
+		  	optionLabel: "--なし--",
+			cascadeFrom: "inputId",
+			dataTextField: "childName",
+			dataValueField: "childId",
+			dataSource: {!childDsJson},
+		});
+	}
+	*/
+}
+// 多选类型值的处理
+function multiselectFun(){
+	$("select.k-multiSelect").each(function(){
+		var multiselect = $(this).data("kendoMultiSelect");
+		var selArray = $(this).attr("oldVal").split(";");
+		multiselect.value(selArray);
+	});
+}
+var newDataMap = new Map();
+function saveDataFun(dataId, insertFlag){
+	var reqFieldValEmpty = false;
+	$("[req][api]").each(function(){
+		var $field = $(this);
+		if(($field.attr("req") == "true" && $.trim($field.val()).length == 0) || $field.attr('qualified') == "false") {
+			reqFieldValEmpty = true;
+			return false;
+		}
+	});
+	if(reqFieldValEmpty){
+		alert("必須項目を入力してください。");
+		return;
+	}
+	if(newDataMap.size == 0) {
+		openUrl();
+		return;
+	}
+	startLoading();
+	Visualforce.remoting.Manager.invokeAction(
+	"{!$RemoteAction.ExpoShopInfoEditCtrl.saveInfo}", dataId, JSON.stringify(newDataMap.map), "{!JSENCODE(currentUser.ExpoOrgInfoRef__c)}", function (result, event) {
+		if (event.type == 'exception') {
+			alert(event.message);
+		} else {
+			newDataMap.clear();
+			if(insertFlag == false) cancelFun();
+			else openUrl(result,dataId == result);
+		}
+		stopLoading();
+	}, {escape: false});
+	 
+}
+
+function openUrl(shopid,insertFlag){
+	var sid="{!sessionId}";
+	var openUrl = "{!URLFOR($Page.ExpoShopInfoView)}"+"?sid="+sid;
+	// 2018/09/26 店舗レポートロゴ変更機能追加　by zy BEGIN
+	if (shopid && !insertFlag){
+		if(newDataMap.size > 0) {
+			if(window.confirm('店舗の変更内容を保存しますか？')) saveFun();
+			else cancelFun();
+			return;
+		}
+		openUrl = "{!URLFOR($Page.ExpoLogoUploadPage)}"+"?sid="+sid + '&id=' + shopid;
+	}
+	// 2018/09/26 店舗レポートロゴ変更機能追加　by zy END
+	window.location.href = openUrl;
+}
+function cancelFun() {
+	// 2019/09/15 Security Check BY zyz BEGIN
+	window.location.href = "{!URLFOR($Page.ExpoLogoUploadPage)}"+"?sid=" + "{!JSENCODE(sessionId)}" + "&id=" + '{!JSENCODE(dataId)}';
+	// 2019/09/15 Security Check BY zyz END
+}
+function saveFun() {
+	// 2019/09/15 Security Check BY zyz BEGIN
+	saveDataFun('{!JSENCODE(dataId)}', false);
+	// 2019/09/15 Security Check BY zyz END
+}
+function valOnchangeFun(_this){ // 处理SUB数据变更
+	var newval = $(_this).val();
+	var oldval = $(_this).attr("oldval");
+	var api = $(_this).attr("api");
+	if(newval == oldval) newDataMap.delete(api);
+	else {
+		var typ = $(_this).attr("typ");
+		if(typ == "MPLST" && newval != null) newval = newval.join(";");
+		if(typ == "BLN") newval = $(_this).is(':checked');
+		newDataMap.set(api, [newval,oldval,typ]);
+	}
+}
+</script>
+</apex:page>

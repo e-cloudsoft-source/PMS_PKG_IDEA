@@ -1,0 +1,14 @@
+<apex:component >
+<apex:attribute name="elementId" description="Set the User Id to the Element" type="String" required="true"/>
+<apex:attribute name="elementName" description="Set the User Name to the Element" type="String" required="true"/>
+<apex:attribute name="filter" description="Set the paramter for user search" type="String" required="false"/>
+<apex:attribute name="onclikcFun" description="onclick js function name" type="String" required="false" />
+<apex:attribute name="openPgUrl" description="open window url" type="String" required="required" />
+<img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+              onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+              onfocus="this.className = 'lookupIconOn';"
+              onblur="this.className = 'lookupIcon';"
+              class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+              onclick="{!onclikcFun}('{!openPgUrl}','{!elementId}','{!elementName}', '{!filter}');"/>
+
+</apex:component>

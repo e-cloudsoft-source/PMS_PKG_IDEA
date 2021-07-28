@@ -1,0 +1,1009 @@
+<apex:page standardController="Yadochou__c" extensions="GuestBookingInputCtrl" action="{!init}" showheader="{!isShowHeader}" sidebar="false" title="宿泊名簿">
+<!-- 2017/04/12 署名 zyz BEGIN -->
+<meta name="screen-orientation" content="portrait" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0;"/>
+<!-- 2017/04/12 署名 zyz END -->
+<c:CommHeaderComp />
+<apex:includeScript value="{!URLFOR('/soap/ajax/30.0/connection.js')}"/>
+<apex:includeScript value="{!URLFOR('/soap/ajax/30.0/apex.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.autoKana.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.ZipcodeSearch, 'js/ZipSearchMuliti.js')}"/>
+<style>
+/* 2017/03/17 读取xml设定layout BEGIN by wx */
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+/* 2017/03/17 读取xml设定layout END by wx */
+/* 2017/03/22 移動 BEGIN  */
+.pointImg{
+	cursor: move;
+}
+.theadTr{
+	height: 26px;
+}
+/* 2017/03/22 移動 END  */
+.normalCol{
+	width: 100px;
+}
+.normalCol .k-input {
+	width:98%;
+}
+.normalColEmail {
+	width: 150px;
+}
+.normalColEmail .k-input {
+	width:98%;
+}
+td.lastAreaTd {
+	vertical-align: top;
+}
+td.tdHidden {
+	display:none;
+}
+.searchInput {
+	width: 400px;
+}
+.ui-autocomplete {
+    max-height: 260px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+img.lookupIcon{
+	display: none;
+}
+</style>
+
+<script>
+$ = jQuery.noConflict();
+var _g_ns = "{!JSENCODE($Setup.CommDefine__c.AppNS__c)}";
+function setFocusOnLoad() {}// Sf Auto Complete Event disabled
+// 2017/05/22 署名 zyz BEGIN
+var switchCode = "{!JSENCODE($Setup.CommDefine__c.CashRegisterSwitchCode__c)}";
+// 2017/05/22 署名 zyz END
+</script>
+<apex:outputPanel id="errMsgPanel">
+<apex:pageMessages />
+</apex:outputPanel>
+<!-- 2017/04/12 署名 zyz BEGIN -->
+<script>
+// Handtekening verskyn links
+function signaTrueOpen(yadoid){
+	var openUrlPlus = "";
+	// 予約確認書４の場合
+	// 2017/10/23 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+	if ( switchCode == "4" || switchCode == "5") {
+	// 2017/10/23 全画面サイン、画像ファイルに保存の改善対応 zyz END
+		//金額を表示しますか？
+		if (window.confirm( "{!$Label.MSG_012_0133}")) {
+			openUrlPlus = "&smy=1";
+		}    
+	}
+	// 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz BEGIN
+	var openUrl = "{!URLFOR('/apex/CashRegisterCardSignSwitch')}"+"?id="+yadoid + openUrlPlus;
+	/*
+	// 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz END
+	// 2017/10/23 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN
+	if(switchCode == "4"){
+		var openUrl = "{!URLFOR('/apex/CashRegisterCardPDF4Sign')}"+"?id="+yadoid + openUrlPlus;
+	} else if(switchCode == "5"){
+		var openUrl = "{!URLFOR('/apex/CashRegisterCardPDF5Sign')}"+"?id="+yadoid + openUrlPlus;
+	// 2018/07/17 レジカードコード7の署名機能追加 zyz BEGIN
+	} else if(switchCode == "7"){
+		var openUrl = "{!URLFOR('/apex/CashRegisterCardPDF7Sign')}"+"?id="+yadoid + openUrlPlus;
+	}
+	// 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz BEGIN
+	*/
+	// 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz END
+	// 2018/07/17 レジカードコード7の署名機能追加 zyz END
+	// 2017/10/23 全画面サイン、画像ファイルに保存の改善対応 zyz END
+	window.open(openUrl, "CashRegisterCardPDF","width=780, height=980,scrollbars=no,toolbar=no,menubar=no,status=no,directories=no,resizable=no");
+	$("#img_"+yadoid).attr("src", "/img/func_icons/util/checkmark16.gif");
+	$("#signa_title_"+yadoid).attr("title", "署名済");
+}
+</script>
+<!-- 2017/04/12 署名 zyz END -->
+<apex:form id="baseInfoSelect"  rendered="{!isShowHeader}">
+<apex:actionFunction action="{!confirm}" name="searchDataFun" status="JINYACONNECT_LOADINGSTATUS" reRender="bookingForm,errMsgPanel,guestInputBlock">
+	<apex:param name="roomIndex" value="" />
+</apex:actionFunction>
+<apex:pageBlock id="guestInputBlock" title="宿帳">
+	<table>
+		<tr style="vertical-align: middle;">
+			<td><apex:outputlabel value="検索項目:" /></td>
+			<td>
+			<span class="lookupInput">
+			<apex:inputField value="{!inputLead.LeadIndexRef__c}" styleClass="k-input searchInput" id="SearchLeadNo" html-placeholder="お客様名、電話番号、メール、予約番号を入力してください" >
+		            <!-- 2018/05/21 宿帳入力機能改善対応 zyz BEGIN -->
+		            <c:AutoCompleteComp objectname="{!$Setup.CommDefine__c.AppNS__c}LeadIndex__c" 
+		            	showField="{!$Setup.CommDefine__c.AppNS__c}ContactNameCal__c,{!$Setup.CommDefine__c.AppNS__c}EntryDate__c,{!$Setup.CommDefine__c.AppNS__c}contactRef__r.Phone,{!$Setup.CommDefine__c.AppNS__c}contactRef__r.Email,{!$Setup.CommDefine__c.AppNS__c}LeadName__c,{!$Setup.CommDefine__c.AppNS__c}TravelLeadNo__c" 
+		            	autocomplete_textbox="{!$Component.SearchLeadNo}"
+		            	jslibnew="true"
+		            	showFieldSeparator=","
+		            	withContact="true"
+		            	contactKey="contactRef__c"
+		            	selectedCallBackFunction="_search_callbackFunction"
+		            	respBeforeFunction="_respBeforeFunction"
+		            	sortKey="order by createddate desc"
+		            	addFilter="{!autoComLeadNoFilter}"
+		            	autofocus="false"/>
+		            <!-- 2018/05/21 宿帳入力機能改善対応 zyz END -->
+			</apex:inputField>
+			</span>
+			</td>
+			<td>
+			<!-- 
+			<input type="button" onclick="javascript:searchDataFun()" value="確定" style="width:100px" class="btn"/>
+			 -->
+			</td>
+		</tr>
+	</table>
+			
+</apex:pageBlock>
+</apex:form>
+
+<apex:form id="bookingForm" >
+<!-- 2019/09/15 Security Check BY zyz BEGIN -->
+<input type="hidden" value="{!$Setup.CommDefine__c.ps__ApplicationFormShopLogoFlg__c}" id="hidApplicationFormShopLogoFlg" />
+<!-- 2019/09/15 Security Check BY zyz END -->
+<!-- 2017/03/22 移動 BEGIN -->
+<!-- <apex:actionFunction action="{!addNewLine}" name="addNewLineFun" status="JINYACONNECT_LOADINGSTATUS" reRender="guestInputBlock"> -->
+<apex:actionFunction action="{!addNewLine}" name="addNewLineFun" status="JINYACONNECT_LOADINGSTATUS" oncomplete="restoreAreaToUi()" reRender="guestInputBlock,errMsgPanel">
+<!-- 2017/03/22 移動 END -->
+	<apex:param name="roomIndex" value="" />
+</apex:actionFunction>
+<!--
+<apex:outputPanel rendered="{!AND(!ISBLANK(inputLead.LeadIndexRef__c) ,roomGuestList.size==0)}">
+<apex:pageMessage summary="有効な予約情報が存在しておりませんため、宿帳情報を登録できません." severity="Warning" strength="1" />
+</apex:outputPanel>
+-->
+<apex:pageBlock title="{!edtiContactName}" id="guestInputBlock" rendered="{!AND(!ISBLANK(inputLead.LeadIndexRef__c),roomGuestList.size > 0)}">
+ 	<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+ 	<input type="hidden" value="{!RespectFlg}" id="hidRespectFlg" />
+ 	<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+ 	<apex:pageBlockButtons >
+		<!-- 2017/03/21 读取xml设定layout BEGIN by wx -->
+		<!-- <apex:commandButton action="{!saveGuestInfo}" value="保存" style="width:100px"/> -->
+		<input type="button" value="保存" style="width:100px" class="btn" onclick="preSaveFun(true);if(disableOn(this)) return false;" id="disableOnSubmit" />
+		<apex:actionFunction name="saveGuestInfo" action="{!saveGuestInfo}" oncomplete="restoreAreaToUi()" reRender="bookingForm,guestInputBlock,errMsgPanel" status="JINYACONNECT_LOADINGSTATUS"/>
+		<!-- 2017/03/21 读取xml设定layout END by wx -->
+		<!-- 
+		<input type="button" value="レジカード" class="btn" style="width:100px"/>
+		<input type="button" value="予約確認書" class="btn" style="width:100px"/>
+		-->
+	</apex:pageBlockButtons>
+	<apex:variable var="roomcount" value="{!0}"/>
+	<apex:repeat value="{!roomGuestList}" var="oneRoom" >
+	<div class="k-block k-info-colored">
+	<div style="float: right;">
+	<apex:outputPanel rendered="{!!ISBLANK(oneRoom.yado.Id)}">
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+	<!-- 2017/10/23 全画面サイン、画像ファイルに保存の改善対応 zyz BEGIN -->
+	<!-- 2018/07/17 レジカードコード7の署名機能追加 zyz BEGIN -->
+	<!--<span title="{!if((oneRoom.signature == null && oneRoom.pagesignature == null),'未署名','署名済')}" style="display: {!IF((($Setup.CommDefine__c.ps__CashRegisterSwitchCode__c == '4' || $Setup.CommDefine__c.ps__CashRegisterSwitchCode__c == '5') && $Setup.CommDefine__c.ps__CashRegisterSign__c), 'inline-flex;','none')}" id="signa_title_{!oneRoom.yado.Id}" >-->
+	<!-- 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz BEGIN -->
+	<span title="{!if((oneRoom.signature == null && oneRoom.pagesignature == null),'未署名','署名済')}" style="display: {!IF((($Setup.CommDefine__c.ps__CashRegisterSwitchCode__c == '4' || $Setup.CommDefine__c.ps__CashRegisterSwitchCode__c == '5' || $Setup.CommDefine__c.ps__CashRegisterSwitchCode__c == '7' || $Setup.CommDefine__c.ps__CashRegisterSwitchCode__c == '8') && $Setup.CommDefine__c.ps__CashRegisterSign__c), 'inline-flex;','none')}" id="signa_title_{!oneRoom.yado.Id}" >
+	<!-- 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz END -->
+	<!-- 2018/07/17 レジカードコード7の署名機能追加 zyz END -->
+	<!-- 2017/10/23 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+	<!-- 2017/04/26  署名機能レビュー　by zy BEGIN -->
+	<!-- 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN -->
+	<!--<a href="javascript:void(0)" onclick="javascript:signaTrueOpen('{!JSENCODE(oneRoom.yado.Id)}')" >署名<img id="img_{!oneRoom.yado.Id}" src="{!if((oneRoom.signature == null && oneRoom.pagesignature == null),'/img/icon/custom51_100/pencil16.png','/img/func_icons/util/checkmark16.gif')}" style="vertical-align: bottom;"/></a></span>&nbsp;&nbsp;&nbsp;&nbsp;-->
+	<a href="javascript:void(0)" onclick="javascript:openGuestWindow('{!oneRoom.yado.Id}','true','{!shopCodeStr}')" >署名<img id="img_{!oneRoom.yado.Id}" src="{!if((oneRoom.signature == null && oneRoom.pagesignature == null),'/img/icon/custom51_100/pencil16.png','/img/func_icons/util/checkmark16.gif')}" style="vertical-align: bottom;"/></a></span>&nbsp;&nbsp;&nbsp;&nbsp;
+	<!-- 2017/04/26  署名機能レビュー　by zy END -->
+	<!-- 2017/09/20 全画面サイン、画像ファイルに保存の改善対応 zyz END -->
+	<!--<a href="javascript:void(0)" onclick="javascript:openGuestCardPdf('{!oneRoom.yado.Id}')">レジカード</a>&nbsp;&nbsp;&nbsp;&nbsp;-->
+	<a href="javascript:void(0)" onclick="javascript:openGuestWindow('{!oneRoom.yado.Id}','false','{!shopCodeStr}')">レジカード</a>&nbsp;&nbsp;&nbsp;&nbsp;
+	<!-- 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END -->
+	<!-- 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN -->
+	<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+	<!--<a href="javascript:void(0)" onclick="javascript:openLeadConfirmPdf('{!oneRoom.yado.Field1__c}','{!inputLead.LeadIndexRef__c}','{!shopCodeStr}')">予約確認書</a>-->
+	<a href="javascript:void(0)" onclick="javascript:openLeadConfirmPdf('{!oneRoom.yado.Field1__c}','{!inputLead.LeadIndexRef__c}','{!shopCodeStr}','{!oneRoom.leadMrVal}')">予約確認書</a>
+	<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+	<!-- 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END -->
+	</apex:outputPanel>
+	</div>
+	<div>
+	<table><tr>
+	<!-- 2017/04/19 宿帳画面の「部屋名」は一番左に表示する -->
+	<td><apex:outputText value="{!oneRoom.headerInfo2}"/>&nbsp;&nbsp;</td>
+	<td>ご予約:</td>
+	<td>
+	<apex:outputField value="{!oneRoom.yado.Field1__c}" id="purChaseTypes"  styleClass="k-input" />
+	</td>
+	<td>
+	<apex:outputText value="{!oneRoom.headerInfo1}" title="{!oneRoom.headerInfo3}"/>
+	</td>
+	</tr></table>
+	</div>
+	</div>
+	<!-- お客様明細リスト -->
+<!-- 2017/03/17 读取xml设定layout BEGIN by wx -->
+<!-- 2017/03/22  宿帳移動 BEGIN-->
+<!--	
+	<table class="list" border="0" cellpadding="0" cellspacing="0" width="100%">
+		<thead>
+			<tr class="headerRow">
+				<th style="text-align: center;"><span class="k-icon k-i-plus" style="cursor: pointer;" onclick="addNewLine({!roomcount})" title="1行目追加"></span></th>
+				<th> {!$ObjectType.Yadochou__c.Fields.Field15__c.label} </th>
+				<th> {!$ObjectType.Contact.Fields.Katakana__c.label} </th>
+				<th> {!$ObjectType.Contact.Fields.Phone.label} </th>
+				<th> {!$ObjectType.Contact.Fields.Email.label} </th>
+				<th> {!$ObjectType.Contact.Fields.gender__c.label} </th>
+				<th>{!$ObjectType.Yadochou__c.Fields.Field13__c.label}</th>
+			</tr>
+		</thead>
+
+		<apex:repeat value="{!oneRoom.guestList}" var="oneGuest" >
+		<tr>
+			<td style="width:30px">
+			<input type="button" title="{!$Label.MSG_006_0253}" value="{!$Label.MSG_006_0253}" 
+				onclick="javascript:clearCurrRowInfo(this)" class="btn"/>
+			</td>
+			<td>
+		<!-- INPUT　FIELD　SPAN　SECTION --
+	            <span class="lookupInput">
+		            <apex:inputText id="relcontact" value="{!oneGuest.contactName}" 
+		            	html-placeholder="お客様名、電話、メールを入力してください" 
+		            	style="width:98%" maxlength="80" styleClass="k-input">
+		            <apex:inputHidden value="{!oneGuest.c.Id}" id="relcontact_lkid"/>
+		<apex:inputHidden id="relcontact_lkold"/>       	<!-- PopupWin利用 -- 
+		<input type="hidden" id="relcontact_lkid_org" />	<!-- JS判断用 --
+		            <c:AutoCompleteComp objectname="Contact" 
+		                autocomplete_textbox="{!$Component.relcontact}" 
+		                showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,Email,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}gender__c,Description"
+		                maxLenFilter="Description:16"
+		                showFieldSeparator=", "
+		                jslibnew="true"
+		                addFilter="IsDelete__c!=true"
+		                callbackFunction="_contact_callbackFunction"
+		                rendered="true"
+		            />
+		            </apex:inputText>
+		            <!-- 部屋選択 -->
+		            <!-- 
+		            <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+		             onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+		             onfocus="this.className = 'lookupIconOn';"
+		             onblur="this.className = 'lookupIcon';"
+		             class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px"
+		             name="accountPopup" />
+--
+				</span>
+			</td>
+			<td class="normalCol">
+				<apex:inputField value="{!oneGuest.c.Katakana__c}" id="cKatakana"  styleClass="k-input"/>
+			</td>
+			<td class="normalCol">
+				<apex:inputField value="{!oneGuest.c.Phone}" id="cPhone"  styleClass="k-input"/>
+			</td>
+			<td class="normalColEmail">
+				<apex:inputField value="{!oneGuest.c.Email}" id="cEmail"  styleClass="k-input" />
+			</td>
+			<td class="normalCol">
+				<apex:inputField value="{!oneGuest.c.gender__c}" id="cGender" style="font-size:1em;height:100%"/>
+			</td>
+			<td rowspan="{!oneRoom.guestList.size}" style="vertical-align: top;" class="{!IF(oneGuest.isShowMemoCol,'','tdHidden')}">
+				<apex:inputTextArea value="{!oneRoom.yado.Field13__c}" rendered="{!oneGuest.isShowMemoCol}" style="height:100%;width:98%" />
+			</td>
+		</tr>
+	</apex:repeat>
+-->	
+
+	<table class="list" border="0" cellpadding="0" cellspacing="0" width="100%" id="BookEstTable" rowClasses="tranDetailRow" LeadId="{!oneRoom.yado.Field1__c}" YadoId="{!oneRoom.yado.Id}">	
+	<thead>
+		<tr class="headerRow theadTr">
+			<th style ="width:24px;"></th>
+			<th style="text-align: center;width:36px;"><span class="k-icon k-i-plus" style="cursor: pointer;" onclick="addNewLine({!roomcount})" LeadId="{!oneRoom.yado.Field1__c}" title="1行目追加"></span></th>
+			<th> {!$ObjectType.Yadochou__c.Fields.Field15__c.label} </th>
+			<apex:repeat value="{!parseItem.inputLst}" var="field">
+				<th> {!field.label}</th>
+			</apex:repeat>
+			<th>
+				{!$ObjectType.Yadochou__c.Fields.Field13__c.label}
+				<apex:inputTextarea id="hidField13" value="{!oneRoom.field13}" style="display:none"/>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+
+	<apex:variable var="rscnt" value="{!0}"/>
+	<apex:repeat value="{!oneRoom.guestList}" var="oneGuest" >
+	<apex:variable var="rscnt" value="{!rscnt+1}"/>
+		<tr class="tbodyTr">
+			<td style ="width: 24px;">
+				<div title="{!$Label.MSG_011_0050}"  class="pointIndex" >
+					<img title="" class="pointImg" alt="" src="{!URLFOR($Resource.AppImages, 'extend/blur.png')}" />	
+				</div>
+				<apex:inputHidden value="{!oneGuest.leadId}" id="hidLeadId"/>
+				<apex:inputhidden value="{!oneGuest.rowsNo}" id="hidRowsNo"/>
+			</td>
+			<td style="width:36px">
+				<input type="button" title="{!$Label.MSG_006_0253}" value="{!$Label.MSG_006_0253}" 
+					onclick="javascript:clearCurrRowInfo(this)" class="btn"/>
+			</td>
+			<td style="min-width:100px">
+				<span class="lookupInput">
+				<apex:inputText id="relcontact" value="{!oneGuest.contactName}" 
+					html-placeholder="お客様名、電話、メールを入力してください" 
+					style="width:98%" maxlength="80" styleClass="k-input">
+				<apex:inputHidden value="{!oneGuest.c.Id}" id="relcontact_lkid"/>
+				<apex:inputHidden id="relcontact_lkold"/>      
+				<input type="hidden" id="relcontact_lkid_org" />  
+				<!-- 2018/05/21 宿帳入力機能改善対応 zyz BEGIN -->  
+				<c:AutoCompleteComp objectname="Contact" 
+					autocomplete_textbox="{!$Component.relcontact}" 
+					showField="{!parseItem.refreshContactSql}"
+					maxLenFilter="Description:16"
+					showFieldSeparator=", "
+					jslibnew="true"
+					addFilter="IsDelete__c!=true"
+					callbackFunction="_contact_callbackFunction"
+					rendered="true"
+					noResultAutoClearId="false"
+					autofocus="false"
+					comdefNoUse="true"
+				/>
+				<!-- 2018/05/21 宿帳入力機能改善対応 zyz END -->
+				</apex:inputText>
+				</span>
+			</td>
+			<apex:repeat value="{!parseItem.inputLst}" var="field">
+				<td class="normalCol" id='{!field.api}' style="{!field.style}">
+					<apex:inputField value="{!oneGuest.c[field.api]}" html-rowEleId="{!roomcount}_{!rscnt}_{!field.api}" styleClass="k-input" rendered="{!(field.dataType != 'Boolean')}"/>
+					<apex:inputCheckbox value="{!oneGuest.c[field.api]}" html-rowEleId="{!roomcount}_{!rscnt}_{!field.api}" styleClass="k-input" rendered="{!(field.dataType == 'Boolean')}"/>	
+				</td>
+			</apex:repeat>
+			<td rowspan="{!oneRoom.guestList.size}" style="vertical-align: top;" class="lastAreaTd {!IF(rscnt==1,'','tdHidden')}">
+				<apex:outputPanel rendered="{!rscnt==1}">
+				<textarea rows="{!oneRoom.guestList.size}" cols="20" style="height:{!oneRoom.guestList.size*25}px;width: 99%">{!oneRoom.field13}</textarea>	
+				</apex:outputPanel>
+			</td>
+		</tr>
+	</apex:repeat>
+	</tbody>
+<!-- 2017/03/22  宿帳移動 END -->		
+<!-- 2017/03/17 读取xml设定layout END by wx -->		
+	</table>
+	<apex:variable var="roomcount" value="{!roomcount+1}"/>
+	</apex:repeat>
+<script>
+$(document).ready(function() {
+    bindEvent();
+});
+</script>
+</apex:pageBlock>
+</apex:form>
+<!-- SCRIPT SECTION -->
+<script>
+// 2017/03/21 读取xml设定layout BEGIN by wx 
+// 項目定義APIのJSON定義情報
+var gApiArr = JSON.parse("{!JSENCODE(parseItem.inputFieldJson)}");
+// 2017/03/21 读取xml设定layout END by wx 
+// お客様AutoCompleteのCallBack関数
+function _contact_callbackFunction(data, itemId) {
+	//console.debug(data);
+	var itemObj = document.getElementById(itemId);
+	var $c = $(itemObj);
+	var $currTr = $c.closest('tr');
+	// 2018/05/21 宿帳入力機能改善対応 zyz BEGIN
+	$("[id$=relcontact]",$currTr).blur();
+	// 2018/05/21 宿帳入力機能改善対応 zyz END
+	// 宿帳画面に既存ユーザーは別のユーザーに入替する場合、あるお客様情報が一気に書き換わっている不具合改修 BEGIN
+	$currTr.find("input[id$=':relcontact_lkid']").val( data.Id );
+	// 宿帳画面に既存ユーザーは別のユーザーに入替する場合、あるお客様情報が一気に書き換わっている不具合改修 END
+	// 2017/03/17 读取xml设定layout BEGIN by wx 
+	_refresh_valtofield(data,$currTr);
+	/*
+	var $cKatakana = $currTr.find("input[id$=':cKatakana']");
+	var $cPhone = $currTr.find("input[id$=':cPhone']");
+	var $cEmail = $currTr.find("input[id$=':cEmail']");
+	var $cGender = $currTr.find("select[id$=':cGender']");
+	//cKatakana.val(data.);
+	if (data.Phone != undefined && data.Phone != null) $cPhone.val(data.Phone);
+	else $cPhone.val("");
+	if (data.Email != undefined && data.Email != null) $cEmail.val(data.Email);
+	else $cEmail.val("");
+	var genderKey = _g_ns + 'gender__c';
+	if (data[genderKey] != undefined && data[genderKey] != null) $cGender.val(data[genderKey]);
+	else $cGender.val("");
+	var kataKanaKey = _g_ns + 'Katakana__c';
+	if (data[kataKanaKey] != undefined && data[kataKanaKey] != null) $cKatakana.val(data[kataKanaKey]);
+	else $cKatakana.val("");
+	*/
+	// 2017/03/17 读取xml设定layout END by wx
+}
+function _refresh_valtofield(data, $currTr) {
+	// お客様名以外項目をクリックする
+	clearRelApiInfo($currTr);
+	for(i in data){
+		var key = i;
+		if (_g_ns != "" && key.startsWith(_g_ns)) key = key.replace(_g_ns, "");
+		var dataType = hashMap.Get(key + '_dataType');
+		if(gApiArr.indexOf(key) > -1){
+			// 情報存在
+			if (data[i] != undefined && data[i] != null) {
+				var $targetObj = $currTr.find("[rowEleId$="+key+"]");
+				// 個別処理項目タイプは事前定義される場合
+				if(dataType != undefined) {
+					// お客様自定义关联的日期型字段
+					if (dataType == "Date") {
+						$targetObj.val(kendo.toString(new Date(data[i]),'{!parseItem.DateFormatStr}'));
+					// お客様自定义关联的datetime型字段
+					} else if (dataType == "DateTime") {
+						$targetObj.val(kendo.toString(new Date(data[i]),'{!parseItem.DateTimeFormatStr}'));
+					// お客様自定义关联的checkbox型字段
+					} else if(dataType == "Boolean"){
+						//チェック
+						if(data[i]){
+							$targetObj.prop("checked",true);
+						//チェックなし
+						}else {
+							$targetObj.prop("checked",false);
+						}
+					} else $targetObj.val(data[i]);
+				} 
+				// 個別処理項目タイプは事前定義されない場合
+				else $targetObj.val(data[i]);
+			}else $targetObj.val('');
+		} else continue;
+	}
+}
+// Search Complete Call Function
+function _search_callbackFunction(data, itemId) {
+	// 検索結果が存在すると、該当結果で検索を行う
+	searchDataFun();
+}
+// AutoComplete Reponse Result
+function _respBeforeFunction(result) {
+//console.debug(result);
+	// 到着日の日付は変換を行う
+	if (result == null || result.length == 0 ) return;
+	var entryDateKey = _g_ns + 'EntryDate__c';
+	for (i=0;i<result.length;i++) {
+		var data = result[i];
+		//console.debug(data);
+		var entryDtVal = data[entryDateKey];
+		if (entryDtVal != null) {
+			var strDtVal = "到着日:"+kendo.toString(new Date(entryDtVal),JINYACONNECT.DateFormat)
+			data[entryDateKey] = strDtVal;
+		}
+	}
+}
+function bindEvent() {
+	$("input[id$=':relcontact']").each(function(){
+		//console.debug(this);
+		var $currTr = $(this).closest('tr');
+		// 2017/03/17 读取xml设定layout BEGIN by wx
+		//var $cKatakana = $currTr.find("input[id$=':cKatakana']");
+		var $cKatakana = $currTr.find("input[roweleid$='Katakana__c']");
+		if ($cKatakana.length == 0) return false;
+		// 2017/03/17 读取xml设定layout END by wx
+		var element1Id = "#"+commUtils.escapeJqSelector(this.id);
+		var element2Id = "#"+commUtils.escapeJqSelector($cKatakana.attr("id"));
+		//console.debug(element2Id);
+		$.fn.autoKana(element1Id, element2Id, {katakana:false});
+	});
+	//2017/03/22  宿帳移動 BEGIN
+	kendoDraggableFun();
+	// 2017/03/22  宿帳移動 END
+	// 2017/03/22 宿帳登録画面に、お客様項目をカスタムできるように改善対応(ZIP検索BIND) BEGIN
+    window.Zipsearch({
+    	locNs:(_g_ns.length > 2) ? (_g_ns.slice(0,-2) + ".") : "",
+    	zipInputFields: $("input[roweleid$=PostalCode]"),
+   		stateInputFields: $("input[roweleid$= State]"),
+   		cityInputFields:$("input[roweleid$= City]"),
+   		streetInputFields:$("input[roweleid$= Street]"),
+   		sessionId: "{!GETSESSIONID()}",
+   		selectorKey:function(key) {
+   			return "[roweleid$='"+key+"']";
+   		},
+   		selectorId:function(that) {
+   			return $(that).attr('roweleid');
+   		}
+    });
+    // 2017/03/22 宿帳登録画面に、お客様項目をカスタムできるように改善対応(ZIP検索BIND) END
+}
+// 2017/03/22 宿帳移動 BEGIN 
+var bookEstTableId = 'BookEstTable';
+function preSaveFun(sortflg) {
+	// 调用当前页面的显示顺序信息 处理
+	$("table#BookEstTable").each(function(){
+		$table = $(this);
+		var newObj = $table.find("td.lastAreaTd textarea");
+		if (newObj.length > 0) {
+			var hidObj = $table.find("thead textarea[id$=':hidField13']");
+			hidObj.val(newObj.val());
+		}
+	});
+	if (!sortflg) return;
+	var curNo = 0;
+	$("input[id$=hidRowsNo]").each(function() {
+		this.value = curNo;
+		curNo++;
+	});
+}
+// 拖动行的最后一个Td信息
+var drag_lastTd;
+function kendoDraggableFun() {
+	$("[id$="+ bookEstTableId +"]").kendoDraggable({
+		filter:'.pointIndex:not(.disabled)',
+		hint: function(e) {
+			dragLeadElement = $(e).parent().parent();
+			var cloneELment = dragLeadElement.clone();
+			$("td:last",cloneELment).remove();
+			return cloneELment;
+		},
+		dragstart: draggableOnDragStart,// 开始
+		dragend: draggableOnDragEnd // 停止
+	});
+	$("[id$="+ bookEstTableId +"] tr").kendoDropTarget({
+		drop: droptargetOnDrop
+	});
+}
+// 移動开始
+function draggableOnDragStart(e) {
+	$(dragLeadElement).addClass(_DRAGROW_CLASS);
+	// 最新内容をコピーする
+	preSaveFun(false);
+}
+// 移動结束放下前处理【和目标位置匹配才会进入这个方法里】
+function droptargetOnDrop(e) {
+
+	// TARGET対象フラグ
+	var $drg_row = $(dragLeadElement);
+	var $target_row = $(e.dropTarget);
+	var isTheader = $target_row.hasClass("theadTr");
+	var isTbody = $target_row.hasClass("tbodyTr");
+	var $newTable = $target_row.closest("table#BookEstTable");
+	var $tbody = $("tbody",$newTable);
+	// 既存明細行数
+	var $new_rows = $("tbody tr",$newTable);
+	var sameRowFlg = false;
+	if (isTheader) {
+		if ($new_rows.length > 0) {
+			$firstRow = $new_rows.first();
+			sameRowFlg = $firstRow.hasClass(_DRAGROW_CLASS);
+		}
+	} else if (isTbody) {
+		sameRowFlg = $target_row.hasClass(_DRAGROW_CLASS);
+	}
+	if (sameRowFlg) {
+		e.preventDefault();
+		return;
+	}
+	// 元予約ID
+	var $orgLeadIdObj = $drg_row.find("input[Id$='hidLeadId']");
+	var orgLeadId = $orgLeadIdObj.val();
+	// 新予約ID
+	var newLeadId = $newTable.attr('leadid');
+	// 同じテーブルフラグ
+	var isSameTableFlg = (orgLeadId == newLeadId);
+	// 元の特記事項列を外す
+	var $lastTd = $("td:last",$drg_row);
+//console.debug($lastTd.html());
+	if ($lastTd.hasClass("lastAreaTd")) $lastTd.remove();
+	var newAreaVal = $newTable.find("thead textarea[id$=':hidField13']").val();
+	var newAreaHtml = '<td class="lastAreaTd"><textarea cols="20" style="width: 99%">'+newAreaVal+'</textarea></td>';
+	// 別のテーブルに移動する場合
+	if (!isSameTableFlg) {
+		// 元のテーブル処理する
+		var $orgTable = $drg_row.closest("table#BookEstTable");
+		var orgAreaVal = $orgTable.find("thead textarea[id$=':hidField13']").val();
+		var orgAreaHtml = '<td class="lastAreaTd"><textarea cols="20" style="width: 99%">'+orgAreaVal+'</textarea></td>';
+		var $org_rows = $("tbody tr",$orgTable);
+		resetTableTextArea($org_rows, true, orgAreaHtml, false);
+	}
+	// 新テーブルの設定作業を行う
+	if($new_rows.length > 0){
+		// 遷移先テーブルの明細設定
+		resetTableTextArea($new_rows, false, newAreaHtml, isTheader);
+		if (isTheader) {
+			$("td:last",$drg_row).after(newAreaHtml);
+			$tbody.prepend($drg_row);
+		}
+		else {
+			$target_row.after($drg_row);
+		}
+	} else if ($new_rows.length == 0) {
+		// 新テーブルに新た明細を追加する
+		$("td:last",$drg_row).after(newAreaHtml);
+		$tbody.prepend($drg_row);
+	}
+	var $newAllRows = $("tr",$tbody);
+	var varHeight = ($newAllRows.length * 25);
+	$lastTd = $("td:last",$newAllRows.first());
+	$lastTd.attr('rowspan',$newAllRows.length);
+	var $textArea = $lastTd.find("textarea");
+	if ($textArea.length > 0 && $textArea.height() < varHeight) $textArea.height(varHeight);
+	// 最新予約IDを設定する
+	$orgLeadIdObj.val(newLeadId);
+	
+}
+// 一番目の明細処理を行う
+function resetTableTextArea($allRows, orgFlg, areaHtml, isTheader) {
+	if ((orgFlg && $allRows.length < 2) || (!orgFlg && $allRows.length < 1)) return;
+	$firstRow = $allRows.first();
+	if($firstRow.hasClass(_DRAGROW_CLASS)) {
+		$firstRow = $firstRow.next();
+	}
+	$lastTd = $("td:last",$firstRow);
+	if ($lastTd.hasClass("lastAreaTd")) $("td:last",$firstRow).remove();
+	if (orgFlg) {
+		$("td:last",$firstRow).after(areaHtml);
+		$lastTd = $("td:last",$firstRow);
+		$lastTd.attr('rowspan',$allRows.length-1);
+		var varHeight = (($allRows.length-1) * 25);
+		var $textArea = $lastTd.find("textarea");
+		if ($textArea.length > 0 && $textArea.height() < varHeight) $textArea.height(varHeight);
+	}
+	else if (!isTheader) $("td:last",$firstRow).after(areaHtml);
+}
+var _DRAGROW_CLASS="dropCurrRow";
+// 移動结束放下时对当前行数据处理
+function draggableOnDragEnd(e) {
+	$(dragLeadElement).removeClass(_DRAGROW_CLASS);
+}
+// 2017/03/22 移動 End
+function clearCurrRowInfo(that) {
+	var $c = $(that);
+	var $currTr = $c.closest('tr');
+	$currTr.find("input[id$=':relcontact']").val("");
+	// 2017/03/17 读取xml设定layout BEGIN by wx
+	$currTr.find("input[id$=':relcontact_lkid']").val("");
+	$currTr.find("input[id$=':relcontact_lkold']").val("");
+	$currTr.find("input[id$=':relcontact_lkid_org']").val("");
+	/*
+	$currTr.find("input[id$=':cKatakana']").val("");
+	$currTr.find("input[id$=':cPhone']").val("");
+	$currTr.find("input[id$=':cEmail']").val("");
+	$currTr.find("select[id$=':cGender']").val("");
+	*/	
+	clearRelApiInfo($currTr);
+	// 2017/03/17 读取xml设定layout END by wx
+}
+// 2017/03/17 读取xml设定layout BEGIN by wx
+function clearRelApiInfo(that) {
+	var $currTr = that;
+	var apiArr = gApiArr;
+	for(var i = 0 ; i < apiArr.length; i++){
+		var apiId = apiArr[i];
+		var td = $currTr.find("td#"+apiId);
+		$("input[rowEleId]",td).prop("checked",false);
+		$("input,select,textarea[rowEleId]",td).val("");
+	}
+}
+// 2017/03/17 读取xml设定layout END by wx
+function openGuestCardPdf(yadoId) {
+	var openUrl = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'CashRegisterCardPDFSwitch')}"+"?id="+yadoId;
+	// 2017/05/25 レジカード５のとき、ご宿泊料金が非表示するポップアップが出ない不具合改修 zyz BEGIN
+	if ( switchCode == "4" || switchCode == "5") {
+	// 2017/05/25 レジカード５のとき、ご宿泊料金が非表示するポップアップが出ない不具合改修 zyz END
+		//金額を表示しますか？
+	    if (window.confirm( "{!$Label.MSG_012_0133}")) {
+	       openUrl += "&smy=1";
+	    }    
+	}
+	window.open(openUrl, "CashRegisterCardPDF","width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+}
+// 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN 
+// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+// function openLeadConfirmPdf(leadid, strLeadIndex, shopCd) {
+function openLeadConfirmPdf(leadid, strLeadIndex, shopCd,mrTypeStr) {
+// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+// 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END 
+	sforce.connection.sessionId = "{!$Api.Session_ID}";
+	var locNs = (_g_ns.length > 2) ? (_g_ns.slice(0,-2) + ".") : "";
+    var layoutCd = "{!JSENCODE($Setup.CommDefine__c.ps__ApplicationFormPDFSwitchCode__c)}";
+    // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN 
+	// 2019/09/15 Security Check BY zyz BEGIN
+	var shopCodeCalFlg = $("#hidApplicationFormShopLogoFlg").val();
+	// 2019/09/15 Security Check BY zyz END
+    // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END 
+    // 2016/01/28 店舗選択できる機能対応 BEGIN
+    var locShopCode = "{!$User.ShopCode__c}"; 
+    var locShopHtmls = ""; 
+    // 2021/07/30 #JP10785 by zy BEGIN
+    var leadInfoHtml = '';
+    // 2021/07/30 #JP10785 by zy END
+    if (locShopCode.indexOf(",") > 0) { 
+        var locOptStr = ""; 
+        // 選択できる店舗リストを取得する 
+        var currUsrId = "{!$User.Id}"; 
+        var defaultShop = "{!$User.DefaultShopCode__c}"; 
+	// 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN 
+        if(shopCodeCalFlg.toLowerCase() == "true" && shopCd != undefined && shopCd != ""){ 
+        	defaultShop = shopCd ; 
+        }
+        // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END 
+        var shops = sforce.apex.execute(locNs+"ShopInfoUtil","getCanSelectShopLst",{userId:currUsrId}); 
+        for(i=0;i<shops.length;i++) { 
+            var shopinf = shops[i].split(":"); 
+            locOptStr +="<option value='"+shopinf[0]+"'"+ (defaultShop == shopinf[0] ? ' selected' : '') +">" +shopinf[1] +"</option>"; 
+        } 
+        if (locOptStr != "") { 
+            //店舗 
+            locShopHtmls = '<tr><td class="labelCol first " width="80px"><label>{!$Label.MSG_006_0241}</label></td><td class="data2Col first "><select id="dialog_shopcd">' + locOptStr + '</select></td></tr>'; 
+        } 
+    }
+    // 2016/01/28 店舗選択できる機能対応 END
+    // 2017/04/17 Source Security Fix BEGIN
+	var popupWinIsShowFlg = "{!JSENCODE(ApplicationFormReportPopupIsShowStr)}";
+	// 2017/04/17 Source Security Fix END
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+	var RespectIsShowFlg = $("#hidRespectFlg").val(); 
+	var accountMrSelectHtml =''; 
+	if(RespectIsShowFlg == "true"){ 
+		var mrTypeLst = sforce.apex.execute(locNs + "ShopInfoUtil","getLeadSelect",{}); 
+		var accountMroptStr =""; 
+		for(i=0; i < mrTypeLst.length; i++){ 
+			var mrinf = mrTypeLst[i].split(":"); 
+			if(mrTypeStr =="" && mrinf[1] =="true") mrTypeStr = mrinf[0]; 
+			accountMroptStr += "<option value='"+mrinf[0]+"'"+ (mrinf[0] == mrTypeStr ? ' selected' : '') +">" +mrinf[0] +"</option>"; 
+		} 
+		accountMrSelectHtml = '<tr><td class="labelCol first " width="80px"><label>敬称</label></td><td class="data2Col first "><select id="dialog_mrselect">' + accountMroptStr + '</select></td></tr>'; 
+	} 
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+	// 2021/07/30 #JP10785 by zy BEGIN
+	if (layoutCd == '6'){
+      	var leadinfo = sforce.apex.execute(locNs + "ShopInfoUtil","getLeadInfo",{leadId:leadid,shopCode:locShopCode});
+        leadinfo = JSON.parse(leadinfo);
+        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>予約人数</label></td><td class="data2Col first "><input id="personNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.PersonNumber + '"/></td></tr>';
+        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>大人人数</label></td><td class="data2Col first "><input id="adultNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.AdultNumber + '"/></td></tr>';
+        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>子供人数</label></td><td class="data2Col first "><input id="childNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.ChildNumber + '"/></td></tr>';
+        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>部屋数</label></td><td class="data2Col first "><input id="roomNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.RoomNumber + '"/></td></tr>';
+        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>宿泊数</label></td><td class="data2Col first "><input id="nightNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.NightNumber + '"/></td></tr>';
+    } 
+    // 2021/07/30 #JP10785 by zy END
+	if (popupWinIsShowFlg.toLowerCase() != 'false' && layoutCd != '1') {
+		// XMLのコメント情報初期値
+      	var rsStr = ""+sforce.apex.execute(locNs+"ApplicationFormPDFSwitch", "getApplicationFormPdfCommentAndRooms", {leadIndex:strLeadIndex});
+      	var rsArr = rsStr.split(":");
+      	var locInitComment =rsArr[0];
+      	var assignedRooms = 1*rsArr[1];
+      	var infoNb = (layoutCd == 4 ? 9 : 4);
+      	var infoMojiNb = (layoutCd == 5 ? 40 : 40);
+		// アサイン部屋が存在する場合、選択肢を追加する
+		var roomIsShowMsg = "";
+		if (assignedRooms > 0) {
+			roomIsShowMsg = '<tr><td class="labelCol" nowrap="nowrap">部屋番号</td><td><input type="radio" name="dialog_showroom" value="" checked="checked">非表示<input type="radio" name="dialog_showroom" value="1">表示</td></tr>';
+		}
+		var d = sfdcPage.dialogs['MyCoolDialog'], close;
+        if (!d) {
+          // if the dialog doesn't exist create one
+          d = sfdcPage.dialogs['MyCoolDialog'] = new SimpleDialog('MyCoolDialog', false);
+          // set general information on your dialog and finally run the create function
+          // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+          //d.setWidth(640);
+          // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+          d.createDialog();
+        }
+        // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+        d.setWidth(640);
+        // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+        d.setTitle('ご予約確認書');
+		// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+		$(d.dialog).find('#MyCoolDialogInner').html('<div class="pbBody"><div><div class="pbSubsection"><table class="detailList" border="0" cellpadding="1" cellspacing="1">' + locShopHtmls + accountMrSelectHtml 
+			// 2021/07/30 #JP10785 by zy BEGIN
+            + leadInfoHtml
+            // 2021/07/30 #JP10785 by zy END
+			+ roomIsShowMsg +'<tr style="vertical-align: top;"><td class="labelCol "><label>コメント</label></td><td class="data2Col "><textarea id="dialog_comment"rows="4" cols="40"style="width:550px;" >' + locInitComment + '</textarea><p>コメント：１行' + infoMojiNb + '文字、' + infoNb + '行以内入力ください。</p></td></tr><tr><td colspan="2" style="text-align: right;"><input class="btn" id="dialog_cancelBtn" style="width: 100px" type="button" value="キャンセル" />    <input class="btn" id="dialog_printoutBtn" style="width: 100px" type="button" value="確認書作成" /></td></tr></table></div></div></div>');
+		// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+        $(d.dialog).find('input[type="button"]').on('click', function() {
+			var btnId = $(this).attr("id");
+			if (btnId == "dialog_cancelBtn") {
+            	d.hide();
+			} else if (btnId == "dialog_printoutBtn") {
+	            // ご予約確認書画面を起動する
+	            var comment = $("#dialog_comment").val();
+	            var $isShowRoom = $("input[name='dialog_showroom']:checked");
+	            var showRoomUrl = "";
+	            if ($isShowRoom.length > 0 && $isShowRoom.val() != "") {
+	              showRoomUrl = "&showroom=1";
+	            }
+	            var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'ApplicationFormPDFSwitch')}";
+	            var custNameUrl = "?id=" + leadid + "&comment=" + encodeURIComponent(comment);
+	            // 2016/01/28 店舗選択できる機能対応 BEGIN
+	            var selectShopLen = $("#dialog_shopcd").length; 
+	            var selectShopVal = $("#dialog_shopcd").val(); 
+	            if (selectShopLen > 0 && selectShopVal != "") { 
+					custNameUrl += "&shopcd=" + encodeURIComponent(selectShopVal); 
+	            }
+	            // 2016/01/28 店舗選択できる機能対応 END
+	            // 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN 
+	            if(RespectIsShowFlg == "true"){ 
+	            var accMr = $("#dialog_mrselect").val(); 
+	            	custNameUrl += "&mr=" + encodeURIComponent(accMr); 
+	            } 
+	            // 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END 
+		    	// 2021/07/30 #JP10785 by zy BEGIN
+	            var customUrl = '';
+	            if (layoutCd == '6'){
+	            	var pnum = $("#personNumberInput"),adnum = $("#adultNumberInput"),cnum = $("#childNumberInput"),rnum = $("#roomNumberInput"),nights = $("#nightNumberInput");
+					pnum.hasClass("change") ? customUrl += '&pnum=' + pnum.val() : '';
+					adnum.hasClass("change") ? customUrl += '&adnum=' + adnum.val() : '';
+					cnum.hasClass("change") ? customUrl += '&cnum=' + cnum.val() : '';
+					rnum.hasClass("change") ? customUrl += '&rnum=' + rnum.val() : '';
+					nights.hasClass("change") ? customUrl += '&nights=' + nights.val() : '';
+	            }
+		    window.open(url + custNameUrl + showRoomUrl + customUrl);
+		    // 2021/07/30 #JP10785 by zy END
+	            d.hide();
+			}
+		});
+        // we also need to make sure we have a close button on the dialog
+        if ($(d.dialog).find('#InlineEditDialogX').size() == 0) {
+			// if there is none we create it
+			close = $('<a id="InlineEditDialogX" title="Close" tabindex="0" href="javascript:void(0)" class="dialogClose">Close</a>');
+			// add some functionality to the close button (for the default ui we change the classname on mouseover/out
+			close.mouseover(function() {
+            	this.className = 'dialogCloseOn';
+          	}).mouseout(function() {
+				this.className = 'dialogClose';
+			}).click(function() {
+				// finally our on click handler which closes the dialog
+				d.hide();
+			});
+			// insert the new generated close button before the h2 tag so it'll show up on the top right corner
+			close.insertBefore($(d.dialog).find('.topLeft h2'));
+        }
+        // now it's time to show the new dialog
+        d.show();
+	}else{
+		var showRoomUrl = "";
+    	if (layoutCd != 1) {
+      		var assignedRooms = 1*sforce.apex.execute(locNs+"ApplicationFormPDFSwitch", "isHaveAssigedRoom", {leadIndex:strLeadIndex});
+     		if (assignedRooms > 0 && window.confirm("部屋番号を表示しますか?")) {
+        		showRoomUrl = "&showroom=1";
+			}
+		}
+		var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'ApplicationFormPDFSwitch')}";
+		var custNameUrl = "?id=" + leadid;
+		window.open(url + custNameUrl+showRoomUrl);
+	}
+}
+// 2017/03/22 移動 End	
+// function addNewLine (roomIndex) {
+function addNewLine (roomIndex) {
+	// 调用当前页面的显示顺序信息 处理
+	preSaveFun(true);
+	//console.debug(roomIndex);
+	// addNewLineFun(roomIndex);
+	addNewLineFun(roomIndex);
+}
+function restoreAreaToUi() {
+	$("table#BookEstTable").each(function(){
+		$table = $(this);
+		var newObj = $table.find("td.lastAreaTd textarea");
+		if (newObj.length > 0) {
+			var hidObj = $table.find("thead textarea[id$=':hidField13']");
+			newObj.val(hidObj.val());
+		}
+	});
+}
+// 2017/03/22 移動 End
+// 2017/03/22 お客様項目をカスタムできるように改善対応 BEGIN
+//init only loading
+$(document).ready(function() {
+    //_initContactFieldTypeInfo();
+    // XML定義情報はHASHMAPに格納する
+	<apex:repeat value="{!parseItem.inputLst}" var="def" >
+		hashMap.Put("{!JSENCODE(def.api)}_dataType","{!JSENCODE(def.dataType)}");
+	</apex:repeat>
+});
+// 2017/03/22 お客様項目をカスタムできるように改善対応 END
+// 2017/03/01 防止二次点击功能  begin by wx
+function disableOn(input) {	
+	if(!$(input).hasClass("Disabled")){
+		$(input).addClass("Disabled");
+	}else{
+		return true;
+	}
+	saveGuestInfo();
+}
+// 2017/03/01 防止二次点击功能  end by wx
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+function openGuestWindow(yadoId,canvasFlg,shopCd){
+	sforce.connection.sessionId = "{!$Api.Session_ID}";
+	var locNs = (_g_ns.length > 2) ? (_g_ns.slice(0,-2) + ".") : "";
+	// 店铺处理
+    var locShopCode = "{!$User.ShopCode__c}"; 
+    var locShopHtmls = ""; 
+    if (locShopCode.indexOf(",") > 0) { 
+        var locOptStr = ""; 
+        // 選択できる店舗リストを取得する 
+        var currUsrId = "{!$User.Id}"; 
+        var defaultShop = "{!$User.DefaultShopCode__c}"; 
+        /*
+        // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN 
+        if(shopCd != undefined && shopCd != ""){ 
+        	defaultShop = shopCd ; 
+        } 
+        // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END 
+        */
+        var shops = sforce.apex.execute(locNs+"ShopInfoUtil","getCanSelectShopLst",{userId:currUsrId}); 
+        for(i=0;i<shops.length;i++) { 
+            var shopinf = shops[i].split(":"); 
+            locOptStr +="<option value='"+shopinf[0]+"'"+ (defaultShop == shopinf[0] ? ' selected' : '') +">" +shopinf[1] +"</option>"; 
+        } 
+        if (locOptStr != "") { 
+            //店舗 
+            locShopHtmls = '<tr><td class="labelCol first " width="120px"><label>{!$Label.MSG_006_0241}</label></td><td class="data2Col first "><select id="dialog_shopcd" style="max-width: 170px;">' + locOptStr + '</select></td></tr><tr><td colspan="2" style="width:350px;height:2px"></td></tr>'; 
+        } 
+    }
+    // 店铺选择列表为空，直接打开PDF
+    var cashLogoFlg = "{!CashLogoFlg}";
+    if(locShopHtmls != "" && cashLogoFlg == "true" && switchCode != "3"){
+		var d = sfdcPage.dialogs['MyCoolDialog'], close;
+		if (!d) {
+			// if the dialog doesn't exist create one
+			d = sfdcPage.dialogs['MyCoolDialog'] = new SimpleDialog('MyCoolDialog', false);
+			// set general information on your dialog and finally run the create function
+			// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+			//d.setWidth(380);
+			// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+			d.createDialog();
+		}
+		// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+		d.setWidth(380);
+		// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+		d.setTitle('レジカード');
+		// 按钮显示
+		var buttonIdStr = 'dialog_printoutBtn';
+		if(canvasFlg == 'true') buttonIdStr = 'dialog_canvasBtn';
+		var buttonHtml = '<input class="btn" id="'+buttonIdStr+'" style="width: 100px" type="button" value="確定" /></td>';
+		// 金額を表示しますか？
+		var symHtml = '';
+		var smyUrl = '';
+		if(switchCode == "4" || switchCode == "5"){
+			symHtml = '<tr><td class="labelCol first " width="120px"><label>{!$Label.MSG_012_0133}</label><td class="data2Col first "><input type="checkbox" id="dialog_symId" checked="checked" value="" /></td>';
+		}
+		$(d.dialog).find('#MyCoolDialogInner').html('<div class="pbBody"><div><div class="pbSubsection"><table class="detailList" border="0" cellpadding="1" cellspacing="1">' + locShopHtmls  + symHtml +'<tr><td colspan="2" style="text-align: right;"><input class="btn" id="dialog_cancelBtn" style="width: 100px" type="button" value="キャンセル" />    '+buttonHtml+'</tr></table></div></div></div>');
+		// 按钮事件
+		$(d.dialog).find('input[type="button"]').on('click', function() {
+			var btnId = $(this).attr("id");
+			if (btnId == "dialog_cancelBtn") {
+				d.hide();
+			} else if (btnId == "dialog_printoutBtn") {
+				var openUrl = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'CashRegisterCardPDFSwitch')}"+"?id="+yadoId;
+				var custNameUrl = "";
+				var selectShopLen = $("#dialog_shopcd").length; 
+				var selectShopVal = $("#dialog_shopcd").val(); 
+				if (selectShopLen > 0 && selectShopVal != "") { 
+					custNameUrl += "&shopcd=" + encodeURIComponent(selectShopVal); 
+				}
+				var symFlg = $("#dialog_symId").prop('checked');
+				if(symFlg) smyUrl = '&smy=1';
+				window.open(openUrl + custNameUrl + smyUrl,"CashRegisterCardPDF","width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+				d.hide();
+			} else if (btnId == "dialog_canvasBtn") {
+				var openUrl = "{!URLFOR('/apex/CashRegisterCardSignSwitch')}"+"?id="+yadoId;
+				var custNameUrl = "";
+				var selectShopLen = $("#dialog_shopcd").length; 
+				var selectShopVal = $("#dialog_shopcd").val(); 
+				if (selectShopLen > 0 && selectShopVal != "") { 
+					custNameUrl += "&shopcd=" + encodeURIComponent(selectShopVal); 
+				}
+				var symFlg = $("#dialog_symId").prop('checked');
+				if(symFlg) smyUrl = '&smy=1';
+				window.open(openUrl + custNameUrl +smyUrl,"CashRegisterCardPDF","width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+				$("#img_"+yadoId).attr("src", "/img/func_icons/util/checkmark16.gif");
+				$("#signa_title_"+yadoId).attr("title", "署名済");
+				d.hide();
+			}
+			
+		});
+		d.show();
+	}else{
+		if(canvasFlg == 'true') signaTrueOpen(yadoId);
+		else openGuestCardPdf(yadoId);
+		// window.open(openUrl, "CashRegisterCardPDF","width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+	}
+	
+}
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+</script>
+
+</apex:page>

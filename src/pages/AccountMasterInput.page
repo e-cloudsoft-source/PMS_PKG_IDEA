@@ -1,0 +1,4 @@
+<apex:page controller="BillSimpleProductCtrl" action="{!init}" sidebar="false"  showHeader="false">
+	<c:CommHeaderComp loadJsLib="true"/>
+	<c:BillSimpleProductComp container="BillSimpleProductCompId"  shopCode="{!inShopCode}" callbackFun="{!callBackFun}"/>
+</apex:page>

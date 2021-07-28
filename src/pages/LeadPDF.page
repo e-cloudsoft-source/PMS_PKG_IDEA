@@ -1,0 +1,809 @@
+<apex:page standardcontroller="Lead__c" extensions="LeadPDF" showHeader="false" 
+	applyHtmlTag="false" applyBodyTag="false"
+    sidebar="false" renderAs="pdf" readonly="true">
+<!--  Entry Css style sheet file to resource file -->
+<html>
+ <head>
+  <style>
+   @page {
+    size: 8.27in 11.69in;   /* A4 portlate size */
+    margin: 10px; 
+   }
+   body {
+   font-family: Arial Unicode MS;
+   }
+   
+   .odd {
+    border-bottom: 1px solid #000;
+    padding: 1px 1px 2px 2px;
+    font-size: 100%;
+   }
+   
+   .even {
+    border-bottom: 1px solid #000;
+    background-color: #CCCCCC;
+    padding: 1px 1px 2px 2px;
+    font-size: 100%;
+   }
+    .header {
+		height:26px;
+        font-size: 85%;
+        background-color: #CCCCCC;
+    }
+/* 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN */
+/* 表格线控制 */
+.dumyclass div{
+	height:100%;
+	line-height:20px;
+}
+.dumyclass div div{
+	height:100%;
+}
+.tableborderright {
+    border-right:1px solid #000;
+}
+.tableborderleft {
+	height:22px;
+    border-left:1px solid #000;
+    border-bottom:1px solid #000;
+}
+.tableborderbottom {
+    border-top:1px solid #000;
+}
+.tableborderheader {
+    border-top:1px solid #000;
+    border-left:1px solid #000;
+    border-right:1px solid #000;
+    border-bottom:1px solid #000;
+}
+/* 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END */
+/* 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz BEGIN */
+.lineHt1em{
+	line-height: 1em;
+	font-size: 10pt;
+}
+/* 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz END */
+  </style>
+ </head>   
+ <body>
+ <!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+<apex:variable var="idx" value="{!1}"/>
+<apex:repeat value="{!bulkPrintInfoLst}" var="onePages" >
+<!-- <apex:repeat value="{!allPageList}" var="onePage" > -->
+<apex:repeat value="{!onePages}" var="onePage" >
+<!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+<div style="vertical-align:top ;margin-top: 0px;{!if( onePage.isFirstPage, '', 'page-break-before: always;')}">
+</div>
+
+<apex:outputPanel rendered="{!!isForeignCurrency}">  
+<!-- 2019/06/30 見積書の帳票のタイトルを御見積書 BY zyz BEGIN -->
+<!-- <div align="center"><span style="font-size:18pt;">見 　 積　  書</span></div> -->
+<div align="center"><span style="font-size:18pt;">御 　 見 　 積 　 書</span></div>
+<!-- 2019/06/30 見積書の帳票のタイトルを御見積書 BY zyz END -->
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isForeignCurrency}">  
+<div align="center" style="line-height:90%;">
+<!-- 2019/06/30 見積書の帳票のタイトルを御見積書 BY zyz BEGIN -->
+<!-- <span style="font-size:18pt;">見  積  書</span> -->
+<span style="font-size:18pt;">御  見  積  書</span>
+<!-- 2019/06/30 見積書の帳票のタイトルを御見積書 BY zyz END -->
+<br/>
+<span style="font-size:11pt;"> Quotation</span>
+</div>
+</apex:outputPanel>
+<div align="right"><span style="font-size:8pt;">No.&nbsp;{!lead.No__c}</span></div>
+<hr size="2" color="#000000"/>
+
+
+<table style="width: 100%" cellpadding="0px" cellspacing="0px">
+<tr style="vertical-align: top;">
+<td>
+
+<br/>
+<!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+<!--<span style="font-size:16pt;">{!Customer}　様</span>-->
+<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+<span style="font-size:16pt;">{!onePage.estimateName}　{!IF(lead.RespectLst__c != '', lead.RespectLst__c, '様')}</span>
+<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+<!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+<br/>
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz BEGIN -->
+<apex:outputPanel rendered="{!!allAmountShowFlg}">
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz END -->
+<br/>
+<apex:outputPanel rendered="{!!isForeignCurrency}">  
+<span style="font-size:14pt;">御見積金額</span><br/>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isForeignCurrency}">  
+<span style="font-size:14pt;">御見積金額</span><span style="font-size: 0.4cm"> Total Amount</span><br/>
+</apex:outputPanel>
+ <table border="1" cellspacing="0" bordercolor="black" width="{!IF(isForeignCurrency, '200px','150px')}">
+  <tr>
+   <td>
+    <div style="font-size:12pt;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+      <!--<apex:param value="{!sumInfo.amoutQuotePriceIncTax}"></apex:param>-->
+      <apex:param value="{!onePage.sumInfo.amoutQuotePriceIncTax}"></apex:param>
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+ </table>
+ <!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz BEGIN -->
+ </apex:outputPanel>
+ <table style="display:{!IF(allAmountShowFlg,'','none')}" border="0" width="{!IF(isForeignCurrency, '370px','290px')}">
+  <tr>
+    <td colspan="{!IF(isReducedTaxFlg, '3', '1')}">
+<apex:outputPanel rendered="{!!isForeignCurrency}"> 
+    <div style="font-size:14pt; margin-right: 2px;" align="right">
+     御見積金額(税込)
+    </div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isForeignCurrency}"> 
+    <div style="font-size:12pt; margin-right: 2px;" align="right">
+     御見積金額(税込)<span style="font-size: 10px;"> Total Amount * Tax Included</span>
+    </div>
+</apex:outputPanel>
+   </td>
+   <td>
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <apex:param value="{!onePage.sumInfo.amoutQuotePriceIncTax}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+  <tr style="display:{!IF(NOT(isReducedTaxFlg), true, 'none')}">
+    <td width="50%">
+<apex:outputPanel rendered="{!!isForeignCurrency}"> 
+    <div style="font-size:12pt; margin-right: 2px;" align="right">
+     内消費税
+    </div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isForeignCurrency}"> 
+    <div style="font-size:12pt; margin-right: 2px;" align="right">
+     内消費税<span style="font-size: 10px; white-space: nowrap;"> {!taxEnglishLabel}</span>
+    </div>
+</apex:outputPanel>
+   </td>
+   <td width="50%">
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <apex:param value="{!onePage.sumInfo.amoutTax}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+  <tr style="{!if (isReducedTaxFlg,'line-height:0.8em;','')};display: {!IF(ISNULL(serviceAmount), 'none' , 'table-row')}">
+    <td colspan="{!IF(isReducedTaxFlg, '3', '1')}" >
+	<apex:outputPanel rendered="{!!isForeignCurrency}"> 
+	    <div style="{!IF(isReducedTaxFlg, 'font-size:10pt', 'font-size:12pt')}; margin-right: 2px;" align="right">
+	     サービス料
+	    </div>
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!isForeignCurrency}"> 
+	    <div style="{!IF(isReducedTaxFlg, 'font-size:10pt', 'font-size:12pt')}; margin-right: 2px;" align="right">
+	     サービス料<span style="font-size: 10px; white-space: nowrap;">Service Charge</span>
+	    </div>
+	</apex:outputPanel>
+   </td>
+   <td>
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <apex:param value="{!onePage.service}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+<apex:repeat value="{!onePage.taxRowDataLst}" var="item" rendered="{!isReducedTaxFlg}">
+<tr class="lineHt1em" style="display:{!IF( item.isNoTaxRowShowFlg && (item.amountExcTax + item.taxAmount) != 0 , true, 'none')}">
+ <td style="text-align: right;">
+  <apex:outputtext value="({0,number,{!TaxNumberFormat}} )対象" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+   <apex:param value="{!item.taxRate}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td style="text-align: right;">
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+   <apex:param value="{!item.amountExcTax}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td style="text-align: right;"> 消費税 </td>
+ <td style="text-align: right;">
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+   <apex:param value="{!item.taxAmount}"></apex:param>
+  </apex:outputtext>
+ </td>
+</tr>
+</apex:repeat>
+<apex:repeat value="{!onePage.disRowDataLst}" var="item" rendered="{!isReducedTaxFlg}">
+<tr class="lineHt1em" style="text-align: right;display:{!IF(item.isDisRowShowFlg && ( (item.disUnitPriceSum + item.disTaxAmountSum) != 0 ), true, 'none')}">
+ <td>
+  <apex:outputtext value="({0,number,{!TaxNumberFormat}} )値引">
+   <apex:param value="{!item.taxRate}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td>
+  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:param value="{!item.disUnitPriceSum}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td> 消費税 </td>
+ <td>
+  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+    <apex:param value="{!item.disTaxAmountSum}"></apex:param>
+   </apex:outputtext>
+  </td>
+</tr>
+</apex:repeat>
+<tr class="lineHt1em" style="text-align: right;display:{!IF(onePage.sumRowData.isSumRowShowFlg && isReducedTaxFlg && (onePage.taxRowDataLst.size != 0), true, 'none')}">
+ <td> 合計(税抜) </td>
+ <td>
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:param value="{!onePage.sumRowData.amountExcTax}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td> 消費税 </td>
+ <td>
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:param value="{!onePage.sumRowData.taxAmount}"></apex:param>
+  </apex:outputtext>
+ </td>
+</tr>
+<tr height="2px" style="background-color: black;"><td colspan="{!IF(isReducedTaxFlg, '4', '2')}"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height:1px;width: 1px"/></td></tr>
+ </table>
+<apex:outputPanel rendered="{!IF(allAmountShowFlg && isReducedTaxFlg,false,true)}">
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz END -->
+<apex:outputPanel rendered="{!!isForeignCurrency}">
+<span style="font-size:10pt;">毎度格別の御引立に預かり厚く御礼申し上げます</span><br/>
+<span style="font-size:10pt;">下記の通り御見積申し上げます。</span>
+</apex:outputPanel>
+
+<apex:outputPanel rendered="{!isForeignCurrency}">
+<table style="width: 100%;line-height:70%;">
+<tr><td><span style="font-size:9pt;">毎度格別の御引立に預かり厚く御礼申し上げます</span></td></tr>
+<tr><td><span style="font-size:9pt;">下記の通り御見積申し上げます。</span></td></tr>
+<tr><td><span style="font-size:9pt;">Thank you for your request for a quotation.</span></td></tr>
+<tr><td><span style="font-size:9pt;">We are pleased to offer a quotation as follows.</span></td></tr>
+</table>
+</apex:outputPanel>
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz BEGIN -->
+</apex:outputPanel>
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz END -->
+</td>
+
+<td style="text-align: right;">
+<!--
+<div style="float:right; width:255px;height:155px">
+<apex:outputField value="{!ReportLogo.ReportLogo__c}" id="logoImg" />
+</div> -->
+	<c:ReportTitleComp postion="top" noExtendInfo="true" pdfType="leadShou" width="300" stampisShowFlg="{!stampIsShowFlg}" shopcd="{!shopcd}"/>
+	<!-- 
+    <div style="float:right; width:255px;height:75px">
+    <apex:outputField value="{!ReportLogo.ReportLogo__c}" id="logoImg" />
+    </div>
+    <div style="float:right; width:255px; text-align: left;font-size: 10pt;">
+    <table cellpadding="0" cellspacing="0">
+       <tr style="height: 2px;">
+       <td style="width: 30px;"></td>
+       <td style="width: 100px;"></td>
+       <td style="width: 20px;"></td>
+       <td style="width: 100px;"></td>
+       </tr>
+
+       <tr height="10px;"><td colspan="4"><span style="font-size: 11pt;">{!$Organization.Name}</span></td></tr>
+       <tr height="10px;"><td colspan="4">〒{!$Organization.PostalCode}</td></tr>
+       <tr height="10px;"><td colspan="4">{!$Organization.State}{!$Organization.City}{!$Organization.Street}</td></tr>
+       <tr height="10px;"><td>Tel</td><td colspan="3">{!$Organization.Phone}</td></tr>
+       <tr height="10px;"><td>Fax</td><td colspan="3">{!$Organization.Fax}</td></tr>
+    </table>
+    </div>
+     -->
+</td>
+</tr>
+
+<!-- 2019/09/27 パラメータ切り替え WGCH BEGIN -->
+<!-- <tr> <td></td> -->
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz BEGIN -->
+<tr style="display:{!IF(allAmountShowFlg && isReducedTaxFlg,'','none')}">
+<td>
+	<apex:outputPanel rendered="{!!isForeignCurrency}">
+	<span style="font-size:10pt;">毎度格別の御引立に預かり厚く御礼申し上げます</span><br/>
+	<span style="font-size:10pt;">下記の通り御見積申し上げます。</span>
+	</apex:outputPanel>
+	
+	<apex:outputPanel rendered="{!isForeignCurrency}">
+	<table style="width: 100%;line-height:70%;">
+	<tr><td><span style="font-size:9pt;">毎度格別の御引立に預かり厚く御礼申し上げます</span></td></tr>
+	<tr><td><span style="font-size:9pt;">下記の通り御見積申し上げます。</span></td></tr>
+	<tr><td><span style="font-size:9pt;">Thank you for your request for a quotation.</span></td></tr>
+	<tr><td><span style="font-size:9pt;">We are pleased to offer a quotation as follows.</span></td></tr>
+	</table>
+	</apex:outputPanel>
+</td>
+<td>
+	<table style="width:100%;height:100%">
+	<tr>
+		<td align="right" style="width:65%;font-size:9pt;">
+			<div align="right" style="font-size:9pt;">&nbsp;</div>
+			<div align="right" style="font-size:8pt;">
+			<apex:outputtext value="{!$Label.ps__msg_006_0458}" />
+			</div>
+		</td>
+		<td style="width:35%;">
+		<div align="right" style="font-size:9pt;">
+		<apex:outputText value="{0,date,yyyy年MM月dd日}">
+		発行日付&nbsp;&nbsp;<apex:param value="{!lead.LeadReceiptDate__c}" />
+		</apex:outputText>
+		</div>
+		<div align="right" style="font-size:8pt;">単位:{!currencyUnit}</div>
+		</td>
+	</tr>
+	</table>
+</td>
+</tr>
+<tr style="display:{!IF(allAmountShowFlg && isReducedTaxFlg,'none','')}">
+<!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz END -->
+<td align="left" style="font-size:9pt;">
+	<div align="left" style="font-size:9pt;display:{!IF(isReducedTaxFlg, true, 'none')}">&nbsp;</div>
+	<div align="left" style="font-size:8pt;display:{!IF(isReducedTaxFlg, true, 'none')}">
+	<apex:outputtext value="{!$Label.ps__msg_006_0458}" rendered="{!isReducedTaxFlg}"/>
+	</div>
+</td>
+<!-- 2019/09/27 パラメータ切り替え WGCH END -->
+<td>
+<div align="right" style="font-size:9pt;">
+<apex:outputText value="{0,date,yyyy年MM月dd日}">
+発行日付&nbsp;&nbsp;<apex:param value="{!lead.LeadReceiptDate__c}" />
+</apex:outputText>
+</div>
+<div align="right" style="font-size:8pt;">単位:{!currencyUnit}</div>
+</td>
+
+</tr>
+</table>
+
+
+ 
+<apex:pageBlock >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+<apex:dataTable rowClasses="odd,even" value="{!onePage.onePageList}" var="t" border="0" cellpadding="0" width="100%" headerClass="{!IF(isForeignCurrency,'header','dumyclass')} tableborderbottom tableborderleft">
+   <apex:column width="5%" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" styleClass="tableborderleft" >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+    <apex:facet name="header" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+      No.
+     </div>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+      No.
+     </div>
+
+    </apex:facet>
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <div align="center"> -->
+    <div align="center" style="{!IF(t.pBrkDNFlg, 'display:none;', '')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+     <apex:outputtext value="{0,number,}">
+      <apex:param value="{!t.rowNo}" />
+     </apex:outputtext>
+    </div>
+   </apex:column>
+<!-- 2016/12/09 見積明細利用日機能対応 BEGIN zyz -->  
+	<!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+	<apex:column width="10%" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" styleClass="tableborderleft" >
+	<!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+	<apex:facet name="header" >
+	<!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+	<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" >
+	<!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+	利用日
+	</div>
+	<!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+	<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" >
+ 	<!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+ 利用日<br/>
+<span style="font-size: 0.2cm;">Date</span>
+	</div>
+    
+	</apex:facet>
+	<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <apex:outputField value="{!t.sobj.UseDate__c}" /> -->
+    <apex:outputField value="{!t.sobj.UseDate__c}" rendered="{!!t.pBrkDNFlg}" />
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+	</apex:column>
+<!-- 2016/12/09 見積明細利用日機能対応 END zyz -->   
+   <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+   <!-- <apex:column width="57%" style="font-size:80%;"> -->
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+   <apex:column width="{!IF(isReducedTaxFlg, '51%', '57%')}" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" styleClass="tableborderleft" >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+   <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+    <apex:facet name="header" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+      摘要／項目
+     </div>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+摘要／項目<br/>
+<span style="font-size: 0.2cm;">Reference</span>
+     </div>
+  
+    </apex:facet>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <apex:outputtext value="{!t.productName}" rendered="{!ISNULL(t.produceNms)}"/>
+     <apex:repeat value="{!t.produceNms}" var="pnm" rendered="{!t.produceNms!=null}">
+        <apex:outputtext value="{!pnm}" style="line-height:20.5px;" /><br/>
+     </apex:repeat>
+<!-- 2016/12/27 見積明細利用日機能対応 BEGIN zyz -->
+    <!-- {!LEFT(t.sobj.ProductName__c,37)} {!t.productName}-->
+<!-- 2016/12/27 見積明細利用日機能対応 END zyz -->
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+   </apex:column>
+   
+
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+   <apex:column width="11%" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" styleClass="tableborderleft" >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+    <apex:facet name="header">
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+      単価
+     </div>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+単価<br/>
+<span style="font-size: 0.2cm;">Price</span>
+     </div>
+
+    
+    </apex:facet>
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <div align="right"> -->
+    <div align="right" style="{!IF(t.planFlg, 'display:none;', '')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <apex:outputLabel value="{!currencyMark} " rendered="{!!ISBLANK(t.sobj.UnitPrice__c)}" />
+      <apex:param value="{!t.sobj.UnitPrice__c}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+   <apex:column width="6%" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" rendered="{!isReducedTaxFlg}" styleClass="tableborderleft" >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+    <apex:facet name="header">
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+    消費税
+     </div>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+消費税<br/>
+<span style="font-size: 0.2cm;">Tax</span>
+     </div>
+
+    
+    </apex:facet>
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <div align="right"> -->
+    <div align="right" style="{!IF(t.planFlg, 'display:none;', '')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+     <apex:outputtext value="{0,number,{!taxNumberFormat}}" rendered="{!AND(!ISBLANK(t.sobj.UnitPrice__c),NOT(t.isPayItem),NOT(t.isServieFlg))}">
+      <apex:param value="{!t.taxRate}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+   <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+   <apex:column width="5%" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" styleClass="tableborderleft" >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+    <apex:facet name="header">
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+      数量
+     </div>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" >
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+数量<br/>
+<span style="font-size: 0.2cm;">Q'ty</span>
+     </div>
+
+
+    </apex:facet>
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <div align="center"> -->
+    <div align="center" style="{!IF(t.planFlg, 'display:none;', '')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+     <apex:outputtext value="{0,number}">
+      <apex:param value="{!t.sobj.Amount__c}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </apex:column>
+   
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+   <apex:column width="12%" style="font-size:80%;vertical-align: top;visibility:{!if(t.blankFlg,'hidden','')}" styleClass="tableborderleft tableborderright" >
+   <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+    <apex:facet name="header">
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}" class="tableborderright">
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+      金額
+     </div>
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz BEGIN -->
+     <div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}" class="tableborderright">
+     <!-- 2019/09/30 見積書で印刷した際に、商品名が折り返し出力できるように改善対応 zyz END -->
+御見積金額<br/>
+<span style="font-size: 0.2cm;">Amount</span>
+     </div>
+
+    </apex:facet>
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <div align="right"> -->
+    <div align="right" style="{!IF(t.planFlg, 'display:none;', '')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <apex:outputLabel value="▲" rendered="{!AND(!ISBLANK(t.sobj.UnitPrice__c), t.isPayItem)}" style="font-size:1em"/>
+      <apex:outputLabel value="{!currencyMark} " rendered="{!!ISBLANK(t.sobj.UnitPrice__c)}" />
+	  <apex:param value="{!t.sobj.SpTotal__c}" />
+     </apex:outputtext>
+    </div>
+   </apex:column>
+ </apex:dataTable>
+</apex:pageBlock>
+
+ <table>
+ <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 1px;"/></td></tr>
+ </table>
+ 
+ <!-- 2014.11.14 ADD -->
+ <table  border="0" cellspacing="0" width="52%" align="left" style="table-layout: fixed;">
+ 	<tr>
+ 		<td style="word-break: break-all;word-wrap:break-word;vertical-align: bottom;line-height: 100%;">
+    <!-- 2015/12/03 換行 Fix BEGIN -->
+     <apex:outputField value="{!lead.QuotationComment__c}" rendered="{!!isCommentAutoBreakFlg}"/>
+     <apex:outputLabel value="{!lead.QuotationComment__c}" rendered="{!isCommentAutoBreakFlg}"/>
+     <!-- 2015/12/03 換行 Fix END -->
+ 		</td>
+ 	</tr>
+ </table>
+ 
+ <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+ <!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz BEGIN -->
+ <table style="{!IF(isReducedTaxFlg , 'font-size: 120%', '')};display:{!IF(allAmountShowFlg,'none','')}" border="1" cellspacing="0" bordercolor="black" width="{!IF(isForeignCurrency, '45%','40%')}" align="right">
+ <!-- 2020/06/30 見積書のレイアウトは請求書のレイアウトに統一に改善対応 BY zyz END -->
+ <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+<apex:repeat value="{!onePage.taxRowDataLst}" var="item" rendered="{!isReducedTaxFlg}">
+<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH BEGIN -->
+<tr style="font-size:70%;display:{!IF( item.isNoTaxRowShowFlg && (item.amountExcTax + item.taxAmount) != 0 , true, 'none')}">
+<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH END -->
+ <td style="text-align: right; width:70px;">
+  <apex:outputtext value="({0,number,{!TaxNumberFormat}})対象" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+   <apex:param value="{!item.taxRate}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td style="text-align: right;">
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+   <apex:param value="{!item.amountExcTax}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td style="text-align: right;"> 消費税 </td>
+ <td style="text-align: right;">
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+   <apex:param value="{!item.taxAmount}"></apex:param>
+  </apex:outputtext>
+ </td>
+</tr>
+</apex:repeat>
+<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH BEGIN -->
+<tr style="text-align: right; font-size:70%; display:{!IF(false && isReducedTaxFlg && ( (onePage.disRowData.disUnitPriceSum + onePage.disRowData.disTaxAmountSum) != 0 ), true, 'none')}">
+<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH END -->
+ <td style="width:70px;"> 値引 </td>
+ <td>
+  <!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH BEGIN -->
+  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+  <!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH END -->
+   <apex:param value="{!onePage.disRowData.disUnitPriceSum}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td> 消費税 </td>
+ <td>
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:outputLabel value="▲ "/>
+    <apex:param value="{!onePage.disRowData.disTaxAmountSum}"></apex:param>
+   </apex:outputtext>
+  </td>
+</tr>
+<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH BEGIN -->
+<apex:repeat value="{!onePage.disRowDataLst}" var="item" rendered="{!isReducedTaxFlg}">
+<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH BEGIN -->
+<tr style="text-align: right; font-size:70%; display:{!IF(item.isDisRowShowFlg && ( (item.disUnitPriceSum + item.disTaxAmountSum) != 0 ), true, 'none')}">
+<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH END -->
+ <td style="width:70px;">
+  <apex:outputtext value="({0,number,{!TaxNumberFormat}})値引">
+   <apex:param value="{!item.taxRate}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td>
+  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:param value="{!item.disUnitPriceSum}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td> 消費税 </td>
+ <td>
+  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+    <apex:param value="{!item.disTaxAmountSum}"></apex:param>
+   </apex:outputtext>
+  </td>
+</tr>
+</apex:repeat>
+<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH END -->
+<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH BEGIN -->
+<tr style="text-align: right; font-size:70%; display:{!IF(onePage.sumRowData.isSumRowShowFlg && isReducedTaxFlg && (onePage.taxRowDataLst.size != 0), true, 'none')}">
+<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH END -->
+ <td style="width:70px;"> 合計(税抜) </td>
+ <td>
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:param value="{!onePage.sumRowData.amountExcTax}"></apex:param>
+  </apex:outputtext>
+ </td>
+ <td> 消費税 </td>
+ <td>
+  <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+   <apex:param value="{!onePage.sumRowData.taxAmount}"></apex:param>
+  </apex:outputtext>
+ </td>
+</tr>
+<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+  <tr>
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <td width="{!IF(isForeignCurrency, '70%', '50%')}"> -->
+    <td width="{!IF(isForeignCurrency || isReducedTaxFlg, '70%', '50%')}" colspan="{!IF(isReducedTaxFlg, '3', '1')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+<apex:outputPanel rendered="{!!isForeignCurrency}"> 
+    <div style="font-size:70%; margin-right: 2px;" align="right">
+     御見積金額(税込)
+    </div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isForeignCurrency}"> 
+    <div style="font-size:70%; margin-right: 2px;" align="right">
+     御見積金額(税込)<span style="font-size: 10px;"> Total Amount * Tax Included</span>
+    </div>
+</apex:outputPanel>
+   </td>
+   <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+   <td width="{!IF(isForeignCurrency || isReducedTaxFlg, '30%', '50%')}">
+   <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+      <!--<apex:param value="{!sumInfo.amoutQuotePriceIncTax}"></apex:param>-->
+      <apex:param value="{!onePage.sumInfo.amoutQuotePriceIncTax}"></apex:param>
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+  <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+  <!-- <tr> -->
+  <tr style="display:{!IF(NOT(isReducedTaxFlg), true, 'none')}">
+  <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+    <td width="50%">
+<apex:outputPanel rendered="{!!isForeignCurrency}"> 
+    <div style="font-size:70%; margin-right: 2px;" align="right">
+     内消費税
+    </div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isForeignCurrency}"> 
+    <div style="font-size:70%; margin-right: 2px;" align="right">
+     内消費税<span style="font-size: 10px; white-space: nowrap;"> {!taxEnglishLabel}</span>
+    </div>
+</apex:outputPanel>
+   </td>
+   <td width="50%">
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+      <!--<apex:param value="{!sumInfo.amoutTax}"></apex:param>-->
+      <apex:param value="{!onePage.sumInfo.amoutTax}"></apex:param>
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+  <tr style="display: {!IF(ISNULL(serviceAmount), 'none' , 'table-row')}">
+    <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+    <!-- <td width="50%"> -->
+    <td width="{!IF(isReducedTaxFlg, '', '50%')}" colspan="{!IF(isReducedTaxFlg, '3', '1')}" >
+    <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+	<apex:outputPanel rendered="{!!isForeignCurrency}"> 
+	    <div style="font-size:70%; margin-right: 2px;" align="right">
+	     サービス料
+	    </div>
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!isForeignCurrency}"> 
+	    <div style="font-size:70%; margin-right: 2px;" align="right">
+	     サービス料<span style="font-size: 10px; white-space: nowrap;">Service Charge</span>
+	    </div>
+	</apex:outputPanel>
+   </td>
+   <!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+   <!-- <td width="50%"> -->
+   <td width="{!IF(isReducedTaxFlg, '', '50%')}">
+   <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     {!currencyMark}&nbsp;
+     <apex:outputtext value="{0,number,{!NumberFormat}}" >
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+      <!--<apex:param value="{!serviceAmount}"></apex:param>-->
+      <apex:param value="{!onePage.service}"></apex:param>
+      <!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+   <!--
+  <tr style="display: {!if( sumInfo.amoutServiceIncTax > 0, '', 'none')}">
+    <td width="50%">
+    <div style="font-size:70%; margin-right: 2px;" align="right">
+     内サービス料(税込)
+    </div>
+   </td>
+   <td width="50%">
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     ¥&nbsp;
+     <apex:outputtext value="{0,number,}" >
+      <apex:param value="{!sumInfo.amoutServiceIncTax}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+
+  <tr style="display: {!if( sumInfo.amoutSpecialIncTax > 0, '', 'none')}">
+    <td width="50%">
+    <div style="font-size:70%; margin-right: 2px;" align="right">
+     内宿泊税
+    </div>
+   </td>
+   <td width="50%">
+    <div style="font-size:90%; margin-right: 2px;" align="right">
+     ¥&nbsp;
+     <apex:outputtext value="{0,number,}" >
+      <apex:param value="{!sumInfo.amoutSpecialIncTax}"></apex:param>
+     </apex:outputtext>
+    </div>
+   </td>
+  </tr>
+     -->
+
+ </table>
+</apex:repeat>
+<!-- 2019/07/30 予約見積は明細分割機能 BY zyz BEGIN -->
+<div style="vertical-align:top ;{!if( idx == bulkPrintInfoLst.size, '', 'page-break-before: always;')}"></div>
+<apex:variable var="idx" value="{!idx + 1}"/>
+</apex:repeat>
+<!-- 2019/07/30 予約見積は明細分割機能 BY zyz END -->
+
+</body>
+</html>
+</apex:page>

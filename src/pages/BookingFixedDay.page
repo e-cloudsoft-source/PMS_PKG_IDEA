@@ -1,0 +1,43 @@
+<apex:page showHeader="false" sidebar="false" standardController="BookingPlus__c" extensions="BookingFixedDay">
+<!-- Get booking List of fixed day  -->
+ <apex:form >
+ <!-- の予約一覧 -->
+  <apex:sectionHeader title="" subtitle="{!fixedday} {!$Label.ps__msg_002_0074}"/>
+  <!--  <apex:pageBlock id="counter" mode="edit"> -->
+  <apex:pageBlock id="counter">
+  <!-- <apex:outputPanel layout="block" styleClass="container" >  -->
+   <apex:pageBlockTable value="{!booking}" var="o">
+    <apex:column style="background-color:whitesmoke;color:black;">
+     <apex:facet name="header"><!-- 予約名 -->{!$Label.ps__msg_002_0075}</apex:facet>
+     <div align="center" style="width:95px;">
+      <a target="_top" href="/{!o.Id}" id="{!o.Id}" onblur="LookupHoverDetail.getHover('{!o.Id}').hide();" onfocus="LookupHoverDetail.getHover('{!o.Id}', '/{!o.Id}/m?retURL=%2F{!o.Id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!o.Id}').hide();" onmouseover="LookupHoverDetail.getHover('{!o.Id}', '/{!o.Id}/m?retURL=%2F{!o.Id}&isAjaxRequest=1').show();">{!o.Name}</a>
+     </div>
+    </apex:column>
+    <apex:column style="background-color:white; color:black;">
+     <apex:facet name="header"><!-- 部屋タイプ -->{!$Label.ps__msg_002_0076}</apex:facet>
+     {!o.refTypeOfRooms__r.Name}
+    </apex:column>
+    <apex:column style="background-color:whitesmoke;color:black;">
+     <apex:facet name="header"><!-- 部屋 -->{!$Label.ps__msg_002_0077}</apex:facet>
+     <div align="center" style="width:95px;">
+      {!o.rRoom__r.Name}
+     </div>
+    </apex:column>
+    <apex:column style="background-color:white;color:black;">
+     <apex:facet name="header"><!-- 予約人数 -->{!$Label.ps__msg_002_0078}</apex:facet>
+     <apex:outputtext value="{0,number,}">
+      <apex:param value="{!o.StayPersons__c}"></apex:param>
+     </apex:outputtext>
+    </apex:column>
+    <apex:column style="background-color:whitesmoke;color:black;">
+     <apex:facet name="header"><!-- 到着時刻 -->{!$Label.ps__msg_002_0079}</apex:facet>
+     <div align="center" style="width:95px;">
+      {!o.Field4__c}
+     </div>
+    </apex:column>
+   </apex:pageBlockTable>
+   <!--  </apex:outputPanel>  -->
+  </apex:pageBlock>
+  <apex:actionPoller action="{!incrementCounter}" rerender="counter" interval="60"/>
+ </apex:form>
+</apex:page>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>プロジェクト</value>
+    </caseValues>
+    <fields>
+        <label><!-- 担当者 --></label>
+        <name>AssignUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- カレンダー非表示 --></label>
+        <name>CalendarFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 日付切替モード設定 --></label>
+        <name>DateMode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 説明 --></label>
+        <name>Describe__c</name>
+    </fields>
+    <fields>
+        <label><!-- 終了日 --></label>
+        <name>EndDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- 公開フラグ --></label>
+        <name>IsPublicFlag__c</name>
+    </fields>
+    <fields>
+        <label><!-- マネージャー --></label>
+        <name>ManagerUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- 基準名 --></label>
+        <name>PlanBaseName__c</name>
+    </fields>
+    <fields>
+        <label><!-- プロジェクトコード --></label>
+        <name>ProjectRecord__c</name>
+    </fields>
+    <fields>
+        <label><!-- タスク別権限制限 --></label>
+        <name>RoleDetailFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 開始日 --></label>
+        <name>StartDt__c</name>
+    </fields>
+    <fields>
+        <label><!-- アーカイブ --></label>
+        <name>finish__c</name>
+    </fields>
+</CustomObjectTranslation>

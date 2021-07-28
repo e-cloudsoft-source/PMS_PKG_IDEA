@@ -1,0 +1,633 @@
+<apex:page standardcontroller="Lead__c" extensions="RepGeneralExtendCtrl" showHeader="false" action="{!initPdf}"
+	applyHtmlTag="false" applyBodyTag="false" sidebar="false" renderAs="pdf" >
+<html>
+<head>
+<style>
+	@page {
+	 size: 8.27in 11.69in;   /* A4 portlate size */
+	 margin: 10px; 
+	}
+	body {
+	font-family: Arial Unicode MS;
+	}
+	.odd {
+		border-bottom: 1px solid #000;
+		padding: 1px 1px 2px 2px;
+		font-size: 100%;
+	}
+	.even {
+		border-bottom: 1px solid #000;
+		background-color: #CCCCCC;
+		padding: 1px 1px 2px 2px;
+		font-size: 100%;
+	}
+	.underline {
+		list-style:none; 
+		border-bottom:0.5px black solid; 
+	}
+	.header {
+		height:24px;
+		font-size: 80%;
+		background-color: #CCCCCC;
+	}
+	/* 2017/07/07 调整显示的表格线 BEGIN */
+	.tableborderleft {
+		border-top:1px solid #000;
+		border-left:1px solid #000;
+		//border-right:1px solid #000;
+		//border-bottom:1px solid #000;
+	}
+	.tableborderright {
+		border-top:1px solid #000;
+		border-left:1px solid #000;
+		border-right:1px solid #000;
+		//border-bottom:1px solid #000;
+	}
+	.tableborderbottom {
+		border-top:1px solid #000;
+		border-left:1px solid #000;
+		//border-right:1px solid #000;
+		border-bottom:1px solid #000;
+	}
+	.tableborderbottomFull {
+		border-top:1px solid #000;
+		border-left:1px solid #000;
+		border-right:1px solid #000;
+		border-bottom:1px solid #000;
+	}
+	.tablebottom {
+		border-bottom:1px solid #000;
+		width:435px;
+		vertical-align: top;
+	}
+	/* 2017/07/07 调整显示的表格线 END */
+		/* 2017/07/10 検収印 BEGIN */
+		.splitline {
+			list-style:none; 
+			border-top:0.5px black solid; 
+		}
+		.leftline {
+			list-style:none; 
+			border-left:0.5px black solid; 
+		}
+		.rightline {
+			list-style:none; 
+			border-right:0.5px black solid; 
+		}
+		/* 2017/07/10 検収印 END */
+		#itemAmountId tr td {
+			width:50%;
+		}
+</style>
+<title>No.{!lead.No__c}</title>
+</head>
+<body>
+<apex:pageMessages />
+<!--  整个页面分页   -->
+<apex:repeat value="{!allPageList}" var="onePage" >
+<div style="vertical-align:top ;margin-top: 0px;{!if( onePage.isFirstPage, '', 'page-break-before: always;')}">
+</div>
+<table style="width:100%">
+	<tr>
+		<!--  注文請書/納品書 的LOGO显示 -->
+		<td>
+		<apex:outputPanel rendered="{!(isOrderConfirmPdf || isOrderDeliveryPdf)}">
+        <div style="position:relative; width:225px;height:75px;">
+			<apex:outputField value="{!rep.ReportLogo__c}" style="height:30px" />
+		</div>
+		</apex:outputPanel>
+		</td>
+		<td style="text-align:right;vertical-align: top;">
+			<div align="right" style="font-size:9pt;">
+				<!--  発注書発行日/注文請書発行日 / 納品書発行日 / 検収書発行日 的切换   -->
+				<apex:outputPanel rendered="{!isOrderPdf}">
+					<apex:outputText value="{0,date,{!dateFormat}}">
+						発注書発行日:&nbsp;&nbsp;<apex:param value="{!toDayDate}"/>
+					</apex:outputText>
+				</apex:outputPanel>
+				<apex:outputPanel rendered="{!isOrderConfirmPdf}">
+					<apex:outputText value="{0,date,{!dateFormat}}">
+						注文請書発行日:&nbsp;&nbsp;<apex:param value="{!toDayDate}"/>
+					</apex:outputText>
+				</apex:outputPanel>
+				<apex:outputPanel rendered="{!isOrderDeliveryPdf}">
+					<apex:outputText value="{0,date,{!dateFormat}}">
+						納品書発行日:&nbsp;&nbsp;<apex:param value="{!toDayDate}"/>
+					</apex:outputText>
+				</apex:outputPanel>
+				<apex:outputPanel rendered="{!isOrderReceiptPdf}">
+					<apex:outputText value="{0,date,{!dateFormat}}">
+						検収書発行日:&nbsp;&nbsp;<apex:param value="{!toDayDate}"/>
+					</apex:outputText>
+				</apex:outputPanel>
+			</div>
+			<div align="right"><span style="font-size:8pt;">No.{!lead.No__c}</span></div>
+		</td>
+	</tr>
+</table>
+<!--  発注書/注文請書/納品書/検収書 的切换   -->
+<apex:outputPanel rendered="{!isOrderPdf}">
+	<div align="center"><span style="font-size:18pt;">発 　 注　  書</span></div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isOrderConfirmPdf}">
+	<div align="center"><span style="font-size:18pt;">注 　 文 　 請 　 書</span></div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isOrderDeliveryPdf}">
+	<div align="center"><span style="font-size:18pt;">納 　 品 　 書</span></div>
+</apex:outputPanel>
+<apex:outputPanel rendered="{!isOrderReceiptPdf}">
+	<div align="center"><span style="font-size:18pt;">検 　 収 　 書</span></div>
+</apex:outputPanel>
+<!--  2017/07/06 店铺信息显示部分  zyz -->
+<!--  発注書/検収書   -->
+<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+<apex:outputPanel rendered="{!(isOrderPdf && !isSwapFlg) || (isOrderReceiptPdf && !isSwapFlg) || (isOrderConfirmPdf && isSwapFlg) || (isOrderDeliveryPdf && isSwapFlg)}">
+<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+	<table border="0" style="width: 100%;font-size:80%;margin-top: 5px;" cellpadding="0px" cellspacing="0px">
+		<tr style="vertical-align: top;">
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz BEGIN -->
+			<td style="width:60%;">
+                <span style="font-size:14pt;">{!rep.ShopInfoRef__r.Name}&nbsp;</span>
+                <!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz END -->
+                <!--  2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+                <!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+                <!--<span style="font-size:14pt;vertical-align: bottom;width: 10px;">御中</span>-->
+                <span style="font-size:14pt;vertical-align: bottom;width: 10px;">
+                	<apex:outputPanel rendered="{!mrStr !=''}">{!mrStr}</apex:outputPanel>
+                	<apex:outputPanel rendered="{!mrStr ==''}">御中</apex:outputPanel>
+                </span>
+                <!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+                <!--  2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+                <div>{!IF (ISBLANK(rep.ShopInfoRef__r.Post__c),'' , '〒')}{!rep.ShopInfoRef__r.Post__c}</div>
+                <div>{!rep.ShopInfoRef__r.Address__c}</div>
+			</td>
+			<td style="width:10px">&nbsp;</td>
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz BEGIN -->
+			<td style="width:40%;">
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz END -->
+                <div style="float:right; width:255px;text-align: left;">
+                <span style="font-size: 12pt">{!lead.QuotationName__c}</span>
+                <div>{!IF (contactPost='','' , '〒')}{!contactPost}</div>
+                <div>{!contactAddress}</div>
+                <div>{!lead.ChargeUserNm__c}</div>
+                </div>
+			</td>
+		</tr>
+	</table>
+	<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+	<!--
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderReceiptPdf,'none','')}">下記の通り発注いたします。</div>
+	-->
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderPdf,'','none')}">下記の通り発注いたします。</div>
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderConfirmPdf && isSwapFlg,'','none')}">下記の通り注文をお請けいたします。</div>
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderDeliveryPdf && isSwapFlg,'','none')}">下記の通り納品いたしました。</div>
+	<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+</apex:outputPanel>
+<!--  注文請書/納品書  -->
+<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+<!--
+<apex:outputPanel rendered="{!(isOrderConfirmPdf || isOrderDeliveryPdf)}">
+-->
+<apex:outputPanel rendered="{!(isOrderConfirmPdf && !isSwapFlg) || (isOrderDeliveryPdf && !isSwapFlg) || (isOrderPdf && isSwapFlg) || (isOrderReceiptPdf && isSwapFlg)}">
+<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+	<table style="width:100%;font-size:80%;margin-top: 5px;" cellpadding="0px" cellspacing="0px">
+		<tr style="vertical-align: top;">
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz BEGIN -->
+			<td style="width:60%;">
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz END -->
+                <!-- 
+                <table>
+                    <tr style="font-size:14pt;">
+                    <td>{!lead.QuotationName__c}</td>
+                    <td style="vertical-align: bottom;width: 10px;">御中</td>
+                    </tr>
+                </table>
+                -->
+                <!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz BEGIN -->
+                <span style="font-size:14pt;" >{!lead.QuotationName__c}&nbsp;</span>
+                <!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz END -->
+                <!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+                <!--<span style="font-size:14pt;vertical-align: bottom;width: 10px;">御中</span>-->
+                <span style="font-size:14pt;vertical-align: bottom;width: 10px;">
+                	<apex:outputPanel rendered="{!mrStr !=''}">{!mrStr}</apex:outputPanel>
+                	<apex:outputPanel rendered="{!mrStr ==''}">御中</apex:outputPanel>
+                </span>
+                <!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+                <div>{!IF (contactPost='','' , '〒')}{!contactPost}</div>
+                <div>{!contactAddress}</div>
+                <div>{!lead.ChargeUserNm__c}</div>
+			</td>
+			<td style="width:10px">&nbsp;</td>
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz BEGIN -->
+			<td style="width:40%;">
+			<!-- 2020/01/30 宛名が一定文字数を超えた場合に自動改行する BY zyz END -->
+                <div style="float:right; width:255px;text-align: left;">
+                <span style="font-size: 12pt">{!rep.ShopInfoRef__r.Name}</span>
+                <div>{!IF (ISBLANK(rep.ShopInfoRef__r.Post__c),'' , '〒')}{!rep.ShopInfoRef__r.Post__c}</div>
+                <div>{!rep.ShopInfoRef__r.Address__c}</div>
+                </div>
+			</td>
+		</tr>
+	</table>
+	<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderPdf && isSwapFlg,'','none')}">下記の通り発注いたします。</div>
+	<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderConfirmPdf,'','none')}">下記の通り注文をお請けいたします。</div>
+	<div style="width:100%;font-size:80%;margin-top: 5px;display: {!IF(isOrderDeliveryPdf,'','none')}">下記の通り納品いたしました。</div>
+</apex:outputPanel>
+<!--  2017/07/06 合计金额信息显示部分  zyz   -->
+<table style="width:100%;font-size:80%;margin-top: 5px" border="0" cellpadding="0px" cellspacing="0px" >
+	<tr>
+		<td style="width: 72%">
+			<!--  発注書/発注請書   -->
+			<table cellpadding="0px" cellspacing="0px" border="0">
+				<tr style="display: {!IF(isOrderReceiptPdf,'','none')}"><td colspan="2">下記の通り検収いたしました。</td></tr>
+				<!--  契約日   -->
+				<tr style="display: {!IF((isOrderPdf || isOrderConfirmPdf),'','none')}">
+					<td class="tablebottom">
+						<span>契約日</span>
+					</td>
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 BEGIN -->
+					<!-- <td class="tablebottom"> -->
+					<td class="tablebottom" colspan="{!IF(isReducedTaxFlg, '4', '1')}">
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 END -->
+						<span>
+						  <apex:outputField value="{!lead.ContractDate__c}"/>{!contractDtYobi}
+						</span>
+					</td>
+				</tr>
+				<!--  納期   -->
+				<tr style="display: {!IF((isOrderPdf || isOrderConfirmPdf),'','none')}">
+					<td class="tablebottom">
+						<span>納期</span>
+					</td>
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 BEGIN -->
+					<!-- <td class="tablebottom"> -->
+					<td class="tablebottom" colspan="{!IF(isReducedTaxFlg, '4', '1')}">
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 END -->
+						<span>
+							<apex:outputText value="{!lead.PeriodInfo__c}"></apex:outputText>
+						</span>
+					</td>
+				</tr>
+				<!--  納品日   -->
+				<tr style="display: {!IF(isOrderDeliveryPdf,'','none')}">
+					<td class="tablebottom">
+						<span>納品日</span>
+					</td>
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 BEGIN -->
+					<!-- <td class="tablebottom"> -->
+					<td class="tablebottom" colspan="{!IF(isReducedTaxFlg, '4', '1')}">
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 END -->
+						<span>
+							<apex:outputField value="{!lead.DeliveryDate__c}" />{!contractDtYobi}
+						</span>
+					</td>
+				</tr>
+				<!--  支払期限・方法   -->
+				<tr style="display: {!IF(isOrderPdf,'','none')}">
+                    <td class="tablebottom">
+                        <span>支払期限・方法</span>
+                    </td>
+                    <!-- 2019/07/30 WGCH 軽減税率機能対応 BEGIN -->
+                    <!-- <td class="tablebottom"> -->
+                    <td class="tablebottom" colspan="{!IF(isReducedTaxFlg, '4', '1')}">
+                    <!-- 2019/07/30 WGCH 軽減税率機能対応 END -->
+						<span>
+							<apex:outputText value="{!lead.PayDuration__c}"></apex:outputText>
+						</span>
+					</td>
+				</tr>
+				<!--  発注金額(税込)   -->
+				<tr>
+					<td style="width:20%;" class="tablebottom">
+						<span>{!IF((isOrderPdf || isOrderConfirmPdf), '発注金額(税込)','合計金額(税込)')}</span>
+					</td>
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 BEGIN -->
+					<!-- <td class="tablebottom"> -->
+					<td class="tablebottom" colspan="{!IF(isReducedTaxFlg, '4', '1')}">
+					<!-- 2019/07/30 WGCH 軽減税率機能対応 END -->
+						<div>
+							<apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" >
+								<apex:param value="{!sumInfo.amoutQuotePriceIncTax}"></apex:param>
+							<!-- 2019/07/30 WGCH 軽減税率機能対応 BEGIN -->
+							</apex:outputtext>
+							<!-- 2019/07/30 WGCH 軽減税率機能対応 END -->
+						</div>
+					</td>
+				</tr>
+				<!--  内消費税   -->
+				<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+				<tr style="display:{!IF(NOT(isReducedTaxFlg), true, 'none')}">
+				<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+					<td class="tablebottom">
+						<span>内消費税</span>
+					</td>
+					<td class="tablebottom">
+						<div>
+							<apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" >
+								<apex:param value="{!sumInfo.amoutTax}"></apex:param>
+							<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+							</apex:outputtext>
+							<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						</div>
+					</td>
+				</tr>
+				<!--  発注金額(税抜)  -->
+				<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+				<tr style="display:{!IF(NOT(isReducedTaxFlg), true, 'none')}">
+				<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+					<td class="tablebottom">
+						<span>{!IF((isOrderPdf || isOrderConfirmPdf), '発注金額(税抜)','合計金額(税抜)')}</span>
+					</td>
+					<td class="tablebottom">
+						<div>
+							<apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" >
+								<apex:param value="{!sumInfo.amoutGoukeinoneTax}"></apex:param>
+							<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+							</apex:outputtext>
+							<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+						</div>
+					</td>
+				</tr>
+<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+  <apex:repeat value="{!onePage.taxRowDataLst}" var="item" rendered="{!isReducedTaxFlg}">
+  <!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH BEGIN -->
+  <tr style="display:{!IF( item.isNoTaxRowShowFlg && (item.amountExcTax + item.taxAmount) != 0 , true, 'none')}">
+  <!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH END -->
+   <td class="tablebottom" style="text-align: right;display:{!IF( (item.amountExcTax + item.taxAmount) != 0 , true, 'none')}"> 
+	     <apex:outputtext value="({0,number,{!TaxNumberFormat}})対象" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+	      <apex:param value="{!item.taxRate}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+   <td class="tablebottom" style="text-align: right;">
+     <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+	      <apex:param value="{!item.amountExcTax}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+   <td class="tablebottom" style="text-align: right;"> 消費税 </td>
+   <td class="tablebottom" style="text-align: right;">
+     <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}" rendered="{!item.isDiscountTax && item.isNoTaxPrice}">
+	      <apex:param value="{!item.taxAmount}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+	    <td class="tablebottom"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:150px; height: 1px;"/></td>
+	</tr>
+	</apex:repeat>
+	<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH BEGIN -->
+	<tr style="text-align: right; display:{!IF(false && isReducedTaxFlg && ( (onePage.disRowData.disUnitPriceSum + onePage.disRowData.disTaxAmountSum) != 0 ), true, 'none')}">
+	<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH END -->
+	    <td class="tablebottom"> 値引 </td>
+	    <td class="tablebottom">
+	<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH BEGIN -->
+    <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+    <!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH END -->
+	      <apex:param value="{!onePage.disRowData.disUnitPriceSum}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+	    <td class="tablebottom"> 消費税 </td>
+	    <td class="tablebottom">
+     <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+	      <apex:outputLabel value="▲ "/>
+	      <apex:param value="{!onePage.disRowData.disTaxAmountSum}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+	    <td class="tablebottom"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:150px; height: 1px;"/></td>
+	</tr>
+	<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH BEGIN -->
+	<apex:repeat value="{!onePage.disRowDataLst}" var="item" rendered="{!isReducedTaxFlg}">
+	<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH BEGIN -->
+	<tr style="text-align: right;display:{!IF(item.isDisRowShowFlg && ( (item.disUnitPriceSum + item.disTaxAmountSum) != 0 ), true, 'none')}">
+	<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH END -->
+	 <td class="tablebottom">
+	  <apex:outputtext value="({0,number,{!TaxNumberFormat}})値引">
+	   <apex:param value="{!item.taxRate}"></apex:param>
+	  </apex:outputtext>
+	 </td>
+	 <td class="tablebottom">
+	  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+	   <apex:param value="{!item.disUnitPriceSum}"></apex:param>
+	  </apex:outputtext>
+	 </td>
+	  <td class="tablebottom"> 消費税 </td>
+	 <td class="tablebottom">
+	  <apex:outputtext value="▲ {!currencyMark}{0,number,{!NumberFormat}}">
+	    <apex:param value="{!item.disTaxAmountSum}"></apex:param>
+	   </apex:outputtext>
+	  </td>
+	  <td class="tablebottom"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:150px; height: 1px;"/></td>
+	</tr>
+	</apex:repeat>
+	<!-- 2019/10/12 8と10％が混在する為、値引きも両方表記の対応 WGCH END -->
+	<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH BEGIN -->
+	<tr style="text-align: right; display:{!IF(onePage.sumRowData.isSumRowShowFlg && isReducedTaxFlg && (onePage.taxRowDataLst.size != 0), true, 'none')}">
+	<!-- 2019/10/30 消費税対象、値引行非表示の機能機能対応 WGCH END -->
+	    <td class="tablebottom"> 合計(税抜)  </td>
+	    <td class="tablebottom">
+    <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+	      <apex:param value="{!onePage.sumRowData.amountExcTax}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+	    <td class="tablebottom"> 消費税 </td>
+	    <td class="tablebottom">
+    <apex:outputtext value="{!currencyMark}{0,number,{!NumberFormat}}">
+	      <apex:param value="{!onePage.sumRowData.taxAmount}"></apex:param>
+	     </apex:outputtext>
+	    </td>
+	    <td class="tablebottom"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:150px; height: 1px;"/></td>
+  </tr>
+  <!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+				<tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:100%; height: 5px;"/></td></tr>
+			</table>
+		</td>
+		<td style="width:28%;vertical-align:bottom;">
+			<apex:outputLabel rendered="{!isOrderReceiptPdf}">
+				<!--  2017/07/10 検収印 BEGIN  -->
+				<table cellpadding="0" cellspacing="0" style="height: 70px;width: 70px; margin-left: 140px">
+					<tr style="height: 15px">
+						<td colspan="7" class="splitline leftline rightline" style="width: 40px;text-align:center;">検収印</td>
+					</tr>
+	                <tr style="height: 10px">
+		                <td class="splitline leftline" style="width: 10px"></td>
+		                <td style="width: 10px"></td>
+		                <td class="splitline" style="width: 10px"></td>
+		                <td style="width: 10px"></td>
+		                <td class="splitline" style="width: 10px"></td>
+		                <td style="width: 10px"></td>
+		                <td class="splitline rightline" style="width: 14px"></td>
+	                </tr>
+	                <tr style="height: 7px"><td colspan="7"></td></tr>
+	                <tr style="height: 7px"><td class="leftline"></td><td colspan="5"></td><td class="rightline"></td></tr>
+	                <tr style="height: 7px"><td colspan="7"></td></tr>
+	                <tr style="height: 7px"><td class="leftline"></td><td colspan="5"></td><td class="rightline"></td></tr>
+	                <tr style="height: 7px"><td colspan="7"></td></tr>
+	                <tr style="height: 7px">
+	                    <td class="leftline underline"></td>
+	                    <td ></td>
+	                    <td class="underline" ></td>
+	                    <td ></td>
+	                    <td class="underline" ></td>
+	                    <td ></td>
+	                    <td class="rightline underline" ></td>
+	                </tr>
+	            </table>
+	            <!--  2017/07/10 検収印 END  -->
+            </apex:outputLabel>
+			<div align="right">単位:{!currencyUnit}</div>
+		</td>
+	</tr>
+</table>
+
+<!--  明细显示   -->
+<apex:pageBlock >
+	<apex:dataTable rowClasses="odd,even" value="{!onePage.onePageList}" var="t" border="1" cellpadding="1" width="100%" headerClass="{!IF(isForeignCurrency,'header','')}">
+		<apex:column width="5%" style="font-size:80%;">
+			<apex:facet name="header" >
+				<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+					No.
+				</div>
+				<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+					No.
+				</div>
+			</apex:facet>
+			<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+			<!-- <div align="center"> -->
+			<div align="center" style="{!IF(t.pBrkDNFlg, 'display:none;', '')}">
+			<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+				<apex:outputtext value="{0,number,}">
+					<apex:param value="{!t.rowNo}"></apex:param>
+				</apex:outputtext>
+			</div>
+		</apex:column>
+		<apex:column width="10%" style="font-size:80%;">
+			<apex:facet name="header">
+				<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+				 	商品コード
+				</div>
+				<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+					商品コード<br/>
+					<span style="font-size: 0.2cm;">Date</span>
+				</div>
+			</apex:facet>
+			<!-- 商品code -->
+			{!t.accountCode}
+		</apex:column>
+		<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+		<!--<apex:column width="57%" style="font-size:80%;">-->
+		<apex:column width="{!IF(isReducedTaxFlg, '51%', '57%')}" style="font-size:80%;">
+		<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+			<apex:facet name="header" >
+				<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+					摘要／項目
+				</div>
+				<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+					摘要／項目<br/>
+					<span style="font-size: 0.2cm;">Reference</span>
+				</div>
+			</apex:facet>
+			{!t.productName}
+		</apex:column>
+		<apex:column width="11%" style="font-size:80%;">
+			<apex:facet name="header">
+				<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+					単価
+				</div>
+				<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+					単価<br/>
+					<span style="font-size: 0.2cm;">Price</span>
+				</div>
+			</apex:facet>
+			<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+			<!-- <div align="right"> -->
+			<div align="right" style="{!IF(t.planFlg, 'display:none;', '')}">
+			<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+				<apex:outputtext value="{0,number,{!NumberFormat}}">
+					<apex:outputLabel value="{!currencyMark} " rendered="{!!ISBLANK(t.sobj.UnitPrice__c)}" />
+					<apex:param value="{!t.sobj.UnitPrice__c}"></apex:param>
+				</apex:outputtext>
+			</div>
+		</apex:column>
+		<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+		<apex:column width="6%" style="font-size:80%;" rendered="{!isReducedTaxFlg}">
+			<apex:facet name="header">
+				<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+					消費税
+				</div>
+				<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+					消費税<br/>
+					<span style="font-size: 0.2cm;">Tax</span>
+				</div>
+			</apex:facet>
+			<div align="right" style="{!IF(t.planFlg, 'display:none;', '')}">
+				<apex:outputtext value="{0,number,{!TaxNumberFormat}}" rendered="{!(!ISBLANK(t.sobj.UnitPrice__c)) && t.isShowInfo && NOT(t.isServieFlg)}">
+					<apex:param value="{!t.taxRate}"></apex:param>
+				</apex:outputtext>
+			</div>
+		</apex:column>
+		<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+		<apex:column width="5%" style="font-size:80%;">
+			<apex:facet name="header">
+				<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+					数量
+				</div>
+				<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+					数量<br/>
+					<span style="font-size: 0.2cm;">Q'ty</span>
+				</div>
+			</apex:facet>
+			<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+			<!-- <div align="center"> -->
+			<div align="center" style="{!IF(t.planFlg, 'display:none;', '')}">
+			<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+				<apex:outputtext value="{0,number}">
+					<apex:param value="{!t.sobj.Amount__c}"></apex:param>
+				</apex:outputtext>
+			</div>
+		</apex:column>
+		<apex:column width="12%" style="font-size:80%;">
+		<apex:facet name="header">
+			<div align="center" style="font-size:70%;background-color:#CCCCCC;display: {!IF(!isForeignCurrency, 'block','none')}">
+				金額
+			</div>
+			<div align="center" style="line-height:80%;display: {!IF(isForeignCurrency, 'block','none')}">
+				ご利用金額<br/>
+				<span style="font-size: 0.2cm;">Amount</span>
+			</div>
+		</apex:facet>
+			<!-- 2019/07/30 軽減税率機能対応 WGCH BEGIN -->
+			<!-- <div align="right"> -->
+			<div align="right" style="{!IF(t.planFlg, 'display:none;', '')}">
+			<!-- 2019/07/30 軽減税率機能対応 WGCH END -->
+				<apex:outputtext value="{0,number,{!NumberFormat}}" >
+					<apex:outputLabel value="▲" rendered="{!AND(!ISBLANK(t.sobj.UnitPrice__c), t.isPayItem)}" style="font-size:1em"/>
+					<apex:outputLabel value="{!currencyMark} " rendered="{!!ISBLANK(t.sobj.UnitPrice__c)}" />
+					<apex:param value="{!t.sobj.SpTotal__c}" />
+				</apex:outputtext>
+			</div>
+		</apex:column>
+	</apex:dataTable>
+</apex:pageBlock>
+<!-- 見積書コメント   -->
+<div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width:100%; height: 7px;"/></div>
+<table  border="0" cellspacing="0" width="100%" align="left" style="font-size:80%;table-layout: fixed;{!if(onePage.isFirstPage, 'display:true', 'display:none')}">
+	<!-- 2019/09/27 パラメータ切り替え WGCH BEGIN -->
+	<!-- 
+	<tr><td>備考</td></tr>
+	<tr>
+		<td style="word-break: break-all;word-wrap:break-word;vertical-align: top;line-height: 100%;">
+	-->
+	<tr><td>備考</td>
+	<td style="text-align:right;" ><apex:outputtext value="{!$Label.ps__msg_006_0458}" rendered="{!isReducedTaxFlg}"/></td>
+	</tr>
+	<tr>
+		<td colspan="2" style="word-break: break-all;word-wrap:break-word;vertical-align: top;line-height: 100%;">
+	<!-- 2019/09/27 パラメータ切り替え WGCH END -->
+	
+			<apex:outputField value="{!lead.QuotationComment__c}"/>
+		</td>
+	</tr>
+</table>
+</apex:repeat>
+</body>
+</html>
+</apex:page>

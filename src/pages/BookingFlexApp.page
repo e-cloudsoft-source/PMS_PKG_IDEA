@@ -1,0 +1,4396 @@
+<!-- ご予約 -->
+<apex:page standardController="LeadIndex__c" extensions="BookingFlexApp"
+	sidebar="false" tabstyle="BookingAppTab__tab" title="{!$Label.ps__msg_001_0002}">
+
+<meta name="viewport" content="width=1960;initial-scale=0.5;user-scalable=yes;"/>
+<!-- 2016/06/09 共通JS定数を定義追加する -->
+<c:CommHeaderComp loadJsLib="true"/>
+<!-- Load jQuery -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.tablescroll.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'timmer/jquery.plugin.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'timmer/jquery.timeentry.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/keymaster.js')}"/>
+<!-- 2019/12/30 一括予約画面での特記事項項目だけ行間の幅が違う仕様を修正  by zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.ckeditor, 'ckeditor.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.ckeditor, 'util.js')}" />
+<!-- 2019/12/30 一括予約画面での特記事項項目だけ行間の幅が違う仕様を修正  by zy END -->
+<apex:includeScript value="{!$Resource.planExtendPlug}"/>
+<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.BookingAppLib, 'js/autoAssign.js')}"/>
+<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy END -->
+<c:CommProductFeeCalJsComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+
+<script>
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+$j=jQuery.noConflict();
+var JS_APPNS = "{!JSENCODE($Setup.CommDefine__c.AppNS__c)}";
+var JS_DEFCHKIN_DT = "{!JSENCODE(JS_DEFCHKIN_DT)}";
+var JS_DEFCHKOT_DT = "{!JSENCODE(JS_DEFCHKOT_DT)}";
+var JS_DEF_TARIFKEY = "{!JSENCODE($Label.ps__cst_0001)}";
+var JS_SYS_TODAY = dateFormat.format(Date.parse("{!TODAY()}"),JINYACONNECT.DateFormat);
+// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+var JS_ROOM_FLG = "{!selRoomModeFlg}" == "true";
+// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+var currency = kendo.culture().numberFormat.currency;
+function setFocusOnLoad() {}// Sf Auto Complete Event disabled
+currency.decimals = JINYACONNECT.NumberPointLen;
+currency.symbol = JINYACONNECT.CurrencySybmol;
+currency.pattern = ["$-n","$n"];
+</script>
+
+<style>
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+
+.tableHeader {
+    padding-left: 6px;
+}
+/*
+.ui-autocomplete {
+    max-height: 160px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}*/
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+  */
+* html .ui-autocomplete {
+    height: 160px;
+}
+
+.apexp .bPageBlock.apexDefaultPageBlock .pbBody{
+	margin-left: 2px;
+	margin-right:2px;
+}
+.bPageBlock .detailList span table td {
+	white-space: nowrap;
+}
+.floatPage{
+	position: fixed;
+    top: 175px;
+    right: 10px;
+    width: 32px;
+    background:#f2f3f3;
+}
+.floatPage div{
+	cursor: pointer;
+	height: 32px;
+    width: 32px;
+    margin-bottom: 30px;
+}
+
+#roomIndicatorPage{
+    background-image: url('../img/icon/custom51_100/highwaySign32.png');
+}
+#timeTablePage{
+    background-image: url('../img/icon/knight32.png');
+}
+#yadotyouPage{
+    background-image: url('../img/icon/custom51_100/tvWidescreen32.png');
+}
+#chatPage{
+	background-image: url('../img/icon/mail32.png');
+}
+#chatPage img{
+	position: relative;
+    top: 20px;
+    left: 20px;
+}
+#mapPage{
+	background-image: url('../img/icon/custom51_100/globe32.png');
+}
+#accountPage{
+	background-image: url('../img/icon/bank32.png');
+}
+.showFrame{
+	border: 1px solid red;
+}
+
+.framePage{
+    display: none;
+    width:100%;
+    height:100%
+}
+#customeDiv td{
+	padding-top: 0px;
+    padding-bottom: 0px;
+}
+table.infoTableClass {
+	table-layout: fixed;
+	width:100%;
+	word-spacing: 0px;
+	border-collapse: 0px;
+	border-spacing: 0px;
+	border: 1px;
+}
+table.infoTableClass.curRow{
+	height: 20px;
+	min-height: 20px;
+}
+table.infoTableClass .labelCol{
+	vertical-align: top;
+	width:95px;
+}
+.headerRow{
+	background:#7575d7;
+	background-image: url(/img/alohaSkin/opacity75.png);
+}
+.customRow{
+	background:{!colorStr};
+}
+#customeDiv li{
+	float: left;
+}
+/* 最大1640 */
+@media screen and (max-width: 1640px) {
+	select[multiple].leadColumn{
+		width:60px !important;
+	}
+	.detailRow textarea.leadColumn,input.leadColumn{
+		width:130px;
+	}
+	select.leadColumn{
+		width:135px;
+	}
+	th.typeClass,select.typeClass{
+		width:200px;!important;
+	}
+	.prodClass{
+		width: 88%;!important;
+	}
+}
+/* 最大1280 */
+@media screen and (max-width: 1279px) {
+	th.typeClass,select.typeClass{
+		width:150px;!important;
+	}
+	.prodClass{
+		width: 82%;!important;
+	}
+}
+@media screen and (max-width: 1040px) {
+	th.typeClass,select.typeClass{
+		width:100px;!important;
+	}
+	.prodClass{
+		width: 75%;!important;
+	}
+}
+@media screen and (max-width: 900px) {
+	th.typeClass,select.typeClass{
+		width:70px;!important;
+	}
+	.prodClass{
+		width: 65%;!important;
+	}
+}
+@media screen and (max-width: 800px) {
+	th.typeClass,select.typeClass{
+		width:60px;!important;
+	}
+	.prodClass{
+	width: 60%;!important;
+	}
+}
+@media screen and (min-width: 1280px) and (max-width: 1539px) {
+	select[multiple].leadColumn{
+		width:60px !important;
+	}
+	.detailRow textarea.leadColumn,input.leadColumn{
+		width:130px;
+	}
+	select.leadColumn{
+		width:135px;
+	}
+}
+@media screen and (min-width: 1540px) and (max-width: 1639px) {
+	select[multiple].leadColumn{
+		width:60px !important;
+	}
+	.detailRow textarea.leadColumn,input.leadColumn{
+		width:130px;
+	}
+	select.leadColumn{
+		width:135px;
+	}
+}
+@media screen and (min-width: 1640px) {
+	select[multiple].leadColumn{
+		width:110px !important;
+	}
+	.detailRow textarea.leadColumn,input.leadColumn{
+		width:240px;
+	}
+	select.leadColumn{
+		width:245px;
+	}
+	th.typeClass,select.typeClass{
+		width:200px;!important;
+	}
+	.prodClass{
+		width: 92%;!important;
+	}
+}
+
+input.needCopyClass{
+    display:none;
+}
+thead.hideTitleClass{
+	 display:none;
+}
+longRow.cke_contents{
+	height:130px;
+}
+table.bookingItemTb .showDetail{
+	text-align: right;
+}
+input.actBtnCtrlStyle {
+	border: 1px solid #ddd;
+	background-color: #F5F5F5;
+	color:#ACA899;
+}
+div.recentRefFrame{
+    background:#f2f3f3;
+}
+span.detailCancel {
+	cursor: pointer;
+}
+/*2017/01/10 layout by zy END */
+td.layoutTd .k-widget {
+	width:auto;
+}
+div.k-popup.k-group.k-reset{
+	width:auto !important;
+}
+/*2017/01/10 layout by zy END */
+/*2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw BEGIN*/
+.badge {
+    height: 14px;
+    line-height: 14px;
+    display: inline-block;
+    padding: 0 4px;
+    font-size: 12px;
+    text-align: center;
+    background-color: #FF5722;
+    color: #fff;
+    border-radius: 2px;
+    position: absolute;
+    top: -10px;
+    right: -5px; 
+}
+/*2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw END*/
+/* 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN */
+.disabledClass{
+	color: darkgrey;
+}
+/* 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END */
+</style>
+
+<!-- 処理ステータス制御する -->
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<div id="curPage" >
+<apex:pageBlock >
+<apex:form >
+	<apex:actionFunction name="_search_callbackFunction" action="{!queryExistLeadByLeadIndexIdByEdit}"  status="refStatusBlock" />
+	
+	<input type="hidden" value="{!planString}" id="hidContactField" />
+	<!-- COPY BUTTON -->
+	<apex:actionFunction name="_copy_orgDataQueryFun" action="{!preCopyAction}"  status="refStatusBlock" />
+	<apex:outputPanel >
+	<table>
+		<tr style="vertical-align: middle;">
+			<td style="width:240px">
+			<span style="font-size: 1.5em;width:240px; font-weight: normal;margin-right: 20px; line-height: 1.1em;display: inline-block;" id="leadEdit">{!if(ISBLANK(leadBaseInf.contactName),'新規ご予約',leadBaseInf.contactName)}</span>
+			</td>
+			<td><apex:outputlabel value="" /></td>
+			<td>
+		        <apex:inputText value="{!searchLabel}" style="size:300px;width:400px;" id="searchInput" styleClass="k-input"
+		        	html-placeholder="お客様名、電話番号、メール、予約番号を入力してください">
+		        	<apex:inputHidden value="{!searchLeadIdxId}" id="searchInput_lkid"/>
+		            <c:AutoCompleteComp objectname="{!$Setup.CommDefine__c.AppNS__c}LeadIndex__c" 
+		            	showField="{!$Setup.CommDefine__c.AppNS__c}ContactNameCal__c,{!$Setup.CommDefine__c.AppNS__c}EntryDate__c,{!$Setup.CommDefine__c.AppNS__c}contactRef__r.Phone,{!$Setup.CommDefine__c.AppNS__c}contactRef__r.Email,{!$Setup.CommDefine__c.AppNS__c}LeadName__c,{!$Setup.CommDefine__c.AppNS__c}TravelLeadNo__c" 
+		            	autocomplete_textbox="{!$Component.searchInput}"
+		            	jslibnew="true"
+		            	showFieldSeparator=","
+		            	withContact="true"
+		            	contactKey="contactRef__c"
+		            	selectedCallBackFunction="_search_callbackFunction"
+		            	respBeforeFunction="_respBeforeFunction"
+		            	sortKey="order by createddate desc"
+		            	addFilter="{!autoComLeadNoFilter}"/>
+		        </apex:inputText>
+        	</td>
+        	<!-- 2017/01/10 多layout by zy BEGIN -->
+			<td class="layoutTd">
+				<!-- 2017/03/02 防止二次点击功能  begin by wx -->
+				<!-- <input type="button" value="コピー" style="width:100px;margin-right: 5px;display:{!if(LEN(searchLeadIdxId) > 0,if(cloneFlag,'none','true'),'none')}" id="copyBtn" class="btn disBtn" onclick="javascript:_copy_callBackFun();_copy_orgDataQueryFun()"/> -->
+				<!-- 2017/04/25 项目优化 by zy BEGIN-->
+				<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN -->
+				<input type="button" value="コピー" style="width:100px;height:20px;display:{!if(LEN(searchLeadIdxId) > 0,if(cloneFlag,'none','true'),'none')}" id="copyBtn" class="btn disBtn" onclick="changeCopyMode(this)"/>
+				<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END -->
+				<!-- 2017/04/25 项目优化 by zy END-->
+			   	<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN -->
+				<input type="button" value="キャンセル" style="width:100px;height:20px;display:{!if(cloneFlag,'true','none')}" class="btn disBtn"  id="cancelBtn" onclick="cancelCloneInfo(this)"/>
+				<!-- 予約登録（コピー） -->
+				<input type="button" value="保存" style="width:100px;height:20px;display:{!if(cloneFlag,'true','none')};" id="cloneTopSaveBtn" class="btn disBtn" onclick="cloneLeadInfo(this)"/>
+				<!-- 予約登録 -->
+				<input type="button"  style="min-width:100px;width:100px;height:20px;display:{!if(cloneFlag,'none','true')};" class="btn disBtn" value="保存" onclick="upsertLeadInfo(this)" id="leadTopUpsertBtn" />
+				<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END -->
+				<!-- 2017/03/02 防止二次点击功能  end by wx -->
+				<!-- 2019/12/30 一括予約画面、既存予約の一括予約画面上に「予約インデックスに戻る」ボタンの追加 by zy BEGIN -->
+				<input type="button"  style="width:110px;height:20px;margin-right: 5px;display:{!if(ISBLANK(searchLeadIdxId),'none',if(cloneFlag,'none','true'))}" class="btn disBtn" value="予約ｲﾝﾃﾞｸｽに戻る" onclick="returnStarmPage('{!searchLeadIdxId}')" />
+				<!-- 2019/12/30 一括予約画面、既存予約の一括予約画面上に「予約インデックスに戻る」ボタンの追加 by zy BEGIN -->
+			    <apex:selectList size="1" value="{!curLayoutId}" rendered="{!layoutLst.size > 1}" id="layoutId" style="    height: 21px;color: #333; font-weight: bold; font-size: .9em;">
+			        <apex:selectOptions value="{!layoutLst}" />
+			        <apex:actionSupport event="onchange" action="{!changeLayoutNo}" status="refStatusBlock"  />
+			    </apex:selectList>
+			</td>
+			<!-- 2017/01/10 多layout by zy BEGIN -->
+		</tr>
+ 	</table>
+	</apex:outputPanel>
+</apex:form>
+</apex:pageBlock>
+<!-- 予約登録・編集 -->
+<apex:pageBlock id="condBlock">
+<!-- wgch -->
+<div style="width:100%" id="allPage">
+<div id="splitter" style="height: 100%; width: 100%;">
+<div style="width: 100%; vertical-align: top;" id="bookingDiv">
+<!-- wgch -->
+<apex:outputPanel id="leftPanel">
+<script>
+$j(document).ready(function() {
+    bindEvent();
+    //2017/04/25
+});
+//section 展开不展开角标响应
+function showYoyakuDetail(that){
+	$this = $j(that);
+	if ($this.hasClass("k-i-collapse")) {
+		$this.removeClass("k-i-collapse");
+		$this.addClass("k-i-expand");
+		$j(that).closest("tr").nextUntil(".infoHead").hide();
+	} else {
+		$this.removeClass("k-i-expand");
+		$this.addClass("k-i-collapse");
+		var $table = $j(that).closest("table");
+		var begin = $j(that).closest("tr")[0].rowIndex;
+		$j(that).closest("tr").nextUntil(".infoHead").show();
+	}
+	
+}
+
+function _copy_callBackFun(){
+	//blockUi();
+	$j("input[id$=hideBackFlag]").val(true);
+	$j("span[id$=':subindexBtnPanel']").hide();
+}
+function chgValue(that){
+	var orgData = $j(that).data("orgData");
+	if($j("#recentRefPage").hasClass("showFrame")){
+		$j(".recentRefFrame").data("kendoWindow").close();
+	}
+	//判断お客様是否变更
+	if ($j(that).hasClass("contactClass")) $j("input[id$=hidChgConflag]").val(true);
+	if(!orgData){
+		$j(that).data("orgData",$j(that).val());
+		$j(that).data("beforeVal",$j(that).val());
+		$j(that).closest("tr.detailRow").addClass("hadChange");
+		return;
+	} else { 
+		var oldValue = $j(that).data("beforeVal");
+		if(oldValue != $j(that).val()){
+			if($j(that).val() == orgData) {
+				$j(that).closest("tr.detailRow").removeClass("hadChange");
+			}
+		}
+		$j(that).closest("tr.detailRow").addClass("hadChange");
+	}
+}
+// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+function lazyLoadRows(curRow){
+	var target = $j("select.roomSelect",curRow);
+	if (requiredFieldChk(curRow) && target.hasClass("disabledClass")) {
+		var select = curRow.find("select.roomSelect");
+		select.removeAttr("disabled");
+		ajaxGetSelectRoomOpts(curRow,false,false,afterGetRoom.bind({tar:target}));
+	}
+}
+function afterGetRoom(result){
+	let {tar} = this;
+	var lockFlg = tar.next().is(":checked");
+	if (lockFlg) {
+		tar.attr("disabled","disabled");
+	}
+	else {
+		tar.removeAttr("disabled");
+		tar.removeClass("disabledClass");
+	}
+	var curRow = tar.closest("tr.dataRow");
+	var roomOpt = curRow.data("jinyaRoomOpt");
+	var roomId = $("select.roomSelect",roomOpt.element).val();
+	if (roomId != "") $j("[id$=hidRoomType]",curRow).val(roomOpt.roomData[roomId]);
+	$j("[id$=':hidRoomsSyncInfo']",curRow).val(JSON.stringify(roomOpt.leadArr));
+}
+// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+</script>
+<apex:form id="hiddenForm">
+	<apex:pageMessages id="inputFormMsg"/>
+	<div class="message errorM3" id="inputFormErrorMsg" role="alert" style="display:none;">
+          	<table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+          		<tbody>
+          			<tr valign="top">
+          				<td><img alt="ERROR" class="msgIcon" src="/s.gif" title="ERROR"/></td>
+          				<td class="messageCell">
+          					<div class="messageText">
+          						<span style="color:#cc0000"><h4>{!$Label.CONST_003_0132}:</h4></span>{!$Label.MSG_003_0105}<br/>
+          					</div>
+          				</td>
+          			</tr>
+          			<tr>
+          				<td></td>
+          				<td></td>
+          			</tr>
+          		</tbody>
+          	</table>
+          </div>
+	<apex:actionFunction name="setCookie" action="{!setCookieInf}" rerender="" />
+	<apex:inputhidden id="hideCookieMessage" value="{!cookieMessage}" />
+	<apex:inputhidden id="hideLeadId" value="{!newLead.id}" />
+</apex:form>
+<apex:form id="bookingForm" >
+<div id="customeDiv">
+	<table>
+		<tr>
+			<apex:repeat value="{!tblLst}" var="tbl">
+				<td style="vertical-align: top;">
+					<table class="infoTableClass first" style="table-layout: fixed;">
+						<apex:repeat value="{!tbl.secLst}" var="sec">
+							<apex:outputpanel rendered="{!!ISBLANK(TRIM(sec.title))}">
+								<tr class="infoHead detailRow headerRow {!if(ISBlank(colorStr),'','customRow')}">
+									<th colspan="2">
+										<span class="k-icon {!if(sec.explanFlag,'k-i-expand','k-i-collapse')}" onclick="showYoyakuDetail(this);"></span>{!sec.title}</th>
+									<th colspan="2"></th>
+								</tr>
+							</apex:outputpanel>
+							<tr class="detailRow" style="display:{!if(sec.explanFlag,'none','true')}">
+								<apex:outputpanel rendered="{!sec.colnum == 0}">
+									<td colspan="4">
+										<table  class="infoTableClass" style="table-layout: fixed;">
+											<apex:repeat value="{!sec.colLst}" var="col">
+												<apex:repeat value="{!col.fieldLst}" var="f">
+													<tr class="longRow" >
+														<td class="labelCol" style="width:110px;min-width:110px;">
+															<apex:outputLabel value="{!$ObjectType.Lead__c.fields[f.fieldName].Label}" rendered="{!f.fieldName!='$_blank_$' && !f.isContactFlag}"/>
+															<apex:outputLabel value="{!$ObjectType.Contact.fields[f.fieldName].Label}" rendered="{!f.fieldName!='$_blank_$' && f.isContactFlag}"/>
+														</td>
+														<td colspan="3" class="data2Col {!if(f.isRichTextAreaFlag && f.isContactFlag,'contactClass','')}" element="{!f.fieldName}" style="vertical-align: top;">
+															<!-- 2016/11/15  横幅画面拉长表示 -->
+															<!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz BEGIN -->
+															<c:CommentHelperComp commentId="{!f.fieldName}" rendered="{!LOWER(f.fieldName)=='comment3__c'}"/>
+															<!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz END -->
+															<apex:inputField rendered="{!f.fieldName!='$_blank_$'&& f.isContactFlag}" html-element="{!f.fieldName}" value="{!newContact[f.fieldName]}" styleClass="{!f.fieldName} {!if(f.isContactFlag,'contactClass','')} {!if(f.isRequiredFlag,'repuiredClass','')}" 
+															onchange="chgValue(this)" style="max-height:150px;width:91%;" 
+															required="{!f.isRequiredFlag}" showDatePicker="false"/> 
+															<!-- 2019/03/15 JINYABUG-1450 エラー修正 by zy BEGIN -->
+															<apex:inputField value="{!newLead[f.fieldName]}" styleClass="{!if(f.isLongTextareaflag,'','leadColumn')} {!f.fieldName} {!if(f.isRequiredFlag,'repuiredClass','')}"
+															onchange="chgValue(this)" style="max-height:150px; width:91%;" 
+															required="{!f.isRequiredFlag}" rendered="{!f.fieldName!='$_blank_$' && !f.isContactFlag && !f.isContactRefFlag}" showDatePicker="false"/>
+															<!-- 2019/03/15 JINYABUG-1450 エラー修正 by zy END -->
+															<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!f.isContactRefFlag}">
+										                        <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!f.isRequiredFlag}"/>
+										                        <span class="lookupInput">
+										                        <!-- 2017/03/14 keyup場合下　参照ウィンドウ閉じる　by zy BEGIN-->
+										                        <apex:inputText id="relcontact" label="お客様" style="width:91%;" styleClass="{!if(f.isRequiredFlag,'repuiredClass','')} leadColumn Relcontact__c contactClass" value="{!contactName}" html-placeholder="{!$Label.ps__inf_0002}" html-element="lead_{!f.fieldName}" maxlength="90" onkeyup="chgValue(this)">
+										                        <!-- 2017/03/14 keyup場合下　参照ウィンドウ閉じる　by zy END-->
+										                        <apex:inputHidden value="{!newLead.Relcontact__c}" id="relcontact_lkid" html-element="lead_{!f.fieldName}" />
+										                        <apex:inputHidden id="relcontact_lkold" html-element="lead_{!f.fieldName}" />       <!-- PopupWin利用 -->
+										                        <input type="hidden" id="relcontact_lkid_org" html-element="lead_{!f.fieldName}" />    <!-- JS判断用 -->
+										                        <c:AutoCompleteComp objectname="Contact" 
+										                            additionalfield="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Name1__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c"
+										                            autocomplete_textbox="{!$Component.relcontact}" 
+										                            showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,Description"
+										                            maxLenFilter="Description:16"
+										                            callbackFunction="setContactMessage"
+										                            showFieldSeparator=", "
+										                            addFilter="IsDelete__c!=true"
+										                            jslibnew="true"
+										                        />
+										                        </apex:inputText>
+										                        <!-- 2019/03/15 一括予約にお客様名の隣にルックアップアイコンが、と浦河イン様よりございましたの対応。 BY zyz BEGIN	-->
+										                        <!-- お客様選択	-->
+										                        <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+										                         onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+										                         onfocus="this.className = 'lookupIconOn';"
+										                         onblur="this.className = 'lookupIcon';"
+										                         class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px;position: relative;left: -4px;"
+										                         name="contactPopup" />
+										                         <!-- 2019/03/15 一括予約にお客様名の隣にルックアップアイコンが、と浦河イン様よりございましたの対応。 BY zyz END	-->
+										                        </span>
+									                        </apex:outputPanel>
+														</td>
+													</tr>
+												</apex:repeat>
+											</apex:repeat>
+										</table>
+									</td>
+								</apex:outputpanel>
+								<apex:outputpanel rendered="{! sec.colnum > 0}">
+										<apex:repeat value="{!sec.colLst}" var="col">
+											<td colspan="2" style="vertical-align: top;">
+												<table class="infoTableClass" style="table-layout: fixed;">
+													<apex:repeat value="{!col.fieldLst}" var="f">
+														<tr class="curRow">
+															<td class="labelCol" style="width:110px;min-width:110px;">
+																<apex:outputLabel value="{!$ObjectType.Lead__c.fields[f.fieldName].Label}" rendered="{!f.fieldName!='$_blank_$' && !f.isContactFlag}"/>
+																<apex:outputLabel value="{!$ObjectType.Contact.fields[f.fieldName].Label}" rendered="{!f.fieldName!='$_blank_$' && f.isContactFlag}"/>
+															</td>
+															<td class="data2Col {!if(f.isRichTextAreaFlag && f.isContactFlag,'contactClass','')}" element="{!f.fieldName}" colspan="{!if(f.isLongTextareaflag,3,1)}" style="vertical-align: top;">
+																<apex:inputField rendered="{!f.fieldName!='$_blank_$'&& f.isContactFlag}" html-element="{!f.fieldName}" value="{!newContact[f.fieldName]}" styleClass="{!if(f.isLongTextareaflag,'','leadColumn')} {!f.fieldName} {!if(f.isContactFlag,'contactClass','')} {!if(f.isRequiredFlag,'repuiredClass','')}" 
+																onchange="chgValue(this)" style="{!if(f.isLongTextareaflag,'max-height:150px;width:95%;','')}" 
+																required="{!f.isRequiredFlag}" showDatePicker="false"/> 
+																<!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz BEGIN -->
+																<c:CommentHelperComp commentId="{!f.fieldName}" rendered="{!LOWER(f.fieldName)=='comment3__c'}"/>
+																<!-- 2018/05/08 特記事項に定型文をクリック一つで入力できる機能 zyz END -->
+																<apex:inputField value="{!newLead[f.fieldName]}" styleClass="{!if(f.isLongTextareaflag,'','leadColumn')} {!f.fieldName} {!if(f.isRequiredFlag,'repuiredClass','')}" 
+																onchange="chgValue(this)" style="{!if(f.isLongTextareaflag,'max-height:150px;width:95%;','')}" 
+																required="{!f.isRequiredFlag}" rendered="{!f.fieldName!='$_blank_$' && !f.isContactFlag && !f.isContactRefFlag}" showDatePicker="false"/> 
+																<!-- -->
+																<apex:outputPanel styleClass="requiredInput" layout="block" rendered="{!f.isContactRefFlag}">
+											                        <apex:outputPanel styleClass="requiredBlock" layout="block" rendered="{!f.isRequiredFlag}"/>
+											                        <span class="lookupInput">
+											                        <!-- 2017/03/14 keyup場合下　参照ウィンドウ閉じる　by zy BEGIN-->
+											                        <apex:inputText id="relcontact" label="お客様" styleClass="{!if(f.isRequiredFlag,'repuiredClass','')} leadColumn Relcontact__c contactClass" value="{!contactName}" html-placeholder="{!$Label.ps__inf_0002}" html-element="lead_{!f.fieldName}" maxlength="90" onkeyup="chgValue(this)">
+											                        <!-- 2017/03/14 keyup場合下　参照ウィンドウ閉じる　by zy END-->
+											                        <apex:inputHidden value="{!newLead.Relcontact__c}" id="relcontact_lkid" html-element="lead_{!f.fieldName}" />
+											                        <apex:inputHidden id="relcontact_lkold" html-element="lead_{!f.fieldName}" />       <!-- PopupWin利用 -->
+											                        <input type="hidden" id="relcontact_lkid_org" html-element="lead_{!f.fieldName}" />    <!-- JS判断用 -->
+											                        <c:AutoCompleteComp objectname="Contact" 
+											                            additionalfield="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Name1__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c"
+											                            autocomplete_textbox="{!$Component.relcontact}" 
+											                            showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,Description"
+											                            maxLenFilter="Description:16"
+											                            callbackFunction="setContactMessage"
+											                            showFieldSeparator=", "
+											                            addFilter="IsDelete__c!=true"
+											                            jslibnew="true"
+											                        />
+											                        </apex:inputText>
+											                        <!-- 2019/03/15 一括予約にお客様名の隣にルックアップアイコンが、と浦河イン様よりございましたの対応。 BY zyz BEGIN	-->
+											                        <!-- お客様選択	-->
+											                        <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+											                         onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+											                         onfocus="this.className = 'lookupIconOn';"
+											                         onblur="this.className = 'lookupIcon';"
+											                         class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px;position: relative;left: -4px;"
+											                         name="contactPopup" />
+											                         <!-- 2019/03/15 一括予約にお客様名の隣にルックアップアイコンが、と浦河イン様よりございましたの対応。 BY zyz END	-->
+											                         </span>
+										                        </apex:outputPanel>
+															</td>
+														</tr>
+													</apex:repeat>
+												</table>
+											</td>
+										</apex:repeat>
+								</apex:outputpanel>
+							</tr>
+						</apex:repeat>
+					</table>
+				</td>
+			</apex:repeat>
+		</tr>
+	</table>
+</div>
+<style>
+body .bPageBlock .pbTitle{
+width: 0px;
+}
+</style>
+
+<div class="hideCurrDate" id="subBookingItem">
+<!-- 
+<apex:pageMessage summary="{!$Label.MSG_0001}" severity="info" strength="1" rendered="{!isEditPage}"/>
+ -->
+<apex:pageBlock id="bookingItem">
+	<!-- 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy BEGIN -->
+	<input type="hidden" id="defStaysNums" value="{!gStaysNums}" />
+	<!-- 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy END -->
+<!-- wgch -->
+	<!-- 
+    <apex:actionFunction name="addSubIdxItemFun" action="{!addSubIdxItem}" status="refStatusBlock" oncomplete="bindEventSubIdx()" reRender="bookingItem,hiddenForm"/>
+    -->
+    <!-- 2017/01/10 会計ポタン　の追加　by zy BEGIN -->
+    <apex:actionFunction name="redirectKaikeiFun" action="{!redirectKaikei}" status="refStatusBlock" oncomplete="bindEventSubIdx()" reRender="bookingItem,hiddenForm"/>
+    <!-- 2017/01/10 会計ポタン　の追加　by zy END -->
+    <apex:actionFunction name="redirectChkInFun" action="{!redirectChkIn}" status="refStatusBlock" oncomplete="bindEventSubIdx()" reRender="bookingItem,hiddenForm"/>
+    <apex:actionFunction name="cancelSubDetailFun" action="{!cancelSubDetail}" status="refStatusBlock"  />
+    <!--2017/01/10 行追加 by zy BEGIN -->
+    <apex:actionFunction name="addSubDetailRow" action="{!addSubIdxItem}" status="refStatusBlock" oncomplete="bindEventSubIdx();autoFocus()"  reRender="bookingItem,hiddenForm" />
+    <!--2017/01/10 行追加 by zy END -->
+	<!-- wgch -->    
+	<apex:pageBlockButtons location="top">
+	<!-- 行追加 -->
+	<!-- 
+	<input class="btn" value="{!$Label.MSG_001_0024}" type="button" onclick="javascript:addSubIdxItemFun();" style="width: 100px" />
+	 -->
+	<!-- 
+	<input class="btn" value="キャンセル" type="button"  style="width: 100px" />
+	 -->
+	<table style="table-layout: fixed;">
+		<tr>
+			<td style="width:50%;text-align: center;">
+				<apex:outputPanel rendered="{!isEditPage}" id="subindexBtnPanel">
+					<!-- 2017/03/02 防止二次点击功能  begin by wx -->
+					<!--<input class="btn actBtnCtrlStyle" value="キャンセル" type="button" style="width: 100px;" id="actionBtn_cancel" disabled="disabled" onclick="javascript:setRediretMessage();cancelSubDetailFun()"/>-->
+					<input class="btn actBtnCtrlStyle" value="キャンセル" type="button" style="width: 100px;" id="actionBtn_cancel" disabled="disabled" onclick="subIndexCancelFun(this)"/>
+					<!-- 2017/03/02 防止二次点击功能  end by wx -->
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<input class="btn actBtnCtrlStyle" value="見積書" type="button"  style="width: 100px;display: none;" id="actionBtn_LeadPdf" onclick="javascript:openLeadQuotationPdf('{!newLead.id}')" disabled="disabled"/>
+					<!-- 2017/03/02 防止二次点击功能  begin by wx -->
+					<!-- <input class="btn actBtnCtrlStyle" value="チェックイン" type="button" style="width: 100px" id="actionBtn_checkin" onclick="javascript:setRediretMessage(); redirectChkInFun()" disabled="disabled"/> -->
+					<input class="btn actBtnCtrlStyle" value="チェックイン" type="button" style="width: 100px" id="actionBtn_checkin" onclick="subCheckInFun(this);" disabled="disabled"/>
+					<!-- 2017/03/02 防止二次点击功能  end by wx -->
+				</apex:outputPanel>
+			</td>
+			<td style="width:50%" >
+				<table id="totalTable" style="width: 100%; border-spacing: 0px;border-collapse: 0px; font-size: 16px;font-weight: bold;table-layout: fixed;text-align: right;visibility: hidden;display:none;">
+                	<tr>
+                		<td style="height: 24px;">
+                			<!-- ご利用金額(税込)：{!$Label.MSG_006_0250} -->
+                			<span>見積合計(税込)：</span>
+                		</td>
+                		<td style="width: 200px">
+                			<input type="hidden" class="detailClass" id="totalAmountExcTax" />
+		                   	<apex:outputPanel style="margin-right: 2px;" id="usedAmount">
+				    			<span id="usedAmountBlock" ></span>  	
+		                   	</apex:outputPanel>
+                		</td>
+                	</tr>
+                	<!-- ご請求金額(税込)： -->
+                	<tr style="display:none;">
+                		<td style="height: 24px;">
+                			
+                			<span>{!$Label.MSG_006_0259}</span>
+                		</td>
+                		<td style="width: 200px">
+		                   	<apex:outputPanel style="margin-right: 2px;" id="reqAmount">
+				    			<span id="reqAmountBlock"></span>  	
+		                   	</apex:outputPanel>
+                		</td>
+                	</tr>
+	            </table>
+			</td>
+		</tr>
+	</table>
+	
+	 
+	<!-- 
+	<input class="btn" value="一括会計" type="button"  style="width: 100px" />
+	
+	<input class="btn" value="事前会計" type="button"  style="width: 100px" />
+	-->
+	</apex:pageBlockButtons>
+	<table class="list" style="table-layout: fixed;" border='0' cellpadding='0' cellspacing='0' id="usbLst">
+		<thead>
+			<tr class="headerRow">
+				<th style="width:18px;"><apex:outputLabel value="{!$Label.ps__msg_001_0025}" /></th>
+				<!-- 
+				<th style="width:15px;"></th> -->
+				<th style="width:15px;">親</th>
+				<!-- 
+				<th style="width:15px;"></th>
+				-->
+				<th style="width:17px;">
+					<apex:outputPanel rendered="{!!cloneFlag}">
+						<input type="checkbox" name="allpick" onclick="javascript:_detailSelectAll(this)" style="vertical-align:middle;" />
+					</apex:outputPanel>
+					<apex:outputPanel rendered="{!cloneFlag}">
+						<span class="k-icon k-i-cancel" style="cursor: pointer;" title="一括クリア" onclick="clearAllRows()"></span>
+                   	</apex:outputPanel>
+				</th>
+				<!-- 
+				<th style="width:15px;"><apex:outputLabel value="{!$Label.MSG_001_0027}" /></th>
+				-->
+				<th style="width:80px;"><apex:outputLabel value="{!$Label.ps__msg_001_0028}" /></th>
+				<th style="width:37px;"></th>
+				<th style="width:28px;"><apex:outputLabel value="{!$Label.ps__msg_001_0029}" /></th>
+				<th style="width:80px;"><apex:outputLabel value="{!$Label.ps__msg_001_0030}" /></th>
+				<th style="width:37px;"></th>
+				<!--TYP -->
+				<th class="typeClass">
+					<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+					<apex:outputLabel value="{!$Label.ps__msg_001_0031}" rendered="{!!selRoomModeFlg}"/> 
+					<apex:outputPanel rendered="{!selRoomModeFlg}">
+						<apex:outputLabel value="部屋"/>
+						<apex:outputLabel value="{!$ObjectType.Lead__c.Fields.Field276__c.label}" style="float:right;"/>
+					</apex:outputPanel>
+					<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+				</th>
+				<th style="width:25px;"><apex:outputLabel value="{!$Label.ps__msg_001_0032}" /></th>
+				<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN -->
+				<!--
+				<th style="width:24px;"><apex:outputLabel value="{!$Label.ps__msg_001_0033}" /></th>
+				-->
+				<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+				<th style="width:25px;{!if(selRoomModeFlg,'display:none;','')}"><apex:outputLabel value="{!$Label.ps__msg_001_0033}" /></th>
+				<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+				<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy END -->
+				<!--  {!$Label.MSG_001_0034}プラン　⇨　商品明細 -->
+				<th><apex:outputLabel value="{!$ObjectType.LeadIndex__c.Fields.AccountMasterRef__c.label}" /></th>
+				<th style="width:54px;"><apex:outputLabel value="{!$Label.ps__msg_001_0037}" /></th>
+				<th style="width:29px;display:{!if(!isHaveEbInfo,'none','true')}" ><apex:outputLabel value="{!$Label.ps__msg_001_0039}" /></th>
+			</tr>
+		</thead>
+		<apex:repeat value="{!oLeadLst}" var="leadSub">
+			<tr class="dataRow {!if(leadSub.isReadOnly, 'cantEdit','')}" rowNo="{!leadSub.rowIdx}">
+				<td>
+					<apex:outputText value="{!leadSub.rowNo}" />
+					<input type="hidden" value="{!leadSub.orgSobj.id}" id="orgSubIdxId_{!(leadSub.rowNo-1)}"/>
+				</td>
+				<!-- 
+				<td>
+					<span class="k-icon k-i-expand"  onclick="showBookingItemDetail(this);"></span>
+				</td>
+				 -->
+				<td>
+					<apex:inputHidden value="{!leadSub.s.ParentFlg__c}" id="hidParentFlag"/>
+					<!-- 2017/04/06 親部屋更新 by zy BEGIN
+					<apex:outputPanel rendered="{!!isOyaInputFlag && !cloneFlag}">
+						<apex:outputPanel rendered="{!leadSub.isParentFlag }">
+			    			<img src="/img/checkbox_checked.gif" alt="{!$Label.MSG_041_0013}" width="16" height="16" class="checkImg" />
+	                   	</apex:outputPanel>
+	                   	<apex:outputPanel rendered="{!!leadSub.isParentFlag}">
+			    			<img src="/img/checkbox_unchecked.gif" alt="{!$Label.MSG_041_0013}" width="16" height="16" class="checkImg" />
+	                   	</apex:outputPanel>
+					</apex:outputPanel>
+					<apex:outputPanel rendered="{!isOyaInputFlag || cloneFlag}">
+                   	</apex:outputPanel>
+                   	  2017/04/06 親部屋更新 by zy END -->
+                   	<apex:outputPanel rendered="{!leadSub.s.ParentFlg__c}">
+		    			<input type="radio" name="parentSub" value="{!leadSub.s.id}" class="mainSub" onclick="chgSubId(this)"  checked="checked" />
+                   	</apex:outputPanel>
+                   	<apex:outputPanel rendered="{!!leadSub.s.ParentFlg__c}">
+		    			<input type="radio" name="parentSub" value="{!leadSub.s.id}" onclick="chgSubId(this)" />
+                   	</apex:outputPanel>
+				</td>
+				<!-- 
+				<td>
+					<span class="k-icon k-i-cancel"></span>
+				</td>
+				 -->
+				<td>
+					<apex:outputPanel rendered="{!leadSub.orgSobj.id != null}">
+	                <input type="checkbox" class="detailChkItem disBtn" data-readonly="{!leadSub.isReadOnly}" value="{!leadSub.s.id}" style="vertical-align:middle;" onclick="javascript:_detailItemSelect(this)"/>
+					</apex:outputPanel>
+					<apex:outputPanel rendered="{!cloneFlag}">
+						<span class="k-icon k-i-cancel detailCancel disBtn" title="クリア" onclick="clearCurrRow(this)"></span>
+                   	</apex:outputPanel>
+				</td>
+				<!-- 
+				<td>
+					<apex:image url="{!$Resource.Checkin}" width="14" height="14" style="cursor: {!IF(leadSub.s.Id != null, 'pointer;','auto')}"
+			 		onclick="javascript:showGuest('{!leadSub.s.Id}','{!leadSub.rowNo}','{!leadSub.s.RoomTypeRef__c}','{!leadSub.s.EntryDate__c}','{!leadSub.s.DepartureDate__c}');"/>
+				</td>
+				-->
+				<td>
+					<apex:inputField value="{!leadSub.s.EntryDate__c}" id="cidate" rendered="{!!leadSub.isReadOnly}"  showDatePicker="false"/>
+					<apex:outputField value="{!leadSub.s.EntryDate__c}" id="cidateStr" rendered="{!leadSub.isReadOnly}"/>
+				</td>
+				<td>
+					<apex:inputField value="{!leadSub.s.EntryTime__c}" id="citime" rendered="{!!leadSub.isReadOnly}" style="width:30px;ime-mode: inactive;"/>
+					<apex:outputField value="{!leadSub.s.EntryTime__c}" rendered="{!leadSub.isReadOnly}" style="width:30px;"/>
+				</td>
+				<td>
+					<apex:inputText value="{!leadSub.nights}" size="2" id="nights" rendered="{!!leadSub.isReadOnly}"   html-rowindex="{!(leadSub.rowNo-1)}" />
+					<apex:outputText value="{!leadSub.nights}" id="nightsStr" rendered="{!leadSub.isReadOnly}"/>
+				</td>
+				<td>
+					<!-- C/O -->
+					<apex:inputField value="{!leadSub.s.DepartureDate__c}" id="codate" rendered="{!!leadSub.isReadOnly}"  html-rowindex="{!(leadSub.rowNo-1)}" showDatePicker="false"/>
+					<apex:outputField value="{!leadSub.s.DepartureDate__c}" id="codateStr" rendered="{!leadSub.isReadOnly}"/>
+				</td>
+				<td>
+					<apex:inputField value="{!leadSub.s.DepartureTime__c}" id="cotime" rendered="{!!leadSub.isReadOnly}" style="width:30px;ime-mode: inactive;"/>
+					<apex:outputField value="{!leadSub.s.DepartureTime__c}" rendered="{!leadSub.isReadOnly}" style="width:30px;"/>
+				</td>
+				<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN -->
+				<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+				<td class="roomSelClass">
+				<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+					<div class="typeClass">
+						<!-- 2018/01/03 部屋のアイコン変更　by　zy　BEGIN -->
+						<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN -->
+						<!-- 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN 
+						<apex:selectList value="{!leadSub.s.RoomTypeRef__c}" id="roomType" multiselect="false" size="1" style="vertical-align:text-bottom;{!if(LEN(searchLeadIdxId) > 0 && !cloneFlag && !ISBLANK(leadSub.s.id),'width: calc(100% - 25px);','width:98%;')}" onchange="checkChgAndClose(this);processOpt(this);" rendered="{!!leadSub.isReadOnly}">
+						-->
+						<apex:selectList value="{!leadSub.s.RoomTypeRef__c}" id="roomType" styleClass="{!if(leadSub.isLockFlag,'disabledClass','')}" multiselect="false" size="1" style="vertical-align:text-bottom;width: calc(100% - 25px);" onchange="checkChgAndClose(this);processOpt(this);" rendered="{!!leadSub.isReadOnly && !selRoomModeFlg}">
+						<!-- 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END --> 
+						<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy END -->
+						<!-- 2018/01/03 部屋のアイコン変更　by　zy　END -->
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!roomTypeLst}"/>
+						</apex:selectList>
+						<!-- 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN 
+						<apex:outputpanel rendered="{! LEN(searchLeadIdxId) > 0 && !cloneFlag && !ISBLANK(leadSub.s.id) && !leadSub.isReadOnly}">
+						-->
+						<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+						<apex:outputpanel rendered="{!!leadSub.isReadOnly && !selRoomModeFlg}">
+						<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+						<!-- 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END --> 
+							<img src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}" class="{!if(ISBLANK(leadSub.s.RoomTypeRef__c),'greyImg','')}" 
+							title="部屋アサイン"
+							onclick="javascript:roomSelectLst(this)" 
+							name="homeSelect" style="cursor: pointer;position: relative;top: 2px;width: 18px; height: 18px;"/>
+						</apex:outputpanel>
+						<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+						<apex:inputHidden id="hidRoomInt" value="{!leadSub.rooms}" rendered="{!selRoomModeFlg}"/>
+						<apex:inputHidden id="hidRoomType" value="{!leadSub.s.RoomTypeRef__c}" rendered="{!selRoomModeFlg}"/>
+						<apex:outputpanel rendered="{!!leadSub.isReadOnly && selRoomModeFlg}">
+							<select onchange="roomChange(this)" class="roomSelect disabledClass" style="vertical-align:text-bottom;width: calc(100% - 25px);"></select>
+							<apex:inputCheckbox value="{!leadSub.isLockFlag}" style="float:right;   margin-right: 8px;" id="lockSelChk" onclick="oneRoomLock()"/>
+						</apex:outputpanel>
+						<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+					</div>
+					<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+					<apex:outputField value="{!leadSub.s.RoomTypeRef__c}" rendered="{!leadSub.isReadOnly && !selRoomModeFlg}"/>
+					<apex:outputPanel rendered="{!leadSub.isReadOnly && selRoomModeFlg}">
+						<apex:outputText value="{!leadSub.roomName}" />
+						<img src="{!if(leadSub.isLockFlag,'/img/checkbox_checked.gif','/img/checkbox_unchecked.gif')}" width="16" height="16" class="checkImg" style="float:right;"/>
+					</apex:outputPanel>
+					<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+					<input type="hidden" id="hidSubId" value="{!leadSub.s.id}" />
+					<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy END -->
+					<!-- 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN -->
+					<apex:inputHidden value="{!leadSub.roomInfoJson}" id="hidRoomsSyncInfo" />
+					<!-- 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END -->
+				</td>
+				<td>
+					<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+					<apex:inputText value="{!leadSub.persons}" size="2" id="perpsons" rendered="{!!leadSub.isReadOnly}" style="{!if (selRoomModeFlg,'width:95%;','')}" html-rowindex="{!(leadSub.rowNo-1)}" />
+					<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+					<apex:outputText value="{!leadSub.persons}" id="perpsonsStr" rendered="{!leadSub.isReadOnly}"/>
+				</td>
+				<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+				<td style="{!if (selRoomModeFlg,'display:none;','')}">
+					<apex:inputText value="{!leadSub.rooms}" size="2" id="rooms" rendered="{!!leadSub.isReadOnly && !selRoomModeFlg}"  html-rowindex="{!(leadSub.rowNo-1)}" />
+				<!-- 2019/11/15 一括予約画面の部屋直接選択 by zy END -->	
+					<apex:outputText value="{!leadSub.rooms}" rendered="{!leadSub.isReadOnly}"/>
+				</td>
+				<td>
+					<!-- wgch -->
+					<apex:outputPanel rendered="{!!leadSub.isReadOnly}">
+						<span class="lookupInput">
+						<!--2017/01/10 plan → 商品 by zy BEGIN -->
+						<apex:inputText value="{!leadSub.productName}" id="dlPlanItem" styleClass="prodClass" html-rowindex="{!(leadSub.rowNo-1)}" maxlength="80" size="40"/>
+						<!--2017/01/10 plan → 商品 by zy END -->
+		                <img title="" onmouseover="this.className = 'look
+		                upIconOn';this.className = 'lookupIconOn';"
+			              onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+			              onfocus="this.className = 'lookupIconOn';"
+			              onblur="this.className = 'lookupIcon';"
+			              class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+			              name="productPopup"
+			              rowIndex = "{!(leadSub.rowNo-1)}" />
+						<!-- プラン詳細 -->
+			            <img src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}" style="cursor: pointer; width: 18px; height: 18px;display:{!if(leadSub.isPlanFlag,'true','none')};"
+			            	rowindex="{!(leadSub.rowNo-1)}"
+			            	onclick="javascript:openMiniPlanSetup(this);" id="planCustomeBtn" title="{!$Label.MSG_001_0035}"/>
+			             <!--2017/01/10 plan → 商品 by zy END -->
+			           	</span>
+			           	<!--2017/01/10 plan → 商品 by zy BEGIN -->
+			           	<apex:inputHidden id="hidSobjId" value="{!leadSub.sobjId}" />
+			           	<apex:inputHidden id="productFlag" value="{!leadSub.isProductFlag}" />
+			           	<apex:inputHidden id="hidIsPlanFlag" value="{!leadSub.isPlanFlag}" />
+			           	<apex:inputHidden id="dlPlanItem_lkid" value="{!leadSub.s.PlanRef__c}" />
+			           	<apex:inputHidden id="dlAccItem_lkid" value="{!leadSub.s.AccountMasterRef__c}" />
+			           	<!--2017/01/10 plan → 商品 by zy END -->
+			           	<apex:inputHidden value="{!leadSub.s.PlanDetailSyncInfo__c}" id="nl_hidPlanDetailInfo"/>
+		            </apex:outputPanel>
+		            <!--2017/01/10 plan → 商品 by zy BEGIN 
+		            <apex:outputField value="{!leadSub.s.PlanRef__c}" rendered="{!leadSub.isReadOnly}"/>-->
+		            <apex:outputPanel rendered="{!leadSub.isReadOnly && leadSub.isProductFlag}">
+		            	<a href="/{!leadSub.s.AccountMasterRef__c}" id="{!leadSub.s.AccountMasterRef__c}"  onblur="LookupHoverDetail.getHover('{!leadSub.s.AccountMasterRef__c}').hide();" onfocus="LookupHoverDetail.getHover('{!leadSub.s.AccountMasterRef__c}', '/{!leadSub.s.AccountMasterRef__c}/m?retURL=%2F{!leadSub.s.AccountMasterRef__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!leadSub.s.AccountMasterRef__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!leadSub.s.AccountMasterRef__c}', '/{!leadSub.s.AccountMasterRef__c}/m?retURL=%2F{!leadSub.s.AccountMasterRef__c}&isAjaxRequest=1').show();"><apex:outputText value="{!leadSub.productName}" rendered="{!leadSub.isReadOnly}"/></a>
+		            </apex:outputPanel>															
+		            <apex:outputPanel rendered="{!leadSub.isReadOnly && !leadSub.isProductFlag}">
+		            	<a href="/{!leadSub.s.PlanRef__c}" id="{!leadSub.s.PlanRef__c}"  onblur="LookupHoverDetail.getHover('{!leadSub.s.PlanRef__c}').hide();" onfocus="LookupHoverDetail.getHover('{!leadSub.s.PlanRef__c}', '/{!leadSub.s.PlanRef__c}/m?retURL=%2F{!leadSub.s.PlanRef__c}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!leadSub.s.PlanRef__c}').hide();" onmouseover="LookupHoverDetail.getHover('{!leadSub.s.PlanRef__c}', '/{!leadSub.s.PlanRef__c}/m?retURL=%2F{!leadSub.s.PlanRef__c}&isAjaxRequest=1').show();"><apex:outputText value="{!leadSub.productName}" rendered="{!leadSub.isReadOnly}"/></a>
+		            </apex:outputPanel>
+		            <!--2017/01/10 plan → 商品 by zy END -->
+				</td>
+				<!-- dis
+				<td>
+					<apex:inputText value="{!leadSub.discount}" size="6"/>
+				</td> -->
+				<td>
+					<apex:inputText id="salescnt" value="{!leadSub.salescnt}"
+                    style="width:50px" rendered="{!!leadSub.isReadOnly}"/>
+		            <apex:outputtext value="{0,number,{!NumberFormat}}" style="text-align: right; width:60px" rendered="{!leadSub.isReadOnly}" >
+		            	<apex:param value="{!leadSub.s.SalesPrice__c}" />
+		            </apex:outputtext>
+		        </td>
+				<!-- DS
+				<td>
+					<apex:inputText value="{!leadSub.dsField}" size="4"/>
+				</td>
+				 -->
+				<!--E/B -->
+				
+				<td style="display:{!if(!isHaveEbInfo,'none','true')}">
+		            <apex:inputField value="{!leadSub.s.ExtraBedChk__c}" rendered="{!!leadSub.isReadOnly}" id="extraBedChk"/>
+		            <apex:outputField value="{!leadSub.s.ExtraBedChk__c}" rendered="{!leadSub.isReadOnly}"/>
+				</td>
+			</tr>
+		</apex:repeat>
+	</table>
+
+<apex:inputHidden value="{!parId}" id="hidParId"/>
+<apex:inputHidden value="{!psub}" id="hidPsub"/>
+<apex:inputHidden value="{!leadBaseInf.leadNo}" id="inputLeadNo"/>
+<apex:inputHidden value="{!leadBaseInf.s.contactRef__c}" id="inputContactId"/>
+<apex:inputHidden value="{!leadBaseInf.contactName}" id="inputContactNm"/>
+<!-- 2017/04/25 项目优化 by zy BEGIN-->
+<apex:inputHidden value="{!isChgConFlag}" id="hidChgConflag"/>
+<!-- 2017/04/25 项目优化 by zy END-->
+<input type="hidden" value="{!leadBaseInf.s.id}" id="hidleadBaseId"/>
+<!-- 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます by zy BEGIN -->
+<input type="hidden" value="{!cloneRoomExitModeFlg}" id="hidCloneExitFlg"/>
+<!-- 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます by zy END -->
+</apex:pageBlock>
+
+<!-- BUTTON SECTION -->
+<div style="text-align: right;">
+<!-- 2017/03/02 防止二次点击功能  begin by wx -->
+<!--<input type="button" value="キャンセル" style="width:100px;height:20px;display:{!if(cloneFlag,'true','none')}" class="btn disBtn"  id="cancelBtn" onclick="cancelCloneFun()"/>  -->
+<!-- 2017/04/25 项目优化 by zy BEGIN-->
+<input type="button" value="キャンセル" style="width:100px;height:20px;display:{!if(cloneFlag,'true','none')}" class="btn disBtn"  id="cancelBtn" onclick="cancelCloneInfo(this)"/>
+<!-- 2017/04/25 项目优化 by zy END-->
+<!--<input type="button" value="{!$Label.MSG_001_0041}" style="width:100px;height:20px;display:{!if(cloneFlag,'true','none')}" id="cloneSaveBtn" class="btn disBtn" onclick="blockUi();if(!beforeSubmit()) return false; cloneLeadFun()"/> -->
+<!-- 2017/04/25 项目优化 by zy BEGIN-->
+<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN -->
+<input type="button" value="保存" style="width:100px;height:20px;display:{!if(cloneFlag,'true','none')}" id="cloneSaveBtn" class="btn disBtn" onclick="cloneLeadInfo(this)"/>
+<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END -->
+<!-- 2017/04/25 项目优化 by zy END-->
+<!-- 予約登録 -->
+<!--<input type="button"  style="min-width:100px;width:100px;height:20px;display:{!if(cloneFlag,'none','true')}" class="btn disBtn" value="{!$Label.MSG_001_0041}" onclick="blockUi();if(!preSaveConfirm()) return false; if(!beforeSubmit()) return false; createLeadInfo();" id="leadUpsertBtn" />-->
+<!-- 2017/04/25 项目优化 by zy BEGIN-->
+<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN -->
+<input type="button"  style="min-width:100px;width:100px;height:20px;display:{!if(cloneFlag,'none','true')}" class="btn disBtn" value="保存" onclick="upsertLeadInfo(this)" id="leadUpsertBtn" />
+<!-- 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END -->
+<!-- 2017/04/25 项目优化 by zy END-->
+<!-- 2017/03/02 防止二次点击功能  end by wx -->
+
+<apex:actionFunction name="createLeadInfo" action="{!createLeadInfo}" status="refStatusBlock" />
+<apex:actionFunction name="cancelCloneFun" action="{!cancelClonInfo}" status="refStatusBlock" immediate="true"/>
+</div>
+</div>
+
+<!-- CLONE BTN->SAVE FUNCTION -->
+<apex:actionFunction name="cloneLeadFun" action="{!cloneLeadAction}" status="refStatusBlock" />
+
+<apex:inputHidden value="{!saveFlag}" id="hideBackFlag"/>
+
+</apex:form>
+
+</apex:outputPanel> <!-- left panel end -->
+
+</div>
+</div>
+<!-- 予約明細設定画面 -->
+
+</div>
+
+
+
+<apex:form id="commForm" >
+	<apex:inputHidden value="{!indexSubId}" id="indexSubId"/>
+	<apex:inputHidden value="{!indexSubNo}" id="indexSubNo"/>
+	<apex:inputHidden value="{!indexSubRType}" id="indexSubRType"/>
+	<apex:inputHidden value="{!indexSubStrDt}" id="indexSubStrDt"/>
+	<apex:inputHidden value="{!indexSubEndDt}" id="indexSubEndDt"/>
+	<!-- 2017/06/21 親部屋の選択機能追加　by　zy BEGIN -->
+	<apex:inputHidden value="{!mainSubId}" id="hidMainSubId"/>
+	<apex:actionFunction name="changeParentFun" action="{!changeParentInfo}" status="refStatusBlock"/>
+	<!-- 2017/06/21 親部屋の選択機能追加　by　zy END -->
+</apex:form>
+
+<apex:form >
+<!-- 予約情報を更新する -->
+<apex:actionFunction name="actRefreshLead" action="{!refreshExistLeadInfo}" 
+	rerender="condBlock" status="refStatusBlock">
+</apex:actionFunction>
+
+</apex:form>
+</apex:pageblock>
+
+<div id="otherPage" class="floatPage">
+<!--2017/04/25 项目优化 by zy BEGIN-->
+	<div id="recentRefPage" class="floatDiv" name="recentRefFrame" title="最近参照" style="display:{!if(isEditPage ,'none',if(cloneFlag,'none','true'))}" message="{!cookieMsg['recentRefFrame']}" onclick="showMesssageWindow(this);">
+		<img src="/img/icon/custom51_100/stopwatch32.png" class="imgstyle" />
+	</div>
+	<!-- 2016/12/27 多店舗区分機能追加　by　zy BEGIN-->
+	<div id="roomIndicatorPage" class="floatDiv" name="roomIndicatorPageframe" style="display:{!if(!isEditPage,'none',if(cloneFlag,'none','true'))}" message="{!cookieMsg['roomIndicatorPageframe']}" title="ルームインジケータ({!leadBaseInf.contactName})" onclick="showWindow(this,'{!URLFOR('/apex/RoomIndicatorInfo?frame=1&dt='+TEXT(leadBaseInf.s.EntryDate__c)+ '&spcd=' + branchNm)}')">
+	</div>
+	<div id="timeTablePage" class="floatDiv" name="timeTablePageframe" style="display:{!if(!isEditPage,'none',if(cloneFlag,'none','true'))}" message="{!cookieMsg['timeTablePageframe']}" title="タイムテーブル({!leadBaseInf.contactName})" onclick="showWindow(this,'{!URLFOR('/apex/RoomScheduleReport?frame=1&dt='+TEXT(leadBaseInf.s.EntryDate__c)+ '&spcd=' + branchNm)}')">
+	</div>
+	<div id="yadotyouPage" class="floatDiv"  name="yadotyouPageframe" style="display:{!if(!isEditPage,'none',if(cloneFlag,'none','true'))}" message="{!cookieMsg['yadotyouPageframe']}" title="宿帳({!leadBaseInf.contactName})" onclick="showWindow(this,'{!URLFOR('/apex/GuestBookingInput?pid=' + leadBaseInf.s.id + '&frame=true')}')"></div>
+	<div id="chatPage" class="floatDiv" name="chatPageFrame" data-width="550px" data-src="{!URLFOR('/apex/MessageInformation?frame')}" data-height="200px;"  message="{!cookieMsg['chatPage']}" title="警告メッセージ" onclick="showWindow(this,'{!URLFOR('/apex/MessageInformation?frame')}')">
+		<img title="/img/msg_icons/info16.png"  class="infoMsg" style="display:none;"  src="https://na9.salesforce.com/img/msg_icons/warning16.png" alt=""/>
+		<!-- 
+		<img title="/img/msg_icons/error16.png" class="errorMsg" src="https://na9.salesforce.com/img/msg_icons/error16.png" alt=""/>
+		<img title="/img/msg_icons/warning16.png" class="warnMsg" style="top:-px;" src="https://na9.salesforce.com/img/msg_icons/warning16.png" alt=""/>
+		 -->
+	</div>
+	<!-- 
+	<div id="mapPage" class="floatDiv" name="mapPageframe" title="マップ"  message="{!cookieMsg['mapPageframe']}" onclick="showWindow(this,'{!URLFOR('/apex/BookingMapApp')}')">
+	 -->
+	<div id="mapPage" class="floatDiv" name="mapPageframe" title="マップ"  message="{!cookieMsg['mapPageframe']}" onclick="showWindow(this,'{!URLFOR('/apex/BookingMapInfo')}')">
+	</div>
+	<!-- 2017/01/10 会計ポタン　の追加　by zy BEGIN -->
+	<div id="accountPage" class="floatDiv" style="display:{!if(!hadAccFlag,'none',if(cloneFlag,'none','true'))}"  title="会計({!leadBaseInf.contactName})" onclick="{!if(hadAccFlag,'setRediretMessage(true);redirectKaikeiFun()','')}">
+<!--2017/04/25 项目优化 by zy END-->
+	</div>
+	<!-- 2017/01/10 会計ポタン　の追加　by zy END -->
+	<!-- 2017/11/23 多見積対応　by　zy　BEGIN -->
+	<div id="bookingEstIcon" class="floatDiv"  name="estframe"  message="{!cookieMsg['estframe']}"  style="display:{!if(!isEditPage,'none',if(cloneFlag,'none','true'))}" onclick="showWindow(this,'{!URLFOR('/apex/BookingEstimateItemSetups?id=' + newLead.id)}')">
+		<div style="width:100%;height:100%;border-radius:18px;background: lightblue;">
+			<div style="font-weight: bold;position: relative;top:5px;left:2px;">
+				<!-- 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw BEGIN -->
+				<!-- 見積 -->
+				<span class="badge" style="{!IF(QuotaItemNum <= 1, 'display:none;', '')}">{!QuotaItemNum}</span>
+				<span style="position: absolute;">見積</span>
+				<!-- 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw END -->
+			</div>
+		</div>
+	</div>
+	<!-- 2017/11/23 多見積対応　by　zy　END -->
+</div>
+<div id="hideWindow">
+	<div class="recentRefFrame framePage" style="width:560px;height:340px;overflow: auto">
+		<!-- ご予約 --><!-- 新規ご予約 -->
+		<!-- 最近編集予約インデックス一覧-->
+		<table class="list" style="table-layout: fixed;" border='0' cellpadding='0' cellspacing='0' id="usbLst">
+			<thead>
+				<tr class="headerRow">
+					<th style="width:40px;"></th>
+					<th style="width:100px;">予約番号</th>
+					<th style="width:200px;">予約名</th>
+					<th style="width:200px;">お客様</th>
+					<th style="width:100px;">到着日</th>
+				</tr>
+			</thead>
+			<tbody>
+			<apex:repeat value="{!recRefLeadIndexs}" var="recIdx">
+				<tr>
+					<td><a href="javascript:void(0)" onclick="_editCurrLeadindexFun('{!JSENCODE(recIdx.id)}','{!JSENCODE(recIdx.Name)}')">編集</a></td>
+					<td><apex:outputField value="{!recIdx.Name}" /></td>
+					<td><apex:outputField value="{!recIdx.LeadName__c}" /></td>
+					<td><apex:outputField value="{!recIdx.contactRef__c}" /></td>
+					<td><apex:outputField value="{!recIdx.EntryDate__c}" /></td>
+					
+				</tr>
+			</apex:repeat>
+			</tbody>
+		</table>
+	
+	</div>
+	<div class="roomIndicatorPageframe framePage"></div>
+	<div class="timeTablePageframe framePage"></div>
+	<div class="yadotyouPageframe framePage"></div>
+	<div class="chatPageFrame framePage" data-width="550px" data-height="200px">
+	</div>
+	<div class="mapPageframe framePage" data-width="1165px"></div>
+	<!-- 2017/11/23 多見積対応　by　zy　BEGIN -->
+	<div class="estframe framePage" ></div>
+	<!-- 2017/11/23 多見積対応　by　zy　END -->
+</div>
+</div>
+<!-- ※※※※※※※※※[SCRIPT]※※※※※※※※※※ -->
+<script>
+var _localMap = new Map(),topIdx=0
+,_CONST_PRICE_ROOM_TYPE = '室料';			// 室料のKeyWord定義する
+// 画面Lockする
+function blockUi() {
+    $j("[id$='curPage']").block({
+    //$j("#allPage").block({
+	//Processing...
+		 message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_001_0058}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j("[id$='curPage']").unblock();
+    //$j("#allPage").unblock();
+}
+// ****************************
+// Componet Action Binding
+// 基本情報関連のJsのEvent Bindする
+// ****************************
+function bindEvent() {
+    // 顧客変更する場合、顧客情報を自動取得、基本情報を画面に設定する　
+    // 2019/03/15 一括予約にお客様名の隣にルックアップアイコンが、と浦河イン様よりございましたの対応。 BY zyz BEGIN
+    // お客様情報を選択する
+    $j("img[name='contactPopup']").click(function() {
+		var lkfmVal = $j("form[id$=':bookingForm']").attr("id");
+		var lknmVal= $j("input[id$=':relcontact']").attr("id");
+		// お客様ID固定番号
+		var lktpVal ="003";
+		var lksrchVal =  encodeURIComponent($j("input[id$=':relcontact']").val());
+		var url = "/_ui/common/data/LookupPage?lkfm=" + lkfmVal + "&lknm=" +lknmVal + "&lktp=" + lktpVal; 
+		openLookup(url, 670, '1', "&lksrch=" + lksrchVal);
+		// 最近参照DIV隐藏
+		chgValue(this);
+		// 2021/03/31 予約ポップやルームインジケータから予約作成する際に郵便番号検索が使えるようにして欲しい by zy BEGIN
+		if ("jinyaZipCodeSearceBind" in window) {
+			jinyaZipCodeSearceBind(curPopupWindow);
+		}
+		// 2021/03/31 予約ポップやルームインジケータから予約作成する際に郵便番号検索が使えるようにして欲しい by zy END
+    });
+    // 2019/03/15 一括予約にお客様名の隣にルックアップアイコンが、と浦河イン様よりございましたの対応。 BY zyz END
+    //2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+    $j("[id$=':relcontact']").on('blur', function(){ 
+   	//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy END
+        var $this = $(this);
+        console.log(2);
+        // 設定内容が存在する場合
+        if ($this.val() != "") {
+           // Content Changed
+           //2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+           if ($j("#relcontact_lkid_org").val().substring(0,15) != $j("input[id$=':relcontact_lkid']").val().substring(0,15)) {
+               // お客様情報のID情報を格納する
+               $j("#relcontact_lkid_org").val($("input[id$=':relcontact_lkid']").val());
+               // 顧客情報を更新する
+               var contactId = $j("input[id$=':relcontact_lkid']").val();
+               //2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy END
+               var contactName = $this.val();
+               var hidContactFields = $j("input[id$=hidContactField]").val();
+               blockUi();
+               // 既に定義する売価はプランカラ取得、画面に設定する
+               Visualforce.remoting.Manager.invokeAction(
+               "{!$RemoteAction.BookingFlexApp.refreshContcatInfo}", contactId,contactName,hidContactFields, function(result, event){
+                   if(event.type == 'exception') {
+                       alert(event.message);
+                   } else { 
+                       // 取得するお客様情報を画面に設定する
+                       var Obj = result;
+                       //2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+                       //contactはNULL
+                       if($j.isEmptyObject(Obj)){
+                       	  unblockUi();
+                       	  return;
+                       } else {
+                       //2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy END
+	                       var beforePix = JS_APPNS;
+	                       $j(".contactClass").each(function(){
+	                       		var path = $(this).attr("element");
+	                       		//2017/06/02 by zy BEGIN
+	                       		if (path.indexOf("lead_") >= 0 ) return true;
+	                       		//2017/06/02 by zy END
+	                       		//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+	                       		if(Obj[path] != undefined || Obj[beforePix + path]  != undefined){ 
+	                       		//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy END
+	                       			var elementVal = Obj[path] ? Obj[path] : Obj[beforePix + path];
+	                       			// 2019/03/08 リッチテキストエリアツール変更 by zy BEGIN 
+	                       			if(path.toLowerCase().indexOf('Date'.toLowerCase()) >= 0 || $(this).hasClass("hasDatepicker")){
+	                       			// 2019/03/08 リッチテキストエリアツール変更 by zy END 
+		                       	     	elementVal = kendo.toString(new Date(elementVal),JINYACONNECT.DateFormat);
+		                       	    }
+		                       	    // 2019/04/30 一括予約画面、新規予約画面と一括予約画面のカスタマイズ上でお客様に紐づく取引先の項目 by zy BEGIN
+		                       	    if (typeof elementVal === "object") {
+		                       	    	var curTd = $(this).closest("td");
+		                       	    	$("input[id$=lkid]",curTd).val(elementVal.id);
+		                       	    	$("input[id$=lkold]",curTd).val(elementVal.name);
+						return setValueInput(this,elementVal.name);
+		                       	    }
+		                       	    // 2019/04/30 一括予約画面、新規予約画面と一括予約画面のカスタマイズ上でお客様に紐づく取引先の項目 by zy END
+		                       	    if(path.toLowerCase().indexOf('Id'.toLowerCase()) >= 0 && (elementVal.length == 15 || elementVal.length == 18)) return true;
+	                      			//$j(this).val(elementVal);
+	                      			//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+	                      			setValueInput(this,elementVal);
+	                       		} else {
+	                       			setValueInput(this,"");
+	                       		}
+	                       		//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+	                       });
+                       }
+                   }
+                   // 画面解除する
+                   unblockUi();
+               });
+           }
+           // 予約名自動設定を行う
+           //2017/03/07 予約名自動設定 by zy BEGIN
+           var el_leadName = $j("input.leadColumn.Name");
+           // 2018/07/03 字段超出エラー対応　by zy BEGIN
+           if (el_leadName.length > 0 && el_leadName.val() == "") {
+           		var maxLength = kendo.parseInt(el_leadName.attr("maxlength"));
+           		if (maxLength != null) el_leadName.val($this.val().substring(0,maxLength));
+           		else el_leadName.val($this.val());
+           }
+           // 2018/07/03 字段超出エラー対応　by zy END
+           //2017/03/07 予約名自動設定 by zy END
+           //autoSetupLeadName();
+        } else {
+        	if ($(this).val() == "") {
+	            $("input[id$=':relcontact_lkid']").val("");
+	            $("input[id$=':relcontact_lkold']").val("");
+	            $("#relcontact_lkid_org").val("");
+	            //2017/01/19 お客様　の関連データを削除　by zy BEGIN
+	            /*
+	            $("input[element='Katakana__c']").val("");
+	            $("input[element='KanaName1__c']").val("");
+	            $("input[element='Phone']").val("");
+	            */
+	            $(".contactClass").each(function(){
+	            	//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+	            	setValueInput(this,"");
+	            	//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy END
+	            });
+	             //2017/01/19 お客様　の関連データを削除　by zy END
+	            $("input[element=lead_Name]").val("");
+	        }
+        }
+    });
+	// *****************************
+	// 2015/10/28 CTI->PAST機能対応
+	// *****************************
+	_call_pasteInfo();
+	// *******************************************************
+	
+	// *******************************************************
+	// 日付項目関連処理
+	// *******************************************************
+	// C/I日付 / C/O日付
+	$j("input[id$=':entryDt']" + "," + "input[id$=':departDt']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function() {
+		var $this = $j(this);
+	    if ($this.val() == "") return;
+	    if (!checkDate($this.val())) {
+	    	//$j(this).focus();
+	    	return false;
+	    }
+	    // 日付書式化
+	    var inputDt = dateFormat.format(Date.parse($this.val()));
+	    $this.val(inputDt);
+		if ($j("[id$=':LeadNo']").val() == "") {
+			if (inputDt < JS_SYS_TODAY) {
+		   		//対象外日付けです
+				alert("{!$Label.MSG_001_0059}");
+		   		return false;
+			}
+		}
+	});
+	
+	// *******************************************************
+	// 明細情報 Event Bind
+	// *******************************************************
+	// プラングループ機能に対して、全部再BIND
+	$j("img[id='planCustomeBtn']").unbind("jinyaPlanExtend");
+	// 明細処理のEventBindする
+	bindEventSubIdx();
+	setInterval("setCookies()",50000);
+	// カレンダー情報BIND
+	bindEventDatePicker(true);
+	
+	$j("input[id$='searchInput']").unbind("change");
+	$j("input[id$='searchInput']").bind("change",function(){
+		if($j(this).val() == ""){
+			window.location.href = '../apex/BookingFlexApp';
+			//_initFun();
+		}
+	});
+	//first load chatmessage window
+	setTimeout(function(){
+		showWindow($j("#chatPage")[0],$j("#chatPage").data("src"),true);
+	},4000);
+	if({!!isEditPage && !cloneFlag})
+		showMesssageWindow($j("#recentRefPage")[0]);
+	//2017/01/10 多layout对应 by zy BEGIN
+	//$j("select[id$=layoutId]").kendoDropDownList();
+	//2017/01/10 多layout对应 by zy END
+	//2017/07/23 31.一画面のF5/Commadn+Rで画面Refreshできるように改善対応 by zy BEGIN
+	bindWindowKey();
+	//2017/07/23 31.一画面のF5/Commadn+Rで画面Refreshできるように改善対応 by zy END
+	// 2018/10/12 特記事項の文字色変更 by cxw BEGIN
+	changeCkeditor();
+	// 2018/10/12 特記事項の文字色変更 by cxw END
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	if (!JS_ROOM_FLG){
+		$("div.typeClass:has(.disabledClass)").on("mouseenter",function(){
+			$("select",this).attr("disabled",true);
+		});
+	}
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+}
+function bindEventDatePicker(bindBaseInfo) {
+	// 基本予約情報
+	if (bindBaseInfo) $j("#customeDiv .dateInput").children().jinyaDatePicker();
+	// 子情報
+	else $j("#subBookingItem .dateInput").children().jinyaDatePicker();
+}
+//window size cookie set
+function setCookies(){
+	var cookieMessage = '';
+	$j("#otherPage div.hadResize").each(function(){
+		var pageName = $j(this).attr("name");
+		var pageMessage = $j(this).attr("message");
+		cookieMessage += pageName +'$' + pageMessage + ',';
+		$j(this).removeClass("hadResize");
+	});
+	if(cookieMessage != ''){
+		$j("input[id$=hideCookieMessage]").val(cookieMessage);
+		setCookie();
+	}
+}
+
+// *******************************************************
+// 明細情報関連のEvent Bindする
+// *******************************************************
+function bindEventSubIdx () {
+
+	// カレンダー情報BIND
+	bindEventDatePicker(false);
+	
+	// C/I日付 / C/O日付
+	$j("input[id$=':cidate']" + "," + "input[id$=':codate']")
+	.on('blur', function(){
+		var $this = $j(this);
+        // 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN
+        checkChgAndClose(this);
+        // 2017/12/25 部屋自動割り当て機能追加　by　zy END
+	    if ($this.val() == "") return;
+	    if (!checkDate($this.val())) {
+	    	return false;
+	    }
+	    //2016/12/30 親部屋の設定の対応　by　zy　BEGIN
+	    if($j("input[name=parentSub]:checked").length == 0){
+	    	var curRow = $this.closest("tr");
+	    	var curChkBox = $j("input[name=parentSub]",curRow);
+	    	if (curChkBox.length > 0){
+	    		curChkBox.addClass("mainSub");
+	    		curChkBox.get(0).checked = true;
+	    		$j("input[id$=hidParentFlag]").val(false);
+	    		$j("input[id$=hidParentFlag]",curRow).val(true);
+	    	}
+	    }
+	    //2016/12/30 親部屋の設定の対応　by　zy　END
+	    //var inputDt = Date.parse($this.val());
+	    var inputDt = Date.parseExact($this.val(),JINYACONNECT.DateFormat);
+	    // 日付書式処理を行う
+		$this.val(dateFormat.format(inputDt));
+	});
+	
+	// ********************************
+	// 明細データ初期値自動設定機能
+	// *********************************
+    // 数字だけ入力可能の制御
+    $j("input[id$=':nights']" + "," + "input[id$=':perpsons']" + "," + "input[id$=':rooms']"+ "," + "input[id$=':salescnt']").keyup(function(){
+        $j(this).val($j(this).val().replace(/[^\d\,]/g,''));
+        // 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN
+        checkChgAndClose(this);
+        // 2017/12/25 部屋自動割り当て機能追加　by　zy END
+    }).bind("paste",function(){
+        $j(this).val($j(this).val().replace(/[^\d\,]/g,''));
+    }).css("ime-mode","disabled");
+	// 到着時間初期値設定する[2017/02/02 分の単位は10分から1分に変更対応]
+	$j("input[id$=':citime']").timeEntry({spinnerImage:'', show24Hours: true, showSeconds: false, timeSteps : [1, 1]})
+	.on('blur', function(){
+		var $this = $j(this);
+	    if ($this.val() == "") {
+	        $this.val(JS_DEFCHKIN_DT);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	    processOpt(this);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	}});
+	// 出発時間初期値設定する[2017/02/02 分の単位は10分から1分に変更対応]
+	$j("input[id$=':cotime']").timeEntry({spinnerImage:'', show24Hours: true, showSeconds: false, timeSteps : [1, 1]})
+	.on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.val() == "") {
+	        $this.val(JS_DEFCHKOT_DT);
+	        //2017/01/10 0泊时间自动加2小时 by zy BEGIN
+	       	var curRow = $this.closest("tr");
+	       	var nights = $j("input[id$=nights]",curRow).val();
+	       	if (nights == 0){
+	       		var cidateStr = $j("input[id$=cidate]",curRow).val();
+	       		var citimeStr = $j("input[id$=citime]",curRow).val();
+	       		if (cidateStr != "" && citimeStr != ""){
+		       		var curDt = kendo.parseDate(cidateStr + ' ' + citimeStr);
+		       		curDt.addHours({!defStayHours});
+		       		$this.val(kendo.toString(curDt,'HH:mm'));
+	       		}
+	       	}
+	       	//2017/01/10 0泊时间自动加2小时 by zy END
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+		}
+	    processOpt(this);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	});
+	// 元の基本情報の泊数ため、削除する
+	/*
+	// 宿泊数初期値設定する
+	$j("input[id$=':staysNums']").on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.val() == "") {
+	        $this.val("1");
+		}
+		// 泊数により、出発日計算を行う
+		var nights = $this.val();
+		// 出発日計算を行う
+		var entryDate = $j("input[id$=':entryDt']").val();
+		if (entryDate != "") $j("input[id$=':departDt']").val(dateFormat.format(Date.parse(entryDate).addDays(nights)));
+	});
+	*/
+	// C/I日付[基本情報の設定情報から明細にコピーを行う]
+	$j("input[id$=':cidate']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function() {
+	    var $this = $j(this);
+	    if ($this.attr("orgval") == "") {
+			var allRows = $this.closest("tr").prevAll(".dataRow");
+			var prevTrs = allRows.filter(function(){
+				return $j("input[id$=cidate]",this).val() != "";
+			});
+			if (prevTrs.length > 0) {
+				var $prevTr = $j(prevTrs[0]);
+				// 編集不可の場合
+				if ($prevTr.hasClass("cantEdit")){
+					$this.val($prevTr.find("span[id$=':cidateStr']").text());
+				} else {
+					$this.val($prevTr.find("input[id$=':cidate']").val());
+				}
+	    		$this.attr("orgval",$this.val());
+	    	}
+		}
+		// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	    processOpt(this);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	});
+	// C/O日付[基本情報の設定情報から明細にコピーを行う]
+	$j("input[id$=':codate']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.attr("orgval") == "") {
+			var allRows = $this.closest("tr").prevAll(".dataRow");
+			var prevTrs = allRows.filter(function(){
+				return $j("input[id$=codate]",this).val() != "";
+			});
+			if (prevTrs.length > 0) {
+				var $prevTr = $j(prevTrs[0]);
+				// 編集不可の場合
+				if ($prevTr.hasClass("cantEdit")){
+					$this.val($prevTr.find("span[id$=':codateStr']").text());
+				} else {	
+					$this.val($prevTr.find("input[id$=':codate']").val());
+				}
+	    		$this.attr("orgval",$this.val());
+	    	}
+		}
+		// 泊数自動計算を行う
+		var row = $this.attr("rowindex");
+		// 開始日と終了日により、泊数自動計算を行う
+		//var entryDate = Date.parse($j("input[id$=':" + row + ":cidate']").val());
+		var entryDate = Date.parseExact($j("input[id$=':" + row + ":cidate']").val(),JINYACONNECT.DateFormat);
+		//var departDate= Date.parse($this.val());
+		var departDate= Date.parseExact($this.val(),JINYACONNECT.DateFormat);
+		if (entryDate != null && departDate != null) {
+			var nights = (departDate.getTime()-entryDate.getTime() )/1000/60/60/24;
+			if (nights >= 0) $j("input[id$=':" + row + ":nights']").val(nights);
+		}
+		//chgMessage(this,'codate');
+		// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	    processOpt(this);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	});
+	// 泊数[基本情報の設定情報から明細にコピーを行う]
+	$j("input[id$=':nights']").on('focus', function(){
+    	var $this = $j(this);
+    	$this.attr("orgval",$this.val());
+	}).on('blur', function(){
+	    var $this = $j(this);
+	    if ($this.attr("orgval") == "") {
+	    	//2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy BEGIN
+	    	var defStayNums = $j("#defStaysNums").val();
+	    	//2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy END
+	    	if ($this.val() == "") {
+	    		var allRows = $this.closest("tr").prevAll(".dataRow");
+				var prevTrs = allRows.filter(function(){
+					return $j("input[id$=nights]",this).val() != "";
+				});
+				if (prevTrs.length > 0) {
+					var $prevTr = $j(prevTrs[0]);
+					// 編集不可の場合
+					//2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy BEGIN
+					var preNigths = defStayNums;
+					//2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy END
+					if ($prevTr.hasClass("cantEdit")){
+						preNigths = $prevTr.find("span[id$=':nightsStr']").text();
+					} else {
+						preNigths = $prevTr.find("input[id$=':nights']").val();
+					}
+					//2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy BEGIN
+					if (preNigths == "" || kendo.parseFloat(preNigths) == null) $this.val(defStayNums);
+					//2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 by zy END
+					else $this.val(preNigths);
+		    	} else {
+		    		// 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 BEGIN
+		    		//$this.val("1");
+		    		$this.val($j("#defStaysNums").val());
+		    		// 2017/11/07 店舗別泊数、到着時刻、出発時刻初期値自動設計できるように改善対応 END
+		    	}
+	    	}
+		}
+    	// Row Number
+    	var row = $j(this).attr("rowindex");
+		// 泊数により、出発日計算を行う
+		var nights = $this.val();
+		// 出発日計算を行う
+		var entryDate = $j("input[id$=':" + row + ":cidate']").val();
+		//if (entryDate != "") $j("input[id$=':" + row + ":codate']").val(dateFormat.format(Date.parse(entryDate).addDays(nights)));
+		if (entryDate != "") $j("input[id$=':" + row + ":codate']").val(dateFormat.format(Date.parseExact(entryDate,JINYACONNECT.DateFormat).addDays(nights)));
+		$this.attr("orgval",$this.val());
+		//chgMessage(this,'nights');
+		// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	    processOpt(this);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	});
+
+	// 人の初期値
+	$j("input[id$=':perpsons']").on('blur', function(){
+		var $this = $j(this);
+    	// Row Number
+    	//var row = $j(this).closest('tr').prevAll().length;
+    	var row = $j(this).attr("rowindex");
+    	// 部屋タイプ設定値
+    	var roomTypeVal = $j("select[id$=':" + row + ":roomType']").val();
+		// 2019/12/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+		if (JS_ROOM_FLG) {
+			var curRow = $this.closest("tr");
+			roomTypeVal = getTypeId(curRow);
+		}
+		// 2019/12/30 一画面、部屋タイプ　部屋の選択 by zy END
+    	// 部屋タイプの最大人数チェックを行う
+    	if (roomTypeVal != "") {
+    		var maxNumber = getMaxNumbers(roomTypeVal);
+    		// 最大人数のチェックと初期値設定を行う
+    		if ($this.val() == "")  {$this.val(maxNumber);}
+    		else if ( (1 * $this.val()) > maxNumber) {
+				//最大人数オーバーです
+				alert ("{!$Label.MSG_001_0060}");
+				$this.val(maxNumber);
+				//$this.focus();
+    		}
+    	}
+    	// 2019/12/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+		// 人数本来就不用确认变更，但是其他状态既然已经好用就暂时不降此代码去掉
+	    if (!JS_ROOM_FLG) processOpt(this);
+	    // 2019/12/30 一画面、部屋タイプ　部屋の選択 by zy END
+	});
+	// 室の初期値
+	$j("input[id$=':rooms']").on('blur', function(){
+		var $this = $j(this);
+	    if ($this.val() == "") $this.val("1");
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	    processOpt(this);
+	    // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	});
+
+
+	// *******************************************************
+	// 明細のプラン項目関連処理
+	// *******************************************************
+	// プラングループ情報MAP初期化する
+	_localMap = new Map();
+	
+	// 既にプランを登録される場合、固定金額プランを指定する場合、金額変更不可になる
+	$j("input[id$=':dlPlanItem']").each(function(idx, ele) {
+		// 既に登録するプランに対して、金額入力可・不可制御を行う
+		var row = $j(this).attr("rowindex");
+		if (ele.value != "") {
+			if (ele.value.indexOf(JS_DEF_TARIFKEY) >= 0) {
+			    $j("input[id$=':" + row + ":salescnt']").attr('disabled', null);
+			} else {
+				//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy BEGIN
+				//2017/01/10 plan -》 商品 by zy BEGIN
+				if (!planDetailIsReadonly(row) &&  !detailIsProduct(row)) $j("input[id$=':" + row + ":salescnt']").attr('disabled', 'disabled');
+				//2017/01/10 plan -》 商品 by zy END
+				//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy END
+			}
+		}
+		
+		// プラングループ関連初期化
+		var planId = $j("input[id$=':" + row + ":dlPlanItem_lkid']").val();
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy BEGIN
+		if (detailIsProduct(row)) planId = $j("input[id$=':" + row + ":dlAccItem_lkid']").val();
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy END
+		var mapKey = "_" + row +"_planidKey";
+		_localMap.put(mapKey, planId);
+	});
+
+
+	// プランの売価編集制限チェックを行う
+	$j("input[id$=':dlPlanItem']").on('blur', function(e){
+		
+		var row = $j(this).attr("rowindex");
+		var planName = $j(this).val();
+		var planId = $j("input[id$=':" + row + ":dlPlanItem_lkid']").val();
+		//2017/01/10 plan -》 商品 by zy BEGIN
+		var prodId = $j("input[id$=':" + row + ":dlAccItem_lkid']").val();
+		var sobjId = $j("input[id$=':" + row + ":hidSobjId']").val();
+		//2017/01/10 plan -》 商品 by zy END
+		var mapKey = "_" + row +"_planidKey";
+		// プラン未設定する場合、既に設定する情報はクリアする
+		if (planName == "") {
+		    // 関連項目の連動クリアする
+			$j("input[id$=':" + row + ":salescnt']").val("");
+			$j("input[id$=':" + row + ":salescnt']").attr("disabled", false);
+			//$j("hidden[id$=':" + row + ":hidSalescnt']").val("");
+			$j("input[id$=':" + row + ":dlPlanItem_lkid']").val("");
+			//2017/01/10 plan -》 商品 by zy BEGIN
+			$j("input[id$=':" + row + ":dlAccItem_lkid']").val("");
+			$j("input[id$=':" + row + ":hidSobjId']").val("");
+			//2017/01/10 plan -》 商品 by zy END
+			$j(this).data("planid","");
+			_localMap.remove(mapKey);
+			return;
+		} else {
+			// 元のIDと比較する
+			var orgPlanId = _localMap.get(mapKey);
+			if (orgPlanId) {
+				if (orgPlanId == sobjId) return;
+			}
+			_localMap.put(mapKey, sobjId);
+		}
+		<!-- 2016/12/27 copy 機能fix by ZY BEGIN-->
+		var curRow = $j(this).closest("tr");
+		var hidInfo = $j("input[id$=nl_hidPlanDetailInfo]",curRow).val();
+		<!-- 2016/12/27 copy 機能fix by ZY END-->
+		blockUi();
+        // NameSpace追加する
+		var key = JS_APPNS + "Price__c";
+		//2017/01/10 plan -》 商品 by zy BEGIN
+		// 既に定義する売価はプランカラ取得、画面に設定する
+		Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.BookingFlexApp.getPlanInfos}", planId, prodId, function(result, event){
+		//2017/01/10 plan -》 商品 by zy END
+            if(event.type == 'exception') {
+                alert(event.message);
+				// 画面解除する
+				unblockUi();
+            } else {
+            	// Result Info
+            	if (result.length > 0) {
+            		var price = result[0][key] != undefined ? result[0][key] : "";
+            		var num = commUtils.numFormat(price);
+            		<!-- 2016/12/27 copy 機能fix by ZY BEGIN-->
+            		if (hidInfo != ""){
+            			var infoArr = hidInfo.split(";");
+            			var curNum = 0;
+            			for (var i = 0 ; i < infoArr.length ; i++){
+            				var inf = infoArr[i];
+            				var infMsgArr = inf.split(":");
+            				curNum += kendo.parseFloat(infMsgArr[1]);
+            			}
+            			num = commUtils.numFormat(curNum);
+            		}
+            		<!-- 2016/12/27 copy 機能fix by ZY END-->
+            		$j("input[id$=':" + row + ":salescnt']").val(num);
+            		//$j("input[id$=':" + row + ":hidSalescnt']").val(price);
+            	} else {
+                    $j("input[id$=':" + row + ":salescnt']").val("");
+                    //$j("input[id$=':" + row + ":hidSalescnt']").val(0);
+            	}
+            }
+			if (planName.indexOf(JS_DEF_TARIFKEY) >= 0) {
+			    $j("input[id$=':" + row + ":salescnt']").attr("disabled", false);
+			} else {
+			    $j("input[id$=':" + row + ":salescnt']").attr("disabled", true);
+			   	//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy BEGIN
+			    //2017/01/10 plan -》 商品 by zy BEGIN
+				if (!planDetailIsReadonly(row) && detailIsProduct(row)) $j("input[id$=':" + row + ":salescnt']").attr("disabled", false);
+				//2017/01/10 plan -》 商品 by zy END
+				//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy END
+			}
+			// 画面解除する
+			unblockUi();
+		});
+	});
+
+ 	
+ 	// プランを切り替えする場合、関連のプラン明細・非表示制御追加
+	$j("input[id$=':dlPlanItem']").change(function () {
+		// 前に設定するプラン商品と金額情報をクリアする
+		var planItem = $j(this).parent().parent().find("[id='planCustomeBtn']").data("jinyaPlanExtend");
+		planItem.reset();
+		// 2016/08/29 処理済みから呼出関数
+	})
+	//2017/03/15 noshow row filter by zy BEGIN
+	var colspanNumber = $j("tr.dataRow:eq(0) td:visible").length;
+	//2017/03/15 noshow row filter by zy END
+	// プラングループ機能初期化対応
+	$j("img[id='planCustomeBtn']").each(function(idx) {
+		$this = $j(this);
+		// 既にBind済みの場合、再BINDを行わない
+		if ($this.data("jinyaPlanExtend")) return true;
+		var rowIndex = $this.attr("rowindex");
+		$j(this).jinyaPlanExtend({
+	        selectorRoot : $this.parent().parent().parent().parent(),
+	        planInputField : $j("input[id$=hidSobjId]",'tr.dataRow[rowno=' + rowIndex + ']'),
+	        //planId : planIdVal,
+	        colspanNum : colspanNumber,
+	        planSetupSyncField : $j("input[id$=':"+rowIndex+":nl_hidPlanDetailInfo']"),
+	        startfun : blockUi,
+	        endfun : unblockUi,
+			actionOpenImg : "{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}",
+			actionCloseImg: "{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}",
+	        groupIndex : rowIndex,
+	        summaryPriceField : $j("input[id$=':"+rowIndex+":salescnt']"),
+	        isReadonlyFun : planDetailIsReadonly,
+	        remotePlanQuery  : "{!$RemoteAction.BookingFlexApp.getPlanDetailListById}",
+	        remoteProdQuery  : "{!$RemoteAction.BookingFlexApp.getArrayProductItemInfo}",
+	        labels : {NOFOUND:"{!JSENCODE($Label.MSG_006_0235)}",PRODUCTNM:"{!JSENCODE($Label.MSG_006_0212)}",UNITPRICE:"{!JSENCODE($Label.MSG_006_0213)}",SUMMARY:"{!JSENCODE($Label.MSG_006_0402)}"}
+		});
+	});
+	//clear no data table
+	$j(".bookingItemRow").each(function(){
+		if($j(this).find(".bookingItemTb").length == 0){
+			$j(this).remove();
+		}
+	});
+	//2017/01/11  last row add new line by zy BEGIN
+	lastBookingDetail();
+	//2017/01/11  last row add new line by zy END
+	//2017/01/11  plan search to plan or product by zy BEGIN
+	
+	setTimeout(function(){
+		//2017/04/26 商品窗口共通化 by zy BEGIN
+		initProductWindow();
+		/*
+		var searchWin = $j("#producdSearchWindow");
+		if(searchWin.length > 0 && !searchWin.data("kendoWindow")){
+			var src = '/apex/AccountMasterInput?spcd={!branchNm}&callback=window.parent.ProdcutSet';
+			searchWin.kendoWindow({
+	        	visible: false,
+	            content: src,
+				iframe: true,
+				width: 700,
+				height : 450,
+				title : '商品選択',
+	            actions: ["close"]
+	        });
+		}*/
+		//2017/04/26 商品窗口共通化 by zy END
+	},4000);
+	$("img[name='productPopup']").click(function() {
+		var searchWin = $j("#producdSearchWindow");
+		var curRow = $j(this).closest("tr");
+		var item = $j("img#planCustomeBtn",curRow);
+		if (item.attr("isopenstatus") == "false"){
+			var planItem = item.data("jinyaPlanExtend");
+			planItem.switchStatus();
+		}
+		//2017/04/26 商品窗口共通化 by zy BEGIN
+		initProductWindow();
+		//2017/04/26 商品窗口共通化 by zy END
+		var kendoSearchWin = searchWin.data("kendoWindow");
+		var offsetObj = $j("input[id$=dlPlanItem]",curRow).offset();
+		searchWin.closest(".k-window").css({
+				top: offsetObj.top-485,
+	   			left: offsetObj.left
+			});
+		kendoSearchWin.index =  $(this).attr("rowindex");
+		kendoSearchWin.close();
+		kendoSearchWin.open();
+	});
+	 // 会計商品AutoComplete[1桁以上]
+    $("input[id$=':dlPlanItem']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.BookingFlexApp.getProductItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($.map(result, function (item) {
+                    	item.id = item.productId;
+                    	item.value = item.prodcutName + "("+item.prodcutCode+")";
+                    	return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+        	var curRow = $j(this).closest("tr");
+			var item = $j("img#planCustomeBtn",curRow);
+			if (item.attr("isopenstatus") == "false"){
+				var planItem = item.data("jinyaPlanExtend");
+				planItem.switchStatus();
+			}
+        },
+        select: function (event, ui) {
+        	var curRow = $j(this).closest("tr");
+			var item = $j("img#planCustomeBtn",curRow);
+			if (item.attr("isopenstatus") == "false"){
+				var planItem = item.data("jinyaPlanExtend");
+				planItem.switchStatus();
+			}
+	    	afterSelectProduct(curRow,ui.item);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+        },
+    });
+    //2017/01/11  plan search to plan or product by zy END
+	//loadAutoComplete();
+	// 2017/12/29 JINYABUG-230 対応 by zy BEGIN
+	// 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN
+	$j("#usbLst tr.dataRow").jinyaRoomOpt({
+		// 2018/01/03 部屋のアイコン変更　by　zy　BEGIN
+		imgElement:'img[name=homeSelect]',
+		imgExpland:'{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}',
+		imgCollapse:'{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}',
+		// 2018/01/03 部屋のアイコン変更　by　zy　END
+		// roomtypeid取得
+		roomTypeElement:'select[id$=roomType]',
+		// 控制显示位置
+		aimElement:'select[id$=roomType]',
+		// 变更保持
+		afterBind:function(row){
+			this.curKey = getKey(row);
+			// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+			var cloneFlag = {!cloneFlag};
+			if (JS_ROOM_FLG) {
+				var curRow = $j(row);
+				this.expland = this.element;
+				this.selectTemp = curRow;
+			}
+			if (JS_ROOM_FLG || cloneFlag) lazyLoadRows($j(row));
+			// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+		}
+	});
+	// 2017/12/25 部屋自動割り当て機能追加　by　zy END
+	// 2017/12/29 JINYABUG-230 対応 by zy END
+}
+//2017/06/02 by zy BEGIN
+function setContactMessage(result){
+	 $j("input[id$=relcontact_lkid]").val( result.Id );
+     $j("input[id$=relcontact_lkold]").val( result.Name );
+}
+//2017/06/02 by zy END
+//2017/01/11  plan search to plan or product by zy BEGIN
+ProdcutSet = function (data) {
+	var serachWin = $j("#producdSearchWindow").data("kendoWindow");
+	serachWin.close();
+	var rowIndex = serachWin.index;
+	var curRow = $j("tr.dataRow[rowno='" + rowIndex +"']");
+	afterSelectProduct(curRow,data);
+	// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+	if ("accMasterFun" in window) accMasterFun(data.productId);
+	// 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END	
+}
+	
+function afterSelectProduct(curRow,data){
+	$j("input[id$=dlPlanItem]",curRow).val(data.prodcutName);
+	//$j("input[id$=salescnt]",curRow).val(data.unitPrice);
+	$j("input[id$=productFlag]",curRow).val(true);
+	if (data.actionType == "{!ACTTYPE_PLAN}") {
+		//2017/01/11 bug fix by zy BEGIN
+		var mapKey = "_" + curRow.attr("rowno") +"_planidKey";
+		_localMap.remove(mapKey);
+		//2017/01/11 bug fix by zy BEGIN
+		$j("img[id$=planCustomeBtn]",curRow).show();
+		$j("input[id$=hidIsPlanFlag]",curRow).val(true);
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy BEGIN
+		$j("input[id$=':salescnt']",curRow).attr('disabled', 'disabled');
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy END
+	} else {
+		$j("img[id$=planCustomeBtn]",curRow).hide();
+		$j("input[id$=hidIsPlanFlag]",curRow).val(false);
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy BEGIN
+		$j("input[id$=':salescnt']",curRow).removeAttr('disabled');
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy END
+	}
+	$j("input[id$=hidSobjId]",curRow).val(data.productId);
+	$j("input[id$=dlPlanItem_lkid]",curRow).val("");
+	$j("input[id$=dlAccItem_lkid]",curRow).val(data.productId);
+	$j("input[id$=nl_hidPlanDetailInfo]",curRow).val("");
+	$j("input[id$=dlPlanItem]",curRow).blur();
+}
+//判断会计商品是否是plan商品
+function detailIsProduct(parentRowIndex){
+	var curRow = $j("tr.dataRow[rowno='" + parentRowIndex + "']");
+	return $j("input[id$='productFlag']",curRow).val() == "true" && $j("input[id$=hidIsPlanFlag]",curRow).val() == "false";
+}
+//2017/01/10 plan -》 商品 by zy END
+
+// 部屋タイプ：最大格納人数関数
+function getMaxNumbers(roomType) {
+	var roomArray = <apex:outputText escape="true" value="{!roomTypeScript}" />;
+	if (roomArray[roomType] == undefined) {
+		// 未設定する場合、人数制限なしで戻る
+		return 99;
+	}
+	return 1*roomArray[roomType];
+}
+// 有効日付チェックを行う
+function checkDate(dt) {
+    //var dateValue = Date.parse(dt);
+    var dateValue = Date.parseExact(dt,JINYACONNECT.DateFormat);
+    if (dateValue == null) {
+    	//無効な日付です
+		alert('{!$Label.MSG_001_0061}');
+    	return false;
+   	}
+   	return true;
+}
+/*  2017/04/06 親部屋更新 by zy BEGIN
+// 情報更新処理
+function refreshInfoFunction() {
+	var leadNo = $j("input[id$=':LeadNo']").val();
+	$j("input[id$=':inputLeadNo']").val(leadNo);
+	// 最新予約情報を取得する
+	actRefreshLead();
+}
+// 顧客様情報更新
+ 2017/04/06 親部屋更新 by zy END
+function refreshContactInfoFun() {
+	var contactId = $j("input[id$=':relcontact_lkid']").val();
+	var contactNm = $j("input[id$=':relcontact']").val();
+	$j("input[id$=':inputContactId']").val(contactId);
+	$j("input[id$=':inputContactNm']").val(contactNm);
+	// 顧客様最新情報を取得する
+	actRefreshCust();
+}*/
+/*
+// 有効性チェック
+function preCheckforSubmit(){
+	// 期間チェック削除(2013.08.19)
+	// 基本情報の設定期間
+	var baseEntryDate = $j("input[id$=':entryDt']").val();
+	var baseDepartDate = $j("input[id$=':departDt']").val();
+	// Check Result
+	var result = new Array();
+	// 期間チェック
+	$j("input[id$=':cidate']").each(function(){
+		var $this = $j(this);
+		// C/I
+		var newEntryDate = $this.val();
+		// Row Number
+    	var row = $this.closest('tr').prevAll().length;
+    	// C/O
+		var newDepartDate = $j("input[id$=':" + row + ":codate']").val();
+		//var leadId = $j("input[id$=':" + row + ":hidLeadId']").val();
+		// 期間範囲チェック
+		if(newEntryDate != "" && newDepartDate != ""){
+			if(baseEntryDate > newEntryDate || baseDepartDate < newDepartDate  ){
+				result.push('No' + row);
+			}
+		}
+	});
+	// チェック結果を判定する
+	if(result.length > 0 ){
+		//明細情報のC/I、C/O日付は予約基本情報の到着日、出発日の期間範囲外なりました
+		var msgBox = '{!$Label.MSG_001_0062}';
+		if(window.confirm(msgBox)){
+			$j("input[id$=':leadUpsertBtn']").click();
+	   	}
+	 }else{
+	 	$j("input[id$=':leadUpsertBtn']").click();
+	 }	
+}
+// ３０日間連泊情報照会画面起動
+function openBookingInfoWin() {
+    window.open("/apex/RoomScheduleReport");
+}*/
+
+// プラン設定機能
+function openMiniPlanSetup(item) {
+	// 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN
+	removeSelctLst($j(item).closest("tr.dataRow"),true);
+	// 2017/12/25 部屋自動割り当て機能追加　by　zy END
+	// プラン明細を展開する 
+	var planItem = $j(item).data("jinyaPlanExtend");
+	planItem.switchStatus();
+	// 2016/08/29 処理済みから呼出関数
+}
+
+// プランの（＋）展開する場合、明細編集可・不可制御Method
+function planDetailIsReadonly(planRowIdx) {
+	//console.debug(planRowIdx)
+	//console.debug($j("#orgSubIdxId_"+planRowIdx).val());
+	//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy BEGIN
+	var curRow = $j("#orgSubIdxId_"+planRowIdx).closest("tr.dataRow");
+	return curRow.hasClass("cantEdit");
+	//return ($j("#orgSubIdxId_"+planRowIdx).val() != "");
+		//2017/06/26 チャックインのデータは価格変更可能改修機能　by　zy END
+}
+
+// 2015/07/29 予約登録の確認
+function preSaveConfirm() {
+	var reflg = true;
+	//2016/12/30 親部屋の設定の対応　by　zy　BEGIN
+	if ( $j("input[name=parentSub]:checked").length == 0 ) {
+		$j("input[id$=cidate]").each(function(){
+			if($j(this).val() != ""){
+				var curRow = $j(this).closest("tr");
+				var curRadio = $j("input[name=parentSub]",curRow);
+				if (curRadio.length > 0){
+					curRadio.get(0).checked = true;
+					$j("input[id$=hidParentFlag]").val(false);
+					$j("input[id$=hidParentFlag]",curRow).val(true);
+					return false;
+				}
+			}
+		});
+	}
+	//2016/12/30 親部屋の設定の対応　by　zy　END
+	/*
+	暂时注释
+	var cancelLines = $j("input[id$=':cancelItem']:checked");
+	var existDetail = $j("input[id^='orgSubIdxId']");
+	var confirmMsg = "{!JSENCODE($Label.MSG_001_0001)}";
+	var sbuMsg = "";
+	cancelLines.each(function(i,obj) {
+		var lineNo = this.getAttribute("lineno");
+		if (existDetail[(1*lineNo-1)].value != "") {
+			sbuMsg += lineNo + ",";
+		}
+	});
+	if (sbuMsg.length > 1) {
+		sbuMsg = sbuMsg.slice(0,-1);
+		if (!window.confirm(confirmMsg.replace("$$_NO_$$", sbuMsg))) {
+			reflg = false;
+		}
+	}*/
+	return reflg;
+}
+
+
+//float menu
+
+function showWindow(that,src,openFlag){
+	var curName = $j(that).attr("name");
+	if(!openFlag) $j(that).toggleClass("showFrame");
+	var frameNm = $j(that).attr("name");
+	var curWin = $j("." + frameNm);
+	if(frameNm == 'chatPageFrame' && !openFlag) $j(".infoMsg").hide();
+	if ($j(that).hasClass("showFrame") || openFlag) {
+		if(!curWin.data("kendoWindow")){
+			var iframeWidth = $j(window).width()  - 88;
+			var meisaiHeight = $j(window).height()-$j("[id$=bookingItem]").offset().top;
+			var iframeHeight = 730;
+			//$j(window).height() - 150 - meisaiHeight;
+			var positionTop = 150 + topIdx*30;
+			var positionLeft = 30 + topIdx*5;
+			if($j(that).data("width")){
+				iframeWidth = $j(that).data("width");
+				positionLeft = $j("#otherPage").position().left-550;
+			}
+			if($j(that).data("height")){
+				iframeHeight = $j(that).data("height");
+				positionTop = $j("#otherPage").position().top;
+			}
+			var message = $j(that).attr("message");
+			if( message != null && message != ''){
+				var msgArr = message.split('_');
+				iframeWidth = msgArr[0];
+				iframeHeight = msgArr[1];
+			}
+			curWin.data("divName",curName);
+			curWin.kendoWindow({
+                 visible: false,
+                 content: src,
+  				 iframe: true,
+  				 iframeUrl:src,
+  				 width: iframeWidth,
+  				 height:iframeHeight,
+  				 title:$j(that).attr("title"),
+                 actions: ["Refresh","close"],
+                 close: function(e) {
+				    // close animation has finished playing
+				    var divNm = $j(e.sender.element[0]).data("divName");
+				    $j("div[name='" + divNm + "']").removeClass("showFrame");
+				    // 2017/04/06 小窗关闭停止自动更新 by zy BEGIN
+				    var iframClass = '';
+				    if (e.sender.element.hasClass("roomIndicatorPageframe")) iframClass = 'roomIndicatorPageframe';
+				    else if (e.sender.element.hasClass("timeTablePageframe")) iframClass = 'timeTablePageframe';
+				    if (iframClass != "") {
+				    	var indicatorWin = $j("." + iframClass +" iframe").get(0).contentWindow;
+			  	 		if (indicatorWin.stopRunning != undefined) indicatorWin.stopRunning();
+				    }
+				    // 2017/04/06 小窗关闭停止自动更新 by zy END
+				  },
+				  resize: function(e) {
+			    	var curName = $j(that).attr("name");
+		    		var $this = $j("div."+curName).closest("div.k-widget");
+					var curWinWd = $this.width();
+					var curWinHg = $this.height();
+					var curWinLef = $this.position().left;
+					var curWinTop = $this.position().top;
+					var message = curWinWd + '_' + curWinHg + '_' + curWinLef + '_' + curWinTop;
+					var framNm = $j(e.sender.element[0]).data("divName");
+					$j("div[name=" + framNm + "]").addClass("hadResize");
+					$j("div[name=" + framNm + "]").attr("message",message);
+			  	 },
+			  	 // 2017/04/06 小窗打开调用页面自刷新 by zy BEGIN
+			  	 activate:function(e){
+			  	 	if (e.sender.element.hasClass("roomIndicatorPageframe")){
+			  	 		var indicatorWin = $j(".roomIndicatorPageframe iframe").get(0).contentWindow;
+			  	 		if (indicatorWin.refreshRoomAndMessage != undefined) indicatorWin.refreshRoomAndMessage();
+			  	 	} else if (e.sender.element.hasClass("timeTablePageframe")) {
+			  	 		var timeTableWin = $j(".timeTablePageframe iframe").get(0).contentWindow;
+			  	 		if (timeTableWin.refreshCurrentDate != undefined) timeTableWin.refreshCurrentDate();
+			  	 	//2017/04/26 宿帳画面のrefresh機能追加　by　zy BEGIN
+			  	 	} else if (e.sender.element.hasClass("yadotyouPageframe")) {
+			  	 		var yodotyouTableWin = $j(".yadotyouPageframe iframe");
+			  	 		if (yodotyouTableWin.length > 0){ 
+			  	 			e.sender.refresh(e.sender.iframeUrl);
+			  	 		}
+			  	 		
+			  	 	}
+			  	 	//2017/04/26 宿帳画面のrefresh機能追加　by　zy END
+			  	 }
+			  	 // 2017/04/06 小窗打开调用页面自刷新 by zy END
+             }).closest(".k-window").css({
+				top: positionTop,
+	   			left: positionLeft
+			});
+			topIdx++;
+			if(!openFlag) curWin.data("kendoWindow").open();
+		} else {
+			 // 2017/04/06 窗口打开不刷新页面 by zy BEGIN
+			curWin.data("kendoWindow").open();//.refresh(src)
+			 // 2017/04/06 窗口打开不刷新页面 by zy END
+		}
+	} else {
+		curWin.data("kendoWindow").close();
+	}
+}
+function showMesssageWindow(that){
+	var frameNm = $j(that).attr("name");
+	var curWin = $j("." + frameNm);
+	$j(that).toggleClass("showFrame");
+	if ($j(that).hasClass("showFrame")) {
+		if(!$j(curWin).data("kendoWindow")){
+			curWin.data("divName",frameNm);
+			$j(curWin).kendoWindow({
+                visible: false,
+ 				width: 560,
+ 				height:340,
+ 				title:"最近参照",
+                actions: ["close"],
+                close: function(e) {
+			    // close animation has finished playing
+			    var divNm = $j(e.sender.element[0]).data("divName");
+			    $j("div[name='" + divNm + "']").removeClass("showFrame");
+			  },
+			  resize: function(e) {
+			  	var curName = $j(that).attr("name");
+		    	var $this = $j("div."+curName).closest("div.k-widget");
+				var curWinWd = $this.width();
+				var curWinHg = $this.height();
+				var curWinLef = $this.position().left;
+				var curWinTop = $this.position().top;
+				var message = curWinWd + '_' + curWinHg + '_' + '' + '_' + '';
+				var framNm = $j(e.sender.element[0]).data("divName");
+				$j("div[name=" + framNm + "]").addClass("hadResize");
+				$j("div[name=" + framNm + "]").attr("message",message);
+		  	 }
+            }).closest(".k-window").css({
+				top: 175,
+   				right: 45
+			});
+		}
+		$j(curWin).data("kendoWindow").open();
+	}else 
+		$j(curWin).data("kendoWindow").close();
+}
+function showChatWindow(that){
+	$j(that).toggleClass("showFrame");
+	if ($j(that).hasClass("showFrame")) {
+		$j(".chatPageFrame").data("kendoWindow").open();
+		$j("#chatPage img").hide(500);
+	}else 
+		$j(".chatPageFrame").data("kendoWindow").close();
+	
+}
+</script>
+
+
+<script>
+// 2017/06/28 DUMY機能、削除 BEGIN
+/*
+function showDetailFun(obj) {
+	var curRow = $j(obj).closest("tr");
+    if ($j(obj).attr("openStatus") == "false") {
+		$j(obj).attr("openStatus","true");
+		//折りたたむ
+		$j(obj).attr("title","{!$Label.MSG_011_0066}");
+		$j(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}");
+		
+		// Javasceipr Remotingでデータを取得する
+		var groupIndex = curRow.attr("id");
+		var ctrlId = curRow.data("proid");
+		var bookingItemId = curRow.data("itemid");
+		var childcls = groupIndex + "_child";
+		
+		// 該当商品はMEMORYに格納していない場合
+		hashMap.Clear();
+		var syncInfo = $j("input[id$=hidSyncInfo]",curRow).val();
+		if (syncInfo != "" && syncInfo.length > 1) {
+			syncInfo = syncInfo.substring(0, syncInfo.length-1);
+			var synInfoArr = syncInfo.split(";");
+			for (i = 0; i < synInfoArr.length; i++){
+				var setupInfArr = synInfoArr[i].split(":");
+				var sobjId = setupInfArr[0];
+				var mapKey1 = groupIndex + "_p_" + sobjId;		// 設定明細の価額
+				var mapKey2 = groupIndex + "_i_" + sobjId;		// 設定明細の会計商品ID
+				var mapKey3 = groupIndex + "_n_" + sobjId;		// 設定明細の会計商品名
+				hashMap.Put(mapKey1, setupInfArr[1]);
+				if (setupInfArr.length > 2) hashMap.Put(mapKey2, setupInfArr[2]); // 会計商品ID
+				if (setupInfArr.length > 3) hashMap.Put(mapKey3, setupInfArr[3]); // 会計商品名
+			}
+		}
+		blockUi();
+		Visualforce.remoting.Manager.invokeAction(
+            '{!$RemoteAction.BookingFlexApp.getAccountMstLstByPlan}',
+           	bookingItemId,ctrlId,currentTier,
+            function(result, event){
+            	unblockUi();
+                if (event.status) {
+                    if(result== null || result.length == 0){
+			//データ詳細がありません。
+                        curRow.after("<tr><td colspan='10' style='margin-right: 200px;' >{!$Label.MSG_011_0067}</td></tr>");
+                    }else{
+                    	// プラン明細設定情報を格納用
+                    	var planSyncInf = '';
+						var tabStrHead = _CONST_ADDITEM_TEMPLATE.replaceAll("$colspan$", 10)
+																.replaceAll("$groupIndex$",groupIndex);
+	                	var tabStrBody = "";
+
+	                	for (var i=0; i<result.length; i++) {
+	                		// メモーに既存場合、メモーの設定情報から、単価を設定する
+	                		//var mapKey = groupIndex + "_" + result[i].sobjId;
+	                		
+							var mapKey1 = groupIndex + "_p_" + result[i].sobjId;		// 設定明細の価額
+							var mapKey2 = groupIndex + "_i_" + result[i].sobjId;		// 設定明細の会計商品ID
+							var mapKey3 = groupIndex + "_n_" + result[i].sobjId;		// 設定明細の会計商品名
+							
+	                		var memoryPrice = hashMap.Contains(mapKey1) ? hashMap.Get(mapKey1) : result[i].prodPrice;
+	                		var productId = hashMap.Contains(mapKey2) ? hashMap.Get(mapKey2) : result[i].prodId;
+	                		var productNm = hashMap.Contains(mapKey3) ? hashMap.Get(mapKey3) : result[i].prodName;
+	                		
+	                		
+							var prodtaxflg = '';
+	                		if(result[i].prodTaxRate !=null && result[i].prodTaxRate !='') prodtaxflg = '1';
+		        			tabStrBody += _CONST_ADDITEM_DTEAIL_TEMPLATE.replaceAll("$rowidx$",i)
+     											.replaceAll("$groupIndex$",groupIndex)
+     											.replaceAll("$productName$",commUtils.escapeQuotes(productNm))
+     											.replaceAll("$productId$",productId)
+     											.replaceAll("$sobjId$",result[i].sobjId)
+     											.replaceAll("$childclsItemClass$",childcls)
+     											.replaceAll("$actType$",result[i].actionType)
+     											.replaceAll("$memoryPrice$",memoryPrice)
+     											.replaceAll("$prodtaxflg$",prodtaxflg);
+     											//.replaceAll("$planDetail$",result[i].planDetail);
+							
+	                		//planSyncInf += result[i].sobjId + ':' + memoryPrice.replaceAll(",","") + ':' + result[i].prodId + ':' + result[i].prodName + ';';
+	                	}
+	                	//$(obj).parent().parent().parent().after(tabStrHead + tabStrBody + tabStrFoot);
+	                	var summaryPriceId = groupIndex + "_summary";
+						curRow.after(tabStrHead.replaceAll("$tBodyContent$",tabStrBody).replace("$summaryPriceId$",summaryPriceId));
+	                	// 連携用情報、HIDDEN項目に格納する
+	                	//$("input[id$=':" + groupIndex + ":hidSyncInfo']").val(planSyncInf);
+						if(curRow.hasClass("readOnlyClass")) {
+							 _autoGetSetupSyncInfo(groupIndex);
+							$j("input:text",curRow.next()).each(function(){
+								$j(this).attr("readonly", true).css('background-color', '#DCDCDC');
+							});
+							$j("img.lookupIcon",curRow.next()).hide();
+							unblockUi();
+							return;
+						} 
+	                	// 単価合計値計算して、プランの単価へ反映する
+	                	// Event Binding
+	                	//old value input
+	                	$j("[class='"+ childcls +"']").unbind("keydown");
+	                	$j("[class='"+ childcls +"']").on('keydown', function(e){
+	                		$j(this).data("olddata",$j(this).val().replaceAll(",",""));
+	                	});
+	                	$j("[class='"+ childcls +"']").unbind("keyup");
+	                	$j("[class='"+ childcls +"']").on('keyup', function(e){
+	                		var price = $j(this).val().replaceAll(",","");
+	                		var oldValue = $j(this).data("olddata");
+	                		if(oldValue == price)return;
+	                		var parentRowIndex = $j(this).attr("parentIndex");
+							setTimeout(function(){
+								__reComputePrice(childcls,parentRowIndex);
+							},500);
+	                	});
+	                	$j("[class='"+ childcls +"']").unbind("blur");
+	                	$j("[class='"+ childcls +"']").on('blur', function(e){
+			        		var price = $j(this).val().replaceAll(",","");
+	                		if (!$j.isNumeric(price)) price = "0";
+	                		$j(this).val(commUtils.numFormat(price));
+			        	});
+						// 入力の商品コードで、商品自動設定を行う
+						// 作成した項目は自動商品コードのAutoComplete機能を追加する
+						$j("input[id^='"+groupIndex+"_prodName_']").autocomplete({
+					        minLength: 1,
+					        source: function (request, response) {
+					            Visualforce.remoting.Manager.invokeAction(
+					                "{!$RemoteAction.BookingFlexApp.getArrayProductItemInfoNoPlan}", request.term, function(result, event){
+					                if (event.type == 'exception') {
+					                    alert(event.message);
+					                } else {
+					                    response($.map(result, function (item) {
+					                    	item.id = item.productId;
+					                    	item.value = item.prodcutName + "("+item.prodcutCode+")";
+					                    	return item;
+					                    }));
+					                } // End else
+					            });
+					        },
+					        focus: function (event, ui) {
+					        	var rowidx = $j(this).attr("rowidx");
+					        	ui.item["rowIndex"] = rowidx;
+			    				ui.item["groupIndex"] = $j(this).attr("parentIndex");
+								getChildDetailProductInfo(ui.item);
+					            return false;
+					        },
+					        select: function (event, ui) {
+						    	var rowidx = $j(this).attr("rowidx");
+						    	ui.item["rowIndex"] = rowidx;
+			    				ui.item["groupIndex"] = $j(this).attr("parentIndex");
+					            getChildDetailProductInfo(ui.item);
+					            return false;
+					        },
+					    });
+					    _autoGetSetupSyncInfo(groupIndex);
+                    }
+
+                } else if (event.type === 'exception') {
+				//データ詳細がありません。
+                    curRow.after("<tr><td colspan='10' style='margin-left: 200px;' >{!$Label.MSG_011_0067}</td></tr>");
+                } else {
+                //データ詳細がありません。
+                    curRow.after("<tr><td colspan='10' style='margin-left: 200px;' >{!$Label.MSG_011_0067}</td></tr>");
+                }
+            },
+            {escape: true}
+        );
+    } else {
+        $j(obj).attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}");
+        $j(obj).attr("openStatus","false");
+	//展開
+        $j(obj).attr("title","{!$Label.MSG_011_0064}");
+        curRow.next().remove();
+    }
+}
+*/
+// 2017/06/28 DUMY機能、削除 END
+/*
+//商品名のautocomplete 作成
+function loadAutoComplete(){
+	var automDiv = $j("input[name$='prod']:not(.auto-loaded)");
+	automDiv.autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.BookingFlexApp.getArrayProductDetailItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($j.map(result, function (item) {
+                    	item.id = item.productId;
+                    	item.value = item.prodcutName + "("+item.prodcutCode+")";
+                    	return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+        	var rowidx = $j(this).closest("tr").attr("id");
+  			ui.item.rowidx = rowidx;
+  			autoGetProductInfo(ui.item);
+            return false;
+        },
+        select: function (event, ui) {
+	    	var rowidx = $j(this).closest("tr").attr("id");
+  			ui.item.rowidx = rowidx;
+            ui.item.syncInfo = "";
+            autoGetProductInfo(ui.item);
+            var rowCash = getCashRow();
+			rowCash.setIndex(rowidx);
+			var reqAmount = $("#reqAmountBlock").text();					// 未支払請求金額
+			reqAmount = reqAmount.replace(JINYACONNECT.CurrencySybmol,"");
+			reqAmount = kendo.parseFloat(reqAmount);
+			rowCash.reCompute(reqAmount,true);
+           	CashMap[rowidx] = rowCash;
+            setDataAndComputeTotal(CashMap[rowidx],true);
+            //商品替え
+            var itemId = $j(this).closest("tr").data("itemid");
+			if(itemId && itemId != ""){
+				var hideDeleteMessage = $j("input[id$=hideDeleteMessage]").val();
+				hideDeleteMessage += itemId + ',';
+				$j("input[id$=hideDeleteMessage]").val(hideDeleteMessage);
+				$j(this).closest("tr").data("itemid","");
+			}
+			$j(this).closest("tr").data("itemid","");
+            
+            $j(this).parents("tr.bookingItemRow").prev(".dataRow").addClass("hadUpdRow");
+            return false;
+        },
+    });
+    automDiv.addClass("auto-loaded");
+}
+//父级plan
+function autoGetProductInfo(result){
+	var compRes = computePrice(result)
+    var taxRate = kendo.parseFloat(result.tax);
+    if (taxRate == null) taxRate = 0;
+    var serviceLabel = (　result.serviceRate == "" ? "0%" : result.serviceRate + "%");
+    var tabLabel = (　result.tax == "" ? "0%" : result.tax + "%");
+    var curRow = $j("tr#" + result.rowidx);
+    var parentRows = curRow.closest("tr.bookingItemRow").prevAll('.dataRow');
+    var nums = 1;
+   	// 関連金額を計算する
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+    var amountIncTax;
+    var amountExcTax;
+   	var res = JINYACONNECT.PRODUCT.PROCESS(compRes.unitPrice, nums, result.tax, result.service, JINYACONNECT.PRODUCT.CAL.PRICE_KBN);
+	// 合計金額計算を行う
+	amountIncTax = commUtils.mathNumAdd(res.priceIncTax , result.specialTax);
+	amountExcTax = res.priceExcTax;
+	//set value
+	$j("input[id$='cnt']",curRow).val(nums);
+   	$j("input[id='prod']",curRow).val(result.prodcutName);
+	$j("input[id$='price']",curRow).val(compRes.unitPrice);
+	$j("span[id$=totalInc]",curRow).text(kendo.toString(amountIncTax,"c"));
+	$j("span[id$=totalExc]",curRow).text(kendo.toString(amountExcTax,"c"));
+	$j("td[name=tax]",curRow).text(tabLabel);
+	$j("td[name=serviceTax]",curRow).text(serviceLabel);
+	$j("img[id^=showDetailEvent]",curRow).attr("productid",result.productId);
+	
+	curRow.data("tax",result.tax);
+   	curRow.data("service",result.serviceRate);
+   	curRow.data("actiontype",result.actionType);
+   	curRow.data("paytype",result.paymentType);
+   	curRow.data("price",compRes.unitPrice);
+   	curRow.data("kbn",JINYACONNECT.PRODUCT.CAL.PRICE_KBN);
+   	curRow.data("cnt",nums);
+   	curRow.data("proid",result.productId);
+   	curRow.data("plandetail",result.unitPriceExcTax);
+   	
+   	showProduInfoToView(result.rowidx);
+}
+
+function showProduInfoToView(groupindex){
+	var curRow = $j("tr#"+ groupindex);
+	// プラン設定の切り替え
+	var actType = curRow.data("actiontype");
+   	if(actType == "{!ACTTYPE_PLAN}"){
+       	dispExtendImg("visible", curRow);
+	} else{
+       	dispExtendImg("hidden", curRow);
+   	}
+   	// 元の設定情報をクリアを行う
+   	$("input:hidden[id$=':" + groupindex + ":hidSyncInfo']").val("");
+    // 項目自動クリア
+    $("input:hidden[id$=':" + groupindex + ":hidBookingItemId']").val("");
+    $("input:hidden[id$=':" + groupindex + ":hidLeadId']").val("");
+    // 宿泊税は０の場合、空白に設定を行う
+    var specialTax = $("input:text[id$=':" + groupindex + ":specialTax']").val();
+    if (1 * specialTax == 0) $("input:text[id$=':" + groupindex + ":specialTax']").val("");
+}
+function computePrice(result){
+	// 2015/06/16 割引％計算機能設定 BEGIN
+	var unitPrice = result.unitPrice;
+	var paymentType = result.paymentType;
+	var productName = result.prodcutName;
+	if (result.actionType == "{!JSENCODE(ACTTYPE_PAY)}" &&
+		result.paymentType == "{!JSENCODE(ACTTYPE_PAY_DIS_RATE)}" ) {
+		// 既存の請求金額から割引計算を行う
+		// 割引%は未設定すると、画面から割引率を入力するWINDOWを表示する
+		var discountRate = kendo.parseFloat(result.discountRate);
+		if (discountRate == null) discountRate == 0;
+		// 利用金額に対して、一括割引処理を行う
+		var usedAmount = kendo.parseFloat($("#usedAmountBlock").text());//　利用金額
+		var reqAmount = $("#reqAmountBlock").text();					// 未支払請求金額
+			reqAmount = reqAmount.replace(JINYACONNECT.CurrencySybmol,"");
+			reqAmount = kendo.parseFloat(reqAmount);
+		//if (reqAmount != null && reqAmount > 0) {
+			// 利用金額から計算後の値引き金額を計算を行う
+			unitPrice = commUtils.mathRound( commUtils.mathNumDiv (commUtils.mathNumMulti( usedAmount, discountRate) , 100), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 割引金額は未支払金額は超える場合、未請求金額を表示する
+			if(unitPrice > reqAmount && (reqAmount != null && reqAmount > 0)) unitPrice = reqAmount;
+		//} else {
+			//unitPrice = 0;
+		//}
+		paymentType = "{!JSENCODE(ACTTYPE_PAY_DIS_PRICE)}";			
+	} else if (result.paymentType == "{!JSENCODE(ACTTYPE_PAY_ADD_RATE)}" ) {
+		// 既存の請求金額から割引計算を行う
+		// 割引%は未設定すると、画面から割引率を入力するWINDOWを表示する
+		var plusRate = kendo.parseFloat(result.discountRate);
+		if (plusRate == null) plusRate == 0;
+		// 利用金額（税抜き）から計算後の割増金額を計算を行う
+		var totalAmountExcTax = $("#totalAmountExcTax").val();
+		var unitOnePrice = commUtils.mathNumDiv (commUtils.mathNumMulti( totalAmountExcTax, plusRate) , 100);
+		unitOnePrice = commUtils.mathRound(unitOnePrice, JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		unitPrice = JINYACONNECT.PRODUCT.CONVERTPRICE(unitOnePrice,result.tax,result.serviceRate,JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN4,JINYACONNECT.PRODUCT.CAL.PRICE_KBN)
+	}
+	var compRes = new Object();
+	compRes["unitPrice"] = unitPrice;
+	return compRes
+}
+*/
+function popupChildCallback(groupIndex) {
+	return function() {
+		_autoGetSetupSyncInfo(groupIndex)
+	}
+}
+function _autoGetSetupSyncInfo(groupIndex) {
+	var planSyncInf = "";
+	var sumVal = 0;
+	var isHaveShituliaoFlag = false;
+	var ExcTaxPrice = 0;
+	var curRow = $j("tr#"+groupIndex);
+	//$("[class='"+ childcls +"']").each(function(idx){
+	$j("input."+groupIndex+"_child").each(function(idx){
+		var rowIdx = $j(this).attr("rowIndex");
+		var hidFieldId = groupIndex + "_sobjId_" + rowIdx;
+		var hidProdId = groupIndex + "_prodid_" + rowIdx;
+		var hidProdNm = groupIndex + "_prodName_" + rowIdx;
+		// 見積明細ID/プラン明細ID ： 単価 ： 会計商品ID ： 会計商品名
+		var unitPrice = $j(this).val().replaceAll(",","");
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ':' + $("#"+hidProdId).val()+ ':' + $("#"+hidProdNm).val() +';';
+		sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+      	// 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+      	if($j(this).attr("taxflg") != 1) {
+      		ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+      	}
+		var actionType = $j(this).data("actiontype");
+		if(actionType == _CONST_PRICE_ROOM_TYPE) isHaveShituliaoFlag = true;
+	});
+	var summaryPriceId = groupIndex + "_summary";
+	var summaryPriceInputFlag = $j("#"+summaryPriceId).is('input');
+      	// 合計値でプランの単価に反映する
+    if(isHaveShituliaoFlag){
+   		if(summaryPriceInputFlag){
+   			$j("#"+summaryPriceId).val(sumVal);
+   		}else{
+   			$j("#"+summaryPriceId).replaceWith('<input type="text" id="' + summaryPriceId + '" style="text-align:right;" value="' + commUtils.numFormat(sumVal) + '" />');
+			$j("#"+summaryPriceId).keydown(function(){
+				$j(this).data("olddata",$(this).val().replaceAll(",",""));
+			});
+			$j("#"+summaryPriceId).unbind("keyup");
+			$j("#"+summaryPriceId).keyup(function(e){
+				//if((e.keyCode<48 || e.keyCode>57) && e.keyCode!=46 && e.keyCode != 8 ) return;
+				var price = $(this).val().replaceAll(",","");
+				if(price == $(this).data("olddata")) return;
+				setTimeout(function(){__reComputeShitulyou(groupIndex,summaryPriceId);},300);
+			});
+     	}
+    }else if(summaryPriceInputFlag)
+     		$j("#"+summaryPriceId).replaceWith('<span id="' + summaryPriceId + '" style="float:right;margin-right: 3px">' + commUtils.numFormat(sumVal) +'</span>');
+    else $j("#"+summaryPriceId).text(commUtils.numFormat(sumVal));
+	$j("input[id$='hidSyncInfo']",curRow).val(planSyncInf);
+	return planSyncInf;
+}
+//因为展开明细所以要重新计算下价格
+function __reComputePrice(childcls,parentRowIndex){
+	var sumVal = 0;
+    // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+    var ExcTaxPrice = 0;
+   	// 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END
+    // 合計値計算を行う
+    $j("[class='"+ childcls +"']").each(function(idx){
+		var hidFieldId = parentRowIndex + "_" + $j(this).attr("rowIndex");
+		var unitPrice = $j(this).val().replaceAll(",","");
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		//sumVal += 1 * unitPrice;
+		sumVal = commUtils.mathNumAdd(sumVal,unitPrice);
+      	// 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+      	if($j(this).attr("taxflg") != 1) {
+      		ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+      	}
+     });
+     var curRow = $j("tr#" + parentRowIndex);
+     $j("input[id$='hidPlandetail']",curRow).val(ExcTaxPrice);
+     // 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 END
+     // 合計値でプランの単価に反映する
+     $j("input[id$='price']",curRow).val(sumVal);
+     $j("input[id='"+ parentRowIndex + "_summary']").val(sumVal);
+     curRow.data("plandetail",ExcTaxPrice);
+     curRow.data("price",sumVal);
+     // 2013/11/08 単価計算後、総金額計算を行う
+	 var rowIndex = $j("input[id$=':"+ parentRowIndex + ":clearProduct']").attr("rowIndex");
+	 //更新plandetail的内容
+	 _autoGetSetupSyncInfo(parentRowIndex);
+     //更新父节点价格
+     setupCalAmoutPrice(parentRowIndex,false);
+     //setupInvoiceNoShowFlg(rowIndex, false);
+}
+function openChildProdutWin(groupIndex,rowIndex) {
+    var dumyField = $("#"+groupIndex+"_workHidItem").get(0);
+    // 引き渡し値を設定して、選択画面を開く
+    ctrlNm = $("#"+groupIndex+"_prodName_"+rowIndex).get(0);
+    ctrlId = $("#"+groupIndex+"_prodid_" + rowIndex).get(0);
+    ctrlHidNm = dumyField;
+    ctrlPriceId = dumyField;
+    ctrlOrderNumId = dumyField;
+    ctrlTaxRate = dumyField;
+    ctrlHidTaxRate = dumyField;
+    ctrlServiceTaxRate = dumyField;
+    ctrlHidServiceTaxRate = dumyField;
+    ctrlSpecialTax = dumyField;
+    ctrlHidSpecialTax = dumyField;
+    ctrlHidActionType = $("#"+groupIndex+"_workHidActType_" + rowIndex).get(0);
+    var openUrl = "/apex/ProductSearch?np=1";
+    // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+	objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+		ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType);
+	commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, popupChildCallback(groupIndex));
+}
+
+var _CONST_ADDITEM_TEMPLATE =  "<tr ><td colspan='$colspan$'>" +
+			"<input type='hidden' id='$groupIndex$_workHidItem' />"+
+       	  	"<table style='width:60%;' class='list' border='0' cellpadding='0' cellspacing='0'>" +
+       	     	"<tHead class='rich-table-thead'>" +
+       	        	"<tr class='headerRow' nowrap='nowrap'>" +
+			//商品名
+       	              "<th class='headerRow' nowrap='nowrap' style='width:70%'>{!$Label.MSG_011_0048}</th>" +
+       	            //単価
+       	              "<th class='headerRow' nowrap='nowrap' style='width:30%'>{!$Label.MSG_011_0049}</th></tr>" +
+
+       	         "</tHead>" +
+       	         "<tBody>" +
+       	         "$tBodyContent$" +
+	    		 "</tBody>" +
+	    		 //合計
+	    		 "<tFoot><tr><td style='text-align: right;'><span style='margin-right:3px'>{!$Label.MSG_011_0071}：</span></td><td style='text-align:right;'><span id='$summaryPriceId$' style='float:right;margin-right: 3px'></span></td></tr>"+
+		    		 "</tFoot> " +
+	    	"</table></td>" +
+	    "</tr>";
+var _CONST_ADDITEM_DTEAIL_IMG_TEMPLATE =  "<img onmouseover='this.className = \"lookupIconOn\";this.className = \"lookupIconOn\";'" +
+   		"onmouseout='this.className = \"lookupIcon\";this.className = \"lookupIcon\";'" +
+   		"onfocus='this.className = \"lookupIconOn\";' onblur='this.className = \"lookupIcon\";'" +
+   		"class='lookupIcon' src='/s.gif' style='cursor: pointer;'" +
+   		"name='childrenProductPopup' onclick='javascript:openChildProdutWin(\"$groupIndex$\",\"$rowidx$\")'/>";
+var _CONST_ADDITEM_DTEAIL_TEMPLATE =  "<tr><td style='background-color: #FFEBCD;'>" + 
+        "<input type='text'style='width:180px' value='$productName$' id='$groupIndex$_prodName_$rowidx$' rowidx='$rowidx$' parentIndex='$groupIndex$' />" +
+        _CONST_ADDITEM_DTEAIL_IMG_TEMPLATE +
+        "<input type='hidden' value='$productId$' id='$groupIndex$_prodid_$rowidx$' />" +
+        "<input type='hidden' value='$sobjId$' id='$groupIndex$_sobjId_$rowidx$' />"+
+        "<input type='hidden' id='$groupIndex$_workHidActType_$rowidx$' value='$actType$' />" +
+        //"<input type='hidden' value='$planDetail$' id='$groupIndex$_hidPlandetail_$rowidx$' /></td>"+
+        "<td style='background-color: #FFEBCD;text-align: right;'>" +
+        //"<input type='text' style='text-align:right;' id='$groupIndex$_price_$rowidx$' class='$childclsItemClass$' value='$memoryPrice$' rowidx='$rowidx$' /></td></tr>";
+		"<input type='text' style='text-align:right;' parentIndex='$groupIndex$' id='$groupIndex$_prodPrice_$rowidx$' rowIndex='$rowidx$' class='$childclsItemClass$' value='$memoryPrice$' taxflg='$prodtaxflg$' data-actiontype='$actType$'/></td></tr>";
+</script>
+
+
+<script>
+/* 2017/04/06 不用source处理 by zy BEGIN
+var _addNewLineIcon = '<span class="k-icon k-i-plus" onclick="addNewLine(this)" />';
+var TableTemplate = '<table style="width:70%;" class="list bookingItemTb" border="0" cellpadding="0" cellspacing="0"></table>';
+var HeadTemplate = '<thead class="rich-table-thead"><tr class="headerRow"><th colspan="2" class="curDate">$nightnum$</th><th class="headerRow" style="min-width:170px;">商品明細</th><th class="headerRow">単価</th><th class="headerRow">数量</th><th class="headerRow">合計金額</th><th class="headerRow">合計金額(税抜)</th><th class="headerRow">消費税</th><th class="headerRow">サービス料</th></tr></thead>';
+var RowInputTemplate = '<tr id="$id$" class="load_$date$ rowDetail" style="background-color: #FFEBCD;"><td>$addNewLine$</td><td><span class="k-icon k-i-cancel" onclick="deleteRow(this)"></span></td><td style="white-space: nowrap;"><input type="text" style="width:85%" name="prod" id="prod"><input type="hidden" value="" id="hidSyncInfo"/><input type="hidden" value="" id="hidPlandetail"/><img title="{!$Label.MSG_011_0064}" src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}" style="cursor: pointer;display: true; width: 18px; height: 18px; visibility:hidden;vertical-align: middle;margin-left: 4px;" id="showDetailEvent" onclick="showDetailFun(this)" openStatus="false"   rowIndex = "id" /></td><td ><input type="text" style="width:80px;" onblur="chgTotal(this)" id="price"></td><td><input type="text"  style="width:40px;" id="cnt" onkeyup="chgTotal(this)"></td><td name="total" class="showDetail"><span id="totalInc"></span></td><td name="totalExc" class="showDetail"><span id="totalExc"></span></td><td name="tax" class="showDetail"></td><td name="serviceTax" class="showDetail"></td></tr>';
+//見積ーshow
+function toggleExpand(curRow){
+	//var $this = $j(that);
+	console.log('tool');
+	//var curRow = $this.closest("tr.dataRow")
+	var planItem = $j("#planCustomeBtn",curRow).data("jinyaPlanExtend");
+	var childTable = curRow.next("tr.bookingItemRow").find(".bookingItemTb");
+	if (planItem != null) planItem.close();
+	var curSpanIcon = $j("span.k-icon",curRow);
+	if (curSpanIcon.hasClass("k-i-collapse")) {
+		curSpanIcon.removeClass("k-i-collapse");
+		curSpanIcon.addClass("k-i-expand");
+		curSpanIcon.closest("tr").next().hide();
+	} else {
+		//新規
+		if(childTable.length == 0 ){
+			var entryDate = $j("input[id$=':cidate']",curRow).val();
+			var entryDt = new Date(entryDate);
+			var nights = $j("input[id$=':nights']",curRow).val();
+			makeDetailMessage(curRow,nights,1,'ChildDetailRow',entryDt);
+		}
+		switchPriceStatus();
+		curSpanIcon.removeClass("k-i-expand");
+		curSpanIcon.addClass("k-i-collapse");
+		curSpanIcon.closest("tr").next().show();
+	}
+	var rowNo = curRow.attr("rowNo");
+	if(rowTierMap[rowNo]){
+		var tierLst = rowTierMap[rowNo];
+		for (var i = 0 ; i < tierLst.length ; i++) {
+			var tier = tierLst[i];
+			var curTable = childTable.eq(i);
+			if(curTable) curTable.data("tier",tier);
+		}
+	}
+} 2017/04/06 不用source处理 by zy END */
+//見積明細の展开
+/*
+function showBookingItemDetail(that){
+	var $this = $j(that);
+	var curRow = $this.closest("tr.dataRow");
+	var nextDetail = curRow.nextUntil(".bookingItemRow").find(".bookingItemTb")
+	//checkin数据
+	if (curRow.hasClass("cantEdit")){
+		toggleExpand(curRow);
+		var childTable = curRow.next().find(".bookingItemTb");
+		$j("input:not(readOnlyClass)",childTable).each(function(){
+			$j(this).attr("readonly", true).css('background-color', '#DCDCDC');
+			$j(this).addClass("readOnlyClass");
+			$j(this).closest("tr").addClass("readOnlyClass");
+		});
+		
+		return;
+	}
+	var checkinDtStr = $j("[id$=cidate]",curRow).val();
+	var checkoutDtStr = $j("[id$=codate]",curRow).val();
+	var startDate = new Date(checkinDtStr);//kendo.parseDate(checkinDtStr);//new Date(checkinDtStr);
+	var endDate = new Date(checkoutDtStr);//kendo.parseDate(checkoutDtStr);//new Date(checkoutDtStr);
+	var nights = $j("[id$=nights]",curRow).val();
+	var hadChangeFlag = false;
+	var blankFlag = checkinDtStr == "" || nights == "" ;
+	if (blankFlag || startDate > endDate) {
+		return ;
+	}
+	getCurTierMap(curRow);
+	//親チェック
+	//had no default checked
+	if($j("input[name=parentSub]:checked").length == 0){
+		$j("input[name=parentSub]",curRow).prop("checked",true);
+	}
+}*/
+// 2016/10/14 EDIT SCETION BEGIN
+// AutoComplete Reponse Result
+function _respBeforeFunction(result) {
+//console.debug(result);
+	// 到着日の日付は変換を行う
+	if (result == null || result.length == 0 ) return;
+	var entryDateKey = JS_APPNS + 'EntryDate__c';
+	for (i=0;i<result.length;i++) {
+		var data = result[i];
+		//console.debug(data);
+		var entryDtVal = data[entryDateKey];
+		if (entryDtVal != null) {
+			var strDtVal = "到着日:"+kendo.toString(new Date(entryDtVal),JINYACONNECT.DateFormat);
+			data[entryDateKey] = strDtVal;
+		}
+	}
+}
+function _detailSelectAll(that) {
+	var allCheckFlg = $j(that).prop("checked");
+	$j(".detailChkItem").prop("checked",allCheckFlg);
+	__detailCheckRelSwith();
+}
+function _detailItemSelect(that) {
+	var $that = $j(that);
+	// 選択取消の場合
+	if (!$that.prop("checked")) {
+		// 全て選択取消
+		$j(".allpick").prop("checked",false);
+	}
+	// 選択する場合
+	else {
+		// 全て明細のCHECKBOXを選択する場合、ALL項目を自動選択される
+		if ($j(".detailChkItem").length == $j("input.detailChkItem:checked").length) {
+			$j(".allpick").prop("checked",true);
+		} else {
+			$j(".allpick").prop("checked",false);
+		}
+	}
+	__detailCheckRelSwith();
+}
+function __detailCheckRelSwith() {
+	// 有効な明細を選択対象あり、なし
+	var isTargetDataFlg = false;
+	$j("input.detailChkItem:checked").each(function(){
+		 if (this.value != "") {
+		 	isTargetDataFlg = true;
+		 	return false;
+		 }
+	});
+	// 関連ボタン有効化する
+	if (isTargetDataFlg) {
+		$j("#actionBtn_cancel").removeClass("actBtnCtrlStyle").prop("disabled", false);
+		$j("#actionBtn_LeadPdf").removeClass("actBtnCtrlStyle").prop("disabled", false);
+		$j("#actionBtn_checkin").removeClass("actBtnCtrlStyle").prop("disabled", false);
+	} else {
+		$j("#actionBtn_cancel").addClass("actBtnCtrlStyle").prop("disabled", true);
+		$j("#actionBtn_LeadPdf").addClass("actBtnCtrlStyle").prop("disabled", true);
+		$j("#actionBtn_checkin").addClass("actBtnCtrlStyle").prop("disabled", true);
+	}
+	// 2016/12/30 親SUBのフラグ追加　by　zy  BEGIN
+	var validateRowLen = 0;
+	var checkLenth = $j("input.detailChkItem:checked").length;
+	var isAllValideChkFlag = true;
+	$j("#usbLst tr.dataRow [id^=orgSubIdxId]").each(function(){
+		var subIdxValue = $j(this).val();
+		if (subIdxValue != "" && subIdxValue != null){
+			var curRow = $j(this).closest("tr");
+			if( !$j("input.detailChkItem",curRow).is(":checked")){
+				isAllValideChkFlag = false;
+				return false;
+			}
+		}
+	});
+	var checkedE = $j("input[id$=hidParentFlag][value=true]");
+	var curRow = checkedE.closest("tr");
+	var curRowCheckFlag = $j("input.detailChkItem",curRow).is(":checked");
+	if(curRowCheckFlag && !isAllValideChkFlag){
+		$j("#actionBtn_cancel").addClass("actBtnCtrlStyle").prop("disabled", true);
+	}
+	// 2016/12/30 親SUBのフラグ追加　by　zy  BEGIN
+}
+//sub内容作成
+function setRediretMessage(filterFlag){
+	var checkedE = $j("input[id$=hidParentFlag][value=true]");
+	var curRow = checkedE.closest("tr");
+	var parId = $j("[id^=orgSubIdxId]",curRow).val();
+	var psubStr = '';
+	var $checkTarget = $j("input.detailChkItem:checked");
+	$checkTarget.each(function(){
+		if (filterFlag ) if(!$j(this).data("readonly")) return true;
+		psubStr += $j(this).val() + ',';
+	});
+	$j("input[id$=hidParId]").val(parId);
+	//<!-- 2017/01/10 会計ポタン　の追加　by zy BEGIN -->
+	if (filterFlag ) {
+		// チェックイン項目のSUBINDEX情報のみ引き渡し
+		if ($checkTarget.length == 0) {
+			psubStr = "";
+			$j("input.detailChkItem").each(function(){
+				if(!$j(this).data("readonly")) return true;
+				psubStr += $j(this).val() + ',';
+			});
+		}
+		$j("input[id$=hidPsub]").val(psubStr); 
+	} else {
+		// チェックインへ引き渡し情報
+		if (psubStr == '') return false;
+		else $j("input[id$=hidPsub]").val(psubStr);
+	}
+	if ($checkTarget.length > 0) $j("input[id$=hidPsub]").val(psubStr);
+}
+// 2017/03/02 防止二次点击功能  begin by wx
+function disableOnSubmit(that) {
+	if(!$j(that).hasClass("Disabled")){
+    	$j(that).addClass("Disabled");	
+		// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN
+		$j("#cloneTopSaveBtn,#leadTopUpsertBtn").addClass("Disabled");
+		// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END
+//2017/04/25 项目优化 by zy BEGIN
+    	return true;
+    }
+    return false;
+//2017/04/25 项目优化 by zy END
+}
+// 2017/03/02 防止二次点击功能  end by wx
+/*
+function refreshDetailTable(rowNo){
+	var curRow = $j("#usbLst tr[rowno='" + rowNo + "']");
+	var nightElement = $j("input[id$=nights]",curRow);
+	var orgNight = nightElement.attr("orgval");
+	var curNight = nightElement.val();
+	if(curNight == 0 ) curNight = 1;
+	var showTabls = curRow.next("tr.bookingItemRow").find("table.bookingItemTb");
+	var entryDate = $j("input[id$=cidate]",curRow).val();
+	if(showTabls.length > curNight){
+		for (var i = showTabls.length - 1 ; i >= curNight ; i--) {
+			showTabls.eq(i).remove();
+		}
+	} else if(showTabls.length < curNight) {
+		var addLenth = curNight - showTabls.length;
+		var lastTable = showTabls.eq(showTabls.length-1);
+		var begDt = new Date(entryDate);
+		begDt = begDt.addDays(showTabls.length-1);
+		for (var i = 0 ; i < addLenth; i++){
+			//console.log(dateFormat.format(begDt));
+			lastTable = addTabel(begDt.addDays(1),lastTable);
+			
+		}
+	}
+	loadAutoComplete();
+}
+function addTabel(_currDt,tableEl){
+	var $table = $j(TableTemplate);
+    $table.append($j(HeadTemplate.replace("$nightnum$",dateFormat.format(_currDt))));
+    $table.data("date",dateFormat.format(_currDt));
+	var guuid = kendo.guid();
+    $j(RowInputTemplate.replace("$addNewLine$",_addNewLineIcon).replaceAll("$id$",guuid).replace('$date$',$table.data("date"))).appendTo($table);
+    tableEl.after($table);
+    return $table;
+}
+function chgMessage(that,type){
+	var $this = $j(that);
+	var curRow = $this.closest("tr.dataRow");
+	var planItem = $j("#planCustomeBtn",curRow).data("jinyaPlanExtend");
+	if (planItem != null) planItem.close();
+	if(type == 'cidate'){
+		//子明细收起
+		var icon = curRow.find("span.k-icon");
+		if(icon.hasClass("k-i-collapse")){
+			var childTable = $this.closest("tr.dataRow").next().find(".bookingItemTb");
+			if(childTable.length > 0 ){
+				var curDateStr = childTable.eq(0).find("td.curDate").text();
+				if($this.val() != curDateStr){
+					icon.removeClass("k-i-collapse");
+					icon.addClass("k-i-expand");
+					icon.closest("tr").next().hide();
+				}
+			}
+		}
+	} else {
+		var entryDate = $j("input[id$=':cidate']",curRow).val();
+		var entryDt = new Date(entryDate);
+		var nights = $j("input[id$=':nights']",curRow).val();
+		var childTable = curRow.next().find(".bookingItemTb");
+		var rowNo = curRow.attr("rowno");
+		if(childTable.length > 0 ){
+			var curDateStr = childTable.eq(0).find("td.curDate").text();
+			if($this.val() != curDateStr){
+				var idx = 0;
+				childTable.each(function(){
+					$j(this).find(".curDate").text(dateFormat.format(entryDt.addDays(idx)));
+					idx = 1;
+				});
+			}
+			refreshDetailTable(rowNo);
+		//新規
+		} else {
+			makeDetailMessage(curRow,nights,1,'ChildDetailRow',entryDt);
+		}
+	}
+}
+*/
+// 返金比較用キー
+var g_refundKeyArr = JSON.parse("{!JSENCODE(refundItemString)}");
+<!--　該当支払情報は返金するがどうかチェック -->
+function isRefundItem(paytype) {
+	return (paytype.length > 0 && g_refundKeyArr.indexOf(paytype) >= 0);
+}
+// 会計明細の単価入力制御
+function switchPriceStatus() {
+	$("[id^='showDetailEvent']").each(function(idx) {
+		$this = $(this);
+		var rowIndex = $this.attr("rowIndex");
+		var prodId = $this.attr("productid");
+		var curRow = $this.closest("tr.rowDetail");
+		if(prodId){
+			if ($this.css("visibility") == "hidden") {
+				$("input[id$='price']",curRow).attr('readonly', false).css('background-color', '');
+			} else {
+				$("input[id$='price']",curRow).attr('readonly', true).css('background-color', '#DCDCDC');
+			}
+		}
+	});
+}
+function __reComputeShitulyou(groupIndex,summaryPriceId){
+	var otherPrice = 0;
+	var ExcTaxPrice = 0;
+ 	var childcls = groupIndex + "_child";
+ 	var planSyncInf = "";
+ 	// 合計値計算を行う
+	$("[class='"+ childcls +"']:not([data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "'])").each(function(idx){
+		var unitPrice = $(this).val().replaceAll(",","");
+		var hidFieldId = groupIndex + '_sobjId_' + $(this).attr("rowIndex");
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		otherPrice = commUtils.mathNumAdd(otherPrice,unitPrice);
+		planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ';';
+      	// 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+      	if($(this).attr("taxflg") != 1) {
+      		ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+      	}
+	});
+	var firstShituLyoElement;
+	$("[class='"+ childcls +"'][data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "']").each(function(idx){
+		var unitPrice = $(this).val().replaceAll(",","");
+		if(unitPrice == "" || !unitPrice || isNaN(parseFloat(unitPrice)) ) unitPrice = 0;
+		if(!firstShituLyoElement){ 
+			firstShituLyoElement = $(this);
+			return true;
+		}
+		var hidFieldId = groupIndex + "_sobjId_" + $(this).attr("rowIndex");
+		otherPrice = commUtils.mathNumAdd(otherPrice,unitPrice);
+		planSyncInf += $("#"+hidFieldId).val() + ':' + unitPrice + ';';
+      	// 2015/10/16 プラン明細課税、非課税混在合計金額計算対応 BEGIN
+      	if($(this).attr("taxflg") != 1) {
+      		ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,unitPrice);
+      	}
+	}); 
+  	var summaryElement = $("#" + summaryPriceId);
+  	var summaryPrice = summaryElement.val().replaceAll(",","");
+  	if(summaryPrice == "" || !summaryPrice || isNaN(parseFloat(summaryPrice)) ) summaryPrice = 0;
+ 	var changePrice = commUtils.mathNumSub(parseFloat(summaryPrice), otherPrice);
+ 	//var firstShituLyoElement = $("[class='"+ childcls +"'][data-actiontype = '" + _CONST_PRICE_ROOM_TYPE + "']:eq(0)");
+ 	firstShituLyoElement.val(changePrice);
+ 	var hidFieldId = groupIndex + "_sobjId_" + firstShituLyoElement.attr("rowIndex");
+ 	ExcTaxPrice = commUtils.mathNumAdd(ExcTaxPrice,changePrice);
+ 	
+ 	var parentRowIndex = firstShituLyoElement.attr("parentindex");
+ 	planSyncInf += $("#"+hidFieldId).val() + ':' + changePrice + ';';
+ 	var curRow = $j("tr#" + parentRowIndex);
+ 	$("input:hidden[id$='hidPlandetail']",curRow).val(ExcTaxPrice);
+ 	$("input[id$='price']",curRow).val(summaryPrice);
+ 	$("input[id$='hidSyncInfo']",curRow).val(planSyncInf);
+ 	curRow.data("price",summaryPrice);
+ 	setupCalAmoutPrice(parentRowIndex,false);
+}
+
+function openLeadQuotationPdf(leadId) {
+	if (leadId == null || leadId == "") {
+		alert('指定の予約情報が無効するため、見積書を起動できません.');
+		return;
+	}
+	// 見積書を起動する
+	var openUrl = "{!URLFOR('/apex/' & $Setup.CommDefine__c.ps__AppNS__c & 'LeadPDF')}"+"?id="+leadId;
+	window.open(openUrl, "LeadPDF","width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+}
+// プランの明細情報リスト格納する
+function getChildDetailProductInfo(result) {
+//console.debug(result);
+	var rowIndex = result.rowIndex;  
+	var groupIndex = result.groupIndex;
+    $("#"+groupIndex+"_prodName_"+rowIndex).val(result.prodcutName);
+    $("#"+groupIndex+"_prodid_" + rowIndex).val(result.productId);
+    $("#"+groupIndex+"_workHidActType_" + rowIndex).val(result.actionType);
+    _autoGetSetupSyncInfo(groupIndex);
+}
+
+
+
+// 展開imgの表示・非表示を制御する
+function dispExtendImg(flg, curRow){ // flg : visible | hidden
+	$obj = $j("img[id^=showDetailEvent]",curRow);
+    $obj.attr("style", "cursor: pointer;vertical-align: middle;margin-left: 4px;display: true; width: 18px; height: 18px; visibility:" + flg);
+    if($obj.attr("openStatus") == "true"){
+        $obj.attr("src","{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}")
+        	.attr("openStatus","false")
+        	//展開
+        	.attr("title","{!$Label.MSG_011_0064}");
+        curRow.next().remove();
+    }
+    // ステータス切替
+    switchPriceStatus();
+}
+
+function showWarning(){
+	if(!$j("#chatPage").hasClass("showFrame")){
+		$j(".infoMsg").show();
+	}
+}
+/* 2016/12/27 copy 機能fix by ZY BEGIN*/
+function planRest(e,id){
+	var curElement = $j("[id='" + id + "']");
+	var row = curElement.attr("rowindex");
+	var curRow = curElement.closest("tr");
+	var item = $j("img#planCustomeBtn",curRow);
+	if (item.attr("isopenstatus") == "false"){
+		var planItem = item.data("jinyaPlanExtend");
+		planItem.switchStatus();
+	}
+	var mapKey = "_" + row +"_planidKey";
+	_localMap.remove(mapKey);
+	$j("input[id$=nl_hidPlanDetailInfo]",curRow).val("");
+	$j("input[id$=':dlPlanItem']",curRow).data("planid",e.Id);
+	//2017/01/11 bug fix by zy BEGIN
+	$j("input[id$=':dlAccItem_lkid']",curRow).val("");
+	$j("input[id$=productFlag]",curRow).val(false);
+	$j("#planCustomeBtn",curRow).show();
+	//2017/01/11 bug fix by zy BEGIN
+	
+	console.log(e);
+}
+/* 2016/12/27 copy 機能fix by ZY END*/
+function _editCurrLeadindexFun(leadId,leadName) {
+	$j("input[id$=':searchInput']").val(leadName);
+	$j("input[id$=':searchInput_lkid']").val(leadId);
+	_search_callbackFunction();
+}
+// 2016/12/30 親SUBのフラグ追加　by　zy  BEGIN
+function chgSubId(that){
+	var parentSub = $j(that).val();
+	var curRow = $j(that).closest("tr");
+	//無効データ
+	if($j("input[id$=cidate]",curRow).val() == ""){
+		// 2017/07/05 既存予約モード場合、新規明細は選択ない　by　zy BEGIN
+		reBackSub(that);
+		// 2017/07/05 既存予約モード場合、新規明細は選択ない　by　zy END
+		return ;
+	}
+	// 2017/07/05 既存予約モード場合、新規明細は選択ない　by　zy BEGIN
+	var cloneFlag = {!cloneFlag};
+	var exitLeadId = $j("input[id$=hideLeadId]").val();
+	if (exitLeadId != "" && parentSub == "" && !cloneFlag) {
+		// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN 
+		// alert('該当明細を保存した後に選択してください');
+		alert('該当明細を予約登録した後に選択してください');
+		// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END
+		//主房间回切
+		//var prevSub = $j("input[name=parentSub].mainSub");
+		reBackSub(that);
+		return;
+	}
+	// 2017/07/05 既存予約モード場合、新規明細は選択ない　by　zy END
+	//有効データ
+	$j("input[name=parentSub].mainSub").removeClass("mainSub");
+	$j("input[name=parentSub]",curRow).addClass("mainSub");
+	$j("input[id$=hidParentFlag]").val(false);
+	$j("input[id$=hidParentFlag]",curRow).val(true);
+	// 2017/07/05 既存予約モード場合、新規明細は選択ない　by　zy BEGIN
+	//var cloneFlag = {!cloneFlag};
+	// 2017/07/05 既存予約モード場合、新規明細は選択ない　by　zy END
+	//2017/06/21 親部屋の選択機能追加　by　zy BEGIN
+	//新規の予約データ処理なし
+	if (parentSub == "" || cloneFlag) return ;
+	$j("input[id$=hidMainSubId]").val(parentSub);
+	changeParentFun();
+	//2017/06/21 親部屋の選択機能追加　by　zy END
+	
+}
+// 2016/12/30 親SUBのフラグ追加　by　zy  BEGIN
+function clearAllRows () {
+	var allClearBtn = $j(".detailCancel");
+	for (var i = 0; i < allClearBtn.length; i++){
+		clearCurrRow(allClearBtn[i]);
+	}
+}
+function clearCurrRow (that) {
+	var $this = $j(that);
+   	var curRow = $this.closest("tr");
+   	// 各項目内容をクリアする
+   	//var curChkBox = $j("input[name=parentSub]",curRow);
+	var clearItemIdArr=new Array(':cidate',':citime',':nights',':codate',':cotime',':roomType',':perpsons',':rooms',':dlPlanItem',
+								':dlPlanItem_kid',':dlPlanItem_lkid',':nl_hidPlanDetailInfo',':salescnt',':extraBedChk');
+	for (var i = 0; i < clearItemIdArr.length; i++){
+		clearObj = $j("[id$='" + clearItemIdArr[i] + "']",curRow);
+		if (clearObj.size() == 0) continue;
+		if (clearObj.is(":checkbox")) {
+			clearObj.removeAttr('checked');
+		} else if (clearObj.is("select")) {
+             clearObj.get(0).selectedIndex = 0;
+		} else if (clearObj.is("span")) {
+             clearObj.text("");
+		} else {
+             clearObj.val("");
+		}
+	}
+	var item = $j("img#planCustomeBtn",curRow);
+	if (item.attr("isopenstatus") == "false"){
+		var planItem = item.data("jinyaPlanExtend");
+		planItem.switchStatus();
+	}
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	roomOptCollapse(curRow);
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+}
+//2017/01/12 bug fix by zy BEGIN
+function beforeSubmit(){
+	$j("input[id$=salescnt]").each(function(){
+		if($j(this).val() != null || $j(this).val() != ""){
+			$j(this).attr("disabled",false);	
+		}
+	});
+	return checkIfHadRequiredItem();
+}
+checkIfHadRequiredItem = function (){
+   	// CKEDITOR情報は実勢の項目にコピーする
+   	if ($j(".ckeditorClass").length > 0){
+       CKEDITOR.jinya.copyValue($j, "ckeditorClass");
+    }
+   	var checkFlag = false;
+   	var focusElement;
+	$j(".repuiredClass").each(function(){
+		$this = $j(this);
+		if(($this[0].tagName == "INPUT" && $this[0].type != "checkbox") || $this[0].tagName == "SELECT" || $this[0].tagName == "TEXTAREA" ){
+			if($j(this).val()  == "") {
+				checkFlag = true;
+				if (focusElement == undefined) focusElement = $j(this);
+				//return false;
+			}
+		}else if($this[0].tagName == "SPAN"){
+			if ($j(this).text() == ""){
+				checkFlag = true;
+				//return false;
+			}
+		}
+	});
+	if (checkFlag) {
+		if(!$j("[id$=inputFormMsg] div.message").is(":visible")) $j("#inputFormErrorMsg").show();
+		$j(document).scrollTop(0);
+		if (focusElement != undefined) focusElement.focus();
+		//$j(".leadColumn,.contactClass",".infoTableClass:first td.data2Col:first ").focus();
+		unblockUi();
+		return false;
+	}else
+		$j("#inputFormErrorMsg").hide();
+	return true;
+}
+//2017/01/12 bug fix by zy END
+//2017/01/16 by zy BEGIN
+function lastBookingDetail(){
+	var lastSector = "input[id$=cidate],input[id$=':citime'],input[id$=':nights'],input[id$=':codate'],input[id$=':cotime'],select[id$=':roomType'],input[id$=':perpsons'],input[id$=':rooms'],input[id$=':dlPlanItem'],input[id$=':salescnt'],input[id$=':extraBedChk']";
+	//$j(lastSector,"tr.dataRow:last").unbind("blur");
+	$j(lastSector,"tr.dataRow:last").on("blur",function(){
+		//2017/01/18 排除扩展子明细行取得index值 by zy BEGIN
+		//var rowIdx = $j(this).closest("tr.dataRow").index();
+    	var rowIdx = $j("tr.dataRow").index($j(this).closest("tr.dataRow"));
+    	//2017/01/18 排除扩展子明细行取得index值 by zy END
+		
+		var curRow = $j(this).closest("tr.dataRow");
+		if (!chkValidate(rowIdx) ) return;
+		if(checkIfHadRequiredItem()){
+			curFocusUUid = $j(this).attr("id");
+			$j(lastSector,"tr.dataRow:last").unbind("blur");
+			$j(lastSector,curRow).keydown(function(e){
+				if (e.which == 9) {
+			        e.preventDefault();
+			    }
+			});
+			$j(this).focus();
+			addSubDetailRow();
+		}
+	});
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	$j(".disBtn").unbind("mouseenter");
+	$j(".disBtn").on("mouseenter",function(){
+		blurDisabled = true;
+	});
+	$j(".disBtn").unbind("mouseleave");
+	$j(".disBtn").on("mouseleave",function(){
+		blurDisabled = false;
+	});
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+}
+var curFocusUUid;var blurDisabled = false;
+function autoFocus(){
+	if (curFocusUUid != undefined){
+		$j("[id='" + curFocusUUid + "']").focus();
+		curFocusUUid = undefined;
+	}
+}
+function chkValidate(rowIdx){
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy BEGIN
+	if (blurDisabled) return false;
+	//2017/01/18 鼠标选中 行追加失效功能添加 by zy END
+	var lastSector = "input[id$=cidate],input[id$=':citime'],input[id$=':nights'],input[id$=':codate'],input[id$=':cotime'],select[id$=':roomType'],input[id$=':perpsons'],input[id$=':rooms']";
+	var chkflag = true;
+	$j(lastSector,"tr.dataRow:eq(" + rowIdx + ")").each(function(){
+		if($(this).val() == "") {
+			chkflag = false;
+			//break;
+			return false;
+		}
+	});
+	return chkflag;
+}
+//2017/01/16 by zy END
+//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy BEGIN
+function setValueInput(el,val){
+	if(el.nodeName == 'INPUT'){
+		if (el.type == 'checkbox'){
+			if (val == "") val = false;
+			$(el).prop("checked",val);
+		} else {
+			$(el).val(val);
+		}
+	// 2019/03/08 リッチテキストエリアツール変更 by zy BEGIN 
+	} else if (el.nodeName == 'TD') {
+		var element = $("textarea",el);
+		var ckName = $(element).attr("id");
+		if (CKEDITOR && (ckName in CKEDITOR.instances)) {
+			val = (val).replace(new RegExp("&\lt;", "g"), "<").replace(new RegExp("&\gt;", "g"), ">").replace(new RegExp("&\quot;", "g"), '"');
+			CKEDITOR.instances[ckName].setData(val);
+		}
+		$(el).val(val);
+	// 2019/03/08 リッチテキストエリアツール変更 by zy END 
+	} else {
+		$(el).val(val);
+	}
+}
+//2017/03/13 一括予約で「お客様名」を入力し、 tabで送っても予約名が反映できるように改善対応 by zy END
+// 2017/04/25 项目优化 by zy BEGIN
+//予約登録
+function upsertLeadInfo(that){
+	//2017/04/26 重复点击check提前 by zy BEGIN
+	//非空判断check
+	if(!beforeSubmit()) return false; 
+	//二次点击check
+	if(!disableOnSubmit(that)) return false;
+	//予約事前check
+	if(!preSaveConfirm()) return false; 
+	//2017/04/26 重复点击check提前 by zy END
+	blockUi();
+	// 2019/03/08 リッチテキストエリアツール変更 by zy BEGIN 
+	// CKEDITORツール入力値設定
+	ckeditorCheckAndSetSetData();
+	// 2019/03/08 リッチテキストエリアツール変更 by zy END 
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	if (!JS_ROOM_FLG) $("select.disabledClass").removeAttr("disabled");
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	// 新規予約事前チェック
+	if (preCheckNewLead()) return;
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	//予約保存する
+	createLeadInfo();
+}
+//予約コピー
+function cloneLeadInfo(that){
+	//2017/04/26 重复点击check提前 by zy BEGIN
+	//非空判断check
+	if(!beforeSubmit()) return false; 
+	//二次点击check
+	if(!disableOnSubmit(that)) return false; 
+	//2017/04/26 重复点击check提前 by zy END
+	blockUi();
+	// 2019/07/31 JINYABUG-2044 bug fix by zy BEGIN
+	// 新規予約事前チェック
+	if (preCheckNewLead(cloneLeadFun)) return;
+	//予約コピーする
+	cloneLeadFun();
+	// 2019/07/31 JINYABUG-2044 bug fix by zy END
+	
+}
+//コピー キャンセル
+function cancelCloneInfo(that){
+	//二次点击check
+	if(!disableOnSubmit(that)) return false; 
+	blockUi();
+	//コピー機能キャンセル
+	cancelCloneFun();
+}
+//コピーのボタンの対応
+function changeCopyMode(that){
+	//二次点击check
+	if(!disableOnSubmit(that)) return false; 
+	blockUi();
+	_copy_callBackFun(); 
+	_copy_orgDataQueryFun();
+}
+//checkinとcancelボタン不具合修正　by zy BEGIN
+//キャンセル
+function subIndexCancelFun(that){
+	//二次点击check
+	if(!disableOnSubmit(that)) return false; 
+	blockUi();
+	setRediretMessage(); 
+	//sub失效
+	cancelSubDetailFun();
+}
+//チェックイン
+function subCheckInFun(that){
+	//二次点击check
+	if(!disableOnSubmit(that)) return false;
+	blockUi();
+	setRediretMessage(); 
+	redirectChkInFun()
+}
+//2017/04/26 商品窗口共通化 by zy BEGIN
+function initProductWindow(){
+	var searchWin = $j("#producdSearchWindow");
+	//2017/04/25 项目优化 by zy BEGIN
+	if ( searchWin.length > 0 && searchWin.data("kendoWindow") == undefined) {
+		var src = '/apex/AccountMasterInput?spcd={!branchNm}&callback=window.parent.ProdcutSet';
+		searchWin.kendoWindow({
+        	visible: false,
+            content: src,
+			iframe: true,
+			width: 700,
+			height : 450,
+			title : '商品選択',
+            actions: ["close"]
+        });
+	}
+}
+//2017/04/26 商品窗口共通化 by zy END
+//checkinとcancelボタン不具合修正　by zy END
+// 2017/04/25 项目优化 by zy END
+//radio按钮出错时返回上次选择的主房间
+function reBackSub(that){
+	var prevSub = $j("input[name=parentSub].mainSub");
+	if (prevSub.length > 0) prevSub.get(0).checked = true;
+	$j(that).get(0).checked = false;
+}
+//2017/07/23 31.一画面のF5/Commadn+Rで画面Refreshできるように改善対応 by zy BEGIN
+// f5 失效
+function bindWindowKey(){
+	var $key = key.noConflict();
+	$key.filter = function(event){
+		// 全画面から画面更新可能
+		return true;
+	}
+	$key('command+r, ctrl+r, f5', function(e){ 
+		console.log('refresh');
+		//查看leadindex下有无contact
+		var contactId = $j("input[id$=inputContactId]").val();
+		//如果既存数据
+		if (contactId != "") {
+			//执行既存数据查询方法
+			_search_callbackFunction();
+			//停到自带的页面刷新
+			event.stopImmediatePropagation();
+			//e.preventDefault();
+			return false;
+		}
+		return true;
+	});
+	// 2019/09/30 新規予約など、保存(Ctrl+S)対応 WGCH BEGIN
+	$key('command+s, ctrl+s', function(e){
+		var showWins = $j(".k-widget.k-window").filter(":visible");
+		// 2019/12/30 5018 bug fix by zy BEGIN
+		showWins = showWins.not(":has(.k-i-restore)");
+		// 2019/12/30 5018 bug fix by zy END
+		if (showWins.length == 0) {
+			var btn = $j("#cloneSaveBtn,#leadUpsertBtn").filter(":visible");
+			btn.click();
+		}
+		// $j("input[id='leadUpsertBtn']").click();
+		e.preventDefault();
+		return false;
+	});
+	// 2019/09/30 新規予約など、保存(Ctrl+S)対応 WGCH END
+}
+//2017/07/23 31.一画面のF5/Commadn+Rで画面Refreshできるように改善対応 by zy END
+// 2015/10/28 CTI->PAST機能対応
+function _call_pasteInfo() {
+	$j("[id$=':relcontact']").unbind('paste');
+	$j("[id$=':relcontact']").bind('paste',function(e){
+        // 2017/09/23 新規予約ウインドウ、お客様情報反映されない不具合改修 WGCH BEGIN
+        var $relcontact = $j(this);
+        $relcontact.autocomplete('search', this.value);
+        // 2017/09/23 新規予約ウインドウ、お客様情報反映されない不具合改修 WGCH END
+		var pastedText = undefined;
+		if (window.clipboardData && window.clipboardData.getData) {
+			pastedText = window.clipboardData.getData('Text');
+		}else {
+			pastedText = e.originalEvent.clipboardData.getData('Text');
+		}
+		cti_call_pasteInfo(e, pastedText);
+	});
+}
+// 2015/11/09 CTI->PAST機能対応
+function cti_call_pasteInfo(e, pastedText) {
+	// 入力WINが非表示の場合、自動設定処理中止
+	if (pastedText != undefined && pastedText.indexOf('#') > 0) {
+		if (e != null) e.preventDefault();
+		$j("[id$=':relcontact']").val(pastedText.split('#')[0]);
+		$j("input[id$=':relcontact_lkid']").val(pastedText.split('#')[1]);
+		$j("[id$=':relcontact']").blur();
+	}
+	return true;
+}
+// 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN
+// 房间选择
+function roomChange(el){
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	// 部屋変更機能
+	return changeRoomFun($(el));
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	var orgValue =  $(el).attr("orgval");
+	var roomid = $(el).val();
+	if (orgValue == undefined) orgValue = "";
+	if (orgValue == roomid) return;
+	blockUi();
+	var leadid = $(el).attr("leadid");
+	var curRow = $(el).closest("tr.roomClass");
+	var orgRow = curRow.prev();
+	ajaxSaveLeadAssignRoom(leadid,roomid,orgRow,false);
+}
+// 显示下拉列表
+function roomSelectLst(el){
+	if ($(el).hasClass("greyImg")) return;
+	var curRow = $(el).closest("tr.dataRow");
+	if (removeSelctLst(curRow)) return;
+	// 刷新可选项目
+	ajaxGetSelectRoomOpts(curRow,true);
+	
+}
+// 查询展开的key跟现在行的key是否相同
+// 不相同则功能禁用
+function checkChgAndClose(el){
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	return;
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	var curRow = $j(el).closest("tr.dataRow");
+	var jinyaRoomOpt = curRow.data("jinyaRoomOpt");
+	if (jinyaRoomOpt != undefined) {
+		if (jinyaRoomOpt.curKey != getKey(curRow)) {
+			removeSelctLst(curRow,true);
+		    $("[name=homeSelect]",curRow).addClass("greyImg");
+		    $("[name=homeSelect]",curRow).attr("title","保存後、部屋アサイン処理可能になります。");
+		} else {
+			$("[name=homeSelect]",curRow).removeClass("greyImg");
+		    $("[name=homeSelect]",curRow).attr("title","部屋アサイン");
+		}
+	}
+}
+// 获取当前key
+function getKey(curRow) {
+	var cidate = $("input[id$=cidate]",curRow).val();
+	var nights = $("input[id$=nights]",curRow).val();
+	var codate = $("input[id$=codate]",curRow).val();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	// var typeid = $("select[id$=roomType]",curRow).val();
+	// var rooms = $("input[id$=rooms]",curRow).val();
+	var typeid = getTypeId(curRow);
+	var rooms = getRoomInt(curRow);
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	// 2019/07/31 20190729.01.一括予約の空部屋リスト表示不正の確認 by zy BEGIN
+	// チェックイン時間
+	var it = $("input[id$=citime]",curRow).val();
+	// チェックアウト時間
+	var ot = $("input[id$=cotime]",curRow).val();
+	return cidate + '_' + nights + '_' + codate + '_' + typeid + '_' + rooms + '_' + it + '_' + ot;
+	// 2019/07/31 20190729.01.一括予約の空部屋リスト表示不正の確認 by zy END
+}
+// 房间列表移除
+function removeSelctLst(curRow,otherFlag){
+	var localFun = otherFlag ? false : true;
+	if ( curRow.hasClass("hadShow") ) {
+		var curRoomOpt = curRow.data("jinyaRoomOpt");
+		curRoomOpt.deleteExpland();
+		curRow.removeClass("hadShow");
+		return true;
+	} else {
+		if (curRow.next().hasClass("_jinyaPlanExtend_appendTr_classNm")){
+			if (localFun) {
+				var item = $("[id^=planCustomeBtn]",curRow);
+				var planItem = item.data("jinyaPlanExtend");
+				planItem.switchStatus();
+			}
+		}
+	}
+	if (localFun) curRow.addClass("hadShow");
+	return false;
+}
+// 部屋分配保存
+function ajaxSaveLeadAssignRoom(leadId,roomId,orgRow,isDirect){
+	var obj = {
+		id:roomId,
+		lid:leadId,
+		spcd:"{!branchNm}",
+		direct:isDirect
+	};
+	var req = JSON.stringify(obj);
+	Visualforce.remoting.Manager.invokeAction(
+      "{!$RemoteAction.BookingFlexApp.saveLeadRoom}", req, function(result, event){
+          var leadArr = [];
+          curRoomOpt = orgRow.data("jinyaRoomOpt");
+          curRoomOpt.init();
+          if(event.type == 'exception') {
+          	   console.log(event);
+          	   ajaxGetSelectRoomOpts(orgRow);
+          	   alert(event.message);
+          } else if (result != undefined && result != "") {
+          	 for (var i = 0 ; i < result.length ; i++) {
+  			 	var req = result[i];
+  			 	// 提示房间占用
+  			 	if (req.styp == 'warn') {
+  			 		if (confirm(req.message)) {
+  			 			ajaxSaveLeadAssignRoom(leadId,roomId,orgRow,true);
+  			 			return;
+  			 		}
+  			 	} else if (req.styp == 'error') {
+  			 		alert(req.message);
+  			 	} else curRoomOpt.add(req);
+     	  	 }
+     	  	 curRoomOpt.refresh();
+       	  }
+       	  afterSaveRoom(orgRow);
+    });
+}
+// 保存后刷新所有展开房间列表
+function afterSaveRoom(orgRow){
+	var otherOpenRow = $("tr.dataRow.hadShow").not(orgRow);
+	// 解锁画面
+	if (otherOpenRow.length == 0 ) unblockUi();
+	else {
+		otherOpenRow.addClass("needRefresh");
+		otherOpenRow.each(function(){
+			ajaxGetSelectRoomOpts($(this));
+		});
+	}
+}
+// 拉取可选房间
+// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+function ajaxGetSelectRoomOpts(curRow,isLockWin,isRefresh,callback){
+// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+	// 显示loading画面
+	if (isLockWin) blockUi();
+	var cidate = $("input[id$=cidate]",curRow).val();
+	var codate = $("input[id$=codate]",curRow).val();
+	var typeid = $("select[id$=roomType]",curRow).val();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	// if (cidate == "" || codate == "" || typeid == "") {
+	if (cidate == "" || codate == "" ) {
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+		if (isLockWin) unblockUi();
+		return;
+	}
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	var cloneFlag = {!cloneFlag};
+	// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy BEGIN
+	var cloneExitFlg = $j("input[id$=hidCloneExitFlg]").val();
+	cloneFlag = cloneFlag && cloneExitFlg != "true";
+	// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy END
+	var sid = cloneFlag ? "" : $("input[id$=hidSubId]",curRow).val();
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	var ldxid = $("input[id$=hidleadBaseId]").val();
+	var obj = {
+		ci:cidate,
+		co:codate,
+		sid:sid,
+		ldxid:ldxid,
+		// 2019/07/31 20190729.01.一括予約の空部屋リスト表示不正の確認 by zy BEGIN
+		tid:typeid,
+		it:$("input[id$=citime]",curRow).val(),
+		ot:$("input[id$=cotime]",curRow).val(),
+		// 2019/07/31 20190729.01.一括予約の空部屋リスト表示不正の確認 by zy END
+		spcd:"{!branchNm}"
+	};
+	// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy BEGIN
+	if(JS_ROOM_FLG) {
+		obj.typeid = '';
+	}
+	// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy END
+	var req = JSON.stringify(obj);
+	Visualforce.remoting.Manager.invokeAction(
+      "{!$RemoteAction.BookingFlexApp.refreshCanAssign}", req, function(result, event){
+          var roomArr = [];
+          var curRoomOpt = curRow.data("jinyaRoomOpt");
+          curRoomOpt.init();
+          if(event.type == 'exception') {
+          	   console.log(event);
+          } else if (result != undefined && result != "") {
+          	 for (var i = 0 ; i < result.length ; i++) {
+  			 	var req = result[i];
+  			 	curRoomOpt.add(req);
+				// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+				if (JS_ROOM_FLG) {
+					if (!("roomData" in curRoomOpt)) curRoomOpt.roomData = {};
+					if (!(req.id in curRoomOpt.roomData)) curRoomOpt.roomData[req.id] = req.tid;
+				}
+				// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+     	  	 }
+       	  }
+       	  // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+       	  beforeRefreshInfo(curRoomOpt);
+       	  // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	  	  // 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+       	  if (isRefresh == undefined || isRefresh == false) curRoomOpt.refresh();
+		  // 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+       	  // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+       	  // 刷新明細
+       	  refreshLeadRow(curRoomOpt);
+       	  // 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+       	  if (isLockWin) unblockUi();
+       	  else {
+       	  	  // 刷新好一个去掉一个
+       	  	  curRow.removeClass("needRefresh");
+       	  	  // 判断是否还有没刷新好的
+       	  	  // 都刷新好了解锁页面
+       	  	  if ( $("tr.needRefresh").length == 0 ) unblockUi();
+       	  }
+		// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+		if (callback) callback(result);
+		// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+    });
+}
+function lockRoom(el){
+	var curRow = $(el).closest("tr.roomRow");
+	var leadid = $("select.roomSelect",curRow).attr("leadid");
+	var lockFlag = $("input[name=lockcheck]",curRow).is(":checked");
+	roomlock(el);
+	var thisRow = $(el).closest("tr.roomClass");
+	var orgRow = thisRow.prev();
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+	var roomOpt = orgRow.data("jinyaRoomOpt");
+	roomOpt.leadArr.forEach(function(lead){
+		if (lead.lid == leadid) lead.lock = lockFlag;
+	});
+	// カスタム設定
+	$j("[id$=':hidRoomsSyncInfo']",orgRow).val(JSON.stringify(roomOpt.leadArr));
+	return;
+	// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+	ajaxLockSelectRoom(leadid,lockFlag,orgRow);
+}
+function roomlock(el,localFlag){
+	var curRow = $(el).closest("tr.roomRow");
+	var checkInput = $("input[name=lockcheck]",curRow);
+	var rmSelect = $("select.roomSelect",curRow);
+	if (localFlag) checkInput.prop("checked",true);
+	if ( checkInput.is(":checked") ) {
+		rmSelect.attr("disabled","disabled");
+	} else {
+		rmSelect.removeAttr("disabled");
+	}
+}
+function ajaxLockSelectRoom(leadId,lockFlag,orgRow){
+	var obj = {
+		lid:leadId,
+		lock:lockFlag
+	};
+	var req = JSON.stringify(obj);
+	blockUi();
+	Visualforce.remoting.Manager.invokeAction(
+      "{!$RemoteAction.BookingFlexApp.lockRoom}", req, function(result, event){
+          if(event.type == 'exception') {
+          	   console.log(event);
+          }
+          var resArr = [];
+          if (result != undefined && result != "") {resArr = result;}
+       	  unblockUi();
+    });
+}
+// 2017/12/25 部屋自動割り当て機能追加　by　zy END
+// 2017/12/20 focus error 対応 by zy BEGIN
+function oncloseCallBack(e){
+	e.input.focus();
+}
+// 2017/12/20 focus error 対応 by zy END
+// 2018/10/12 特記事項の文字色変更 by cxw BEGIN
+function changeCkeditor(){
+	if (typeof CKEDITOR == "undefined") return;
+	// 2019/12/30 一括予約画面での特記事項項目だけ行間の幅が違う仕様を修正  by zy BEGIN
+	try{
+		window.errorRedo = 5;
+	// 2019/12/30 一括予約画面での特記事項項目だけ行間の幅が違う仕様を修正  by zy END
+	$.each(CKEDITOR.instances, function(i, e){
+		e.destroy(true);
+		CKEDITOR.replace(i, { toolbar : [["Undo", "Redo"], ["Bold", "Italic", "Underline", "Strike"], ["Link", "sfdcImage"], ["JustifyLeft", "JustifyCenter", "JustifyRight"], ["BulletedList", "NumberedList", "Indent", "Outdent"], ["TextColor", "BGColor"]], removePlugins:"elementspath", resize_enabled: false});
+	});
+	// 2019/12/30 一括予約画面での特記事項項目だけ行間の幅が違う仕様を修正  by zy BEGIN
+		delete window.errorRedo;
+	}catch(e){
+		if ("errorRedo" in window && errorRedo > 0) {
+			errorRedo--; 
+			setTimeout(changeCkeditor,800);
+		}
+	}
+	// 2019/12/30 一括予約画面での特記事項項目だけ行間の幅が違う仕様を修正  by zy END
+}
+// 2018/10/12 特記事項の文字色変更 by cxw END
+// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN
+// 画面情報設定
+var PageSetting = {
+	roomArr : {},
+	leadArr : [],
+	checkAll : [0,1,2,3,4], //cidate,nights,codate,typeid,rooms
+	checkType : [3],
+	checkDate : [0,1,2],
+	// 部屋変更機能
+	changeRoom:function(orgId,roomId,start,end){
+		if (roomId != undefined && roomId != "") {
+			if (!(roomId in this.roomArr)) this.roomArr[roomId] = [];
+			this.roomArr[roomId].push({start:start,end:end});
+		}
+		if (orgId in this.roomArr) {
+			var infoLst = this.roomArr[orgId];
+			var filterRoom = [];
+			infoLst.forEach(function(info){
+				if (info.start != start || info.end != end) filterRoom.push(info);
+			});
+			if (filterRoom.length == 0) delete this.roomArr[orgId];
+			else this.roomArr[orgId] = filterRoom;
+		} 
+	},
+	// チェック部屋割当済み
+	filterExitRooms:function(rooms,start,end){
+		var selectorsArr = [];
+		if (rooms) {
+			var roomArr = this.roomArr;
+			rooms.forEach(function(room){
+				var roomId = room.id;
+				if (roomId != undefined && roomId != "" && (roomId in roomArr)) {
+					var roomLst = roomArr[roomId];
+					var checkFlag = false;
+					for (var i = 0 ; i < roomLst.length ; i++) {
+						var room = roomLst[i];
+						checkFlag = !(end < room.start || start > room.end);
+						if (checkFlag) break;
+					}
+					if (checkFlag) selectorsArr.push('[value="' + roomId + '"]');
+				}
+			});
+		}
+		return selectorsArr.join(',');
+	},
+	hadLead:function(leadid){
+		if (this.leadArr.length > 0) {
+			// 該当部屋存在
+			return $j.inArray(leadid,this.leadArr) >= 0; 
+		}
+		return false;
+	},
+	setLead:function(leadId){
+		this.leadArr.push(leadId);
+	}
+};
+// 部屋変更機能
+function changeRoomFun(sel){
+	var orgValue = sel.attr("orgval");
+	var roomid = sel.val();
+	var leadid = sel.attr("leadid");
+	var curRow = sel.closest("tr.roomClass");
+	var orgRow = curRow.prev();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	if (JS_ROOM_FLG) {
+		orgRow = sel.closest("tr");
+		var lockChk = $("[id$=lockSelChk]",orgRow);
+		if(lockChk.is(":checked")){
+			if (confirm('該当予約は部屋変更不可')){
+				lockChk.prop("checked",false);
+			} else {
+				sel.val(orgValue);
+				return;
+			}
+		}
+	}
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	var cidate = $("input[id$=cidate]",orgRow).val();
+	var codate = $("input[id$=codate]",orgRow).val();
+	var startTm = $("input[id$=citime]",orgRow).val();
+	var endTm = $("input[id$=cotime]",orgRow).val();
+	var curRoomOpt = orgRow.data("jinyaRoomOpt");
+	var subId = $("#hidSubId",orgRow).val();
+	var beforeValue = sel.attr("bef");
+	if (orgValue == undefined) orgValue = "";
+	// 前回入力値
+	if (beforeValue == undefined) beforeValue = orgValue;
+	// 既存見積存在の場合
+	var alermFlag = false;
+	if (subId != undefined && subId != "")
+		// アラームアイコン表示チェック
+		alermFlag = orgValue != roomid;
+	// フィルター変更予約情報
+	curRoomOpt.leadArr.filter(function(lead){
+		if (lead.lid == leadid){
+			lead.nm = $("option:checked",sel).text();
+			lead.direct = false;
+			lead.orgid = orgValue;
+			lead.ci = cidate;
+			lead.co = codate;
+			lead.id = roomid;
+			lead.it = startTm;
+			lead.ot = endTm;
+			lead.spcd = "{!branchNm}";
+			lead.isWarn = alermFlag;
+		}
+	});
+	// 部屋変更機能
+	PageSetting.changeRoom(beforeValue,roomid,cidate,codate);
+	// 刷新明細
+	refreshLeadRow(curRoomOpt);
+	// 前回入力値設定
+	sel.attr("bef",roomid);
+	// カスタム設定
+	$j("[id$=':hidRoomsSyncInfo']",curRoomOpt.element).val(JSON.stringify(curRoomOpt.leadArr));
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	if (JS_ROOM_FLG) {
+		$j("[id$=hidRoomType]",curRoomOpt.element).val(curRoomOpt.roomData[roomid]);
+	}
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+}
+function requiredFieldChk(curRow){
+	var cidate = $j("input[id$=cidate]",curRow).val();
+	var nights = $j("input[id$=nights]",curRow).val();
+	var codate = $j("input[id$=codate]",curRow).val();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	// $j("select[id$=roomType]",curRow).val();
+	// $j("input[id$=rooms]",curRow).val();
+	var typeid = getTypeId(curRow); 
+	var rooms = getRoomInt(curRow);
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	if (cidate == undefined || cidate == "") return false;
+	if (nights == undefined || nights == "") return false;
+	if (codate == undefined || codate == "") return false;
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	var citm = $j("input[id$=citime]",curRow).val();
+	var cotm = $j("input[id$=cotime]",curRow).val();
+	if (JS_ROOM_FLG) {
+		if (citm == undefined || citm == "") return false;
+		if (cotm == undefined || cotm == "") return false;
+		return true;
+	} 
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	if (typeid == undefined || typeid == "") return false;
+	if (rooms == undefined || rooms == "") return false;
+	return true;
+}
+// カスタム設定部屋情報
+function beforeRefreshInfo(roomOpt){
+	var curRow = roomOpt.element;
+	var syncInfo = $j("input[id$=hidRoomsSyncInfo]",curRow).val();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	var rooms = getRoomInt(curRow);
+	// $j("input[id$=rooms]",curRow).val();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	var customInfo = syncInfo ? JSON.parse(syncInfo) : [];
+	var chkKey = getKey(roomOpt.element);
+	// 部屋タイプ
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	var roomTypeId = getTypeId(curRow);
+	// var roomTypeId = $("select[id$=roomType]",curRow).val();
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	rooms = kendo.parseInt(rooms);
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	// 一部屋选择不进行roomid更新交给后方preupdate确认
+	var needRefresh = JS_ROOM_FLG ? !JS_ROOM_FLG : checkNeedFresh(roomOpt.curKey,chkKey,PageSetting.checkType);
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	var rowNo = kendo.parseInt(curRow.attr("rowno"));
+	if (rooms != null) {
+		var leadArr = roomOpt.leadArr;
+		roomOpt.leadArr = [];
+		for (var i = 0 ; i < rooms ; i++) {
+			// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+			// isNew:新規フラグ
+			var obj = {isNew:false};
+			// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+			// 既存予約フラグ
+			var exitLeadFlag = i < leadArr.length;
+			// カスタム設定あり
+			if (i < customInfo.length) obj = customInfo[i];
+			// 新規予約場合
+			else if (!exitLeadFlag){
+				obj.lid = kendo.guid();
+				obj.styp = 'lead';
+				// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+				obj.isNew = true;
+				// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+				PageSetting.setLead(obj.lid);
+			}
+			if (exitLeadFlag) obj = $.extend(leadArr[i],obj);
+			roomOpt.add(obj);
+			var lead = roomOpt.leadArr[i];
+			// 部屋タイプ、泊数変更の場合
+			if (needRefresh) {
+				lead.id = '';
+				lead.tid = roomTypeId;
+			}
+			lead.rowNo = rowNo + 1;
+		}
+	}
+	// 最後変更値更新
+	roomOpt._typeid = roomTypeId;
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	if (JS_ROOM_FLG) roomOpt._typeid = '';
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	roomOpt.curKey = chkKey;
+}
+function processOpt(el){
+	var curRow = $(el).closest("tr");
+	if (curRow) {
+		var roomOpt = curRow.data("jinyaRoomOpt");
+		var chkKey = getKey(roomOpt.element);
+		// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+		var blankKey = '______';
+		// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+		// 明細の情報未変更
+		if (blankKey != chkKey && chkKey == roomOpt.curKey) roomOptExpand(roomOpt.element);
+		// 明細の情報変更
+		else if (requiredFieldChk(roomOpt.element)){
+			// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+			if (JS_ROOM_FLG) {
+				roomOpt.expland = roomOpt.element;
+				roomOpt.selectTemp = curRow;
+				// 每次重新刷新会多出一个相同项目问题修复 bug fix by zy BEGIN
+				$("select.roomSelect",curRow).html("");
+				// 每次重新刷新会多出一个相同项目问题修复 bug fix by zy END
+				ajaxGetSelectRoomOpts(roomOpt.element,true,false,afterGetRoom.bind({tar:$("select.roomSelect",curRow)}));
+				return;
+			}
+			// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+			if (roomOpt.expland) {
+		 		ajaxGetSelectRoomOpts(roomOpt.element,true);
+			// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+			} else {
+				roomOptExpand(roomOpt.element);
+				ajaxGetSelectRoomOpts(roomOpt.element,false,true);
+			}
+			// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+		} else roomOptCollapse(roomOpt.element);
+	}
+}
+function roomOptExpand(curRow){
+	$j("[name=homeSelect]",curRow).removeClass("greyImg");
+	$j("[name=homeSelect]",curRow).attr("title","部屋アサイン");
+}
+function roomOptCollapse(curRow){
+	removeSelctLst(curRow,true);
+    $j("[name=homeSelect]",curRow).addClass("greyImg");
+    $j("[name=homeSelect]",curRow).attr("title","保存後、部屋アサイン処理可能になります。");
+}
+// 事前チェック
+function preCheckNewLead(callback){
+	var request = [];
+	// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy BEGIN
+	var cloneFlag = {!cloneFlag};
+	// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy END
+	$j("tr.dataRow").each(function(){
+		var curRow = $j(this);
+		var roomOpt = curRow.data("jinyaRoomOpt");
+		// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+		var cidate = $("input[id$=cidate]",roomOpt.element).val();
+		var codate = $("input[id$=codate]",roomOpt.element).val();
+		// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+		// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy BEGIN
+		// clone check逻辑出问题，克隆的时候默认带着房间 bug fix by zy BEGIN 
+		if (cloneFlag && roomOpt.leadArr.length == 1) {
+		// clone check逻辑出问题，克隆的时候默认带着房间 bug fix by zy END 
+			var roomInfo = $j("[id$=':hidRoomsSyncInfo']",curRow).val();
+			if (roomInfo != "") {
+				roomInfo = JSON.parse(roomInfo);
+				var cidate = $("input[id$=cidate]",curRow).val();
+				var codate = $("input[id$=codate]",curRow).val();
+				var startTm = $("input[id$=citime]",curRow).val();
+				var endTm = $("input[id$=cotime]",curRow).val();
+				for (var i = 0 ; i < roomInfo.length ; i++) {
+					var data = roomInfo[i];
+					data.rowNo = i + 1;
+					data.ci = cidate;
+					data.it = startTm;
+					data.co = codate;
+					data.ot = endTm;
+					request.push(data);
+				}
+			}
+			return true;
+		}
+		// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy END 
+		roomOpt.leadArr.forEach(function(data){
+			// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy BEGIN
+			if (data.id != undefined && data.id != '') {
+				// データ新規と「到着日、出発日」変更
+				// 2019/07/15 JINYABUG-2047 bug fixed by zy BEGIN
+				// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy BEGIN
+				if (data.isNew || data.ci != cidate || data.co != codate || data.isWarn || cloneFlag) {
+				// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy END
+				// 2019/07/15 JINYABUG-2047 bug fixed by zy END
+					if (data.ci != cidate) data.ci = cidate;
+					if (data.co != codate) data.co = codate;
+					// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy BEGIN
+					if (cloneFlag) data.sid = "";
+					// 2019/11/15 一括予約のコピー時にアサインされている部屋もコピーしてほしい、アサイン部屋もコピーしないと手間が増えてしまいます。by zy END
+					request.push(data);
+				}
+			}
+			// 2019/07/15 予約登録ボタンを押すと全く関係ない日付の予約情報により、アサイン注意の警告文が表示されます by zy END
+		});
+	});
+	// 2019/07/31 JINYABUG-2044 bug fix by zy BEGIN
+	if (request.length > 0) remoteCenter('preUpdateLead',request,afterCheck.bind({call:callback}));
+	// 2019/07/31 JINYABUG-2044 bug fix by zy END
+	return request.length > 0;
+}
+// チェック後
+function afterCheck(result){
+	// 2019/07/31 JINYABUG-2044 bug fix by zy BEGIN
+	let {call} = this;
+	// 2019/07/31 JINYABUG-2044 bug fix by zy END
+	var errorMsg = '';
+	var warnMsg = '';
+	for (var i = 0 ; i < result.length; i++) {
+		var data = result[i];
+		if (data.styp == 'error')  errorMsg += data.message;
+		if (data.styp == 'warn') warnMsg += data.message;
+	}
+	if (errorMsg != "") {
+		alert(errorMsg);
+		return unDisablePage();
+	} else if (warnMsg != "" && !confirm(warnMsg)) return unDisablePage();
+	// 予約登録
+	// 2019/07/31 JINYABUG-2044 bug fix by zy BEGIN
+	if (call == undefined) createLeadInfo();
+	else call();
+	// 2019/07/31 JINYABUG-2044 bug fix by zy END
+}
+// remoteデータ取得
+function remoteCenter(type,req,callback){
+	if (req == undefined || !req) req = {};
+	// 既に定義する売価はプランカラ取得、画面に設定する
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.BookingFlexApp.remoteCenter}", type,JSON.stringify(req), function(result, event){
+        if(event.type == 'exception') {
+        	console.log("-------error-------");
+            alert(event.message);
+        } else if(result != null){
+        	// html encode
+        	try{} catch(e){}
+        }
+        if (callback != undefined) callback(result);
+    });
+}
+function unDisablePage(){
+	if($j("#leadUpsertBtn").hasClass("Disabled")) $j("#leadUpsertBtn").removeClass("Disabled");	
+	// 2019/07/31 JINYABUG-2045 bug fix by zy BEGIN
+	if ($j("#cloneSaveBtn").hasClass("Disabled")) $j("#cloneSaveBtn").removeClass("Disabled");
+	// 2019/07/31 JINYABUG-2045 bug fix by zy END
+	// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN
+	$j("#cloneTopSaveBtn,#leadTopUpsertBtn").removeClass("Disabled");
+	// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END
+	unblockUi();
+}
+function refreshWarnMessage(curRoomOpt){
+	if (curRoomOpt.expland) {
+		var leadArr = curRoomOpt.leadArr;
+		$("select",curRoomOpt.expland).each(function(idx){
+			if (idx < leadArr.length ) {
+				showAlertMessage(this,leadArr[idx].isWarn);
+			}
+		});
+	}
+}
+	
+function showAlertMessage(sel,showFlag){
+	// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy BEGIN 
+	// var warnImg = '<span title="予約内容をご確認の上、[予約登録]ボタンを押してください。" class="waringImg"></span>';
+	var warnImg = '<span title="予約内容をご確認の上、[保存]ボタンを押してください。" class="waringImg"></span>';
+	// 2019/12/30 一括予約画面、「予約登録」ボタンを画面上部に。名称は「保存」に変更 by zy END 
+	var curRow = $(sel).closest("td").next();
+	if (showFlag) {
+		// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+		if (curRow.find(".waringImg").length == 0) {
+			if (JS_ROOM_FLG) $(sel).closest("td").append(warnImg);
+			else curRow.append(warnImg);
+		}
+		// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	} else 
+		$(".waringImg",curRow).remove();
+}
+// 刷新明細
+function refreshLeadRow(curRoomOpt){
+	// 刷新アラーム情報
+	refreshWarnMessage(curRoomOpt);
+	// 該当選択リスト
+	refreshOptions(curRoomOpt);
+	// 同じ部屋タイプ選択リスト刷新
+ 	setTimeout(refreshSameTypes(curRoomOpt));
+}
+// 該当選択リスト
+function refreshOptions(curRoomOpt){
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+	var roomArr = [];
+	if (curRoomOpt._typeid != "") roomArr = curRoomOpt.datas[curRoomOpt._typeid];
+	else {
+		for (var typeId in curRoomOpt.datas) roomArr = roomArr.concat(curRoomOpt.datas[typeId]);
+	}
+	// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+	var orgRow = curRoomOpt.element;
+	var cidate = $("input[id$=cidate]",orgRow).val();
+	var codate = $("input[id$=codate]",orgRow).val();
+ 	var selector = PageSetting.filterExitRooms(roomArr,cidate,codate);
+ 	if (curRoomOpt.expland) {
+ 		var options = $("option",curRoomOpt.expland);
+ 		if (selector != "") {
+	 		options.filter(selector).hide();
+	 		options.not(selector).show();
+ 		} else options.show();
+ 		// 自分選択値表示する
+ 		$("select.roomSelect",curRoomOpt.expland).each(function(){
+			var select = $(this).val();
+			$("option[value='" + select + "']",this).show();
+		});
+ 	}
+}
+// 同じ部屋タイプ選択リスト刷新
+function refreshSameTypes(curRoomOpt){
+	var curRow = curRoomOpt.element;
+	var roomTypeId = curRoomOpt._typeid;
+	$("tr.dataRow").not(curRow).each(function(){
+		var otherOpt = $(this).data("jinyaRoomOpt");
+		if (roomTypeId == otherOpt._typeid) {
+			refreshOptions(otherOpt);
+		}
+	});
+}
+// チェック該当明細変更
+function checkNeedFresh(curKey,chkKey,chkArr){
+	var beforeKeys = curKey.split('_');
+	var afterKeys = chkKey.split('_');
+	for (var i = 0 ; i < chkArr.length; i++) {
+		var idx = chkArr[i];
+		var before = beforeKeys[idx];
+		var after = afterKeys[idx];
+		if (after != before) return true;
+	}
+	return false;
+}
+// 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END
+// 2019/03/08 リッチテキストエリアツール変更 by zy BEGIN 
+function ckeditorCheckAndSetSetData(){
+	// 2019/03/15 JINYABUG-1450 bug fix by zy BEGIN
+	if ("CKEDITOR" in window) {
+		// 既存CKEDITOR
+		for (var key in CKEDITOR.instances) {
+			var ckeditor = CKEDITOR.instances[key];
+			var textElement = ckeditor.element.$;
+			var curTd = $(textElement).closest("td");
+			// お客様関連字段チェック
+			if (curTd.hasClass("contactClass")) {
+				// 変更前値
+				var beforeData = textElement.innerText;
+				// 変更後値
+				var afterData = ckeditor.getData();
+				if (beforeData != afterData) $j("input[id$=hidChgConflag]").val(true);
+			}
+		}
+	}
+	// 2019/03/15 JINYABUG-1450 bug fix by zy END
+}
+// 2019/03/08 リッチテキストエリアツール変更 by zy END
+// 2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN
+function getTypeId(curRow){
+	return JS_ROOM_FLG ? $("input[id$=hidRoomType]",curRow).val() : $("select[id$=roomType]",curRow).val();
+}
+function getRoomInt(curRow){
+	if (JS_ROOM_FLG) {
+		$("input[id$=hidRoomInt]",curRow).val(1);
+		return 1;
+	}
+	return $("input[id$=rooms]",curRow).val();
+}
+function oneRoomLock(){
+	var el = $(event.currentTarget);
+	var curRow = $(event.currentTarget).closest("tr");
+	var lockFlag = el.is(":checked");
+	var roomOpt = curRow.data("jinyaRoomOpt");
+	roomOpt.leadArr.forEach(function(lead){
+		lead.lock = lockFlag;
+	});
+	// bug fix by zy BEGIN
+	if (lockFlag) {
+		var roomSel = $("select.roomSelect",curRow);
+		if (roomSel.length > 0) {
+			roomSel.attr("disabled","disabled");
+			roomSel.addClass("disabledClass");
+		}
+	} else {
+		var roomSel = $("select.roomSelect",curRow);
+		if (roomSel.length > 0) {
+			roomSel.removeAttr("disabled");
+			roomSel.removeClass("disabledClass");
+		}
+	}
+	// bug fix by zy END
+	// カスタム設定
+	$j("[id$=':hidRoomsSyncInfo']",curRow).val(JSON.stringify(roomOpt.leadArr));
+}
+// 2019/11/15 一括予約画面の部屋直接選択 by zy END
+// 2019/12/30 一括予約画面、既存予約の一括予約画面上に「予約インデックスに戻る」ボタンの追加 by zy BEGIN 
+function returnStarmPage(leadIdx){
+	if (confirm('予約インデックス画面へ遷移しますか？')) {
+		window.location.href = '/' + leadIdx;
+	}
+}
+// 2019/12/30 一括予約画面、既存予約の一括予約画面上に「予約インデックスに戻る」ボタンの追加 by zy END 
+</script>
+<!-- 2017/12/20 focus error 対応 by zy BEGIN -->
+<c:DatePickerComp callbackFun="oncloseCallBack(inst)"/>
+<!-- 2017/12/20 focus error 対応 by zy END -->
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+<!--2017/01/10 plan or product by zy BEGIN -->
+<div id="producdSearchWindow"></div>
+<!--2017/01/10 plan or product by zy END -->
+<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy BEGIN -->
+<style>
+.centerWindow{
+	position: relative;
+	background: white;
+	border: 1px solid #e0e3e5;
+	display: none;
+}
+.title{
+	background: #f2f3f3;
+    border-width: 0 0 1px 1px;
+    border-color: #e0e3e5;
+    color: #000;
+    font-size: .9em;
+    font-weight: bold;
+    padding: 5px 2px 4px 5px;
+    height: 18px;
+}
+.greyImg {
+    -webkit-filter: grayscale(100%);
+    filter: grayscale(100%);
+}
+.roomSelect{
+	width:300px;
+}
+/* 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy BEGIN */
+.waringImg{
+	background-image: url("../img/msg_icons/warning16.png");
+	width: 16px;
+	height: 16px;
+	position: absolute;
+	right:-19px;
+}
+div.centerWindow>table tr>td{
+	position: relative;
+}
+/* 2019/01/30 一画面、部屋タイプ　部屋の選択 by zy END */
+</style>
+<!--  2019/11/15 一括予約画面の部屋直接選択 by zy BEGIN -->
+<apex:outputPanel rendered="{!selRoomModeFlg}">
+<style>
+.waringImg{
+	width: 10px;
+	height: 10px;
+	right:-2px;
+	top:10px;
+	background-size: 10px 10px;
+}
+.roomSelClass{
+	position: relative;
+}
+</style>
+</apex:outputPanel>
+<!--  2019/11/15 一括予約画面の部屋直接選択 by zy END -->
+<div id="curWin" class="centerWindow">
+	<table style="table-layout:fixed;background-color: #FFEBCD;word-spacing: 0px; border-collapse: 0px; border-spacing: 0px; border: 1px;">
+		<tr class="title">
+			<th>{!$ObjectType.Lead__c.Fields.Rroom__c.label}</th>
+			<th style="width:20px;">{!$ObjectType.Lead__c.Fields.Field276__c.label}</th><!-- 部屋変更不可 -->
+		</tr>
+	</table>
+</div>
+<!-- 2017/12/25 部屋自動割り当て機能追加　by　zy END -->
+<!-- 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw BEGIN -->
+<script>
+function changeQuotaItemNum(value){
+	var $badge = $("#bookingEstIcon").find(".badge");
+	if(value <= 1) $badge.hide();
+	else $badge.show();
+	var bookingestNum = kendo.parseInt($badge.html());
+	if( bookingestNum == value) return;
+	$badge.html(value);
+}
+</script>
+<!-- 2018/10/25 複数作成の操作方法が、マニュアルがなくても操作方法がわかると良いかと感じました。 by cxw END -->
+<!-- 2021/03/31 予約ポップやルームインジケータから予約作成する際に郵便番号検索が使えるようにして欲しい by zy BEGIN -->
+<c:ZipCodeSearchComp />
+<!-- 2021/03/31 予約ポップやルームインジケータから予約作成する際に郵便番号検索が使えるようにして欲しい by zy END -->
+</apex:page>

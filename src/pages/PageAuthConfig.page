@@ -1,0 +1,509 @@
+<apex:page sidebar="false" controller="PageAuthConfigCtrl" action="{!init}">
+<apex:stylesheet value="{!URLFOR($Resource.kendoFile2019, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFile2019, 'styles/kendo.default.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/messages/kendo.messages.ja-JP.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFile2019, 'js/cultures/kendo.culture.ja-JP.min.js')}"/>
+<style>
+/* モバイルのswitch BEGIN */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 23px;
+}
+.switch input {display:none;}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 19px;
+  width: 19px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(17px);
+  -ms-transform: translateX(17px);
+  transform: translateX(17px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+input:checked ~ .onchecked{
+    display: block!important;
+    position: absolute;
+    z-index: 1;
+    color: white;
+    left: 3px;
+    line-height: 23px;
+    font-size: 14px;
+}
+input:checked ~ .nochecked{
+    display: none!important;
+}
+.nochecked{
+    position: absolute;
+    right:3px;
+    color:white;
+    line-height: 23px;
+    font-size: 14px;
+}
+/* モバイルのswitch END */
+td[aria-expanded] .k-reset{
+    width:100%;
+}
+.disabledBtn{
+    color:gray;
+}
+.groupSpan{
+    float:right;
+    text-align: center;
+    display: none;
+}
+.searchPanel .k-button{
+    padding: 2px 5px;
+}
+</style>
+<script>
+$j = jQuery.noConflict();
+kendo.culture("ja-JP");
+$j(document).ready(function(){
+    bindEvent();
+});
+// 画面初期化
+function bindEvent(){
+    // ユーザーリスト作成
+    bindUserGrid();
+}
+// ユーザーリスト作成
+function bindUserGrid(){
+    // 画面高サイズ
+    var ht = $j(document).height() -  $j("#grid").offset().top;
+    // リスト初期化
+    $j("#grid").kendoGrid({
+        dataSource:{
+            transport:{
+                read:function(options){
+                    var obj = {
+                        shops:$j("input[id$=multiDepartCds]").val(),
+                        profileStr:$j("input[id$=hidProfileIds]").val(),
+                        roles:$j("input[id$=hidUserRoles]").val()
+                    }
+                    remoteCenter('getUsers',JSON.stringify(obj),afterUser.bind({options}));
+                }
+            }
+        },
+        height:ht,
+        groupable:true,
+        filterable: {
+            operators: {
+                number: {
+                    // 指定の値に等しい
+                    eq: "{!$Label.MSG_041_0033}",
+                    // 指定の値に等しくない
+                    neq: "{!$Label.MSG_041_0034}",
+                    // 指定の値より以上
+                    gte: "{!$Label.MSG_041_0043}",
+                    // 指定の値より大きい
+                    gt: "{!$Label.MSG_041_0044}",
+                    // 指定の値より以下
+                    lte: "{!$Label.MSG_041_0045}",
+                    // 指定の値より小さい
+                    lt: "{!$Label.MSG_041_0046}",
+                },
+                string: {
+                    // 指定の値に等しい
+                    eq: "{!$Label.MSG_041_0033}",
+                    // 指定の値に等しくない
+                    neq: "{!$Label.MSG_041_0034}",
+                    // 指定の値で始まる
+                    startswith: "{!$Label.MSG_041_0035}",
+                    // 指定の値を含む
+                    Contains: "{!$Label.MSG_041_0036}",
+                    // 指定の値を含まない
+                    doesnotcontain: "{!$Label.MSG_041_0037}",
+                    // 指定の値で終わる
+                    endswith: "{!$Label.MSG_041_0038}",
+                }
+            },
+            messages: {
+                // フィルター:
+                info: "{!$Label.MSG_041_0032}",
+                // および
+                and: "{!$Label.MSG_041_0039}",
+                // または
+                or: "{!$Label.MSG_041_0040}",
+                // フィルター
+                filter: "フィルタ",
+                // クリア
+                clear: "{!$Label.MSG_041_0042}",
+                additionalOperator: "演算子",
+                logic:"ロジック",
+            }
+        },
+        sortable:true,
+        resizable:true,
+        dataBound:groupDataBound,
+        columns: [
+            { field: "name" ,title:"ユーザ名",groupable:false},
+            { field:"profileNm" , title:"プロファイル" ,groupHeaderTemplate: $j("#groupTemplate").html() },
+            { field: "hadRoomFlg" ,title:"ﾙｰﾑｲﾝｼﾞｹｰﾀ",width:100,template:$j("#roomTemp").html(),
+                attributes:{style: "text-align: center;","class":"k-dirty-cell"}
+                    ,filterable:false,groupable:false,resizable:false},
+            { field: "hadTimeTable" ,title:"ﾀｲﾑﾃｰﾌﾞﾙ",width:80,template:$j("#timeTemp").html(),
+                attributes:{style: "text-align: center;","class":"k-dirty-cell"}
+                    ,filterable:false,groupable:false,resizable:false},
+            { field: "hadTaskFlg" ,title:"ﾏﾙﾁﾀｽｸ",width:70,template:$j("#taskTemp").html(),
+                attributes:{style: "text-align: center;","class":"k-dirty-cell"}
+                    ,filterable:false,groupable:false,resizable:false}
+        ],
+    });
+}
+// ツール初期化の対応
+function groupDataBound(e){
+    // グループ有効の場合
+    if (this._groupRows && this._groupRows.length > 0) {
+        var groups = $j("tr.k-grouping-row");
+        for (var i = 0 ; i < this._groupRows.length ; i++) {
+            var group = this._groupRows[i];
+            var $group = groups.eq(i);
+            var isRoom = false,isTime = false,isTask = false;
+            if ("items" in group) {
+                var hadNextGroupFlg = ("items" in group.items[0])
+                for (var j = 0 ; j < group.items.length; j++){
+                    if (hadNextGroupFlg) {
+                        var nextGroup = group.items[j];
+                        i++;
+                        var $nextGroup = groups.eq(i);
+                        nextGroup.items.forEach(function(item){
+                            if (item.hadRoomFlg) isRoom = true;
+                            if (item.hadTimeTable) isTime = true;
+                            if (item.hadTaskFlg) isTask = true;
+                        });
+                        $nextGroup.find("input[name=hadRoomFlg]").prop("checked",isRoom);
+                        $nextGroup.find("input[name=hadTimeTable]").prop("checked",isTime);
+                        $nextGroup.find("input[name=hadTaskFlg]").prop("checked",isTask);
+                    } else {
+                        var item = group.items[j];
+                        if (item.hadRoomFlg) isRoom = true;
+                        if (item.hadTimeTable) isTime = true;
+                        if (item.hadTaskFlg) isTask = true;
+                        if (isRoom && isTime && isTask) break;
+                    }
+                }
+            }
+            $group.find("input[name=hadRoomFlg]").prop("checked",isRoom);
+            $group.find("input[name=hadTimeTable]").prop("checked",isTime);
+            $group.find("input[name=hadTaskFlg]").prop("checked",isTask);
+        }
+        $j(".groupSpan",groups).show();
+    }
+    // ボタン状態刷新
+    refreshButtonStatus();
+}
+// 保存該当変更内容
+function saveGrid(){
+    if ($j(event.currentTarget).hasClass("disabledBtn")) return;
+    var grid = $j("#grid").getKendoGrid();
+    // 画面ロック
+    grid._requestStart();
+    var updObj = [];
+    // 変更内容作成
+    grid.dataSource.data().forEach(function(item){
+        if (item.dirty){
+            updObj.push({dataid:item.dataid,hadRoomFlg:item.hadRoomFlg,hadTimeTable:item.hadTimeTable,hadTaskFlg:item.hadTaskFlg});
+        }
+    });
+    // 連携
+    if (updObj.length > 0) remoteCenter('saveUsers',JSON.stringify(updObj),searchGrid);
+}
+function cancelGrid(){
+    if ("ORG_DATA" in window){
+        // ツール取得
+        var grid = $j("#grid").getKendoGrid();
+        // 画面ロック
+        grid._requestStart();
+        var newDs = grid.dataSource;
+        var kendDs = new kendo.data.DataSource({
+            options:newDs.options,
+            // 変更後データ
+            data:ORG_DATA,
+            group:newDs.group()
+        });
+        grid.setDataSource(kendDs);
+        // キャンセールの場合、刷新不能修正
+        kendDs.transport = newDs.transport;
+    }
+}
+// 検索ユーザ
+function searchGrid(){
+    var grid = $j("#grid").getKendoGrid();
+    // 画面ロック
+    grid._requestStart();
+    grid.dataSource.read();
+}
+// 取得ユーザ後処理
+function afterUser(result){
+    // kendo UIツール
+    let {options} = this;
+    // エラーメッセージ初期化
+    $j(".message.errorM3").hide();
+    // ユーザ結果初期化
+    if (result == null) result = [];
+    else if (result.legnth > 0){
+        // ユーザ警告あり
+        if (result[0].warn != undefined && result[0].warn != '') {
+            // エラーメッセージ表示
+            $j(".message.errorM3").show();
+            // エラーメッセージ内容設定
+            $j(".errorText").text(result[0].warn);
+            // エラー結果削除
+            result.splice(0,1);
+        }
+    }
+    // kendo UI内容作成
+    options.success(result);
+    window.ORG_DATA = result;
+}
+// 連携中心
+function remoteCenter(type,data,callback){
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.PageAuthConfigCtrl.remoteCenter}", type,data , function(result, event){
+        if(event.type == 'exception') {
+           // alert(event.message);
+        } else {
+        }
+        if (callback) callback(result);
+    });
+}
+function onDepartChange(){}
+// チェックボックス機能対応
+function chgGridItem(){
+    // 該当チェックボックス対象
+    var $target = $j(event.currentTarget);
+    // 機能対象名
+    var fieldName = $target.attr("name");
+    // データID
+    var uid = $target.closest("tr").attr("data-uid");
+    // ツール取得
+    var grid = $j("#grid").getKendoGrid();
+    // リストデータ取得
+    var item = grid.dataSource.getByUid(uid);
+    // 更新前の値設定
+    orgFieldSet(item,fieldName);
+    // item.set(fieldName,$target.is(":checked"));
+    // 更新字段設定
+    dirtySet(item,fieldName,false,$target.is(":checked"));
+}
+// 更新前の値設定
+function orgFieldSet(item,fieldName){
+    var orgFiledNm = "org" + fieldName;
+    if (!(orgFiledNm in item)) item[orgFiledNm] = item.get(fieldName);
+}
+// 更新字段設定
+function dirtySet(item,fieldName,setFlg,val){
+    if (item.dirtyFields == undefined) item.dirtyFields = [];
+        var index = $j.inArray(fieldName,item.dirtyFields);
+        var orgFiledNm = "org" + fieldName;
+        // 更新チェック
+    if (item.get(orgFiledNm) != val) {
+            // 更新字段追加
+            if (index < 0) item.dirtyFields.push(fieldName);
+        } else {
+            // 未変更の場合、字段作成
+            item.dirtyFields.splice(index,1);
+        }
+        // 更新フラグ設定
+    if (setFlg) {
+        item.dirty = item.dirtyFields.length > 0;
+        item[fieldName] = val;
+    } else {
+        item.dirty = item.dirtyFields.length > 0;
+        item.set(fieldName,val);
+    }
+}
+// チェックボックス一括設定機能対応
+function chgGroupItem(){
+    // 該当チェックボックス対象
+    var $target = $j(event.currentTarget);
+    // 機能対象名
+    var fieldName = $target.attr("name");
+    // 全部グループ対象取得
+    var groups = $j("tr.k-grouping-row");
+    // 該当チェックボックスのグループ対象取得
+    var curRow = $target.closest("tr");
+    // グループ行の番号
+    var rowIdx = groups.index(curRow);
+    // ツール取得
+    var grid = $j("#grid").getKendoGrid();
+    grid._requestStart();
+    var group = grid._groupRows[rowIdx];
+    var changeRoom = {groups:groups,i:rowIdx,ds:$j.extend({},grid.dataSource)};
+    changeRoom[fieldName] = $target.is(":checked");
+    // 一括状態設定
+    var newDs = setGroupItems.call(changeRoom,group,curRow);
+    var kendDs = new kendo.data.DataSource({
+        options:newDs.options,
+        // 変更後データ
+        data:newDs.data(),
+        group:newDs.group()
+    });
+    grid.setDataSource(kendDs);
+}
+// 一括状態設定
+function setGroupItems(group,$group){
+    var {hadRoomFlg,hadTimeTable,hadTaskFlg,groups,i,ds} = this;
+    if ("items" in group) {
+        for (var j = 0 ; j < group.items.length; j++){
+            var nextGroup = group.items[j];
+                var item = group.items[j];
+                var dataIem = ds.getByUid(item.uid);
+                // 指定内容設定
+                changeVal(dataIem,hadRoomFlg,hadTimeTable,hadTaskFlg);
+        }
+    }
+    return ds;
+}
+// 指定内容設定
+function changeVal(dataIem,hadRoomFlg,hadTimeTable,hadTaskFlg){
+    var chgArr = null;
+    var chgValue = null;
+    if (hadRoomFlg != undefined) {
+        chgArr = 'hadRoomFlg';
+        chgValue = hadRoomFlg;
+    }
+    if (hadTimeTable != undefined) {
+        chgArr = 'hadTimeTable';
+        chgValue = hadTimeTable;
+    }
+    if (hadTaskFlg != undefined) {
+        chgArr = 'hadTaskFlg';
+        chgValue = hadTaskFlg;
+    }
+        // 更新前の値設定
+    orgFieldSet(dataIem,'hadRoomFlg');
+    // 更新字段設定
+    dirtySet(dataIem,chgArr,true,chgValue);
+        }
+// ボタン状態刷新
+function refreshButtonStatus(){
+    if ($j(".k-dirty").length > 0){
+        $j("#saveBtn").removeClass("disabledBtn");
+        $j("#cancelBtn").show();
+    } else {
+        $j("#saveBtn").addClass("disabledBtn");
+        $j("#cancelBtn").hide();
+    }
+}
+</script>        
+<script type="text/x-kendo-template" id="roomTemp">
+    #if (data.dirtyFields && data.dirtyFields.includes('hadRoomFlg')) {# <span class="k-dirty"></span> #}#
+    <label class="switch">#if (hadRoomFlg){#<input type="checkbox" name="hadRoomFlg" onclick="chgGridItem()"  checked="checked"/> <span title="画面編集可能" class="slider round"></span> #} else {#<input type="checkbox"  name="hadRoomFlg" onclick="chgGridItem()" /> <span title="画面読み込み専用" class="slider round"></span>#}#</label>
+</script>
+<script type="text/x-kendo-template" id="timeTemp">
+    #if (data.dirtyFields && data.dirtyFields.includes('hadTimeTable')) {# <span class="k-dirty"></span> #}#
+    <label class="switch">#if (hadTimeTable){#<input type="checkbox" name="hadTimeTable" onclick="chgGridItem()"  checked="checked"/><span title="画面編集可能" class="slider round"></span> #} else {#<input type="checkbox" name="hadTimeTable" onclick="chgGridItem()" /> <span title="画面読み込み専用" class="slider round"></span>#}#</label>
+</script>
+<script type="text/x-kendo-template" id="taskTemp">
+    #if (data.dirtyFields && data.dirtyFields.includes('hadTaskFlg')){# <span class="k-dirty"></span> #}#
+    <label class="switch">#if (hadTaskFlg){#<input type="checkbox"  name="hadTaskFlg" onclick="chgGridItem()"  checked="checked"/><span title="画面編集可能" class="slider round"></span> #} else {#<input type="checkbox" name="hadTaskFlg" onclick="chgGridItem()"/> <span title="画面読み込み専用" class="slider round"></span>#}#</label>
+</script>
+<script type="text/x-kendo-template" id="groupTemplate">
+    #:value# 
+    <span class="groupSpan" style="width:55px;">
+    <label class="switch">
+        <input type="checkbox" name="hadTaskFlg" onclick="chgGroupItem()" checked="checked"/>
+        <span class="slider round"></span>
+    </label>
+    </span>
+    <span class="groupSpan" style="width:80px;margin-right: 6px;">
+        <label class="switch">
+            <input type="checkbox" name="hadTimeTable" onclick="chgGroupItem()" checked="checked"/>
+            <span class="slider round"></span>
+        </label>
+    </span>
+    <span class="groupSpan" style="width:80px;margin-right: 10px;">
+        <label class="switch" >
+            <input type="checkbox" name="hadRoomFlg" onclick="chgGroupItem()" checked="checked"/>
+            <span class="slider round"></span>
+        </label>
+    </span>
+</script>
+
+<apex:outputlabel value="{!errorMessage}" rendered="{!Not(isShowPageDetail)}" />
+<apex:pageBlock rendered="{!isShowPageDetail}">
+<apex:form >
+<div class="searchPanel">
+    <div class="message errorM3" id="inputFormErrorMsg" role="alert" style="display:none;">
+            <table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+                <tbody>
+                    <tr valign="top">
+                        <td><img src="/img/msg_icons/warning16.png" title="ERROR"/></td>
+                        <td class="messageCell">
+                            <div class="messageText">
+                                <span><h4>警告:</h4></span><span class="errorText"></span><br/>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    <apex:inputHidden value="{!branchShopNm}" id="multiDepartCds"/>
+    <apex:inputHidden value="{!profileIds}" id="hidProfileIds"/>
+    <c:MultiSelectComp dataSourceId="branchShopCd" assingTargetId="multiDepartCds" callBackFunction="onDepartChange" selectedValue="{!branchShopNm}" rendered="{!branchShopLst.size > 0}" />
+    <apex:selectList size="1" value="{!branchShopNm}" rendered="{!branchShopLst.size > 0}" id="branchShopCd" html-multiple="multiple" >
+        <!-- All -->    
+        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_008_0003}"/>
+        <apex:selectOptions value="{!branchShopLst}" />
+    </apex:selectList>
+    <c:MultiSelectComp dataSourceId="profileId" assingTargetId="hidProfileIds" callBackFunction="onDepartChange" selectedValue="{!profileIds}" rendered="{!profileLst.size > 0}" />
+    <apex:selectList size="1" value="{!profileIds}" rendered="{!profileLst.size > 0}" id="profileId" html-multiple="multiple" >
+        <!-- All -->    
+        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_008_0003}"/>
+        <apex:selectOptions value="{!profileLst}" />
+    </apex:selectList>
+    <input type="button" class="k-button" value="検索" onclick="searchGrid()"/>
+    <input type="button" class="k-button disabledBtn" id="saveBtn" style="float:right;width:100px" value="保存" onclick="saveGrid()"/>
+    <input type="button" class="k-button" id="cancelBtn" style="float:right;display:none;width:100px;margin-right:10px;" value="キャンセル" onclick="cancelGrid()"/>
+</div>
+</apex:form>
+</apex:pageBlock>
+<apex:pageBlock rendered="{!isShowPageDetail}">
+<div id="grid"></div>
+</apex:pageBlock>
+</apex:page>

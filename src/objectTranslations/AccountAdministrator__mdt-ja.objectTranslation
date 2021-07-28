@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>会計ロック除外者設定</value>
+    </caseValues>
+    <fields>
+        <help><!-- ユーザのユーザ名を設定する --></help>
+        <label><!-- ユーザ名 --></label>
+        <name>AdministratorsName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 除外者はどの店舗の会計書を編集できるの店舗コードを設定する
+空欄場合、全て店舗の会計書を編集できる
+複数設定可能、複数場合、カンマで複数店舗コードを定義する
+注：共通定義：「店舗ごとの予約・会計権限」項目設定が優先
+　　「店舗ごとの予約・会計権限」設定により、該当ユーザは指定店舗の会計書権限がない場合、
+　　該当項目に店舗コード定義しでも、会計編集不可です --></help>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 無効 --></label>
+        <name>isInvalidFlg__c</name>
+    </fields>
+</CustomObjectTranslation>

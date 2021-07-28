@@ -1,0 +1,10 @@
+<apex:page standardcontroller="Lead__c" extensions="RepGeneralExtendCtrl" showHeader="false" sidebar="false">
+<apex:form >
+    <apex:actionFunction name="actSaveParamToLead" action="{!saveParamToLead}"/>
+    <script>
+    window.onload = function () {
+        actSaveParamToLead();
+    };
+    </script>
+</apex:form>
+</apex:page>

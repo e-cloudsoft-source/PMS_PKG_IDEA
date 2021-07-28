@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>Hierarchy</customSettingsType>
+    <description>指定期間の仕訳明細はFREEE環境に自動連携機能のパラメータを設定する</description>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>DeveloperName__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>認証プロバイダ設定に指定のURL接尾辞を設定する</inlineHelpText>
+        <label>認証プロバイダをURL 接尾辞</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>DisplayName__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>FREEE環境の事業所名を入力してください（注：FREEE連携アプリを設定ありの事業所）</inlineHelpText>
+        <label>事業所名(屋号)</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>OffsetVal__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>仕訳明細連携対象月計算用パラメータ値を設定 
+例:「-1」指定、バッチは2019/12/15日起動する場合、
+売上計上日が2019/11/01-2019/11/30間の仕訳明細はFREEEへ連携</inlineHelpText>
+        <label>スケジュール指定処理月</label>
+        <precision>4</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ShopCode__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>どの店舗の仕訳明細をFREEE側に連携する店舗コードを定義する、カンマで複数店舗コードを定義可能、定義省略可能、空欄の場合、全て店舗の仕訳明細はFREEEの指定の事業所へ連携する
+例：複数店舗(01,02,03)仕訳明細をFREEEへ連携する
+     01,02,03</inlineHelpText>
+        <label>店舗コード</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <label>FREEE連携設定</label>
+    <visibility>Public</visibility>
+</CustomObject>

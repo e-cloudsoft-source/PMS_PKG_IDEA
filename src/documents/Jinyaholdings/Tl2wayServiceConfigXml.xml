@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、TLのAPIを利用して、TL側へ通信を行う
+     多店舗の場合、店舗毎に設定が必要場合、
+　　　タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容を修正する
+     TL連携機能が要らない場合、タグ「<SHOP>」を含める内容を全部削除して、「ドキュメント」→「Jinyaholdings」→「TL2WAY接続情報設定」→「ドキュメントの置き換え」で更新する
+書式：
+	COMMON:					TL機能共通定義情報
+		STOCKINTERVAL:			在庫調整機能は次の処理時間間隔秒数（デフォルト：60秒）
+		STOCKDELETEVAL:			在庫調整履歴情報の削除対象期間：履歴データの調整日は該当バッチ処理日からXX日前のデータを削除する（デフォルト：14日前）
+		LEADINTERVAL:			予約取込API呼出時間間隔秒数（デフォルト：60秒）
+		LEADDELETEVAL:			予約取込機能連携結果情報の削除対象期間：履歴データの作成日は該当バッチ処理日からXX日前のデータを削除する（デフォルト：14日前）
+		SERVICE_URL:			TLサビースサイトURL、
+								注意；該当URLは必ずSalesforce側の「設定」→「管理者設定」→「セキュリティのコントロール」→「リモートサイトの設定」に設定してください。
+	SHOPCODE:        		店舗コード:支店がない場合、空白のままに定義する、多店舗の場合、店舗コードを設定ください
+		APPCONFIG:				TLサビースへログイン情報(必須)
+			SYSTEMID:			TLから貰えた「システム識別ID」
+			USERID:				TLから貰えた「連動用ユーザーID」
+			PASSWORD:			TLから貰えた「連動用パスワード」
+			UCACTISSYNC:		予約取り込みのとき、変更の予約、キャンセルの予約を取り込むかどうか制御パラメータ、店舗別定義定義
+									TRUE: 予約変更、キャンセルの予約情報を取込み（デフォルト値）
+									FALSE:予約変更、キャンセルの予約情報を取り込まない
+			ROOMAUTOASSIGN:		部屋自動割当機能制御フラグ（部屋項目：自動割当優先順位　設定順番で割当）
+									TRUE:部屋タイプにより、空い部屋を自動的に予約に割当する
+									FALSE:部屋を自動割当しない(デフォルト値)
+			ROOMSORT:			上記部屋を割当する場合、部屋の割当の並び順
+									ASC:部屋項目の「自動割当優先順位」昇順で部屋割当（デフォルト値）
+									DESC:部屋項目の「自動割当優先順位」降順で部屋割当
+			MAILDIVFLG:			メール本文設定フラグ
+									TRUE：N部屋の場合、メール本文は親部屋のご予約に設定する
+									FALSE:N部屋の場合、メール本文は全て部屋のご予約に設定する（デフォルト値）
+			GENDERDIVEXT:		男女割区分判断ロジックの補足定義、定義のキーワードは指定範囲の文字列の中に含めるとき、該当予約情報は男女割区別すると判断する
+				BEG：				メール本文情報から該当キーワード以後の文字列を取得する（必須）
+				BEG2：				上記BEGで取得の文字列から該当キーワード以後の文字列を取得する
+				END：				上記BEGとBEGで取得の文字列から該当キーワード以前の文字列を戻る(必須、デフォル値は[\n])
+			DEFAULTVALUES:		ご予約情報を自動取込の場合、指定項目に対して、デフォルト値を設定する
+				LEADFIELD:				複数項目のデフォルト値設定可能
+					COONDITION:			新規予約情報のデフォルト値設定の条件を指定する(2017.05.30新規追加)、定義省略可、該当タグに設定しない場合、無条件にデフォルト値を設定する
+										注：COONDITIONタグ内容指定の場合、最大５０件指定可能
+					APIFIELDNAME:		ご予約オブジェクトの項目API名
+					APIFIELDVALUE:		デフォルト値(指定可能の項目タイプ：テキスト、数値）
+										例：<DEFAULTVALUES>
+												<LEADFIELD>
+													<APIFIELDNAME>Field390__c</APIFIELDNAME>
+													<APIFIELDVALUE>担当者不明</APIFIELDVALUE>
+												</LEADFIELD>
+											</DEFAULTVALUES>
+			RELA_STOCK_REQ_SYNC: リアル（旅行会社）在庫更新要求を発行する・しない制御パラメータ、デフォルト値：発行しない
+									TRUE:リアル（旅行会社）の在庫更新要求はTL側へ発行する
+									FALSE:リアル（旅行会社）の在庫更新要求はTL側へ発行しない（デフォルト値)
+			CHGDT_ROOMCLR:		日程変更しても、既にアサイン済みの部屋情報をクリアする・しないフラグ　(2017/09/01 新規追加)
+                                    TRUE:部屋クリアを行う
+                                    FALSE:部屋クリアを行わない（デフォルト値)
+            GENERAL_CHILD_LEAD: 子部屋関連間機能定義  (2017/09/01 新規追加)
+                CHILD_LINK_RULE:    変更通知が来た際に、どの子部屋の予約情報を連動されるの判別用ルールを定義する
+                
+            XMLPOINTNAMETOEST:  ポイント取込とき、見積明細の商品名称はXMLタグ「PointsDiscountName」値または会計商品の商品目で 設定切替フラグ(デフォルト：会計商品の商品名で設定する）(2017/10/16)
+            PER_ROOM_PAXCOUNT_CAL:　予約人数はXMLの各人数タグ合計値で計算して設定する・しないフラグ(TRUE:予約人数＝大人人員(男性)+大人人員(女性)+子供A人数+子供B人数+子供C人数+子供D人数 合計で設定、FALSE:予約人数＝1室利用人数　で設定(デフォルト値))
+	    
+		ACCOUNTCONFIG:			予約取込み機能必須の関連会計商品コードの指定(指定の会計商品は事前登録が必要、登録しないと、入湯税とサビース料情報は見積明細へ自動反映できません)
+			NYUUTOUACCOUNT:		入湯税会計商品コード        Salesforce側に該当会計商品の商品コードは該当タグに指定する
+			SERVICEACCOUNT:		サビース料会計商品コード		Salesforce側に該当会計商品の商品コードは該当タグに指定する
+
+		PLANCODE_CONVERT:		AGT単位のパッケージコード->SFのPlanNoの変換表:定義省略可能、定義しないと、パッケージコード&&AGTコード&&店舗別でプラン検索を行う
+            ESTNAMEBYSF(非必須)      属性：取込した見積明細の商品名は変換後のプラン名で設定するがどうか切替フラグ(2017/07/18新規追加)
+                                        TRUE：変換後のプラン名で見積明細の商品名を設定する、
+                                        FALSE:XMLのプラン名そで見積明細の商品名を設定する（デフォルト値）   
+			AGT:				販売先単位のプラン変換情報の定義
+				NAME:				販売先名：下記記載している販売名から「Name」属性を設定してください
+									[TLサポートしている販売先名一覧]
+									＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+									JTB,近畿日本ツーリスト,日本旅行,トップツアー,農協観光,名鉄観光,ＪＲ東海ツアーズ,全日空(ANAス カイホリデー分),ＪＲ北海道,ＪＲ東日本,ＪＲ四国,ＪＲ九州,ＪＲ共同,
+									東武トラベル,JALツアーズ,yoyaQ,フジトラベル,ホワイト・ベアーファ ミリー,WELBOX,ツアーランド・たびらい,ちゅらとく,JREH-GE,e-concierge,RJ-win,Booking.com,
+									スマ宿(H.I.S.),REVIVE,阪急交通社,ジャル パック,Agoda,Expedia,Pegasus,RatesToGo,共通販売,るるぶトラベル(旧e-Hotel),オリエンタルランド,e宿,
+									小田急トラベル,HRS,Yahoo!トラベ ル,楽天トラベル,TYMS/R-with's,Dynatech,エイチ・アイ・エス,じゃらんnet,Ozmall,Ctrip,ビッグホリデー,宿ぷらざ,エアリーサイト,
+									沖縄 ツーリスト,ぐるなびトラベル,HPDS,宿シス,TENAWAN,一休.com,リザーブゲート,i-honex,ベストリザーブ・宿ぷらざ,予約番,SUITE,WILLER  TRAVEL,ベネフィット・ステーション,
+									予約プロ,Yadvance!,らくだ倶楽部,Smart/Optima,たび寅,JTO,MAPPLEトラベル,全日空(@ホテル・旅作分),西鉄旅行
+									＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊					
+			CONVERT:			変換定義情報
+				AGTPACKAGECODE:		販売先側に販売しているプランのパッケージコード
+				SFPLANNO:			Salesforce側にプランオブジェクトのPlanNo値
+		CONTACT_INFO_PARSE:		メール本文内容から指定キーワードにより、パーサーした内容はお客様の指定の項目(誕生日、携帯電話)に更新、設定
+			PARSE_LOGIC_INFO		解析ロジック
+					AGTCODE			解析ロジック属性：AGTCODE、該当設定により、取り込みXMLのエンジンコード（SalesOfficeCompanyCode）と比較する、一致すると、該当解析ロジックを実施する
+									属性定義省略可、属性未定義の場合、エンジンコードチェックなし、常に解析ロジックを実施する
+									書式：<PARSE_LOGIC_INFO AGTCODE="CODE1,ACODE2"> 複数エンジンコードを定義可能
+				KEYWORD:			誕生日/携帯電話分析対象情報存在するがどうか判断用キーワード、該当キーワードが複数定義可能、「;」で連携する
+									例：誕生日項目に対して、新規キーワード(出生年月日)を追加したい場合、下記ように定義定義可能
+									<KEYWORD>誕生日;Birthday</KEYWORD> から　<KEYWORD>誕生日;Birthday;出生年月日</KEYWORD>
+				FORMAT				解析用の正規表現、複数定義可能、「;」で連携する
+				TOFIELD				お客様の更新先の項目判別用、変更不可
+				EXCLUDEVAL			取込み対象外項目値を定義可能、
+									例：ネットから取り込みの誕生日は1900-01-01の日付は取り込まない場合、
+									<EXCLUDEVAL>1900-01-01</EXCLUDEVAL>を定義すると、制御可能
+									注： 誕生日の場合、書式：YYYY-MM-DD　または YYYY/MM/DD
+										携帯電話の場合、書式：99988881111 または 999-9999-9999
+		PAYMENT_CONVERTS:		事前決済区分とAGTコードにより、指定の会計商品を取り込み
+				POINT_CONVERT		割引額(ポイント・補助金)金額に対して、事前決済区分とAGTコードにより、取り込みしたい会計商品コード情報を定義する
+					PAYKBN(非必須)	属性：事前決済区分　「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 
+										該当属性設定が省略可能、省略の場合、全ての事前決済区分は該当変換ルールを適当する
+					CONVERT(必須)	AGT単位で取り込むしたいの会計商品コードを定義する（該当商品は事前登録が必要）
+						AGTCODE(非必須)	属性：AGTコード　指定の場合、該当AGTコードと一致のみ、割引金額は指定の会計商品で取り込むする
+										該当属性設定が省略可能、省略の場合、全てのAGTは該当変換ルールを適当する
+				PAYMENT_CONVERT		事前決済金額に対して、事前決済区分とAGTコードにより、取り込みしたい会計商品コード情報を定義する
+					PAYKBN(必須)		属性：事前決済区分　「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 
+										該当属性設定は「0」以外の区分値を指定が必要
+					CONVERT(必須)	AGT単位で取り込むしたいの会計商品コードを定義する（該当商品は事前登録が必要）
+						AGTCODE(非必須)	属性：AGTコード　指定の場合、該当AGTコードと一致のみ、割引金額は指定の会計商品で取り込むする
+										該当属性設定が省略可能、省略の場合、全てのAGTは該当変換ルールを適当する	
+		CHILD_PLAN_CONVERT:		お子様プラン自動取り込み機能定義情報
+			MATCH:				お子様プランのPlanNo定義する
+				RATE:			子供一人料金/大人一人料金のパーセント値
+								例：	<CHILD_PLAN_CONVERT>
+									<MATCH RATE="70">00000702</MATCH>
+									</CHILD_PLAN_CONVERT>
+									大人一人料金:30000円,子供A料金は21000円、21000/3000=70パーセント、
+									該当数値は上記のRATEが一致するとめ、見積明細に、PlanNoが[00000702]のプランは見積明細に反映する
+				PRICE:			子供一人料金金額(2017/03/02新規追加)
+								例：	<CHILD_PLAN_CONVERT>
+									<MATCH PRICE="5000">00000702</MATCH>
+									</CHILD_PLAN_CONVERT>
+									子供A料金は5000円の場合、
+									該当数値は上記のPRICEが一致するとめ、見積明細に、PlanNoが[00000702]のプランは見積明細に反映する
+				NAMEONLY		子供プランへの置き換え設定を行わず、入ってきたプラン名を見積明細に反映する
+									TRUE:定義値は見積明細の商品目として設定する
+									FALSE：定義義はお子様プランのPlanNoと認識して、子供プランを置き換え
+								例1：<MATCH RATE="50" NAMEONLY="TRUE">小学生宿泊代</MATCH>
+								例2：<MATCH PRICE="3000" NAMEONLY="TRUE">小学生宿泊代</MATCH>
+				注：RATEとPRICEは混在に設定可能、RATEの比較結果は優先
+2016.06.30リリース機能追加
+			NO01.楽天AGTからお客様住所情報を取り込み機能、必要場合、タグ「CONTACT_INFO_PARSE」に含めている設定情報のコメントアウトを外して、設定情報は有効になる
+			<PARSE_LOGIC_INFO AGTCODE='61'>
+				<KEYWORD>住所:</KEYWORD>	
+				<FORMAT>([0-9]{3}-[0-9]{4})[)]?(.+)</FORMAT>
+				<TOFIELD>Contact.MailingAddress</TOFIELD>
+				<ENDKEY>\n</ENDKEY>
+			</PARSE_LOGIC_INFO>
+2016.08.04リリース機能追加
+     	CHANNEL_CONVERTS:		AGTコードからSalesforce側の予約チャネルへ変換ルールの定義
+     		CONVERT:			変更後のSalesforce側の予約チャネル項目の値
+     			AGTCODE:		AGTコード(XMLの旅行会社コード[SalesOfficeCompanyCode])
+		例：
+		<CHANNEL_CONVERTS>
+			<CONVERT AGTCODE="80">AGT[一休]</CONVERT>
+			<CONVERT AGTCODE="88">AGT[予約プロ]</CONVERT>
+		</CHANNEL_CONVERTS>
+2017.01.17リリース機能追加
+		MAILDIVFLG:				メール本文設定フラグ
+		メール本文の携帯電話のキーに「TEL:」を追加すること
+2017.03.02リリース機能追加
+		PRICE:					子供プランは別に金額による紐付けの場合、比較用金額
+		例:
+		<CHILD_PLAN_CONVERT>
+			<MATCH RATE="70" PRICE="5000">00000702</MATCH>	70% または　子供利用金額は5000の場合、PlanNoが[00000702]のプランを紐付く
+			<MATCH RATE="50">00000806</MATCH>				50%、PlanNoが[00000806]のプランを紐付く
+			<MATCH PRICE="3000">00000806</MATCH>			子供利用金額は3000の場合、PlanNoが[00000806]のプランを紐付く
+			<MATCH RATE="30">00000807</MATCH>				30%、PlanNoが[00000807]のプランを紐付く
+			<MATCH RATE="10">00000805</MATCH>				10%、PlanNoが[00000805]のプランを紐付く
+		</CHILD_PLAN_CONVERT>
+2017.05.30リリース機能追加(指定条件で新規予約へデフォルト値設定できる）
+		例：予約タイプ項目に対して、自動設定を行う
+			条件１：泊数は１以上場合、「宿泊」で予約タイプ項目へ設定する　
+			条件２：泊数は０の場合、「日帰り」で予約タイプ項目へ設定する　
+			設定例：
+			<DEFAULTVALUES>
+				<LEADFIELD>
+		            <COONDITION>
+		                StayNightCal__c > 0
+		            </COONDITION>
+					<APIFIELDNAME>ReservedType__c</APIFIELDNAME>
+					<APIFIELDVALUE>宿泊</APIFIELDVALUE>
+				</LEADFIELD>
+				<LEADFIELD>
+		            <COONDITION>
+		                StayNightCal__c = 0
+		            </COONDITION>
+					<APIFIELDNAME>ReservedType__c</APIFIELDNAME>
+					<APIFIELDVALUE>日帰り</APIFIELDVALUE>
+				</LEADFIELD>
+			</DEFAULTVALUES>
+2017.09.01リリース機能追加（変更通知（２泊→１泊に変更）が来た際に、子部屋２日目の夕食レストランの席がキャンセルできるように改善対応)
+        例：下記条件で子部屋データとして、判別ルールを定義する
+            同じ予約インデックスに、予約タイプ：宿泊、予約人数：０人、宿泊数：０泊、部屋タイプの#SEQ(61[夜 竹河 4名テーブル]、52[夜 富月 2名テーブル]、51[夜 富月 4名テーブル])
+            <GENERAL_CHILD_LEAD>
+                <CHILD_LINK_RULE>ReservedType__c = '宿泊' AND StayPersons__c = 0 AND StayNightCal__c = 0 AND refTypeOfRooms__r.Seq__c in (51,52,61)</CHILD_LINK_RULE>
+            </GENERAL_CHILD_LEAD>
+            子部屋判別ルールは複数存在する場合、下記ように複数ルールを定義可能
+            ①同じ予約インデックスに、予約タイプ：宿泊、予約人数：０人、宿泊数：０泊、部屋タイプの#SEQ(61[夜 竹河 4名テーブル]、52[夜 富月 2名テーブル]、51[夜 富月 4名テーブル])
+            ②同じ予約インデックスに、予約タイプ：日帰り、予約人数：０人、宿泊数：０泊、部屋タイプの#SEQ(31[昼 竹河 4名テーブル]、22[昼 富月 2名テーブル]、21[昼 富月 4名テーブル])
+            <GENERAL_CHILD_LEAD>
+                <CHILD_LINK_RULE>ReservedType__c = '宿泊' AND StayPersons__c = 0 AND StayNightCal__c = 0 AND refTypeOfRooms__r.Seq__c in (51,52,61)</CHILD_LINK_RULE>
+                <CHILD_LINK_RULE>ReservedType__c = '日帰り' AND StayPersons__c = 0 AND StayNightCal__c = 0 AND refTypeOfRooms__r.Seq__c in (31,22,21)</CHILD_LINK_RULE>
+            </GENERAL_CHILD_LEAD>  
+2017.12.31リリース機能追加（TL2way在庫連携機能、SF側1部屋タイプからTLのN部屋タイプへマッピングできるように改善対応）
+        STOCK_CONVERT_ROOMTYPECODE
+2018.05.15リリース機能追加（男女不明の場合、指定AGTにより、男、女、子供取り込みできるように改善対応
+		GENDERDIVFLG
+2018.07.31リリース機能追加（予約人数はXMLの各人数タグ合計値で計算して設定する・しないフラグ)
+		APPCONFIG→PER_ROOM_PAXCOUNT_CAL
+2018.10.02リリース機能追加（到着時刻は２４時間以後の場合、指定の到着時間に入り替えで取り込みを行う
+		APPCONFIG→MAX24REPTIME
+2018.10.31リリース機能追加（予約変更通知の部屋タイプ変更すると、部屋割当済みでも部屋タイプを自動変更できるように改善対応）
+		APPCONFIG→CHGROOMTYPE
+2018.12.20リリース機能追加（「予約人数」欄に子供の人数を含めたくない機能追加）
+		APPCONFIG→CHILD_COUNT_CAL
+2019.04.30リリース機能追加（取り込まれた支払いメディアの反映を宿泊の最終日にする）
+		APPCONFIG→PAYMEDIATOLASTDAY
+2019.07.19リリース機能追加（予約取り込み時に子供プランの置き換えではなく、プランの表示名だけを変更機能設定タグ）
+		CHILD_PLAN_CONVERT→MATCH→NAMEONLY
+2019.10.15リリース機能追加（ネットからの取り込みで、お客様をすべて新規で取り込み機能切り替え用タグ）
+		APPCONFIG→CONTACT_ALWAYS_NEW
+2019.11.30リリース機能追加（変更通知の場合、見積明細の変更を反映できるように改善切り替え用タグ）
+		APPCONFIG→RESET_ESTITEMS
+2019.12.30リリース機能追加（ローマ字で入ってきたお客様名をカタカナに変換機能切り替え用タグ）
+		APPCONFIG→CHGROMANTOKANA
+2020.10.30リリース機能追加（OTAからの予約取り込み時に「楽天ポイント」と「楽天クーポン」が分かれて見積明細へ反映する）
+		PAYMENT_CONVERTS→POINT_CONVERT→POINTNAME 属性タグ新規追加、カンマで複数名定義可能
+		機能１：取り込みXMLの「PointsDiscountName」タグ値XMLに該当属性タグ「POINTNAME」値が一致場合、定義した会計商品で見積明細へ反映する
+		機能２；SF側の会計商品名は取り込みXMLの「PointsDiscountName」タグ値一致場合、「POINTNAME」値一致しなくでも、該当会計商品で見積明細へ反映する
+		例1：「PointsDiscountName」タグ値は"【国内宿泊】＜GoToトラベル＞"または"【国内日帰り】＜GoToトラベル＞"場合、商品コードが「M99002」の商品は見積明細へ反映
+		　　 「PointsDiscountName」タグ値は"【高級宿】5と0のつく日5%OFFク"場合、商品コードが「M99003」の商品は見積明細へ反映
+		<POINT_CONVERT>
+			<CONVERT AGTCODE="60" POINTNAME="【国内宿泊】＜GoToトラベル＞,【国内日帰り】＜GoToトラベル＞">M99002</CONVERT>
+		</POINT_CONVERT>
+		<POINT_CONVERT>
+			<CONVERT AGTCODE="60" POINTNAME="【高級宿】5と0のつく日5%OFFク">M99003</CONVERT>
+		</POINT_CONVERT>
+		例2：「PointsDiscountName」タグ値は"＜GoToトラベル＞"場合、会計商品マスタに商品名が「＜GoToトラベル＞」データ存在場合、該当会計商品「＜GoToトラベル＞」は見積明細へ反映する
+-->
+	<COMMON>
+		<!-- 在庫調整機能は次の処理時間間隔秒数（デフォルト：60秒） -->
+		<STOCKINTERVAL>90</STOCKINTERVAL>
+		<!-- 在庫調整履歴情報削除期間：履歴データの調整日のXX日前（デフォルト：１４日前） -->
+		<STOCKDELETEVAL>-14</STOCKDELETEVAL>
+		<!-- 予約取込API呼出時間間隔秒数（デフォルト：60秒） -->
+		<LEADINTERVAL>90</LEADINTERVAL>
+		<!-- 予約取込機能連携結果情報削除期間：履歴データの作成日のXX日前（デフォルト：１４日前） -->
+		<LEADDELETEVAL>-14</LEADDELETEVAL>
+		<!-- エンドポイント -->
+		<SERVICE_URL>https://xxxxx.tl-lincoln.net/pmsservice/V1</SERVICE_URL>
+	</COMMON>
+	<SHOP>
+		<!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+		<SHOPCODE>02</SHOPCODE>
+		<APPCONFIG>
+			<!-- TL側にログイン情報[店舗別] -->
+			<SYSTEMID>XXXXXXX</SYSTEMID>
+			<USERID>YYYYYYY</USERID>
+			<PASSWORD>ZZZZZZZ</PASSWORD>
+			<!-- 予約変更、キャンセルの場合、予約を取り込むかどうかをパラメータ -->
+			<UCACTISSYNC>TRUE</UCACTISSYNC>
+			<!-- デフォルト値自動設定項目 -->
+			<DEFAULTVALUES>
+				<LEADFIELD>
+					<APIFIELDNAME></APIFIELDNAME>
+					<APIFIELDVALUE></APIFIELDVALUE>
+				</LEADFIELD>
+			</DEFAULTVALUES>
+			<!-- チェックイン時刻は24時以後の場合、自動入り替え時刻を設定する、未設定の場合、該当機能無効、
+				書式：HH:MM 
+				例：到着時刻は24：30でも、到着時間は23：55として取り込みを行う
+			-->
+			<MAX24REPTIME>23:55</MAX24REPTIME>
+			<!-- 予約変更通知の際に、部屋タイプを変更すると、既存予約の部屋タイプを自動変更する・しないフラグ
+					TRUE:予約変更通知の部屋タイプを変更とき、PMS側の既存予約の部屋が割当済み場合、既存予約の部屋タイプを更新する
+					FALSE:予約変更通知の部屋タイプを変更とき、PMS側の既存予約の部屋が割当済み場合、既存予約の部屋タイプを更新しない(デフォルト)
+					注：該当予約の部屋が割当されない場合、予約変更通知の際に、部屋タイプを変更すると、既存予約の部屋タイプが常に変更される、該当フラグと関係ない
+			 -->
+			<CHGROOMTYPE>FALSE</CHGROOMTYPE>
+			<!-- 总人数根据定义的字段计算是否包含小孩的人数、不定义字段只计算大人的人数、没有tag计算大人和小孩的人数 -->
+			<!-- 2018.12.20 「予約人数」欄に子供の人数を含めたくない機能
+				例1:予約人数欄に大人人数のみを含めたい場合
+					<CHILD_COUNT_CAL></CHILD_COUNT_CAL>
+				例2:予約人数欄に大人人数、小人A,B人数を含めたい場合
+					<CHILD_COUNT_CAL>ChildFA__c,Childs__c</CHILD_COUNT_CAL>
+				例3:予約人数欄にすべて人数を含めたい場合
+					該当タグは定義なし
+			 -->
+			 <!-- 
+			<CHILD_COUNT_CAL></CHILD_COUNT_CAL>
+			 -->
+			 <!-- 取り込まれた支払いメディアの反映を宿泊の最終日にする・しないフラグ
+					TRUE:最終泊目に反映する
+					FALSE:１泊目に反映する（デフォルト値）
+			 -->
+			 <PAYMEDIATOLASTDAY>FALSE</PAYMEDIATOLASTDAY>
+			 <!-- 2019.10.15リリース機能追加（ネットからの取り込みで、お客様をすべて新規で取り込み機能切り替え用タグ）
+			 	TRUE:ご予約新規取り込み際に、お客様情報が常に新規作成する
+			 	FALSE:電話番号と重複ルールにより、既存お客様情報を自動判断する(デフォルト値)
+			  -->
+			 <CONTACT_ALWAYS_NEW>FALSE</CONTACT_ALWAYS_NEW>
+			 <!-- 2019/11/30 変更通知の場合、見積明細の変更を反映できるように改善 
+			 	TRUE:変更通知の場合、見積明細の変更を反映する
+			 	FALSE:変更通知の場合、見積明細の変更を反映しない(デフォルト値)
+			 -->
+			<RESET_ESTITEMS>FALSE</RESET_ESTITEMS>
+			<!-- 2019/12/30 ローマ字で入ってきたお客様名をカタカナに変換機能の追加改善
+				TRUE:新規の場合、ローマ字で入ってきたお客様名をカタカナに自動変換する
+			 	FALSE:新規の場合、ローマ字で入ってきたお客様名をカタカナに自動変換しない(デフォルト値)
+			 -->
+			<CHGROMANTOKANA>FALSE</CHGROMANTOKANA>
+		</APPCONFIG>
+		<ACCOUNTCONFIG>
+			<!-- 入湯税会計商品コード -->
+			<NYUUTOUACCOUNT></NYUUTOUACCOUNT>
+			<!-- サビース料会計商品コード -->
+			<SERVICEACCOUNT></SERVICEACCOUNT>
+		</ACCOUNTCONFIG>
+		<!-- メール本文Parse指定ロジック -->
+		<CONTACT_INFO_PARSE>
+			<PARSE_LOGIC_INFO AGTCODE=''>
+				<KEYWORD>携帯電話;Mobile Phone Number;TEL:</KEYWORD>	<!-- 携帯電話項目情報が存在するがどうか判断用キーワード -->
+				<FORMAT>((090|080|070)[-| ]?\d{4}[-| ]?\d{4})</FORMAT>	<!-- 解析用の正規表現定義する -->
+				<TOFIELD>Contact.Phone</TOFIELD>	<!-- お客様の更新先の項目、変更不可 -->
+				<EXCLUDEVAL></EXCLUDEVAL>
+			</PARSE_LOGIC_INFO>
+			<PARSE_LOGIC_INFO AGTCODE=''>
+				<KEYWORD>誕生日;Birthday</KEYWORD>	<!-- 誕生日項目情報が存在するがどうか判断用キーワード -->
+				<FORMAT>([0-9]{4})年([0-9]{1}|[0-9]{2})月([0-9]{1}|[0-9]{2})日;([0-9]{4})-([0-9]{1,2})-([0-9]{1,2});([0-9]{4})/([0-9]{1,2})/([0-9]{1,2})</FORMAT>
+				<TOFIELD>Contact.Birthday</TOFIELD>	<!-- お客様の更新先の項目、変更不可 -->
+				<EXCLUDEVAL>1900-01-01</EXCLUDEVAL>
+			</PARSE_LOGIC_INFO>
+			<!-- 楽天AGTの住所取り込み機能、必要場合、コメントアウトを外して、設定情報は有効になる -->
+			<!--
+			<PARSE_LOGIC_INFO AGTCODE='61'>
+				<KEYWORD>住所:</KEYWORD>	
+				<FORMAT>([0-9]{3}-[0-9]{4})[)]?(.+)</FORMAT>
+				<TOFIELD>Contact.MailingAddress</TOFIELD>
+				<ENDKEY>\n</ENDKEY>
+			</PARSE_LOGIC_INFO>
+			 -->
+		</CONTACT_INFO_PARSE>
+		<!-- 事前決済区分とAGTコードにより、指定の会計商品を取り込み -->
+		<PAYMENT_CONVERTS>
+			<!-- 引額(ポイント・補助金)金額に対して、事前決済区分とAGTコードにより、取り込みしたい会計商品コード情報を定義する -->
+			<POINT_CONVERT PAYKBN="0">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="80">M90201</CONVERT><!--一休ポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="3">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="80">M90201</CONVERT><!--一休ポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="2">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="80">M90201</CONVERT><!--一休ポイント-->
+			</POINT_CONVERT>
+
+			<POINT_CONVERT PAYKBN="0">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="66">M90202</CONVERT><!--じゃらんポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="3">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="66">M90202</CONVERT><!--じゃらんポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="2">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="66">M90202</CONVERT><!--じゃらんポイント-->
+			</POINT_CONVERT>
+
+			<POINT_CONVERT PAYKBN="0">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="90">M90203</CONVERT><!--らくだポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="3">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="90">M90203</CONVERT><!--らくだポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="2">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="90">M90203</CONVERT><!--らくだポイント-->
+			</POINT_CONVERT>
+
+			<POINT_CONVERT PAYKBN="0">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="01">M90205</CONVERT><!--JTBｸｰﾎﾟﾝ-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="3">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="01">M90205</CONVERT><!--JTBｸｰﾎﾟﾝ-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="2">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="01">M90205</CONVERT><!--JTBｸｰﾎﾟﾝ-->
+			</POINT_CONVERT>
+
+			<POINT_CONVERT PAYKBN="0">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="61">FM90200</CONVERT><!--楽天ポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="3">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="61">M90200</CONVERT><!--楽天ポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="2">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="61">M90200</CONVERT><!--楽天ポイント-->
+			</POINT_CONVERT>
+			
+			<POINT_CONVERT PAYKBN="0">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="51">M90204</CONVERT><!--るるぶポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="3">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="51">M90204</CONVERT><!--るるぶポイント-->
+			</POINT_CONVERT>
+			<POINT_CONVERT PAYKBN="2">	<!-- KBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+		          <CONVERT AGTCODE="51">M90204</CONVERT><!--るるぶポイント-->
+			</POINT_CONVERT>
+
+
+<!-- 事前決済金額に対して、事前決済区分とAGTコードにより、取り込みしたい会計商品コード情報を定義する -->
+			<PAYMENT_CONVERT PAYKBN="2">
+		          <CONVERT AGTCODE="80">M90215</CONVERT><!--一休事前決済-->
+			</PAYMENT_CONVERT>
+
+			<PAYMENT_CONVERT PAYKBN="2">
+		          <CONVERT AGTCODE="66">M90216</CONVERT><!--じゃらん事前決済-->
+			</PAYMENT_CONVERT>
+
+			<PAYMENT_CONVERT PAYKBN="2">
+		          <CONVERT AGTCODE="47">M90220</CONVERT><!--Expedia事前決済-->
+			</PAYMENT_CONVERT>
+
+			<PAYMENT_CONVERT PAYKBN="2">
+		          <CONVERT AGTCODE="61">M90214</CONVERT><!--楽天事前決済-->
+			</PAYMENT_CONVERT>
+			
+			<PAYMENT_CONVERT PAYKBN="じゃらんクーポン">
+		          <CONVERT AGTCODE="66">M90208</CONVERT><!--じゃらんクーポン-->
+			</PAYMENT_CONVERT>
+			
+			
+	     </PAYMENT_CONVERTS>
+	    <!-- お子様プラン自動取り込み機能定義情報 -->
+	    <!-- 2019/07/19 機能新規追加 
+			例1：<MATCH RATE="50" NAMEONLY="TRUE">小学生宿泊代</MATCH>
+			例2：<MATCH PRICE="5000" NAMEONLY="TRUE">小学生宿泊代</MATCH>
+	    -->
+		<CHILD_PLAN_CONVERT>
+			<MATCH RATE="70"></MATCH>
+			<MATCH RATE="50"></MATCH>
+			<MATCH RATE="30"></MATCH>
+			<MATCH RATE="10"></MATCH>
+		</CHILD_PLAN_CONVERT>
+		<!-- AGTコードからSalesforce側の予約チャネルへ変換ルールの定義 -->
+<!--
+		<CHANNEL_CONVERTS>
+			<CONVERT AGTCODE="80">一休</CONVERT>
+			<CONVERT AGTCODE="47">Expedia</CONVERT>
+			<CONVERT AGTCODE="30">booking.com</CONVERT>
+			<CONVERT AGTCODE="84">自社サイト</CONVERT>
+			<CONVERT AGTCODE="61">楽天</CONVERT>
+			<CONVERT AGTCODE="01">JTB</CONVERT>
+			<CONVERT AGTCODE="51">るるぶ</CONVERT>
+			<CONVERT AGTCODE="90">らくだ倶楽部</CONVERT>
+			
+		</CHANNEL_CONVERTS>
+-->
+	</SHOP>
+	
+</root>

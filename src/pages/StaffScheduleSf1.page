@@ -1,0 +1,65 @@
+<apex:page docType="html-5.0" applyHtmlTag="false" applyBodyTag="false" action="{!URLFOR('/apex/ps__StaffSchedule')}"
+sidebar="false" showHeader="false" controller="StaffScheduleSf1Ctrl" title="スタッフ">
+<apex:stylesheet value="{!URLFOR($Resource.jqueryMobile, 'styles/jquery.mobile-1.4.5.min.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.jqueryMobile, 'js/jquery.mobile-1.4.5.min.js')}"/>
+<apex:form >
+<apex:actionFunction action="{!upsertData}" name="save"/>
+<apex:actionFunction action="{!gotoDate}" name="cancel"/>
+<div data-role="page" >
+
+	<div data-role="content">
+		<label for="fname">氏名</label>
+		<!-- <apex:inputText value="{!loginUser.Name}"/> -->
+		<a role="button" aria-haspopup="true" class="ui-btn" style="text-align: left;">{!loginUser.Name}</a>
+
+		<label for="fname">部署</label>
+		<!-- <apex:inputText value="{!loginUser.Department}"/> -->
+		<a role="button" aria-haspopup="true" class="ui-btn" style="text-align: left;">{!loginUser.Department}</a>
+
+
+		<label for="fname">勤怠日</label>
+		<apex:inputField value="{!staffObj.WorkDay__c}" style="width: 100%;" type="date" showDatePicker="false" id="workd">
+			<apex:actionSupport event="onblur" action="{!gotoDate}" onsubmit="refresh()" oncomplete="refreshST()"/>
+		</apex:inputField>
+
+		<label for="fname">状態</label>
+		<apex:inputText value="{!customStatus}" styleClass="statusDis"/>
+		<apex:selectList multiselect="true" value="{!statusSelLst}" styleClass="multiple-select statusDis">
+			<apex:selectOptions value="{!statusLabLst}"/>
+		</apex:selectList>
+		<label for="fname">コメント</label>
+		<apex:outputPanel rendered="{!!isPostDate}">
+		<apex:inputText value="{!customComment}" styleClass="statusDis"/>
+		<apex:selectList multiselect="true" value="{!commentSelLst}" styleClass="multiple-select statusDis">
+			<apex:selectOptions value="{!commentLabLst}"/>
+		</apex:selectList>
+		</apex:outputPanel>
+		<apex:outputPanel rendered="{!isPostDate}">
+			<apex:outputField value="{!staffObj.CommentLst__c}"></apex:outputField>
+		</apex:outputPanel>
+		
+	</div>
+	<div data-role="footer" data-position="fixed">
+		<div data-role="navbar">
+			<ul>
+			<li><a onclick="save();refresh()" oncomplete="refreshST()">保存</a></li>
+			<li><a onclick="cancel();refresh()" oncomplete="refreshST()">キャンセル</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+</apex:form>
+
+<script >
+beenFocused = true;
+var $j = jQuery.noConflict();
+$j(".multiple-select").attr('data-native-menu', 'false');
+function refresh() {
+	$j.mobile.loading( "show" );
+}
+function refreshST() {
+	$j.mobile.loading( "hide" );
+}
+</script>
+</apex:page>

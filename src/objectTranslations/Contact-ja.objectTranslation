@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>お客様</value>
+    </caseValues>
+    <fields>
+        <help><!-- 誕生日から現在の年齢を計算します --></help>
+        <label><!-- 現在の年齢 --></label>
+        <name>Age__c</name>
+    </fields>
+    <fields>
+        <label><!-- アレルギー --></label>
+        <name>Allergy__c</name>
+    </fields>
+    <fields>
+        <label><!-- 申込者 --></label>
+        <name>ApplicantName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 申込者電話 --></label>
+        <name>ApplicantPhone__c</name>
+    </fields>
+    <fields>
+        <label><!-- ブライダル --></label>
+        <name>Bridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 取引先会社名 --></label>
+        <name>CompanyNameCal__c</name>
+    </fields>
+    <fields>
+        <help><!-- C：法人、P：個人、KH：候補顧客、UG：UG --></help>
+        <label><!-- 顧客区分 --></label>
+        <name>ContactType__c</name>
+        <picklistValues>
+            <masterLabel>C</masterLabel>
+            <translation><!-- C --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>KH</masterLabel>
+            <translation><!-- KH --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>P</masterLabel>
+            <translation><!-- P --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>UG</masterLabel>
+            <translation><!-- UG --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- DM許可 --></label>
+        <name>DM__c</name>
+        <picklistValues>
+            <masterLabel>不要</masterLabel>
+            <translation><!-- 不要 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>必要</masterLabel>
+            <translation><!-- 必要 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 削除区分 --></label>
+        <name>DelFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- アレルギーの内容 --></label>
+        <name>DetailedAllergy__c</name>
+    </fields>
+    <fields>
+        <label><!-- メール２ --></label>
+        <name>Email2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 内線 --></label>
+        <name>Extension__c</name>
+    </fields>
+    <fields>
+        <label><!-- Fax２ --></label>
+        <name>Fax2__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <help><!-- 10桁の顧客ID --></help>
+        <label><!-- ID --></label>
+        <name>ID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 論理削除 --></label>
+        <name>IsDelete__c</name>
+    </fields>
+    <fields>
+        <label><!-- 自動車ナンバー通知投稿対象外 --></label>
+        <name>IsNotNotifyCarInfomation__c</name>
+    </fields>
+    <fields>
+        <label><!-- おもてなしお客様情報 --></label>
+        <name>JTbSyncInfoRef__c</name>
+        <relationshipLabel><!-- 取引先責任者 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- お客様名のカタカナを入力してください --></help>
+        <label><!-- カナ１ --></label>
+        <name>KanaName1__c</name>
+    </fields>
+    <fields>
+        <label><!-- カナ２ --></label>
+        <name>KanaName2__c</name>
+    </fields>
+    <fields>
+        <help><!-- お客様名のひらがなを入力してください --></help>
+        <label><!-- ひらがな --></label>
+        <name>Katakana__c</name>
+    </fields>
+    <fields>
+        <label><!-- Languages --></label>
+        <name>Languages__c</name>
+    </fields>
+    <fields>
+        <label><!-- 最終利用日 --></label>
+        <name>LastUsageDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- Level --></label>
+        <name>Level__c</name>
+        <picklistValues>
+            <masterLabel>Primary</masterLabel>
+            <translation><!-- Primary --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Secondary</masterLabel>
+            <translation><!-- Secondary --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tertiary</masterLabel>
+            <translation><!-- Tertiary --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 婚姻区分 --></label>
+        <name>MarriyStaLst__c</name>
+        <picklistValues>
+            <masterLabel>M</masterLabel>
+            <translation><!-- M --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- メモー１ --></label>
+        <name>Memo1__c</name>
+    </fields>
+    <fields>
+        <label><!-- メモー２ --></label>
+        <name>Memo2__c</name>
+    </fields>
+    <fields>
+        <label><!-- メモー３ --></label>
+        <name>Memo3__c</name>
+    </fields>
+    <fields>
+        <label><!-- メモー４ --></label>
+        <name>Memo4__c</name>
+    </fields>
+    <fields>
+        <label><!-- メモー５ --></label>
+        <name>Memo5__c</name>
+    </fields>
+    <fields>
+        <label><!-- メモー６ --></label>
+        <name>Memo6__c</name>
+    </fields>
+    <fields>
+        <label><!-- マージ先お客様ID --></label>
+        <name>MergeNewId__c</name>
+    </fields>
+    <fields>
+        <help><!-- 漢字入力してください --></help>
+        <label><!-- 名称１ --></label>
+        <name>Name1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称２ --></label>
+        <name>Name2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 名称３ --></label>
+        <name>Name3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 作成日（旧） --></label>
+        <name>OrgCreateDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 登録担当者（旧） --></label>
+        <name>OrgCreateUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- 更新日（旧） --></label>
+        <name>OrgUpdateDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 更新担当者（旧） --></label>
+        <name>OrgUpdateUser__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親顧客№ --></label>
+        <name>ParentContactRef__c</name>
+        <relationshipLabel><!-- 取引先責任者 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 電話2 --></label>
+        <name>Phone2__c</name>
+    </fields>
+    <fields>
+        <help><!-- 顧客ランク --></help>
+        <label><!-- RANK --></label>
+        <name>RANK__c</name>
+        <picklistValues>
+            <masterLabel>AAA</masterLabel>
+            <translation><!-- AAA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>BBB</masterLabel>
+            <translation><!-- BBB --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>CCC</masterLabel>
+            <translation><!-- CCC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DDD</masterLabel>
+            <translation><!-- DDD --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 略称１ --></label>
+        <name>RyakuNm1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 略称２ --></label>
+        <name>RyakuNm2__c</name>
+    </fields>
+    <fields>
+        <help><!-- チェックすると、喫煙です --></help>
+        <label><!-- 喫煙区分 --></label>
+        <name>SmokeFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Usage Charge --></label>
+        <name>Usage_Charge__c</name>
+    </fields>
+    <fields>
+        <label><!-- Usage Count --></label>
+        <name>Usage_Count__c</name>
+    </fields>
+    <fields>
+        <label><!-- 結婚記念日 --></label>
+        <name>WeddingAnniversary__c</name>
+    </fields>
+    <fields>
+        <label><!-- 性別 --></label>
+        <name>gender__c</name>
+        <picklistValues>
+            <masterLabel>女性</masterLabel>
+            <translation><!-- 女性 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>男性</masterLabel>
+            <translation><!-- 男性 --></translation>
+        </picklistValues>
+    </fields>
+    <webLinks>
+        <label><!-- BookingInfoListBtn --></label>
+        <name>BookingInfoListBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- CustomMerge --></label>
+        <name>CustomMerge</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Karte --></label>
+        <name>Karte</name>
+    </webLinks>
+</CustomObjectTranslation>

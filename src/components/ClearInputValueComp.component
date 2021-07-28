@@ -1,0 +1,9 @@
+<apex:component >
+<apex:attribute name="elementIds" description="Clear the element Ids" type="String" required="true"/>
+<apex:attribute name="tips" description="Clear the element Ids" type="String" required="false" default="検索語句をクリア"/>
+<apex:attribute name="label" description="Clear the element Ids" type="String" required="false"/>
+<!-- クリア -->
+<a class="headerSearchClearButton" href="javascript: void(0);" onclick="commUtils.clearValue({!elementIds})"
+title="{!tips}" style="vertical-align:top;margin-top: 0px" />
+
+</apex:component>

@@ -1,0 +1,170 @@
+<apex:page showHeader="false" title="レジカード" sidebar="false" renderas="PDF"
+    applyHtmlTag="false" applyBodyTag="false" action="{!pdfInit}"
+    readonly="true" standardcontroller="Yadochou__c" extensions="CashRegisterCardPDF">
+
+<html>
+<head>
+ <style>
+    @page {
+        size: 6.93in 9.84in;        /* B5 portlate size */
+        margin: 0.4cm;
+    }
+    body {
+        font-family: Arial Unicode MS;
+        top: 0cm;
+        left: 0cm;
+        color: black;
+        font-size: 0.30cm;
+    }
+    .titleHeader {
+        text-align: center;
+        font-size: 100%;
+        background-color: #FFFFFF;
+    }
+    .header {
+        height:30px;
+        font-size: 100%;
+        background-color: #CCCCCC;
+    }
+    .underline {
+        list-style:none; 
+        border-bottom:1px black solid; 
+    }
+    .underlinesmall {
+        list-style:none; 
+        border-bottom:0.5px white solid; 
+    }
+    .splitline {
+        list-style:none; 
+        border-top:0.5px black solid; 
+    }
+    .rightline {
+        list-style:none; 
+        border-right:0.5px black solid; 
+    }
+    .leftline {
+        list-style:none; 
+        border-left:0.5px black solid; 
+    }
+
+ </style>
+</head>
+<body>
+<!-- 一括印刷 -->
+<apex:repeat value="{!bulkAllPageList}" var="oneCard">
+	<div style="vertical-align:top ;margin-top: 4px;height:4px;{!if( oneCard.isFirstPage, '', 'page-break-before: always;')} "></div>
+	
+<!-- border space  -->
+<apex:repeat value="{!oneCard.allPageList}" var="onePage" >
+    <!-- 改ページ -->
+    <div style="{!if( onePage.isFirstPage, '', 'page-break-before: always;')} ">
+    <img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 30px; height: 1px;"/>
+    </div>
+    <!-- １ページ内容を出力する -->
+    <table style="width:99%;" cellpadding="0px" cellspacing="0px">
+        <tr>
+            <td colspan="6" style="text-align:center;">
+            <table style="100%">
+            <tr>
+            <td width="50%"></td>
+            <td>
+            <div style="height:75px;">
+            <!-- apex:outputField value="{!reportInfo.ReportLogo__c}" rendered="{!!$Setup.CommDefine__c.AccountStampIsShowFlg__c}" style=""/ -->
+            </div>
+            </td>
+            <td width="50%"></td>
+            </tr>
+            </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" style="font-size: 0.36cm;">&nbsp;</td>
+            <td colspan="2" style="text-align:right;">{!usedDate}</td>
+        </tr>
+        <tr height="18px">
+            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 32%;" colspan="2">&nbsp;</td>
+            <td width="2px" rowspan="37" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 16px;width: 2px;"/></td>
+            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 11%">&nbsp;</td>
+            <td width="2px" rowspan="37" ><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 16px;width: 2px;"/></td>
+            <td class="titleHeader" style="height: 13px;font-size: 12px;width: 57%" >&nbsp;</td>
+        </tr>
+        <apex:repeat value="{!onePage.onePageList}" var="g" >
+            <tr>
+                <td style="height: 22px;" colspan="2">&nbsp;</td>
+                <td ></td>
+                <td >&nbsp;&nbsp;&nbsp;&nbsp;<span  style="margin-left: 2px">{!g.post}</span></td>
+            </tr>
+            <tr >
+                <td rowspan="2"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 30px;width: 1px;"/></td>
+                <td style="font-size: 12px; vertical-align: top;" rowspan="2">
+				<apex:outputLabel value="{!IF(ISBLANK(g.guestName),'', g.guestName + '<br/>')}{!g.hiragana}" escape="false"/>
+				</td>
+                <td ></td>
+                <td style="word-break: break-all;word-wrap:break-word;" rowspan="2">
+                <apex:outputLabel value="{!IF(LEN(g.address1) == 0,'', g.address1 + '<br/>')}{!g.address2}" escape="false" />
+                </td>
+            </tr>
+            <tr><td style ="text-align:center;">{!g.birthDate}</td><td></td></tr>
+            <tr >
+                <td colspan="2" class="underlinesmall" style ="text-align:right;">{!g.gender}</td>
+                <td class="underlinesmall" style ="text-align:center;">{!IF(g.age = 0 , '', g.age)}</td>
+                <td class="underlinesmall" >
+                	<table style="width:100%;border: 0px;border-spacing: 0px;table-layout: fixed;">
+                		<tr>
+                			<td width="36%" style="white-space: nowrap;">
+								<span  style="margin-left: 21px;">{!g.phone}</span>
+                			</td>
+                			<td width="64%">
+                				<div style="width: 240px;overflow: hidden;white-space: nowrap;">
+                				&nbsp;　&nbsp;<span  style="margin-left: 17px;">{!g.email}</span>
+                				</div>
+                			</td>
+                		</tr>
+                	</table>
+                </td>
+            </tr>
+
+        </apex:repeat>
+    </table>
+    
+    <!-- space -->
+    <img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 28px;width: 2px;"/>
+    
+    <!-- PDF FOOTER -->
+    <table style="width:99%;"  cellpadding="0px" cellspacing="0px">     
+        <tr>
+            <td style="text-align: center">&nbsp;</td>
+        </tr>
+        <tr>
+            <td >
+                <table style="table-layout: fixed;">
+                    <tr>
+                        <td class="underlinesmall" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span  style="margin-left: 6px">{!LEFT(onePage.footer.roomNm,14)}</span></td>
+                        <td class="underlinesmall" >&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span  style="margin-left: 6px">{!onePage.footer.checkInTime}</span></td>
+                        <td class="underlinesmall" >&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span  style="margin-left: 6px">&nbsp;</span></td>
+                    </tr>
+                    <tr>
+                        <td  > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span  style="margin-left: 10px">{!onePage.footer.nightHour}&nbsp;時</span>
+                        <span  style="margin-left: 4px">{!onePage.footer.nightMinute}&nbsp;分</span>
+                        </td>
+                        <td  >&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span  style="margin-left: 6px">{!onePage.footer.moringHour}&nbsp;時</span>
+                        <span  style="margin-left: 4px">{!onePage.footer.moringMinute}&nbsp;分</span>
+                        </td>
+                        <td  >&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span  style="margin-left: 6px">{!onePage.footer.checkoutHour}&nbsp;時</span>
+                        <span  style="margin-left: 4px">{!onePage.footer.checkoutMinute}&nbsp;分</span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</apex:repeat>
+</apex:repeat>
+
+</body>
+</html>
+</apex:page>

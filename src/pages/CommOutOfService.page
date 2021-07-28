@@ -1,0 +1,6 @@
+<apex:page sidebar="false" title="機能利用不可">
+
+
+<apex:pageMessage title="タブ利用不可" summary="申し訳ございません。該当タブは利用できませんでした。" severity="warn" strength="3" />
+
+</apex:page>

@@ -1,0 +1,624 @@
+<apex:page showheader="false" sidebar="false" standardcontroller="Lead__c" extensions="RepGeneralExtendCtrl" action="{!initRepWindow}" 
+title="発注書">
+<c:CommHeaderComp />
+<style>
+.divFont {
+	font-size: 13px;
+}
+.divFont .inputFD{
+	font-size: 13px;
+	height: 16px;
+}
+.divFont .inputTxt{
+    font-size: 13px;
+    width: 294px;
+    height: 16px;
+}
+.divFont select {
+    font-size: 13px;
+}
+.pbSubsection table tr {
+    height: 24px;
+}
+.labelCol{
+    width: 100px;
+}
+/*
+* Kendo UI Stand Css Edit
+*/
+.k-combobox .k-dropdown-wrap, .k-dropdown .k-dropdown-wrap {
+    height: 21px;
+}
+.k-dropdown-wrap .k-input {
+    height: 21px;
+    padding: 0px;
+}
+input.k-textbox {
+    height: 23px;
+    padding: 0px;
+}
+input.calNokiByContract {
+    width:20px;
+    text-align: right;
+}
+span.youbiTxt{
+    width:20px;
+    display: inline-block;
+}
+span.k-widget.k-combobox.k-header.inputTxt{
+    height: 23px;
+}
+/*
+ * Salesforce Stand Css Edit
+ */
+/* Salesforce Calendar Link No Show */
+span.dateFormat {
+    display:none;
+}
+</style>
+<script>
+beenFocused = true;
+var $ = jQuery.noConflict();
+</script>
+<div id="printPdfWinTabStrip" style="width: 100%;" class="divFont">
+	<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+	<input type="hidden" value="{!RespectFlg}" id="hidRespectFlg" />
+	<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+	<ul>
+		<li id="printPdfWinTabStrip_purchase" class="{!IF(isOrderPdf,'k-state-active','')}">発注書</li>
+		<li id="printPdfWinTabStrip_letter" class="{!IF(isOrderConfirmPdf,'k-state-active','')}">注文請書</li>
+		<li id="printPdfWinTabStrip_delivery" class="{!IF(isOrderDeliveryPdf,'k-state-active','')}">納品書</li>
+		<li id="printPdfWinTabStrip_receipt" class="{!IF(isOrderReceiptPdf,'k-state-active','')}">検収書</li>
+	</ul>
+	<!-- 発注書  -->
+	<div>
+		<div class="pbSubsection">
+			<apex:form >
+				<table style="table-layout: fixed;width: 400px;" border="0" cellpadding="1" cellspacing="1">
+					<!-- 店舗  -->
+					<apex:outputPanel rendered="{!shopList.size > 1}">
+					<tr>
+					   <td class="labelCol">店舗</td>
+					   <td>
+                            <apex:selectList multiselect="false" size="1" id="dialog_receiptShopCode1" value="{!lead.LeadPdfShopCode__c}" styleClass="k-input inputTxt">
+                                <apex:selectOptions value="{!shopList}"/>
+                            </apex:selectList>
+					   </td>
+                    </tr>
+                    </apex:outputPanel>
+					<tr>
+						<td class="labelCol">予約No.</td>
+						<td><apex:outputText id="dialog_receiptNo1" value="{!lead.No__c}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td class="labelCol">予約名</td>
+						<td><apex:outputText id="dialog_receiptLeadName1" value="{!lead.Name}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td class="labelCol">お客様宛名</td>
+						<td style="vertical-align: top;"><input type="text" id="dialog_receiptRelcontact1" value="{!lead.QuotationName__c}" class="inputTxt" maxlength="255"/></td>
+					</tr>
+					<!-- 担当者 -->
+					<tr >
+						<td class="labelCol">担当者</td>
+						<td>
+							 <input type="text" id="dialog_receiptCharge1" value="{!lead.ChargeUserNm__c}" class="k-input inputTxt" maxlength="255"/>
+						</td>
+					</tr>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+					<apex:outputPanel rendered="{!RespectFlg}">
+					<tr >
+						<td class="labelCol">敬称</td>
+						<td>
+						<apex:selectList size="1" value="{!lead.RespectLst__c}" id="dialog_mrSelectStr1">
+							<apex:selectOptions value="{!mrTypeLst}" />
+						</apex:selectList>
+						</td>
+					</tr>
+					</apex:outputPanel>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+					<tr>
+						<td class="labelCol">契約日</td>
+						<td>
+							<apex:inputField id="dialog_receiptContract1" value="{!lead.ContractDate__c}" styleClass="inputFD" html-relHtmlId="dialog_receiptPeriod1" onchange="autoGenNohi(this)"></apex:inputField>
+							<span class="youbiTxt"></span>
+						</td>
+					</tr>
+					<tr>
+						<td class="labelCol">納期</td>
+						<td><input type="text" id="dialog_receiptPeriod1" value="{!lead.PeriodInfo__c}" class="k-input inputTxt" maxlength="255"/></td>
+					</tr>
+					<tr>
+						<td class="labelCol">支払期限・方法</td>
+						<td><input type="text" id="dialog_receiptMethod1" style="width: 295px;" value="{!lead.PayDuration__c}" class="k-input inputTxt" maxlength="255"/></td>
+					</tr>
+					<!--  備考    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">備考</td>
+						<td class="data2Col "><apex:inputField id="dialog_receiptComment1" style="width: 290px;height:56px;" value="{!lead.QuotationComment__c}"/></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+					<!--  発注先・元位置変換    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">発注先・元変換</td>
+						<td class="data2Col "><apex:inputCheckbox id="LAYOUT1" onclick="setSwapLayoutCookieFun();" value="{!layout1}" styleClass="check" /></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+					<!--  キャンセル/発注書作成    -->
+					<tr>
+						<td colspan="2" style="text-align: right;">
+							<input class="btn" id="dialog_cancelBtn" onclick="closeMe()" style="width: 100px" type="button" value="閉じる" />
+							<input class="btn" id="dialog_printoutBtn_purchase" onclick="buttonOpen1()" style="width: 100px" type="button" value="発注書作成" />
+						</td>
+					</tr>
+				</table>
+			</apex:form>
+		</div>
+	</div>
+	<!--  注文請書    -->
+	<div>
+		<div class="pbSubsection">
+			<apex:form >
+				<table class="detailList" style="table-layout: fixed;width: 400px;" border="0" cellpadding="1" cellspacing="1">
+					<!-- 店舗  -->
+					<apex:outputPanel rendered="{!shopList.size > 1}">
+                    <tr>
+                       <td class="labelCol">店舗</td>
+                       <td>
+                            <apex:selectList multiselect="false" size="1" id="dialog_receiptShopCode2" value="{!lead.LeadPdfShopCode__c}" styleClass="k-input inputTxt">
+                                <apex:selectOptions value="{!shopList}"/>
+                            </apex:selectList>
+                       </td>
+                    </tr>
+                    </apex:outputPanel>
+					<tr>
+						<td class="labelCol">予約No.</td>
+						<td><apex:outputText id="dialog_receiptNo2" value="{!lead.No__c}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td class="labelCol">予約名</td>
+						<td><apex:outputText id="dialog_receiptLeadName2" value="{!lead.Name}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td class="labelCol">お客様宛名</td>
+						<td style="vertical-align: top;"><input type="text" id="dialog_receiptRelcontact2" value="{!lead.QuotationName__c}" class="inputTxt" maxlength="255"/></td>
+					</tr>
+					<!-- 担当者 -->
+					<tr>
+						<td class="labelCol">担当者</td>
+						<td>
+							 <input type="text" id="dialog_receiptCharge2" value="{!lead.ChargeUserNm__c}" class="k-input inputTxt" maxlength="255"/>
+						</td>
+					</tr>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+					<apex:outputPanel rendered="{!RespectFlg}">
+					<tr >
+						<td class="labelCol">敬称</td>
+						<td>
+						<apex:selectList size="1" value="{!lead.RespectLst__c}" id="dialog_mrSelectStr2">
+							<apex:selectOptions value="{!mrTypeLst}" />
+						</apex:selectList>
+						</td>
+					</tr>
+					</apex:outputPanel>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+					<tr>
+						<td class="labelCol">契約日</td>
+						<td><apex:inputField id="dialog_receiptContract2" value="{!lead.ContractDate__c}" styleClass="inputFD" html-relHtmlId="dialog_receiptPeriod2" onchange="autoGenNohi(this)" ></apex:inputField>
+						<span class="youbiTxt"></span>
+						</td>
+					</tr>
+					<tr>
+						<td class="labelCol">納期</td>
+						<td><input type="text" id="dialog_receiptPeriod2" value="{!lead.PeriodInfo__c}" class="k-input inputTxt" maxlength="255"/></td>
+					</tr>
+					<!--  見積書コメント    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol ">備考</td>
+						<td class="data2Col "><apex:inputField id="dialog_receiptComment2" style="width: 290px;;height:56px;" value="{!lead.QuotationComment__c}" /></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+					<!--  発注先・元位置変換    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">発注先・元変換</td>
+						<td class="data2Col "><apex:inputCheckbox id="LAYOUT2" onclick="setSwapLayoutCookieFun();" value="{!layout2}" styleClass="check" /></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+					<!--  キャンセル/注文請書作成    -->
+					<tr>
+						<td colspan="2" style="text-align: right;">
+							<input class="btn" id="dialog_cancelBtn" onclick="closeMe()" style="width: 100px" type="button" value="閉じる" />
+							<input class="btn" id="dialog_printoutBtn_letter" onclick="buttonOpen2()" style="width: 100px" type="button" value="注文請書作成" />
+						</td>
+					</tr>
+				</table>
+			</apex:form>
+		</div>
+	</div>
+	<!--  納品書    -->
+	<div>
+		<div class="pbSubsection">
+			<apex:form >
+				<table class="detailList" style="table-layout: fixed;width: 400px;" border="0" cellpadding="1" cellspacing="1">
+					<!-- 店舗  -->
+					<apex:outputPanel rendered="{!shopList.size > 1}">
+					<tr>
+					   <td class="labelCol">店舗</td>
+					   <td>
+                            <apex:selectList multiselect="false" size="1" id="dialog_receiptShopCode3" value="{!lead.LeadPdfShopCode__c}" styleClass="k-input inputTxt">
+                                <apex:selectOptions value="{!shopList}"/>
+                            </apex:selectList>
+					   </td>
+                    </tr>
+                    </apex:outputPanel>
+					<tr>
+						<td style="width:100px;">予約No.</td>
+						<td><apex:outputText id="dialog_receiptNo3" value="{!lead.No__c}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td>予約名</td>
+						<td><apex:outputText id="dialog_receiptLeadName3" value="{!lead.Name}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td class="labelCol">お客様宛名</td>
+						<td style="vertical-align: top;"><input type="text" id="dialog_receiptRelcontact3" value="{!lead.QuotationName__c}" class="inputTxt" maxlength="255"/></td>
+					</tr>
+					<!-- 担当者 -->
+					<tr >
+						<td class="labelCol">担当者</td>
+						<td>
+							 <input type="text" id="dialog_receiptCharge3" value="{!lead.ChargeUserNm__c}" class="k-input inputTxt" maxlength="255" />
+						</td>
+					</tr>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+					<apex:outputPanel rendered="{!RespectFlg}">
+					<tr >
+						<td class="labelCol">敬称</td>
+						<td>
+						<apex:selectList size="1" value="{!lead.RespectLst__c}" id="dialog_mrSelectStr3">
+							<apex:selectOptions value="{!mrTypeLst}" />
+						</apex:selectList>
+						</td>
+					</tr>
+					</apex:outputPanel>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+					<tr>
+						<td class="labelCol">納品日</td>
+						<td>
+							<apex:inputField id="dialog_receiptDelivery3" value="{!lead.DeliveryDate__c}" styleClass="inputFD" onchange="autoGenNohi(this)"></apex:inputField>
+							<span class="youbiTxt"></span>
+						</td>
+					</tr>
+					<!--  備考    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">備考</td>
+						<td class="data2Col "><apex:inputField id="dialog_receiptComment3" style="width: 290px;height:56px;" value="{!lead.QuotationComment__c}"/></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+					<!--  発注先・元位置変換    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">発注先・元変換</td>
+						<td class="data2Col "><apex:inputCheckbox id="LAYOUT3" onclick="setSwapLayoutCookieFun();" value="{!layout3}" styleClass="check" /></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+					<!--  キャンセル/納品書作成    -->
+					<tr>
+						<td colspan="2" style="text-align: right;">
+							<input class="btn" id="dialog_cancelBtn" onclick="closeMe()" style="width: 100px" type="button" value="閉じる" />
+							<input class="btn" id="dialog_printoutBtn_delivery" onclick="buttonOpen3()" style="width: 100px" type="button" value="納品書作成" />
+						</td>
+					</tr>
+				</table>
+			</apex:form>
+		</div>
+	</div>
+	<!--  検収書    -->
+	<div>
+		<div class="pbSubsection">
+			<apex:form >
+				<table class="detailList" style="table-layout: fixed;width: 400px;" border="0" cellpadding="1" cellspacing="1">
+					<!-- 店舗  -->
+					<apex:outputPanel rendered="{!shopList.size > 1}">
+					<tr>
+					   <td class="labelCol">店舗</td>
+					   <td>
+                            <apex:selectList multiselect="false" size="1" id="dialog_receiptShopCode4" value="{!lead.LeadPdfShopCode__c}" styleClass="k-input inputTxt">
+                                <apex:selectOptions value="{!shopList}"/>
+                            </apex:selectList>
+					   </td>
+                    </tr>
+                    </apex:outputPanel>
+					<tr>
+						<td style="width:100px;">予約No.</td>
+						<td><apex:outputText id="dialog_receiptNo4" value="{!lead.No__c}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td>予約名</td>
+						<td><apex:outputText id="dialog_receiptLeadName4" value="{!lead.Name}" ></apex:outputText></td>
+					</tr>
+					<tr>
+						<td class="labelCol">お客様宛名</td>
+						<td style="vertical-align: top;"><input type="text" id="dialog_receiptRelcontact4" value="{!lead.QuotationName__c}" class="inputTxt" maxlength="255"/></td>
+					</tr>
+					<!-- 担当者 -->
+					<tr >
+						<td class="labelCol">担当者</td>
+						<td>
+							 <input type="text" id="dialog_receiptCharge4" value="{!lead.ChargeUserNm__c}" class="k-input inputTxt" maxlength="255" />
+						</td>
+					</tr>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+					<apex:outputPanel rendered="{!RespectFlg}">
+					<tr >
+						<td class="labelCol">敬称</td>
+						<td>
+						<apex:selectList size="1" value="{!lead.RespectLst__c}" id="dialog_mrSelectStr4">
+							<apex:selectOptions value="{!mrTypeLst}" />
+						</apex:selectList>
+						</td>
+					</tr>
+					</apex:outputPanel>
+					<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+					<!--  備考    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">備考</td>
+						<td class="data2Col "><apex:inputField id="dialog_receiptComment4" style="width: 290px;height:56px;" value="{!lead.QuotationComment__c}"/></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+					<!--  発注先・元位置変換    -->
+					<tr style="vertical-align: top;">
+						<td class="labelCol">発注先・元変換</td>
+						<td class="data2Col "><apex:inputCheckbox id="LAYOUT4" onclick="setSwapLayoutCookieFun();" value="{!layout4}" styleClass="check" /></td>
+					</tr>
+					<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+					<!--  キャンセル/検収書作成    -->
+					<tr>
+						<td colspan="2" style="text-align: right;">
+							<input class="btn" id="dialog_cancelBtn" onclick="closeMe()" style="width: 100px" type="button" value="閉じる" />
+							<input class="btn" id="dialog_printoutBtn_receipt" onclick="buttonOpen4()" style="width: 100px" type="button" value="検収書作成" />
+						</td>
+					</tr>
+				</table>
+			</apex:form>
+		</div>
+	</div>
+</div>
+<!--  キャンセル按钮功能处理    -->
+<input type="button" onclick="window.top.close()" id="closeBtn" style="visibility: hidden;"/>
+<!-- 納期自動計算期間 -->
+<input type="hidden" value="{!defContractDtNums}" id="defCalDays" />
+<script>
+// 予约ID
+var leadId = "{!JSENCODE(leadId)}";
+// お客様宛名
+var accountNamesDs = $.parseJSON("{!JSENCODE(leadNames)}");
+// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+var RespectFlg = $("#hidRespectFlg").val();
+// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+
+$(document).ready(function() {
+	// TabStrip Init
+	$("#printPdfWinTabStrip").kendoTabStrip();
+
+	// 2017/07/12 お客様宛名 BEGIN
+	$("#dialog_receiptRelcontact1,#dialog_receiptRelcontact2,#dialog_receiptRelcontact3,#dialog_receiptRelcontact4").kendoComboBox({
+		dataTextField: "label",
+		dataValueField: "value",
+		dataSource: accountNamesDs,
+	}).css({"overflow-x": "hidden", "padding-right": "5px"});
+	// 2017/07/12 お客様宛名 END
+	// 日付曜日自動設定を行う
+	$(".inputFD").each(function(i, elem) {
+	   autoGenNohi(elem);
+	});
+});
+// 2017/07/12 キャンセル按钮功能 BEGIN
+function closeMe(){
+	$("#closeBtn").trigger("click");
+}
+// 2017/07/12 キャンセル按钮功能 END
+// 2017/07/11 跳转PDF页面 BEGIN
+//発注書
+function buttonOpen1(){
+	// 店舗
+	var receiptShopCode = "";
+	if ($("[id$='dialog_receiptShopCode1']").length > 0) receiptShopCode = $("[id$='dialog_receiptShopCode1']").val();
+	// お客様
+	var receiptRelcontact = $("#dialog_receiptRelcontact1").val();
+	// 契约日
+	var receiptContract = $("[id$='dialog_receiptContract1']").val();
+	// 纳期
+	var receiptPeriod = $("#dialog_receiptPeriod1").val();
+	// 支払期限・方法
+	var receiptPayDuration = $("[id$='dialog_receiptMethod1']").val();
+	// 担当者
+	var receiptCharge = $("#dialog_receiptCharge1").val();
+	// コメント
+	var receiptComment = $("[id$='dialog_receiptComment1']").val();
+	// URL
+	var purchaseUrl = '';
+	purchaseUrl += "&spcd=" + encodeURIComponent(receiptShopCode) + "&contactNM=" + encodeURIComponent(receiptRelcontact);
+	purchaseUrl	+= "&Contract=" + encodeURIComponent(receiptContract) + "&Period=" + encodeURIComponent(receiptPeriod) + "&PayDuration=" + encodeURIComponent(receiptPayDuration)
+						+ "&Charge=" + encodeURIComponent(receiptCharge) + "&Comment=" + encodeURIComponent(receiptComment)
+						+ "&ptype=1";
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN
+	purchaseUrl += getDefLayoutFlgFun(CONST_LAYOUT1);
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+	if(RespectFlg == "true"){
+		var mrSelectVal = $("[id$='dialog_mrSelectStr1']").val();
+		purchaseUrl += "&mr=" + mrSelectVal;
+	}
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+	// 2018/03/07 Security Check BEGIN
+	var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'RepGeneralExtendRedirect')}?id="+leadId;
+	// 2018/03/07 Security Check END
+	window.open(url+purchaseUrl,"_blank","width=780, height=980" );
+	// 起動メニューを閉じる
+	closeMe();
+}
+//注文請書 
+function buttonOpen2(){
+	// 店舗
+	var receiptShopCode = "";
+	if ($("[id$='dialog_receiptShopCode2']").length > 0) receiptShopCode = $("[id$='dialog_receiptShopCode2']").val();
+	// お客様
+	var receiptRelcontact = $("#dialog_receiptRelcontact2").val();
+	// 契约日
+	var receiptContract = $("[id$='dialog_receiptContract2']").val();
+	// 纳期
+	var receiptPeriod = $("#dialog_receiptPeriod2").val();
+	// 担当者
+	var receiptCharge = $("#dialog_receiptCharge2").val();
+	// コメント
+	var receiptComment = $("[id$='dialog_receiptComment2']").val();
+	// URL
+	var purchaseUrl = '';
+	purchaseUrl += "&spcd=" + encodeURIComponent(receiptShopCode) + "&contactNM=" + encodeURIComponent(receiptRelcontact);
+	purchaseUrl	+= "&Contract=" + encodeURIComponent(receiptContract) + "&Period=" + encodeURIComponent(receiptPeriod)
+						+ "&Charge=" + encodeURIComponent(receiptCharge) + "&Comment=" + encodeURIComponent(receiptComment)
+						+ "&ptype=2";
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN
+	purchaseUrl += getDefLayoutFlgFun(CONST_LAYOUT2);
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+	if(RespectFlg == "true"){
+		var mrSelectVal = $("[id$='dialog_mrSelectStr2']").val();
+		purchaseUrl += "&mr=" + mrSelectVal;
+	}
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+	// 2018/03/07 Security Check BEGIN
+	var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'RepGeneralExtendRedirect')}?id="+leadId;
+	// 2018/03/07 Security Check END
+	window.open(url+purchaseUrl,"_blank","width=780, height=980");
+    // 起動メニューを閉じる
+    closeMe();
+}
+//納品書
+function buttonOpen3(){
+	// 店舗
+	var receiptShopCode = "";
+	if ($("[id$='dialog_receiptShopCode3']").length > 0) receiptShopCode = $("[id$='dialog_receiptShopCode3']").val();
+	// お客様
+	var receiptRelcontact = $("#dialog_receiptRelcontact3").val();
+	// 納品日
+	var receiptDelivery = $("[id$='dialog_receiptDelivery3']").val();
+	// 担当者
+	var receiptCharge = $("#dialog_receiptCharge3").val();
+	// コメント
+	var receiptComment = $("[id$='dialog_receiptComment3']").val();
+	// URL
+	var purchaseUrl = '';
+	purchaseUrl += "&spcd=" + encodeURIComponent(receiptShopCode) + "&contactNM=" + encodeURIComponent(receiptRelcontact);
+	purchaseUrl += "&Delivery=" + encodeURIComponent(receiptDelivery)
+						+ "&Charge=" + encodeURIComponent(receiptCharge) + "&Comment=" + encodeURIComponent(receiptComment)
+					+ "&ptype=3";
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN
+	purchaseUrl += getDefLayoutFlgFun(CONST_LAYOUT3);
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+	if(RespectFlg == "true"){
+		var mrSelectVal = $("[id$='dialog_mrSelectStr3']").val();
+		purchaseUrl += "&mr=" + mrSelectVal;
+	}
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+	// 2018/03/07 Security Check BEGIN
+	var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'RepGeneralExtendRedirect')}?id="+leadId;
+	// 2018/03/07 Security Check END
+	window.open(url+purchaseUrl,"_blank","width=780, height=980");
+    // 起動メニューを閉じる
+    closeMe();
+}
+//検収書
+function buttonOpen4(){
+	// 店舗
+	var receiptShopCode = "";
+	if ($("[id$='dialog_receiptShopCode4']").length > 0) receiptShopCode = $("[id$='dialog_receiptShopCode4']").val();
+	// お客様
+	var receiptRelcontact = $("#dialog_receiptRelcontact4").val();
+	// 担当者
+	var receiptCharge = $("#dialog_receiptCharge4").val();
+	// コメント
+	var receiptComment = $("[id$='dialog_receiptComment4']").val();
+	// URL
+	var purchaseUrl = '';
+	purchaseUrl += "&spcd=" + encodeURIComponent(receiptShopCode) + "&contactNM=" + encodeURIComponent(receiptRelcontact);
+	purchaseUrl += "&Charge=" + encodeURIComponent(receiptCharge) + "&Comment=" + encodeURIComponent(receiptComment)
+					+ "&ptype=4";
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN
+	purchaseUrl += getDefLayoutFlgFun(CONST_LAYOUT4);
+	// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+	if(RespectFlg == "true"){
+		var mrSelectVal = $("[id$='dialog_mrSelectStr4']").val();
+		purchaseUrl += "&mr=" + mrSelectVal;
+	}
+	// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+	// 2018/03/07 Security Check BEGIN
+	var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'RepGeneralExtendRedirect')}?id="+leadId;
+	// 2018/03/07 Security Check END
+	window.open(url+purchaseUrl,"_blank","width=780, height=980");
+    // 起動メニューを閉じる
+    closeMe();
+}
+// 2017/07/11 跳转PDF页面 END
+// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN
+function getDefLayoutFlgFun(chkId){
+	return $("[id$=':" + chkId + "']:checked").length > 0 ? "&chk" : "";
+}
+var userId = "{!JSENCODE(userId)}";
+var CONST_LAYOUT1 = "{!JSENCODE(CONST_LAYOUT1)}";
+var CONST_LAYOUT2 = "{!JSENCODE(CONST_LAYOUT2)}";
+var CONST_LAYOUT3 = "{!JSENCODE(CONST_LAYOUT3)}";
+var CONST_LAYOUT4 = "{!JSENCODE(CONST_LAYOUT4)}";
+function setSwapLayoutCookieFun(){
+	var _wkMap = new Map();
+	_wkMap.put(CONST_LAYOUT1, $("[id$=':"+ CONST_LAYOUT1 +"']:checked").length > 0);
+	_wkMap.put(CONST_LAYOUT2, $("[id$=':"+ CONST_LAYOUT2 +"']:checked").length > 0);
+	_wkMap.put(CONST_LAYOUT3, $("[id$=':"+ CONST_LAYOUT3 +"']:checked").length > 0);
+	_wkMap.put(CONST_LAYOUT4, $("[id$=':"+ CONST_LAYOUT4 +"']:checked").length > 0);
+	var cookVal = "";
+	_wkMap.forEach(function(value, key) {
+		cookVal += key + ":" + value + ",";
+	});
+	// DBへ情報格納
+	JINYACONNECT.CONFIG.saveKrepConfig('SWAPFLG',cookVal,userId,'');
+}
+// 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END
+// 2017/07/12 纳期的值自动计算增加21天 BEGIN
+//発注書
+function autoGenNohi(that){
+    var $parentTd = $(that).closest("td");
+	var $contractDt = $parentTd.find(".inputFD");
+	var contractDtStr = $contractDt.val();
+	var contractDt = kendo.parseDate(contractDtStr, '{!JSENCODE(dateFormat)}');
+	if (contractDt == null) return;
+	var contractYobi = "("+commUtils.getYobi(contractDt)+")";
+    $parentTd.find("span.youbiTxt").text(contractYobi);
+    /*
+	// XX日後の日付情報を計算する　
+	var strCalDasy = $parentTd.find("input.calNokiByContract").val();
+    var calDaysVal = kendo.parseInt(strCalDasy);
+    if (calDaysVal != null) {
+        var calDate = kendo.date.addDays(contractDt,calDaysVal);
+        var youbiStr = commUtils.getYobi(calDate);
+        $parentTd.find("span.calNoKiTxt").text(kendo.toString(calDate,'{!JSENCODE(dateFormat)}') + '('+youbiStr+')');
+	}*/
+	// 納期情報を自動設定する　
+    var targetId = $contractDt.attr("relHtmlId");	
+    var targetVal = $("#"+targetId).val();
+	if (targetVal != "") return;
+	var defCalDays = kendo.parseInt($("#defCalDays").val());
+	//if (calDaysVal != null) defCalDays = calDaysVal;
+	if (defCalDays != null) {
+		var nokiDate = kendo.date.addDays(contractDt,defCalDays);
+		var youbiStr = commUtils.getYobi(nokiDate);
+		$("#"+targetId).val(kendo.toString(nokiDate,'{!JSENCODE(dateFormat)}') + '('+youbiStr+')');
+	}
+}
+// 2017/07/12 纳期的值自动计算增加21天 END
+</script>
+<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH BEGIN -->
+<c:UserConfigComp functiontype="KREP"/>
+<!-- 2017/11/29 発注書、検収書、受注請書、納品書の発注先と元を切替できるように改善 WGCH END -->
+</apex:page>

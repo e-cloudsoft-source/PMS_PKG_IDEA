@@ -1,0 +1,419 @@
+<apex:page controller="CashPdfBulkPrintCtrl" title="レジカード一括印刷" sidebar="false" showHeader="false" >
+
+<c:CommHeaderComp />
+<style>
+span.dateFormat{
+   display:none;
+}
+.inputDtCls{
+	font-size: 1.2em;
+	width:120px;
+	margin-left: 5px;
+	height:21px;
+	padding: 1px;
+	vertical-align: top;
+}
+.spanClass{
+	vertical-align: middle;
+}
+.k-textbox>input, .k-autocomplete .k-input, .k-picker-wrap .k-input, .k-numeric-wrap .k-input, .k-dropdown-wrap .k-input, .k-selectbox .k-input{
+	height: 1.64em;
+	line-height: 1.64em;
+}
+</style>
+<apex:actionStatus id="refStatusBlock"	onstart="javascript:blockUi();" onstop="unblockUi();" />	<!-- 処理中場合、画面BLOCK処理 -->
+
+<apex:form id="pdfBulkSearch">
+	<!-- 条件 -->
+	<apex:pageBlock title="{!$Label.ps__msg_006_0443}">
+		<div class="toolBarExtCls">
+		    <!-- 店铺对应房型 -->
+		    <span class="spanClass" rendered="{!RoomTypeLst.size > 0}">部屋タイプ</span>
+		    <apex:selectList size="1" value="{!RoomTypeNm}" id="roomTypeId" rendered="{!RoomTypeLst.size > 0}" styleClass="inputDtCls" html-multiple="multiple">
+	            <!-- All -->
+		        <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_003_0042}"/>
+		        <apex:selectOptions value="{!RoomTypeLst}" />
+		    </apex:selectList>
+		    <!-- 时间 -->
+		    <span class="spanClass" style="margin-left:10px;">到着日</span>
+		    <apex:inputField value="{!selectDate.Checkinday__c}" id="gotoDT" styleClass="inputDtCls"></apex:inputField>
+		    <!-- 顾客 -->
+		    <span class="spanClass" style="margin-left:10px;">顧客</span>
+			<apex:inputField value="{!yadoNew.Field15__c}" id="editColumn" styleClass="inputDtCls"/>
+			<span style="margin-left: 20px">
+				<apex:commandButton action="{!gotoDate}" style="width:100px" value="{!$Label.ps__msg_006_0448}" onclick="setSwapLayoutCookieFun()" />
+			</span>
+			<!-- 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN -->
+			<input type="hidden" value="{!shopLst}" id="hidshopLstId"/>
+			<!-- 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END -->
+		</div>
+	</apex:pageBlock>
+</apex:form>
+<apex:form id="pdfBulkYadoList">
+<apex:pageBlock title="{!$Label.ps__msg_006_0446}（件数：{!yadoList.size}件）" id="pdfBulkYadoBlock">
+	<apex:pageBlockButtons rendered="{!yadoList.size > 0}">
+			<input type="button" class="btn" style="width:100px" onclick="getCheckbulkIdFun();" value="印刷" />
+	</apex:pageBlockButtons>
+	<apex:outputPanel rendered="{!yadoList.size > 0}">
+	<table border="0" cellpadding="0" cellspacing="0" id="grid" style="width:100%;">
+		<thead>
+			<tr>
+				<!-- 一括対象 -->
+				<th data-field="checkFlg">
+					<input type="checkbox" name="allpick" style="vertical-align:middle;" checked="checked"/>
+					<label style="vertical-align:middle;">{!$Label.MSG_006_0100}</label>
+				</th>
+				<!-- 予約名 -->
+				<th data-field="leadName">
+					{!$ObjectType.Lead__c.Fields.Name.label}
+				</th>
+				<!-- 取引先責任者 -->
+				<th data-field="conName">
+					{!$ObjectType.Lead__c.Fields.Relcontact__c.label}
+				</th>
+				<!-- 予約チャネル -->
+				<th data-field="leadChannel">
+					{!$ObjectType.Lead__c.Fields.Field2__c.label}
+				</th>
+				<!-- 予約タイプ -->
+				<th data-field="leadReservedType">
+					{!$ObjectType.Lead__c.Fields.ReservedType__c.label}
+				</th>
+				<!-- セグメント -->
+				<th data-field="leadSegment">
+					{!$ObjectType.Lead__c.Fields.Segment__c.label}
+				</th>
+				<!-- 予約人数 -->
+				<th data-field="leadStayPersons">
+					{!$ObjectType.Lead__c.Fields.StayPersons__c.label}
+				</th>
+				<!-- 到着日 -->
+				<th data-field="leadEntry">
+					{!$ObjectType.Lead__c.Fields.EntryTime__c.label}
+				</th>
+				<!-- 出発日 -->
+				<th data-field="leadDepar">
+					{!$ObjectType.Lead__c.Fields.Departure__c.label}
+				</th>
+				<!-- 泊数 -->
+				<th data-field="leadStayNight">
+					{!$ObjectType.LeadIndex__c.Fields.Nights__c.label}
+				</th>
+				<!-- 部屋 -->
+				<th data-field="roomName">
+					{!$ObjectType.Lead__c.Fields.Rroom__c.label}
+				</th>
+			</tr>
+		</thead>
+	</table>
+	</apex:outputPanel>
+</apex:pageBlock>
+</apex:form>
+<script>
+$=jQuery.noConflict();
+// Lock
+function blockUi() {
+	return JINYACONNECT.blockUi();
+}
+// Lock解除
+function unblockUi() {
+	JINYACONNECT.unblockUi();
+}
+// 检索按钮响应时，页面锁死
+function setSwapLayoutCookieFun(){
+	blockUi();
+}
+$(document).ready(function() {
+    setKendoGrid();
+    // 开启监视Allpick
+    $("[name=allpick]").on("click",function(){
+        // 所有Tr主数据的CheckBox
+        $(".check").prop("checked",$(this).prop("checked"));
+        // 所有Tr子数据 的CheckBox
+        $(".itemCheck").prop("checked",$(this).prop("checked"));
+        keepDataSource();
+    });
+    refreshDS();
+    // 时间框锁死
+    $("input[id$=':gotoDT']").attr('readonly', true);
+    //confirmFun();
+});
+// 选择列表调整
+function refreshDS(){
+    $("select[id$=':roomTypeId']").css({ fontSize: 13, height:28, padding:0}).kendoDropDownList();
+    $("select[id$=':roomTypeId']").data("kendoDropDownList").list.css({"width":"auto","white-space":"nowrap"});
+}
+function setKendoGrid(){
+	// 初期化
+   	var $grid = $("table[id='grid']");
+    var JsonStr = JSON.parse('{!JSENCODE(yadoItemJson)}');
+    var yadoTypeDs = new kendo.data.DataSource({data: JsonStr,
+			schema: {
+				model: {
+					fields: {
+						checkFlg: { type: "boolean" },
+						leadName: { type: "string" },
+						conName: { type: "string" },
+						leadChannel: { type: "string" },
+						leadReservedType: { type: "string" },
+						leadSegment: { type: "string" },
+						leadStayPersons: { type: "number" },
+						leadEntry: { type: "string" },
+						leadDepar: { type: "string" },
+						leadStayNight: { type: "string" },
+						roomName: { type: "string" }
+					}
+				}
+			},
+    });
+    $grid.kendoGrid({
+     	dataSource:yadoTypeDs,
+        scrollable:false,
+        filterable:true,
+		columns: [
+			// 一括対象
+            {   
+                field: "checkFlg",
+                title: " ",
+                type:"boolean",
+                sortable: false,
+                filterable: false,
+                width: 94,
+                template:
+                        "# if (checkFlg) { #" +
+                            '<input type="checkbox" class="itemCheck" onclick="setCheckBoxFun()" id="#= yadoId#" Name="checkNm" checked="checked" />' +
+                        "# } else { #" +
+                            '<input type="checkbox" class="itemCheck" onclick="setCheckBoxFun()" id="#= yadoId#" Name="checkNm" />' +
+                        "# } #",
+            },
+            // 予約名
+			{	field:"leadName", 
+				sortable: true, 
+				filterable: true,
+				width:300,
+				template:
+                        '<a href="/#= leadId#" target="_blank">#=leadName#</a>'
+			},
+			// 取引先責任者
+			{	field:"conName", 
+				sortable: true, 
+				filterable: true,
+				width:300,
+				template:
+                        '<a href="/#= conId#" target="_blank">#=conName#</a>'
+			},
+			// 予約チャネル
+			{	field:"leadChannel", sortable: true, filterable: true,width:150},
+			// 予約タイプ
+			{	field:"leadReservedType", sortable: true, filterable: true,width:150},
+			// セグメント
+			{	field:"leadSegment", sortable: true, filterable: true,width:150},
+			// 予約人数
+			{	field:"leadStayPersons", sortable: true, filterable: true,width:110,attributes: {style: "text-align: right;"}},
+			// 到着日
+			{	field:"leadEntry", sortable: true, filterable: false,width:110},
+			// 出発日
+			{	field:"leadDepar", sortable: true, filterable: false,width:110},
+			// 泊数
+			{	field:"leadStayNight", sortable: true, filterable: false,width:50,attributes: {style: "text-align: right;"}},
+			// 部屋
+			{	field:"roomName", sortable: true, filterable: true}
+		],
+		filterable: {
+			operators: {
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				},
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: " ",
+				// および
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+		    }
+		},
+		dataBound: function(e) {
+			getDataNum(e);
+		},
+        // 排序
+        sortable:true
+     });
+}
+function getDataNum(e){
+	var filterLength = e.sender.dataSource.view().length;
+	var textMessage = "{!$Label.ps__msg_006_0446}（件数： " + filterLength + "件）";
+	$("div[id$=pdfBulkYadoBlock] .mainTitle").text(textMessage);
+}
+// 所有Tr主数据的CheckBox事件
+function setCheckBoxFun(e) {
+    var uid = $(e).parents("tr").attr("data-uid");
+    // 对Tr子数据的CheckBox设定
+    $("input[uid='"+ uid +"']").prop("checked",$(e).prop("checked"));
+    // 对Allpick的CheckBox设定
+    setAllPickBoxFun();
+}
+// 对Allpick的CheckBox设定
+function setAllPickBoxFun() {
+    $("[name=allpick]").prop("checked",$("input.itemCheck").length == $("input.itemCheck:checked").length);
+    var curInput = $(event.currentTarget);
+    // チェック状態保持
+	keepDataSource(curInput);
+}
+// 金额check
+function clickFun($This){
+	$('input[id="confirm"]').prop("checked", $($This).prop("checked"));
+}
+// チェック状態保持
+function keepDataSource(input){
+    var $grid = $("table[id='grid']").data("kendoGrid");
+    if (!input) input = $("input.itemCheck");
+    input.each(function(){
+    	var curRow = $(this).closest("tr[role]");
+    	var uid = curRow.attr("data-uid");
+    	var data = $grid.dataSource.getByUid(uid);
+    	data.set("checkFlg",$(this).is(":checked"));
+    });
+}
+// 印刷按钮响应
+function getCheckbulkIdFun(){
+	var yadoArr = [];
+	$("tr[role='row'] input[name=checkNm]:checked").each(function(){
+		yadoArr.push($(this).attr("id"));
+	});
+	if(yadoArr == "") return alert("印刷対象データは1件以上選択してください。");
+	var cardDate = $("input[id$=':gotoDT']").val();
+	var openUrl = "{!URLFOR('/apex/CashRegisterCardPDFSwitch')}"+"?cardDate=" + cardDate +"{!JSENCODE(isShowMoneyUrlInfo)}";
+	var urls = getYodoPdfUrl(yadoArr);
+	// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+	var shops = $("[id$='hidshopLstId']").val();
+	if(shops != "") { 
+		openGuestWindow(openUrl,urls,shops);
+	}else {
+	// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+		if (urls.length > 0) {
+			for (var i = 0; i < urls.length ; i++) {
+				var yodoUrl = openUrl + "&sid=" + urls[i];
+				window.open(yodoUrl, "CashRegisterCardPDF" + i,"width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+			}
+		}
+	// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+	}
+	// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+}
+// url拆分
+function getYodoPdfUrl(arr){
+	var maxLen = 450;//１回最大印刷できる宿帳件数
+	var syncInt = Math.ceil(arr.length / maxLen);
+	var yodoArr = [];
+	var beg = 0,end = 0;
+	for (var i = 0 ; i < syncInt ; i++) {
+		end = beg + maxLen;
+		var yadoIds = arr.slice(beg,end).join(',');
+		if (yadoIds != "") yodoArr.push(yadoIds);
+		beg = end;
+	}
+	return yodoArr;
+}
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+function openGuestWindow(openUrl,urlIds,shops){
+	var _g_ns = "{!JSENCODE($Setup.CommDefine__c.AppNS__c)}";
+	var locNs = (_g_ns.length > 2) ? (_g_ns.slice(0,-2) + ".") : "";
+	// 店铺处理
+    var locShopCode = "{!$User.ShopCode__c}"; 
+    var locShopHtmls = ""; 
+    if (locShopCode.indexOf(",") > 0) { 
+        var locOptStr = ""; 
+        // 選択できる店舗リストを取得する 
+        var currUsrId = "{!$User.Id}"; 
+        var defaultShop = "{!$User.DefaultShopCode__c}"; 
+        // var shops = sforce.apex.execute(locNs+"ShopInfoUtil","getCanSelectShopLst",{userId:currUsrId}); 
+        shops = JSON.parse(shops);
+        for(i=0;i<shops.length;i++) { 
+            var shopinf = shops[i].split(":"); 
+            locOptStr +="<option value='"+shopinf[0]+"'"+ (defaultShop == shopinf[0] ? ' selected' : '') +">" +shopinf[1] +"</option>"; 
+        } 
+        if (locOptStr != "") { 
+            //店舗 
+            locShopHtmls = '<tr><td class="labelCol first " width="120px"><label>{!$Label.MSG_006_0241}</label></td><td class="data2Col first "><select id="dialog_shopcd" style="max-width: 170px;">' + locOptStr + '</select></td></tr><tr><td colspan="2" style="width:350px;height:2px"></td></tr>'; 
+        } 
+    }
+    // 店铺选择列表为空，直接打开PDF
+    if(locShopHtmls != ""){
+		var d = sfdcPage.dialogs['MyCoolDialog'], close;
+		if (!d) {
+			// if the dialog doesn't exist create one
+			d = sfdcPage.dialogs['MyCoolDialog'] = new SimpleDialog('MyCoolDialog', false);
+			// set general information on your dialog and finally run the create function
+			d.setWidth(380);
+			d.createDialog();
+		}
+		d.setTitle('レジカード');
+		// 按钮显示
+		var buttonHtml = '<input class="btn" id="dialog_printoutBtn" style="width: 100px" type="button" value="確定" /></td>';
+		var switchCode = "{!JSENCODE(switchCode)}";
+		var symHtml ='';
+		if(switchCode == "4" || switchCode == "5"){
+			symHtml = '<tr><td class="labelCol first " width="120px"><label>{!$Label.MSG_012_0133}</label><td class="data2Col first "><input type="checkbox" id="dialog_symId" checked="checked" value="" /></td>';
+		}
+		$(d.dialog).find('#MyCoolDialogInner').html('<div class="pbBody"><div><div class="pbSubsection"><table class="detailList" border="0" cellpadding="1" cellspacing="1">' + locShopHtmls + symHtml +'<tr><td colspan="2" style="text-align: right;"><input class="btn" id="dialog_cancelBtn" style="width: 100px" type="button" value="キャンセル" />    '+buttonHtml+'</tr></table></div></div></div>');
+		// 按钮事件
+		$(d.dialog).find('input[type="button"]').on('click', function() {
+			var btnId = $(this).attr("id");
+			if (btnId == "dialog_cancelBtn") {
+				d.hide();
+			} else if (btnId == "dialog_printoutBtn") {
+				var custNameUrl = "";
+				var selectShopLen = $("#dialog_shopcd").length; 
+				var selectShopVal = $("#dialog_shopcd").val(); 
+				if (selectShopLen > 0 && selectShopVal != "") { 
+					custNameUrl += "&shopcd=" + encodeURIComponent(selectShopVal); 
+				}
+				var symFlg = $("#dialog_symId").prop('checked');
+				if(symFlg) custNameUrl += '&smy=1';
+				if (urlIds.length > 0) {
+					for (var i = 0; i < urlIds.length ; i++) {
+						var yodoUrl = openUrl + custNameUrl + "&sid=" + urlIds[i];
+						window.open(yodoUrl, "CashRegisterCardPDF" + i,"width=780, height=980, menubar=no, toolbar=no, scrollbars=yes");
+					}
+				}
+				d.hide();
+			}
+		});
+		d.show();
+	}
+}
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+</script>
+<c:UserConfigComp functiontype="KREP"/>
+</apex:page>

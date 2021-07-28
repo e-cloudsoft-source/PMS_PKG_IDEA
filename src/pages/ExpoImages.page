@@ -1,0 +1,41 @@
+<apex:page showHeader="{!!isMobile && !isFromSite}" standardStylesheets="{!!isFromSite}" sidebar="false" 
+    controller="ExpoUiApiCtrl" action="{!initAct}" title="商品画像管理" cache="false" >
+<!-- 201901/15 EXPO会計商品画像管理機能、NONEEXPOに利用できるように改善 BY zyz BEGIN -->
+<header id="header">
+	<c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}" isIncJpMsg="false" rendered="{!isFromSite}"/>
+</header>
+<div id="bodyDiv">
+   <apex:iframe id="idIframe" width="100%" src="{!imgEndPoint}/imgManager/showProduct?orgId={!orgid}&subOrgId={!suborgId}" scrolling="true"   />  
+</div>
+<footer id="footer">
+	<c:ExpoFooterComp rendered="{!isFromSite}"/>
+</footer> 
+<!-- 201901/15 EXPO会計商品画像管理機能、NONEEXPOに利用できるように改善 BY zyz END -->
+   <script>
+   
+   window.addEventListener("resize", function(){
+        setDfFrameHeight();
+   });
+   window.addEventListener("load", function(){
+        setDfFrameHeight();
+   });
+   function setDfFrameHeight(){
+       // 201901/15 EXPO会計商品画像管理機能、NONEEXPOに利用できるように改善 BY zyz BEGIN
+       var isFromSite = {!isFromSite};
+       var footerHeight = 0;
+       var headerHeight = 0;
+       if(!isFromSite) {
+       	footerHeight = document.getElementsByClassName("bPageFooter noTableFooter")[0].clientHeight;
+       	headerHeight = document.getElementById("AppBodyHeader").clientHeight;
+       }
+       // 201901/15 EXPO会計商品画像管理機能、NONEEXPOに利用できるように改善 BY zyz END
+       headerHeight = headerHeight + 55;
+    
+       var windowHeight  = window.innerHeight;
+       var iframeHeight = windowHeight - (footerHeight + headerHeight);
+       var sframe = document.getElementById("idIframe");
+       sframe.style.height = iframeHeight+"px";
+    }
+   
+   </script>
+</apex:page>

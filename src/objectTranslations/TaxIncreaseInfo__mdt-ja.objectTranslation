@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>消費税差分税率定義</value>
+    </caseValues>
+    <fields>
+        <label><!-- 終了日 --></label>
+        <name>EndDate__c</name>
+    </fields>
+    <fields>
+        <help><!-- 2%消費税明細計算対象外商品コードを定義、複数指定場合、カンマ「,」連結で定義可能
+例：商品コード「8001,8002,8003」を登録場合、該当３商品が明細に登録しても、該当金額も2%消費税計算対象外 --></help>
+        <label><!-- 対象外商品 --></label>
+        <name>FilterMstCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 2%消費税金の端数処理区分を定義する、指定されない場合、共通定義の「会計税の端数処理」で計算する --></help>
+        <label><!-- 端数処理 --></label>
+        <name>RoundType__c</name>
+        <picklistValues>
+            <masterLabel>切り上げ</masterLabel>
+            <translation><!-- 切り上げ --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>切り捨て</masterLabel>
+            <translation><!-- 切り捨て --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>四捨五入</masterLabel>
+            <translation><!-- 四捨五入 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 開始日 --></label>
+        <name>StartDate__c</name>
+    </fields>
+    <fields>
+        <help><!-- 差分税明細自動作成用会計商品コードを定義する、注意：該当会計商品を定義する場合、消費税、サビース、単価は全部０に定義してください --></help>
+        <label><!-- 差分税率用商品コード --></label>
+        <name>TaxIncMstCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 差分税率Xパーセントを定義する、例：2%税率を定義したい場合、該当項目に2を入力する --></help>
+        <label><!-- 差分税率 --></label>
+        <name>TaxIncRate__c</name>
+    </fields>
+</CustomObjectTranslation>

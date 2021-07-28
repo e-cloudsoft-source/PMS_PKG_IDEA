@@ -1,0 +1,651 @@
+<!-- 仕入 -->
+<apex:page standardcontroller="Purchase__c" extensions="PurchaseManagentInputSf1"
+action="{!InitEdit}" title="{!$Label.ps__msg_040_0053}" cache="true" 
+standardStylesheets="true" showheader="false" sidebar="false" showChat="false"
+applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>仕入入力</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<apex:stylesheet value="{!URLFOR($Resource.notifyLib, 'styles/metro/notify-metro.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<script type="text/javascript" src="/soap/ajax/22.0/connection.js"></script>
+<apex:includeScript value="{!URLFOR($Resource.notifyLib, 'js/notify.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.notifyLib, 'styles/metro/notify-metro.js')}"/>
+
+<style>
+span.dateFormat{
+	display: none;
+}
+.lookupInput a {
+	width: 25px;
+	height: 28px;
+	padding:0px;
+	margin-left: -25px;
+}
+.lookupIcon {
+	padding:0px;
+	margin-right:0px ;
+	margin-top: 3px;
+}
+.lookupIconOn {
+	margin-top: 3px;
+}
+.k-button .k-image {
+	height: 16px;
+	vertical-align:sub;
+}
+.spanClass{
+	font-size:13px;
+	color:#7889A5;
+}
+.requiredInput {
+    position: relative;
+    width: 95%;
+}
+.requiredInput .requiredBlock {
+    background-color: #c00;
+    position: absolute;
+    left: -4px;
+    width: 3px;
+    top: 1px;
+    bottom: 1px;
+}
+.fullWidth {
+    margin-left:0;
+    margin-right:0;
+    width:95%;
+    height: 28px;
+    font-size: 1em;
+}
+
+</style>
+<script>
+//beenFocused = true;
+var $j = jQuery.noConflict();
+// kendo culture custome
+var _pointLen = {!JSENCODE(PointLen)};
+var _numberFromat = kendo.culture().numberFormat;
+//_numberFromat.decimals = _pointLen;
+var currency = _numberFromat.currency;
+currency.decimals = _pointLen;
+currency.symbol = "{!JSENCODE(CurrencySybmol)}";
+currency.pattern = ["$-n","$n"];
+var _gNs = "{!JSENCODE(Ns)}";
+var _gSobjPrefix = "{!JSENCODE(viewPrefix)}";
+// PCの場合、標準画面に設定する
+if (!isSf1()) {
+    var purId = "{!JSENCODE(pur.Id)}";
+    if (purId == "") {
+        window.location.href = "/"+_gSobjPrefix+"/e?nooverride=1&retURL=/"+_gSobjPrefix;
+    } else {
+        window.location.href = "/"+purId+"/e?nooverride=1&retURL=/"+purId;
+    }
+}
+// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+function disableTaxSel(flag){
+	var selRate = $j("[id$=tarRateShopSel]");
+	if (flag == undefined) flag = $j("input.noTaxFlgClass").is(":checked");
+	if (flag) {
+		$j(".disableRate").css("width",selRate.outerWidth());
+	} else {
+		$j(".disableRate").css("width",0);
+    }
+}
+// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+</script>
+</head>
+<body>
+
+<apex:form >
+<input type="hidden" id="hidPurId" value="{!pur.Id}"/>
+<input type="hidden" id="hidRsvId" value="{!pur.JinyaRevenue__c}" />
+<div>
+		
+		<div style="width:100%;height:100%;padding-right: 10px" id="lDiv">
+			<ol style="list-style-type:none;width:100%;padding: 0px">
+				<li>
+					<!-- 種別 -->
+					<span class="spanClass">
+						<div>
+						{!$Label.MSG_040_0065}
+						<span id="purStatus" style="float: right;padding-right: 10%;color: green;"></span>
+						</div>
+					</span>
+				</li>
+				<li>
+					<span >
+		    			<apex:outputPanel styleClass="requiredInput" layout="block">
+		    			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+							<apex:inputField value="{!pur.PurchaseType__c}" id="purChaseType" onchange="autoNoTaxKbnFlg()"  styleClass="fullWidth"/>
+		    			</apex:outputPanel>
+	    			</span>
+	    		</li>
+				<li>
+					<!-- 科目 -->
+					<span class="spanClass">{!$Label.MSG_040_0066}</span>
+				</li>
+				<li>
+					<span >
+		    			<apex:outputPanel styleClass="requiredInput" layout="block">
+		    			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+		    				<!-- 2016/07/15 wgch BEGIN -->
+		    				<apex:inputField value="{!pur.KamokuLst__c}" id="depKamoku"  onchange="autoNoTaxKbnFlg()"  styleClass="fullWidth"/>
+		    				<!-- 2016/07/15 wgch END -->
+		    			</apex:outputPanel>
+	    			</span>
+				</li>
+				<li>
+					<!-- 仕入日 -->
+					<span class="spanClass">{!$Label.MSG_040_0056}</span>
+				</li>
+				<li>
+			    	<apex:outputPanel styleClass="requiredInput" layout="block">
+					<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+					<span >
+			    	<apex:input value="{!strSalesDate}" type="date" id="salesDate" styleClass="fullWidth" onchange="getRsvId(this)"/>
+			    	</span>
+			    	</apex:outputPanel>
+				</li>
+				<li>
+					<!-- 仕入先 -->
+					<span class="spanClass">{!$Label.MSG_040_0055}</span>
+				</li>
+				<li>
+					<apex:outputPanel styleClass="requiredInput" layout="block" >
+					<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+					<span >
+					<apex:inputField value="{!pur.Purchasesource__c}" id="purchaseSource" onchange="getKbnByAccount(this)" styleClass="fullWidth"/>
+			    	</span>
+			    	</apex:outputPanel>
+				</li>
+				<li>
+					<!-- 税対象外 -->
+					<span class="spanClass">{!$ObjectType.Purchase__c.Fields.NoTaxFlg__c.label}</span>
+				</li>
+				<li>
+					<span >
+						<apex:inputCheckbox value="{!pur.NoTaxFlg__c}" id="notaxflg"  styleClass="noTaxFlgClass" onchange="callAutoTaxCon()"/>
+					</span>
+				</li>
+				<!-- 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN -->
+				<li style="{!if(taxOpts.size > 1 , '' , 'display:none;')}">
+					<!-- 税 -->
+					<span class="spanClass">{!$ObjectType.Purchase__c.Fields.TaxRate__c.label}</span>
+				</li>
+				<li style="{!if(taxOpts.size > 1 , '' , 'display:none;')}">
+					<span style="position:relative">
+						<apex:selectList value="{!taxRate}" multiselect="false" 
+                            size="1" id="tarRateShopSel" onchange="changeTaxKbnFlg()" styleClass="fullWidth">
+	                        <apex:selectOptions value="{!taxOpts}"/>
+						</apex:selectList>
+						<div class="disableRate" style="position:absolute;background:lightgray;height:30px;top:-6px;opacity:0.3;border-radius: 3px;"></div>
+					</span>
+				</li>
+				<!-- 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END -->
+				<li>
+					<!--金額(税抜)-->
+					<span class="spanClass">{!$Label.MSG_040_0069}</span>
+				</li>
+				<li>
+			    	<apex:outputPanel styleClass="requiredInput" layout="block">
+					<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+		    		<span>	
+		    		    <input type="number" value="{!payAmountExcTax}" id="denpyoukei" class="fullWidth j-numberInput-NoTax" />
+		    		</span>
+		    		</apex:outputPanel>
+				</li>
+				<li>
+					<!-- 金額(税込) -->
+					<span class="spanClass">{!$Label.MSG_040_0070}</span>
+				</li>
+				<li>
+					<apex:outputPanel styleClass="requiredInput" layout="block">
+					<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+		    		<span  >
+		    			<input type="number" value="{!payAmountIncTax}" id="denpyoukeiIncTax" class="fullWidth j-numberInput-IncTax" />
+		    		</span>
+		    		</apex:outputPanel>
+				</li>
+                <li>
+                    <!-- 摘要 -->
+                    <span title="{!pur.Memo__c}" Class="spanClass">{!$Label.MSG_040_0068}</span>
+                </li>
+                <li Class="dataClass">
+                    <apex:outputPanel styleClass="requiredInput" layout="block">
+                    <span >
+                        <textarea id="memo" rows="3" class="fullWidth">{!pur.Memo__c}</textarea>
+                    </span>
+                    </apex:outputPanel>
+                </li>
+                <apex:outputPanel rendered="{!shopOpts.size>0}">
+                <li>
+                    <!-- 店舗 -->
+                    <span class="spanClass">{!$Label.MSG_040_0063}</span>
+                </li>
+                <li>
+                    <apex:outputPanel styleClass="requiredInput" layout="block" >
+                    <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                    <span  width="5%">
+                        <apex:selectList value="{!pur.ShopInfoRef__c}" multiselect="false" 
+                            size="1" id="depShopSel" onchange="autoNoTaxKbnFlg()" styleClass="fullWidth">
+	                        <apex:selectOptions value="{!shopOpts}"/>
+	                    </apex:selectList>
+                    </span>
+                    </apex:outputPanel>
+                </li>
+                </apex:outputPanel>
+                <li>&nbsp;</li>
+				<li style="margin-top: 5px;">
+					<!-- Button Action -->
+			    	<apex:outputPanel style="white-space: nowrap; text-align: center;">
+			    		<input type="button" class="btn" name="inputBtn" style="width:33%;height:30px"  value="{!$Label.MSG_040_0073}" onclick="preSaveSubmit(true,false);"/>
+			    		<input type="button" class="btn" name="inputBtn" style="width:33%;height:30px"  value="{!$Label.MSG_040_0073}&新規"  onclick="preSaveSubmit(false,true)"/>
+			    		<input type="button" class="btn" name="inputBtn" style="width:33%;height:30px"  value="キャンセル" onclick="cancelAction();" />
+			    	</apex:outputPanel>
+				</li>
+			</ol>
+		</div>
+</div>
+</apex:form>
+
+<apex:remoteObjects >
+  <apex:remoteObjectModel name="ps__RsvAccount__c" fields="Id, Name" jsShorthand="RsvAccount"
+    retrieve="{!$RemoteAction.PurchaseManagentInputSf1.rsvRetrieve}"/>
+  <apex:remoteObjectModel name="ps__Purchase__c" fields="Id,Name,ps__StatusLst__c,ps__KamokuLst__c,ps__ShopInfoRef__c,ps__PsalesproductRef__c,ps__DenpyoukeiIncTax__c,ps__Denpyoukei__c,ps__Purchasesource__c,ps__JinyaRevenue__c,ps__Field1__c,ps__PurchaseType__c,ps__Memo__c,ps__NoTaxFlg__c" 
+    jsShorthand="Purchase"/>
+</apex:remoteObjects>
+
+<script>
+$j(document).ready(function() {
+	bindEvent();
+	if("{!Purchase__c.Id}" == ""){
+		//alert('仕入新规入力!');
+		//notify('success','新規入力中...');
+		setStatusText('新規入力中...');
+	} else{
+		//notify('success','編集中...');
+		setStatusText('編集中...');
+	}
+});
+
+var inputClearId;var inputNoTaxId;
+function bindEvent(){
+    /*
+	// 入力数値項目
+	// 課税から非課税に自動計算
+    var incTax = $j(".j-numberInput-IncTax").kendoNumericTextBox({
+        format: "c",
+        upArrowText: "",
+        downArrowText: "",
+        restrictDecimals: true,
+        change:function(e){
+            callAutoIncTaxToNoTax(e);
+        }
+    }).data("kendoNumericTextBox");
+    */
+    var incTax = $j(".j-numberInput-IncTax");
+    if (incTax != null) {
+        // 課税から非課税に自動計算
+        incTax.keyup(function(e){
+            if(inputClearId)clearTimeout(inputClearId);
+            inputClearId = setTimeout(callAutoIncTaxToNoTax, 200);
+        }).change(function(e){
+            callAutoIncTaxToNoTax(e);
+        });
+    }
+    /*
+    // 非課税から課税に自動計算
+    var noTax = $j(".j-numberInput-NoTax").kendoNumericTextBox({
+        format: "c",
+        upArrowText: "",
+        downArrowText: "",
+        restrictDecimals: true,
+        change:function(e){
+            callAutoNoTaxToIncTax(e);
+        }
+    }).data("kendoNumericTextBox");
+    */
+    var noTax = $j(".j-numberInput-NoTax");
+    if (noTax != null) {
+        // 非課税から課税に自動計算
+        noTax.keyup(function(e){
+            if(inputNoTaxId)clearTimeout(inputNoTaxId);
+            inputNoTaxId = setTimeout(callAutoNoTaxToIncTax, 200);
+        }).change(function(e){
+            callAutoNoTaxToIncTax(e);
+        });
+    }
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+	disableTaxSel();
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+}
+
+//仕入先変更の場合
+function getKbnByAccount(that){
+	var accountId = $j("[id$=':purchaseSource_lkid']").val();
+	var accountName = $j(that).val();
+	if(accountId == "" || accountName == '') {
+	   $j("[id$=':purchaseSource_lkid']").val("");
+	   return;
+	}
+	if (accountId == "000000000000000" || accountId.includes("000000000000000") ) {
+		accountId = "";
+	}
+	if (accountId == "") return;
+	// 有効な期間チェックを行う
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.PurchaseManagentInputSf1.getAccount}", accountId, function(result, event){
+		// 異常
+		if(event.type == 'exception') {
+			alert(event.message);
+			//unblockUi();
+		} else {
+		  if (result[1] != "") {
+		      alert(result[1]);
+		  } else {
+		      if (_gRoundMode != (1*result[0])) {
+		          _gRoundMode = 1*result[0];
+		          // 再度自動計算を行う
+		          callAutoNoTaxToIncTax(event);
+		      }
+		  }
+		}
+	});
+}
+
+// 税対象外連動フラグ
+var noTaxChangeFlg = false;
+// 取込先の端数処理区分
+var _gRoundMode = {!JSENCODE(TEXT(roundMode))};
+// 税対象外のCLICKの場合、金額自動計算する
+function callAutoTaxCon() {
+	var noTaxFlg = $j("input.noTaxFlgClass");
+   	var noTax = $j(".j-numberInput-NoTax");
+	var incTax = $j(".j-numberInput-IncTax");
+	noTaxChangeFlg = true;
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+	disableTaxSel(noTaxFlg.is(":checked"));
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+	if (noTax != null) {
+   		if(inputNoTaxId) clearTimeout(inputNoTaxId);
+   		inputNoTaxId = setTimeout(callAutoNoTaxToIncTax, 200);
+   	}else {
+   		if(inputClearId) clearTimeout(inputClearId);
+   		inputClearId = setTimeout(callAutoIncTaxToNoTax, 200);
+   	}
+}
+// 税込み金額から税抜き金額を計算する
+function callAutoIncTaxToNoTax(e){
+	var valueTarget = $j("input.j-numberInput-IncTax[id]");
+	var incTaxVal = kendo.parseFloat(valueTarget.val());
+	//var accountId = $("[id$=':purchaseSource_lkid']").val();
+	// 取引先の端数処理区分情報格納
+	var roundMode = _gRoundMode;
+	//if (!noTaxChangeFlg) {
+	//	if(kendo.parseFloat(valueTarget.data("olddata")) == kendo.parseFloat(valueTarget.val()))return;
+	//};
+	noTaxChangeFlg = false;
+	// 2015/12/03 Fix BEGIN
+	var noTaxFlg = $j("input.noTaxFlgClass[id]");
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+	// var commTaxRate = "{!commTaxRate}";
+	var commTaxRate = getTaxRate();
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+	if (noTaxFlg.is(':checked')) commTaxRate = 0;
+	var noTaxPrice = isNaN(incTaxVal) ? 0 : incTaxVal;
+	// 2015/12/03 Fix END
+	var changePrice = JINYACONNECT.PRODUCT.CALNOTAXPRICE(noTaxPrice,commTaxRate,{!JSENCODE(PointLen)},roundMode);
+	$j("input.j-numberInput-NoTax").val(changePrice);
+console.log("inTax::round:" + roundMode);
+console.log("inTax:::" + changePrice);
+	if(inputClearId) clearTimeout(inputClearId);
+}
+// 税抜き金額から税込み金額を計算する
+function callAutoNoTaxToIncTax(e){
+	var valueTarget = $j("input.j-numberInput-NoTax[id]");
+	var excTaxVal = kendo.parseFloat(valueTarget.val());
+	var roundMode = _gRoundMode;
+	//if (!noTaxChangeFlg) {
+	//	if(kendo.parseFloat(valueTarget.data("olddata")) == kendo.parseFloat(valueTarget.val()))return;
+	//};
+	//noTaxChangeFlg = false;
+	// 2015/12/03 Fix BEGIN
+	var noTaxFlg = $j("input.noTaxFlgClass[id]");
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+	// var commTaxRate = "{!commTaxRate}";
+	var commTaxRate = getTaxRate();
+	// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+	if (noTaxFlg.is(':checked')) commTaxRate = 0;
+	var incTaxPrice = isNaN(excTaxVal) ? 0 : excTaxVal;
+	// 2015/12/03 Fix END
+	var changePrice = JINYACONNECT.PRODUCT.CALINCTAXPRICE(incTaxPrice,commTaxRate,{!JSENCODE(PointLen)},roundMode);
+	$j("input.j-numberInput-IncTax").val(changePrice);
+console.log("noTax::round:" + roundMode);
+console.log("noTax:::" + changePrice);
+	if(inputNoTaxId) clearTimeout(inputNoTaxId);
+}
+
+
+// 保存処理前処理
+function preSaveSubmit(isNewOnly, isNewAndClone) {
+    //e.preventDefault();
+    
+	//必須項目を入力してください。
+	var checkMsg = '{!$Label.MSG_040_0084}';
+
+	var purChaseType=  $j("[id$=':purChaseType']").val();                       // 種別
+	var depKamoku  =   $j("[id$=':depKamoku']").val();                          // 科目
+	var salesDate  =   $j("[id$=':salesDate']").val();                          // 仕入日
+    var purchaseSourceId = $j("[id$=':purchaseSource_lkid']").val();            // 仕入先
+    var purchaseSource = $j("[id$=':purchaseSource']").val();                   // 仕入先名
+    if (purchaseSourceId == "000000000000000" || purchaseSourceId.includes("000000000000000") ) {
+        purchaseSourceId = "";
+    }   
+    var notaxflgHidvar  = $j("[id$=':notaxflg']").is(':checked');               // 税対象外
+    var denpyoukei      = $j("#denpyoukei").val();                              // 金額(税抜き)
+    var denpyoukeiIncTax= $j("#denpyoukeiIncTax").val();                        // 金額(税込み)
+    var memo            = $j("#memo").val();                                    // 備考
+    var shopId          = $j("[id$=':depShopSel']").length > 0                  // 店舗コード
+	                           ? $j("[id$=':depShopSel']").val()
+	                           : null;                       
+    if (
+        $j.trim(purChaseType).length == 0 ||
+        $j.trim(depKamoku).length == 0 ||
+        $j.trim(salesDate).length == 0 ||
+        $j.trim(denpyoukeiIncTax).length == 0 ||
+        $j.trim(denpyoukei).length == 0 ||
+        $j.trim(purchaseSource).length == 0 ||
+        (shopId != null && $j.trim(shopId).length == 0)
+        ) {
+        alert(checkMsg);
+        return false;
+    }
+    // ADD NOTIFY ANIMAL BEGIN
+    // 仕入保存中...
+    $j("input.btn").attr("disabled", "disabled");
+    notifyRemove();
+    setStatusText('');
+    notify('success','仕入保存中...',"<img src='../img/loading32.gif'/>");
+    // 現在画面の情報はDBへ反映を行う
+    var purId = $j("#hidPurId").val();
+    
+    // 保存のみ場合、DB保存して、詳細画面へ戻る
+    var rsvDate = kendo.parseDate(salesDate);
+    if (rsvDate == null) rsvDate = new Date(rsvDate);
+    var strRsvDate = kendo.toString(rsvDate, "yyyyMMdd");
+    var rsv = new SObjectModel.RsvAccount();
+    rsv.retrieve({Name: strRsvDate}, function(err, rs) { 
+        if (err) { 
+            alert(err); 
+        } else { 
+            if (rs.length == 0) {
+                alert("{!JSENCODE($Label.ERR_9000)}")
+            } else {
+                // Save Data To Db;
+                //rsv.set('KamokuLst__c',purChaseType);
+                //rsv.upsert();
+                var rsvid = rs[0].get("Id");
+                var rsvUpsert = new SObjectModel.Purchase();
+                rsvUpsert.set("Id",                     $j("#hidPurId").val());
+                rsvUpsert.set(_gNs+"PurchaseType__c",   purChaseType);
+                rsvUpsert.set(_gNs+"KamokuLst__c",      depKamoku);
+                rsvUpsert.set(_gNs+"JinyaRevenue__c",   rsvid);
+                rsvUpsert.set(_gNs+"Purchasesource__c", purchaseSourceId);
+                rsvUpsert.set(_gNs+"NoTaxFlg__c",       notaxflgHidvar);
+                rsvUpsert.set(_gNs+"Denpyoukei__c",     kendo.parseFloat(denpyoukei));
+                rsvUpsert.set(_gNs+"DenpyoukeiIncTax__c",kendo.parseFloat(denpyoukeiIncTax));
+                rsvUpsert.set(_gNs+"Memo__c",           memo);
+                rsvUpsert.set(_gNs+"ShopInfoRef__c",    shopId);
+				// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+				rsvUpsert.set(_gNs+"TaxRate__c",    getTaxRate());
+				// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+                                 
+                rsvUpsert.upsert(function (err, rs, evt) {
+                    if (err) {
+                        alert(err);
+                    } else {
+                        // 詳細画面へ遷移する
+                        //console.debug(rs);
+                        updateNotify('','保存成功しました');
+                        // 詳細画面へ遷移する　
+                        if (isNewOnly) {
+	                        if (isSf1()) {
+	                            sforce.one.navigateToURL("/"+rs, false);
+	                        } else {
+	                            window.location.href = "/"+rs;
+	                        }
+	                         updateNotify('','保存完了');
+                        } else if(isNewAndClone) {
+                           // IDはクリアする　
+                            $j("#hidPurId").val("");
+                            updateNotify('','仕入データ保存成功しました');
+                            setStatusText('新規入力中...');
+                            //var t = setTimeout(function(){ notifyRemove();},2000);
+                        }
+                    }
+                    $j("input.btn").attr("disabled", null);
+                    //console.log(err);
+                    //console.log("rs="+rs);
+                    //console.log("ev="+evt);
+                });
+            }
+            //console.log(records);
+        } 
+    });
+}
+// 2016/04/21 課税対象外自動設定機能対応
+var noTaxDataSrc = JSON.parse("{!JSENCODE(xmlShopNotaxTypeMapJson)}");
+var noTaxRightDataSrc = JSON.parse("{!JSENCODE(xmlShopNotaxTypeRightMapJson)}");
+var defaultShopCode = "{!JSENCODE(xmlDefaultSetShopCode)}";
+var shopIdToCdJson = JSON.parse("{!JSENCODE(shopIdToCdMapJson)}");
+function autoNoTaxKbnFlg() {
+	// 当前に選択の店舗情報を取得する
+	var currShopCode = '';
+	var defSpCdId = shopIdToCdJson[defaultShopCode];
+	$shopObj = $j("select[id$=depShopSel]");
+	if ($shopObj.length > 0) currShopCode = shopIdToCdJson[$shopObj.val()];
+	// 種別値
+	var typeVal = $j("select[id$=purChaseType]").val();
+	// 科目値
+	var typeVal2 = $j("select[id$=depKamoku]").val();
+	var noTaxArray = noTaxRightArray = null;
+	var noTaxKbn = false;
+	// 種別項目は非課税
+	if (noTaxDataSrc[currShopCode] === undefined) {
+		noTaxArray = noTaxDataSrc[defSpCdId];
+	} else {
+		noTaxArray = noTaxDataSrc[currShopCode];
+	}
+	// 科目項目は非課税
+	if (noTaxRightDataSrc[currShopCode] === undefined) {
+		noTaxRightArray = noTaxRightDataSrc[defSpCdId];
+	} else {
+		noTaxRightArray = noTaxRightDataSrc[currShopCode];
+	}
+	// 非課税フラグを設定する
+	if (noTaxArray != undefined && noTaxArray != null) {
+		if (noTaxArray.indexOf(typeVal) >= 0 ) {
+			noTaxKbn = true;
+		}
+	}
+	if (noTaxRightArray != undefined && noTaxRightArray != null) {
+		if (noTaxRightArray.indexOf(typeVal2) >= 0 ) {
+			noTaxKbn = true;
+		}
+	}
+	// 税区分により、金額再計算を再計算を行う
+	var $notaxObj = $j("input[id$=notaxflg]");
+	var oldFlg = $notaxObj.prop("checked");
+	if (oldFlg != noTaxKbn) {
+		$notaxObj.prop("checked",noTaxKbn);
+		$notaxObj.trigger('change');
+	}
+}
+function cancelAction() {
+	$j("input.btn").attr("disabled", "disabled");
+    var sobjPrefix = _gSobjPrefix;
+    if (isSf1()) {
+        sforce.one.navigateToURL("/"+sobjPrefix);
+    } else {
+        window.location.href = "/"+sobjPrefix;
+    }
+}
+
+function notify(style,ctext,img) {
+    $j.notify({
+        title: '仕入入力',
+        text: ctext,
+        image: img
+    }, {
+        style: 'metro',
+        className: style,
+        autoHide: true,
+        autoHideDelay: 2000,
+        clickToHide: true
+    });
+}
+function notifyRemove() {
+	$j(".notifyjs-corner").remove();
+}
+function updateNotify(image,text) {
+	var $img = $j("div[data-notify-html='image'] img");
+	if($img.length > 0) $img[0].outerHTML = image;
+	$j("div[data-notify-html='text']")[0].innerHTML = text;
+}
+function setStatusText(text) {
+	$j('#purStatus')[0].innerHTML = text;
+}
+// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy BEGIN
+// 税対象外のCLICKの場合、金額自動計算する
+function changeTaxKbnFlg() {
+	var noTaxFlg = $j("input.noTaxFlgClass");
+   	var noTax = $j(".j-numberInput-NoTax");
+	var incTax = $j(".j-numberInput-IncTax");
+	noTaxChangeFlg = true;
+	if (noTax != null) {
+   		if(inputNoTaxId) clearTimeout(inputNoTaxId);
+   		inputNoTaxId = setTimeout(callAutoNoTaxToIncTax, 200);
+   	}else {
+   		if(inputClearId) clearTimeout(inputClearId);
+   		inputClearId = setTimeout(callAutoIncTaxToNoTax, 200);
+   	}
+}
+function getTaxRate(){
+	var commTaxRate = "{!commTaxRate}";
+	var selRate = $j("[id$=tarRateShopSel]").val();
+	if (selRate != "") commTaxRate = selRate;
+	return selRate;
+}
+// 2019/10/15 現在料理の仕入れはsalesforceアプリの仕入（標準）上から入力しているのですが、この画面には「消費税」項目が表示されていないため、追加していただきたいです by zy END
+</script>
+<c:CommProductFeeCalJsComp />
+</body>
+</html>
+</apex:page>

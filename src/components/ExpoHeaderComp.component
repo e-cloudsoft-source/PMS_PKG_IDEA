@@ -1,0 +1,557 @@
+<apex:component controller="ExpoHeaderCtrl" allowDML="true">
+<apex:attribute name="isIncJpMsg" description="jp message is include" type="Boolean" required="false" default="true"/>
+
+<!-- css -->
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/font-awesome.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/droppy.css')}" />
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/loader.js')}"/>
+
+<apex:outputPanel rendered="{!isIncJpMsg}" >
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/messages/kendo.messages.ja-JP.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/cultures/kendo.culture.ja-JP.min.js')}" />
+</apex:outputPanel>
+
+<apex:attribute name="curUser" description="currentUser Info" type="ExpoUser__c" assignTo="{!currentUser}" default="" />
+<apex:attribute name="sid" description="session key" type="String" default=""/>
+<script>
+
+Object.defineProperty(Map.prototype, 'map', {get : function(){ var obj = {}; this.forEach(function(value, key){obj[key] = value;}); return obj;}})
+
+if ($("#nav").length == 0){
+	$("ul.bf-l").wrap("<nav id='nav'/>");
+}
+$(document).ready(function() {
+	if ({!isIncJpMsg}) kendo.culture("ja-JP");
+	$("body:eq(0)").css("minWidth","1004px");
+	$(".hd-1 a:not([class*='notLoad']),.hd-1 a:not([class*='notLoad'])").bind("click",function(){
+		startLoading();
+	});
+	if(isMobile()){ // true为手机端, false为PC端
+		$("#nav li").click(function(){
+			var $ul = $(".children-1", $(this));
+			$("#nav li .children-1").not($ul).css("display", "none"); // 隐藏所以
+			$ul.css("display", ($ul.is(':visible') ? "none" : "block") );
+			var css = {
+						border: "1px solid #737373",
+						color: "#fffbf7",
+						background: "#8c8c8c",
+						background: "-moz-linear-gradient(top, #8c8c8c 0%, #8c8c8c 50%, #808080 53%, #808080 100%)",
+						background: "-webkit-linear-gradient(top, #8c8c8c 0%,#8c8c8c 50%,#808080 53%,#808080 100%)",
+						background: "linear-gradient(to bottom, #8c8c8c 0%,#8c8c8c 50%,#808080 53%,#808080 100%)",
+						filter: "progid:DXImageTransform.Microsoft.gradient( startColorstr='#8c8c8c', endColorstr='#808080',GradientType=0 )",
+					  };
+			var delcss = {
+							border: "",
+							color: "",
+							background: "",
+							filter: "",
+						  };
+			if($ul.is(':visible')) $("a.btn", $(this)).css(delcss);
+			else $("a.btn", $(this)).css(css);
+		});
+	}
+});
+function isMobile(){ // true为手机端, false为PC端
+	var mobile_flag = false;
+	try {
+		mobile_flag = kendo.support.mobileOS;
+	} catch (e) {
+		var userAgentInfo = navigator.userAgent.toLowerCase();
+		var mobileAgents = ["android", "iphone", "symbianos", "windows phone", "ipad", "ipod"];
+		// 根据userAgent判断是否是手机
+		for (var i = 0; i < mobileAgents.length; i++) {
+			if (userAgentInfo.indexOf(mobileAgents[i]) > 0) {
+				mobile_flag = true;
+				break;
+			}
+		}
+	}
+	return mobile_flag;
+}
+</script>
+<style>
+* {
+	box-sizing: border-box;
+}
+html {
+	font-size: 62.5%;
+	min-width: 980px;
+}
+header {
+	width: 100%;
+	box-shadow: 0px 4px 2px 0px rgba(0,0,0,0.25);
+	position: fixed;
+	z-index: 20;
+	background: #fff;
+	min-width: 980px;
+}
+body, div, ul, ol, li, h1, form input, p {
+	margin: 0;
+	padding: 0;
+}
+body {
+	font-size: 1.3rem;
+	line-height: 1.5em;
+	font-family: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+	color: #000;
+	background: #fff;
+	margin:0;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+ol, ul {
+	list-style: none
+}
+a {
+	transition: 0.1s;
+	text-decoration: none;
+	display: block;
+	color: #000;
+	cursor: pointer; /* 2016/12/26 add */
+}
+h1 {
+	display: inline-block;
+	vertical-align: middle;
+	margin:0;
+	padding:0;
+}
+img {
+	max-width: 100%;
+	height: auto;
+	width: auto;
+}
+ul{
+	list-style: none;
+}
+#contents {
+	width: auto;
+	padding: 10px 10px 0 10px;
+	height: 100%;
+	overflow: auto;
+}
+
+/* GENERAL CLASS
+---------------------------------------------------------------------- */
+.fLeft {
+	float: left;
+}
+#loader-bg {
+	display: none;
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	background: #737373;
+	z-index: 1;
+}
+#loader {
+	display: none;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	width: 200px;
+	height: 200px;
+	margin-top: -100px;
+	margin-left: -100px;
+	text-align: center;
+	color: #fff;
+	z-index: 2;
+}
+
+/* BUTTON
+---------------------------------------------------------------------- */
+.bf-l .btn{
+	font-size:1.6rem;
+}
+.bw-s .btn {
+	width:90px;
+}
+.btn{
+	color:#fff;
+	text-align:center;
+	text-decoration:none!important;
+	border-radius: 5px;
+	box-shadow: 0px 3px 2px 0px rgba(0,0,0,0.25), 1px 1px 0 rgba(256, 256, 256, 0.55) inset;
+	cursor:pointer;
+	padding:2px;
+	width:135px;
+}
+.bc-gys{
+	border: solid 1px #a6a6a6;
+	background-image: -webkit-linear-gradient(bottom, #b2b2b2 1%, #b2b2b2 50%, #bfbfbf 51%, #bfbfbf 99%);
+	background-image: -moz-linear-gradient(bottom, #b2b2b2 1%, #b2b2b2 50%, #bfbfbf 51%, #bfbfbf 99%);
+	background-image: -o-linear-gradient(bottom, #b2b2b2 1%, #b2b2b2 50%, #bfbfbf 51%, #bfbfbf 99%);
+	background-image: -ms-linear-gradient(bottom, #b2b2b2 1%, #b2b2b2 50%, #bfbfbf 51%, #bfbfbf 99%);
+	background-image: linear-gradient(to top, #b2b2b2 1%, #b2b2b2 50%, #bfbfbf 51%, #bfbfbf 99%);
+}
+.bc-gy{
+	border: 1px solid #737373;
+	background: #8c8c8c;
+	background: -moz-linear-gradient(top, #8c8c8c 0%, #8c8c8c 50%, #808080 53%, #808080 100%);
+	background: -webkit-linear-gradient(top, #8c8c8c 0%,#8c8c8c 50%,#808080 53%,#808080 100%);
+	background: linear-gradient(to bottom, #8c8c8c 0%,#8c8c8c 50%,#808080 53%,#808080 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#8c8c8c', endColorstr='#808080',GradientType=0 );
+}
+.bc-dgy{
+	border:1px solid #333333;
+	background: #727272;
+	background: -moz-linear-gradient(top, #727272 0%, #727272 50%, #666666 51%, #666666 100%);
+	background: -webkit-linear-gradient(top, #727272 0%,#727272 50%,#666666 51%,#666666 100%);
+	background: linear-gradient(to bottom, #727272 0%,#727272 50%,#666666 51%,#666666 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#727272', endColorstr='#666666',GradientType=0 );
+}
+.bc-gr{
+	border:1px solid #22854a;
+	background: #509e60; /* Old browsers */
+	background: -moz-linear-gradient(top, #509e60 0%, #509e60 50%, #4d9959 51%, #4d9959 100%); /* FF3.6-15 */
+	background: -webkit-linear-gradient(top, #509e60 0%,#509e60 50%,#4d9959 51%,#4d9959 100%); /* Chrome10-25,Safari5.1-6 */
+	background: linear-gradient(to bottom, #90EE90 0%,#90EE90 50%,#90EE90 51%,#90EE90 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#509e60', endColorstr='#4d9959',GradientType=0 ); /* IE6-9 */
+}
+.bc-bl-menu{
+	border:1px solid #24759d;
+	background: #60a9cc;
+	background: -moz-linear-gradient(top, #60a9cc 0%, #60a9cc 50%, #62a4c6 50%, #62a4c6 100%);
+	background: -webkit-linear-gradient(top, #60a9cc 0%,#60a9cc 50%,#62a4c6 50%,#62a4c6 100%);
+	background: linear-gradient(to bottom, #60a9cc 0%,#60a9cc 50%,#62a4c6 50%,#62a4c6 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#60a9cc', endColorstr='#62a4c6',GradientType=0 );
+}
+.bc-bl{
+	border:1px solid #24759d;
+	background: #60a9cc;
+	background: -moz-linear-gradient(top, #60a9cc 0%, #60a9cc 50%, #62a4c6 50%, #62a4c6 100%);
+	background: -webkit-linear-gradient(top, #60a9cc 0%,#60a9cc 50%,#62a4c6 50%,#62a4c6 100%);
+	background: linear-gradient(to bottom, #60a9cc 0%,#60a9cc 50%,#62a4c6 50%,#62a4c6 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#60a9cc', endColorstr='#62a4c6',GradientType=0 );
+}
+.bc-or{
+	border:1px solid #cc7c0d;
+	background: #e5a867;
+	background: -moz-linear-gradient(top, #e5a867 0%, #e5a867 50%, #eba255 50%, #eba255 100%);
+	background: -webkit-linear-gradient(top, #e5a867 0%,#e5a867 50%,#eba255 50%,#eba255 100%);
+	background: linear-gradient(to bottom, #e5a867 0%,#e5a867 50%,#eba255 50%,#eba255 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5a867', endColorstr='#eba255',GradientType=0 );
+}
+.bc-pk{
+	border:1px solid #8d831f;
+	background: #bfb14e;
+	background: -moz-linear-gradient(top, #bfb14e 0%, #bfb14e 50%, #b6ac4d 50%, #b6ac4d 100%);
+	background: -webkit-linear-gradient(top, #bfb14e 0%,#bfb14e 50%,#b6ac4d 50%,#b6ac4d 100%);
+	background: linear-gradient(to bottom, #bfb14e 0%,#bfb14e 50%,#b6ac4d 50%,#b6ac4d 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#bfb14e', endColorstr='#b6ac4d',GradientType=0 );
+}
+.bc-br{
+	border:1px solid #804e0c;
+	background: #c49257;
+	background: -moz-linear-gradient(top, #c49257 0%, #c49257 50%, #bb884b 50%, #bb884b 100%);
+	background: -webkit-linear-gradient(top, #c49257 0%,#c49257 50%,#bb884b 50%,#bb884b 100%);
+	background: linear-gradient(to bottom, #c49257 0%,#c49257 50%,#bb884b 50%,#bb884b 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c49257', endColorstr='#bb884b',GradientType=0 );
+}
+/* 褐色 */
+.bc-lrd{
+	border:1px solid #F44D33;
+	background: #f48270;
+	background: -moz-linear-gradient(top, #f48270 0%, #f48270 48%, #f76c54 56%, #f76c54 100%);
+	background: -webkit-linear-gradient(top, #f48270 0%,#f48270 48%,#f76c54 56%,#f76c54 100%);
+	background: linear-gradient(to bottom, #f48270 0%,#f48270 48%,#f76c54 56%,#f76c54 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f48270', endColorstr='#f76c54',GradientType=0 );
+}
+/* 橙红色 */
+.bc-prd{
+	border:1px solid #F44D33;
+	background: #dc9287;
+	background: -moz-linear-gradient(top, #dc9287 0%, #dc9287 50%, #da8071 52%, #da8071 100%);
+	background: -webkit-linear-gradient(top, #dc9287 0%,#dc9287 50%,#da8071 52%,#da8071 100%);
+	background: linear-gradient(to bottom, #dc9287 0%,#dc9287 50%,#da8071 52%,#da8071 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#dc9287', endColorstr='#da8071',GradientType=0 );
+	font-weight:normal;
+}
+/* 橙红色 */
+.bc-cc{
+	border:1px solid #F44D33;
+	background: #f48270;
+	background: -moz-linear-gradient(top, #f48270 0%, #f48270 48%, #f76c54 56%, #f76c54 100%);
+	background: -webkit-linear-gradient(top, #f48270 0%,#f48270 48%,#f76c54 56%,#f76c54 100%);
+	background: linear-gradient(to bottom, #f48270 0%,#f48270 48%,#f76c54 56%,#f76c54 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f48270', endColorstr='#f76c54',GradientType=0 );
+}
+/* 天蓝色 */
+.bc-sb{
+	border:1px solid #24759d;
+	background: #289ec9;
+	background: -moz-linear-gradient(top, #289ec9 0%, #289ec9 50%, #2494bd 51%, #2494bd 100%, #318a42 100%, #318a42 100%, #318a42 100%, #7db9e8 100%, #2494bd 100%);
+	background: -webkit-linear-gradient(top, #289ec9 0%,#289ec9 50%,#2494bd 51%,#2494bd 100%,#318a42 100%,#318a42 100%,#318a42 100%,#7db9e8 100%,#2494bd 100%);
+	background: linear-gradient(to bottom, #289ec9 0%,#289ec9 50%,#2494bd 51%,#2494bd 100%,#318a42 100%,#318a42 100%,#318a42 100%,#7db9e8 100%,#2494bd 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#289ec9', endColorstr='#2494bd',GradientType=0 );
+}
+.bc-gbl{
+	border:1px solid #6E8DAD;
+	background: #81b0c8;
+	background: -moz-linear-gradient(top, #81b0c8 0%, #81b0c8 50%, #78a6bd 52%, #78a6bd 100%);
+	background: -webkit-linear-gradient(top, #81b0c8 0%,#81b0c8 50%,#78a6bd 52%,#78a6bd 100%);
+	background: linear-gradient(to bottom, #81b0c8 0%,#81b0c8 50%,#78a6bd 52%,#78a6bd 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#81b0c8', endColorstr='#78a6bd',GradientType=0 );
+}
+.btn .icon{
+	width:25px;
+	box-shadow: 1px 0 rgba(255,255,255,0.4);
+}
+.btn .icon i{
+	margin-right:0;
+}
+.bc-gr .icon{
+	border-right:1px solid #22854a;
+}
+.bc-bl .icon{
+	border-right:1px solid #24759d;
+}
+.bc-or .icon{
+	border-right:1px solid #cc7c0d;
+}
+.bc-pk .icon{
+	border-right:1px solid #8d831f;
+}
+.bc-br .icon{
+	border-right:1px solid #804e0c;
+}
+.bc-gy:hover{
+	opacity:0.8;
+}
+
+/* input
+-------------------- */
+input {
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+}
+.inCon input[type="text"]{
+	position: relative;
+	width: 100%;
+	border-radius:5px;
+	padding: 3px 10px 0px 10px;
+	border: 1px solid #cccccc;
+	background: #fff;
+	box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2) inset;
+}
+.inCon input[type="text"]:disabled{
+	background:#e5e5e5;
+	box-shadow:none;
+}
+.search{
+	font-family: FontAwesome;
+}
+
+/* HEADER
+---------------------------------------------------------------------- */
+.hd-1{
+	background:#1ea22a;
+	padding: 1px 5px 1px;
+	/*overflow:hidden;*/
+}
+/*
+.hd-1 a{
+	color:#fff;
+	text-decoration:underline;
+	display:inline-block;
+}
+.hd-1 ul{
+	float:right;
+	padding-top:0px;
+	margin:0;
+}
+.hd-1 li{
+	color:#fff;
+	display:inline-block;
+	padding:5px;
+}
+.hd-1 li:last-child{
+	padding-right:0;
+}
+*/
+.hd-1{
+	/*background:#fff;*/
+	/*padding:7px 10px 5px 10px;*/
+}
+.hd-1 nav > ul > li > ul a{
+	border-radius: 0px;
+	padding: 7px;
+	margin: 0 5px;
+}
+.hd-1 nav > ul > li > a span{
+	display:table-cell;
+	vertical-align:middle;
+}
+.hd-1 nav > ul > li > ul.children-1{
+	width: 260px;
+}
+/* ナビ部分 >>> droppy.cssへ記述 */
+
+/* FOOTER
+---------------------------------------------------------------------- */
+footer {
+	width: 100%;
+	padding: 0 0px;
+	background: lightslategrey;
+	bottom: 0;
+	position: absolute;
+}
+footer ul {
+	text-align: center;
+	padding:0;
+	margin:0;
+}
+footer ul li{
+	display: inline-block;
+	color: #fff;
+	font-size: 1.2rem;
+	padding: 3px 5px;
+}
+footer ul li a{
+	color:#fff;
+	text-decoration:underline;
+}
+
+#nav > ul > li > a {
+	box-sizing: border-box;
+}
+
+
+@media ( max-width: 960px ) {
+	footer ul li {
+		font-size:1.1rem;
+	}
+}
+@media ( max-width: 980px ) {
+	.cat-or ul li a{
+		border-left:1px solid #fffaf4;
+	}
+	.cat-or ul li a:hover{
+		border-left:none;
+		box-shadow: 0 0px 0px #e3edf2 inset;
+	}
+	.cat-bl ul li a{
+		border-left:1px solid #e3edf2;
+	}
+	.cat-bl ul li a:hover{
+		border-left:none;
+		box-shadow: 0 0px 0px #ec9012 inset;
+	}
+	.cat-pk ul li a{
+		border-left:1px solid #F7F6DE;
+	}
+	.cat-pk ul li a:hover{
+		border-left:none;
+		box-shadow: 0 0px 0px #8d831f inset;
+	}
+	.cat-br ul li a{
+		border-left:1px solid #FAF1E5;
+		border-right:1px solid #FAF1E5;
+	}
+	.cat-br ul li a:hover{
+		border-left:none;
+		border-right:none;
+		box-shadow: 0 0px 0px #804e0c inset;
+	}
+	.cat-lrd ul li a{
+		border-left:1px solid #f48270;
+	}
+	.cat-lrd ul li a:hover{
+		border-left:none;
+		box-shadow: 0 0px 0px #f76c54 inset;
+	}
+}
+@media ( max-width: 1100px ) {
+	body {
+		font-size: 1.2rem;
+	}
+}
+@media ( max-width: 1120px ) {
+	#nav .btn{
+		width:130px;
+	}
+	footer ul li {
+		font-size:1rem;
+	}
+}
+@media print {
+	body {
+		zoom: 80%;
+	}
+}
+.htmlDetailElementTable img{
+	height:38px !important;
+}
+/* BodyDiv */
+.md-buttons {overflow: hidden; width: 100%; margin: 20px auto;text-align: center;pointer-events: none;}
+.md-buttons a{display:block;color:#666;text-decoration:none;transition:.1s; }
+.md-buttons .btn{pointer-events:auto;padding:5px 0;width:135px;border-radius:5px;box-shadow:0 3px 2px 0 rgba(0,0,0,.25),1px 1px 0 rgba(255,255,255,.55) inset;color:#fff;text-align:center;text-decoration:none!important;cursor:pointer;display: inline-block;}
+.md-buttons .bc-bl{border:1px solid #00ACC1;background:#66c1cc;background:-moz-linear-gradient(top,#66c1cc 0,#66c1cc 50%,#51bfcc 52%,#51bfcc 100%);background:-webkit-linear-gradient(top,#66c1cc 0,#66c1cc 50%,#51bfcc 52%,#51bfcc 100%);background:linear-gradient(to bottom,#66c1cc 0,#66c1cc 50%,#51bfcc 52%,#51bfcc 100%)}
+.md-buttons a:hover{opacity:.8} 
+.md-buttons .bc-gy{border: 1px solid #737373;background: #8c8c8c;background: -moz-linear-gradient(top, #8c8c8c 0%, #8c8c8c 50%, #808080 53%, #808080 100%);background: -webkit-linear-gradient(top, #8c8c8c 0%,#8c8c8c 50%,#808080 53%,#808080 100%);background: linear-gradient(to bottom, #8c8c8c 0%,#8c8c8c 50%,#808080 53%,#808080 100%);}
+.ec-disabled{background-color: #ccc !important;}
+#bodyDiv{
+	min-width: 1024px;
+	width: calc(100% - 20px) !important;
+	margin: 48px 10px 10px 10px;
+	/*
+	overflow:auto !important;
+	-webkit-overflow-scrolling:touch !important;
+	*/
+}
+
+
+</style>
+<script>
+	$("#header").css({
+		minWidth:"1004px"
+	});
+	function openLoinFun(){
+		window.location.href = "{!URLFOR($Page.ExpoLogin)}";
+	}
+</script>
+<apex:form >
+<apex:actionFunction action="{!logout}" name="logoutFun" rerender="" oncomplete="openLoinFun()"/>
+</apex:form>
+<div class="hd-1" style="min-width: 1004Px; background: lightslategrey; height: 41px;">
+	<h1>
+		<a href="{!URLFOR($Page.ExpoHome, null,[sid=sid], false)}" style="height:38px">
+			<apex:outputfield value="{!SpcdLog.ReportLogo__c}" rendered="{!SpcdLog.Id != null}"/>
+			<apex:outputPanel rendered="{!SpcdLog.Id == null}" >
+				<img  style="height:38px" src="{!SpcdLog.ReportLogo__c}"/>
+			</apex:outputPanel>
+		</a>
+	</h1>
+	<nav id="nav" style="float: right; padding: 5px;">
+		<ul class="bf-l fLeft">
+			<!-- ユーザ名 -->
+			<li><a href="{!URLFOR($Page.ExpoUserEdit, null,[sid=sid], false)}&id={!currentUserId}" style="color: white; text-decoration: underline;">{!currentUserNm}</a></li>
+			<!--商品するサブメニュー-->
+			<li class="cat-or"> <a class="btn bc-gy notLoad"><span class="icon"><i class="fa fa-shopping-bag" aria-hidden="true"></i></span><span class="text">商品</span></a>
+				<ul class="children-1 span-1 ">
+					<li class=""><a href="{!URLFOR($Page.ExpoAccountMasterEdit, null,[sid=sid], false)}"><span class="title">新規会計商品</span><span class="text"></span></a></li>
+					<li class=""><a href="{!URLFOR($Page.ExpoAccountMasterView, null,[sid=sid], false)}"><span class="title">会計商品一覧</span><span class="text"></span></a></li>
+					<li class=""><a href="{!URLFOR($Page.ExpoImages, null,[sid=sid], false)}"><span class="title">会計商品画像</span><span class="text"></span></a></li>
+					<li class=""><a href="{!URLFOR($Page.ExpoHrInfoView, null,[sid=sid], false)}"><span class="title">人材属性一覧</span><span class="text"></span></a></li>
+					<li class=""><a href="{!URLFOR($Page.ExpoReports, null,[sid=sid], false)}"><span class="title">稼働率レポート</span><span class="text"></span></a></li>
+				</ul>
+			</li>
+			<!--設定サブメニュー-->
+			<li class="cat-bl"><a class="btn bc-gy notLoad" style=""><span class="icon"><i class="fa fa-fa" aria-hidden="true"></i></span><span class="text">設定</span></a>
+				<ul class="children-1 span-1 ">
+					<li class=""><a href="{!URLFOR($Page.ExpoOrgInfoEdit, null,[sid=sid], false)}"><span class="text">組織情報</span></a></li>
+					<li class=""><a href="{!URLFOR($Page.ExpoShopInfoView, null,[sid=sid], false)}"><span class="text">店舗情報</span></a></li>
+					<li class=""><a href="{!URLFOR($Page.ExpoUserView, null,[sid=sid], false)}"><span class="text">ユーザ</span></a></li>
+				</ul>
+			</li>
+			<li>&nbsp;&nbsp;&nbsp;&nbsp;</li>
+			<li><a class="btn bc-gy" onclick="logoutFun()"><span class="icon"><i class="fa fa-sign-out" aria-hidden="true"></i></span><span class="text"></span>ログアウト</a></li>
+		</ul>
+	</nav>
+</div>
+</apex:component>

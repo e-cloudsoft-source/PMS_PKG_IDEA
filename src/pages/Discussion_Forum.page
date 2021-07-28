@@ -1,0 +1,38 @@
+<!-- // 2018/03/07 Security Check BEGIN -->
+<apex:page showHeader="true" sidebar="false" controller="ConfigHelper" title="Discussion Forum">
+    <apex:form >
+	    <apex:actionFunction name="actSendImage" action="{!sendImage}" reRender="nonetarget"/>
+	    <script>
+	    window.onload = function () {
+	        actSendImage();
+	    };
+	    </script>
+    </apex:form>
+<!-- // 2018/03/07 Security Check END -->
+   <apex:iframe id="idIframe"  src="{!DiscussionUrl}"    scrolling="true"   />  
+   <script>
+   
+   window.addEventListener("resize", function(){
+
+        setDfFrameHeight();
+   });
+
+     window.addEventListener("load", function(){
+    
+        setDfFrameHeight();
+   });
+  
+   function setDfFrameHeight(){
+       var footerHeight = document.getElementsByClassName("bPageFooter noTableFooter")[0].clientHeight;
+       var headerHeight = document.getElementById("AppBodyHeader").clientHeight;
+       headerHeight = headerHeight + 55;
+    
+       var windowHeight  = window.innerHeight;
+       var iframeHeight = windowHeight - (footerHeight + headerHeight);
+       var sframe = document.getElementById("idIframe");
+       sframe.style.height = iframeHeight+"px";
+    }
+
+   
+   </script>
+</apex:page>

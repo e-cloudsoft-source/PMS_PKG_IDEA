@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>連絡事項</value>
+    </caseValues>
+    <fields>
+        <label><!-- 連絡事項１０ --></label>
+        <name>Message10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１１ --></label>
+        <name>Message11__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１２ --></label>
+        <name>Message12__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１３ --></label>
+        <name>Message13__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１４ --></label>
+        <name>Message14__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１５ --></label>
+        <name>Message15__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１６ --></label>
+        <name>Message16__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１７ --></label>
+        <name>Message17__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１８ --></label>
+        <name>Message18__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１９ --></label>
+        <name>Message19__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項１ --></label>
+        <name>Message1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項２０ --></label>
+        <name>Message20__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項２１ --></label>
+        <name>Message21__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項２２ --></label>
+        <name>Message22__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項２３ --></label>
+        <name>Message23__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項２４ --></label>
+        <name>Message24__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項２ --></label>
+        <name>Message2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項３ --></label>
+        <name>Message3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項４ --></label>
+        <name>Message4__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項５ --></label>
+        <name>Message5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項６ --></label>
+        <name>Message6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項７ --></label>
+        <name>Message7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項８ --></label>
+        <name>Message8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項９ --></label>
+        <name>Message9__c</name>
+    </fields>
+    <fields>
+        <label><!-- 連絡事項(リッチ) --></label>
+        <name>MessageRich__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopCodeRef__c</name>
+        <relationshipLabel><!-- 連絡事項 --></relationshipLabel>
+    </fields>
+    <validationRules>
+        <errorMessage><!-- 該当年月にすでに存在するため、重複登録できません --></errorMessage>
+        <name>DuplicationNameChk</name>
+    </validationRules>
+</CustomObjectTranslation>

@@ -1,0 +1,546 @@
+<apex:component controller="CommBaseCtrl">
+<script>
+if (typeof JINYACONNECT === "undefined") {
+	JINYACONNECT = {};
+}
+if (typeof JINYACONNECT.PRODUCT === "undefined") {
+	JINYACONNECT.PRODUCT = {};
+}
+// 計算参照情報格納用
+if (typeof JINYACONNECT.PRODUCT.CAL === "undefined") {
+	JINYACONNECT.PRODUCT.CAL = {};
+	if (typeof JINYACONNECT.PRODUCT.CAL.ROUNDMODE === "undefined") {
+		JINYACONNECT.PRODUCT.CAL.ROUNDMODE = {};
+		JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING 	= 'ceil';	// 切り上げ
+		JINYACONNECT.PRODUCT.CAL.ROUNDMODE.HALF_UP 	= 'half';	// 四捨五入
+		JINYACONNECT.PRODUCT.CAL.ROUNDMODE.FLOOR 	= 'floor';	// 切り捨て
+	}
+	// 会計商品単価定義区分
+    // 1:税込、サービス料抜き
+    // 2:税込、サービス料込
+    // 3:税抜、サービス料抜き
+	JINYACONNECT.PRODUCT.CAL.PRICE_KBN = "{!JSENCODE(TEXT(UnitPriceDefKbn))}";
+	JINYACONNECT.PRODUCT.CAL.POINT_LEN = "{!PointLen}";											// 小数保留桁数
+	JINYACONNECT.PRODUCT.CAL.ROUND_MODE = JINYACONNECT.PRODUCT.CAL.ROUNDMODE.HALF_UP;			// 端末計算区分初期値
+	var pointRoundMode = "{!JSENCODE(TEXT(RoundType))}";	// 小数処理：四捨五入
+	if (pointRoundMode == "0") JINYACONNECT.PRODUCT.CAL.ROUND_MODE = JINYACONNECT.PRODUCT.CAL.ROUNDMODE.FLOOR;
+	else if (pointRoundMode == "2") JINYACONNECT.PRODUCT.CAL.ROUND_MODE = JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING;
+}
+// 処理結果情報格納用
+if (typeof JINYACONNECT.PRODUCT.RESULT === "undefined") {
+	JINYACONNECT.PRODUCT.RESULT = {};
+	//
+	JINYACONNECT.PRODUCT.RESULT.unitPriceExcTax = 0;			//　単価「税抜き、サービス料抜き「本体単価（税抜き）」
+	JINYACONNECT.PRODUCT.RESULT.unitPriceIncTax = 0;			//　単価「税込み、サービス料抜き「本体単価(税込み）」
+	JINYACONNECT.PRODUCT.RESULT.unitPriceIncService = 0;		//　単価のサービス料（税込み）
+	JINYACONNECT.PRODUCT.RESULT.unitPriceExcService = 0;		//　単価のサービス料（税抜き）
+	JINYACONNECT.PRODUCT.RESULT.unitPriceTax = 0;				//　単価（税込、サービス料込）
+	JINYACONNECT.PRODUCT.RESULT.unitPriceIncServiceExcTax = 0;	//　単価（本体＋サービス料）「税抜き」
+	JINYACONNECT.PRODUCT.RESULT.priceExcTax = 0;				//　総金額（本体＋サービス料）「税抜き」
+	JINYACONNECT.PRODUCT.RESULT.priceService = 0;				//　総サービス料（税込み）
+	JINYACONNECT.PRODUCT.RESULT.priceServiceExcTax = 0;			//　総サービス料（税抜き）
+	JINYACONNECT.PRODUCT.RESULT.priceIncTaxNoService = 0;		//　総金額（本体総金額）「サービス料抜き」「税込み」
+	JINYACONNECT.PRODUCT.RESULT.priceIncTax = 0;				//　総金額（本体＋サービス料）「税込み」
+}
+if (typeof JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP === "undefined"){
+	JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP = new Object();
+	JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP["0"] = JINYACONNECT.PRODUCT.CAL.ROUNDMODE.FLOOR;
+	JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP["1"] = JINYACONNECT.PRODUCT.CAL.ROUNDMODE.HALF_UP;
+	JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP["2"] = JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING;
+}
+if (typeof JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF === "undefined"){
+	JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF = {};
+	JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN1 = '1';
+	JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN2 = '2';
+	JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN3 = '3';
+	JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN4 = '4';
+}
+(function($){
+	// 初期化関数[組織の処理区分と小数点保留桁数]
+	JINYACONNECT.PRODUCT.INIT = function(kbn, pPointLen) {
+		JINYACONNECT.PRODUCT.CAL.PRICE_KBN = kbn;			// 単価定義区分
+		JINYACONNECT.PRODUCT.CAL.POINT_LEN = pPointLen;		// 小数点保留桁数
+	}
+	// ********************************
+	// 税抜き→税込み金額計算関数
+	// d 		:税込み金額 (number)
+	// taxRate	:消費税率 (8%の場合、8で引き渡し)
+	// pPointLen:小数点保留桁数
+	// ********************************
+	JINYACONNECT.PRODUCT.CALINCTAXPRICE = function(d, taxRate, pPointLen , roudModeKbn) {
+		if (d == null) return 0;
+		if (taxRate == null) return d;
+		roudMode = JINYACONNECT.PRODUCT.CAL.ROUND_MODE;
+		// 2017/06/29 ０の場合、設定不正不具合改修、BEGIN
+		//if (roudModeKbn) roudMode = JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP[roudModeKbn];
+		if (typeof roudModeKbn != "undefined") roudMode = JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP[roudModeKbn];
+		// 2017/06/29 ０の場合、設定不正不具合改修、END
+		var preTaxRate = commUtils.mathNumDiv(commUtils.nullToZero(taxRate) , 100);
+		return ( d == null || taxRate == null ? 0 : commUtils.mathRound(commUtils.mathNumMulti(d , (1+preTaxRate)), pPointLen, roudMode ));
+	}
+	// ********************************
+	// 税込み→税抜き金額計算関数
+	// d 		:税抜き金額 (number)
+	// taxRate	:消費税率 (8%の場合、8で引き渡し)
+	// pPointLen:小数点保留桁数
+	// ********************************
+	JINYACONNECT.PRODUCT.CALNOTAXPRICE = function(d, taxRate, pPointLen , roudModeKbn) {
+		if (d == null) return 0;
+		if (taxRate == null) return d;
+		roudMode = JINYACONNECT.PRODUCT.CAL.CEILING;
+		// 2017/06/29 ０の場合、設定不正不具合改修、BEGIN
+		//if (roudModeKbn) roudMode = JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP[roudModeKbn];
+		if (typeof roudModeKbn != "undefined") roudMode = JINYACONNECT.PRODUCT.CAL.ROUND_MODE_MAP[roudModeKbn];
+		// 2017/06/29 ０の場合、設定不正不具合改修、END
+		var preTaxRate = commUtils.mathNumDiv(commUtils.nullToZero(taxRate) , 100);
+		return commUtils.mathRound(commUtils.mathNumDiv(d , (1 + preTaxRate)), pPointLen, roudMode);
+	}
+	// ********************************
+	// 端数処理関数
+	// d : 			処理対象(number)
+	// pointSize:	小数
+	// mode:		端末処理モード
+	// ********************************
+	JINYACONNECT.PRODUCT.PROCESS = function(unitPrice, amount, taxRate, serviceRate, kbn) {
+		if (kbn == "" || typeof(kbn) == "undefined") {
+			kbn = JINYACONNECT.PRODUCT.CAL.PRICE_KBN;
+		}
+		var preTaxRate = commUtils.mathNumDiv(commUtils.nullToZero(taxRate) , 100);
+		var preServiceRate = commUtils.mathNumDiv(commUtils.nullToZero(serviceRate) , 100);
+		// 2016/02/15 マイナス数値計算の対応 BEGIN
+		// 2017/04/17 Source Security Fix BEGIN
+		var accountMinusCalFlg =  ("{!JSENCODE(AccountNoTaxCalFlgStr)}" == "true");
+		// 2017/04/17 Source Security Fix END
+		var unitPriceIsMinus = unitPrice < 0 ? true : false;
+		if (unitPriceIsMinus && accountMinusCalFlg) unitPrice = Math.abs(unitPrice);
+		var accountNoTaxCalFlg = accountMinusCalFlg ;
+		// 2016/02/15 マイナス数値計算の対応 END
+		// 税込み、サービス料抜き
+		if (kbn == "1") {
+            // *****************[仕様説明]**************
+            //　単価：500円　数量：3
+            // 単価（税込）:500
+            // 単価（税抜）：500 / 1.05 =  477 (切上げ)
+            // 単価サービス料（税込）：500 * 0.1 = 50
+            // 単価サービス料（税抜）：477 * 0.1 = 47.7 ->47(切り捨て)
+            // 単価金額（税込:サービス込）：500 + 50 = 550
+	        // 合計サービス料（税込）：50 * 3 = 150
+			// 合計サービス料（税抜）：47 * 3 = 141
+			// 合計金額(税抜)：477 * 3 = 1431
+			// 合計金額（税込：サービスなし）:500 * 3 = 1500
+			// ****************************************
+			// 合計金額（税込:サービス込）:550 * 3 = 1650
+			// ****************************************
+			// 本体単価（税込）
+		    unitPriceIncTax = unitPrice;
+		    // 本体単価（税抜き）※※※※（１円未満切り上げ）※※※※
+		    // 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+		    	unitPriceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPriceIncTax , (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+		    } else {
+		    	unitPriceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPriceIncTax , (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    }
+		    // 2016/03/01 税抜金額の端数処理は共通定義により計算する END
+		    // 単価サービス料（税込）
+		    unitPriceIncService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncTax , preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 単価サービス料（税抜）
+		    unitPriceExcService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax , preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 単価（税込、サービス料込）
+		    unitPriceTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncTax , ( 1 + preServiceRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 単価（税抜き、サービス料込）
+		    // 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+				unitPriceIncServiceExcTax = commUtils.mathRound(commUtils.mathNumDiv(commUtils.mathNumMulti(unitPriceIncTax , (1 + commUtils.mathNumDiv(commUtils.nullToZero(serviceRate)  , 100))) , (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+			} else {
+				unitPriceIncServiceExcTax = commUtils.mathRound(commUtils.mathNumDiv(commUtils.mathNumMulti(unitPriceIncTax , (1 + commUtils.mathNumDiv(commUtils.nullToZero(serviceRate)  , 100))) , (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			}
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する END
+		    // 合計金額(税抜)[Object数式計算式と一致する]
+		    priceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncServiceExcTax , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 合計サービス料金（税込）
+		    //priceService = commUtils.mathRound(commUtils.mathNumMulti(commUtils.mathNumMulti(unitPriceIncTax , amount) , preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    priceService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncService, amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 合計サービス料金（税抜）
+		    priceServiceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcService , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 合計金額（税込：サービスなし）
+		    priceIncTaxNoService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncTax , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		    // 合計金額（税込:サービス込）
+		    priceIncTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceTax,amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			/* 2016/02/15 マイナス数値計算の対応 BEGIN
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcTax = unitPriceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncTax = unitPriceIncTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncService = unitPriceIncService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcService = unitPriceExcService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceTax = unitPriceTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncServiceExcTax = unitPriceIncServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceExcTax = priceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceService = priceService;
+			JINYACONNECT.PRODUCT.RESULT.priceServiceExcTax = priceServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTaxNoService = priceIncTaxNoService;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTax = priceIncTax;
+
+			return JINYACONNECT.PRODUCT.RESULT;
+			*/
+		}
+		// 税込み
+		else if (kbn == "2") {
+            // *****************[仕様説明]**************
+            //　単価：550円　数量：3
+            // 単価（税抜）：550 / 1.1 / 1.05 =  477 (切上げ)
+            // 単価（税込）：477 * 1.05 = 500.86 = 500(切り捨て)
+            // 単価サービス料（税込）：550 - 500 = 50
+            // 単価サービス料（税抜）：477 * 0.1 = 47.7 -> 47(切り捨て)
+            // 単価金額（税込:サービス込）：550
+            // 合計サービス料（税込）：50 * 3 = 150
+            // 合計サービス料（税抜）：47 * 3 = 141
+            // 合計金額(税抜)：477 * 3 = 1431
+            // 合計金額（税込：サービスなし）:単価金額（税込:サービス込） * 3 = 1500
+            // ****************************************
+            // 合計金額（税込:サービス込）:550 * 3 = 1650
+            // ****************************************
+            // 本体単価（税抜き）※※※※（１円未満切り上げ）※※※※
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+            	unitPriceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice , commUtils.mathNumMulti((1 + preTaxRate) , (1 + preServiceRate))), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+            } else {
+            	unitPriceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice , commUtils.mathNumMulti((1 + preTaxRate) , (1 + preServiceRate))), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            }
+            // 2016/03/01 税抜金額の端数処理は共通定義により計算する END
+            // 本体単価（税込）
+            //unitPriceIncTax = JINYACONNECT.PRODUCT.CALINCTAXPRICE(unitPriceExcTax, commUtils.nullToZero(taxRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN);
+            unitPriceIncTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice , (1 + preServiceRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価サービス料（税込）
+            //unitPriceIncService = commUtils.mathNumSub(unitPrice , unitPriceIncTax);
+            unitPriceIncService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax, (1+preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価サービス料（税抜）
+            unitPriceExcService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax , preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価金額（税込:サービス込）
+            unitPriceTax = unitPrice;
+            // 単価（税抜き、サービス料込）
+            //unitPriceIncServiceExcTax = commUtils.mathRound(unitPrice / (1 + (commUtils.nullToZero(taxRate) / 100)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+            	unitPriceIncServiceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice , (1+preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+			} else {
+				unitPriceIncServiceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice , (1+preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			}
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する END
+            // 合計金額(税抜)[Object数式計算式と一致する]
+			priceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncServiceExcTax , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計サービス料金（税込）
+            //priceService = commUtils.mathRound(commUtils.mathNumMulti(commUtils.mathNumMulti(unitPriceIncTax , amount) , preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            priceService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncService, amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計サービス料金（税抜）
+			priceServiceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcService , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計金額（税込：サービスなし）
+			priceIncTaxNoService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncTax , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計金額（税込:サービス込）
+			priceIncTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceTax,amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			/* 2016/02/15 マイナス数値計算の対応 BEGIN
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcTax = unitPriceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncTax = unitPriceIncTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncService = unitPriceIncService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcService = unitPriceExcService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceTax = unitPriceTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncServiceExcTax = unitPriceIncServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceExcTax = priceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceService = priceService;
+			JINYACONNECT.PRODUCT.RESULT.priceServiceExcTax = priceServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTaxNoService = priceIncTaxNoService;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTax = priceIncTax;
+
+			return JINYACONNECT.PRODUCT.RESULT;
+			*/
+		}
+		// 税抜き
+		else if (kbn == "3") {
+            // *****************[仕様説明]**************
+            //　単価：477円　数量：3
+            // 単価（税抜）：477
+            // 単価（税込）：477 * 1.05 = 500.85 = 500(切り捨て)
+            // 単価サービス料（税込）：477 * 0.1 * 1.05 = 50.085 = 50(切り捨て)
+            // 単価サービス料（税抜）：477 * 0.1 = 47.7 = 47 (切り捨て)
+            // 単価金額（税込:サービス込）：477 * 1.1 * 1.05 = 550.935 = 550(切り捨て)
+            // 合計サービス料（税込）：50 * 3 = 150
+            // 合計サービス料（税抜）：47 * 3 = 141
+            // 合計金額(税抜)：477 * 3 = 1431
+            // 合計金額（税込：サービスなし）:単価金額（税込:サービス込） * 3 = 1500
+            // ****************************************
+            // 合計金額（税込:サービス込）:550 * 3 = 1650
+            // ****************************************
+            // 本体単価（税抜き）※※※※（１円未満切り上げ）※※※※
+            unitPriceExcTax = unitPrice;
+            // 本体単価（税込）
+            //unitPriceIncTax = JINYACONNECT.PRODUCT.CALINCTAXPRICE(unitPriceExcTax, commUtils.nullToZero(taxRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN);
+            unitPriceIncTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax,(1 + preTaxRate)),JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価サービス料（税込）
+            unitPriceIncService = commUtils.mathRound(commUtils.mathNumMulti(commUtils.mathNumMulti(unitPriceExcTax , preServiceRate) , (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価サービス料（税抜）
+            unitPriceExcService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax ,preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価金額（税込:サービス込）
+            unitPriceTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax , commUtils.mathNumMulti((1 + preServiceRate) , (1 + preTaxRate))), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 単価（税抜き、サービス料込）
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+            unitPriceIncServiceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax , (1 + preServiceRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+            } else {
+            unitPriceIncServiceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax , (1 + preServiceRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            }
+            // 合計サービス料金（税込）
+			priceService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncService , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計サービス料金（税抜）
+			priceServiceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcService , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計金額(税抜)
+			priceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncServiceExcTax , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計金額（税込：サービスなし）
+			priceIncTaxNoService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncTax , amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計金額（税込:サービス込）
+			priceIncTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceTax,amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+
+			// 結果設定
+			/* 2016/02/15 マイナス数値計算の対応 BEGIN
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcTax = unitPriceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncTax = unitPriceIncTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncService = unitPriceIncService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcService = unitPriceExcService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceTax = unitPriceTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncServiceExcTax = unitPriceIncServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceExcTax = priceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceService = priceService;
+			JINYACONNECT.PRODUCT.RESULT.priceServiceExcTax = priceServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTaxNoService = priceIncTaxNoService;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTax = priceIncTax;
+
+			return JINYACONNECT.PRODUCT.RESULT;
+			*/
+		}
+		
+		else if(kbn == "4"){
+			// *****************[仕様説明]**************
+            //　単価：500 円　数量：3
+            // 単価（税抜）：500 / 1.1 = 454.54 = 455(切り捨て)
+            // 単価（税込）：455 * 1.05 = 477.75 = 478(切り捨て)
+            // 単価サービス料（税込）：(500 - 455) * 1.05 = 47.25 = 47(切り捨て)
+            // 単価サービス料（税抜）：500 - 455 = 45
+            // 単価金額（税込:サービス込）：500 * 1.05 = 525
+            // 合計サービス料（税込）：47 * 3 = 141
+            // 合計サービス料（税抜）：45 * 3 = 135
+            // 合計金額(税抜)：455 * 3 = 1365
+            // 合計金額（税込：サービスなし）:単価金額（税込:サービスなし） * 3 = 1434
+            // ****************************************
+            // 合計金額（税込:サービス込）:525 * 3 = 1575
+            // ****************************************
+            // 本体単価（税抜き）※※※※（１円未満切り上げ）※※※※
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+			unitPriceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice, (1 + preServiceRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+			} else {
+			unitPriceExcTax = commUtils.mathRound(commUtils.mathNumDiv(unitPrice, (1 + preServiceRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			}
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する END
+			// 本体単価（税込）
+			unitPriceIncTax = JINYACONNECT.PRODUCT.CALINCTAXPRICE(unitPriceExcTax, commUtils.nullToZero(taxRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN);
+			// 単価サービス料（税抜）
+			//unitPriceExcService = commUtils.mathNumSub(unitPrice , unitPriceExcTax);
+			unitPriceExcService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcTax , preServiceRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 単価サービス料（税込）         
+			//unitPriceIncService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcService, (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);			
+			unitPriceIncService = commUtils.mathRound(commUtils.mathNumMulti(commUtils.mathNumMulti(unitPriceExcTax , preServiceRate), (1+preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 単価金額（税込:サービス込）			
+			unitPriceTax = commUtils.mathRound(commUtils.mathNumMulti(unitPrice, (1 + preTaxRate)), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 単価（税抜き、サービス料込）
+			// 2016/03/01 税抜金額の端数処理は共通定義により計算する BEGIN
+		    if (!accountNoTaxCalFlg) {
+			unitPriceIncServiceExcTax = commUtils.mathRound(unitPrice, JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+			} else {
+            unitPriceIncServiceExcTax = commUtils.mathRound(unitPrice, JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            }
+            // 2016/03/01 税抜金額の端数処理は共通定義により計算する END
+            // 合計サービス料金（税込）
+			priceService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncService, amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 合計サービス料金（税抜）
+			priceServiceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceExcService, amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 合計金額(税抜)
+			priceExcTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncServiceExcTax, amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			// 合計金額（税込：サービスなし）
+			priceIncTaxNoService = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncTax, amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+            // 合計金額（税込:サービス込）
+			priceIncTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceTax,amount), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+			
+			// 結果設定
+			/* 2016/02/15 マイナス数値計算の対応 BEGIN
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcTax = unitPriceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncTax = unitPriceIncTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceExcService = unitPriceExcService;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncService = unitPriceIncService;			
+			JINYACONNECT.PRODUCT.RESULT.unitPriceTax = unitPriceTax;
+			JINYACONNECT.PRODUCT.RESULT.unitPriceIncServiceExcTax = unitPriceIncServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceService = priceService;
+			JINYACONNECT.PRODUCT.RESULT.priceServiceExcTax = priceServiceExcTax;
+			JINYACONNECT.PRODUCT.RESULT.priceExcTax = priceExcTax;			
+			JINYACONNECT.PRODUCT.RESULT.priceIncTaxNoService = priceIncTaxNoService;
+			JINYACONNECT.PRODUCT.RESULT.priceIncTax = priceIncTax;
+
+			return JINYACONNECT.PRODUCT.RESULT;
+			*/
+		}
+		// 2016/02/15 マイナス数値計算の対応 BEGIN
+		var plusCalMark = 1;
+		if (unitPriceIsMinus && accountMinusCalFlg) plusCalMark = -1;
+		// 2021/04/31 bug fixed by zy BEGIN
+		// 金額（消費税）
+		var priceTax = commUtils.mathRound(commUtils.mathNumMulti(unitPriceIncServiceExcTax,preTaxRate), JINYACONNECT.PRODUCT.CAL.POINT_LEN, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+		// 2021/04/31 bug fixed by zy END
+		JINYACONNECT.PRODUCT.RESULT.unitPriceExcTax = plusCalMark * unitPriceExcTax;
+		JINYACONNECT.PRODUCT.RESULT.unitPriceIncTax = plusCalMark * unitPriceIncTax;
+		JINYACONNECT.PRODUCT.RESULT.unitPriceExcService = plusCalMark * unitPriceExcService;
+		JINYACONNECT.PRODUCT.RESULT.unitPriceIncService = plusCalMark * unitPriceIncService;			
+		JINYACONNECT.PRODUCT.RESULT.unitPriceTax = plusCalMark * unitPriceTax;
+		JINYACONNECT.PRODUCT.RESULT.unitPriceIncServiceExcTax = plusCalMark * unitPriceIncServiceExcTax;
+		JINYACONNECT.PRODUCT.RESULT.priceService = plusCalMark * priceService;
+		JINYACONNECT.PRODUCT.RESULT.priceServiceExcTax = plusCalMark * priceServiceExcTax;
+		JINYACONNECT.PRODUCT.RESULT.priceExcTax = plusCalMark * priceExcTax;			
+		JINYACONNECT.PRODUCT.RESULT.priceIncTaxNoService = plusCalMark * priceIncTaxNoService;
+		JINYACONNECT.PRODUCT.RESULT.priceIncTax = plusCalMark * priceIncTax;
+		// 2021/04/31 bug fixed by zy BEGIN
+		JINYACONNECT.PRODUCT.RESULT.priceTax = plusCalMark * priceTax; // 金額（消費税）
+		// 2021/04/31 bug fixed by zy END
+		return JINYACONNECT.PRODUCT.RESULT;
+		// 2016/02/15 マイナス数値計算の対応 END
+	}
+	
+	// 税区分により、金額変換処理対応
+	// usePrice : 元の商品の利用金額
+	// taxRate  : 消費税率
+	// serviceRate : サビース料
+	// orgTaxKbn: 変換元の税区分
+	// newTaxKbn: 変換後の税区分
+	JINYACONNECT.PRODUCT.CONVERTPRICE = function(usePrice, taxRate, serviceRate, orgTaxKbn, newTaxKbn) {
+		// 変換なしの場合、そのまま返却する
+		if (orgTaxKbn == newTaxKbn) return usePrice;
+		serviceRate = commUtils.nullToZero(serviceRate) / 100;
+		taxRate = commUtils.nullToZero(taxRate) / 100;
+		// 小数点桁数設定
+		var pointLen = JINYACONNECT.PRODUCT.CAL.POINT_LEN;
+		var noTaxKbnPointLen = pointLen;
+		if (serviceRate > 0) noTaxKbnPointLen++;
+		if (taxRate > 0) noTaxKbnPointLen++;
+		
+		var sfLocPrice = usePrice;
+
+		var noTaxPrice = 0;
+		/*
+		// 税区分１に変換:サ抜き、税込
+		if (orgTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN1) { 
+			// 税区分２に変換:サ込、税込
+			if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN2) {
+				sfLocPrice = convertPriceToIncTax(usePrice, null, serviceRate, pointLen);
+			}
+			// 税区分３に変換:サ抜き、税抜き
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN3) {
+				sfLocPrice = convertPriceToNoTax(usePrice, taxRate, null, noTaxKbnPointLen);
+			}
+			// 税区分４に変換:サ込、税抜き
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN4) {
+				var incTaxPrice = convertPriceToIncTax(usePrice, null, serviceRate, pointLen);
+				sfLocPrice = convertPriceToNoTax(incTaxPrice, taxRate, null, noTaxKbnPointLen);
+			}
+		} 
+		// 税区分２に変換:サ込、税込
+		else if (orgTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN2) {
+			// 税区分１に変換:サ抜き、税込
+			if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN1) {
+				sfLocPrice = convertPriceToNoTax(usePrice, null, serviceRate, noTaxKbnPointLen);
+			} 
+			// 税区分３に変換:サ抜き、税抜き
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN3) {
+				sfLocPrice = convertPriceToNoTax(usePrice, taxRate, serviceRate, noTaxKbnPointLen);
+			}
+			// 税区分４に変換:サ込、税抜き
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN4) {
+				sfLocPrice = convertPriceToNoTax(usePrice, taxRate, null, noTaxKbnPointLen);
+			}
+		} 
+		// 税区分３に変換:サ抜き、税抜き
+		else if (orgTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN3) {
+			// 税区分１に変換:サ抜き、税込
+			if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN1) {
+				sfLocPrice = convertPriceToIncTax(usePrice, taxRate, null, noTaxKbnPointLen);
+			} 
+			// 税区分２に変換:サ込、税込
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN2) {
+				sfLocPrice = convertPriceToIncTax(usePrice, taxRate, serviceRate, pointLen);
+			}
+			// 税区分４に変換:サ込、税抜き
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN4) {
+				sfLocPrice = convertPriceToIncTax(usePrice, null, serviceRate, noTaxKbnPointLen);
+			}
+		} 
+		// 税区分４に変換:サ込、税抜き
+		else 
+		*/
+		if (orgTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN4) {
+			// 税区分１に変換:サ抜き、税込
+			if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN1) {
+				// 税込みから税抜きに変更
+				var incTaxPrice = convertPriceToIncTax(usePrice, taxRate, null, pointLen);
+				sfLocPrice = convertPriceToNoTax(incTaxPrice, null, serviceRate, noTaxKbnPointLen);
+			} 
+			// 税区分２に変換:サ込、税込
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN2) {
+				sfLocPrice = convertPriceToIncTax(usePrice, taxRate, null, pointLen);
+			}
+			// 税区分３に変換:サ抜き、税抜き
+			else if (newTaxKbn == JINYACONNECT.PRODUCT.CAL.PRICE_KBN_DEF.KBN3) {
+				sfLocPrice = convertPriceToNoTax(usePrice, null, serviceRate, noTaxKbnPointLen);
+			}
+		}
+		//return sfLocPrice;
+		return checkIfHadScale(sfLocPrice, taxRate, serviceRate, JINYACONNECT.PRODUCT.CAL.PRICE_KBN);
+	}
+	// 税抜き金額から税込金額に変更対応
+	convertPriceToIncTax = function ( usePrice,  taxRate,  serviceRate, pointLen) {
+		// 税抜き→税込みに変換を行う
+		// 小数点桁数設定
+		serviceRate = commUtils.nullToZero(serviceRate);
+		taxRate = commUtils.nullToZero(taxRate);
+		var multiRate = commUtils.mathNumMulti( (1+taxRate), (1+serviceRate) );
+		return commUtils.mathRound(commUtils.mathNumMulti(usePrice ,multiRate) , pointLen, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+	}
+	convertPriceToNoTax = function ( usePrice,  taxRate,  serviceRate, noTaxKbnPointLen) {
+		// 税込み→在抜きに変換を行う
+		// サビース料がない場合
+		serviceRate = commUtils.nullToZero(serviceRate);
+		taxRate = commUtils.nullToZero(taxRate);	
+		var divRate = commUtils.mathNumMulti( (1+taxRate), (1+serviceRate) );
+		return commUtils.mathRound(commUtils.mathNumDiv(usePrice,divRate)  , noTaxKbnPointLen, JINYACONNECT.PRODUCT.CAL.ROUND_MODE);
+	}
+	// 小数桁数はシステム定義により、長い場合、単数処理後の処理値は検証する
+	checkIfHadScale = function( orgPrice, taxRate, serviceRate, kbn){
+		// システム小数点の長さ
+        var pointLen = JINYACONNECT.PRODUCT.CAL.POINT_LEN; 
+        // 変換値の小数点桁数
+        var locPointLens = orgPrice.toString().split('.');
+        var pricePointLen = locPointLens.length >= 2 ? locPointLens[1].length : 0;
+
+        // システム予想の小数桁数により、長小数点をもっている場合
+        if(pricePointLen > pointLen){
+        	// 指定区分でサ込、税込金額を取得する
+        	JINYACONNECT.PRODUCT.PROCESS(orgPrice,1,taxRate,serviceRate,kbn);
+        	orgIncTaxServicePrice = JINYACONNECT.PRODUCT.RESULT.unitPriceTax;
+        	
+ 			// 指定小数まで切上げで変換する
+        	var roundPrice = commUtils.mathRound(orgPrice, pointLen, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.CEILING);
+        	JINYACONNECT.PRODUCT.PROCESS(roundPrice,1,taxRate,serviceRate,kbn);
+        	if (JINYACONNECT.PRODUCT.RESULT.unitPriceTax == orgIncTaxServicePrice) return roundPrice;
+        	
+        	// 指定小数まで切り捨てで変換する
+        	roundPrice = commUtils.mathRound(orgPrice, pointLen, JINYACONNECT.PRODUCT.CAL.ROUNDMODE.FLOOR);
+        	JINYACONNECT.PRODUCT.PROCESS(roundPrice,1,taxRate,serviceRate,kbn);
+        	if (JINYACONNECT.PRODUCT.RESULT.unitPriceTax == orgIncTaxServicePrice) return roundPrice;
+        }
+        return orgPrice;
+	}
+})(jQuery);
+</script>
+</apex:component>

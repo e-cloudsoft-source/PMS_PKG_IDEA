@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <help>Calculate the current age from the Birthday</help>
+        <label>Age</label>
+        <name>Age__c</name>
+    </fields>
+    <fields>
+        <label>Allergy</label>
+        <name>Allergy__c</name>
+    </fields>
+    <fields>
+        <label>Applicant</label>
+        <name>ApplicantName__c</name>
+    </fields>
+    <fields>
+        <label>Applicant telephone</label>
+        <name>ApplicantPhone__c</name>
+    </fields>
+    <fields>
+        <label>Bridal</label>
+        <name>Bridal__c</name>
+    </fields>
+    <fields>
+        <label>Create date (Old)</label>
+        <name>CompanyNameCal__c</name>
+    </fields>
+    <fields>
+        <help>C: corporation, P: personal, KH: candidate Guest　UG: UG</help>
+        <label>Guest division</label>
+        <name>ContactType__c</name>
+        <picklistValues>
+            <masterLabel>C</masterLabel>
+            <translation><!-- C --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>KH</masterLabel>
+            <translation><!-- KH --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>P</masterLabel>
+            <translation><!-- P --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>UG</masterLabel>
+            <translation><!-- UG --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Direct mail - OK</label>
+        <name>DM__c</name>
+        <picklistValues>
+            <masterLabel>不要</masterLabel>
+            <translation><!-- 不要 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>必要</masterLabel>
+            <translation><!-- 必要 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Create date (Old)</label>
+        <name>DelFlg__c</name>
+    </fields>
+    <fields>
+        <label>Allergy detail</label>
+        <name>DetailedAllergy__c</name>
+    </fields>
+    <fields>
+        <label>Mail 2</label>
+        <name>Email2__c</name>
+    </fields>
+    <fields>
+        <label>Extension</label>
+        <name>Extension__c</name>
+    </fields>
+    <fields>
+        <label><!-- Fax２ --></label>
+        <name>Fax2__c</name>
+    </fields>
+    <fields>
+        <label>Comment</label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <help>10 digit Guest ID</help>
+        <label><!-- ID --></label>
+        <name>ID__c</name>
+    </fields>
+    <fields>
+        <label>Logical delete</label>
+        <name>IsDelete__c</name>
+    </fields>
+    <fields>
+        <label><!-- 自動車ナンバー通知投稿対象外 --></label>
+        <name>IsNotNotifyCarInfomation__c</name>
+    </fields>
+    <fields>
+        <label><!-- おもてなしお客様情報 --></label>
+        <name>JTbSyncInfoRef__c</name>
+        <relationshipLabel><!-- 取引先責任者 --></relationshipLabel>
+    </fields>
+    <fields>
+        <help>Input Guest name in katakana</help>
+        <label>Kana 1</label>
+        <name>KanaName1__c</name>
+    </fields>
+    <fields>
+        <label>Kana 2</label>
+        <name>KanaName2__c</name>
+    </fields>
+    <fields>
+        <help>Input Guest name in hiragana</help>
+        <label>Hiragana</label>
+        <name>Katakana__c</name>
+    </fields>
+    <fields>
+        <label><!-- Languages --></label>
+        <name>Languages__c</name>
+    </fields>
+    <fields>
+        <label>Last use date</label>
+        <name>LastUsageDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- Level --></label>
+        <name>Level__c</name>
+        <picklistValues>
+            <masterLabel>Primary</masterLabel>
+            <translation><!-- Primary --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Secondary</masterLabel>
+            <translation><!-- Secondary --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tertiary</masterLabel>
+            <translation><!-- Tertiary --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Martial Status</label>
+        <name>MarriyStaLst__c</name>
+        <picklistValues>
+            <masterLabel>M</masterLabel>
+            <translation><!-- M --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Memo 1</label>
+        <name>Memo1__c</name>
+    </fields>
+    <fields>
+        <label>Memo 2</label>
+        <name>Memo2__c</name>
+    </fields>
+    <fields>
+        <label>Memo 3</label>
+        <name>Memo3__c</name>
+    </fields>
+    <fields>
+        <label>Memo 4</label>
+        <name>Memo4__c</name>
+    </fields>
+    <fields>
+        <label>Memo 5</label>
+        <name>Memo5__c</name>
+    </fields>
+    <fields>
+        <label>Memo 6</label>
+        <name>Memo6__c</name>
+    </fields>
+    <fields>
+        <label>Merge Guest ID</label>
+        <name>MergeNewId__c</name>
+    </fields>
+    <fields>
+        <help>Input in Kanji</help>
+        <label>Name 1</label>
+        <name>Name1__c</name>
+    </fields>
+    <fields>
+        <label>Name 2</label>
+        <name>Name2__c</name>
+    </fields>
+    <fields>
+        <label>Name 3</label>
+        <name>Name3__c</name>
+    </fields>
+    <fields>
+        <label>Create date (Old)</label>
+        <name>OrgCreateDate__c</name>
+    </fields>
+    <fields>
+        <label>Register in charge (Old)</label>
+        <name>OrgCreateUser__c</name>
+    </fields>
+    <fields>
+        <label>Update date (Old)</label>
+        <name>OrgUpdateDate__c</name>
+    </fields>
+    <fields>
+        <label>Update in charge(Old)</label>
+        <name>OrgUpdateUser__c</name>
+    </fields>
+    <fields>
+        <label>New Guest No.</label>
+        <name>ParentContactRef__c</name>
+        <relationshipLabel>Contact</relationshipLabel>
+    </fields>
+    <fields>
+        <label>Telephone 2</label>
+        <name>Phone2__c</name>
+    </fields>
+    <fields>
+        <help>Guest rank</help>
+        <label><!-- RANK --></label>
+        <name>RANK__c</name>
+        <picklistValues>
+            <masterLabel>AAA</masterLabel>
+            <translation><!-- AAA --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>BBB</masterLabel>
+            <translation><!-- BBB --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>CCC</masterLabel>
+            <translation><!-- CCC --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>DDD</masterLabel>
+            <translation><!-- DDD --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label>Shorten 1</label>
+        <name>RyakuNm1__c</name>
+    </fields>
+    <fields>
+        <label>Shorten 2</label>
+        <name>RyakuNm2__c</name>
+    </fields>
+    <fields>
+        <help>If you check, it is smoking</help>
+        <label>No Smoking</label>
+        <name>SmokeFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- Usage Charge --></label>
+        <name>Usage_Charge__c</name>
+    </fields>
+    <fields>
+        <label><!-- Usage Count --></label>
+        <name>Usage_Count__c</name>
+    </fields>
+    <fields>
+        <label>Wedding anniversary</label>
+        <name>WeddingAnniversary__c</name>
+    </fields>
+    <fields>
+        <label>Gender</label>
+        <name>gender__c</name>
+        <picklistValues>
+            <masterLabel>女性</masterLabel>
+            <translation><!-- 女性 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>男性</masterLabel>
+            <translation><!-- 男性 --></translation>
+        </picklistValues>
+    </fields>
+    <webLinks>
+        <label>Booking list</label>
+        <name>BookingInfoListBtn</name>
+    </webLinks>
+    <webLinks>
+        <label>Merge</label>
+        <name>CustomMerge</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- Karte --></label>
+        <name>Karte</name>
+    </webLinks>
+</CustomObjectTranslation>

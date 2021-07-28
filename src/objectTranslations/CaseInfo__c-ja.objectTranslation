@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>問い合わせ</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計商品 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- 問い合わせ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせ詳細内容 --></label>
+        <name>CaseContent__c</name>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせ日時 --></label>
+        <name>CaseDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせユーザ所属店舗 --></label>
+        <name>CaseShopName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせタイトル --></label>
+        <name>CaseTitle__c</name>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせユーザID --></label>
+        <name>CaseUserId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせユーザ名 --></label>
+        <name>CaseUserName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 注文 --></label>
+        <name>OrderRef__c</name>
+        <relationshipLabel><!-- 問い合わせ --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 問い合わせ(親) --></label>
+        <name>ParCaseRef__c</name>
+        <relationshipLabel><!-- 問い合わせ --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

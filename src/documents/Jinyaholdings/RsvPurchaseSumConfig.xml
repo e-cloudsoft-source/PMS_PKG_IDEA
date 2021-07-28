@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、仕入オブジェクトから指定種別から金額を合計して、
+　　　売上指定項目に集計値を設定する
+書式：
+　　　SHOPCODE:        店舗コード、支店が非存在　または　各店舗は共通化する場合、空白のままに定義する
+　　　SUMMARY:     	 「仕入から指定種別]の金額集計ロジック用項目APIと集計条件を指定する
+		PURCHASE		仕入集計タグ
+		ASSING_FROM		集計元の仕入項目API
+		ASSING_TO		集計先の売上に設定する項目API
+		CONDITION		集計条件
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<SUMMARY>
+			<PURCHASE>
+				<ASSING_FROM>Denpyoukei__c</ASSING_FROM>			<!-- 集計元の仕入項目API[計(税抜)] -->
+				<ASSING_TO>PurchaseStand__c</ASSING_TO>				<!-- 集計後、売上に設定する項目API[売店仕入高（日別）] -->
+				<CONDITION>PurchaseType__c = '売店仕入'</CONDITION>	<!-- 集計条件 -->
+			</PURCHASE>
+			<PURCHASE>
+				<ASSING_FROM>Denpyoukei__c</ASSING_FROM>
+				<ASSING_TO>PurchaseBeverage__c</ASSING_TO>
+				<CONDITION>PurchaseType__c = '飲料仕入'</CONDITION>
+			</PURCHASE>
+			<PURCHASE>
+				<ASSING_FROM>Denpyoukei__c</ASSING_FROM>
+				<ASSING_TO>PurchaseRoom__c</ASSING_TO>
+				<CONDITION>PurchaseType__c = '室料経費'</CONDITION>
+			</PURCHASE>
+			<PURCHASE>
+				<ASSING_FROM>Denpyoukei__c</ASSING_FROM>
+				<ASSING_TO>PurchaseBridal__c</ASSING_TO>
+				<CONDITION>PurchaseType__c = 'ブライダル仕入'</CONDITION>
+			</PURCHASE>
+			<PURCHASE>
+				<ASSING_FROM>Denpyoukei__c</ASSING_FROM>
+				<ASSING_TO>PurchaseExpenses__c</ASSING_TO>
+				<CONDITION>PurchaseType__c = '旅館外注費'</CONDITION>
+			</PURCHASE>
+		</SUMMARY>
+	</SHOP>
+</root>

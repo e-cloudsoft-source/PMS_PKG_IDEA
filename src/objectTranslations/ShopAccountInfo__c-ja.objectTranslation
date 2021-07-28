@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>口座情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- 取引先 --></label>
+        <name>AccountRef__c</name>
+        <relationshipLabel><!-- 口座情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 口座種別 --></label>
+        <name>AccountTypeLst__c</name>
+        <picklistValues>
+            <masterLabel>買掛支払</masterLabel>
+            <translation><!-- 買掛支払 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 口座番号 --></label>
+        <name>BankAccountNo__c</name>
+    </fields>
+    <fields>
+        <help><!-- 半角カタカナを入力してください --></help>
+        <label><!-- 支店名(カナ） --></label>
+        <name>BankBranchNameKana__c</name>
+    </fields>
+    <fields>
+        <label><!-- 支店名 --></label>
+        <name>BankBranchName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 支店番号 --></label>
+        <name>BankBranchNumber__c</name>
+    </fields>
+    <fields>
+        <help><!-- 半角カタカナを入力してください --></help>
+        <label><!-- 金融機関名（カナ） --></label>
+        <name>BankNameKana__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金融機関名 --></label>
+        <name>BankName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 金融機関番号 --></label>
+        <name>BankNumber__c</name>
+    </fields>
+    <fields>
+        <label><!-- 預金種目 --></label>
+        <name>DepositsType__c</name>
+        <picklistValues>
+            <masterLabel>その他</masterLabel>
+            <translation><!-- その他 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>当座</masterLabel>
+            <translation><!-- 当座 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>貯蓄</masterLabel>
+            <translation><!-- 貯蓄 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 委託者コード --></label>
+        <name>RequestUserCode__c</name>
+    </fields>
+    <fields>
+        <help><!-- 半角カタカナを入力してください --></help>
+        <label><!-- 委託者名(名義人) --></label>
+        <name>RequestUserName__c</name>
+    </fields>
+    <fields>
+        <label><!-- #Seq --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 店舗口座情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- ステータス --></label>
+        <name>StatusLst__c</name>
+        <picklistValues>
+            <masterLabel>有効</masterLabel>
+            <translation><!-- 有効 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>無効</masterLabel>
+            <translation><!-- 無効 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 振込手数料負担先 --></label>
+        <name>TransferChargeKbn__c</name>
+        <picklistValues>
+            <masterLabel>先方負担</masterLabel>
+            <translation><!-- 先方負担 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>自社負担</masterLabel>
+            <translation><!-- 自社負担 --></translation>
+        </picklistValues>
+    </fields>
+    <recordTypes>
+        <label><!-- 自社 --></label>
+        <name>CompanyRecordType</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- 取引先 --></label>
+        <name>CustomerRecordType</name>
+    </recordTypes>
+</CustomObjectTranslation>

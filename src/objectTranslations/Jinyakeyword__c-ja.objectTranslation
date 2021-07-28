@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>キーワード</value>
+    </caseValues>
+    <fields>
+        <label><!-- ステータス --></label>
+        <name>Field1__c</name>
+        <picklistValues>
+            <masterLabel>キャンセル</masterLabel>
+            <translation><!-- キャンセル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>クレーム</masterLabel>
+            <translation><!-- クレーム --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>出席</masterLabel>
+            <translation><!-- 出席 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>商談中</masterLabel>
+            <translation><!-- 商談中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>成約</masterLabel>
+            <translation><!-- 成約 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>最終決定</masterLabel>
+            <translation><!-- 最終決定 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>来訪(館)</masterLabel>
+            <translation><!-- 来訪(館) --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>欠席</masterLabel>
+            <translation><!-- 欠席 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>見込み</masterLabel>
+            <translation><!-- 見込み --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>郵送</masterLabel>
+            <translation><!-- 郵送 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 管理者 --></label>
+        <name>User__c</name>
+        <relationshipLabel><!-- キーワード --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

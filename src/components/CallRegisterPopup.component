@@ -1,0 +1,30 @@
+<apex:component controller="CallManagementController">
+
+<apex:attribute name="loadJquery" default="false" type="boolean" description="Boolean to allow component to load its  jquery file or use parents jquery" ></apex:attribute>
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<apex:attribute name="loadKendoLib" default="true" type="boolean" description="Boolean to kendo Js Css" ></apex:attribute>
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+<apex:outputpanel rendered="{!(loadJquery == true)}">
+    <apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+</apex:outputpanel> 
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH BEGIN -->
+<apex:outputpanel rendered="{!(loadKendoLib)}">
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}" />
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}" />
+</apex:outputpanel>
+<!-- 2017/11/22 検索結果にFilter機能の追加 WGCH END -->
+<apex:stylesheet value="{!URLFOR($Resource.CallPopupWindow, 'css/CallPopupWindow.css')}" />
+<script src="{!URLFOR($Resource.CallPopupWindow,'js/postmessage.js')}" type="text/javascript"></script>
+<script type="text/javascript">
+    var isPermissionAllowed = '{!isEnabledForUser}';
+    var isHomeComponent = false;
+    var numberOfDispRec = '{!numberOfDispRec}';
+	var isAlarmPopup = '{!userPrefValue.isAlarmPopup}';
+	var isStickyPopup = '{!userPrefValue.isStickyPopup}';
+	var customWidth = '{!userPrefValue.windowWidth}';
+</script>
+
+<script src="{!URLFOR($Resource.CallPopupWindow,'js/CallPopupWindow.js')}" type="text/javascript"></script>
+</apex:component>

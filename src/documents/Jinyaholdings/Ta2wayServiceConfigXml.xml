@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、手間いらずのAPIを利用して、手間いらず側へ通信を行う
+     多店舗の場合、店舗毎に設定が必要場合、
+　　　タグ「<SHOP>」含め内容をコピーして、    
+　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+　　　　　　そして、新コピーした内容を修正する
+     手間いらず連携機能が要らない場合、タグ「<SHOP>」を含める内容を全部削除して、「ドキュメント」→「Jinyaholdings」→「TA2WAY接続情報設定」→「ドキュメントの置き換え」で更新する
+書式：
+	COMMON:					手間いらず機能共通定義情報
+		STOCKINTERVAL:			在庫調整機能は次の処理時間間隔秒数（デフォルト：60秒）
+		STOCKDELETEVAL:			在庫調整履歴情報の削除対象期間：履歴データの調整日は該当バッチ処理日からXX日前のデータを削除する（デフォルト：60日前）
+		LEADINTERVAL:			予約取込API呼出時間間隔秒数（デフォルト：60秒）
+		LEADDELETEVAL:			予約取込機能連携結果情報の削除対象期間：履歴データの作成日は該当バッチ処理日からXX日前のデータを削除する（デフォルト：60日前）
+		SERVICE_URL:			手間いらず.NETサビースサイトURL(予約取得と完了通知機能のリクエストURL)
+		SERVICE_URL_UP:			手間いらず.NETサビースサイトURL(予約取得と完了通知以外機能のリクエストURL)
+								注意；該当URLは必ずSalesforce側の「設定」→「管理者設定」→「セキュリティのコントロール」→「リモートサイトの設定」に設定してください。
+		STOCK_RESTORE_START_DATE:	遡る日付、バッチ再起動場合、作成日は指定の日付から全部未連携/連携失敗の在庫変更履歴を再連携を行う、設定省略の場合、在庫調整バッチ起動から作成した在庫変更履歴のみ連携する
+								例：現在日付け：2016-05-28 該当「遡る日付」は「2016-05-20」を設定する場合、在庫調整データの作成日は「2016-05-20」以後のデータを連携を行う
+									作成日：2016-05-19  連携対象外
+									作成日：2016-05-20  連携対象
+									作成日：2016-05-21  連携対象
+	SHOPCODE:        		店舗コード:支店がない場合、空白のままに定義する、多店舗の場合、店舗コードを設定ください
+		APPCONFIG:				手間いらず.NETサビースへログイン情報(必須)
+			SYSTEMID:			手間いらず.NETから貰えた「パートナーID」
+			USERID:				手間いらず.NETから貰えた「ログインID」
+			PASSWORD:			手間いらず.NETAから貰えた「パスワード」
+			UCACTISSYNC:		予約取り込みのとき、変更の予約、キャンセルの予約を取り込むかどうか制御パラメータ、店舗別定義定義
+									TRUE: 予約変更、キャンセルの予約情報を取込み（デフォルト値）
+									FALSE:予約変更、キャンセルの予約情報を取り込まない
+			ROOMAUTOASSIGN:		部屋自動割当機能制御フラグ（部屋項目：自動割当優先順位　設定順番で割当）
+									TRUE:部屋タイプにより、空い部屋を自動的に予約に割当する
+									FALSE:部屋を自動割当しない(デフォルト値)
+			ROOMSORT:			上記部屋を割当する場合、部屋の割当の並び順
+									ASC:部屋項目の「自動割当優先順位」昇順で部屋割当（デフォルト値）
+									DESC:部屋項目の「自動割当優先順位」降順で部屋割当
+			MAILDIVFLG:			メール本文設定フラグ
+									TRUE：N部屋の場合、メール本文は親部屋のご予約に設定する
+									FALSE:N部屋の場合、メール本文は全て部屋のご予約に設定する（デフォルト値）
+			DEFAULTVALUES:		ご予約情報を自動取込の場合、指定項目に対して、デフォルト値を設定する
+				APIFIELDNAME:		ご予約オブジェクトの項目API名
+				APIFIELDVALUE:		デフォルト値(指定可能の項目タイプ：テキスト、数値）
+2016/10/07 Ver16.50から
+			SALESCLOSESYNC:		販売ステータスが手仕舞い場合、在庫連携する・しない制御パラメータ、TRUE:在庫連携する（デフォルト値）、FALSE：在庫連携しない	
+			TAXSERVICEFEE:		取り込みの場合、税サ区分の参照先制御パラメータ：1 SFDC側の単価定義区分を参照する(デフォルト値)、2：予約のxmlの税サ区分を参照する 
+2017/09/01 から
+            CHGDT_ROOMCLR:      日程変更しても、既にアサイン済みの部屋情報をクリアする・しないフラグ　(2017/09/01 新規追加)
+                                    TRUE:部屋クリアを行う
+                                    FALSE:部屋クリアを行わない（デフォルト値)
+		PLANCODE_CONVERT:		手間いらず.NETで設定したPMSプランタイプコード->SFのPlanNoの変換表:定義省略可能、定義しないと、TAから定義のパッケージコード&&OTAコード&&店舗別でSalesforce側のプランを検索する
+            ESTNAMEBYSF(非必須)      属性：取込した見積明細の商品名は変換後のプラン名で設定するがどうか切替フラグ(2017/07/18新規追加)
+                                        TRUE：変換後のプラン名で見積明細の商品名を設定する、
+                                        FALSE:XMLのプラン名そで見積明細の商品名を設定する（デフォルト値）   
+			AGT:				販売先単位のプラン変換情報の定義
+				AGTCODE:			手間いらず.NETで設定したOTAコード			
+			CONVERT:			変換定義情報
+				AGTPACKAGECODE:		手間いらず.NETで設定したPMSプランタイプコード
+				SFPLANNO:			Salesforce側にプランオブジェクトのPlanNo値
+				
+		PAYMENT_CONVERTS:		 支払方法とOTAコードにより、指定の会計商品を取り込み「定義省略可能」
+				POINT_CONVERT		割引額(ポイント・補助金)金額に対して、支払方法とOTAコードにより、取り込みしたい会計商品コード情報を定義する
+					PARSENO(非必須)  一般情報タグからポイント内訳情報を解析したい場合、該当タグに「PARSE_LOGIC_INFO」のNANME値を指定可能 (2019/03/29新規追加)
+					PAYKBN(非必須)	属性：支払方法
+										該当属性設定が省略可能、省略の場合、全ての支払方法は該当変換ルールを適当する
+					CONVERT(必須)	ルールを適応の場合、自動取込したい会計商品コードを定義する（該当商品は事前登録が必要）
+						AGTCODE(非必須)	OTAコード、指定の場合、該当OTAコードの予約情報を取込の場合、該当変更ルールを適応する、
+										定義省略可能、省略の場合、全ての取込予約データは該当変換ルールを適当する						
+				PAYMENT_CONVERT		事前決済金額に対して、支払方法とOTAコードにより、取り込みしたい会計商品コード情報を定義する
+				    PARSENO(非必須)  特別リクエストタグから事前支払情報を解析したい場合、該当タグに「PARSE_LOGIC_INFO」のNANME値を指定可能 (2017/08/18新規追加)
+					PAYKBN(必須)		属性：支払方法
+										該当属性設定が省略可能、省略の場合、全ての支払方法は該当変換ルールを適当する
+					CONVERT(必須)	ルールを適応の場合、自動取込したい会計商品コードを定義する（該当商品は事前登録が必要）
+						AGTCODE(非必須)	OTAコード、指定の場合、該当OTAコードの予約情報を取込の場合、該当変更ルールを適応する、
+				PARSE_LOGIC_INFO    特別リクエストタグから事前支払情報を解析用タグ (2017/08/18新規追加)
+				    NAME(必須)       タグ解析用タグの名前、「PAYMENT_CONVERT」から指定用
+				    PAR_BEG(必須)    該当タグに定義の内容により、特別リクエストから該当キーワードを捜す、見つかると、該当キーワード以後の文字列を戻る
+				    FORMAT(必須)     正規表現指定、特別リクエストからマッチする結果を戻る
+				    PAR_END(必須)    該当タグに定義の内容により、特別リクエストから該当キーワードを捜す、見つかると、該当キーワード以前の文字列を戻る(カマンで複数キーワードを定義可能)
+										定義省略可能、省略の場合、全ての取込予約データは該当変換ルールを適当する	
+		PRE_PAYMENT_DEF:		支払方法により、事前決済判断用定義情報（省略可能、省略の場合、事前決済カード、売掛金自動登録機能なし）
+				CRAD:				支払方法タグに該当キーワードを含めすると、お客様請求金額はカード明細として、見積明細に反映する
+				CREDIT:				支払方法タグに該当キーワードを含めすると、お客様請求金額は売掛明細として、見積明細に反映する
+		CHILD_PLAN_CONVERT:		お子様プラン自動取り込み機能定義情報
+			MATCH:				お子様プランのPlanNo定義する
+				RATE:			子供一人料金/大人一人料金のパーセント値
+								例：	<CHILD_PLAN_CONVERT>
+									<MATCH RATE="70">00000702</MATCH>
+									</CHILD_PLAN_CONVERT>
+									大人一人料金:30000円,子供A料金は21000円、21000/3000=70パーセント、
+									該当数値は上記のRATEが一致するとめ、見積明細に、PlanNoが[00000702]のプランは見積明細に反映する
+				PRICE:			子供一人料金金額(2017/03/02新規追加)
+								例：	<CHILD_PLAN_CONVERT>
+									<MATCH PRICE="5000">00000702</MATCH>
+									</CHILD_PLAN_CONVERT>
+									子供A料金は5000円の場合、
+									該当数値は上記のPRICEが一致するとめ、見積明細に、PlanNoが[00000702]のプランは見積明細に反映する
+				NAMEONLY		子供プランへの置き換え設定を行わず、入ってきたプラン名を見積明細に反映する
+									TRUE:定義値は見積明細の商品目として設定する
+									FALSE：定義義はお子様プランのPlanNoと認識して、子供プランを置き換え
+								例1：<MATCH RATE="50" NAMEONLY="TRUE">小学生宿泊代</MATCH>
+								例2：<MATCH PRICE="3000" NAMEONLY="TRUE">小学生宿泊代</MATCH>
+				注：RATEとPRICEは混在に設定可能、RATEの比較結果は優先
+2016.08.31リリース機能追加
+     	CHANNEL_CONVERTS:		OTAコードからSalesforce側の予約チャネルへ変換ルールの定義
+     		CONVERT:			変更後のSalesforce側の予約チャネル項目の値
+     			AGTCODE:		OTAコード(XMLの旅行会社コード[SalesOfficeCompanyCode])
+		例：
+		<CHANNEL_CONVERTS>
+			<CONVERT AGTCODE="80">AGT[一休]</CONVERT>
+			<CONVERT AGTCODE="88">AGT[予約プロ]</CONVERT>
+		</CHANNEL_CONVERTS>	
+2017.01.17リリース機能追加
+		MAILDIVFLG:				メール本文設定フラグ		
+2017.03.02リリース機能追加
+		PRICE:					子供プランは別に金額による紐付けの場合、比較用金額
+		例:
+		<CHILD_PLAN_CONVERT>
+			<MATCH RATE="70" PRICE="5000">00000702</MATCH>	70% または　子供利用金額は5000の場合、PlanNoが[00000702]のプランを紐付く
+			<MATCH RATE="50">00000806</MATCH>				50%、PlanNoが[00000806]のプランを紐付く
+			<MATCH PRICE="3000">00000806</MATCH>			子供利用金額は3000の場合、PlanNoが[00000806]のプランを紐付く
+			<MATCH RATE="30">00000807</MATCH>				30%、PlanNoが[00000807]のプランを紐付く
+			<MATCH RATE="10">00000805</MATCH>				10%、PlanNoが[00000805]のプランを紐付く
+		</CHILD_PLAN_CONVERT>
+2017.08.18リリース機能追加（ネット取込、事前払い料金は見積明細へ反映できるよう改善対応
+        例：OTAコードは76、現地決済、12%は事前払い済場合、該当事前払い(商品コード：M90201)金額は見積明細へ反映したい
+        <PAYMENT_CONVERTS>
+            <PAYMENT_CONVERT PAYKBN="現地決済" PARSENO="P01">
+                <CONVERT AGTCODE="76">M90201</CONVERT>
+            </PAYMENT_CONVERT>
+            <PARSE_LOGIC_INFO NAME="P01">
+                <PAR_BEG>ZZdeposit</PAR_BEG>
+                <FORMAT>(\d+\.?\d+)</FORMAT>
+                <PAR_END>ZZ;/SpecialServiceRequest</PAR_END>
+            </PARSE_LOGIC_INFO>
+        </PAYMENT_CONVERTS>
+2018.12.31リリース機能追加（予約変更通知の部屋タイプ変更すると、部屋割当済みでも部屋タイプを自動変更できるように改善対応）
+		APPCONFIG→CHGROOMTYPE
+2019.04.02リリース機能追加(ポイント内訳(楽天ポイント、ショップクーポン、サービスクーポン、宿クーポンetc.)により、それぞれの支払商品ごとに取込できるように改善対応)
+		PAYMENT_CONVERTS→POINT_CONVERT→PARSENO 属性タグを新規追加
+2019.04.30リリース機能追加（取り込まれた支払いメディアの反映を宿泊の最終日にする）
+		APPCONFIG→PAYMEDIATOLASTDAY
+2019.07.19リリース機能追加（予約取り込み時に子供プランの置き換えではなく、プランの表示名だけを変更機能設定タグ）
+		CHILD_PLAN_CONVERT→MATCH→NAMEONLY
+2019.10.15リリース機能追加（ネットからの取り込みで、お客様をすべて新規で取り込み機能切り替え用タグ）
+		APPCONFIG→CONTACT_ALWAYS_NEW
+2019.11.30リリース機能追加（変更通知の場合、見積明細の変更を反映できるように改善切り替え用タグ）
+		APPCONFIG→RESET_ESTITEMS
+2019.12.30リリース機能追加（ローマ字で入ってきたお客様名をカタカナに変換機能切り替え用タグ）
+		APPCONFIG→CHGROMANTOKANA
+-->
+	<COMMON>
+		<!-- 在庫調整機能は次の処理時間間隔秒数（デフォルト：60秒） -->
+		<STOCKINTERVAL>90</STOCKINTERVAL>
+		<!-- 在庫調整履歴情報削除期間：履歴データの調整日はバッチ処理日のXX日前（デフォルト：60日前） -->
+		<STOCKDELETEVAL>-60</STOCKDELETEVAL>
+		<!-- 予約取込API呼出時間間隔秒数（デフォルト：60秒） -->
+		<LEADINTERVAL>90</LEADINTERVAL>
+		<!-- 予約取込機能連携結果情報削除期間：履歴データの作成日はバッチ処理日のXX日前（デフォルト：60日前） -->
+		<LEADDELETEVAL>-60</LEADDELETEVAL>
+		<!-- エンドポイント(上)[在庫取得と更新] -->
+		<SERVICE_URL_UP>https://xxxxxxxxxxxxx/pmsup</SERVICE_URL_UP>
+		<!-- エンドポイント(下)[予約取得と完了通知] -->
+		<SERVICE_URL>https://xxxxxxxxxxxxxxxx/pms</SERVICE_URL>
+	</COMMON>
+	<SHOP>
+		<!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+		<SHOPCODE>XX</SHOPCODE>
+		<APPCONFIG>
+			<!-- 手間いらず側にログイン情報[店舗別] -->
+			<SYSTEMID>XXXXXXX</SYSTEMID>
+			<USERID>YYYYYYY</USERID>
+			<PASSWORD>ZZZZZZZ</PASSWORD>
+			<!-- 予約変更、キャンセルの場合、予約を取り込むかどうかをパラメータ -->
+			<UCACTISSYNC>TRUE</UCACTISSYNC>
+			<!-- 部屋自動割当機能制御フラグ -->
+			<ROOMAUTOASSIGN>FALSE</ROOMAUTOASSIGN>
+			<!-- 部屋自動割当並び順(昇順：ASC  降順: DESC ) -->
+			<ROOMSORT>DESC</ROOMSORT>
+			<!-- 販売ステータスが手仕舞い場合、在庫連携する・しない制御パラメータ -->
+			<!-- <SALESCLOSESYNC>TRUE</SALESCLOSESYNC>-->
+			<TAXSERVICEFEE>1</TAXSERVICEFEE><!-- 税サ区分の参照先制御パラメータ：1 SFDC側の単価定義区分を参照する、2：予約のxmlの税サ区分を参照する -->
+			<!-- メール本文設定フラグ -->
+			<!-- 
+			<MAILDIVFLG>FALSE</MAILDIVFLG>
+			 -->
+			 <!-- 予約変更通知の際に、部屋タイプを変更すると、既存予約の部屋タイプを自動変更する・しないフラグ
+			TRUE:予約変更通知の部屋タイプを変更とき、PMS側の既存予約の部屋が割当済み場合、既存予約の部屋タイプを更新する
+			FALSE:予約変更通知の部屋タイプを変更とき、PMS側の既存予約の部屋が割当済み場合、既存予約の部屋タイプを更新しない(デフォルト)
+			注：該当予約の部屋が割当されない場合、予約変更通知の際に、部屋タイプを変更すると、既存予約の部屋タイプが常に変更される、該当フラグと関係ない
+			-->
+			<CHGROOMTYPE>FALSE</CHGROOMTYPE>
+			<!-- 取り込まれた支払いメディアの反映を宿泊の最終日にする・しないフラグ
+					TRUE:最終泊目に反映する
+					FALSE:１泊目に反映する（デフォルト値）
+			 -->
+			<PAYMEDIATOLASTDAY>FALSE</PAYMEDIATOLASTDAY>
+			<!-- 2019.10.15リリース機能追加（ネットからの取り込みで、お客様をすべて新規で取り込み機能切り替え用タグ）
+			 	TRUE:ご予約新規取り込み際に、お客様情報が常に新規作成する
+			 	FALSE:電話番号と重複ルールにより、既存お客様情報を自動判断する(デフォルト値)
+			-->
+			<CONTACT_ALWAYS_NEW>FALSE</CONTACT_ALWAYS_NEW>
+			<!-- 2019/11/30 変更通知の場合、見積明細の変更を反映できるように改善 
+			 	TRUE:変更通知の場合、見積明細の変更を反映する
+			 	FALSE:変更通知の場合、見積明細の変更を反映しない(デフォルト値)
+			 -->
+			<RESET_ESTITEMS>FALSE</RESET_ESTITEMS>
+			<!-- 2019/12/30 ローマ字で入ってきたお客様名をカタカナに変換機能の追加改善
+				TRUE:新規の場合、ローマ字で入ってきたお客様名をカタカナに自動変換する
+			 	FALSE:新規の場合、ローマ字で入ってきたお客様名をカタカナに自動変換しない(デフォルト値)
+			 -->
+			<CHGROMANTOKANA>FALSE</CHGROMANTOKANA>
+		</APPCONFIG>
+		<!-- AGT単位のパッケージコード->SFのプランNoの変換表:省略可能、定義しないと、パッケージコード&&OTAコード&&店舗別でプラン検索 -->
+		<PLANCODE_CONVERT ESTNAMEBYSF="FALSE">
+			<AGT AGTCODE="XX">
+				<CONVERT>
+					<AGTPACKAGECODE></AGTPACKAGECODE>	<!-- AGTのパッケージコード[カンマで複数定義可能] -->
+					<SFPLANNO></SFPLANNO>			<!-- SFのプランNo -->
+				</CONVERT>
+			</AGT>
+		</PLANCODE_CONVERT>
+		<!-- 事前支払方法キーワード定義 -->
+		<PRE_PAYMENT_DEF>
+	   		<CRAD>事前カード決済</CRAD><!-- 支払方法タグに該当キーワードを含めすると、お客様請求金額はカード明細として、見積明細に反映する -->
+			<CREDIT>一括精算,パッケージ予約</CREDIT><!-- 支払方法タグに該当キーワードを含めすると、お客様請求金額は売掛明細として、見積明細に反映する -->
+		</PRE_PAYMENT_DEF>
+		<!-- 事前決済区分とAGTコードにより、指定の会計商品を取り込み -->
+		<!-- 
+        <PAYMENT_CONVERTS>
+            <POINT_CONVERT PAYKBN="現地決済" PARSENO="P101">
+                <CONVERT AGTCODE="XX">M90202</CONVERT>
+            </POINT_CONVERT>
+            <POINT_CONVERT PAYKBN="現地決済" PARSENO="P102">
+                <CONVERT AGTCODE="XX">M90203</CONVERT>
+            </POINT_CONVERT>
+            <POINT_CONVERT PAYKBN="現地決済" PARSENO="P103">
+                <CONVERT AGTCODE="XX">M90204</CONVERT>
+            </POINT_CONVERT>
+            <POINT_CONVERT PAYKBN="現地決済" PARSENO="P104">
+                <CONVERT AGTCODE="XX">M90205</CONVERT>
+            </POINT_CONVERT>
+            
+            <POINT_CONVERT PAYKBN="現地決済">
+                <CONVERT AGTCODE="XX">M90200</CONVERT>
+            </POINT_CONVERT>
+            <PAYMENT_CONVERT PAYKBN="現地決済" PARSENO="P01">
+                <CONVERT AGTCODE="XX">M90201</CONVERT>
+            </PAYMENT_CONVERT>
+            <PARSE_LOGIC_INFO NAME="P01">
+                <PAR_BEG>ZZdeposit</PAR_BEG>
+                <FORMAT>(\d+\.?\d+)</FORMAT>
+                <PAR_END>ZZ;/SpecialServiceRequest</PAR_END>
+            </PARSE_LOGIC_INFO>
+
+			<PARSE_LOGIC_INFO NAME="P101">	
+				<PAR_BEG>楽天ポイント：</PAR_BEG>
+				<FORMAT>(\d+)</FORMAT>
+				<PAR_END>/OtherServiceInformation</PAR_END>
+			</PARSE_LOGIC_INFO>	
+			<PARSE_LOGIC_INFO NAME="P102">	
+				<PAR_BEG>ショップクーポン：</PAR_BEG>
+				<FORMAT>(\d+)</FORMAT>
+				<PAR_END>/OtherServiceInformation</PAR_END>
+			</PARSE_LOGIC_INFO>
+			<PARSE_LOGIC_INFO NAME="P103">	
+				<PAR_BEG>サービスクーポン：</PAR_BEG>
+				<FORMAT>(\d+)</FORMAT>
+				<PAR_END>/OtherServiceInformation</PAR_END>
+			</PARSE_LOGIC_INFO>
+			<PARSE_LOGIC_INFO NAME="P104">	
+				<PAR_BEG>宿クーポン：</PAR_BEG>
+				<FORMAT>(\d+)</FORMAT>
+				<PAR_END>/OtherServiceInformation</PAR_END>
+			</PARSE_LOGIC_INFO>
+        </PAYMENT_CONVERTS>
+         -->
+	</SHOP>
+
+</root>

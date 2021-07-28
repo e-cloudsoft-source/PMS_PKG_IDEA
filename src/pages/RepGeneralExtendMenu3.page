@@ -1,0 +1,2 @@
+<apex:page showheader="false" sidebar="false" standardcontroller="Lead__c" extensions="RepGeneralExtendCtrl" action="{!redirectDelivery}" 
+title="納品書"/>

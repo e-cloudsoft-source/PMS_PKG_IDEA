@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <content>GuestBookingInput</content>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Visualforce</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <content>GuestBookingInput</content>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Visualforce</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <allowInChatterGroups>false</allowInChatterGroups>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
+    <description>Guest Book Header</description>
+    <enableActivities>true</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableEnhancedLookup>true</enableEnhancedLookup>
+    <enableFeeds>true</enableFeeds>
+    <enableHistory>true</enableHistory>
+    <enableLicensing>false</enableLicensing>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <fields>
+        <fullName>Field11__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Field1__r.Rroom__r.Name</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>御部屋名</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Field12__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Field1__r.ReservationDate__c</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>宿泊日</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Field13__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>特記事項</label>
+        <length>32000</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Html</type>
+        <visibleLines>25</visibleLines>
+    </fields>
+    <fields>
+        <fullName>Field15__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>顧客</label>
+        <referenceTo>Contact</referenceTo>
+        <relationshipLabel>宿帳</relationshipLabel>
+        <relationshipName>guestbookkAF4</relationshipName>
+        <required>false</required>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Field1__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>ご予約</label>
+        <referenceTo>Lead__c</referenceTo>
+        <relationshipLabel>宿帳</relationshipLabel>
+        <relationshipName>Yadouchou8DYp</relationshipName>
+        <required>false</required>
+        <trackFeedHistory>true</trackFeedHistory>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>LeadIndexId__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Field1__r.LeadIndexRef__c</formula>
+        <label>予約インデックスID</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>PageSignature__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>全ページ署名</label>
+        <length>131072</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Html</type>
+        <visibleLines>10</visibleLines>
+    </fields>
+    <fields>
+        <fullName>RespectLstCal__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>text(Field1__r.RespectLst__c)</formula>
+        <label>敬称</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ShopCodeCal__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Field1__r.ShopCodeCal__c</formula>
+        <label>$店舗コード</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Signature__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>署名</label>
+        <length>32768</length>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Html</type>
+        <visibleLines>10</visibleLines>
+    </fields>
+    <label>宿帳</label>
+    <listViews>
+        <fullName>All</fullName>
+        <columns>Field1__c</columns>
+        <columns>Field15__c</columns>
+        <columns>Field12__c</columns>
+        <columns>Field13__c</columns>
+        <filterScope>Everything</filterScope>
+        <label>すべて選択</label>
+        <language>ja</language>
+    </listViews>
+    <nameField>
+        <label>宿帳名</label>
+        <trackFeedHistory>false</trackFeedHistory>
+        <trackHistory>true</trackHistory>
+        <type>Text</type>
+    </nameField>
+    <searchLayouts>
+        <customTabListAdditionalFields>Field1__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Field12__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Field11__c</customTabListAdditionalFields>
+        <lookupDialogsAdditionalFields>Field1__c</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Field12__c</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Field11__c</lookupDialogsAdditionalFields>
+        <lookupFilterFields>NAME</lookupFilterFields>
+        <lookupFilterFields>Field1__c</lookupFilterFields>
+        <lookupFilterFields>Field12__c</lookupFilterFields>
+        <lookupFilterFields>Field11__c</lookupFilterFields>
+        <lookupPhoneDialogsAdditionalFields>Field1__c</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Field12__c</lookupPhoneDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Field11__c</lookupPhoneDialogsAdditionalFields>
+        <searchFilterFields>NAME</searchFilterFields>
+        <searchFilterFields>Field1__c</searchFilterFields>
+        <searchFilterFields>Field12__c</searchFilterFields>
+        <searchFilterFields>Field11__c</searchFilterFields>
+        <searchResultsAdditionalFields>Field1__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Field12__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Field11__c</searchResultsAdditionalFields>
+    </searchLayouts>
+    <sharingModel>ReadWrite</sharingModel>
+    <visibility>Public</visibility>
+    <webLinks>
+        <fullName>ApplicationFormBtn</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>予約確認書</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>{!REQUIRESCRIPT(&quot;/resource/&quot; &amp; $Setup.CommDefine__c.AppNS__c &amp; &quot;queryfiles/js/jquery.min.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/apex.js&quot;)}
+var leadid = &quot;{!Yadochou__c.Field1Id__c}&quot;;
+var strLeadIndex = &quot;{!Yadochou__c.LeadIndexId__c}&quot;;
+sforce.connection.sessionId = &quot;{!$Api.Session_ID}&quot;;
+var locNs = &quot;{! JSENCODE($Setup.CommDefine__c.AppNS__c)}&quot;;
+if (locNs.length &gt; 2) locNs = locNs.slice(0,-2) + &quot;.&quot;;
+
+if (leadid != &quot;&quot;) {
+  var layoutCd = &quot;{!$Setup.CommDefine__c.ApplicationFormPDFSwitchCode__c}&quot;;
+  // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN 
+  var shopCodeCalFlg = &quot;{!$Setup.CommDefine__c.ApplicationFormShopLogoFlg__c}&quot;; 
+  var shopCodeCal = &quot;{!Yadochou__c.ShopCodeCal__c}&quot;; 
+  // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END 
+  // 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+  var RespectIsShowFlg= &quot;{!$Setup.CommDefine__c.RespectIsShowFlg__c}&quot;;
+  var accountMrSelectHtml =&apos;&apos;;
+  if(RespectIsShowFlg == &quot;true&quot;){
+    var mrTypeLst = sforce.apex.execute(locNs + &quot;ShopInfoUtil&quot;,&quot;getLeadSelect&quot;,{});
+    var mrTypeStr = &quot;{!Yadochou__c.RespectLstCal__c}&quot;;
+    var accountMroptStr =&quot;&quot;;
+    for(i=0; i &lt; mrTypeLst.length; i++){
+      var mrinf = mrTypeLst[i].split(&quot;:&quot;);
+      if(mrTypeStr ==&quot;&quot; &amp;&amp; mrinf[1] ==&quot;true&quot;) mrTypeStr = mrinf[0];
+      accountMroptStr += &quot;&lt;option value=&apos;&quot;+mrinf[0]+&quot;&apos;&quot;+ (mrinf[0] == mrTypeStr ? &apos; selected&apos; : &apos;&apos;) +&quot;&gt;&quot; +mrinf[0] +&quot;&lt;/option&gt;&quot;;
+    }
+    accountMrSelectHtml = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;敬称&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;select id=&quot;dialog_mrselect&quot;&gt;&apos; + accountMroptStr + &apos;&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+  }
+  // 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+  // 2016/01/28 店舗選択できる機能対応 BEGIN
+  var locShopCode = &quot;{!$User.ShopCode__c}&quot;; 
+  var locShopHtmls = &quot;&quot;; 
+  // 2021/07/30 #JP10785 by zy BEGIN
+  var leadInfoHtml = &apos;&apos;;
+  var defaultShop = &quot;&quot;; 
+  // 2021/07/30 #JP10785 by zy END
+  if (locShopCode.indexOf(&quot;,&quot;) &gt; 0) { 
+      var locOptStr = &quot;&quot;; 
+      // 選択できる店舗リストを取得する 
+      var currUsrId = &quot;{!$User.Id}&quot;; 
+      // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz BEGIN 
+      if(shopCodeCalFlg.toLowerCase() == &quot;true&quot; &amp;&amp; shopCodeCal != &quot;&quot;){ 
+        defaultShop = shopCodeCal ; 
+      } else{ 
+        defaultShop = &quot;{!$User.DefaultShopCode__c}&quot;; 
+      } 
+      // 2019/03/31 部屋タイプにより、店舗情報を出力対応（パラメータで切り替え可能） BY zyz END 
+      var shops = sforce.apex.execute(locNs + &quot;ShopInfoUtil&quot;,&quot;getCanSelectShopLst&quot;,{userId:currUsrId}); 
+      for(i=0;i&lt;shops.length;i++) { 
+          var shopinf = shops[i].split(&quot;:&quot;); 
+          locOptStr +=&quot;&lt;option value=&apos;&quot;+shopinf[0]+&quot;&apos;&quot;+ (defaultShop == shopinf[0] ? &apos; selected&apos; : &apos;&apos;) +&quot;&gt;&quot; +shopinf[1] +&quot;&lt;/option&gt;&quot;; 
+      } 
+      if (locOptStr != &quot;&quot;) { 
+          //店舗 
+          locShopHtmls = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;{!$Label.ps__msg_006_0241}&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;select id=&quot;dialog_shopcd&quot;&gt;&apos; + locOptStr + &apos;&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;&apos;; 
+      }
+  }
+  // 2021/07/30 #JP10785 by zy BEGIN
+  if (layoutCd == &apos;6&apos;){
+    var leadinfo = sforce.apex.execute(locNs + &quot;ShopInfoUtil&quot;,&quot;getLeadInfo&quot;,{leadId:leadid,shopCode:defaultShop});
+    leadinfo = JSON.parse(leadinfo);
+    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;予約人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;personNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.PersonNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;大人人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;adultNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.AdultNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;子供人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;childNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.ChildNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;部屋数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;roomNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.RoomNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;宿泊数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;nightNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.NightNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+  }
+  // 2021/07/30 #JP10785 by zy END 
+  // 2016/01/28 店舗選択できる機能対応 END
+    function autoLoader_js() {
+      
+      // XMLのコメント情報初期値
+      var rsStr = &quot;&quot;+sforce.apex.execute(locNs + &quot;ApplicationFormPDFSwitch&quot;, &quot;getApplicationFormPdfCommentAndRooms&quot;, {leadIndex:strLeadIndex});
+      var rsArr = rsStr.split(&quot;:&quot;);
+      var locInitComment =rsArr[0];
+      var assignedRooms = 1*rsArr[1];
+      var infoNb = (layoutCd == 4 ? 9 : 4);
+      var infoMojiNb = (layoutCd == 5 ? 40 : 40);
+      // アサイン部屋が存在する場合、選択肢を追加する
+      var roomIsShowMsg = &quot;&quot;;
+      if (assignedRooms &gt; 0) {
+      roomIsShowMsg = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol&quot; nowrap=&quot;nowrap&quot;&gt;部屋番号&lt;/td&gt;&lt;td&gt;&lt;input type=&quot;radio&quot; name=&quot;dialog_showroom&quot; value=&quot;&quot; checked=&quot;checked&quot;&gt;非表示&lt;input type=&quot;radio&quot; name=&quot;dialog_showroom&quot; value=&quot;1&quot;&gt;表示&lt;/td&gt;&lt;/tr&gt;&apos;;
+      }
+
+      if(jQuery) {
+
+        var d = sfdcPage.dialogs[&apos;MyCoolDialog&apos;], close;
+        if (!d) {
+          // if the dialog doesn&apos;t exist create one
+          d = sfdcPage.dialogs[&apos;MyCoolDialog&apos;] = new SimpleDialog(&apos;MyCoolDialog&apos;, false);
+          // set general information on your dialog and finally run the create function
+          // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+          //d.setWidth(640);
+          // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+          d.createDialog();
+        }
+        d.setTitle(&apos;ご予約確認書&apos;);
+        // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+        d.setWidth(640);
+        // 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+        // give your dialog some content (I usually use an iframe linking to another visualforce page
+        // change the url, height, width to your needs
+// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+            $(d.dialog).find(&apos;#MyCoolDialogInner&apos;).html(&apos;&lt;div class=&quot;pbBody&quot;&gt;&lt;div&gt;&lt;div class=&quot;pbSubsection&quot;&gt;&lt;table class=&quot;detailList&quot; border=&quot;0&quot; cellpadding=&quot;1&quot; cellspacing=&quot;1&quot;&gt;&apos; + locShopHtmls + accountMrSelectHtml
+                // 2021/07/30 #JP10785 by zy BEGIN
+                + leadInfoHtml
+                // 2021/07/30 #JP10785 by zy END
+                + roomIsShowMsg +&apos;&lt;tr style=&quot;vertical-align: top;&quot;&gt;&lt;td class=&quot;labelCol &quot;&gt;&lt;label&gt;コメント&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col &quot;&gt;&lt;textarea id=&quot;dialog_comment&quot;rows=&quot;4&quot; cols=&quot;40&quot;style=&quot;width:550px;&quot; &gt;&apos; + locInitComment + &apos;&lt;/textarea&gt;&lt;p&gt;コメント：１行&apos; + infoMojiNb + &apos;文字、&apos; + infoNb + &apos;行以内入力ください。&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&quot;2&quot; style=&quot;text-align: right;&quot;&gt;&lt;input class=&quot;btn&quot; id=&quot;dialog_cancelBtn&quot; style=&quot;width: 100px&quot; type=&quot;button&quot; value=&quot;キャンセル&quot; /&gt;    &lt;input class=&quot;btn&quot; id=&quot;dialog_printoutBtn&quot; style=&quot;width: 100px&quot; type=&quot;button&quot; value=&quot;確認書作成&quot; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&apos;);
+// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+
+        $(d.dialog).find(&apos;input[type=&quot;button&quot;]&apos;).on(&apos;click&apos;, function() {
+          var btnId = $(this).attr(&quot;id&quot;);
+          if (btnId == &quot;dialog_cancelBtn&quot;) {
+            d.hide();
+          } else if (btnId == &quot;dialog_printoutBtn&quot;) {
+            // ご予約確認書画面を起動する
+            var comment = $(&quot;#dialog_comment&quot;).val();
+            var $isShowRoom = $(&quot;input[name=&apos;dialog_showroom&apos;]:checked&quot;);
+            var showRoomUrl = &quot;&quot;;
+            if ($isShowRoom.length &gt; 0 &amp;&amp; $isShowRoom.val() != &quot;&quot;) {
+              showRoomUrl = &quot;&amp;showroom=1&quot;;
+            }
+            var url = &quot;{!URLFOR(&apos;/apex/&apos; &amp; $Setup.CommDefine__c.AppNS__c &amp; &apos;ApplicationFormPDFSwitch&apos;)}&quot;;
+            var custNameUrl = &quot;?id=&quot; + leadid + &quot;&amp;comment=&quot; + encodeURIComponent(comment);
+            // 2016/01/28 店舗選択できる機能対応 BEGIN
+            var selectShopLen = $(&quot;#dialog_shopcd&quot;).length; 
+            var selectShopVal = $(&quot;#dialog_shopcd&quot;).val(); 
+            if (selectShopLen &gt; 0 &amp;&amp; selectShopVal != &quot;&quot;) { 
+        custNameUrl += &quot;&amp;shopcd=&quot; + encodeURIComponent(selectShopVal); 
+            }
+            // 2016/01/28 店舗選択できる機能対応 END
+            // 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+            if(RespectIsShowFlg == &quot;true&quot;){
+            var accMr = $(&quot;#dialog_mrselect&quot;).val();
+            custNameUrl += &quot;&amp;mr=&quot; + encodeURIComponent(accMr );
+            }
+            // 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+        // 2021/07/30 #JP10785 by zy BEGIN
+        var customUrl = &apos;&apos;;
+            if (layoutCd == &apos;6&apos;){
+                var pnum = $(&quot;#personNumberInput&quot;),adnum = $(&quot;#adultNumberInput&quot;),cnum = $(&quot;#childNumberInput&quot;),rnum = $(&quot;#roomNumberInput&quot;),nights = $(&quot;#nightNumberInput&quot;);
+                pnum.hasClass(&quot;change&quot;) ? customUrl += &apos;&amp;pnum=&apos; + pnum.val() : &apos;&apos;;
+                adnum.hasClass(&quot;change&quot;) ? customUrl += &apos;&amp;adnum=&apos; + adnum.val() : &apos;&apos;;
+                cnum.hasClass(&quot;change&quot;) ? customUrl += &apos;&amp;cnum=&apos; + cnum.val() : &apos;&apos;;
+                rnum.hasClass(&quot;change&quot;) ? customUrl += &apos;&amp;rnum=&apos; + rnum.val() : &apos;&apos;;
+                nights.hasClass(&quot;change&quot;) ? customUrl += &apos;&amp;nights=&apos; + nights.val() : &apos;&apos;;
+            }
+            window.open(url + custNameUrl + showRoomUrl + customUrl);
+        // 2021/07/30 #JP10785 by zy END
+
+            d.hide();
+          }
+        });
+        // we also need to make sure we have a close button on the dialog
+        if ($(d.dialog).find(&apos;#InlineEditDialogX&apos;).size() == 0) {
+          // if there is none we create it
+          close = $(&apos;&lt;a id=&quot;InlineEditDialogX&quot; title=&quot;Close&quot; tabindex=&quot;0&quot; href=&quot;javascript:void(0)&quot; class=&quot;dialogClose&quot;&gt;Close&lt;/a&gt;&apos;);
+          // add some functionality to the close button (for the default ui we change the classname on mouseover/out
+          close.mouseover(function() {
+            this.className = &apos;dialogCloseOn&apos;;
+          }).mouseout(function() {
+            this.className = &apos;dialogClose&apos;;
+          }).click(function() {
+            // finally our on click handler which closes the dialog
+            d.hide();
+          });
+          // insert the new generated close button before the h2 tag so it&apos;ll show up on the top right corner
+          close.insertBefore($(d.dialog).find(&apos;.topLeft h2&apos;));
+        }
+        // now it&apos;s time to show the new dialog
+        d.show();
+      }
+  }
+  var popupWinIsShowFlg = &quot;{!$Setup.CommDefine__c.ApplicationFormReportPopupIsShow__c}&quot;;
+    
+    if (popupWinIsShowFlg.toLowerCase() != &apos;false&apos; &amp;&amp; layoutCd != &apos;1&apos;) {
+    autoLoader_js();
+  }else{
+    var showRoomUrl = &quot;&quot;;
+    if (layoutCd != 1) {
+      var assignedRooms = 1*sforce.apex.execute(locNs + &quot;ApplicationFormPDFSwitch&quot;, &quot;isHaveAssigedRoom&quot;, {leadIndex:strLeadIndex});
+      if (assignedRooms &gt; 0 &amp;&amp; window.confirm(&quot;部屋番号を表示しますか?&quot;)) {
+        showRoomUrl = &quot;&amp;showroom=1&quot;;
+      }
+    }
+    var url = &quot;{!URLFOR(&apos;/apex/&apos; &amp; $Setup.CommDefine__c.AppNS__c &amp; &apos;ApplicationFormPDFSwitch&apos;)}&quot;;
+    var custNameUrl = &quot;?id=&quot; + leadid;
+    window.open(url + custNameUrl+showRoomUrl);
+  }
+}else {
+  alert(&quot;ご予約項目が未設定するため、操作は中断されました。&quot;);
+}</url>
+    </webLinks>
+    <webLinks>
+        <fullName>CashRegisterCardPDF</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>レジカード</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+{!REQUIRESCRIPT(&quot;/resource/&quot; &amp; $Setup.CommDefine__c.AppNS__c &amp; &quot;queryfiles/js/jquery.min.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/apex.js&quot;)}
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+var switchCode = &quot;{!JSENCODE($Setup.CommDefine__c.CashRegisterSwitchCode__c)}&quot;;
+var openUrl = &quot;{!URLFOR(&apos;/apex/&apos; &amp; $Setup.CommDefine__c.AppNS__c &amp; &apos;CashRegisterCardPDFSwitch&apos;)}&quot;+&quot;?id={!Yadochou__c.Id}&quot;;
+var leadid = &quot;{!Yadochou__c.Field1Id__c}&quot;; 
+if (leadid != &quot;&quot;) { 
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz BEGIN
+var CashLogoFlg = &quot;{!$Setup.CommDefine__c.CashRegisterLogo__c}&quot;;
+/*
+// 2017/05/25 レジカード５のとき、ご宿泊料金が非表示するポップアップが出ない不具合改修 zyz BEGIN
+	if ( switchCode == &quot;4&quot; || switchCode == &quot;5&quot; ) {
+// 2017/05/25 レジカード５のとき、ご宿泊料金が非表示するポップアップが出ない不具合改修 zyz END
+	//金額を表示しますか？
+	    if (window.confirm( &quot;{!$Label.ps__msg_012_0133}&quot;)) {
+	       openUrl += &quot;&amp;smy=1&quot;;
+	    }    
+
+	}
+*/
+sforce.connection.sessionId = &quot;{!$Api.Session_ID}&quot;;
+var locNs = &quot;{! JSENCODE($Setup.CommDefine__c.AppNS__c)}&quot;;
+if (locNs.length &gt; 2) locNs = locNs.slice(0,-2) + &quot;.&quot;;
+var shopCodeCal = &quot;{!Yadochou__c.ShopCodeCal__c}&quot;;
+var locShopCode = &quot;{!$User.ShopCode__c}&quot;;
+var locShopHtmls = &quot;&quot;;
+if (locShopCode.indexOf(&quot;,&quot;) &gt; 0) {
+var locOptStr = &quot;&quot;;
+// 選択できる店舗リストを取得する
+var currUsrId = &quot;{!$User.Id}&quot;;
+var defaultShop =&quot;{!$User.DefaultShopCode__c}&quot;;
+/*
+var defaultShop = &quot;&quot;;
+if(shopCodeCal != &quot;&quot;){
+defaultShop = shopCodeCal ;
+} else{
+defaultShop = &quot;{!$User.DefaultShopCode__c}&quot;;
+}
+*/
+var shops = sforce.apex.execute(locNs + &quot;ShopInfoUtil&quot;,&quot;getCanSelectShopLst&quot;,{userId:currUsrId});
+for(i=0;i&lt;shops.length;i++) {
+var shopinf = shops[i].split(&quot;:&quot;);
+locOptStr +=&quot;&lt;option value=&apos;&quot;+shopinf[0]+&quot;&apos;&quot;+ (defaultShop == shopinf[0] ? &apos; selected&apos; : &apos;&apos;) +&quot;&gt;&quot; +shopinf[1] +&quot;&lt;/option&gt;&quot;;
+}
+if (locOptStr != &quot;&quot;) {
+//店舗
+locShopHtmls = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;120px&quot;&gt;&lt;label&gt;{!$Label.ps__msg_006_0241}&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;select id=&quot;dialog_shopcd&quot; style=&quot;max-width: 170px;&quot;&gt;&apos; + locOptStr + &apos;&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&quot;2&quot; style=&quot;width:350px;height:2px&quot;&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+}
+}
+if(locShopHtmls != &quot;&quot; &amp;&amp; CashLogoFlg ==&quot;true&quot; &amp;&amp; switchCode != &quot;3&quot;){
+if(jQuery) {
+
+var d = sfdcPage.dialogs[&apos;MyCoolDialog&apos;], close;
+if (!d) {
+// if the dialog doesn&apos;t exist create one
+d = sfdcPage.dialogs[&apos;MyCoolDialog&apos;] = new SimpleDialog(&apos;MyCoolDialog&apos;, false);
+// set general information on your dialog and finally run the create function
+// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+//d.setWidth(380);
+// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+d.createDialog();
+}
+// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ BEGIN
+d.setWidth(380);
+// 2020/06/03 BugFix ウインドウの横幅は毎回自動設定する WSQ END
+d.setTitle(&apos;レジカード&apos;);
+// 金額を表示しますか？
+var symHtml = &apos;&apos;;
+var smyUrl = &apos;&apos;;
+if(switchCode == &quot;4&quot; || switchCode == &quot;5&quot;){
+symHtml = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;120px&quot;&gt;&lt;label&gt;{!$Label.ps__msg_012_0133}&lt;/label&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;dialog_symId&quot; checked=&quot;checked&quot; value=&quot;&quot; /&gt;&lt;/td&gt;&apos;;
+}
+$(d.dialog).find(&apos;#MyCoolDialogInner&apos;).html(&apos;&lt;div class=&quot;pbBody&quot;&gt;&lt;div&gt;&lt;div class=&quot;pbSubsection&quot;&gt;&lt;table class=&quot;detailList&quot; border=&quot;0&quot; cellpadding=&quot;1&quot; cellspacing=&quot;1&quot;&gt;&apos; + locShopHtmls + symHtml +&apos;&lt;tr&gt;&lt;td colspan=&quot;2&quot; style=&quot;text-align: right;&quot;&gt;&lt;input class=&quot;btn&quot; id=&quot;dialog_cancelBtn&quot; style=&quot;width: 100px&quot; type=&quot;button&quot; value=&quot;キャンセル&quot; /&gt; &lt;input class=&quot;btn&quot; id=&quot;dialog_printoutBtn&quot; style=&quot;width: 100px&quot; type=&quot;button&quot; value=&quot;確定&quot; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&apos;);
+
+// 按钮事件
+$(d.dialog).find(&apos;input[type=&quot;button&quot;]&apos;).on(&apos;click&apos;, function() {
+var btnId = $(this).attr(&quot;id&quot;);
+if (btnId == &quot;dialog_cancelBtn&quot;) {
+d.hide();
+} else if (btnId == &quot;dialog_printoutBtn&quot;) {
+var custNameUrl = &quot;&quot;;
+var selectShopLen = $(&quot;#dialog_shopcd&quot;).length;
+var selectShopVal = $(&quot;#dialog_shopcd&quot;).val();
+if (selectShopLen &gt; 0 &amp;&amp; selectShopVal != &quot;&quot;) {
+custNameUrl += &quot;&amp;shopcd=&quot; + encodeURIComponent(selectShopVal);
+}
+var symFlg = $(&quot;#dialog_symId&quot;).prop(&apos;checked&apos;);
+if(symFlg) smyUrl = &apos;&amp;smy=1&apos;;
+window.open(openUrl + custNameUrl + smyUrl,&quot;CashRegisterCardPDF&quot;,&quot;width=780, height=980, menubar=no, toolbar=no, scrollbars=yes&quot;);
+d.hide();
+}
+
+});
+
+d.show();
+}
+} else {
+if ( switchCode == &quot;4&quot; || switchCode == &quot;5&quot; ) {
+//金額を表示しますか？
+if (window.confirm( &quot;{!$Label.ps__msg_012_0133}&quot;)) {
+openUrl += &quot;&amp;smy=1&quot;;
+}
+}
+window.open(openUrl, &quot;CashRegisterCardPDF&quot;,&quot;width=780, height=980, menubar=no, toolbar=no, scrollbars=yes&quot;);
+}
+	//window.open(openUrl, &quot;CashRegisterCardPDF&quot;,&quot;width=780, height=980, menubar=no, toolbar=no, scrollbars=yes&quot;);
+// 2020/02/29 レジカードのロゴを出力した部屋の「店舗情報」対応 BY zyz END
+} else {
+//ご予約項目が未設定するため、操作は中断されました。
+   alert(&quot;{!$Label.ps__msg_012_0134}&quot;); 
+}</url>
+    </webLinks>
+    <webLinks>
+        <fullName>QuestionnaireBtn</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>アンケート</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>{!REQUIRESCRIPT(&quot;/resource/&quot; &amp; $Setup.CommDefine__c.AppNS__c &amp; &quot;queryfiles/js/jquery.min.js&quot;)} 
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/connection.js&quot;)} 
+{!REQUIRESCRIPT(&quot;/soap/ajax/30.0/apex.js&quot;)} 
+
+var leadid = &quot;{!Yadochou__c.Field1__c}&quot;; 
+var questionnaireFlg = {!$Setup.CommDefine__c.QuestionnaireMulitiLangFlg__c}; 
+var locquestionnaireHtmls=&quot;&quot;; 
+if (questionnaireFlg !=false){ 
+// Userの言語により、デフォルト選択値を設定する
+sforce.connection.sessionId = &quot;{!$Api.Session_ID}&quot;;
+var locNs = &quot;{! JSENCODE($Setup.CommDefine__c.AppNS__c)}&quot;;
+if (locNs.length &gt; 2) locNs = locNs.slice(0,-2) + &quot;.&quot;;
+var defLng = sforce.apex.execute(locNs + &quot;UserUtil&quot;,&quot;getDefaultLanguage&quot;,{});
+var repJpLang = repEnLang = &quot;selected&quot;;
+if (defLng == &quot;ja&quot;) repEnLang = &quot;&quot;; else repJpLang = &quot;&quot;;
+
+locquestionnaireHtmls = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol &quot; style=&quot;width:50px&quot;&gt;&lt;label&gt;{!$Label.MSG_006_0238}&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col &quot; Style=&quot;text-align:left&quot;&gt;&lt;select id=&quot;dialog_language&quot;&gt;&lt;option value=&quot;jp&quot; $$_jp_selected_$$ &gt;{!$Label.MSG_006_0234}&lt;/option&gt;&lt;option value=&quot;en&quot; $$_en_selected_$$ &gt;{!$Label.MSG_006_0236}&lt;/option&gt;&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;&apos;; 
+locquestionnaireHtmls = locquestionnaireHtmls.replace(&quot;$$_jp_selected_$$&quot;,repJpLang).replace(&quot;$$_en_selected_$$&quot;,repEnLang);
+} 
+function autoLoader_js() { 
+
+if (jQuery) { 
+
+var d = sfdcPage.dialogs[&apos;MyQuestionDialog&apos;], close; 
+if (!d ) { 
+// if the dialog doesn&apos;t exist create one 
+d = sfdcPage.dialogs[&apos;MyQuestionDialog&apos;] = new SimpleDialog(&apos;MyQuestionDialog&apos;, false); 
+// set general information on your dialog and finally run the create function 
+d.setWidth(320); 
+//alert(d.setWidth); 
+d.createDialog(); 
+}
+d.setTitle(&apos;{!$Label.MSG_012_0467}&apos;); 
+
+// give your dialog some content (I usually use an iframe linking to another visualforce page 
+// change the url, height, width to your needs 
+$(d.dialog).find(&apos;#MyQuestionDialogInner&apos;).html(&apos;&lt;div class=&quot;pbBody&quot;&gt;&lt;div&gt;&lt;div class=&quot;pbSubsection&quot;&gt;&lt;table class=&quot;detailList&quot; border=&quot;0&quot; cellpadding=&quot;1&quot; cellspacing=&quot;1&quot; width=100%&gt;&apos; +locquestionnaireHtmls +&apos;&lt;tr&gt;&lt;td&gt;&amp;nbsp&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan=&quot;2&quot; style=&quot;text-align: right;&quot;&gt;&lt;input class=&quot;btn&quot; id=&quot;dialog_cancelBtn&quot; style=&quot;min-width;&quot; type=&quot;button&quot; value=&quot;{!$Label.MSG_012_0468}&quot; /&gt; &lt;input class=&quot;btn&quot; id=&quot;dialog_printoutBtn&quot; style=&quot;min-width;&quot; type=&quot;button&quot; value=&quot;{!$Label.MSG_012_0469}&quot; /&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&apos;); 
+
+$(d.dialog).find(&apos;input[type=&quot;button&quot;]&apos;).on(&apos;click&apos;, function() { 
+var btnId = $(this).attr(&quot;id&quot;); 
+if (btnId == &quot;dialog_cancelBtn&quot;) { 
+d.hide(); 
+} else if (btnId == &quot;dialog_printoutBtn&quot;) { 
+// アンケート画面を起動する 
+var language= $(&quot;#dialog_language&quot;).val(); 
+var url = &quot;{!URLFOR(&apos;/apex/&apos; &amp; $Setup.CommDefine__c.AppNS__c &amp; &apos;QuestionnairePDF&apos;)}&quot;; 
+var languageUrl = &quot;?orgId={!Yadochou__c.Id}&amp;lng=&quot; + encodeURIComponent(language); 
+window.open(url + languageUrl, &quot;QuestionnairePDF&quot;,&quot;width=780, height=980, menubar=no, toolbar=no, scrollbars=yes&quot;); 
+d.hide(); 
+} 
+}); 
+// we also need to make sure we have a close button on the dialog 
+if ($(d.dialog).find(&apos;#InlineEditDialogX&apos;).size() == 0) { 
+// if there is none we create it 
+close = $(&apos;&lt;a id=&quot;InlineEditDialogX&quot; title=&quot;Close&quot; tabindex=&quot;0&quot; href=&quot;javascript:void(0)&quot; class=&quot;dialogClose&quot;&gt;Close&lt;/a&gt;&apos;); 
+// add some functionality to the close button (for the default ui we change the classname on mouseover/out 
+close.mouseover(function() { 
+this.className = &apos;dialogCloseOn&apos;; 
+}).mouseout(function() { 
+this.className = &apos;dialogClose&apos;; 
+}).click(function() { 
+// finally our on click handler which closes the dialog 
+d.hide(); 
+}); 
+// insert the new generated close button before the h2 tag so it&apos;ll show up on the top right corner 
+close.insertBefore($(d.dialog).find(&apos;.topLeft h2&apos;)); 
+} 
+// now it&apos;s time to show the new dialog 
+d.show(); 
+} 
+} 
+if (leadid != &quot;&quot;) { 
+if (questionnaireFlg != false) { 
+autoLoader_js(); 
+} else { 
+//var url = &quot;{!URLFOR(&apos;/apex/&apos; &amp; $Setup.CommDefine__c.AppNS__c &amp; &apos;QuestionnairePDF&apos;)}&quot;; 
+//var custNameUrl = &quot;?id={!Yadochou__c.Id}&quot;; 
+//window.open(url + custNameUrl, &quot;QuestionnairePDF&quot;,&quot;width=780, height=980, menubar=no, toolbar=no, scrollbars=yes&quot;); 
+var openUrl = &quot;{!URLFOR(&apos;/apex/&apos; &amp; $Setup.CommDefine__c.AppNS__c &amp; &apos;QuestionnairePDF&apos;, Yadochou__c.Field1__c, [orgId= Yadochou__c.Id])}&quot;; 
+window.open(openUrl, &quot;QuestionnairePDF&quot;,&quot;width=780, height=980, menubar=no, toolbar=no, scrollbars=yes&quot;); 
+} 
+} else { 
+//Account Info Merge 
+alert(&quot;{!$Label.MSG_012_0134}&quot;); 
+}</url>
+    </webLinks>
+</CustomObject>

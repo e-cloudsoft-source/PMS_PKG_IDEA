@@ -1,0 +1,28 @@
+<apex:page standardcontroller="Contact" extensions="BarcodeScript">
+    <apex:form >
+        <apex:pageBlock title=" Customer ID - {!customerid} ">
+ 
+                     <apex:image url="{!num1}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num2}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num3}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num4}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num5}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num6}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num7}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num8}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num9}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num10}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num11}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num12}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num13}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num14}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num15}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num16}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num17}"  width="{!bwidth}" height="{!bheight}"/>
+                     <apex:image url="{!num18}"  width="{!bwidth}" height="{!bheight}"/>
+ 
+        </apex:pageBlock>
+     </apex:form>
+ 
+ 
+</apex:page>

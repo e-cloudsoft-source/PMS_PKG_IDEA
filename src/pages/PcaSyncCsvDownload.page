@@ -1,0 +1,5 @@
+<apex:page controller="PcaSyncCsvDownloadCtrl" showHeader="false" sidebar="false" cache="true"
+	action="{!downCsvFile}"
+	contenttype="text/{!IF(FIND(fileName,'.txt')>=0, 'plain', 'csv')};charset=Windows-31J;#{!SUBSTITUTE(SUBSTITUTE(fileName,'%28','('), '%29',')')}" readOnly="true" >
+<apex:outputText value="{!csvBody}" />
+</apex:page>

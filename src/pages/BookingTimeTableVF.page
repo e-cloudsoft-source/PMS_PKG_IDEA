@@ -1,0 +1,645 @@
+<!-- タイムテーブル -->
+<apex:page controller="BookingTimeTable" action="{!toToday}" sidebar="false"
+rendered="true" title="{!$Label.ps__msg_005_0001}" id="page">
+
+
+<style type="text/css">
+    html { width: 1720px; }
+    .ui-selecting{background:#F60;}
+    .ui-selected{background:#F60;}
+    .comfirmStatus{background:#CCCC33;}
+    .comfirmedStatus{background:#33CC66;}
+    .tmpBookinged{background:#FFCCFF;}
+    .partyroomBook{background:#6699ff;}
+
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+</style>
+<script>
+beenFocused = true;
+var _g_isCanUpdateFlg = {!(isCanUpdateLead)};
+var $j = jQuery.noConflict();
+var JS_StayPersons = 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingMansDef__c,0)} + 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingFemailsDef__c,0)} + 1 * {!BLANKVALUE($Setup.CommDefine__c.BookingChildrenDef__c,0)};
+</script>
+
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<apex:form id="actionForm">
+
+<!-- Room Inventry for Booking -->   <!-- 宴会予約 -->
+<apex:sectionHeader title="{!$Label.ps__msg_005_0002}" subtitle="{!$Label.ps__msg_005_0003}"/>
+<!-- 時 -->
+<apex:pageBlock id="block" title="{!$Label.ps__msg_005_0004}" >
+<apex:outputLabel id="messageBlock" >
+<!-- 下記予約の出発時刻には到着時刻以降の時刻を設定ください。 -->
+<apex:pageMessage summary="{!$Label.ps__msg_005_0005}" 
+			severity="error" strength="3" escape="false" rendered="{!LEN(showInfoError)>0}"
+			detail="{!showInfoError}"/>
+<!-- 下記予約の到着時刻と出発時刻の設定範囲が不正です（到着時刻と出発時刻が同時に00:00〜05:00時間帯で設定不可） -->
+<apex:pageMessage summary="{!$Label.ps__msg_005_0006}" 
+			severity="error" strength="3" escape="false" rendered="{!LEN(showInfoError2)>0}"
+			detail="{!showInfoError2}"/>
+</apex:outputLabel>
+<!-- BUTTON処理する -->
+<apex:pageBlockButtons location="top">
+<!-- 前週 --><!-- 前日 --><!-- 今日 --><!-- 翌日 --><!-- 翌週 -->
+	<apex:commandButton style="width:100px;height=20px" value="{!$Label.ps__msg_005_0007}" action="{!toPrevWeek}" reRender="ciTable,calendarPanel,messageBlock" status="refStatusBlock"/>
+    <apex:commandButton style="width:100px;height=20px" value="{!$Label.ps__msg_005_0008}" action="{!toPrev}" reRender="ciTable,calendarPanel,messageBlock" status="refStatusBlock"/>
+    <apex:commandButton style="width:100px;height=20px" value="{!$Label.ps__msg_005_0009}" action="{!toToday}" reRender="ciTable,calendarPanel,messageBlock" status="refStatusBlock"/>
+    <apex:commandButton style="width:100px;height=20px" value="{!$Label.ps__msg_005_0010}" action="{!toNext}" reRender="ciTable,calendarPanel,messageBlock" status="refStatusBlock"/>
+    <apex:commandButton style="width:100px;height=20px" value="{!$Label.ps__msg_005_0011}" action="{!toNextWeek}" reRender="ciTable,calendarPanel,messageBlock" status="refStatusBlock"/>
+
+    <apex:outputPanel style="vertical-align:top" id="calendarPanel">
+ <!-- 指定日 -->
+    <apex:outputLabel value="{!$Label.ps__msg_005_0012} " for="gotoDate" styleClass="label" style="font-weight: bold;"/>
+
+    <apex:inputField value="{!selectDate.Checkinday__c}" id="gotoDate" style="font-size: 1.2em; width:120px">
+        <apex:actionSupport event="onchange" action="{!gotoDate}" rerender="ciTable,messageBlock" status="refStatusBlock"/>
+    </apex:inputField>
+    </apex:outputPanel>
+</apex:pageBlockButtons>
+<apex:outputPanel id="colorpanel">
+
+<apex:selectList size="1" value="{!branchShopNm}" rendered="{!branchShopLst.size > 0}">
+<!-- All -->
+    <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_005_0017}"/>
+    <apex:selectOptions value="{!branchShopLst}" />
+    <apex:actionSupport event="onchange" action="{!refreshBranchShopInfo}" />
+</apex:selectList>
+
+<span style="vertical-align: middle; font-weight: bold;"><!-- 仮予約 -->{!$Label.MSG_005_0013}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle; " class="tmpBookinged"/></span>
+<span style="vertical-align: middle; font-weight: bold;">&nbsp;<!-- 会場おさえ -->{!$Label.MSG_005_0014}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle; " class="partyroomBook"/></span>
+<span style="vertical-align: middle; font-weight: bold;">&nbsp;<!-- 確定 -->{!$Label.MSG_005_0015}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle; " class="comfirmedStatus"/></span>
+<span style="vertical-align: middle; font-weight: bold;">&nbsp;<!-- キャンセルまち -->{!$Label.MSG_005_0016}&nbsp;<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 20px;width:60px;vertical-align:middle; " class="comfirmStatus"/></span>
+
+</apex:outputPanel>
+<br></br>
+<apex:outputPanel >
+<img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height:3px; width: 100%"/>
+</apex:outputPanel>
+<!-- 明細情報 -->
+<apex:outputPanel id="ciTable" >
+<script>$j(document).ready(function() {bindEvent();});</script>
+<table width="98%" style="border:solid 1px #777; background:#FFF; border-radius: 5px;" id="table" cellspacing="0px" cellpadding="0px" class="detailList" >
+    <thead>
+    
+    <tr style="background-color:#F5F5F5; font-weight: bold; height: 20px">
+        <td style="width:100px" rowspan="2">
+		<!-- お部屋 -->
+            <apex:outputLabel value="{!$Label.ps__msg_005_0018}" styleClass="label" style="margin-left:2px; vertical-align: middle; height:20px; font-size:16px; text-align:center; overflow:hidden;"/>
+        </td>
+        <apex:repeat value="{!Hours}" var="intHour">
+        <td colspan="6"><div style="color:#555; width:60px; margin-left:2px; vertical-align: middle;float:left; vertical-align: middle;">
+            <apex:outputLabel value="{!intHour}:00" styleClass="label"/></div></td>
+        </apex:repeat>
+	<!-- お部屋 -->
+        <td style="width:100px"  rowspan="2"><apex:outputLabel value="{!$Label.ps__msg_005_0018}" styleClass="label" style="margin-left:2px; vertical-align: middle; height:20px; font-size:16px; text-align:center; overflow:hidden;"/></td>
+        <!-- 
+        <td style="width:100px"><img src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 1px; width: 50px;"/></td>
+         -->
+    </tr>
+    
+    <!-- TimeLine ToolTips -->
+    <tr style="background-color:#F5F5F5; height: 18px">
+    <apex:repeat value="{!headerTimeList}" var="hhmm">
+		<td colspan="{!tdColspanInfoMap[hhmm]}" title="{!IF(tdColspanInfoMap[hhmm] > 1, timeTipsMap[hhmm], '')}">
+			<span class="{!IF(tdColspanInfoMap[hhmm] > 1, 'ui-icon ui-icon-clock', '')}" >{!IF(tdColspanInfoMap[hhmm] > 1, '', '　')}</span>
+		</td>
+    </apex:repeat>
+	</tr>
+    
+	</thead>
+    <apex:variable var="count" value="{!0}"/>
+    <apex:repeat value="{!Room}" var="r">
+    <tr>
+        <td class="roomNmTd" style="margin-left:2px; vertical-align: middle;border-top:solid 1px #777;border-right:solid 1px #777;font-size:14px; ">
+        <a href="javascript:void(0)" class="roomNmLinkCls" style="margin-left: 2px" onclick="window.open('/{!r.id}')" target="_blank" id="{!r.id}" onblur="LookupHoverDetail.getHover('{!r.id}').hide();" onfocus="LookupHoverDetail.getHover('{!r.id}', '/{!r.id}/m?retURL=%2F{!r.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!r.id}').hide();" onmouseover="LookupHoverDetail.getHover('{!r.id}', '/{!r.id}/m?retURL=%2F{!r.id}&isAjaxRequest=1').show();">
+        {!r.name}
+        </a>
+        <input type="hidden" id="roomId_{!CEILING(count)}" value="{!r.id}" />
+        <input type="hidden" id="roomNm_{!CEILING(count)}" value="{!r.name}" />
+        <apex:variable var="count" value="{!count+1}"/>
+        </td>
+
+        <apex:outputText value="{!roomBookingMap[r.Id].tdHtml}" escape="false"/>
+
+        <td class="roomNmTd" style="margin-left:2px; vertical-align: middle;border-top:solid 1px #777;border-right:solid 1px #777;font-size:14px; ">
+        <a href="javascript:void(0)" class="roomNmLinkCls" style="margin-left: 2px" onclick="window.open('/{!r.id}')" target="_blank" id="{!r.id}_r" onblur="LookupHoverDetail.getHover('{!r.id}_r').hide();" onfocus="LookupHoverDetail.getHover('{!r.id}_r', '/{!r.id}/m?retURL=%2F{!r.id}&isAjaxRequest=1').show();" onmouseout="LookupHoverDetail.getHover('{!r.id}_r').hide();" onmouseover="LookupHoverDetail.getHover('{!r.id}_r', '/{!r.id}/m?retURL=%2F{!r.id}&isAjaxRequest=1').show();">
+        {!r.name}
+        </a>
+        </td>
+    </tr>
+    </apex:repeat>
+
+</table>
+
+</apex:outputPanel>
+</apex:pageBlock>
+</apex:form>
+
+<div id="myPanel" style="display: none; width: 500px;" >
+
+  <div class="hd">
+	<!-- 新規予約 -->
+    <apex:outputText value="{!$Label.ps__msg_005_0019}" />
+
+  </div>
+  
+  <apex:form id="dform">
+  <apex:inputHidden id="bentryh"  value="{!bookingform.Field4__c}" />
+  <apex:inputHidden id="bdeparth" value="{!bookingform.Field3__c}" />
+  <div class="bd" style="height: 400px; overflow: auto;" >
+      
+        <apex:pageBlock id="dblock">
+
+		<!-- Message Panel Block -->        
+		<apex:outputPanel id="messagePanel">
+		  <apex:pageMessages id="inputFormMsg"/>
+		  <apex:inputHidden value="{!bookingCreateOK}" id="hidDataCreateOK"/><!-- Hidden:Data Create IS OK -->
+		</apex:outputPanel>
+		
+        <apex:pageBlockSection columns="1" id="dsec">
+        
+        	<apex:outputField id="bentry"   value="{!bookingform.Field4__c}"></apex:outputField>
+        	<apex:outputField id="bdepart"  value="{!bookingform.Field3__c}"></apex:outputField>
+
+             <!-- お客様 -->
+          <apex:pageBlockSectionItem id="relcontactItem" helpText="{!$ObjectType.Contact.Fields.Name1__c.InlineHelpText}"> 
+	        <apex:outputLabel value="{!$Label.ps__msg_005_0020}"/>
+	        <apex:outputPanel styleClass="requiredInput" layout="block">
+	        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+	        <span class="lookupInput">
+	        <apex:inputText id="relcontact" value="{!contactName}" style="width:200px" maxlength="80">
+	        <apex:inputHidden value="{!bookingform.Relcontact__c}" id="relcontact_lkid"/>
+	        <apex:inputHidden id="relcontact_lkold"/>		<!-- PopupWin利用 -->
+	        <input type="hidden" id="relcontact_lkid_org" />	<!-- JS判断用 -->
+	        <c:AutoCompleteComp objectname="Contact" 
+	        	additionalfield="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Name1__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c"
+	        	autocomplete_textbox="{!$Component.relcontact}" 
+				showField="{!$Setup.CommDefine__c.AppNS__c}KanaName1__c,{!$Setup.CommDefine__c.AppNS__c}Katakana__c,Phone,{!$Setup.CommDefine__c.AppNS__c}CompanyNameCal__c,Description"
+				maxLenFilter="Description:16"
+	        	showFieldSeparator=", "
+	        	addFilter="IsDelete__c!=true"
+	        />
+	        </apex:inputText>
+		        <!-- お客様 -->
+	        <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+	         onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+	         onfocus="this.className = 'lookupIconOn';"
+	         onblur="this.className = 'lookupIcon';"
+	         class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;vertical-align:middle;border: 0px"
+	         name="accountPopup" />
+	        </span>
+	        </apex:outputPanel>
+	      </apex:pageBlockSectionItem>
+	      
+            <!-- 予約名 -->
+            <apex:pageBlockSectionItem id="leadNameItem" >
+                <apex:outputLabel value="{!$Label.ps__msg_005_0021}"/>
+		        <apex:outputPanel styleClass="requiredInput" layout="block">
+		        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:inputField id="leadName" value="{!bookingform.name}" style="width:200px" />
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            <!-- ひらがな -->
+		     <apex:pageBlockSectionItem helpText="{!$ObjectType.Contact.Fields.Katakana__c.InlineHelpText}" id="katakanaItem">
+		        <apex:outputLabel value="{!$ObjectType.Contact.Fields.Katakana__c.label}"/>
+		        <apex:inputText id="katakana" value="{!newContact.Katakana__c}" maxlength="80" />
+		    </apex:pageBlockSectionItem>
+		    <apex:pageBlockSectionItem helpText="{!$ObjectType.Contact.Fields.KanaName1__c.InlineHelpText}" id="kanaNameItem">
+			<!-- カタカナ -->
+		        <apex:outputLabel value="{!$Label.ps__msg_005_0022}"/>
+		        <apex:inputText id="kanaName" value="{!newContact.KanaName1__c}" />
+		    </apex:pageBlockSectionItem>
+		    <apex:pageBlockSectionItem id="custPhoneItem">
+			<!-- TEL -->
+		        <apex:outputLabel value="{!$Label.ps__msg_005_0023}"/>
+		        <apex:inputText id="custPhone" value="{!newContact.Phone}" />
+		    </apex:pageBlockSectionItem>
+            <!-- 
+            <apex:inputField id="bcontact" value="{!bookingform.Relcontact__c}" required="true"/>
+             -->
+            <!-- 
+            <apex:inputField id="broom"    value="{!bookingform.Rroom__c}" />
+             -->
+            <apex:pageBlockSectionItem id="roomItem" helpText="{!$ObjectType.Lead__c.Fields.Rroom__c.InlineHelpText}">
+		<!-- 部屋 -->
+                <apex:outputLabel value="{!$Label.ps__msg_005_0024}"/>
+		        <apex:outputPanel styleClass="requiredInput" layout="block">
+		        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:inputField id="broom" value="{!bookingform.Rroom__c}" />
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            <!-- 
+            <apex:inputField id="bpersons" value="{!bookingform.StayPersons__c}" />
+             -->
+            <apex:pageBlockSectionItem id="stayPersonsItem" helpText="{!$ObjectType.Lead__c.Fields.StayPersons__c.InlineHelpText}">
+                <!-- 予約人数 -->
+		<apex:outputLabel value="{!$Label.ps__msg_005_0025}"/>
+		        <apex:outputPanel styleClass="requiredInput" layout="block">
+		        <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:inputField id="bpersons" value="{!bookingform.StayPersons__c}" required="false"/>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            
+            <apex:inputField id="seminarOrderFlg"    value="{!bookingform.SeminarOrderFlg__c}"/>
+            
+            <!-- プラン -->
+            <apex:pageBlockSectionItem id="planItem">
+		<!-- プラン -->
+                <apex:outputLabel value="{!$Label.ps__msg_005_0026}"/>
+ 				<apex:outputPanel styleClass="lookupInput" style="vertical-align:top">
+			    <span class="lookupInput">
+                	<apex:inputField id="bplan" value="{!bookingform.Field310__c}" />
+			<!-- プラン詳細 -->
+					<img src="{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}" style="cursor: pointer; width: 18px; height: 18px;"
+	                     onclick="javascript:openMiniPlanSetup(this);" id="planCustomeBtn" title="{!$Label.MSG_005_0027}"/>
+				</span>
+				<apex:inputHidden value="{!bookingform.PlanDetailSyncInfo__c}" id="nl_hidPlanDetailInfo"/>
+				</apex:outputPanel>
+            </apex:pageBlockSectionItem> 
+            
+            
+            <apex:inputField id="bsegment" value="{!bookingform.Field2__c}" />
+          </apex:pageBlockSection>
+
+        
+			<!-- Extend Field -->        	
+    		<apex:dynamicComponent componentValue="{!InputExtendFields}" /> 
+        </apex:pageBlock>
+        <!-- 
+        <apex:actionFunction name="bookingCreateFunction" action="{!bookingCreate}" rerender="ciTable,messagePanel" oncomplete="bookingCreateCallBack();" status="refStatusBlock" />
+        <div style="text-align: right;" >
+          <input type="button" value="保存"  onclick="bookingCreateFunction();" class="btn" />
+          <input type="button" value="キャンセル" id="cancelBtn" class="btn" />
+        </div>
+         -->
+      
+  </div>
+  <div class="ft" style="font-size: 10px;">
+    <apex:outputPanel layout="block">
+        <div style="text-align: right;" >
+          <input type="reset" value="reset" id="formresetbtn" style="display: none;"/>
+	<!-- 保存 -->
+          <apex:commandButton value="{!$Label.ps__msg_005_0028}" oncomplete="bookingCreateCallBack();"
+            style="width: 100px" onclick="clearAutoCompContext()"
+            action="{!bookingCreate}" reRender="ciTable,messagePanel"  status="refStatusBlock"/>
+	<!-- キャンセル -->
+          <input type="button" value="{!$Label.MSG_005_0029}" id="cancelBtn" class="btn" style="width: 100px"/>
+        </div>
+    </apex:outputPanel>
+  </div>
+  
+</apex:form>
+</div>
+
+
+<!-- Load jQuery -->
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.stickytableheaders.min.js')}"/>
+
+<!-- Load YUI -->
+<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+
+<!-- Load CommJsLib -->
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<apex:includeScript value="{!$Resource.planExtendPlug}"/>
+
+<script>
+/***************************
+* Javscript Function
+****************************/
+// 入力画面項目をBINDする
+$j(document).ready(function() {bindEvent2();});
+
+// Cancel Selected
+function cancelselected(){
+    $j("td.oneHourPanel").removeClass("ui-selected");
+    $j("td.roomNmTd").removeClass("ui-selected");
+    $j(".roomNmLinkCls").removeClass("ui-selected");
+    // Window Info Clear
+    document.getElementById('{!$Component.page.dform.dblock.dsec.leadNameItem.leadName}').value = '';
+    //document.getElementById('{!$Component.page.dform.dblock.dsec.bcontact}').value = '';
+    document.getElementById('{!$Component.page.dform.dblock.dsec.relcontactItem.relcontact}').value = '';
+    $j("input[id$=':relcontact_lkid']").val("");
+	$j("input[id$=':relcontact_lkold']").val("");
+	$j("#relcontact_lkid_org").val("");
+	
+    document.getElementById('{!$Component.page.dform.dblock.dsec.seminarOrderFlg}').value = '';
+    document.getElementById('{!$Component.page.dform.dblock.dsec.roomItem.broom}').value = '';
+    $j("input[id$='dblock:dsec:broom_lkid']").val("");
+    $j("input[id$='dblock:dsec:broom_lkold']").val("");
+    document.getElementById('{!$Component.page.dform.dblock.dsec.stayPersonsItem.bpersons}').value = JS_StayPersons;
+    //document.getElementById('{!$Component.page.dform.dblock.dsec.bplan}').value = '';
+    $j("input[id$=':bplan']").val("");
+    $j("input[id$=':bplan_lkid']").val("");
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bsegment}').value = '';
+	// 2013/10/17 お客様関連項目内容をクリアする		
+	$j("input[id$=':katakana']").val("");
+	$j("input[id$=':kanaName']").val("");
+	$j("input[id$=':custPhone']").val("");
+	// 2014/01/14 RichTextArea Clear
+	if(typeof editor != "undefined") editor.setData("");
+	
+	// Clear Custom Div
+	var planItem = $j("#planCustomeBtn").data("jinyaPlanExtend");
+	planItem.reset();
+	
+    YAHOO.force.com.myDialog.hide();
+    stopFlg = false;
+    firstPointTime = null;
+}
+// 予約データを登録処理後の自動処理
+function bookingCreateCallBack() {
+	var createResult = $j("input[id$=':hidDataCreateOK']").val();
+	if (createResult.toLowerCase() == "true") {
+		$j("input[id$=':hidDataCreateOK']").val("");
+		// 入力内容をクリアする
+		$j("#formresetbtn").click();
+		// JSで設定内容をクリアする
+		cancelselected();
+		// 入力WINDOWをクリアする
+		//YAHOO.force.com.hideMe();
+	}
+}
+/***************************
+*        YAHOO Dialog      *
+***************************/
+var dialogId;
+// Create a namespace for our custom functions
+YAHOO.namespace("force.com");
+
+// Function called when we want to show the dialog                                                                                              // Function called when we want to show the dialog
+YAHOO.force.com.showMe = function(roomno, roomId, entry, depart) {
+    document.getElementById("myPanel").style.display = "block";
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bentry}').textContent = entry;             // Display Entry Time
+    document.getElementById('{!$Component.page.dform.dblock.dsec.bdepart}').textContent = depart;           // Display Departure Time
+    document.getElementById('{!$Component.page.dform.bentryh}').value = entry;                  // InputHidden Entry Time
+    document.getElementById('{!$Component.page.dform.bdeparth}').value = depart;                // InputHidden Departure Time
+    document.getElementById('{!$Component.page.dform.dblock.dsec.roomItem.broom}').value = roomno;                   // Set Room Name
+    $j("input[id$='dblock:dsec:roomItem:broom_lkid']").val(roomId);
+    $j("input[id$='dblock:dsec:roomItem:broom_lkold']").val(roomno);
+
+    YAHOO.force.com.myDialog.show();
+}
+// Function called when we want to hide the dialog
+YAHOO.force.com.hideMe = function() {
+    YAHOO.force.com.myDialog.hide();
+}
+
+// Function called when the DOM is ready to create the dialog,
+// render the dialog into the document body, add our dialog skin
+// css to the body tag, and wire up the buttons on our dialog
+YAHOO.force.com.init = function() {
+    document.body.className = document.body.className + " yui-skin-sam";
+    YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+        "myPanel",                                                                                          // The id of our dialog container
+        {
+            width       : 300,                                                                              // You can play with this until it's right
+            visible     : false,                                                                            // Should be invisible when rendered
+            draggable   : true,                                                                             // Make the dialog draggable
+            close       : false,                                                                            // Don't include a close title button
+            modal       : true,                                                                             // Make it modal
+            fixedCenter : true,                                                                             // Keep centered if window is scrolled
+            zindex      : 4,                                                                                // Make sure it's on top of everything
+                                                                                                            // This line adds the appear/vanish fade effect
+            effect : {
+                effect:YAHOO.widget.ContainerEffect.FADE,
+                duration:0.05
+            }
+        }
+    );
+                                                                                                            // Render the dialog to the document.body level of the DOM
+    YAHOO.force.com.myDialog.render(document.body);
+}
+                                                                                                            // Add the init method to the window.load event
+YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+
+
+function bindEvent() {
+    // 開始時間／終了時間／ルーム行目
+    var begintime, endtime, roomno, roomId;
+    var firstPointTime = null;
+    // 選択単位数(10分単位) /開始のIndexNo
+    var selectedamount, startno;
+
+    var currTime;
+    var stopFlg = false;
+if (_g_isCanUpdateFlg) {
+    // RoomType Timer Selector
+    $j("td.oneHourPanel").parent().bind("mousedown", function(e){e.metaKey = true;}).selectable({
+        //filter: "not(.roomNmTd)",
+        selected: function(event, ui){
+            selectedamount++;
+            //selectedamount = ($j(ui.selected).attr("colspan") != undefined) ? (1 * $j(ui.selected).attr("colspan")) : selectedamount+1;
+            if(selectedamount == 1){
+                roomNoHtmlId = "input:hidden[id='roomNm_" + $j(ui.selected).attr("rowIndex") + "']";
+                roomIdHtmlId = "input:hidden[id='roomId_" + $j(ui.selected).attr("rowIndex") + "']";
+                roomno = $j(roomNoHtmlId).val();
+                roomId = $j(roomIdHtmlId).val();
+                begintime = $j(ui.selected).attr("colTime");
+                startno = $j("td.oneHourPanel").index($j(ui.selected));
+            }
+        },
+        selecting: function(event, ui) {
+            if ($j(ui.selecting).attr("colspan") != undefined) stopFlg = true;
+            currTime = $j(ui.selecting).attr("colTime");
+            if (firstPointTime == null) {
+                firstPointTime = currTime;
+            }
+        },
+        unselected: function (event, ui) {
+            $j(ui.unselected).addClass('ui-selected');
+        },
+        start: function(event, ui) {
+            selectedamount = 0;
+        },
+        stop: function(event, ui) {
+            //alert('STOP:' + stopFlg);
+            if (stopFlg || currTime == undefined) {
+                //時間設定不正、再確認ください。
+                alert("{!$Label.MSG_005_0030}");
+                // 選択内容を自動取消する
+                cancelselected();
+                
+                stopFlg = false;
+                return;
+            }
+            if(selectedamount > 0){
+                //var mytime = new Date("1/1/1 " + currTime);
+                var dateFormat = new DateFormat("yyyy-MM-dd HH:mm");
+                var mytime = dateFormat.parse(currTime  > firstPointTime ? currTime : firstPointTime);
+                //alert(currTime);
+                //alert(firstPointTime);
+                endtime = new Date(mytime.getTime() + 1000 * 60 * 10);
+                endtime = dateFormat.format(endtime);
+
+                //endtime = (endtime.getHours() < 10 ? "0" : "") + endtime.getHours()  + ":" + ((endtime.getMinutes() < 10) ? "0" : "") + endtime.getMinutes();
+                //mytime = new Date(begintime);
+                //hhmmBeginTime = (mytime.getHours() < 10 ? "0" : "") + mytime.getHours()  + ":" + ((mytime.getMinutes() < 10) ? "0" : "") + mytime.getMinutes();
+                event.preventDefault();
+                //alert("begintime:" + begintime + "\nendtime:" + endtime + "\nroomNO.:" + roomno);
+                window.setTimeout(YAHOO.force.com.showMe(roomno,roomId,begintime,endtime), 100);
+            }
+        }
+    });
+}
+    $j("td.roomNmTd").selectable({ disabled: true });
+    $j("div.timeAssignedTd").selectable({ disabled: true });
+    // Table Header Float
+    $j("#table").stickyTableHeaders();
+}    
+ 
+// 入力画面項目関連EVENT　BINDする
+function bindEvent2() {   
+    // Cancel Button
+    $j("#cancelBtn").click(function(){
+        // Error Message Panel Clear[Attention: Error Class IDはSF設定依存]
+        //$j(".message").hide();
+        $j("span[id$=':inputFormMsg']").hide();
+        // AutoComplete Clear
+        clearAutoCompContext();
+        // 入力内容をクリアする
+        cancelselected();
+    });
+
+	// お客様情報を選択する
+    $j("img[name='accountPopup']").click(function() {
+        var lkfmVal = $j("form[id$=':createForm']").attr("id");
+        var lknmVal= $j("input[id$=':relcontact']").attr("id");
+        var lktpVal ="003";
+        var lksrchVal =  encodeURIComponent($j("input[id$=':relcontact']").val());
+		var url = "/_ui/common/data/LookupPage?lkfm=" + lkfmVal + "&lknm=" +lknmVal + "&lktp=" + lktpVal; 
+		openLookup(url, 670, '1', "&lksrch=" + lksrchVal);
+    });
+	// お客名はクリアする場合、自動的にIDをクリアする
+	$j("input[id$=':relcontact']").blur(function() {
+		if ($j(this).val() == "") {
+			$j("input[id$=':relcontact_lkid']").val("");
+			$j("input[id$=':relcontact_lkold']").val("");
+			$j("#relcontact_lkid_org").val("");
+			$j("input[id$=':katakana']").val("");
+			$j("input[id$=':kanaName']").val("");
+			$j("input[id$=':custPhone']").val("");
+		}
+	});
+	// 顧客変更する場合、顧客情報を自動取得、基本情報を画面に設定する　
+	$j("[id$=':relcontact']").on('blur', function(){
+		var $this = $j(this);
+		// 設定内容が存在する場合
+		if ($this.val() != "") {
+	    	// Content Changed
+		    //if ($this.attr("orgval") != $j("input[id$=':relcontact_lkid']").val()) {
+		    if ($j("#relcontact_lkid_org").val().substring(0,15) != $j("input[id$=':relcontact_lkid']").val().substring(0,15)) {
+		    	// お客様情報のID情報を格納する
+		        //$this.attr("orgval",$j("input[id$=':relcontact_lkid']").val());
+		        $j("#relcontact_lkid_org").val($j("input[id$=':relcontact_lkid']").val());
+		        // 顧客情報を更新する
+		        var contactId = $j("input[id$=':relcontact_lkid']").val();
+		        var contactName = $this.val();
+		        blockUi();
+				// 既に定義する売価はプランカラ取得、画面に設定する
+				Visualforce.remoting.Manager.invokeAction(
+				"{!$RemoteAction.BookingTimeTable.refreshContcatInfo}", contactId,contactName, function(result, event){
+					if(event.type == 'exception') {
+		                alert(event.message);
+		            } else {
+						// 取得するお客様情報を画面に設定する
+						$j("input[id$=':katakana']").val(result.KatakanaName);
+						$j("input[id$=':kanaName']").val(result.KanaName);
+						$j("input[id$=':custPhone']").val(result.phone);
+						// 予約名自動設定を行う
+						autoSetupLeadName();
+					}
+					// 画面解除する
+					unblockUi();
+				});
+			}
+			
+		};
+	});
+	// お客名にて、自動予約名に設定を行う
+	$j("input[id$=':leadName']").focus(function() {
+		autoSetupLeadName();
+	});
+
+    // 入力項目Readlonly[2013/02/15 ADD]
+    $j("input[id$=':gotoDate']").attr('readonly', true);
+    
+    // ************************************************
+ 	// プランを切り替えする場合、関連のプラン明細・非表示制御追加
+ 	$j("input[id$=':bplan']").unbind("change");
+	$j("input[id$=':bplan']").change(function () {
+		// 前に設定するプラン商品と金額情報をクリアする
+		var planItem = $j("#planCustomeBtn").data("jinyaPlanExtend");
+		planItem.reset();
+	})
+	
+	$j("#planCustomeBtn").unbind("jinyaPlanExtend");
+	$j("#planCustomeBtn").jinyaPlanExtend({
+        selectorRoot : $j("#planCustomeBtn").parent().parent().parent().parent(),
+        planInputField : $j("input[id$=':planItem:bplan_lkid']"),
+        //planId : planIdVal,
+        colspanNum : 4,
+        planSetupSyncField : $j("input[id$=':nl_hidPlanDetailInfo']"),
+        startfun : blockUi,
+        endfun : unblockUi,
+		actionOpenImg : "{!URLFOR($Resource.AppImages, 'extend/jiahao.png')}",
+		actionCloseImg: "{!URLFOR($Resource.AppImages, 'extend/jianhao.png')}",
+        tableWidth : "90%",
+        remotePlanQuery  : "{!$RemoteAction.BookingTimeTable.getPlanDetailListById}",
+        remoteProdQuery  : "{!$RemoteAction.BookingTimeTable.getArrayProductItemInfo}",
+        labels : {NOFOUND:"{!JSENCODE($Label.MSG_006_0235)}",PRODUCTNM:"{!JSENCODE($Label.MSG_006_0212)}",UNITPRICE:"{!JSENCODE($Label.MSG_006_0213)}",SUMMARY:"{!JSENCODE($Label.MSG_006_0402)}"}
+	});
+}
+// 予約名自動設定機能
+function autoSetupLeadName() {
+	var contactName = $j("input[id$=':relcontact']").val();
+	var leadName = $j("input[id$=':leadName']").val();
+	if (leadName == "" && contactName != "") {
+		$j("input[id$=':leadName']").val(contactName);
+	}
+}
+
+// 画面Lockする
+function blockUi() {
+    $j.blockUI({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_005_0031}</h1>'
+    }); 
+    return true;
+}
+// 画面Lock解除
+function unblockUi() {
+    $j.unblockUI({ fadeOut: 200 }); 
+}
+
+// Clear Autocomplete Context
+function clearAutoCompContext() {
+     $j(".ui-autocomplete").hide();
+     $j(".ui-autocomplete").empty();
+}
+// プラン設定機能
+function openMiniPlanSetup(item) {
+	// プラン明細を展開する 
+	var planItem = $j("#planCustomeBtn").data("jinyaPlanExtend");
+	planItem.switchStatus();
+}
+</script>
+
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+
+</apex:page>

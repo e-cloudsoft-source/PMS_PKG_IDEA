@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <formFactor>Large</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <formFactor>Small</formFactor>
+        <type>Default</type>
+    </actionOverrides>
+    <allowInChatterGroups>false</allowInChatterGroups>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <deploymentStatus>InDevelopment</deploymentStatus>
+    <deprecated>false</deprecated>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>false</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableLicensing>false</enableLicensing>
+    <enableReports>false</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>false</enableSharing>
+    <enableStreamingApi>false</enableStreamingApi>
+    <fields>
+        <fullName>A__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF ( Not(NoneAccount__c) , IMAGE(&quot;/resource/&quot; &amp; $Setup.CommDefine__c.AppNS__c &amp; &quot;A&quot;,&quot;&quot;),&quot;&quot;)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <inlineHelpText>このレコードは集計の対象に含まれています</inlineHelpText>
+        <label>A</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>AccountOutside__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( NoneAccount__c , 0, 1)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>$集計対象外</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ActionType__c</fullName>
+        <deprecated>false</deprecated>
+        <description>普通の商品は　デフォルト値：通常で設定する、特別商品に対して、別々、商品種別に設定する
+前受付金の場合、会計商品マスたに、価格はNull設定して、入力画面に自由入力する</description>
+        <externalId>false</externalId>
+        <label>商品処理種別</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+        <valueSet>
+            <valueSetDefinition>
+                <sorted>false</sorted>
+                <value>
+                    <fullName>通常</fullName>
+                    <default>true</default>
+                    <label>通常</label>
+                </value>
+                <value>
+                    <fullName>前受付金</fullName>
+                    <default>false</default>
+                    <label>前受付金</label>
+                </value>
+                <value>
+                    <fullName>室料</fullName>
+                    <default>false</default>
+                    <label>室料</label>
+                </value>
+                <value>
+                    <fullName>プラン</fullName>
+                    <default>false</default>
+                    <label>プラン</label>
+                </value>
+            </valueSetDefinition>
+        </valueSet>
+    </fields>
+    <fields>
+        <fullName>Amount__c</fullName>
+        <defaultValue>1</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>商品の数量を入力してください</inlineHelpText>
+        <label>数量</label>
+        <precision>18</precision>
+        <required>true</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>BatchProcessStatusDiv__c</fullName>
+        <deprecated>false</deprecated>
+        <description>増税処理するため、データ処理される状態を標識する、画面へ非表示する</description>
+        <externalId>false</externalId>
+        <label>バッチ処理区分</label>
+        <length>2</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>DPChange__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>#DP</label>
+        <referenceTo>DP__c</referenceTo>
+        <relationshipLabel>会計マスタ (#DP)</relationshipLabel>
+        <relationshipName>QuotaItem71c4</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Field10__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>小計割引／割増</label>
+        <length>3</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Field3__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>商品コード</label>
+        <length>13</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Field4__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>リンクＤＰコード</label>
+        <referenceTo>DP__c</referenceTo>
+        <relationshipLabel>会計マスタ</relationshipLabel>
+        <relationshipName>QuotaItemKmH3</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Field7__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>原価</label>
+        <precision>12</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>GPChange__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>集計先変更定義</inlineHelpText>
+        <label>#GP</label>
+        <referenceTo>GP__c</referenceTo>
+        <relationshipLabel>会計マスタ</relationshipLabel>
+        <relationshipName>QuotaItemzeBO</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>GoukeinoneTax__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Tankanonetax__c * Amount__c</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>$合計金額（税抜）</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>InvoiceNoShowFlg__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <description>請求書に該当商品情報を明細に非表示する</description>
+        <externalId>false</externalId>
+        <label>請求書非表示</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>NoShowRequestFlg__c</fullName>
+        <deprecated>false</deprecated>
+        <description>該当項目値は「１」する場合、会計編集画面からお客様は手動に非表示に設定する</description>
+        <externalId>false</externalId>
+        <label>非表示手動請求フラグ</label>
+        <length>1</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>NoneAccount__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>このレコードを集計の対象としない場合は、チェックを入れてください</inlineHelpText>
+        <label>集計対象外</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>OP__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>会計OP</label>
+        <referenceTo>OP__c</referenceTo>
+        <relationshipLabel>会計マスタ</relationshipLabel>
+        <relationshipName>QuotaItemSUow</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>OptionNo__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>オプション商品グループNo（システム用）</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>OptionPlanKey__c</fullName>
+        <deprecated>false</deprecated>
+        <description>機能処理用項目、業務利用不可</description>
+        <externalId>false</externalId>
+        <formula>IF (
+ISBLANK(OptionNo__c ), 
+&apos;&apos;,
+( TEXT(UseDate__c ) 
+&amp; &apos;_&apos;
+&amp; refAccountMaster__c  
+&amp; &apos;_&apos;
+&amp; OptionNo__c 
+&amp; &apos;_&apos;
+&amp; Text( Total__c / IF ( NULLVALUE (Amount__c , 0) == 0, 1, Amount__c ))
+)  
+)</formula>
+        <label>$オプション商品グループNo（システム用）</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ParentBookingItemRef__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>親予約見積明細</label>
+        <referenceTo>QuotaItem__c</referenceTo>
+        <relationshipLabel>予約見積明細</relationshipLabel>
+        <relationshipName>QuotaItemRef</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>PaymentType__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>支払種別</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>PlanBrkInfo__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>プラン明細情報定義(システム用)</label>
+        <length>131072</length>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>2</visibleLines>
+    </fields>
+    <fields>
+        <fullName>PlanDetailSyncInfo__c</fullName>
+        <deprecated>false</deprecated>
+        <description>見積明細編集画面、直接入力のプラン明細の単価を格納する、該当項目で、明細自動作成・更新する場合、該当単価で、明細へ連携更新を行う 
+Format: プラン明細ID/見積明細ID:単価;プラン明細ID/見積明細ID:単価 書式で複数件格納する（最大600件明細格納可能です）</description>
+        <externalId>false</externalId>
+        <label>プラン明細個別設定情報</label>
+        <length>32768</length>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>3</visibleLines>
+    </fields>
+    <fields>
+        <fullName>PlanRefreshFlg__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>プラン明細自動展開(システム用)</label>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>ProductName__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>商品名称（または券名称）</label>
+        <length>80</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>QuotaRef__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>見積</label>
+        <referenceTo>Quota__c</referenceTo>
+        <relationshipLabel>見積明細</relationshipLabel>
+        <relationshipName>QuotaItemRef</relationshipName>
+        <relationshipOrder>0</relationshipOrder>
+        <reparentableMasterDetail>false</reparentableMasterDetail>
+        <trackTrending>false</trackTrending>
+        <type>MasterDetail</type>
+        <writeRequiresMasterRead>false</writeRequiresMasterRead>
+    </fields>
+    <fields>
+        <fullName>RowNo__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>RowNo.</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ServiceRate__c</fullName>
+        <deprecated>false</deprecated>
+        <description>サービス料金（％）</description>
+        <externalId>false</externalId>
+        <label>サービス料(%)</label>
+        <precision>3</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Percent</type>
+    </fields>
+    <fields>
+        <fullName>ShopCodeCal__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>QuotaRef__r.LeadRef__r.refTypeOfRooms__r.ShopInfoRef__r.ShopCode__c</formula>
+        <label>店舗コード</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ShopCode__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>店舗コード</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>SpTotal__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>#合計金額</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>SpecialTax__c</fullName>
+        <defaultValue>0</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>特別税</label>
+        <precision>10</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>TankanonetaxNew__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>単価(税抜)(増税対応)(システム用)</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Tankanonetax__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>/*if ( OR(ISNULL(TaxRate__c),  TaxRate__c == 0),  UnitPrice__c , CEILING(UnitPrice__c/(1 + TaxRate__c)) )*/
+/*
+    // 1:税込、サービス料抜き
+    // 2:税込、サービス料込
+    // 3:税抜、サービス料抜き
+    // 4:税抜、サビース料込
+*/
+/* 2014/08/06 EDIT
+Case ($Setup.CommDefine__c.UnitPriceDefKb__c ,
+1, CEILING( UnitPrice__c / ( 1 +  NULLVALUE (TaxRate__c, 0) ) ),
+2, CEILING( UnitPrice__c / ( (1 + NULLVALUE (TaxRate__c, 0) ) * ( 1 + NULLVALUE (ServiceRate__c, 0) ) ) ), 
+3, UnitPrice__c ,
+0)
+*/
+/* 2015/10/15 EDIT
+Case (
+VALUE( UnitPriceDefKbCal__c) ,
+1, CEILING( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) / ( 1 + NULLVALUE (TaxRate__c, 0) ) ),
+2, CEILING( UnitPrice__c / ( 1 + NULLVALUE (TaxRate__c, 0) ) ),
+3, CEILING( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) ),
+0)
+*/
+/* 2016/04/13 EDIT 
+Case (
+VALUE( ps__UnitPriceDefKbCal__c) ,
+1, CEILING( ps__UnitPrice__c * ( 1 + NULLVALUE (ps__ServiceRate__c, 0) ) / ( 1 + NULLVALUE (ps__TaxRate__c, 0) ) ),
+2, CEILING( ps__UnitPrice__c / ( 1 + NULLVALUE (ps__TaxRate__c, 0) ) ),
+3, CEILING( ps__UnitPrice__c * ( 1 + NULLVALUE (ps__ServiceRate__c, 0) ) ),
+4, ps__UnitPrice__c,
+0)
+*/
+/* 2019/07/30 軽減税率機能対応 WGCH BEGIN */ 
+IF (NULLVALUE (TankanonetaxNew__c, 0) != 0, TankanonetaxNew__c, 
+/* 2019/07/30 軽減税率機能対応 WGCH END */ 
+IF (NULLVALUE (TankawithoutTaxSys__c, 0) != 0, TankawithoutTaxSys__c, 
+
+IF ( 
+$Setup.CommDefine__c.AccountNoTaxCalFlg__c != true || 
+$Setup.CommDefine__c.RoundType__c = 2, 
+Case ( 
+VALUE( UnitPriceDefKbCal__c ) , 
+1, CEILING( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) / ( 1 + NULLVALUE (TaxRate__c, 0) ) ), 
+2, CEILING( UnitPrice__c / ( 1 + NULLVALUE (TaxRate__c, 0) ) ), 
+3, CEILING( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) ), 
+4, CEILING( UnitPrice__c), 
+0) 
+, 
+IF($Setup.CommDefine__c.RoundType__c = 0, 
+Case ( 
+VALUE( UnitPriceDefKbCal__c ) , 
+1, FLOOR( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) / ( 1 + NULLVALUE (TaxRate__c, 0) ) ), 
+2, FLOOR( UnitPrice__c / ( 1 + NULLVALUE (TaxRate__c, 0) ) ), 
+3, FLOOR( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) ), 
+4, FLOOR( UnitPrice__c ), 
+0) 
+, 
+Case ( 
+VALUE( UnitPriceDefKbCal__c ) , 
+1, ROUND( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) / ( 1 + NULLVALUE (TaxRate__c, 0) ) , 0), 
+2, ROUND( UnitPrice__c / ( 1 + NULLVALUE (TaxRate__c, 0) ) , 0), 
+3, ROUND( UnitPrice__c * ( 1 + NULLVALUE (ServiceRate__c, 0) ) , 0), 
+4, ROUND( UnitPrice__c , 0), 
+0) 
+) 
+) 
+
+)
+/* 2019/07/30 軽減税率機能対応 WGCH BEGIN */ 
+) 
+/* 2019/07/30 軽減税率機能対応 WGCH END */</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>$単価(税抜)</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>TankawithoutTaxSys__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>画面、レポートなど使わない、システム内部利用項目</inlineHelpText>
+        <label>単価(税抜)（システム用）</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>TaxRate__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>消費税</label>
+        <precision>7</precision>
+        <required>false</required>
+        <scale>4</scale>
+        <trackTrending>false</trackTrending>
+        <type>Percent</type>
+    </fields>
+    <fields>
+        <fullName>Total__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>NULLVALUE(SpTotal__c, 0)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>$合計金額(税込)</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>UnitPriceDefKbCal__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>BLANKVALUE(UnitPriceDefKb__c, refBooking__r.UnitPriceDefKbCal__c )</formula>
+        <label>$会計商品単価定義区分</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>UnitPriceDefKb__c</fullName>
+        <defaultValue>TEXT($Setup.CommDefine__c.UnitPriceDefKb__c)</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>会計商品単価定義区分</label>
+        <length>2</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>UnitPrice__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>空欄のまま保存すると、会計商品で定義した単価が設定されます</inlineHelpText>
+        <label>単価</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>UseDate__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>利用日</label>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>X2_1__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>名称2(漢1)</label>
+        <length>80</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>refAccountMaster__c</fullName>
+        <deleteConstraint>Restrict</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>商品を選択して下さい</inlineHelpText>
+        <label>商品名</label>
+        <referenceTo>AccountMaster__c</referenceTo>
+        <relationshipLabel>予約見積明細</relationshipLabel>
+        <relationshipName>QuotaItemhSGP</relationshipName>
+        <required>true</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>refBooking__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>ご予約(RFU)</label>
+        <referenceTo>Lead__c</referenceTo>
+        <relationshipLabel>予約見積明細</relationshipLabel>
+        <relationshipName>QuotaItemFgKu</relationshipName>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <label>見積明細</label>
+    <nameField>
+        <displayFormat>QTITEM-{YYYYMMDD}-{00000}</displayFormat>
+        <label>見積明細名</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <searchLayouts/>
+    <sharingModel>ControlledByParent</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>

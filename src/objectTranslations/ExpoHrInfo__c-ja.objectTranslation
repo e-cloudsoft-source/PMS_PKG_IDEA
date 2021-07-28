@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>EXPO人材属性情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- スキル(経理) --></label>
+        <name>ExpoAccSkillLst__c</name>
+        <picklistValues>
+            <masterLabel>仕訳業務</masterLabel>
+            <translation><!-- 仕訳業務 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>決算業務</masterLabel>
+            <translation><!-- 決算業務 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>簿記を活かす</masterLabel>
+            <translation><!-- 簿記を活かす --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 始業時間 --></label>
+        <name>ExpoDayWorkBegTimeLst__c</name>
+    </fields>
+    <fields>
+        <label><!-- 終業時間 --></label>
+        <name>ExpoDayWorkEndTimeLst__c</name>
+    </fields>
+    <fields>
+        <label><!-- 派遣期間 --></label>
+        <name>ExpoDispatchScopeLst__c</name>
+        <picklistValues>
+            <masterLabel>期間限定</masterLabel>
+            <translation><!-- 期間限定 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>短期</masterLabel>
+            <translation><!-- 短期 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>長期(3ヶ月以上)</masterLabel>
+            <translation><!-- 長期(3ヶ月以上) --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- スキル(英語) --></label>
+        <name>ExpoEngSkillLst__c</name>
+        <picklistValues>
+            <masterLabel>ネイティブレベル</masterLabel>
+            <translation><!-- ネイティブレベル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ビジネス会話レベル</masterLabel>
+            <translation><!-- ビジネス会話レベル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>基礎レベル</masterLabel>
+            <translation><!-- 基礎レベル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>日常会話レベル</masterLabel>
+            <translation><!-- 日常会話レベル --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- その他 --></label>
+        <name>ExpoHrOtherLst__c</name>
+        <picklistValues>
+            <masterLabel>夜勤なし</masterLabel>
+            <translation><!-- 夜勤なし --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>実務経験者</masterLabel>
+            <translation><!-- 実務経験者 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>寮社宅あり</masterLabel>
+            <translation><!-- 寮社宅あり --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>未経験者歓迎</masterLabel>
+            <translation><!-- 未経験者歓迎 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>食事手当あり</masterLabel>
+            <translation><!-- 食事手当あり --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 免許・資格 --></label>
+        <name>ExpoLicSkillLst__c</name>
+        <picklistValues>
+            <masterLabel>サービス接遇</masterLabel>
+            <translation><!-- サービス接遇 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ブライダルプランナー</masterLabel>
+            <translation><!-- ブライダルプランナー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>ボイラー取扱技能</masterLabel>
+            <translation><!-- ボイラー取扱技能 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>マナー・プロトコール</masterLabel>
+            <translation><!-- マナー・プロトコール --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>レストランサービス技能士</masterLabel>
+            <translation><!-- レストランサービス技能士 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接客サービスマナー</masterLabel>
+            <translation><!-- 接客サービスマナー --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>栄養士免許</masterLabel>
+            <translation><!-- 栄養士免許 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>美容師免許</masterLabel>
+            <translation><!-- 美容師免許 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>自動車免許</masterLabel>
+            <translation><!-- 自動車免許 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>調理師免許</masterLabel>
+            <translation><!-- 調理師免許 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>調理補助</masterLabel>
+            <translation><!-- 調理補助 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>販売士（リテールマーケティング）</masterLabel>
+            <translation><!-- 販売士（リテールマーケティング） --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 給料（上限） --></label>
+        <name>ExpoMaxPayLst__c</name>
+    </fields>
+    <fields>
+        <label><!-- 給料（下限） --></label>
+        <name>ExpoMinPayLst__c</name>
+    </fields>
+    <fields>
+        <label><!-- スキル(OA) --></label>
+        <name>ExpoOaSkillLst__c</name>
+        <picklistValues>
+            <masterLabel>Excel 上級レベル</masterLabel>
+            <translation><!-- Excel 上級レベル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Excel 基礎レベル</masterLabel>
+            <translation><!-- Excel 基礎レベル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Excel 実務レベル</masterLabel>
+            <translation><!-- Excel 実務レベル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Wordを活かす</masterLabel>
+            <translation><!-- Wordを活かす --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- Expo組織情報 --></label>
+        <name>ExpoOrgInfoRef__c</name>
+        <relationshipLabel><!-- EXPO人材属性情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- スキル(その他語) --></label>
+        <name>ExpoOthLangSkillLst__c</name>
+        <picklistValues>
+            <masterLabel>中国語</masterLabel>
+            <translation><!-- 中国語 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>韓国語</masterLabel>
+            <translation><!-- 韓国語 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 残業時間 --></label>
+        <name>ExpoOvertimeWorkHourLst__c</name>
+        <picklistValues>
+            <masterLabel>残業20時間以上</masterLabel>
+            <translation><!-- 残業20時間以上 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>残業20時間未満</masterLabel>
+            <translation><!-- 残業20時間未満 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>残業なし</masterLabel>
+            <translation><!-- 残業なし --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 勤務日数 --></label>
+        <name>ExpoWeekWorkDaysLst__c</name>
+        <picklistValues>
+            <masterLabel>自由シフト</masterLabel>
+            <translation><!-- 自由シフト --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>週3日以下勤務</masterLabel>
+            <translation><!-- 週3日以下勤務 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>週4日勤務</masterLabel>
+            <translation><!-- 週4日勤務 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>週5日勤務</masterLabel>
+            <translation><!-- 週5日勤務 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 給料の支払い方式 --></label>
+        <name>WorkPayType__c</name>
+        <picklistValues>
+            <masterLabel>日給</masterLabel>
+            <translation><!-- 日給 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>時給</masterLabel>
+            <translation><!-- 時給 --></translation>
+        </picklistValues>
+    </fields>
+</CustomObjectTranslation>

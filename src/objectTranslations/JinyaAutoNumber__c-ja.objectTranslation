@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>自動採番</value>
+    </caseValues>
+    <fields>
+        <label><!-- 共通採番１０ --></label>
+        <name>CommAutoNumber10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番１ --></label>
+        <name>CommAutoNumber1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番２ --></label>
+        <name>CommAutoNumber2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番３ --></label>
+        <name>CommAutoNumber3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番４ --></label>
+        <name>CommAutoNumber4__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番５ --></label>
+        <name>CommAutoNumber5__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番６ --></label>
+        <name>CommAutoNumber6__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番７ --></label>
+        <name>CommAutoNumber7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番８ --></label>
+        <name>CommAutoNumber8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 共通採番９ --></label>
+        <name>CommAutoNumber9__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン番号 --></label>
+        <name>PlanNoAutoNumber__c</name>
+    </fields>
+</CustomObjectTranslation>

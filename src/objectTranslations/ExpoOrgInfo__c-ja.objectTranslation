@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Expo組織情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- 住所 --></label>
+        <name>AddressCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(利用禁止） --></label>
+        <name>Address__c</name>
+    </fields>
+    <fields>
+        <label><!-- 市区郡 --></label>
+        <name>City__c</name>
+    </fields>
+    <fields>
+        <label><!-- Fax --></label>
+        <name>Fax__c</name>
+    </fields>
+    <fields>
+        <label><!-- 電話 --></label>
+        <name>Phone__c</name>
+    </fields>
+    <fields>
+        <label><!-- 郵便番号 --></label>
+        <name>PostNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 都道府県 --></label>
+        <name>State__c</name>
+    </fields>
+    <fields>
+        <label><!-- 町名番地 --></label>
+        <name>Street__c</name>
+    </fields>
+    <fields>
+        <label><!-- 単価定義区分 --></label>
+        <name>UnitPriceDefKb__c</name>
+        <picklistValues>
+            <masterLabel>税抜、サビース料込</masterLabel>
+            <translation><!-- 税抜、サビース料込 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>税抜、サービス料抜き</masterLabel>
+            <translation><!-- 税抜、サービス料抜き --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>税込、サービス料抜き</masterLabel>
+            <translation><!-- 税込、サービス料抜き --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>税込、サービス料込</masterLabel>
+            <translation><!-- 税込、サービス料込 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ウェブサイト --></label>
+        <name>WebSiteUrl__c</name>
+    </fields>
+</CustomObjectTranslation>

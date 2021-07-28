@@ -1,0 +1,596 @@
+<apex:page title="見積書印刷" standardController="Lead__c" extensions="LeadItemSplitProcess" action="{!refreshBillInfo}" 
+showHeader="false" sidebar="false" id="LeadItemSplitProcess">
+<c:CommHeaderComp loadJsLib="true"/>
+<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.tablescroll.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<style>
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+.tr_Hide{
+	display: none;
+}
+.k-tabstrip-items .k-state-active, .k-ie7 .k-tabstrip-items .k-state-active .k-loading,
+.k-state-active, .k-state-active:hover, .k-active-filter, .k-tabstrip .k-state-active {
+	border-color: rgb(191,175,0) !important;
+}
+.pageblockImp{
+	background-color: #FFFFFF !important;
+	border-color: #FFFFFF !important;
+}
+.yui-skin-sam .yui-panel .bd{
+padding: 4px;
+}
+.numberRightCol {
+	text-align: right;
+	padding-right: 2px;
+}
+.headerRow{
+	text-align: center;
+}
+html { table-layout: auto; }
+/* Layout Page Size */
+@media screen and (min-width: 1400px) {
+	th.splitPageField0 {
+		width: 100px!important;
+	}
+	th.splitPageField1 {
+		width: 6%!important;
+	}
+	th.splitPageField2 {
+		width: 5%!important;
+	}
+	th.splitPageField3 {
+		width: 4%!important;
+	}
+	th.splitPageField4 {
+		width: 6%!important;
+	}
+}
+</style>
+<script>
+$j=jQuery.noConflict();
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+</script>
+<!-- 数据检索页面显示 -->
+<apex:form >
+<!-- 見積分割 -->
+<apex:pageblock title="見積分割">
+
+    <!-- 検索条件 -->
+    <!-- 表示条件 -->
+    <apex:pageBlockSection columns="1" title="{!$Label.ps__msg_006_0260}" >
+
+        <apex:outputPanel id="cond1" >
+        <span class="lookupInput">
+        <!--　会計期間 -->
+        <apex:pageblockSectionItem >
+            <!-- 一括見積 -->
+            <apex:outputlabel value="一括見積" />
+            <apex:outputPanel >
+            <!-- 一括会計 -->
+                <apex:inputCheckbox value="{!c_showAll}" style="margin-left: 17px" label="{!$Label.ps__msg_006_0261}"/>
+                <span style="margin-left: 10px"><!-- 到着期間 -->到着日</span>
+                <apex:inputField value="{!c_termSt.WorkDay__c}" id="fromDate" style="margin-left: 10px;"/>
+                <span style="margin-left: 10px"><!-- 〜 -->{!$Label.MSG_006_0263}</span>
+                <apex:inputField value="{!c_termEt.WorkDay__c}" id="toDate" style="margin-left: 10px"/>
+            </apex:outputPanel>
+        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+
+        <apex:outputPanel id="cond2" >
+        <span class="lookupInput">
+	        <!--　商品名 -->
+	        <apex:pageblockSectionItem >
+	            <apex:outputlabel value="{!$Label.ps__msg_006_0295}" />
+				<apex:outputPanel >
+		            <apex:inputText value="{!c_productNm}" id="productName" style="margin-left: 30px;" size="38" />
+					<!-- カテゴリ -->
+					<apex:outputlabel value="{!$Label.ps__msg_006_0265}" style="margin-left: 10px" rendered="{!dpOptionLst.size > 0}"/>
+					<apex:selectList value="{!c_dpId}" multiselect="false" size="1"
+						style="margin-left: 6px" rendered="{!dpOptionLst.size > 0}" >
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!dpOptionLst}"/>
+					</apex:selectList>
+					<!-- 部門 -->
+		        	<apex:outputlabel value="{!$Label.ps__msg_006_0266}" style="margin-left: 10px" rendered="{!dpOptionLst.size > 0}"/>
+					<apex:selectList value="{!c_gpId}" multiselect="false" size="1"
+						style="margin-left: 6px" rendered="{!gpOptionLst.size > 0}">
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!gpOptionLst}"/>
+					</apex:selectList>
+					<!-- 分割NO -->
+		        	<apex:outputlabel value="{!$Label.ps__msg_006_0267}" style="margin-left: 10px" rendered="{!groupNoOptLst.size > 0}"/>
+					<apex:selectList value="{!c_splitNo}" multiselect="false" size="1"
+						style="margin-left: 6px" rendered="{!groupNoOptLst.size > 0}">
+						<apex:selectOption itemValue="" itemLabel=""/>
+						<apex:selectOptions value="{!groupNoOptLst}"/>
+					</apex:selectList>
+                </apex:outputPanel>
+	        </apex:pageblockSectionItem>
+        </span>
+        </apex:outputPanel>
+
+        <apex:outputPanel id="cond3" >
+        <span class="lookupInput">
+	        <apex:pageblockSectionItem >
+		        <apex:outputlabel value="{!$Label.ps__msg_006_0268}" style="vertical-align: top;margin-top: 6px;"/>
+		        <apex:selectList value="{!c_actType}" multiselect="true" size="3"
+		            style="margin-left: 17px; width:200px" id="c_actionType">
+		            <apex:selectOption itemValue="" itemLabel="ALL"/>
+		            <apex:selectOptions value="{!typeOptionLst}"/>
+		        </apex:selectList>
+	        </apex:pageblockSectionItem>
+	        <span style="margin-left: 100px">
+	        <!-- 検索 -->
+	        <apex:commandButton value="{!$Label.ps__msg_006_0269}" action="{!refreshInfo}" reRender="dataBlock,accSplitGroupNo,billSplitGroupNo"  oncomplete="bindHeader();repeatBindEvent();" status="refStatusBlock" style="width:100px"/>
+			</span>
+        </span>
+        </apex:outputPanel>
+    </apex:pageBlockSection>
+</apex:pageblock>
+</apex:form>
+
+<!-- 数据页面显示 -->
+<apex:form >
+<apex:pageblock id="dataBlock" title="見積明細">
+<apex:pageMessages />
+    <apex:pageBlockButtons style="padding-top:12px;">
+		<span onclick="javascript:saveDataFunction();"  style="cursor:pointer" class="toolButttonStyle">
+			<!-- 登録 -->
+			<span style="">{!$Label.MSG_006_0270}</span>
+			<img title="{!$Label.MSG_006_0270}" alt="{!$Label.MSG_006_0270}" style="width:24px;height:24px;position: relative;top:-12px;right:27px;" src="{!URLFOR($Resource.AppImages, 'toolbtnicon/save.png')}" />
+		</span>
+		<span onclick="javascript:openPrintWin(this);" style="cursor:pointer;height:100px;" class="toolButttonStyle">
+			<!-- 印刷 -->
+			<span style="mar">{!$Label.MSG_006_0271}</span>
+			<img title="{!$Label.MSG_006_0271}" alt="{!$Label.MSG_006_0271}" style="position: relative;top:-12px;right:28px;"  src="{!URLFOR($Resource.AppImages, 'toolbtnicon/print.png')}" />
+		</span>
+		<!-- 見積書分割 -->
+		<apex:actionFunction name="saveDataFunction" action="{!saveNo}"  status="refStatusBlock" reRender="dataBlock,accSplitGroupNo,billSplitGroupNo" oncomplete="bindHeader();repeatBindEvent();" />
+    </apex:pageBlockButtons>
+    <!-- プラン会計明細「▼」と該当プランに所属する会計明細の分割NOは違う分割番号を設定してください -->
+	<span style="color: red; margin-top: 4px; margin-bottom: 4px; {!IF(AccountSplitBkIshow, 'display:block', 'display:none')}">{!$Label.MSG_006_0272}</span>
+	
+    <table style='width:100%' class='list' id="detailTable">
+        <thead class='rich-table-thead'>
+            <tr class="headerRow" nowrap="nowrap">
+	            <th nowrap='nowrap' style='width:50px;'>
+	            	<div class='headerRow' >
+	            		<!-- 分割NO -->{!$Label.ps__msg_006_0267}<br/>
+		           </div>
+	           		<!-- 分割グループ設定 -->
+	           		<!-- 分割NO -->
+		            <apex:selectList size="1" id="selectAll" style="margin-left: 15px;" title="{!$Label.ps__msg_006_0267}">
+	               <apex:selectOption itemValue="" itemLabel=""/>
+	               <apex:selectOptions value="{!groupNoOptLst}"/>
+	           </apex:selectList>
+            </th>
+            <th class='headerRow' nowrap='nowrap' style='width:130px'>部屋</th>
+            <th class='headerRow splitPageField1' nowrap='nowrap' style='width:60px'>到着日</th>
+            <th class='headerRow' nowrap='nowrap' style='width:130px'>
+            	<!-- メディア -->{!$Label.MSG_006_0273}<br/>
+            	<apex:inputText id="dialog_payment_media_customers" style="margin-left:0;margin-right:0; width:100%" rendered="false"/>
+            </th>
+            <th class='headerRow' nowrap='nowrap' style='width:150px'>
+            	<!-- 見積書宛名 -->見積書宛名<br/>
+            	<apex:inputText id="dialog_accName" style="margin-left:0;margin-right:0; width:100%" />
+            </th>
+            <th class='headerRow splitPageField1' nowrap='nowrap' style='width:60px'><!-- カテゴリ -->{!$Label.ps__msg_006_0265}</th>
+            <th class='headerRow splitPageField1' nowrap='nowrap' style='width:60px'><!-- 部門 -->{!$Label.ps__msg_006_0266}</th>
+            <th class='headerRow splitPageField1' nowrap='nowrap' style='width:60px'><!-- 利用日 -->{!$Label.MSG_006_0403}</th>
+            <th class='headerRow' nowrap='nowrap' ><!-- 商品明細 -->{!$Label.MSG_006_0264}</th>
+            <th class='headerRow splitPageField2' nowrap='nowrap' style='width:70px'><!-- 単価 -->{!$Label.MSG_006_0278}</th>
+            <th class='headerRow splitPageField3' nowrap='nowrap' style='width:50px'><!-- 数量 -->{!$Label.MSG_006_0279}</th>
+            <th class='headerRow splitPageField4' nowrap='nowrap' style='width:80px;'><!-- 合計金額 -->{!$Label.MSG_006_0280}</th>
+            </tr>
+        </thead>
+
+        <tBody>
+            <!-- 会計単位LOOPする -->
+            <apex:repeat value="{!billInfLst}" var="oneAcc" >
+                <!-- 会計明細LOOPする -->
+                <apex:repeat value="{!oneAcc.tranLst}" var="oneTran" >
+                <tr style="background-color: #EEE8AA">
+                    <td>
+                    	<span class="lookupInput">
+	                    <!-- 分割グループ設定rendered="{!!oneTran.isPlan}"  -->
+	                    <apex:selectList value="{!oneTran.tran.SplitGroupNo__c}" size="1" style="margin-left: 15px;"
+	                       styleClass="{!IF(oneTran.isPlan, oneTran.tran.Id + '_01','_00')}">
+	                        <apex:selectOption itemValue="" itemLabel=""/>
+	                        <apex:selectOptions value="{!groupNoOptLst}"/>
+	                    </apex:selectList>
+	                    <!-- プラン -->
+	                    <!-- ▼ -->
+	                    <span style="font-size: 90%; display: {!IF(oneTran.isPlan,'true', 'none')}" title="{!$Label.MSG_006_0281}">{!$Label.MSG_006_0282}</span>
+	                    </span>
+                    </td>
+                    <td>
+                    	<apex:outputField value="{!oneTran.tran.refBooking__r.Rroom__r.Name}" />
+                    </td>
+                    <td>
+						<apex:outputtext value="{!oneTran.entry}" />
+                    </td>
+                    <td>
+                    	<apex:outputLink value="/{!oneTran.tran.refAccountMaster__r.Id}" target="_blank" rendered="{!LEN(oneTran.ttendId) > 0}">
+                    		<apex:outputField value="{!oneTran.tran.refAccountMaster__r.Name}"   style="margin-left:0;margin-right:0; width:100%" rendered="{!LEN(oneTran.ttendId) > 0}"/>
+                    	</apex:outputLink>
+                    </td>
+                    
+                    <td>
+                    	<apex:inputText html-data-id="dialog_accName_{!IF(ISBLANK(oneTran.tran.SplitGroupNo__c), '99', oneTran.tran.SplitGroupNo__c)}" value="{!oneTran.tran.QuotationName__c}"   style="margin-left:0;margin-right:0; width:100%" rendered="{!NOT(LEN(oneTran.ttendId) > 0)}"/>
+                    </td>
+                    <td><apex:outputField value="{!oneTran.tran.Field4__r.Name}" /></td>
+                    <td><apex:outputField value="{!oneTran.tran.GPChange__r.Name}"/></td>
+                    <td><apex:outputField value="{!oneTran.tran.UseDate__c}"/></td>
+                    <td><apex:outputtext value="{!LEFT(oneTran.tran.ProductName__c,34)}"/></td>
+                    <td class="numberRightCol">
+                    	<apex:outputText value="{!CurrencySybmol}{0,number,{!NumberFormat}}">
+		                	 <apex:param value="{!oneTran.tran.UnitPrice__c}" />
+		            	</apex:outputText>
+                    </td>
+                    <td class="numberRightCol">
+                    	<apex:outputtext value="{0,number,}">
+                    		<apex:param value="{!oneTran.tran.Amount__c}"></apex:param>
+                    	</apex:outputtext>
+                    	<!--<apex:outputField value="{!oneTran.tran.Amount__c}" />-->
+                    </td>
+                    <td class="numberRightCol">
+                    	<apex:outputText value="{!CurrencySybmol}{0,number,{!NumberFormat}}" >
+							<apex:param value="{!oneTran.tran.SpTotal__c}" />
+						</apex:outputText>
+                    </td>
+                </tr>
+                    <!-- 会計明細（プラン)の明細データ単位LOOPする -->
+	                <apex:repeat value="{!oneTran.childLst}" var="children" >
+	                <tr style="background-color: #FFEFD5">
+	                    <td style="text-align: right;">
+	                    <span style="margin-left: 10px">
+	                    <!-- 分割グループ設定 -->
+	                     <apex:selectList value="{!children.SplitGroupNo__c}" size="1"
+	                        styleClass="{!oneTran.tran.Id}_child" >
+	                        <apex:selectOption itemValue="" itemLabel=""/>
+	                        <apex:selectOptions value="{!groupNoOptLst}"/>
+	                    </apex:selectList>
+
+	                    </span></td>
+	                    <td colspan="5"></td>
+	                    <td>{!children.Field4__r.Name}</td>
+	                    <td>{!children.GPChange__r.Name}</td>
+	                    <td><apex:outputField value="{!oneTran.tran.UseDate__c}"/></td>
+	                    <td><apex:outputField value="{!children.ProductName__c}" /></td>
+	                    <td class="numberRightCol">
+	                    	<apex:outputText value="{!CurrencySybmol}{0,number,{!NumberFormat}}">
+			                	<apex:param value="{!children.UnitPrice__c}" />
+			            	</apex:outputText>
+	                    </td>
+	                    <td class="numberRightCol">
+	                    	<apex:outputtext value="{0,number,}">
+	                    		<apex:param value="{!children.Amount__c}"></apex:param>
+	                    	</apex:outputtext>
+	                    	<!--<apex:outputField value="{!children.Amount__c}" />-->
+	                    </td>
+	                    <td class="numberRightCol">
+	                    	<apex:outputText value="{!CurrencySybmol}{0,number,{!NumberFormat}}">
+			                	<apex:param value="{!children.Total__c}" />
+			            	</apex:outputText>
+	                    </td>
+	                 </tr>
+	                </apex:repeat>
+                </apex:repeat>
+            </apex:repeat>
+        </tBody>
+    </table>
+<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock"/>
+<script>
+jQuery(document).ready(function() {
+    repeatBindEvent();
+    bindEvents();
+    bindHeader();
+});
+// 数据kendo转换
+function bindHeader(){
+	$j("[data-id^='dialog_accName']").kendoComboBox(
+	{
+       dataTextField: "label",
+       dataValueField: "value",
+       dataSource: {!(accountNames)},
+    });
+	// 2015/03/25 会計書宛名情報設定用
+	$j("input[id$='dialog_accName']").kendoComboBox(
+	{
+       dataTextField: "label",
+       dataValueField: "value",
+       dataSource: {!(accountNames)},
+       change:function(e){
+       		var value = this.value();
+       		this.dataSource.filter({field:"value", operator: "startswith",value:value});
+       		var view = this.dataSource.view();
+       		var viewHasDataFlag = false;
+    		if(view.length == 0 ){
+    			this.dataSource.add({ label: value, value: value ,type: "1"});
+    			viewHasDataFlag = true;
+    		}
+       		this.dataSource.filter({});
+       		$j("[data-id^='dialog_accName']").each(function(){
+       			var dropdownlist = $j(this).data("kendoComboBox");
+       			if(viewHasDataFlag){
+       				dropdownlist.dataSource.add({ label: value, value: value ,type: "1"});
+       			}
+       			dropdownlist.select(function(dataItem) {
+				    return dataItem.value === value;
+				});
+       		});
+       }
+    });
+}
+// 数据事件响应
+function repeatBindEvent() {
+	// 印刷の指定分割NOの連動
+    $j(".gpChkAll").click(function(e) {
+        if(this.checked){
+            $j("[name='gpChk']").prop('checked', true);
+        } else {
+            $j("[name='gpChk']").prop('checked', false);
+        }
+    });
+    $j("[name='gpChk']").click(function(e) {
+        var allCheckLen = $j("[name='gpChk']").length;
+        var allChecked = $j("[name='gpChk']:checked").length != allCheckLen ? false : true;
+        if (allChecked) $j("#gpChkAll").prop('checked', true);
+        else $j("#gpChkAll").prop('checked', false);
+    });
+	// 分割番号選択連動
+    $j("select[id$='selectAll']").change(function(e) {
+        var allVal = this.value;
+        $j("select[class$='01'],select[class$='00']").each(function(idx) {
+            $j(this).val(allVal);
+            //$j(this).change();
+        });
+    });
+    $j("select[class$='01']").change(function(e) {
+        var parentId = ($j(this).attr("class")).substr(0,18);
+        var parentNo = $j(this).val();
+        // 18桁IDで、所属するプラン明細一括設定を行う
+        var findKey = parentId + "_child";
+        $j("select[class='"+findKey+"']").val(parentNo);
+    });
+}
+// 印刷窗口打开显示
+function openPrintWin(me) {
+	var pribtnhei = $j(me).offset().top;
+	var printWin = YAHOO.force.com.showMe();
+} 
+
+<!-- YAHOO UI BEGIN ----------------------->
+// Create a namespace for our custom functions
+YAHOO.namespace("force.com");
+// Function called when we want to show the dialog
+YAHOO.force.com.showMe = function() {
+    document.getElementById("myPanel").style.display = "block";
+    YAHOO.force.com.myDialog.show();
+}
+// Function called when we want to hide the dialog
+YAHOO.force.com.hideMe = function() {
+    YAHOO.force.com.myDialog.hide();
+}
+// Function called when the DOM is ready to create the dialog,
+// render the dialog into the document body, add our dialog skin
+// css to the body tag, and wire up the buttons on our dialog
+YAHOO.force.com.init = function() {
+	document.body.className = document.body.className + " yui-skin-sam";
+
+	YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+	    "myPanel",  // The id of our dialog container
+	    {
+	            width           :   600,    // You can play with this until it's right
+	            visible         :   false,  // Should be invisible when rendered
+	            draggable       :   true,   // Make the dialog draggable
+	            close           :   false,  // Don't include a close title button
+	            modal           :   true,   // Make it modal
+	            fixedCenter     :   true,   // Keep centered if window is scrolled
+	            zindex          :   4,     // Make sure it's on top of everything
+
+	            // This line adds the appear/vanish fade effect
+	            effect          :   {
+	                                  effect:YAHOO.widget.ContainerEffect.FADE,
+	                                  duration:0.35
+	                                }
+	    }
+	);
+	// Render the dialog to the document.body level of the DOM
+	YAHOO.force.com.myDialog.render(document.body);
+}
+// Add the init method to the window.load event
+YAHOO.util.Event.addListener(window, "load", YAHOO.force.com.init);
+<!-- YAHOO UI END ----------------------->
+// window事件响应，打开PDF
+function bindEvents(){
+	// 分割印刷
+	$j("#acc_printKaikeBtn").click(function(e) {
+		var id = "?id={!accSobj.Id}";
+		var bulkId = "&bulkid=" + $j("#bulkAccIdHid").val();
+		var branchCd = $j("select[id$=':branchShopCd']").length > 0 ? $j("select[id$=':branchShopCd']").val() : "";
+		var shopcd ="";
+		if(branchCd != "") shopcd = '&shopcd=' + branchCd;
+		var lang = "&language=" + encodeURIComponent($j("[id$=dialog_language]").val());
+		var stampIsShowFlgStr = "&stampFlg=" + encodeURIComponent( $j("input[id$=':dialog_stampIsShowFlg']").prop('checked') );
+   		var accRepDate = "&pdt=" + encodeURIComponent($j("#acc_acountdate").val());
+		var openLeadUrl = '{!$Page.LeadPDF}' + id + bulkId + lang + stampIsShowFlgStr + accRepDate + shopcd;
+		// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN
+		var mrSelectObj =$j("select[id$=accmultiselectId]");
+		openLeadUrl += (mrSelectObj.length > 0 ? ("&mr="+encodeURIComponent(mrSelectObj.get(0).value)) : "");
+		// 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END
+		// 一つタブに出力
+		var accSplitOutputFlg = $j("input[id$=':dialog_accSplitOutputFlg']").prop('checked');
+		
+		var gnoSize = 0;
+   		var gnoValStr = '';
+   		var contactValStr = '';
+	   	if ($j("[name$='gpChk']:checked").length < 1) {
+	   		//印刷したい分割NOを指定してください。
+	   		alert("{!$Label.MSG_006_0293}");
+	   		return false;
+	   	}
+	   	$j("[name$='gpChk']:checked").each(function(){
+	   		var groupNo = this.value;
+	   		var firstKey = groupNo == "" ?  "99" : groupNo;
+	   		var contact = $j("input[data-id$='dialog_accName_"+firstKey+"']");
+	   		var receiptName = $j("input[data-id$='dialog_receiptName_"+firstKey+"']");
+	   		if(accSplitOutputFlg){
+	   			if(groupNo != '') gnoValStr += '&g' + gnoSize + '=' + groupNo;
+	   			if(contact.length > 0) contactValStr += '&cNm' + gnoSize + '=' + encodeURIComponent(contact.get(0).value);
+	   		} else {
+		   		var contactUrl =  (contact.length > 0 )  ? "&cuName=" + encodeURIComponent(contact.get(0).value) : "";
+				var openUrl = openLeadUrl + contactUrl + "&noar=1&gno=" + groupNo;
+				openUrl += "&splitFlg"; 
+			   	window.open(openUrl)
+		   	}
+		   	gnoSize ++;
+		});
+		if(accSplitOutputFlg){
+			var openAllUrl =  openLeadUrl + gnoValStr + contactValStr + "&g=1&gnoSize=" + gnoSize + "&noar=1&splitFlg";
+			window.open(openAllUrl);
+		}
+		YAHOO.force.com.hideMe();
+	});
+	// キャンセルボタン
+	$j("#acc_cancelBtn, #bill_cancelBtn").click(function(e) {
+		YAHOO.force.com.hideMe();
+	});
+	// 分割
+	autoShowAccSplitFun($j("select[id$=':branchShopCd']"));
+}
+// 页面打开一PDF显示
+function autoShowAccSplitFun(_this) {
+	$j("#tr_accSplit").removeClass('tr_Hide');
+	// 设置默认语言
+	$j("select[id='dialog_language']").val('{!JSENCODE(accSobj.Language__c)}');
+}
+// Block Action Window
+function blockUi() {
+    $j("body").block({
+    //Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_006_0299}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j("body").unblock();
+}
+</script>
+<input type="hidden" id="bulkAccIdHid" value="{!bulkAccId}" />
+</apex:pageblock>
+
+</apex:form>
+<!-- 点击印刷启动页面 -->
+<apex:form >
+<!-- This is the content of the modal dialog -->
+<div id="myPanel" style="display: none;" >
+  <div class="hd">
+  <!-- 見積書印刷 -->
+    <apex:outputText value="見積書印刷" />
+  </div>
+  <div class="bd">
+  <div id="tabstrip" style="min-width: 445px">
+  	<div class="workspace" mode="acc">
+  		<apex:pageBlock id="accPrintBlock">
+  			<table>
+  			<!-- 店舗 -->
+  			<apex:outputPanel rendered="{!mulitiShops.size > 1}">
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0454}"/></td>
+  			<td style="vertical-align: top;">
+  				<apex:selectList size="1" value="{!oShopCode}" id="branchShopCd" onchange="autoShowAccSplitFun(this);" >
+  					<apex:selectOptions value="{!mulitiShops}" />
+  				</apex:selectList>
+  			</td>
+  			</tr>
+  			</apex:outputPanel>
+  			<!-- 発行日付： -->
+  			<tr>
+  			<td style="vertical-align: top;"><label>{!$Label.MSG_006_0219}：</label></td>
+  			<td style="vertical-align: top;"><input id="acc_acountdate" type="text" style="width: 96px;" value="{!toDate}"/></td>
+  			</tr>
+  			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz BEGIN -->
+  			<!-- 敬称 -->
+  			<tr style="display: {!IF(RespectFlg,'','none')}">
+  				<td style="vertical-align: top;">敬称</td>
+  				<td>
+	  				<apex:selectList size="1" value="{!mrStr}" id="accmultiselectId">
+	  					<apex:selectOptions value="{!mrTypeLst}" />
+	  				</apex:selectList>
+  				</td>
+  			</tr>
+  			<!-- 2019/10/15 見積書、請求書、会計書、予約確認書の敬称を選択できるように改善対応 BY zyz END -->
+  			<!-- 言語： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0284}" for="dialog_language"/></td>
+  			<td style="vertical-align: top;">
+  			<!--<select id="dialog_language" value="{!IF(accSobj.Language__c == 'jp', 'jp', 'en')}"><option value="jp" >{!$Label.MSG_006_0286}</option><option value="en" >{!$Label.MSG_006_0288}</option></select>-->
+  			<apex:selectList size="1" value="{!accSobj.Language__c}" id="dialog_language">
+  				<apex:selectOptions value="{!langList}" />
+  			</apex:selectList>
+  			</td>
+  			</tr>
+  			<!-- ハンコ表示： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0220}：" for="dialog_groupNo"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<apex:inputCheckbox id="dialog_stampIsShowFlg" value="{!stampIsShowFlg}"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 一つタブに出力： -->
+  			<tr id="tr_accSplit" class="tr_Hide">
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0455}" for="dialog_accSplit"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<apex:inputCheckbox id="dialog_accSplitOutputFlg" value="{!accSplitOutputFlg}"/>
+  			</span>
+  			</td>
+  			</tr>
+  			<!-- 印刷分割No： -->
+  			<tr>
+  			<td style="vertical-align: top;"><apex:outputLabel value="{!$Label.ps__msg_006_0289}" for="dialog_groupNo"/></td>
+  			<td style="vertical-align: top;">
+  			<span class="lookupInput" >
+  			<input type="checkbox" id="gpChkAll" class="gpChkAll" value="" checked="checked" /><!-- ALL -->{!$Label.MSG_006_0290}
+  			<apex:outputPanel id="accSplitGroupNo">
+  			<apex:repeat value="{!c_groupNo}" var="gpno" >
+  			<input type="checkbox" name="gpChk" value="{!gpno.value}" checked="checked" />{!gpno.label}
+  			</apex:repeat>
+  			</apex:outputPanel>
+  			</span>
+  			</td>
+  			</tr>
+  			</table>
+  
+  			<div style="text-align: right;" >
+  				<!-- キャンセル -->
+  				<input type="button" value="{!$Label.MSG_006_0291}" id="acc_cancelBtn" class="btn" style="width: 100px"/>
+  				<!-- 確定 -->
+  				<input type="button" value="{!$Label.MSG_006_0292}" id="acc_printKaikeBtn" class="btn" style="width: 100px"/>
+  			</div>
+  		</apex:pageBlock>
+  	</div>
+  </div>
+  </div>
+</div>
+</apex:form>
+
+</apex:page>

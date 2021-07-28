@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、アンケート可変文字列情報を定義する
+	SHOPCODE:       店舗コード、支店が非存在　または　各店舗は共通化する場合、空白のままに定義する
+	HEADER:			アンケートのHeader部の文言
+	MANAGER_TITLE:	アンケートの施設名　マネージャー名：例：XXXXX　女将 / YYYYY 支配人
+2016/12/15 Ver16.64以後追加[アンケートの出力言語を切替選択できる機能]
+	EXT_MULITI_LANG		共通定義：アンケートの出力言語を切替選択できる機能　はTRUEの場合、該当タグの内容を定義が必要
+		JAPANESE		アンケート日本語版の定義情報
+			HEADER			アンケート日本語版のHeader部の文言
+			MANAGER_TITLE	アンケート日本語版の施設名マネージャー名
+		ENGLISH			アンケート英語版の定義情報
+			HEADER			アンケート英語版のHeader部の文言
+			MANAGER_TITLE	アンケート英語版の施設名マネージャー名
+2019/02/28 新規追加「アンケート出力文言をカスタマイズ」
+    SURVEY_CUSTOME_DEF  アンケート出力文言をカスタマイズ用タグ
+        BODY            アンケート出力文言の定義タグ(多言語の場合、言語別定義が必要)
+            LANGUAGE        アンケート出力文言の言語指定属性タグ (jp、en指定可）
+        GROUP           アンケート種類別タイトル定義用タグ
+            TITLE           アンケート内容種類別タイトル値定義用タグ
+        ROW             アンケート詳細項目評価結果値を定義要タグ（カンマで複数キーワードを定義可能）
+            TITLE           アンケート詳細項目内容値定義用タグ
+            SIZE            アンケート詳細項目評価結果値の横幅のサイズ（px）
+        UNDERLINE		アンダーライン付けの空白行定義用
+        	REPEAT			空白行数を指定する
+        	STYLE			該当空白行目のスタイル定義する
+-->
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE></SHOPCODE>
+        <!-- 英語の場合、下記タグ「HEADER」と「MANAGER_TITLE」の英語を変更してください -->
+		<HEADER>
+		この度は数ある施設の中から「元湯 陣屋」にご宿泊頂きまして誠にありがとうございます。
+		当館でのご滞在はいかがでございましたでしょうか。私どもは、お客様のご意見をお伺いし、次回ご滞在のより良い
+		おもてなしへの向上に努めてまいりたいと考えております。
+		お忙しい所、大変恐縮ではございますが、ご意見、ご感想をお伺い致したくご案内申し上げます。
+		<!-- 
+		Thank you very much for choosing to stay as our guests at Jinya-Ryokan. We hope you have enjoyed your stay with us.
+		To help us better serve you, we would like you to please take a moment to fill out our questionnaire.
+		Thank you for taking the time to complete this survey. 
+		-->
+		</HEADER>
+        <MANAGER_TITLE>元湯 陣屋 女将<!--Jinya-Ryokan --></MANAGER_TITLE>
+        <!-- 共通定義：アンケートの出力言語を切替選択できる機能制御　がTRUEの場合、下記タグ「EXT_MULITI_LANG」に日本語と英語を別々に定義してください -->
+        <!--
+        <EXT_MULITI_LANG>
+        	<JAPANESE>
+				<HEADER>
+				この度は数ある施設の中から「元湯 陣屋」にご宿泊頂きまして誠にありがとうございます。
+				当館でのご滞在はいかがでございましたでしょうか。私どもは、お客様のご意見をお伺いし、次回ご滞在のより良い
+				おもてなしへの向上に努めてまいりたいと考えております。
+				お忙しい所、大変恐縮ではございますが、ご意見、ご感想をお伺い致したくご案内申し上げます。
+				</HEADER>
+				<MANAGER_TITLE>元湯 陣屋 女将</MANAGER_TITLE>
+        	</JAPANESE>
+        	<ENGLISH>
+				<HEADER>
+				Thank you very much for choosing to stay as our guests at Jinya-Ryokan. We hope you have enjoyed your stay with us.
+				To help us better serve you, we would like you to please take a moment to fill out our questionnaire.
+				Thank you for taking the time to complete this survey. 
+				</HEADER>
+				<MANAGER_TITLE>Jinya-Ryokan</MANAGER_TITLE>
+        	</ENGLISH>
+        </EXT_MULITI_LANG>
+        -->
+        <!-- 2019/02/28 アンケート出力の文言等のカスタマイズは可能機能対応 
+        <SURVEY_CUSTOME_DEF>
+        	<BODY LANGUAGE="jp">
+        		<GROUP TITLE="ご予約についてお伺いいたします。">
+        			<ROW TITLE="HPのみやすさ・料金プランわかりやすさ" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="電話・メールのスタッフ対応" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        		</GROUP>
+        		<GROUP TITLE="お出迎え・チェックイン・チェックアウトについてお伺いいたします。">
+        			<ROW TITLE="お出迎えのスタッフ対応" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="館内案内の対応" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="ご滞在中のスタッフ対応" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="チェックアウト時のスタッフ対応" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        		</GROUP>
+        		<GROUP TITLE="お食事についてお伺いいたします。">
+        			<ROW TITLE="ご夕食について" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="ご朝食について" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="ドリンクメニュー" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="スタッフの対応" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        		</GROUP>
+        		<GROUP TITLE="施設・サービスについてお伺いいたします。">
+        			<ROW TITLE="お食事場所の施設・雰囲気" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="露天風呂・大浴場の施設・雰囲気" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="客室の施設・雰囲気" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="備品・アメニティ" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        			<ROW TITLE="清掃の状態" SIZE="68,35,118,35,68">非常に満足,満足,どちらともいえない,不満,非常に不満</ROW>
+        		</GROUP>
+        		<GROUP TITLE="お食事についてお伺いいたします。">
+        			<UNDERLINE STYLE="height:28px;width:100%;border-bottom: solid 1px #000000;" REPEAT="5"/>
+        		</GROUP>
+        	</BODY>
+        	<BODY LANGUAGE="en">
+        		<GROUP TITLE="Reservation">
+        			<ROW TITLE="Booking page is clear and easy to understand" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Correspondence of Telephone and Email staff" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        		</GROUP>
+        		<GROUP TITLE="Welcome, Check-in, Check-out">
+        			<ROW TITLE="Correspondence of staff during welcoming" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Correspondence of staff during hotel introduction" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Correspondence of staff during your stay" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Correspondence of staff during check-out time" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        		</GROUP>
+        		<GROUP TITLE="Dining">
+        			<ROW TITLE="Dinner" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Breakfast" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Drink Menu" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Correspondence of staff" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        		</GROUP>
+        		<GROUP TITLE="Quality of FACILITIES (overall)">
+        			<ROW TITLE="Dining Facilities and Atmosphere" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Outdoor open-air Bath, Main Spa Bath Atmosphere" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Room Facilities and Atmosphere" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Furnishing and Amenities" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        			<ROW TITLE="Cleanliness" SIZE="97,47,50,60,75">Extremely Satisfied,Satisfied,Neither,Dissatisfied,Extremely Dissatisfied</ROW>
+        		</GROUP>
+        		<GROUP TITLE="Others Comments/Suggestions">
+        			<UNDERLINE STYLE="height:28px;width:100%;border-bottom: solid 1px #000000;" REPEAT="5"/>
+        		</GROUP>
+        	</BODY>
+        </SURVEY_CUSTOME_DEF>
+        -->
+    </SHOP>
+</root>

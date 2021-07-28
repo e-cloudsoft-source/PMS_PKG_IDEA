@@ -1,0 +1,8 @@
+買掛決済処理完了しましたのでお知らせいたします。
+
+詳細URL：　https://login.salesforce.com/{!CooperationResult__c.Id}
+
+処理ログ：
+{!CooperationResult__c.ProcessLog__c}
+
+JinyaConnect Enterprise system R&D team.

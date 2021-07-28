@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>予約インデックス</value>
+    </caseValues>
+    <fields>
+        <label><!-- APPNAME --></label>
+        <name>APPNAME__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品明細 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- 予約インデックス --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 自動作成フラグ --></label>
+        <name>AutoCreateFlgCbl__c</name>
+    </fields>
+    <fields>
+        <label><!-- ブッキングAPIメール本文 --></label>
+        <name>BookingApiMailBody__c</name>
+    </fields>
+    <fields>
+        <label><!-- ブッキングAPIメール送信フラグ --></label>
+        <name>BookingApiSendMailFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- リザプリ電文 --></label>
+        <name>BookingApiTelegramData__c</name>
+    </fields>
+    <fields>
+        <label><!-- 一画面のレイアウトNo --></label>
+        <name>BookingFlexAppLayoutNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約チャネル --></label>
+        <name>Channel__c</name>
+    </fields>
+    <fields>
+        <label><!-- 特記事項 --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様住所 --></label>
+        <name>ContactAddressCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様Email --></label>
+        <name>ContactEmailCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様ひらがな --></label>
+        <name>ContactKatakanaCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様ひらがな --></label>
+        <name>ContactKatakana__c</name>
+    </fields>
+    <fields>
+        <label><!-- 顧客名 --></label>
+        <name>ContactNameCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様Phone --></label>
+        <name>ContactPhoneCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様郵便番号 --></label>
+        <name>ContactPostalCodeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- データ種別 --></label>
+        <name>DataClassification__c</name>
+    </fields>
+    <fields>
+        <label><!-- 出発日 --></label>
+        <name>DepartureDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 出発時刻 --></label>
+        <name>DepartureTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約通知料金明細 --></label>
+        <name>EmailBody__c</name>
+    </fields>
+    <fields>
+        <label><!-- 到着日 --></label>
+        <name>EntryDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 到着時刻 --></label>
+        <name>EntryTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 発生源 --></label>
+        <name>EventSource__c</name>
+    </fields>
+    <fields>
+        <label><!-- エキストラベッド(E/B) --></label>
+        <name>ExtraBedChk__c</name>
+    </fields>
+    <fields>
+        <label><!-- ID --></label>
+        <name>ID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約名 --></label>
+        <name>LeadName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約番号 --></label>
+        <name>LeadNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- +付与ポイント --></label>
+        <name>MemberAddPoint__c</name>
+    </fields>
+    <fields>
+        <label><!-- +使用ポイント --></label>
+        <name>MemberUsePoint__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員住所 --></label>
+        <name>MemberUserAddr__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員会社 --></label>
+        <name>MemberUserCorp__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員生年月日 --></label>
+        <name>MemberUserDateOfBirth__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員所属部署 --></label>
+        <name>MemberUserDep__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員緊急連絡先番号(携帯等) --></label>
+        <name>MemberUserEmergencyPhoneNumber__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員性別 --></label>
+        <name>MemberUserGendar__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員番号 --></label>
+        <name>MemberUserID__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員氏名カナ --></label>
+        <name>MemberUserKana__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員Email --></label>
+        <name>MemberUserMailAddr__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員氏名 --></label>
+        <name>MemberUserName__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員電話番号 --></label>
+        <name>MemberUserTel__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員種別 --></label>
+        <name>MemberUserType__c</name>
+    </fields>
+    <fields>
+        <label><!-- +会員郵便番号 --></label>
+        <name>MemberUserZip__c</name>
+    </fields>
+    <fields>
+        <label><!-- 宿泊数 --></label>
+        <name>Nights__c</name>
+    </fields>
+    <fields>
+        <label><!-- 旧ID --></label>
+        <name>OrgID__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親部屋明細フラグ --></label>
+        <name>ParentFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 親予約インデックス --></label>
+        <name>ParentLeadIndxRef__c</name>
+        <relationshipLabel><!-- 予約インデックス --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 支払方法 --></label>
+        <name>Payment__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン明細個別設定情報 --></label>
+        <name>PlanDetailSyncInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン --></label>
+        <lookupFilter>
+            <errorMessage><!-- 非公開に設定されたプランを選択できません。 --></errorMessage>
+        </lookupFilter>
+        <name>PlanRef__c</name>
+        <relationshipLabel><!-- 予約インデックス --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 予約キャンセルメール通知日時 --></label>
+        <name>PmsEmailDelDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約新規・変更メール通知日時 --></label>
+        <name>PmsEmailInsUpdDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ --></label>
+        <name>RoomTypeRef__c</name>
+        <relationshipLabel><!-- 予約インデックス --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 部屋数 --></label>
+        <name>Rooms__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売価 --></label>
+        <name>SalesPrice__c</name>
+    </fields>
+    <fields>
+        <label><!-- セグメント --></label>
+        <name>Segment__c</name>
+    </fields>
+    <fields>
+        <label><!-- 状態 --></label>
+        <name>StatusLst__c</name>
+        <picklistValues>
+            <masterLabel>キャンセル</masterLabel>
+            <translation><!-- キャンセル --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>通常</masterLabel>
+            <translation><!-- 通常 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 部屋人数 --></label>
+        <name>StayPersons__c</name>
+    </fields>
+    <fields>
+        <help><!-- Ver16.50以後仕様、該当フラグは在庫調整ロジック対象データするがどうか判断用、TRUEすると、処理対象 --></help>
+        <label><!-- 在庫調整ロジック対象(システム用) --></label>
+        <name>StockLogicProcessFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- +請求金額 --></label>
+        <name>TotalAccommodationCharge__c</name>
+    </fields>
+    <fields>
+        <label><!-- +キャンセル日時 --></label>
+        <name>TravelAgencyBookingDelDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- +予約日時 --></label>
+        <name>TravelAgencyBookingInsDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- +変更日時 --></label>
+        <name>TravelAgencyBookingUpdDateTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- +旅行会社予約番号 --></label>
+        <name>TravelLeadNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- お客様 --></label>
+        <name>contactRef__c</name>
+        <relationshipLabel><!-- 予約インデックス --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

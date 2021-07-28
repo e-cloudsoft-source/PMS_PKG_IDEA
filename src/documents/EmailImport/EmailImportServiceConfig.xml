@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+	概要：該当XML利用して、メール取り込み機能定義する
+	多店舗の場合、店舗毎に設定が必要場合、
+     　　　タグ「<SHOP>」含め内容をコピーして、
+     　　　　　　新コピーした内容の「SHOPCODE」に該当店舗コードを指定して、例「<SHOPCODE>01</SHOPCODE>」
+     　　　　　　そして、新コピーした内容を修正する
+	書式：
+	COMMON:					共通定義情報
+     	AGTS:					OTAの名とOTAコードとテンプレートマッピングファイル
+     	AGT:					OTAコード値
+     		NMKEY:				該当OTAはメール本文に識別用キーワード
+     		template			該当OTAの予約取り込み用メールテンプレートAPI名「ドキュメント」→「メール取込」→「メールテンプレート(＊＊＊)」
+     		extendTemplate		該当タグはHTMLメール取り込みの場合使える、HTMLからテキストメール本文に対して、予約取り込み用メールテンプレートAPI名を指定する、
+     							省略の場合、HTMLメール共通用（API:EmailTemplateForHtml)テンプレートを使う
+     	MAIL_ADDRESS_MATCH: 	店舗単位でメール取込用メールを定義する
+     		RULE：				店舗コード値、支店がない場合、空白値で設定する、該当設定値により、タグ「SHOP」設定情報を取得する
+     		MAILADDRESS:		予約メール受信アドレス
+	SHOPCODE:        		店舗コード:支店がない場合、空白のままに定義する、多店舗の場合、店舗コードを設定ください
+		APPCONFIG:			手間いらず.NETサビースへログイン情報(必須)
+			UCACTISSYNC:		予約取り込みのとき、変更の予約、キャンセルの予約を取り込むかどうか制御パラメータ、店舗別定義定義
+									TRUE: 予約変更、キャンセルの予約情報を取込み（デフォルト値）
+									FALSE:予約変更、キャンセルの予約情報を取り込まない
+			ROOMAUTOASSIGN:		部屋自動割当機能制御フラグ（部屋項目：自動割当優先順位　設定順番で割当）
+									TRUE:部屋タイプにより、空い部屋を自動的に予約に割当する
+									FALSE:部屋を自動割当しない(デフォルト値)
+			ROOMSORT:			上記部屋を割当する場合、部屋の割当の並び順
+									ASC:部屋項目の「自動割当優先順位」昇順で部屋割当（デフォルト値）
+									DESC:部屋項目の「自動割当優先順位」降順で部屋割当
+    	ACCOUNTCONFIG:		予約取込み機能必須の関連会計商品コードの指定(指定の会計商品は事前登録が必要、登録しないと、入湯税とサビース料情報は見積明細へ自動反映できません)
+     		NYUUTOUACCOUNT:		入湯税会計商品コード        Salesforce側に該当会計商品の商品コードは該当タグに指定する
+     		SERVICEACCOUNT:		サビース料会計商品コード		Salesforce側に該当会計商品の商品コードは該当タグに指定する
+		PLANCODE_CONVERT:	OTA単位のパッケージコード->SFのPlanNoの変換表:定義省略可能、定義しないと、パッケージコード&&OTAコード&&店舗別でプラン検索を行う
+            ESTNAMEBYSF(非必須)      属性：取込した見積明細の商品名は変換後のプラン名で設定するがどうか切替フラグ(2017/07/18新規追加)
+                                        TRUE：変換後のプラン名で見積明細の商品名を設定する、
+                                        FALSE:XMLのプラン名そで見積明細の商品名を設定する（デフォルト値）   
+			AGT:				販売先単位のプラン変換情報の定義
+				AGTCODE:			OTAコード			
+			CONVERT:			変換定義情報
+				AGTPACKAGECODE:		OTA側のプランコード
+				SFPLANNO:			Salesforce側にプランオブジェクトのPlanNo値
+				
+		PAYMENT_CONVERTS:	支払方法とOTAコードにより、指定の会計商品を取り込み「定義省略可能」
+				POINT_CONVERT		割引額(ポイント・補助金)金額に対して、支払方法とOTAコードにより、取り込みしたい会計商品コード情報を定義する
+					PAYKBN(非必須)	属性：支払方法
+										該当属性設定が省略可能、省略の場合、全ての支払方法は該当変換ルールを適当する
+					CONVERT(必須)	ルールを適応の場合、自動取込したい会計商品コードを定義する（該当商品は事前登録が必要）
+						AGTCODE(非必須)	OTAコード、指定の場合、該当OTAコードの予約情報を取込の場合、該当変更ルールを適応する、
+										定義省略可能、省略の場合、全ての取込予約データは該当変換ルールを適当する						
+				PAYMENT_CONVERT		事前決済金額に対して、支払方法とOTAコードにより、取り込みしたい会計商品コード情報を定義する
+					PAYKBN(必須)		属性：支払方法
+										該当属性設定が省略可能、省略の場合、全ての支払方法は該当変換ルールを適当する
+					CONVERT(必須)	ルールを適応の場合、自動取込したい会計商品コードを定義する（該当商品は事前登録が必要）
+						AGTCODE(非必須)	OTAコード、指定の場合、該当OTAコードの予約情報を取込の場合、該当変更ルールを適応する、
+										定義省略可能、省略の場合、全ての取込予約データは該当変換ルールを適当する
+     -->
+    <COMMON>
+        <!-- OTAの名とOTAコードとテンプレートマッピングファイル -->
+        <AGTS>
+            <AGT NMKEY="一休.com" template="EmailTemplateForIkyuu">80</AGT>
+            <AGT NMKEY="予約プロ" template="EmailTemplateForYoyakuPro">88</AGT>
+            <AGT NMKEY="Expedia" template="EmailTemplateForExpedia">28</AGT>
+        </AGTS>
+        <!-- 店舗別メールサービス定義する、多店舗の場合、店舗別「RULE」行を定義する -->
+        <MAIL_ADDRESS_MATCH>
+            <RULE MAILADDRESS="xxxxxxxxx@xxxxxxxxx">XX</RULE>
+        </MAIL_ADDRESS_MATCH>
+    </COMMON>
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE>XX</SHOPCODE>
+        <APPCONFIG>
+            <!-- 予約変更、キャンセルの場合、予約を取り込むかどうかをパラメータ -->
+            <UCACTISSYNC>TRUE</UCACTISSYNC>
+            <!-- 部屋自動割当機能制御フラグ -->
+            <ROOMAUTOASSIGN>FALSE</ROOMAUTOASSIGN>
+            <!-- 部屋自動割当並び順(昇順：ASC  降順: DESC ) -->
+            <ROOMSORT>DESC</ROOMSORT>
+        </APPCONFIG>
+        <ACCOUNTCONFIG>
+            <!-- 入湯税会計商品コード -->
+            <NYUUTOUACCOUNT></NYUUTOUACCOUNT>
+            <!-- サビース料会計商品コード -->
+            <SERVICEACCOUNT></SERVICEACCOUNT>
+        </ACCOUNTCONFIG>
+        <!-- AGT単位のパッケージコード->SFのプランNoの変換表:省略可能、定義しないと、パッケージコード&&AGTコード&&店舗別でプラン検索 -->
+        <PLANCODE_CONVERT ESTNAMEBYSF="FALSE">
+            <AGT AGTCODE="">
+                <CONVERT>
+                    <AGTPACKAGECODE></AGTPACKAGECODE>	<!-- AGTのパッケージコード[カンマで複数定義可能] -->
+                    <SFPLANNO></SFPLANNO>			<!-- SFのプランNo -->
+                </CONVERT>
+            </AGT>
+        </PLANCODE_CONVERT>
+        <!-- 事前決済区分とAGTコードにより、指定の会計商品を取り込み -->
+        <PAYMENT_CONVERTS>
+            <!-- 引額(ポイント・補助金)金額に対して、事前決済区分とAGTコードにより、取り込みしたい会計商品コード情報を定義する -->
+            <!-- PAYKBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+            <!-- 
+            <POINT_CONVERT PAYKBN="3">	
+                <CONVERT AGTCODE="80">M90201</CONVERT>
+            </POINT_CONVERT>
+             -->
+            <!-- 事前決済金額に対して、事前決済区分とAGTコードにより、取り込みしたい会計商品コード情報を定義する -->
+            <!-- PAYKBN:「0」：指定なし、「1」：法人利用、「2」：カード決済、「3」：現地払い、「4」：ツアー会社、「5」：一部精算、「6」：エージェント精算 -->
+            <!-- 
+            <PAYMENT_CONVERT PAYKBN="2">
+                <CONVERT AGTCODE="80">M90201</CONVERT>
+            </PAYMENT_CONVERT>
+             -->
+        </PAYMENT_CONVERTS>
+    </SHOP>
+
+</root>

@@ -1,0 +1,661 @@
+<apex:page controller="ExpoUserEditCtrl" action="{!initAct}" showHeader="false" standardStylesheets="false" title="ユーザ" docType="html-5.0" cache="false" >
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/kendo.common-bootstrap.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/kendo.bootstrap.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo,'css/styles.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.default.min.css')}"/>
+
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/loader.js')}"/>
+<c:CommHeaderComp loadJsLib="false"/>
+<style>
+h3 {
+	font-size: 1.5rem;
+	position: relative;
+	background: #f5f5f5;
+	font-weight: bold;
+	border-left: 3px solid #1ea22a;
+	padding: 5px 5px;
+	margin-bottom: 10px;
+}
+/* 多选框设定 */
+.k-multiSelect{
+	vertical-align: middle;
+	display: inline-block;
+}
+/* 多选内容显示的颜色 */
+.k-multiselect .k-button {
+	 border-color: #d5d5d5;
+	 background-color: #d5d5d5;
+}
+.boxDiv{
+	border: 3px solid #e3e3e3;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+.titleDiv{
+	background-color:#5e82a3;
+	text-align:left;
+	margin-bottom: 0px;
+}
+/* 必填项Css */
+.hide{
+	display: none;
+}
+.span-input > *{
+	width: 100%;
+}
+.infoDiv{
+	margin: 5px;
+}
+.ui-autocomplete {
+	max-height: 260px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.k-checkbox-label{
+	vertical-align: text-top;
+}
+.parent{
+	position: relative;
+}
+.child{
+	border-left: 3px solid #c00;
+	width: 3px;
+	margin-left: -4px;
+	position: absolute;
+	top: 25%;
+	bottom: 25%;
+}
+.requiredExample {
+	border-left: 3px solid #c00;
+	font-size: 80%;
+	vertical-align: 1px;
+	width: 90px;
+	text-align: left;
+	position: absolute;
+	top: 5px;
+	right: 0px;
+	font-weight: bold;
+}
+.messageDiv {
+	margin: 0 auto;
+	padding: 20px 0 0 0 !important;
+	min-width: 1024px;
+	background-color: #ffffff;
+	text-align: center;
+}
+.messageDiv * {
+	color: #01344e;
+	font-family: "ProximaNovaRegular";
+}
+.messageDiv h1.headline {
+	font-size: 48px;
+	line-height: 36px;
+	font-weight: normal;
+}
+.messageDiv h1 {
+	padding: 0;
+	margin: 0;
+	font-size: 24px;
+	font-weight: normal;
+	line-height: 50px;
+}
+div.errorMsg{
+	color:red;
+    line-height: normal;
+}
+</style>
+<header id="header">
+	<c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}" />
+</header>
+<div id="bodyDiv" style="min-width:{!IF(expo.custTrWidthMax > 1024 , (expo.custTrWidthMax + 40), '')}px">
+	<apex:form id="mainForm" styleClass="k-mainForm" >
+		<div class="boxDiv">
+		<div class="infoDiv" align="center">
+		<table align="center" style="width: 100%; font-weight: bold;" cellpadding="0" cellspacing="0" html-table="main">
+			<apex:repeat value="{!expo.custSectionInfoLst}" var="section">
+			<tr><td colspan="{!expo.custColMax}"><div class="titleDiv parent"><h3>{!JSENCODE(section.sctnTitle)} </h3> <div class="requiredExample">&nbsp; = 必須情報</div></div></td></tr>
+			<apex:repeat value="{!section.sctnColLst}" var="sectionItem">
+				<tr style="line-height:{!expo.custHeight};height:{!expo.custHeight};">
+					<apex:variable var="tdNo" value="{!0}"/>
+					<apex:repeat value="{!sectionItem}" var="api">
+						<apex:repeat value="{!expo.custFieldInfoMap[api]}" var="item">
+						<td style="width:{!expo.custTdWidthMaxMap[tdNo]}px">
+						<apex:variable var="tdNo" value="{!tdNo + 1}"/>
+						<span style="float: left; width:{!IF(expo.isDefFlg || (expo.custColMax == 1), '35%', expo.custLabWidth)}" ><span style="margin-right:20px;float: right;">{!item.fieldLab}</span></span>
+						<span style="float: left; width:{!IF(expo.isDefFlg || (expo.custColMax == 1), '32%', item.fieldWidPx)}" class="span-input parent">
+							<span class="{!IF(item.fieldReq && !item.fieldRom,'child','hide')}"></span>
+								<apex:input type="text" html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}" html-maxlength="{!item.fieldLen}"
+												html-req="{!item.fieldReq}"
+												disabled="{!item.fieldRom}"
+												html-oldVal="{!item.fieldVal}" html-nowVal="{!item.fieldVal}" value="{!item.fieldVal}"
+												html-placeholder="{!IF(item.fieldApi == 'username__c', '例：name@yourcompany.com', '')}"
+												onblur="valOnchangeFun(this);"
+												rendered="{!IF(((item.fieldTyp == 'STR' ||
+														item.fieldTyp == 'INT' ||
+														item.fieldTyp == 'DBL' ||
+														item.fieldTyp == 'DBL' ||
+														item.fieldTyp == 'EMAIL' ||
+														item.fieldTyp == 'CURR'  ||
+														item.fieldTyp == 'PCT'  ||
+														item.fieldTyp == 'DT'  ||
+														item.fieldTyp == 'DTTM') && 
+														!item.fieldImg ), TRUE, FALSE)}"
+															
+												styleClass="{!IF(item.fieldTyp == 'STR' || item.fieldTyp == 'EMAIL', 'k-textbox', '')}
+														{!IF(item.fieldTyp == 'INTE' || item.fieldTyp == 'DBL' || item.fieldTyp == 'CURR' || item.fieldTyp == 'PCT', 'k-numberbox', '')}
+														{!IF(item.fieldTyp == 'DT', 'k-datebox', '')}
+														{!IF(item.fieldTyp == 'DTTM', 'k-dateTimebox', '')}
+														{!IF(item.fieldRom, 'ec-disabled', '')} "/>
+							<apex:outputPanel styleClass="span-input" rendered="{!IF((item.fieldTyp == 'CPLST'), TRUE, FALSE)}" >
+							<input id="inputId" type="text" api="{!item.fieldApi}" typ="{!item.fieldTyp}" maxlength="{!item.fieldLen}"
+										req="{!item.fieldReq}"
+										oldVal="{!item.fieldVal}" value="{!item.fieldVal}"
+										onchange="valOnchangeFun(this);"
+										/>
+							</apex:outputPanel>
+							<!-- 单选下拉列表 -->
+							<apex:selectList html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}"
+											html-req="{!item.fieldReq}"
+											disabled="{!item.fieldRom}"
+											html-oldval="{!item.fieldVal}" value="{!item.fieldVal}"
+											onchange="valOnchangeFun(this);"
+											multiselect="false"
+											rendered="{!IF(item.fieldTyp == 'PLST', TRUE, FALSE)}" styleClass="k-dropDownList">
+								<apex:selectOption itemValue="" itemLabel=""/>
+								<apex:selectOptions value="{!item.fieldPLst}"/>
+							</apex:selectList>
+							<!-- 多选下拉列表 -->
+							<apex:selectList html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}"
+											html-req="{!item.fieldReq}"
+											disabled="{!item.fieldRom}"
+											html-oldval="{!item.fieldVal}" value="{!item.fieldVal}"
+											onchange="valOnchangeFun(this);"
+											multiselect="true"
+											rendered="{!IF(item.fieldTyp == 'MPLST', TRUE, FALSE)}" styleClass="k-multiSelect">
+											
+								<apex:selectOptions value="{!item.fieldPLst}"/>
+							</apex:selectList>
+							<!-- 参照下拉列表 -->
+							<apex:selectList html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}" html-ref="{!item.fieldRef}"
+											html-req="{!item.fieldReq}"
+											disabled="{!item.fieldRom}"
+											html-oldval="{!item.fieldVal}" value="{!item.fieldVal}"
+											onchange="valOnchangeFun(this);"
+											multiselect="false"
+											rendered="{!IF(item.fieldTyp == 'REF', TRUE, FALSE)}" styleClass="k-comboBox">
+								<apex:selectOption itemValue="" itemLabel=""/>
+								<apex:selectOptions value="{!item.fieldPLst}"/>
+							</apex:selectList>
+							<!-- BOOLEAN型 -->
+							<apex:inputCheckbox html-api="{!item.fieldApi}" html-typ="{!item.fieldTyp}"
+											html-req="{!item.fieldReq}"
+											html-oldVal="{!item.fieldVal}" value="{!item.fieldVal}"
+											style="display: none;"
+											onchange="valOnchangeFun(this);"
+											rendered="{!IF(item.fieldTyp == 'BLN', TRUE, FALSE)}" Id="box" styleClass="k-checkbox"/>
+							<apex:outputLabel for="box" rendered="{!IF(item.fieldTyp == 'BLN', TRUE, FALSE)}" styleClass="k-checkbox-label"/>
+						</span>
+						<span style="float: left; display: none;"><apex:image value="{!URLFOR($Resource.Expo, 'css/Default/loading.gif')}" style="vertical-align: text-top; margin-left: 8px;" /></span>
+						<div class="errorMsg" style="width: {!IF(expo.isDefFlg || (expo.custColMax == 1), '32%', item.fieldWidPx)};
+													margin-left:{!IF(expo.isDefFlg || (expo.custColMax == 1), '35%', expo.custLabWidth)};"></div>
+						</td>
+						</apex:repeat>
+					</apex:repeat>
+				</tr>
+			</apex:repeat>
+			</apex:repeat>
+		</table>
+		</div>
+		<div id="messageDiv" style="display:none;">
+		<style>
+#messageDiv #content,#messageDiv .container {
+	background-color: #fff;
+}
+
+#messageDiv #header {
+	color: #16325c;
+}
+
+#messageDiv .mb12 {
+	margin-bottom: .75rem;
+}
+
+#messageDiv .mb16 {
+	margin-bottom: 1rem;
+}
+
+#messageDiv .mb24 {
+	margin-bottom: 1.5rem;
+}
+
+#messageDiv .button {
+	padding: 12px 24px;
+	border: 0;
+	border-radius: 4px;
+	background-color: #D8DDE6;
+	background-image: none!important;
+	color: #fff;
+	font-size: 1.3rem !important;
+	font-family: SFS,Arial,sans-serif;
+	cursor: pointer;
+}
+
+#messageDiv a.button {
+	display: inline-block;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+#messageDiv a.primary,#messageDiv a.primary:active,#messageDiv a.primary:hover,#messageDiv a.primary:link,#messageDiv a.primary:visited {
+	color: #fff;
+}
+
+#messageDiv .primary {
+	border: 1px solid transparent;
+	background-color: #0070d2;
+	color: #fff;
+	transition: all .1s;
+}
+
+#messageDiv .primary:focus,#messageDiv .primary:hover {
+	background-color: #005fb2;
+}
+
+#messageDiv .wide {
+	width: 100%;
+}
+
+#messageDiv #wrapper {
+	margin-top: 0;
+	margin-right: auto;
+	margin-bottom: 0;
+	margin-left: auto;
+	padding: 20px 0 0 0;
+	max-width: 380px;
+	-webkit-transition: all .25s;
+	-moz-transition: all .25s;
+	-o-transition: all .25s;
+	transition: all .25s;
+}
+
+#messageDiv .standard_logo_wrapper {
+	display: table;
+	overflow: hidden;
+	margin-right: auto;
+	margin-left: auto;
+	width: 180px;
+	height: 113px;
+	text-align: center;
+}
+
+#messageDiv .standard_logo {
+	margin-right: auto;
+	margin-left: auto;
+	max-width: 180px;
+	max-height: 113px;
+	vertical-align: middle;
+}
+
+#messageDiv #header {
+	display: block;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+	font-size: 1.5rem;
+	font-family: SFSLight,Arial,sans-serif;
+}
+
+#messageDiv #wrap {
+	min-height: 100%;
+	font-family: none;
+}
+
+#messageDiv #main {
+	overflow: auto;
+	padding-bottom: 48px;
+}
+
+#messageDiv #content {
+	margin: 0 auto;
+	padding: 1.25rem;
+	border: 1px solid #D8DDE6;
+	border-radius: .25rem;
+	color: #16325c;
+}
+
+#messageDiv p {
+	display: block;
+	text-align: left;
+	text-align: start;
+	margin: 0px;
+	line-height: 1.5rem;
+	font-size: 16px;
+}
+
+#messageDiv img.logo {
+	width: 160px;
+}
+
+#messageDiv img {
+	vertical-align: middle;
+	border: 0;
+}
+
+#messageDiv a {
+	text-decoration: none;
+	transition: all 0.1s;
+}
+
+#messageDiv a:hover,
+#messageDiv a:active {
+	color: #005fb2;
+}
+
+#messageDiv a:focus {
+	outline: thin dotted #333;
+	outline: 5px auto -webkit-focus-ring-color;
+	outline-offset: -2px;
+}
+
+#messageDiv h1 {
+	font-size: 1.5rem;
+	font-family: SFSLight, Arial, sans-serif;
+}
+
+#messageDiv h2 {
+	font-size: 1.125rem;
+	font-family: SFSLight, Arial, sans-serif;
+}
+
+
+@media only screen and (max-width: 480px) {
+	#messageDiv #wrapper {
+		max-width: 100%;
+		margin-left: inherit;
+		left: inherit;
+		padding-top: 20px !important;
+	}
+	#messageDiv #content {
+		border-left: 0px;
+		border-right: 0px;
+		border-radius: 0px;
+	}
+	#messageDiv .button {
+		font-size: 1rem;
+	}
+	#messageDiv .label,
+	#messageDiv .small {
+		font-size: .875rem;
+	}
+}
+
+@media only screen and (min-height: 1200px) {
+	#messageDiv #wrapper {
+		padding-top: 240px;
+	}
+}
+
+@media only screen and (max-height: 1200px) {
+	#messageDiv #wrapper {
+		padding-top: 180px;
+	}
+}
+
+@media only screen and (max-height: 1000px) {
+	#messageDiv #wrapper {
+		padding-top: 140px;
+	}
+}
+
+@media only screen and (max-height: 900px) {
+	#messageDiv #wrapper {
+		padding-top: 100px;
+	}
+}
+
+@media only screen and (max-height: 736px) {
+	#messageDiv #wrapper {
+		padding-top: 60px;
+	}
+}
+
+@media only screen and (max-height: 670px) {
+	#messageDiv #wrapper {
+		padding-top: 40px;
+	}
+}
+
+@media only screen and (max-height: 610px) {
+	#messageDiv #wrapper {
+		padding-top: 20px;
+	}
+}
+</style>
+<div id="wrap">
+			<div id="main">
+				<div id="wrapper">
+					<div id="logo_wrapper" class="standard_logo_wrapper mb24">
+						<h1 style="height: 100%; display: table-cell; vertical-align: bottom;">
+						<img id="logo" class="standard_logo" src="{!URLFOR(LogoUrl)}" border="0" name="logo" />
+						</h1></div>
+					<h2 id="header" class="mb12" style="font-size: 24px;">メールの確認</h2>
+					<div id="content">
+
+						<div id="forgotPassForm">
+							<div class="message">
+								<p class="senttext mb12">登録が完了しました...</p>
+								<p class="senttext mb12">アカウントを確認するためにメールを確認してください.</p>
+
+							</div>
+							<a href="{!URLFOR($Page.ExpoUserView, null,[sid=sessionId], false)}" class="primary button wide mb16">ユーザ一覧へ戻る</a>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+		</div>
+		<div class="md-buttons">
+			<a class="btn bc-gy" href="{!URLFOR($Page.ExpoUserView, null,[sid=sessionId], false)}" >キャンセル</a>
+			<!-- 2019/09/15 Security Check BY zyz BEGIN -->
+			<a href="javascript:void(0);" class="btn bc-bl" onclick="saveDataFun('{!JSENCODE(dataId)}');" style="margin-left: 50px;">保存</a>
+			<!-- 2019/09/15 Security Check BY zyz END -->
+		</div>
+	</apex:form>
+</div>
+<footer id="footer">
+	<c:ExpoFooterComp />
+</footer>
+<script>
+$(document).ready(function() {
+	setKendoUIFun();
+	bindEvent();
+});
+function bindEvent(){
+	$(':input[api="username__c"]').blur(function(){
+		var $me = $(this);
+		var nowVal = $me.attr('nowVal');
+		var newVal = $me.val();
+		if(nowVal == newVal) return;
+		$me.attr('nowVal', newVal);
+		$me.parent().next().css('display','');
+		var curRow = $me.closest("td");
+		// 既存エラーセクションクリア
+		$me.css('border','');
+		$me.attr('qualified', 'true');
+		$(".errorMsg",curRow).text('');
+		Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.ExpoUserEditCtrl.checkUserName}", newVal, function(result, event){
+				if(event.type == 'exception') {
+					alert(event.message);
+				} else if(result != null){
+					$me.parent().next().css('display','none');
+					// ユーザ重複チェック
+					if(!result){
+						$me.css('border','solid 1px #ff00006b');
+						$me.attr('qualified', 'false');
+						newDataMap.delete('username__c');
+						//$me.attr('errorMsg','すでに使われている文字列です。長くするか、別の文字に変更してください。');
+						$(".errorMsg",curRow).text('そのユーザ名はすでに使用されている可能性があります。メールアドレス形式で一意のユーザ名 (「"name@yourcompany.com"」など) を試してみてください。');
+					}
+				}
+			});
+	});
+	
+    $(".k-textbox[typ='EMAIL']").blur(function(){
+		var $me = $(this);
+		var curRow = $me.closest("td");
+		// 既存エラーセクションクリア
+		$me.css('border','');
+		$me.attr('qualified', 'true');
+		$(".errorMsg",curRow).text('');
+		if($me.val() == '') return;
+		var reg = /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/g;
+		if(!reg.test($me.val())){
+			$me.css('border','solid 1px #ff00006b');
+			$me.attr('qualified', 'false');
+			// $me.attr('title', '有効なメールアドレスを入力してください');
+			$(".errorMsg",curRow).text('有効なメールアドレスを入力してください');
+		}
+	});
+}
+function setKendoUIFun(){
+	kendo.culture("ja-JP");
+	$(".k-datebox").kendoDatePicker({ format: "{!expo.DATEFORMAT}" });
+	$(".k-dateTimebox").kendoDateTimePicker({ format: "{!expo.DATETIMEFORMAT}" });
+	// int
+	$(".k-numberbox[typ='INTE']").kendoNumericTextBox({
+		format: "n0",
+		min:0,
+	});
+	// double
+	$(".k-numberbox[typ='DBL']").kendoNumericTextBox({
+		format: "n",
+		min:0,
+	});
+	// Currency
+	$(".k-numberbox[typ='CURR']").kendoNumericTextBox({
+		decimals: JINYACONNECT.NumberPointLen,
+		format: "c" + JINYACONNECT.NumberPointLen,
+		min: 0
+	});
+	// Percent
+	$(".k-numberbox[typ='PCT']").kendoNumericTextBox({
+		format: "p0",
+		step: 0.1,
+		min: 0
+	});
+	$(".k-dropDownList").kendoDropDownList();
+	$(".k-multiSelect").kendoMultiSelect({
+		autoClose: false,
+	});
+	// 多选类型值处理
+	multiselectFun();
+	var comboBox = $("select.k-comboBox[api]");
+	comboBox.kendoComboBox({
+		dataTextField: "parentName",
+		dataValueField: "parentId",
+		filter: "contains",
+	}).prev().children('span:last').one("click",function(){
+		var select = $(this).parent().next("select");
+		var ref = select.attr("ref") || "";
+		// 获取参照字段的API参照名
+		var refApi = select.attr("api") || "";
+		if(ref != "" && refApi != ""){
+			var value = select.data("kendoComboBox").value();
+			Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.ExpoUserEditCtrl.getRefDs}", ref, function(result, event){
+				if(event.type == 'exception') {
+					alert(event.message);
+				} else if(result != null){
+					//$(".k-comboBox[ref='" + ref + "']").data("kendoComboBox").setDataSource(result);
+					$("select.k-comboBox[api='" + refApi + "']").data("kendoComboBox").setDataSource(result);
+					select.data("kendoComboBox").readonly(false);
+					select.data("kendoComboBox").select(function(dataItem){
+						return dataItem.value === value;
+					});
+					select.data("kendoComboBox").open();
+				}
+			});
+		}
+	});
+	comboBox.each(function(index, element){
+		var $el = $(element);
+		$el.data("kendoComboBox") && $el.data("kendoComboBox").readonly();	
+	});
+}
+// 多选类型值的处理
+function multiselectFun(){
+	$("select.k-multiSelect").each(function(){
+		var multiselect = $(this).data("kendoMultiSelect");
+		var selArray = $(this).attr("oldVal").split(";");
+		multiselect.value(selArray);
+	});
+}
+var newDataMap = new Map();
+function saveDataFun(dataId){
+	var reqFieldValEmpty = false;
+	var errorMsg = "";
+	$("[req][api]").each(function(){
+		var $field = $(this);
+		if(($field.attr("req") == "true" && $.trim($field.val()).length == 0)) {
+			reqFieldValEmpty = true;
+			errorMsg = "必須項目を入力してください。";
+			return false;
+		} else if ($field.attr('qualified') == "false"){
+			reqFieldValEmpty = true;
+			return false;
+		}
+	});
+	if(reqFieldValEmpty){
+		if (errorMsg != "") alert(errorMsg);
+		return;
+	}
+	
+	if(newDataMap.size == 0) {
+		openUrl();
+		return;
+	}
+	startLoading();
+	Visualforce.remoting.Manager.invokeAction(
+	"{!$RemoteAction.ExpoUserEditCtrl.saveInfo}", dataId, JSON.stringify(newDataMap.map), "{!currentUser.ExpoOrgInfoRef__c}", function (result, event) {
+		if (event.type == 'exception') {
+			alert(event.message);
+		} else {
+			newDataMap.clear();
+			if(dataId == ""){
+				$('.infoDiv, .md-buttons').remove();
+				$('#messageDiv').show();
+				$('.boxDiv').css('border', 'none');
+			} else openUrl();
+		}
+		stopLoading();
+	}, {escape: false});
+	 
+}
+
+function openUrl(){
+	var sid="{!sessionId}";
+	var openUrl = "{!URLFOR($Page.ExpoUserView)}"+"?sid="+sid;
+	window.location.href = openUrl;
+}
+
+function valOnchangeFun(_this){ // 处理SUB数据变更
+	var newval = $(_this).val();
+	var oldval = $(_this).attr("oldval");
+	var api = $(_this).attr("api");
+	if(newval == oldval) newDataMap.delete(api);
+	else {
+		var typ = $(_this).attr("typ");
+		if(typ == "MPLST" && newval != null) newval = newval.join(";");
+		if(typ == "BLN")  newval = $(_this).is(':checked');
+		newDataMap.set(api, [newval,oldval,typ]);
+	}
+}
+</script>
+</apex:page>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>レシートに印刷した最新のお知らせと写真を取得用バッチスケジュール</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>最新お知らせ取得バッチスケジュール定義情報</name>
+    <public>false</public>
+</Document>

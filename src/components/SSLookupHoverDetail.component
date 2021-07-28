@@ -1,0 +1,161 @@
+<apex:component controller="SSLookupHoverDetailCtrl">
+<!-- <apex:includeScript value="{!$Resource.jquery_balloon_js}"/> -->
+<style>
+#tipsPanel{
+	display:none; 
+	/*max-width: 600px;*/
+	min-width: 440px;
+	/*overflow-x:auto;*/
+	z-index: 10;
+	max-height: 200px;
+	overflow: auto;
+}
+
+.bPageBlock .detailList .dataCol {
+	width: auto;
+}
+.bPageBlock .detailList .labelCol {
+	width: auto;
+}
+</style>
+<script>
+beenFocused = true;
+var $j = jQuery.noConflict();
+var mytimer = null;
+var canFlg1, canFlg2, lcFlg, ww, wh, wo, wl, objt, objl, dh;
+// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw BEGIN
+//function openTips(element,mode,leadIds) {
+function openTips(element,mode,leadIds, spcd) {
+// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw END
+	closeTip();
+	var userId = $j(element).attr("userId");
+	var taskDt = $j(element).attr("taskDt");
+
+	var objoffset =  $j(element).offset();
+	if ( taskDt && taskDt.length != 0) {
+		canFlg1 = '';
+		canFlg2 = null;
+		lcFlg = '';
+		//ダウンロード中
+		var loadani = '<div class="bPageBlock brandSecondaryBrd secondaryPalette" style="box-shadow: 0 0 3px #000;"><div class="pbBody"><img src="/img/loading.gif" style=""/>{!$Label.CONST_035_0156}...</div></div>';
+		$j('div#tipsPanel').html(loadani);
+		var tipsPanel = document.getElementById('tipsPanel');
+		tipsPanel.style.display="inline";
+	
+		ww = document.documentElement.clientWidth;
+		wh = document.documentElement.clientHeight;
+		wo = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+		wl = document.documentElement.scrollLeft || window.pageXOffset || document.body.scrollLeft;
+		objt = objoffset.top;
+		objl = objoffset.left;
+		dh = $j('div#tipsPanel').height();
+		
+		if (dh == 0) {
+			var div = document.getElementById("tipsPanel").getBoundingClientRect();
+			dh = div.bottom - div.top;
+		};
+		// tipsPanel.style.left= ww - objl < 300 ? ((ww - 460) + "px") : (objl < 180 ? (10 + "px") : ((objl - 165) + "px"));
+		tipsPanel.style.left= ww - objl + wl< 230 ? ((ww - 460 + wl) + "px") : (objl -wl < 230 ? ((10 + wl) + "px") : ((objl - 220) + "px"));
+		tipsPanel.style.top= 2*(objt - wo) < wh ? ((objt - 90) + "px") : ((objt - dh - 120) + "px");
+		tipsPanel.style.position="absolute";
+		if(mode == 'comment'){
+			ajaxGetRoomInfoPop(userId,objoffset,taskDt);
+		}else if(mode == 'leads' ){
+			// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw BEGIN
+			//ajaxGetLeadsInfoPop(objoffset,taskDt,leadIds);
+			ajaxGetLeadsInfoPop(objoffset,taskDt,leadIds, spcd);
+			// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw END
+		}
+	}
+}
+function closeTip(){
+	// clearTimeout(mytimer);
+	if ((canFlg1 == null || canFlg1 == "" ) && canFlg2 == null) {
+		var tipsPanel = document.getElementById('tipsPanel');
+		tipsPanel.style.display="none";
+	};
+}
+function cancelEvent() {
+	lcFlg = null;
+	canFlg1 = null;
+  	clearTimeout(mytimer);
+  	window.setTimeout(function(){closeTip()}, 100);
+}
+function cancelEvent2() {
+	lcFlg = null;
+	canFlg2 = null;
+  	clearTimeout(mytimer);
+  	closeTip();
+}
+function cancelEvent3() {
+	canFlg2 = '';
+}
+// 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw BEGIN
+//function ajaxGetLeadsInfoPop(lc,taskDt,leadIds){
+function ajaxGetLeadsInfoPop(lc,taskDt,leadIds, spcd){
+	Visualforce.remoting.Manager.invokeAction(
+	//'{!$RemoteAction.SSLookupHoverDetailCtrl.getLeadsInfo}',leadIds,function(result, event){
+	    '{!$RemoteAction.SSLookupHoverDetailCtrl.getLeadsInfo}',leadIds, spcd,function(result, event){
+	    // 2018/10/25 マルチタスクとシフトの合計欄の表示内容はカスタマイズできるように改善 by cxw END
+	        if (event.status) {
+	            if(result== null || result.length == 0){
+	                alert("データ詳細がありません。");
+	            }else{
+	            	clearTimeout(mytimer);
+	            	if(lcFlg == null) return;
+                    mytimer = window.setTimeout(function(){opPop(result, lc)}, 500);
+	            }
+	        } else if (event.type === 'exception') {
+	            alert("error データ詳細がありません。");
+	        } else {
+	            alert(" noknown error データ詳細がありません。");
+	        }
+	    },
+	    {escape: true}
+	);
+}
+function ajaxGetRoomInfoPop(leadId, lc, taskDt) {
+	Visualforce.remoting.Manager.invokeAction(
+	    '{!$RemoteAction.SSLookupHoverDetailCtrl.getTaskInfo}',leadId,taskDt,function(result, event){
+	        if (event.status) {
+	            if(result== null || result.length == 0){
+	                alert("データ詳細がありません。");
+	            }else{
+	            	clearTimeout(mytimer);
+	            	if(lcFlg == null) return;
+                    mytimer = window.setTimeout(function(){opPop(result, lc)}, 500);
+	            }
+	        } else if (event.type === 'exception') {
+	            alert("error データ詳細がありません。");
+	        } else {
+	            alert(" noknown error データ詳細がありません。");
+	        }
+	    },
+	    {escape: true}
+	);
+}
+function opPop(leadDt, lc) {
+	var temp = document.createElement("div");
+	temp.innerHTML = leadDt;
+	var output = temp.innerText || temp.textContent;
+	// console.debug(output);
+	$j('div#tipsPanel').html(output);
+
+	var tipsPanel = document.getElementById('tipsPanel');
+	if(lcFlg == null) return;
+	//tipsPanel.style.display="inline";
+	dh = $j('div#tipsPanel').height();
+	if (dh == 0) {
+		var div = document.getElementById("tipsPanel").getBoundingClientRect();
+		dh = div.bottom - div.top;
+	};
+	tipsPanel.style.left= ww - objl + wl< 230 ? ((ww - 460 + wl) + "px") : (objl -wl < 230 ? ((10 + wl) + "px") : ((objl - 220) + "px"));
+	// console.debug("|" + objt + "|" + wo + "|" + dh + "|" + wh);
+	tipsPanel.style.top= 2*(objt - wo) < wh ? ((objt - 120) + "px") : ((objt - dh - 90) + "px");
+	tipsPanel.style.position="absolute";
+}
+</script>
+
+<div style="" id="tipsPanel" onmouseleave="javascript:cancelEvent2()" onmouseenter="javascript:cancelEvent3();">
+</div>
+</apex:component>

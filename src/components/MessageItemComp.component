@@ -1,0 +1,803 @@
+<apex:component id="messageComp" controller="MessageItemCtrl" allowDML="true">
+
+<apex:attribute name="container" type="String" description="componet Id" default="m" required="false"/>
+<apex:attribute name="maxRows" type="Integer" description="Max Rows" required="false" default="6" assignTo="{!messageMaxRows}"/>
+<apex:attribute name="yyyymmddStr" type="String" description="連絡事項の表示の指定年月の情報(yyyymm/yyyymmdd)" required="true" assignTo="{!yyyymmdd}" />
+<apex:attribute name="refreshMessageFunName" type="String" description="情報自動更新起動関数名、該当名で連絡事項の最新内容を取得する" required="false" default="_messageComp_refreshMessage" />
+<!-- 2016/12/15 ルームインジケータ、連絡事項店舗区分 by wx begin -->
+<apex:attribute name="shopcode" type="String" description="shop code" default="" required="false" assignTo="{!messageshopcode}"/>
+<!-- 2016/12/15 ルームインジケータ、連絡事項店舗区分 by wx end  -->
+<apex:attribute name="idx" type="Integer" description="index code" default="1" />
+<!-- 2018/12/3  連絡事項 多个输入框还是ckeditor -->
+<apex:attribute name="ckeditor" type="Boolean" description="show richtextarea or message x" default="false" />
+<!-- 初期情報 -->
+{!Init}
+<style>
+.{!container}_msgbox{
+	width: 100%;
+}
+.{!container}_outMessage{
+	width:100%; 
+	max-width:270px;
+	height:14px;
+	display:block; 
+	overflow:hidden;
+	border-bottom: dashed 1px #0088cc;
+	word-break:keep-all;/* 改行せず */
+    white-space:nowrap;/* 改行せず */
+    overflow:hidden;/* 内容自動隠す */
+    text-overflow:ellipsis;/* 隠される場合、...表示する */
+}
+.{!container}_inputMessage{
+	width:96%;
+	height:14px;
+}
+table .{!container} .dataCol{
+	padding-left: 0px; 
+}
+.k-widget.k-tooltip{
+	background-color: #f8f8f8;
+}
+.{!container}_newFlag {
+    color: red;
+    font-size: .1em;
+    background-image: none;
+    margin: 0;
+    padding: 0;
+    top: 0px;
+    font-family: Arial,Helvetica,sans-serif;
+    position: relative;
+    font-weight: bold;
+    width: 20px;
+    display: none !important;
+}
+.{!container}_editable{
+	background:url(/img/func_icons/util/pencil12.gif) no-repeat right 2px;
+}
+.{!container}_inlineEditWrite{
+	width:270px;
+}
+.{!container}_changeBg{
+	background: #ffe4c4 !important;
+}
+.{!container}_colTd {
+	width:25px;
+	text-align:right;
+	word-break:keep-all;
+}
+.{!container}_colTd label{
+	vertical-align: middle;
+	word-break:keep-all;
+	white-space:nowrap;
+}
+#{!container}_body .apexp .bPageBlock.apexDefaultPageBlock .pbBody{
+	margin:0;
+}
+#{!container}_body .bPageBlock .pbHeader>table>tbody>tr>td {
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+</style>
+<apex:outputPanel rendered="{!(idx == 1)}">
+<script>
+var _refreshFunNameSet = new Set();
+window.{!refreshMessageFunName} = function (){
+	for (var funNm of _refreshFunNameSet) {
+		var fun = window[funNm];
+		if (typeof fun === "function") fun();//eval(_refreshFunNameLst[i]);
+	}
+}
+</script>
+</apex:outputPanel>
+<script>
+var {!container}_timerid;
+var {!container}_timerInterval=1*{!JSENCODE(TEXT($Setup.CommDefine__c.ps__TimerSecond__c))}*1000;
+var {!container}_MOBILE_FLG = kendo.support.mobileOS;
+var {!container}_isCanUpdateFlg = {!(isCanUpdateLead)};
+_refreshFunNameSet.add("{!container}_{!refreshMessageFunName}");
+(function($){
+	//var createArr = new Array();
+	// 自動更新するがどうか制限フラグ：TRUE：自動更新STOP、FALSEの場合、自動更新する
+	var {!container}_refreshLockFlg = false;
+	var backImg = $("<img width = '16px' height = '16px' src='/s.gif' style='position:absolute;z-index:5;' alt='元に戻す' class='inlineEditUndo' >");
+	
+	function _chkEditModeFun(isLocking) {
+		{!container}_refreshLockFlg = isLocking;
+		if(isLocking){
+			if ({!container}_timerid) {
+				clearInterval({!container}_timerid);
+				{!container}_timerid = null;
+			}
+			{!container}_timerid = setInterval(_chkEditModeFun(false),{!container}_timerInterval);
+		}
+	}
+	window.{!container}_eventBind = function(){
+		$(".{!container}_inputMessage").kendoTooltip({
+			autoHide: false,
+			position: "top",
+			width:330,
+			showOn:"keypress",
+			content: function(e){
+				return e.target.val();
+			},
+		});
+		$(".{!container}_inputMessage").unbind("keyup");
+		$(".{!container}_inputMessage").keyup(function(){
+			var curToolTips = $(this).data("kendoTooltip");
+			if(curToolTips != null && curToolTips != undefined){
+				curToolTips.refresh();
+			} 
+		  	if($(this).val() != "" ){
+		  		curToolTips.show();
+		  		var toolTipsContent = curToolTips.popup.element;
+		  		var toolTipsWrapper = curToolTips.popup.wrapper;
+		  		var wrapperHeight = toolTipsContent.height() > 23 ? toolTipsContent.height() : 23; 
+		  		var offsetTop = $(this).offset().top - wrapperHeight -  12;
+		  		if(toolTipsWrapper.css("top") != offsetTop){
+		  			toolTipsWrapper.css("top",offsetTop);
+		  		}
+		  	}else{
+		  		curToolTips.hide();
+		  	}
+		  	if($(this).val() != $(this).data("title")){
+	  			$(this).addClass("{!container}_changeBg");
+	  		}else{
+	  			$(this).removeClass("{!container}_changeBg");
+	  		}
+		  });
+		$(".{!container}_inputMessage").unbind("focus");
+		$(".{!container}_inputMessage").focus(function(){ 
+			if($(this).val() != "" ) $(this).data("kendoTooltip").show();
+			if($(".k-tooltip-content").text() != $(this).val()) $(this).data("kendoTooltip").refresh();
+			if($(this).data("title") == undefined) $(this).data("title","");
+			_chkEditModeFun(true);
+		});
+		
+		$(".{!container}_inputMessage").unbind("blur");
+	    $(".{!container}_inputMessage").blur(function(){ 
+	    	$(this).data("kendoTooltip").hide();
+	    	_chkEditModeFun(false);
+	    });
+	   
+		$(".{!container}_outMessage").urlAutoLink();
+		$(".{!container}_outMessage").unbind("mouseenter");
+		$(".{!container}_outMessage").mouseenter(function(){
+			$(this).addClass("{!container}_editable");
+		});
+		$(".{!container}_outMessage").unbind("mouseleave");
+		$(".{!container}_outMessage").mouseleave(function(){
+			$(this).removeClass("{!container}_editable");
+		});
+		$(".{!container}_outMessage").unbind("dblclick");
+		$(".{!container}_outMessage").dblclick(function(){
+			_chkEditModeFun(true);
+			$(this).hide();
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+			var input = $(this).closest("td").find("input,textarea");
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+			input.show();
+			input.focus();
+			var message = input.val();
+			input.val("");
+			input.val(message);
+			input.data("title",message);
+			var cloneBackImg = backImg.clone();
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+			// ボタン距離設定
+			var space = 16;
+			if({!ckeditor} && input.prop("tagName") == "TEXTAREA"){
+				// ツール初期化
+				var fieldName = input.attr("fieldName");
+				var instance = CKEDITOR.replace("m_{!container}_" + fieldName, {width: input.parent().width(), height: "120px", language: "ja", entities: false});
+				input.data("CKEDITOR", instance);
+				input.addClass("{!container}_changing");
+				cloneBackImg.data("TEXTAREA", input);
+				cloneBackImg.attr("id", "img_{!container}");
+				instance.setData(input.text());
+				var $input = input;
+				// ckediteor绑定加载完毕事件
+				instance.once("instanceReady", function(){ 
+					$input.data("OLDCONTENT", instance.getData());					
+				});
+				// 获取父类div
+				input = input.parent();
+				space = 5;
+			}
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+			input.after(cloneBackImg);
+			$(this).closest("td").next().find(".{!container}_newFlag").hide();
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+			cloneBackImg.css({top: input.position().top ,left: input.position().left + input.width() + space});
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+			cloneBackImg.click(function(){
+				// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+				if({!ckeditor}) return {!container}_textareaCancel(this);
+				// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+				var $td =  $(this).closest("td");
+				var $input = $td.find("input");
+				$input.removeClass("{!container}_changeBg");
+				var $span = $td.find("span.{!container}_outMessage");
+				var orgMessage = $(this).closest("td").find("span[title]").attr("title");
+				$input.val(orgMessage);
+				$input.hide();
+				$span.show();
+				$(this).remove();
+				_chkEditModeFun(false);
+			});
+		});
+		if({!container}_MOBILE_FLG ){
+			$j("#{!container}_body span.{!container}_outMessage").css("font-size","10px");
+		}
+		// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+		if ({!ckeditor}) {
+			// 绑定按键事件
+			$j(document).keyup(function(event){
+				// ESC
+				if(event.keyCode == "27"){ 
+					var img = $j("#img_{!container}");
+					img.prop("tagName") == "IMG" && {!container}_textareaCancel(img);
+				}
+			});
+		}
+		// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+	}
+	window.{!container}_onsubmit = function(that){
+		/*
+		var noUpdFields = new Array();
+		$(".{!container}_outMessage").each(function(){
+			// 変更されない内容は更新項目対象外になる対応
+			if($(this).css("display") != "none"){
+				var fieldName = $(this).closest("td.{!container}_inlineEditWrite").data("fieldname");
+				noUpdFields.push(fieldName);
+			}
+		});
+		$("input.{!container}_inputMessage:not(.{!container}_changeBg)").each(function(){
+			var fieldName = $(this).closest("td.{!container}_inlineEditWrite").data("fieldname");
+			if($.inArray(fieldName , noUpdFields) < 0)
+				noUpdFields.push(fieldName);
+		});
+		$("input[id$=hidNoUpdFields]").val(noUpdFields.toString());
+		*/
+		// 変更される対象項目はJSONに変換、DBへ更新を行う
+		window._blockUi();
+		var isOldFlg = $("#{!container}_HidOldFlg").val();
+		var dao = {};
+		var name = $("#{!container}_HidName").val();
+		var spcd = "{!JSENCODE(shopcode)}";
+		// 過去のデータの場合、すべて内容はDBへ反映する
+		var $target = (isOldFlg == "true" 
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+			? $("input.{!container}_inputMessage, textarea[typ='{!container}_TEXTAREA']")
+			: $("input.{!container}_inputMessage.{!container}_changeBg, textarea[typ='{!container}_TEXTAREA']"));
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+		$target.each(function(){
+			var fName = $(this).closest("td.{!container}_inlineEditWrite").data("fieldname");
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+			var fVal = $(this).prop("tagName") == "TEXTAREA" ? $(this).data("CKEDITOR") ? $(this).data("CKEDITOR").getData() : $(this).text() : $(this).val();
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+			dao[fName] = fVal;
+		});
+		if({!ckeditor} && isOldFlg == 'true'){
+			var lastYearMsgJson = $("#{!container}_last-year-msg-json").val();
+			var lastYearMsg = JSON.parse(lastYearMsgJson);
+			dao = $.extend(lastYearMsg, dao);
+		}
+		// DBへ更新反映する
+		Visualforce.remoting.Manager.invokeAction(
+		   "{!$RemoteAction.MessageItemCtrl.updateMessage}",JSON.stringify(dao),name,spcd, function(result, event){
+	        // 異常
+	     	if(event.type == 'exception') {
+	            alert(event.message);
+	            window._unblockUi();
+	     	} else {
+	     		// 画面REFRESH
+	     		{!container}_timerRefreshMessageItemFun();
+			}
+	    });
+	}
+	// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+	// キャンセル機能
+	{!container}_textareaCancel = function(that){
+		var $this =	$j(that);
+		// 元機能INPUT
+		var textarea = $this.data("TEXTAREA");
+		if(textarea){
+			$this.removeData("TEXTAREA");
+			var ckeditorInstance = textarea.data("CKEDITOR");
+			if(ckeditorInstance){
+				if((textarea.data("OLDCONTENT") || "").replaceAll("\n", "") !== (ckeditorInstance.getData() || "").replaceAll("\n", "")){
+					var spcd = "{!JSENCODE(shopcode)}";
+					if(confirm("連絡事項" + (spcd.length ? "[" + spcd + "]" : "") + "の変更内容を保存しますか？")){
+						window.{!container}_onsubmit();
+						return;
+					}
+				}
+				ckeditorInstance.destroy();
+				textarea.removeClass("{!container}_changing");
+				textarea.hide();
+				textarea.nextAll("div.{!container}_outMessage").show();
+				$this.remove();
+			}
+		}
+	}
+	// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+	window.{!container}_{!refreshMessageFunName} = function (){
+		// 画面自動REFRESH状態チエックを行う
+		if(!{!container}_refreshLockFlg){
+			// 変更項目なし&&編集中じゃない場合、自動更新をRESETする
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN
+			if($(".{!container}_changeBg,.{!container}_changing").length <= 0 ) {
+			// 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END
+				_chkEditModeFun(false);
+				{!container}_timerRefreshMessageItemFun();
+			}
+		}
+	}
+	// ******************************************
+	// UI BLOCK
+	// ******************************************
+	// 画面Lockする
+	window._blockUi = function () {
+	    $.blockUI({
+	        baseZ: 60000,
+	        message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> Processing...</h1>'
+	    });
+	    return true;
+	}
+	// Lock解除
+	window._unblockUi = function() {
+	    $.unblockUI({ fadeOut: 200 }); 
+	}
+	/* 自動URLリンクプラグイン for jQuery */
+	$.fn.urlAutoLink = function(baseURL){
+		var myRegexp = /((https?):\/\/[\x21-\x7e]+)/gi
+		return this.each(function(){
+			// 2019/05/31 bug fix リンクありのメッセージ、刷新表示なしのエラー修正 by zy BEGIN
+			//var autoCreate = $(this).find(".autoCreate");
+			//if (autoCreate.length > 0) autoCreate.attr("href","");
+			var srcText = this.innerHTML;
+			var srcTextContent = $("<div/>").html($(this).text()).get(0).textContent;
+			//var match = myRegexp.exec(srcText);
+			var match = myRegexp.exec(srcTextContent);
+			if (match != null) {
+				// var linkTitle = srcText.replace(myRegexp, "");
+				var linkTitle = srcText;
+				// 2019/05/31 bug fix リンクありのメッセージ、刷新表示なしのエラー修正 by zy END
+				if (linkTitle != "") {
+			   		// URL LINK ありの場合
+			    	this.innerHTML = "<a href='"+match[1]+"' target='_blank'>"+linkTitle+"</a>";
+			    } else {
+			    	this.innerHTML = "<a href='"+match[1]+"' target='_blank'>"+match[1]+"</a>";
+			    }
+			}
+		});
+	}
+})(jQuery);
+</script>
+<apex:form id="_messageForm" >
+<span id="{!container}_body">
+<apex:pageBlock title="{!$Label.ps__msg_003_0021}{!IF(OR(LEN(shopcode) == 0,$Setup.CommDefine__c.RoomIndicatorMultiSelectFlg__c != true),'','['+shopcode+']')}">
+	<apex:pageBlockButtons location="top">
+	<input type="button" onclick="javascript:window.{!container}_onsubmit()" value="{!$Label.MSG_003_0022}" class="btn" style="min-width:100px;height:20px"/>
+	</apex:pageBlockButtons>
+	
+	<apex:actionRegion >
+	<apex:actionFunction name="{!container}_timerRefreshMessageItemFun" action="{!refreshMessage}" reRender="{!$Component._messageForm}" oncomplete="window._unblockUi();"/>
+	</apex:actionRegion>
+<script>
+(function($){
+	$(document).ready(function() {
+		//window.{!container}_clearAndNewTimer();
+		if (!{!container}_isCanUpdateFlg) return;
+		// Event Bind
+		window.{!container}_eventBind();
+	});
+})(jQuery);
+</script>
+
+	<input type="hidden" value="{!messageObj.Name}" id="{!container}_HidName"/>
+	<input type="hidden" value="{!isOldDataFlg}" id="{!container}_HidOldFlg"/>
+	<input type="hidden" value="{!lastYearMsgJson}" id="{!container}_last-year-msg-json"/>
+	<!-- 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN -->
+	<apex:outputPanel rendered="{!!ckeditor}">
+	<!-- 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END -->
+	<table style="margin-left: 50px;table-layout: fixed;" class="{!container}">
+		<tr style="{!IF(maxRows > 0, 'display:block', 'display:none')}">
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　１"/>
+		    </td>
+    		<td class="{!container}_inlineEditWrite" data-fieldname="Message1__c" >
+	   			<apex:inputField value="{!messageObj.Message1__c}"  html-class="{!container}_inputMessage" html-title="{!messageObj.Message1__c}"
+	   				style="display:{!if(len(NULLVALUE(messageObj.Message1__c,'')) == 0,'block','none')}"/>
+	
+				<apex:outputField value="{!messageObj.Message1__c}" title="{!messageObj.Message1__c}" html-class="{!container}_outMessage" 
+					html-data-type="text"
+					rendered="{!len(NULLVALUE(messageObj.Message1__c,'')) > 0}">
+				</apex:outputField>
+			</td>
+			<td><apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message1__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　２"/>
+		    </td>
+    		<td class="{!container}_inlineEditWrite" data-fieldname="Message2__c" >
+    			<apex:inputField value="{!messageObj.Message2__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message2__c}"
+    				style="display:{!if(len(NULLVALUE(messageObj.Message2__c,'')) == 0,'block','none')}" />
+				
+				<apex:outputField value="{!messageObj.Message2__c}" title="{!messageObj.Message2__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message2__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message2__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　３"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message3__c" >
+		    	<apex:inputField value="{!messageObj.Message3__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message3__c}"
+		    		style="display:{!if(len(NULLVALUE(messageObj.Message3__c,'')) == 0,'block','none')}" />
+			
+				<apex:outputField value="{!messageObj.Message3__c}" title="{!messageObj.Message3__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message3__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message3__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　４"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message4__c" >
+		    	<apex:inputField value="{!messageObj.Message4__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message4__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message4__c,'')) == 0,'block','none')}" />
+		    
+				<apex:outputField value="{!messageObj.Message4__c}" title="{!messageObj.Message4__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message4__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message4__c != '' ,'block', 'none')}">New!</span>
+			</td>
+		</tr>
+		<tr style="{!IF(maxRows > 1, 'display:block', 'display:none')}">
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　５"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message5__c" >
+		    	<apex:inputField value="{!messageObj.Message5__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message5__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message5__c,'')) == 0,'block','none')}"  />
+				<apex:outputField value="{!messageObj.Message5__c}" title="{!messageObj.Message5__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message5__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message5__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">		    
+		    	<apex:outputLabel value="　６"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message6__c" >
+		    	<apex:inputField value="{!messageObj.Message6__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message6__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message6__c,'')) == 0,'block','none')}" />
+				<apex:outputField value="{!messageObj.Message6__c}" title="{!messageObj.Message6__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message6__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message6__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　７"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message7__c" >
+		    	<apex:inputField value="{!messageObj.Message7__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message7__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message7__c,'')) == 0,'block','none')}" />
+				<apex:outputField value="{!messageObj.Message7__c}" title="{!messageObj.Message7__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message7__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message7__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　８"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message8__c" >
+		   		<apex:inputField value="{!messageObj.Message8__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message8__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message8__c,'')) == 0,'block','none')}" />
+		    
+				<apex:outputField value="{!messageObj.Message8__c}" title="{!messageObj.Message8__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message8__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message8__c != '' ,'block', 'none')}">New!</span>
+			</td>
+		</tr>
+		<tr style="{!IF(maxRows > 2, 'display:block', 'display:none')}">
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="　９"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message9__c" >
+		    	<apex:inputField value="{!messageObj.Message9__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message9__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message9__c,'')) == 0,'block','none')}" />
+				<apex:outputField value="{!messageObj.Message9__c}" title="{!messageObj.Message9__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message9__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message9__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="１０"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message10__c" >
+		   	 	<apex:inputField value="{!messageObj.Message10__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message10__c}"
+		    			style="display:{!if(len(NULLVALUE(messageObj.Message10__c,'')) == 0,'block','none')}" />
+		    
+				<apex:outputField value="{!messageObj.Message10__c}" title="{!messageObj.Message10__c}" html-class="{!container}_outMessage" 
+					rendered="{!len(NULLVALUE(messageObj.Message10__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message10__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="１１" />
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message11__c" >
+				    <apex:inputField value="{!messageObj.Message11__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message11__c}"
+				    		style="display:{!if(len(NULLVALUE(messageObj.Message11__c,'')) == 0,'block','none')}" />
+				    
+				    
+					<apex:outputField value="{!messageObj.Message11__c}" title="{!messageObj.Message11__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message11__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message11__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd"  nowrap="nowrap" >
+		    	<apex:outputLabel value="１２"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message12__c" >
+				    <apex:inputField value="{!messageObj.Message12__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message12__c}"
+				    		style="display:{!if(len(NULLVALUE(messageObj.Message12__c,'')) == 0,'block','none')}" />
+				    
+				    
+					<apex:outputField value="{!messageObj.Message12__c}" title="{!messageObj.Message12__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message12__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message12__c != '' ,'block', 'none')}">New!</span>
+			</td>	
+		</tr>
+
+		<tr style="{!IF(maxRows > 3, 'display:block', 'display:none')}">
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="１３"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message13__c" >
+				    <apex:inputField value="{!messageObj.Message13__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message13__c}"
+				    		style="display:{!if(len(NULLVALUE(messageObj.Message13__c,'')) == 0,'block','none')}" />
+				    
+				    
+					<apex:outputField value="{!messageObj.Message13__c}" title="{!messageObj.Message13__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message13__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message13__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="１４"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message14__c" >
+				    <apex:inputField value="{!messageObj.Message14__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message14__c}"
+				    		style="display:{!if(len(NULLVALUE(messageObj.Message14__c,'')) == 0,'block','none')}" />
+				    
+					<apex:outputField value="{!messageObj.Message14__c}" title="{!messageObj.Message14__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message14__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message14__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+		    	<apex:outputLabel value="１５"/>
+		    </td>
+		    <td class="{!container}_inlineEditWrite" data-fieldname="Message15__c" >
+				    <apex:inputField value="{!messageObj.Message15__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message15__c}"
+				    		style="display:{!if(len(NULLVALUE(messageObj.Message15__c,'')) == 0,'block','none')}" />
+				    
+					<apex:outputField value="{!messageObj.Message15__c}" title="{!messageObj.Message15__c}" html-class="{!container}_outMessage" 
+						rendered="{!len(NULLVALUE(messageObj.Message15__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message15__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="１６"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message16__c" >
+					    <apex:inputField value="{!messageObj.Message16__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message16__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message16__c,'')) == 0,'block','none')}" />
+					    
+						<apex:outputField value="{!messageObj.Message16__c}" title="{!messageObj.Message16__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message16__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message16__c != '' ,'block', 'none')}">New!</span>
+			</td>
+		</tr>
+		<tr style="{!IF(maxRows > 4, 'display:block', 'display:none')}">
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="１７"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message17__c" >
+					    <apex:inputField value="{!messageObj.Message17__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message17__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message17__c,'')) == 0,'block','none')}" />
+					    
+						<apex:outputField value="{!messageObj.Message17__c}" title="{!messageObj.Message17__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message17__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message17__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="１８"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message18__c" >
+					    <apex:inputField value="{!messageObj.Message18__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message18__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message18__c,'')) == 0,'block','none')}" />
+					    
+						<apex:outputField value="{!messageObj.Message18__c}" title="{!messageObj.Message18__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message18__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message18__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="１９"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message19__c" >
+					    <apex:inputField value="{!messageObj.Message19__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message19__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message19__c,'')) == 0,'block','none')}" />
+					    
+						<apex:outputField value="{!messageObj.Message19__c}" title="{!messageObj.Message19__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message19__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message19__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="２０"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message20__c" >
+					    <apex:inputField value="{!messageObj.Message20__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message20__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message20__c,'')) == 0,'block','none')}" />
+					    
+						<apex:outputField value="{!messageObj.Message20__c}" title="{!messageObj.Message20__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message20__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message20__c != '' ,'block', 'none')}">New!</span>
+			</td>
+		</tr>
+		<tr style="{!IF(maxRows > 5, 'display:block', 'display:none')}">
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="２１"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message21__c" >
+					    <apex:inputField value="{!messageObj.Message21__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message21__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message21__c,'')) == 0,'block','none')}" />
+					    
+						<apex:outputField value="{!messageObj.Message21__c}" title="{!messageObj.Message21__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message21__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message21__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="２２"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message22__c" >
+					    <apex:inputField value="{!messageObj.Message22__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message22__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message22__c,'')) == 0,'block','none')}" />
+					    
+					    
+						<apex:outputField value="{!messageObj.Message22__c}" title="{!messageObj.Message22__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message22__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message22__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="２３"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message23__c" >
+					    <apex:inputField value="{!messageObj.Message23__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message23__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message23__c,'')) == 0,'block','none')}" />
+					    
+					    
+						<apex:outputField value="{!messageObj.Message23__c}" title="{!messageObj.Message23__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message23__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message23__c != '' ,'block', 'none')}">New!</span>
+			</td>
+			<td class="{!container}_colTd">
+			    <apex:outputLabel value="２４"/>
+			</td>
+			<td class="{!container}_inlineEditWrite" data-fieldname="Message24__c" >
+					    <apex:inputField value="{!messageObj.Message24__c}" html-class="{!container}_inputMessage" html-title="{!messageObj.Message24__c}"
+					    		style="display:{!if(len(NULLVALUE(messageObj.Message24__c,'')) == 0,'block','none')}" />
+					    
+					    
+						<apex:outputField value="{!messageObj.Message24__c}" title="{!messageObj.Message24__c}" html-class="{!container}_outMessage" 
+							rendered="{!len(NULLVALUE(messageObj.Message24__c,'')) > 0}"/>
+			</td>
+			<td>
+				<apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/>
+				<span class="{!container}_newFlag" style="display:{!if(updMessageObj.Message24__c != '' ,'block', 'none')}">New!</span>
+			</td>
+		</tr>
+			
+		<tr style="{!IF(maxRows > 6, 'display:block', 'display:none')}">
+			<td><apex:image value="{!URLFOR($Resource.reportFiles, 'img/blank')}" width="20" height="5"/></td>
+		</tr>
+		</table>
+	<!-- 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw BEGIN -->
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{!ckeditor}">
+		<table style="table-layout: fixed;" class="{!container}">
+			<tr>
+				<td class="{!container}_inlineEditWrite" data-fieldname="MessageRich__c">
+					<div id="MessageRich__c_{!container}" style="display: none;">
+						<textarea id="m_{!container}_MessageRich__c" style="display:none;" fieldName="MessageRich__c" typ="{!container}_TEXTAREA">{!messageObj.MessageRich__c}</textarea>
+						<!-- 2019/03/15 特記事項の縦幅は制限なしで対応する by cxw BEGIN -->
+						<div class="{!container}_outMessage" style="min-height:20px ;overflow: hidden;height: auto;max-width: none;" id="{!container}_Message">
+						<!-- 2019/03/15 特記事項の縦幅は制限なしで対応する by cxw END -->
+							<!-- <apex:outputField value="{!messageObj.MessageRich__c}" rendered="{!len(NULLVALUE(messageObj.MessageRich__c,'')) > 0}"></apex:outputField> -->
+							<!-- 2019/05/31 bug fix リンクありのメッセージ、刷新表示なしのエラー修正 by zy BEGIN -->
+							<span class="richContent" style="word-break: break-all; white-space: normal; display: none;">
+							{!messageObj.MessageRich__c}</span>
+							<!-- 2019/05/31 bug fix リンクありのメッセージ、刷新表示なしのエラー修正 by zy END -->
+						</div>
+						<script>
+							(function(idName, idName2){
+								var message = $j("#" + idName);
+								// 2019/05/31 bug fix リンクありのメッセージ、刷新表示なしのエラー修正 by zy BEGIN
+								// var span = message.children("span");
+								var span = message.find("span.richContent");
+								// 2019/05/31 bug fix リンクありのメッセージ、刷新表示なしのエラー修正 by zy END
+								var text = span.html(span.text()).text();
+								message.attr("title", text);
+								span.show();
+								var rich = $j("#" + idName2);
+								rich.css("width",  $j(window).width() - 60);
+								rich.show();
+							})("{!container}_Message", "MessageRich__c_{!container}");
+						</script>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</apex:outputPanel>
+	<!-- 2018/12/15 ルームインジケータ画面に連絡事項は１項目に変更対応 by cxw END -->
+</apex:pageBlock>
+</span>
+</apex:form>
+</apex:component>

@@ -1,0 +1,159 @@
+<apex:component controller="AutoCompleteCtrl">
+  <!-- JQuery Files -->
+  <!-- 
+  <apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+  <apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+  <apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+   -->
+  <!-- Attributes Required For Component -->
+  <apex:attribute name="objectname" description="The object name you want to look for." type="String" required="true"/>
+  <apex:attribute name="additionalfield" description="Any additional fields you'd like to search and include in the display." type="String" required="false"/>
+  <apex:attribute name="autocomplete_textbox" description="The ID for the Autocomplete List Textbox." type="String" required="true"/>
+  <apex:attribute name="addFilter" description="Add Find Data Where Contion String" type="String" />
+  <apex:attribute name="showField" description="the Filed Info in the search Result List" type="String"/>
+  <apex:attribute name="maxLenFilter" description="Add Filter for the Filed max size" type="String"/>
+  <apex:attribute name="showFieldSeparator" description="Show Filed Separator" type="String" default=" "/>
+  <apex:attribute name="soslExtend" description="Show Filed Separator" type="Boolean" default="true"/>
+  <apex:attribute name="callbackFunction" description="call back function" type="String" default=""/>
+  <apex:attribute name="selectedCallBackFunction" description="call back function on selected" type="String" default=""/>
+  <apex:attribute name="jslibnew" description="js lib diffent: Ver1.91以後のJuqeryを使う場合、該当パラメータはtrue設定する" type="Boolean" default="false"/>
+  <apex:attribute name="sortKey" description="sort key" type="String" default=""/>
+  <apex:attribute name="respBeforeFunction" description="js function for data process before show" type="String" default=""/>
+  <apex:attribute name="withContact" description="find scope include contact info" type="boolean" default="false"/>
+  <apex:attribute name="contactKey" description="the key of objectname join contact relation" type="string" default="" />
+  <apex:attribute name="noResultAutoClearId" description="auto clear org id when query result not found" type="boolean" default="true"/>
+  <!-- 2018/05/21 宿帳入力機能改善対応 zyz BEGIN -->
+  <apex:attribute name="autofocus" description="auto focus" type="boolean" default="true"/>
+  <apex:attribute name="comdefNoUse" description="共通定義の「客様検索機能の表示項目」設定内容無効化" type="boolean" default="false"/>
+  <!-- 2018/05/21 宿帳入力機能改善対応 zyz END -->
+  <style>
+    .ui-autocomplete-loading { background: white url({!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}) right center no-repeat; }
+    .ui-autocomplete { position: absolute; cursor: default;z-index:30 !important;}
+  </style>
+  <script type="text/javascript">
+    //var j$ = jQuery.noConflict();
+    //j$(document).ready(function() {
+(function($){
+	$(document).ready(function() {
+        var sObjects;
+        var queryTerm;
+		var fieldSizeFilterStr = "{!maxLenFilter}";
+		var fieldSizeFilter = new Array();
+		var fieldSizeFilterLen = new Array();
+		if ($.trim(fieldSizeFilterStr).length > 0) {
+			//var fieldSizeFilter = fieldSizeFilterStr.split(",");
+			
+			$.each(fieldSizeFilterStr.split(",") , function(key, value) {
+				var sizeFilterItem = value.split(":");
+				fieldSizeFilter.push(sizeFilterItem[0]);
+				fieldSizeFilterLen.push(sizeFilterItem[1]);
+			});
+		}
+		var isNewJsLib = "{!IF(jslibnew, 'ui-autocomplete','autocomplete')}";
+        $(esc('{!autocomplete_textbox}')).autocomplete({
+            minLength: 2,
+            source: function(request, response) {
+                        queryTerm = request.term;
+                        Visualforce.remoting.Manager.invokeAction(
+                        "{!IF(soslExtend, $RemoteAction.AutoCompleteCtrl.findSObjectsExtSL3, $RemoteAction.AutoCompleteCtrl.findSObjectsExt3)}",
+                        "{!objectname}", request.term, "{!additionalfield}","{!addFilter}","{!showField}", "{!sortKey}", "{!withContact}","{!contactKey}","{!comdefNoUse}", function(result, event){
+                            if(event.type == 'exception') {
+                                  alert(event.message);
+                            } else {
+                            	// 検索結果はなかった場合、IDはクリアする
+								if (result == null || result.length == 0) {
+									if ({!noResultAutoClearId}) {
+										$(esc('{!autocomplete_textbox}_lkid')).val("");
+									}
+								}
+								else {
+									if("{!respBeforeFunction}" != ""){
+			                  			var wkRespBeforeFunction = eval("{!respBeforeFunction}");
+										wkRespBeforeFunction(result);
+		                    		}
+                                }
+                                sObjects = result;
+                                response(sObjects);
+                            }
+                        });
+                   },
+            focus: function( event, ui ) {
+                    // 2018/05/21 宿帳入力機能改善対応 zyz BEGIN
+                    if ({!autofocus}) {
+                    // 2018/05/21 宿帳入力機能改善対応 zyz END
+	                    $(esc('{!autocomplete_textbox}')).val( ui.item.Name );
+	                    if("{!callbackFunction}" != ""){
+		                  	var callback = eval("{!callbackFunction}");
+							callback(ui.item,"{!autocomplete_textbox}");
+	                    }
+                    // 2018/05/21 宿帳入力機能改善対応 zyz BEGIN
+                    }
+                    // 2018/05/21 宿帳入力機能改善対応 zyz END
+                    return false;
+			},
+            select: function( event, ui ) {
+                        $(esc('{!autocomplete_textbox}')).val( ui.item.Name );
+                        $(esc('{!autocomplete_textbox}_lkid')).val( ui.item.Id );
+                        $(esc('{!autocomplete_textbox}_lkold')).val( ui.item.Name );
+                        if("{!callbackFunction}" != ""){
+		                  	var callback = eval("{!callbackFunction}");
+							callback(ui.item,"{!autocomplete_textbox}");
+	                    }
+	                    if("{!selectedCallBackFunction}" != ""){
+		                  	var selectedCallBackFunction = eval("{!selectedCallBackFunction}");
+							selectedCallBackFunction(ui.item,"{!autocomplete_textbox}");
+	                    }
+	                    
+                        return false;
+                    },
+         })
+         //.data( "autocomplete" )._renderItem = function( ul, item ) {
+         .data( isNewJsLib )._renderItem = function( ul, item ) {
+            var entry = "<a>" + item.Name;
+	    // 2019/05/21 お客様検索機能、表示項目をカスタマイズできるように改善 BEGIN
+            var disFields = "{!NULLVALUE(showField,additionalfield)}";
+            var contactFiels = $("#contactdef_{!Guid}").val();
+            if (contactFiels != "") disFields = contactFiels;
+
+            //$.each("{!NULLVALUE(showField,additionalfield)}".split(",") , function(key, value) {
+            $.each(disFields.split(",") , function(key, value) {  
+	    // 2019/05/21 お客様検索機能、表示項目をカスタマイズできるように改善 END
+            	var obj = item;
+            	var api = value;
+            	var subInx = value.indexOf('__r.');
+            	if (subInx > 0) {
+            		var subObj = value.split(".");
+            		api = subObj[1];
+            		obj = obj[subObj[0]];
+            	}
+				if (obj != undefined) {
+            	// NameSpace対応
+            	var nsApi = "{!ns}" + value;
+            	var showInfo = (obj[api] == undefined	? (obj[nsApi] == undefined ? "" : (typeof obj[nsApi] == "string" ? $.trim(obj[nsApi]) : obj[nsApi]))
+            											: (typeof obj[api] == "string" ? $.trim(obj[api]) : obj[api]));
+                var findIndex = $.inArray(value, fieldSizeFilter);
+                // 表示サイズ制御があり場合
+                if (findIndex >= 0) {
+                	showInfo = showInfo.substring(0, showInfo.length > fieldSizeFilterLen[findIndex] ? fieldSizeFilterLen[findIndex] : showInfo.length);
+                }
+                entry = entry + (showInfo.length == 0 ? "" : "{!showFieldSeparator}" + showInfo);
+                }
+            });
+            entry = entry + "</a>";
+            entry = entry.replace(queryTerm, "<b>" + queryTerm + "</b>");
+            return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( entry )
+                .appendTo( ul );
+        };
+	});
+    function esc(myid) {
+           return '#' + myid.replace(/(:|\.)/g,'\\\\$1');
+    }
+    
+})(jQuery);
+
+  </script>
+  <!-- 2019/05/21 お客様検索機能、表示項目をカスタマイズできるように改善 -->
+  <input type="hidden" value="{!if(LOWER(objectname)=='contact' && !comdefNoUse,custFields,'')}" id="contactdef_{!Guid}" />
+</apex:component>

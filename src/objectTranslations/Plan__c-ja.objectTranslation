@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>プラン</value>
+    </caseValues>
+    <fields>
+        <label><!-- AccountA --></label>
+        <name>AccountA__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- AccountB --></label>
+        <name>AccountB__c</name>
+        <relationshipLabel><!-- プラン (AccountB) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- AccountC --></label>
+        <name>AccountC__c</name>
+        <relationshipLabel><!-- プラン (AccountC) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- AccountTotal --></label>
+        <name>AccountTotal__c</name>
+    </fields>
+    <fields>
+        <label><!-- ベースプラン --></label>
+        <name>BasePlanFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入湯税 --></label>
+        <name>BathTaxAccMstRef__c</name>
+        <relationshipLabel><!-- プラン (入湯税) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Charge1 --></label>
+        <name>Charge1__c</name>
+    </fields>
+    <fields>
+        <label><!-- Charge2 --></label>
+        <name>Charge2__c</name>
+    </fields>
+    <fields>
+        <label><!-- Charge3 --></label>
+        <name>Charge3__c</name>
+    </fields>
+    <fields>
+        <label><!-- ChargeRC --></label>
+        <name>ChargeRC__c</name>
+    </fields>
+    <fields>
+        <label><!-- コメント --></label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label><!-- カテゴリ --></label>
+        <name>DpRef__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 食事内容（英） --></label>
+        <name>EnMealMemo__c</name>
+    </fields>
+    <fields>
+        <label><!-- Plan（英） --></label>
+        <name>EnName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部門 --></label>
+        <name>GpRef__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- イメージ1 --></label>
+        <name>Image1__c</name>
+    </fields>
+    <fields>
+        <label><!-- イメージ2 --></label>
+        <name>Image2__c</name>
+    </fields>
+    <fields>
+        <label><!-- イメージ3 --></label>
+        <name>Image3__c</name>
+    </fields>
+    <fields>
+        <label><!-- イメージ4 --></label>
+        <name>Image4__c</name>
+    </fields>
+    <fields>
+        <label><!-- 非公開 --></label>
+        <name>IsClosed__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>JmstRef__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Lunch --></label>
+        <name>Lunch__c</name>
+        <relationshipLabel><!-- プラン (Lunch) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 食事内容 --></label>
+        <name>MealMemo__c</name>
+    </fields>
+    <fields>
+        <label><!-- パッケージコード --></label>
+        <name>PackageCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- PlanNo --></label>
+        <name>PlanNo__c</name>
+    </fields>
+    <fields>
+        <label><!-- プランオープン日時 --></label>
+        <name>PlanStartDateandtime__c</name>
+    </fields>
+    <fields>
+        <label><!-- Plan URL --></label>
+        <name>Plan_URL__c</name>
+    </fields>
+    <fields>
+        <label><!-- プランクローズ日時 --></label>
+        <name>Planclosedateandtime__c</name>
+    </fields>
+    <fields>
+        <label><!-- プラン金額 --></label>
+        <name>Price__c</name>
+    </fields>
+    <fields>
+        <help><!-- プラン属性情報 --></help>
+        <label><!-- 属性情報 --></label>
+        <name>PropRef__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <help><!-- サイトへ公開するプランにはチェックを入れる --></help>
+        <label><!-- PublicPlan --></label>
+        <name>PublicPlan__c</name>
+    </fields>
+    <fields>
+        <label><!-- Guest room name --></label>
+        <name>Roomname__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Guest room type --></label>
+        <name>Roomtype__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Seq# --></label>
+        <name>Seq__c</name>
+    </fields>
+    <fields>
+        <label><!-- ServiceNY$ --></label>
+        <name>ServiceN__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料(%) --></label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- Service$ --></label>
+        <name>Service__c</name>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 作成元（UI） --></label>
+        <name>UIEventSource__c</name>
+    </fields>
+    <fields>
+        <label><!-- AGT --></label>
+        <name>client__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Dinner --></label>
+        <name>dinner__c</name>
+        <relationshipLabel><!-- プラン --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- Cost of meal/person --></label>
+        <name>mealcost__c</name>
+    </fields>
+    <fields>
+        <label><!-- Morning --></label>
+        <name>morning__c</name>
+        <relationshipLabel><!-- プラン (朝食) --></relationshipLabel>
+    </fields>
+    <webLinks>
+        <label><!-- PlanDetailSetupBtn --></label>
+        <name>PlanDetailSetupBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- PlanMasterImportBtn --></label>
+        <name>PlanMasterImportBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- PlanMasterImportBtn2 --></label>
+        <name>PlanMasterImportBtn2</name>
+    </webLinks>
+</CustomObjectTranslation>

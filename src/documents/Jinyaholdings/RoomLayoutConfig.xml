@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：オーダーエントリー機能、部屋レイアウトをカスタマイズ情報定義
+書式：
+	SHOPCODE: 			店舗コード、支店が非存在する場合、空白のままに定義する
+	SHAPE:				レイアウト情報設定
+		COLOR：			該当店舗別枠の背景色の初期値
+		WIDTH：			テーブル表示枠の横幅サイズ(PX単位）
+		HEIGHT：			テーブル表示枠の縦幅サイズ(PX単位）
+2019.12.30 LAYOUTSETING　タグ新規追加
+	LAYOUTSETING		作成したレイアウト情報はオーダー画面に表示される場合、制限パラメータ設定用タグ
+		NOLEADSEL:		予約の入っていないお部屋はオーダエントリ画面から選択できる、できないフラグ設定タグ
+			TRUE:		オーダエントリ画面から選択できない
+			FALSE:		オーダエントリ画面から選択できる（デフォルト値）
+		CHECKOUTSEL:	チェックアウト済の部屋はオーダエントリ画面から選択できる、できないフラグ設定タグ
+			TRUE:		オーダエントリ画面から選択できない
+			FALSE:		オーダエントリ画面から選択できる（デフォルト値）
+		ROOMCHGDBLCLICK:モバイル(PAD)でお部屋の選択方式
+			TRUE:		ダブルクリックでお部屋を選択する
+			FALSE:		クリックでお部屋を選択する（デフォルト値）
+-->
+<SHOP>
+	<SHOPCODE></SHOPCODE>
+	<SHAPE>
+		<COLOR>#ececec</COLOR>
+		<WIDTH>78</WIDTH>
+		<HEIGHT>78</HEIGHT>
+	</SHAPE>
+	<LAYOUTSETING NOLEADSEL="FALSE" CHECKOUTSEL="FALSE" ROOMCHGDBLCLICK="FALSE"/>
+</SHOP>
+</root>

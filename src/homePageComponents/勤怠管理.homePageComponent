@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HomePageComponent xmlns="http://soap.sforce.com/2006/04/metadata">
+    <body>&lt;iframe src=&quot;/apex/ps__WorkTimeregiste&quot; id=&quot;workTimeFrame&quot; name=&quot;workTimeFrame&quot; frameborder=&quot;0&quot; style=&quot;overflow:hidden;with:220px;height: 100px;margin:0;padding:0;border:none;&quot;&gt;&lt;/iframe&gt;</body>
+    <pageComponentType>htmlArea</pageComponentType>
+    <width>narrow</width>
+</HomePageComponent>

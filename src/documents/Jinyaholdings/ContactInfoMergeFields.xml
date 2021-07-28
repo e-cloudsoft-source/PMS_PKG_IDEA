@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+「お客様のみマージ」機能に、マージする時に、加算項目を定義する
+書式：
+	SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+	MODE:		固定タグ
+		TYPE：	マージタイプ：　ADD(マージ先お客様の項目内容を加算（項目タイプ：数値）/連結（項目タイプ：文字列）する)
+		FIELDS: 固定タグ
+			FIELD: 	定義項目のAPI名
+			注意：インストール先のカスタマイズ項目APIとパッケージに含めている項目APIは同じする場合、お客様のみマージ画面に非表示になるため、
+			インストール先のカスタム項目APIは変更を薦めます、例：Loc_XXXXXX　前方は　Loc_　キーで区別する
+2017/11/15 NEW ADD
+    VIEWLISTFIELDS: お客様情報マージ画面、検索結果表示項目をカスタマイズ用タグ
+            書式：項目ＡＰＩ名:画面に表示ラベル
+            デフォルト値：
+            Name:氏名,
+            Name1__c:名称１,
+            KanaName1__c:カナ１,
+            Katakana__c:ひらがな,
+            phone:電話,
+            email:メール,
+            MailingAddress:住所,
+            AccountId:取引先 ID
+            
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<MODE>
+			<TYPE>ADD</TYPE> 
+			<FIELDS>
+				<FIELD>Usage_Charge__c</FIELD>
+				<FIELD>Usage_Count__c</FIELD>
+			</FIELDS>
+		</MODE>
+        <VIEWLISTFIELDS>
+            Name:氏名,
+            Name1__c:名称１,
+            KanaName1__c:カナ１,
+            Katakana__c:ひらがな,
+            phone:電話,
+            email:メール,
+            MailingAddress:住所,
+            AccountId:取引先 ID
+        </VIEWLISTFIELDS>
+	</SHOP>
+</root> 

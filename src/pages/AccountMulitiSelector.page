@@ -1,0 +1,241 @@
+<apex:page showheader="false" sidebar="false" controller="AccountMulitiSelectorCtrl" action="{!init}">
+<apex:stylesheet value="{!URLFOR($Resource.multiselectlib2, 'styles/bootstrap.min.css')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.multiselectlib2, 'js/multiselect.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+
+<style>
+select.form-control{
+    height: 400px;
+    width: 270px;
+}
+.row{
+    padding: 5px;
+    margin:  5px;
+}
+</style>
+ 	<apex:outputPanel >
+ 	<apex:actionStatus onstart="blockUi();" onstop="unblockUi();" id="loadingstatus"/>
+		<div class="row" style="vertical-align: middle;" >
+		<table style="width:100%" border="0">
+		<!--検索-->
+		<tr><td colspan="4">
+			<apex:form onkeydown="on_return()">
+				<apex:pageMessages id="conditionMsg"/>
+				<table style="width:100%" ><tr><td class="col-xs-5" >
+				<apex:inputText value="{!accQueryKey}" style="width:520px;" id="searchInput" styleClass="k-input form-control"
+							html-placeholder="取引先名、電話を入力してください"/>
+				</td><td>
+				<apex:commandButton action="{!nameSearch}" id="searchbtn" reRender="leftDivPanel,conditionMsg" status="loadingstatus" value="検索" style="width:90px" />
+				</td></tr></table>
+			</apex:form>
+		</td></tr>
+		<tr>
+			<!--左侧list列表-->
+		    <td class="col-xs-5">
+		    <apex:outputPanel id="leftDivPanel">
+		        <div>選択可能: (<span id="leftMsgPanel">{!leftOptLst.size}</span>)</div>
+		        <select name="from[]" id="multiselect" class="form-control" multiple="multiple" size="10">
+		            <apex:repeat value="{!leftOptLst}" var="opt">
+                        <option value="{!opt.value}" label="{!opt.label}" id="{!opt.value}_id">{!opt.label}</option>
+		            </apex:repeat>
+		        </select>
+				<script>
+				$(document).ready(function(){
+				    multiselects();
+				});
+				</script>
+		    </apex:outputPanel>
+		    </td>
+		    <!--传值button按钮-->
+		    <td class="col-xs-2" style="text-align:center;">
+		        <button type="button" id="multiselect_rightAll" class="btn btn-block" ><i class="glyphicon glyphicon-forward"></i></button>
+		        <button type="button" id="multiselect_rightSelected" class="btn btn-block"><i class="glyphicon glyphicon-chevron-right"></i></button>
+		        <button type="button" id="multiselect_leftSelected" class="btn btn-block" ><i class="glyphicon glyphicon-chevron-left"></i></button>
+		        <button type="button" id="multiselect_leftAll" class="btn btn-block" ><i class="glyphicon glyphicon-backward"></i></button>
+		    </td>
+		    <!--右侧list表-->
+		    <td class="col-xs-5">
+		        <div>選択済み: (<span id="rigtMsgPanel">{!rigtOptLst.size}</span>)</div>
+		        <select name="to[]" id="multiselect_to" class="form-control" multiple="multiple" size="10">
+                    <apex:repeat value="{!rigtOptLst}" var="opt">
+                        <option value="{!opt.value}" id="{!opt.value}_id">{!opt.label}</option>
+                    </apex:repeat>
+		        </select>
+		    </td>
+		    <td>
+	            <div >
+	                <button type="button" id="multiselect_move_up" class="btn btn-block"><i class="glyphicon glyphicon-arrow-up"></i></button>
+	            </div>
+	            <div><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100%; height: 8px;"/></div>
+	            <div >
+	                <button type="button" id="multiselect_move_down" class="btn btn-block col-sm-6"><i class="glyphicon glyphicon-arrow-down"></i></button>
+	            </div>
+            </td>
+		</tr></table>
+		</div>
+	 </apex:outputPanel>
+		<!--完了/キャンセル 按钮-->
+		<div class="row" style="text-align: center;">
+		  <div>
+		  	<input type="button" value="完了" onclick="saveSelectedItemToDb()" style="width:90px"/>
+		  	&nbsp;&nbsp;&nbsp;
+		  	<input type="button" value="キャンセル" onclick="closeMe()" style="width:90px;"/>
+		  </div>
+		</div>
+<!--  キャンセル按钮功能处理    -->
+<input type="button" onclick="window.top.close()" id="closeBtn" style="visibility: hidden;"/>
+<input type="hidden" value="{!currId}" id="hidCurrId" />
+<input type="hidden" value="{!backUrl}" id="hidBackUrl" />
+<!-- 2020/10/31 2.07.取引先の紐付け by zy BEGIN-->
+<input type="hidden" value="{!callBack}" id="hidCallBack" />
+<!-- 2020/10/31 2.07.取引先の紐付け by zy END-->
+<script>
+var $ = jQuery.noConflict();
+// 关闭窗口功能
+function closeMe(){
+	$("#closeBtn").trigger("click");
+}
+// 2017/07/25 select值的共同方法(处理检索值放入右侧) BEGIN
+function multiselects(){
+    $("#multiselect_move_up,#multiselect_move_down,#multiselect_rightAll,#multiselect_rightSelected,#multiselect_leftSelected,#multiselect_leftAll").unbind("click")
+    $("#multiselect").multiselect({
+        right: '#multiselect_to',
+        rightAll:'#multiselect_rightAll',
+        rightSelected: '#multiselect_rightSelected',
+        leftSelected: '#multiselect_leftSelected',
+        leftAll:'#multiselect_leftAll',
+        moveUp:'#multiselect_move_up',
+        moveDown:'#multiselect_move_down',
+        sort:true,
+        // 右側に最大２００項目を選択できる、超えると、えらー表示する 
+        moveToRight: function(Multiselect, $options, event, silent) {
+        	var button = $(event.currentTarget).attr('id');
+        	// 左侧选取数目
+            var sizeleft = $options.length;
+            // 左侧数据数目
+    		var sizeleftNM = Multiselect.$left[0].options.length;
+            // 右侧数据数目
+            var sizeright = Multiselect.$right[0].options.length;
+            // 2017/08/01 重复值可保存 zyz BEGIN
+			if (button == 'multiselect_rightSelected') {
+                var $left_options = Multiselect.$left.find('> option:selected');
+                Multiselect.$right.eq(0).append($left_options);
+ /*
+                if ( typeof Multiselect.callbacks.sort == 'function' && !silent ) {
+                    Multiselect.$right.eq(0).find('> option').sort(Multiselect.callbacks.sort).appendTo(Multiselect.$right.eq(0));
+                }*/
+            } else if (button == 'multiselect_rightAll') {
+                var $left_options = Multiselect.$left.children(':visible');
+                Multiselect.$right.eq(0).append($left_options);
+ /*
+                if ( typeof Multiselect.callbacks.sort == 'function' && !silent ) {
+                    Multiselect.$right.eq(0).find('> option').sort(Multiselect.callbacks.sort).appendTo(Multiselect.$right.eq(0));
+                }*/
+            }
+            // 计算显示数据的数目值
+            var maxSize = sizeleft + sizeright;
+            var leftNM = sizeleftNM - sizeleft;
+            // 2017/08/01 重复值可保存 zyz END
+    		$("#leftMsgPanel").text(leftNM);
+            $("#rigtMsgPanel").text(maxSize);
+        },
+        // 往左传值
+        moveToLeft: function(Multiselect, $options, event, silent, skipStack) {
+            var button = $(event.currentTarget).attr('id');
+            // 左侧数据数目
+            var sizeleftNM = Multiselect.$left[0].options.length;
+            // 右侧数据数目
+            var sizerightNM = Multiselect.$right[0].options.length;
+            // 选中数据数目
+            var sizeright = $options.length;
+            if (button == 'multiselect_leftSelected') {
+                var $right_options = Multiselect.$right.eq(0).find('> option:selected');
+                Multiselect.$left.append($right_options);
+                /*
+                if ( typeof Multiselect.callbacks.sort == 'function' && !silent ) {
+                    Multiselect.$left.find('> option').sort(Multiselect.callbacks.sort).appendTo(Multiselect.$left);
+                }*/
+            } else if (button == 'multiselect_leftAll') {
+                var $right_options = Multiselect.$right.eq(0).children(':visible');
+                Multiselect.$left.append($right_options);
+                /*
+                if ( typeof Multiselect.callbacks.sort == 'function' && !silent ) {
+                    Multiselect.$left.find('> option').sort(Multiselect.callbacks.sort).appendTo(Multiselect.$left);
+                }*/
+            }
+            // 计算显示数据的数目值
+            var leftNM = sizeleftNM + sizeright;
+            var maxSize = sizerightNM -sizeright;
+    		$("#leftMsgPanel").text(leftNM);
+    		$("#rigtMsgPanel").text(maxSize);
+        }
+    });
+}
+// 2017/07/25 select值的共同方法(处理检索值放入右侧) END
+// 保存功能 BEGIN
+function saveSelectedItemToDb() {
+    // 2017/07/24 機能レビュー BEGIN
+	blockUi();
+    // 2017/07/24 機能レビュー END
+    // 画面選択項目内容を取得する
+    var ops = new Array();
+    var opIds = new Array();
+    $("#multiselect_to option").each(function() {
+        ops.push(this.label);
+        opIds.push(this.value);
+    });
+    if (opIds =='') opIds = null;
+    var rightsize = $("#rigtMsgPanel").text();
+    //console.info(ops);
+    var currId = $("#hidCurrId").val();
+    Visualforce.remoting.Manager.invokeAction(
+    "{!$RemoteAction.AccountMulitiSelectorCtrl.saveSelectAccounts}", ops, currId, opIds, function(result, event){
+        if (event.type == 'exception') {
+            alert(event.message);
+            unblockUi();
+        } else {
+		    // 2017/07/24 機能レビュー BEGIN
+		    if(window.opener)  {
+		    	var backUrl = $("#hidBackUrl").val();
+                // 2020/10/31 2.07.取引先の紐付け by zy BEGIN
+                var callback = $("#hidCallBack").val();
+                if (callback != "") window.opener[callback].call();
+                else 
+                // 2020/10/31 2.07.取引先の紐付け by zy END
+		    	if (backUrl != "")  window.opener.location.href = backUrl; 
+		        else window.opener.location.href="/"+currId;
+		    }
+		    closeMe();
+		    unblockUi();
+		    // 2017/07/24 機能レビュー END
+        }
+    });
+}
+// 保存功能 END
+// 2017/07/24 機能レビュー BEGIN
+function blockUi() {
+    $.blockUI({
+	//Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_005_0067}</h1>'
+    }); 
+    return true;
+}
+// 画面Lock解除
+function unblockUi() {
+    $.unblockUI({ fadeOut: 200 }); 
+}
+// 2017/07/24 機能レビュー END
+// 检索框输入值回车响应检索按钮事件 BEGIN
+function on_return(){
+	if (event.keyCode == 13){
+		$("[id$='searchbtn']").focus();
+		$("[id$='searchbtn']").trigger("click");
+	}
+}
+
+// 检索框输入值回车响应检索按钮事件 END
+</script>
+
+
+</apex:page>

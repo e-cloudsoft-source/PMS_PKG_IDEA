@@ -1,0 +1,938 @@
+<apex:page showHeader="false" sidebar="false" controller="BookingMapApp">
+<html>
+	<head>
+		<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}"/>
+		<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}"/>
+		<apex:stylesheet value="{!URLFOR($Resource.yahooFiles, 'css/skin.css')}"/>
+		<!-- Warning Message Push -->
+		<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/cometd.js')}" />
+		<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/json2.js')}" />
+		<apex:includeScript value="{!URLFOR($Resource.CommetD, 'js/jquery.cometd.js')}" />
+		
+		<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/yahoo-dom-event.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/container-min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/animation-min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.yahooFiles, 'js/dragdrop-min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.mapFile, 'js/wheater.js')}" />
+
+		<script type="text/javascript" src="/soap/ajax/20.0/connection.js"></script>
+    	<script type="text/javascript" src="/soap/ajax/20.0/apex.js"></script>
+		
+		<apex:stylesheet value="{!URLFOR($Resource.leaflet, 'leaflet.css')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.leaflet, 'leaflet.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.leaflet, 'weather.min.js')}"/>
+		<style>
+			#mapid {
+				position: relative;
+	           	height: 2048px;
+	           	width: 100%;
+	           	background: #fff;
+	           	cursor: pointer;
+	        }
+		    span.dateInput span.dateFormat{
+			   	display:none;
+			}
+			div#functionWindow{
+				position: fixed;
+				height:800px;
+				z-index: 999;
+			}
+			.customBox {
+			    background: yellow;
+			    border: 1px solid black;
+			    position: absolute;
+		    }
+		    .datePicker {
+		    	z-index: 1000;
+		    }
+		    #tabstrip .pbTitle {
+		    	width: 100%;
+		    }
+		</style>
+		<script>
+			var $j = jQuery.noConflict();
+			var JS_APPNS = "{!JSENCODE($Setup.CommDefine__c.ps__AppNS__c)}";
+        	var url = "{!URLFOR($Resource[mapTilesRootPath],mapTilesSubPath+'/')}";
+        	var JS_LEADSTATUS_CHECKOUT='{!JSENCODE(mulitiCheckoutLabel)}';
+			function backToMain(){
+				$j("[id$=hideMode]").val("main");
+				window.location.href = '/apex/BookingMapInfo';
+			}
+			
+			L.Control.Reset = L.Control.extend({
+			    //在此定义参数    
+			    options: {
+			    	position: 'bottomright'
+			    },
+			    //在此初始化
+			    initialize: function (options) {
+			        L.Util.extend(this.options, options);
+			    },
+			    onAdd: function (map) {
+			       this._container = L.DomUtil.create('div', 'leaflet-control-zoom leaflet-bar leaflet-control')
+			       this._container.innerHTML = '<a class="leaflet-control-zoom-in" href="#" role="button">R</a>'
+			       L.DomEvent.on(this._container, 'click', this.reset, this)
+			       return this._container
+			    },
+			    reset: function(){
+			    	this._map.setView([0, 0], 3);
+			    }
+			});
+
+			function initCometd(){
+			    try{
+			        disconnect();
+			        $j.cometd.init({
+			            url: window.location.protocol+'//'+window.location.hostname+'/cometd/27.0/',
+			            requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'}
+			        });
+			        
+			       $j.cometd.addListener('/meta/handshake', function(message){ 
+			            console.log("--handshake status: " + JSON.stringify(message));
+			            if(message.successful){
+			                callInfoSubscription();
+			                $j("#errorDiv").html('');
+			            }else if(!message.successful && message.error != undefined){
+			                $j("#errorDiv").html('<span style="color: RED;">' + message.error + '</span><br>');
+			            }
+			        });
+			        
+			        $j.cometd.addListener('/meta/connect', function(message){
+			            if(!message.successful){
+			                console.log('--Connection not successful. Trying to handshake.')
+			                var topicToUnsubscribe = pushTopicSubscription;
+			                $j.cometd.unsubscribe(topicToUnsubscribe);
+			                pushTopicSubscription = null;
+			                $j.cometd.handshake();
+			                //Retry for 3 time
+			            }else{
+			                console.log('--Got Connected');
+			                //refreshCallTable();
+			            }
+			        });
+			        
+			        $j.cometd.addListener('/meta/disconnect', function(message){
+			            console.log('--Got Disconnected');
+			            $j.cometd.handshake();
+			        });   
+			    }catch(exception){
+			        console.log('--Exception: ' + exception);
+			    }
+			}
+			function callInfoSubscription(){
+				try{
+					console.log('--in call info subscription function');
+					// Subscribe to a topic. JSON-encoded update will be returned in the callback
+					pushTopicSubscription = $j.cometd.subscribe('/topic/MessageInformation', function(message) {
+			           	addWarningToMark(message);
+					}); 
+				}
+				catch(exception){
+			          console.log('--Exception: ' + exception);
+				}
+			}
+			function disconnect() {
+			    $j.cometd.disconnect();
+			}
+			window.onbeforeunload = disconnect;
+			$j(document).ready(function() {
+			    initCometd();
+			   // initMap();
+			});
+			function droptargetOnDragEnter(e){
+					alert("nice baby");
+			}
+			 $j(document).ready(function() {
+
+		    // キャンセル
+		    $j("#cancelBtn").click(function(e){
+		       	// Error Message Panel Clear[Attention: Error Class IDはSF設定依存]
+		       	$j("span[id$=':inputFormMsg']").hide();
+		        YAHOO.force.com.hideMe();
+		    });
+			YAHOO.force.com.init();
+			$j("input[id$=':gotoDate']").each(function(i, e){
+			    $j(e).attr('onFocus',null);
+			});
+			// 2015/10/30 DatePicker Position Fix
+			$j("input[id$=':gotoDate']").focus(function (e) {
+			    DatePicker.pickDate(true, $j(e.target).attr('id'), false);
+			    var datePickerTop = parseInt($j('.datePicker').css('top'),10);
+			    if(!isNaN(datePickerTop)){
+			        $j('.datePicker').css('top', (datePickerTop + $j(window).scrollTop()) + 'px');
+			    }
+			});
+		});
+        // ******************************************
+		// YAHOO UI BLOCK
+		// ******************************************
+		// Create a namespace for our custom functions
+		YAHOO.namespace("force.com");
+		YAHOO.force.com.showMe = function(result) {
+			// 予約データがない場合
+		//	if(result.leadId == null){return;}
+		
+		    document.getElementById("myPanel").style.display = "block";
+		    // 予約番号
+			if(isInvalid(result.leadIndexNo)){
+				$j("span[id$=':bLeadIndexNo']").html("");
+			} else {
+				var leadIndexId = result.leadIndexId;
+				var leadIndexNm = result.leadIndexNo;
+				var leadLink = "<a href='javascript:void(0);' onclick='window.open(\"/"+ leadIndexId +"/e\")' >" + leadIndexNm + "</a>" ;
+				$j("span[id$=':bLeadIndexNo']").html(leadLink);
+			}
+			// 予約リンク
+			if(isInvalid(result.leadName)){
+				$j("span[id$=':bname']").html("");
+			} else {
+				var leadId = result.leadId;
+				var leadNm = result.leadName;
+				var leadLink = "<a href='javascript:void(0);'  id='detailwindow_lead_"+ leadId +"' onclick='window.open(\"/"+ leadId +"\")' onblur='LookupHoverDetail.getHover(\"detailwindow_lead_"+ leadId +"\").hide();' onfocus='LookupHoverDetail.getHover(\"detailwindow_lead_"+ leadId +"\", \"/"+ leadId +"/m?retURL=%2F"+ leadId + "&isAjaxRequest=1\").show();' onmouseover='LookupHoverDetail.getHover(\"detailwindow_lead_"+ leadId +"\", \"/"+ leadId +"/m?retURL=%2F"+ leadId + "&isAjaxRequest=1\").show();' onmouseout='LookupHoverDetail.getHover(\"detailwindow_lead_"+ leadId +"\").hide();'>" + leadNm + "</a>" ;
+				$j("span[id$=':bname']").html(leadLink);
+			}
+		    // 顧客存在する場合:顧客情報を表示する
+		    if(isInvalid(result.customId)){
+		        $j("span[id$=':bContactRef']").html("");
+		    } else {
+		        var contactId = result.customId;
+		        var contactNm = result.customName;
+		        var contactLink = "<a href='javascript:void(0);' id='detail_"+ contactId +"' onclick='window.open(\"/"+ contactId +"\")'  onblur='LookupHoverDetail.getHover(\"detail_"+ contactId +"\").hide();' onfocus='LookupHoverDetail.getHover(\"detail_"+ contactId +"\", \"/"+ contactId +"/m?retURL=%2F"+ contactId + "&isAjaxRequest=1\").show();' onmouseover='LookupHoverDetail.getHover(\"detail_"+ contactId +"\", \"/"+ contactId +"/m?retURL=%2F"+ contactId + "&isAjaxRequest=1\").show();' onmouseout='LookupHoverDetail.getHover(\"detail_"+ contactId +"\").hide();'>" + contactNm + "</a>" ;
+		
+		        $j("span[id$=':bContactRef']").html(contactLink);
+		    }
+			//お客ステータス
+			if(isInvalid(result.customStatus)){
+				$j("span[id$=':bField298__c']").text("");
+				$j("input[id$=':leadStatusHidden']").val("");
+			} else {
+				$j("span[id$=':bField298__c']").text(result.customStatus);
+				$j("input[id$=':leadStatusHidden']").val(result.customStatus);
+			}
+		    // 予約インデックス情報
+		    // 到着日
+			if(isInvalid(result.entryDate)){
+				$j("span[id$=':bEntryTime__c']").text("");
+			} else {
+				//var EntryDate__cFromLong = new Date(result.entryDate);
+				//$j("span[id$=':bEntryTime__c']").text(dateFormat.format(EntryDate__cFromLong));
+				$j("span[id$=':bEntryTime__c']").text(result.entryDate);
+			}
+			// 到着時刻
+			if (isInvalid(result.entryTime)) {
+				$j("span[id$=':bField4__c']").text("");
+				$j("select[id$=':bInputField4__c']").val("");
+			} else {
+				$j("span[id$=':bField4__c']").text(result.entryTime);
+				$j("select[id$=':bInputField4__c']").val(result.entryTime);
+				$j("input[id$=':bHidEntryTime']").val(result.entryTime);
+			}
+		    // 出発日
+			if(isInvalid(result.departureDate)){
+				$j("span[id$=':bDepartureDate__c']").text("");
+			} else {
+				//var DepartureDate__cFromLong = new Date(result.departureDate);
+				//$j("span[id$=':bDepartureDate__c']").text(dateFormat.format(DepartureDate__cFromLong));
+				$j("span[id$=':bDepartureDate__c']").text(result.departureDate);
+			}
+		    // 出発時刻
+		    if (isInvalid(result.departureTime)) {
+		    	$j("span[id$=':bDepartureTime__c']").text("");
+		    	$j("select[id$=':bInputField3__c']").val("");
+		    } else {
+				$j("span[id$=':bDepartureTime__c']").text(result.departureTime);
+				$j("select[id$=':bInputField3__c']").val(result.departureTime);
+				$j("input[id$=':bHidDepartureTime']").val(result.departureTime);
+			}
+			// 泊数
+			if (isInvalid(result.nights)) {
+				$j("span[id$=':bNights']").text("");
+				$j("input[id$=':bInputNights']").val("");
+				$j("input[id$=':bHidNightId']").val("");
+		
+			} else {
+				$j("span[id$=':bNights']").text(result.nights);
+				$j("input[id$=':bInputNights']").val(result.nights);
+				$j("input[id$=':bHidNightId']").val(result.nights);
+			}
+		    // 人数
+		    if (isInvalid(result.leadPeopleNum)) {
+		        $j("span[id$=':bStayPersons__c']").text("");
+		        $j("input[id$=':bInputStayPersons']").val("");
+		        $j("input[id$=':bHidPeopleNumId']").val("");
+		    } else {
+		        $j("span[id$=':bStayPersons__c']").text(result.leadPeopleNum);
+		        $j("input[id$=':bInputStayPersons']").val(result.leadPeopleNum);
+		        $j("input[id$=':bHidPeopleNumId']").val(result.leadPeopleNum);
+		
+		    }
+		    // 予約チャネル
+		    if (isInvalid(result.leadChannel)) {
+		        $j("span[id$=':bField2__c']").text("");
+		    } else {
+		        $j("span[id$=':bField2__c']").text(result.leadChannel);
+		    }
+		    // プラン
+			if(isInvalid(result.leadPlan)){
+				$j("span[id$=':bplaninfo']").text("");
+			} else {
+				$j("span[id$=':bplaninfo']").text(result.leadPlan);
+			}
+			// 部屋
+			if(isInvalid(result.leadRoom)){
+				$j("span[id$=':bRroom__c']").text("");
+				$j("input[id$=':bHidRoomId']").val("");
+			} else {
+				$j("span[id$=':bRroom__c']").text(result.leadRoom);
+				$j("input[id$=':bHidRoomId']").val(result.leadRoomId);
+			}
+			// 特記事項
+			if(isInvalid(result.leadMemo)){
+				$j("span[id$=':bComment3__c']").html("");
+			}else{
+			   // Html <br> -> <br></br> Replace
+			   //var comment = (result.leadMemo).replace(new RegExp("&\lt;br&\gt;", "g"), "<br>");
+			   var comment = (result.leadMemo).replace(new RegExp("&\lt;", "g"), "<").replace(new RegExp("&\gt;", "g"), ">").replace(new RegExp("&\quot;", "g"), '"');
+		       $j("span[id$=':bComment3__c']").html(comment);
+			}
+			// 予約ID
+		    $j("input[id$=':leadIdHidden']").val(result.leadId);
+		    // 会計ID
+		    if(isInvalid(result.accountId)){
+		    	$j("#accBtn").hide();
+		    	$j("input[id$=':accIdHidden']").val("");
+		    } else {
+		    	$j("#accBtn").show();
+		    	$j("input[id$=':accIdHidden']").val(result.accountId);
+		    }
+		    // 会計済みの場合、印刷ボタンを表示する
+		    $j("#pdfurlHid").val("");
+			if(isInvalid(result.isAccountedFlg)){
+		    	$j("#prtBtn").hide();
+			} else {
+				var flg = result.isAccountedFlg.toString().toLowerCase();
+				if (flg == "true") {
+					$j("#prtBtn").show();
+					$j("#pdfurlHid").val(result.openAccPdfUrl);
+				} else {
+					$j("#prtBtn").hide();
+				}
+			}
+			// 該当予約の予約インデックスIDを設定する
+			$j('input[id$="bHidLeadIndexId"]').val(result.leadIndexId);
+			// 予約データはチェックインありのデータが存在する場合、泊数変更ボタンを表示する、チェックインなし場合、
+			// 泊数変更は行わない
+			if (result.checkInFlg) {
+				// チェックインありの予約データが存在する場合
+				$j("#chgNightsBtn").show();
+				$j("#chgNightsSaveBtn").hide();
+			} else {
+				// チェックインなしの予約データが未存在する場合
+				$j("#chgNightsBtn").hide();
+				$j("#chgNightsSaveBtn").hide();
+			}
+			// 泊数変更項目非表示にする
+			$j(".roomChangeTd").hide();
+			// 時刻変更項目非表示にする
+			$j(".timeChangeTd").hide();
+			// お客様のステータスにより、ボタン制御呼び出し
+			popWindowBtnFun();
+		
+			// ボタン表示制御を行う
+			if (result._isCleanFlg) {
+				// 部屋清掃機能を処理するため、該当Windowを表示する
+				// ボタンは：部屋清掃とキャンセルので
+				$j("[id$=':leadCheckInBtn']").hide();
+				$j("#cleanRoomBtn").show();
+			} else {
+				$j("#cleanRoomBtn").hide();
+			}
+			//stopRunning();
+		    // Window Show
+		    YAHOO.force.com.myDialog.show();
+		}
+		// Function called when we want to hide the dialog
+		YAHOO.force.com.hideMe = function() {
+			//startRunning();
+		    YAHOO.force.com.myDialog.hide();
+		}
+		// Function called when the DOM is ready to create the dialog,
+		// render the dialog into the document body, add our dialog skin
+		// css to the body tag, and wire up the buttons on our dialog
+		YAHOO.force.com.init = function() {
+		    document.body.className = document.body.className + " yui-skin-sam";
+			YAHOO.force.com.myDialog = new YAHOO.widget.Panel(
+		        "myPanel",  // The id of our dialog container
+		        {
+		                width           :   600,    // You can play with this until it's right
+		                visible         :   false,  // Should be invisible when rendered
+		                draggable       :   true,   // Make the dialog draggable
+		                close           :   false,  // Don't include a close title button
+		                modal           :   true,   // Make it modal
+		                fixedCenter     :   true,   // Keep centered if window is scrolled
+		                zindex          :   999999,     // Make sure it's on top of everything
+		
+		                // This line adds the appear/vanish fade effect
+		                effect          :   {
+		                                      effect:YAHOO.widget.ContainerEffect.FADE,
+		                                      duration:0.35
+		                                    }
+		        }
+		     );
+		
+		    // Render the dialog to the document.body level of the DOM
+		    YAHOO.force.com.myDialog.render(document.body);
+		}
+        function ajaxGetRoomInfo(roomId, leadId, isCleanFlg) {
+			roomId = roomId || "";
+			leadId = leadId || "";
+			Visualforce.remoting.Manager.invokeAction(
+			    '{!$RemoteAction.BookingMapApp.getRoomInfo}',
+			    roomId,leadId,
+			    function(result, event){
+			        if (event.status) {
+			            if(result== null || result.length == 0){
+			                alert("データ詳細がありません。");
+			            }else{
+			            	// 清掃ステータスは設定を行う
+			            	result._isCleanFlg = G.DATA.roomMessages[roomId].isUnClean;
+		                    YAHOO.force.com.showMe(result);
+			            }
+		
+			        } else if (event.type === 'exception') {
+			            alert("error データ詳細がありません。");
+			        } else {
+			            alert(" noknown error データ詳細がありません。");
+			        }
+			    },
+			    {escape: true}
+			);
+		}
+		
+		function isInvalid(val) {
+			return (val == null || val == undefined);
+		}
+		function popWindowBtnFun() {
+			// お客様ステータス
+			var leadStatus = $j("input[id$=':leadStatusHidden']").val();
+		    // チェックインとチェックアウトボタン切り替えする
+		    if (leadStatus == "") {
+		    	// 未チェックイン
+		    	$j("[id$=':leadCheckInBtn']").show();
+		    	$j("[id$=':leadCheckOutBtn']").hide();
+		
+		    } else if (leadStatus == JS_LEADSTATUS_CHECKOUT) {
+		    	// チェックアウト済み
+		    	$j("[id$=':leadCheckInBtn']").hide();
+		    	$j("[id$=':leadCheckOutBtn']").hide();
+		    } else {
+		    	// チェックイン済み、泊まる中
+		    	$j("[id$=':leadCheckInBtn']").hide();
+		    	$j("[id$=':leadCheckOutBtn']").show();
+		    }
+		}
+		
+			function closeToolTip(LeadId){
+				var cache = G.Cache || {};
+				var marker = cache[LeadId];
+				if(marker){
+					var toolTip = marker.getTooltip();
+					if(toolTip && marker.isTooltipOpen()){
+						marker.closeTooltip();
+					} 
+				}
+				
+			}
+			
+      		function addOneRoomMessage(position, lead, titleMap){
+     			var marker = L.marker(position, {icon: this.ICON.human, draggable: true, zIndexOffset: 4}).addTo(this.MAP);
+     			var content = '<div style="background:white;font:normal 14px sans-serif;overflow:hidden;"><div style="width:140px;height:20px;overflow:hidden;">';
+     			content += '<a target="_top" href="\\' + lead.Id + '">' + lead.Name + '</a>';
+     			content += '</div>';
+     			content += '<div style="height:20px;overflow:hidden;">' + titleMap[lead.Id] + '</div><a class="leaflet-popup-close-button" onclick="closeToolTip(\'' + lead.Id + '\');">×</a></div>';
+     			this.Cache = this.Cache || {};
+     			this.Cache[lead.Id] = marker;
+     			marker.on('click', function(){
+     				this.toggleTooltip();
+     			});
+     			marker.bindTooltip(content, {autoClose: false, permanent: true, opacity: 0.8, interactive: true}).openTooltip();
+     		}
+     		
+     		function showAllMarker(bool){
+     			try{
+	     			for(var i = 0; i < G.DATA.roomLst.length; i++){
+	     				if(!G.DATA.roomLst[i].isEmptyNoShow) {
+	     					if(bool) G.DATA.roomMarkObj[G.DATA.roomLst[i].roomId].remove();
+	     					else G.DATA.roomMarkObj[G.DATA.roomLst[i].roomId].addTo(G.MAP);
+	     				}
+	     			}     			
+     			}catch(e){console.log('ERROR');}
+     		}
+     		function initIotMessaget() {
+				var iotMsgData = JSON.parse("{!JSENCODE(initIotMessage)}");
+				for (i = 0; i < iotMsgData.length; i++) {
+					var msgObj = {};
+					msgObj.data = {};
+					msgObj.data.sobject = iotMsgData[i];
+					addWarningToMark(msgObj);
+				}
+			}
+			function createMap(object, id){
+	        	object.MAP = L.map(id, {
+				    minZoom: 1,
+				    maxZoom: 4,
+				    center: [0, 0],
+				    zoom: 3,
+				    crs: L.CRS.EPSG900913,
+				    zoomControl: false,
+				    attributionControl: false,
+				    doubleClickZoom: false,
+				    boxZoom: false,
+				    // dragging: false,
+				    scrollWheelZoom: false
+				}).addControl(L.control.zoom({position: 'bottomright'}));
+				L.tileLayer(url + '{f}.jpg').addTo(object.MAP);
+				$j('.leaflet-bottom.leaflet-right').css('position', 'fixed')		
+       		}
+       		
+       		function regIcon(object){
+        		var icon = L.icon({
+	        		iconUrl: "{!URLFOR($Resource.mapFile, 'image/chart2.png')}",
+	        		iconSize: [21, 34],
+	        		iconAnchor: [10, 34],
+	        		popupAnchor: [0, -30]
+	        	});
+	        	var pinErrorImage = L.icon({
+	        		iconUrl: "{!URLFOR($Resource.mapFile, 'image/1.gif')}",
+	        		iconSize: [60, 60],
+	        		iconAnchor: [10, 34],
+	        		popupAnchor: [20, -30]
+	        	});
+	        	var pinInfoImage = L.icon({
+	        		iconUrl: "{!URLFOR($Resource.mapFile, 'image/White.png')}",
+	        		iconSize: [60, 60],
+	        		iconAnchor: [10, 34],
+	        		popupAnchor: [20, -30]
+	        	});
+	        	var pinWarnImage = L.icon({
+	        		iconUrl: "{!URLFOR($Resource.mapFile, 'image/2.gif')}",
+	        		iconSize: [60, 60],
+	        		iconAnchor: [10, 34],
+	        		popupAnchor: [20, -30]
+	        	});
+	        	var pinLeadImage = L.icon({
+	        		iconUrl: "{!URLFOR($Resource.mapFile, 'image/chart3.png')}",
+	        		iconSize: [21, 34],
+	        		iconAnchor: [10, 34],
+	        		popupAnchor: [0, -30]
+	        	});
+	        	var Human = L.icon({
+	        		iconUrl: '{!$Resource.Human}',
+	        		iconSize: [28, 28],
+	        		iconAnchor: [14, 14]
+	        	});
+	        	object.ICON = {Default: icon, error: pinErrorImage, info: pinInfoImage, warn: pinWarnImage, lead: pinLeadImage, human: Human};
+       		}
+       		
+       		function initData(object){
+       			var roomMsgJson = $j.parseJSON($j("#hidRoomMessageJson").val() || '[]');
+       			var leadLst = $j.parseJSON($j("input[id$='leadJsonHid']").val() || '[]');
+    			var titleLst = $j.parseJSON($j("input[id$='titleJsonHid']").val() || '[]');
+		    	var roomIdKey = JS_APPNS + 'Rroom__c';
+				var titleMap = {};
+				
+       			var roomMessages = {};
+       			var roomMarkObj = {};
+       			var roomLst = [];
+				var leadRoomCount = 0;
+				var emptyRoomCount = 0;
+      			for(var i = 0; i < roomMsgJson.length ; i++){
+					var roomInf = roomMsgJson[i];
+					roomMessages[roomInf.roomId] = roomInf;
+					if(!roomInf.isEmptyNoShow){
+						roomMarkObj[roomInf.roomId] = new Object();
+						roomLst.push(roomInf);
+					}
+				}
+				emptyRoomCount = roomLst.length;
+			    for(var i = 0 ; i < roomLst.length ; i++){
+			    	roomMarkObj[roomLst[i].roomId] = L.marker(roomLst[i].myLatLng, {icon: object.ICON.Default, title: i.toString()});
+			    }
+				
+			    for(var i = 0 ; i < titleLst.length ; i++){
+			    	var titleObj = titleLst[i];
+			    	titleMap[titleObj.leadId] = titleObj.titleStr;
+			    }
+			    
+	    	    for(var i = 0; i < leadLst.length ; i++){
+			    	let lead = leadLst[i];
+			    	var roomIdVal = lead[roomIdKey];
+			    	if(roomIdVal && roomMarkObj[roomIdVal]){
+			    		var roomMark = roomMarkObj[roomIdVal];
+			    		var titleStr = titleMap[lead.Id] || '';
+			    		var marker = L.marker(roomMark.getLatLng(), {icon: object.ICON.lead, title: titleStr, zIndexOffset: 3}).addTo(object.MAP);
+						 marker.on('click', function() {
+						 	var forigenKey = JS_APPNS + "Rroom__c";
+						 	var p1 = "Rroom__c" in lead ? lead.Rroom__c : forigenKey in lead ? lead[forigenKey] : "";
+						 	var p2 = lead.Id;
+		                	ajaxGetRoomInfo(p1, p2, true);
+						 });
+						 // roomMarkObj[roomIdVal]	= marker;
+						 roomMarkObj[lead.Rroom__c]	= marker;
+						 addOneRoomMessage.call(object, roomMark.getLatLng(), lead, titleMap);
+						 emptyRoomCount--;
+						 leadRoomCount++;
+			    	}
+			    }
+			    
+				object.DATA = {roomMsgJson: roomMsgJson, roomMessages: roomMessages, roomMarkObj: roomMarkObj, roomLst: roomLst, emptyRoomCount: emptyRoomCount, leadRoomCount: leadRoomCount};
+       		}
+		
+		function initMap(){
+			init(window, 'mapid');
+			
+			/*$j.simpleWeather({
+		    //初期設定
+		    location: 'Tokyo, JP',
+		    unit: 'c',
+		
+		    //正常に実行された時の処理
+		    success: function(weather) {
+		    	
+		        //地名の表示
+		        html = '<div style="text-align:center"><span>'+weather.city+'</span>';
+		        //気温の表示
+		        html += '<span>  '+weather.temp+'℃'+'</span></div>'; 
+		 		
+		        //画面に表示
+		        $j("[id$=cloudArea]>.pbBody").html(html);
+		    }
+		  });*/
+        }
+    	function init(window, id){
+       		var object = {};
+       		L.TileLayer.prototype.getTileUrl = function(a){var k=a.x;var j=a.y;var h=a.z;var l=Math.pow(2,h);var i="t";for(var b=0;b<h;b++){l/=2;if(j<l){if(k<l){i+="q"}else{i+="r";k-=l}}else{if(k<l){i+="t";j-=l}else{i+="s";k-=l;j-=l}}}return this._url.replace("{f}",i)};
+
+        	showAllMarker(true);	        		
+       		
+       		createMap(object, id);
+       		regIcon(object);
+			initData(object);
+       		
+       		var Reset = new L.Control.Reset({ position: 'bottomright' });
+	        //添加图例
+	        Reset.addTo(object.MAP)
+       		
+       		window.G = object;
+       		showAllMarker();
+       		initIotMessaget();
+       	};
+        	
+			function addWarningToMark(Message){
+				console.log(Message);
+				var callSubRoomId = JS_APPNS + "MessageSub1__c";
+				var callMessage = JS_APPNS + "Message__c";
+				var callType = JS_APPNS + "MessageType__c";
+				var callLevel = JS_APPNS + "MessageLevel__c";
+			    var dataMessageTyoe = Message.data.sobject[callType];
+			    if(dataMessageTyoe != "IOT") return;
+			    var roomSub = Message.data.sobject[callSubRoomId];
+			    for (var roomId in G.DATA.roomMessages) {
+			    	if(typeof(roomId) === "string"){
+			    		var roomM = G.DATA.roomMessages[roomId];
+			    		if(roomM.filterMessage != null && roomM.filterMessage.indexOf(roomSub) >= 0){
+			    			var subStatus = Message.data.sobject[callLevel];
+							// 2016/12/29 old version no level skip by zy BEGIN
+							if (subStatus == "" || subStatus == undefined) continue;
+							var infoStatus_Icon = G.ICON.error;
+							if (subStatus.toLocaleUpperCase().indexOf('info'.toLocaleUpperCase()) >= 0) {
+								infoStatus_Icon = G.ICON.info;
+							} else if (subStatus.toLocaleUpperCase().indexOf('Warn'.toLocaleUpperCase()) >= 0 ) {
+								infoStatus_Icon = G.ICON.warn;
+							}
+							// 2016/12/29 old version no level skip by zy END
+							
+			    			var marker = G.DATA.roomMarkObj[roomId];
+							
+							//2016/12/28 info marke not create by zy BEGIN
+							if ( marker == undefined && subStatus.toLocaleUpperCase() == 'info'.toLocaleUpperCase()) continue;
+							//2016/12/28 by zy END
+			    			if(!marker){
+			    				marker = L.marker(roomM.myLatLng, {icon: infoStatus_Icon, errorLevel:Message.data.sobject[callLevel], roomId:roomId}).addTo(G.MAP);
+								 // This event listener calls addMarker() when the map is clicked.
+								G.DATA.roomMarkObj[roomId] = marker;
+							} else {
+								if (subStatus.toLocaleUpperCase() == 'info'.toLocaleUpperCase()){
+									// marker.remove();
+									continue;
+								}
+								marker._icon.title = "";
+							}
+							
+							marker.off();
+							marker.unbindPopup();
+							marker.setIcon(infoStatus_Icon);
+							marker.bindPopup('<p style="font:normal 14px sans-serif;">' + Message.data.sobject[callMessage] + '</p>', {autoClose: false}).openPopup();
+			    		}
+			    	}
+			    }
+			}
+		</script>
+	</head>
+	<body>
+		<apex:actionStatus id="refStatusBlock"	onstart="javascript:blockUi();" onstop="unblockUi();" />	<!-- 処理中場合、画面BLOCK処理 -->
+		 <apex:form id="actionForm" >
+			<div id="mapid"></div>
+		 	<apex:inputHidden value="{!leadJson}" id="leadJsonHid"/>
+		 	<apex:inputHidden value="{!titleInfoLstJson}" id="titleJsonHid"/>
+		 	<input type="hidden" value="{!roomMessageJson}" id="hidRoomMessageJson"/>
+		 	<apex:inputHidden value="{!refreshMode}" id="hideMode"/>
+			 <div style="width:60px;background:black;-moz-opacity:0.5; -khtml-opacity: 0.5; opacity: 0.5;position: fixed;top:100px;left:10px; display:{!if(refreshMode !='futu', 'none','block')}" onclick="backToMain();">
+			 	<span style="color:white"><apex:image value="/img/arrow2_picklist_left.gif" />戻り</span>
+			 </div>
+		 	 <div id="functionWindow" style="display:none;">
+		 	 	<div style="position: absolute; top: 10px; left: 300px; height: 30px; width: 30px;">
+			 		<span class="k-font-icon k-i-minimize"></span>
+			 		<span class="k-font-icon k-i-copy"></span>
+			 		<input type="button" onclick="minOrMax(this)" value="minsize"/>
+				 </div>
+		 		<div id="tabstrip">
+			 		<ul>
+			 			<li class="k-state-active">基本情報</li>
+			 		</ul>
+			 	
+					<div id="basicDiv" style="height: 500px; overflow: auto;">
+						<apex:pageBlock id="basicArea" title="条件エリア">
+							<apex:outputLabel >
+							    <apex:selectList size="1" value="{!branchShopNm}" rendered="{!branchShopLst.size > 0}" id="branchShopCd" style="width:45%;">
+							        <apex:selectOption itemValue="" itemLabel="All"/>
+							        <apex:selectOptions value="{!branchShopLst}" />
+							        <apex:actionSupport event="onchange" action="{!refreshBranShop}" status="refStatusBlock" />
+							    </apex:selectList>
+							    <apex:selectList size="1" value="{!roomTypeNm}" rendered="{!roomTypeLst.size > 0}" id="roomTypeSelectId" style="width: 45%;">
+							        <apex:selectOption itemValue="" itemLabel="All"/>
+							        <apex:selectOptions value="{!roomTypeLst}" /> 
+							    </apex:selectList>
+							</apex:outputLabel>
+						</apex:pageBlock>
+						<apex:pageBlock id="dateArea" title="日付エリア">
+							<apex:outputText value="{!strToday}" />
+							<apex:outputPanel id="calendarPanel" style="display:-moz-inline-box; display:inline-block; width:180px;">
+						   	 	<apex:outputLabel value="指定日" for="gotoDate" styleClass="label" style="font-weight: bold;" />&nbsp;
+						    	<apex:inputField value="{!selectDate.Checkinday__c}" id="gotoDate" style="font-size: 1.2em; width:120px">
+						    	 	<apex:actionSupport event="onchange" action="{!gotoDate}" rerender="actionForm" status="refStatusBlock"  oncomplete="javascript:syncNoAssignLeadInfo();" />
+						    	</apex:inputField>
+						    </apex:outputPanel>
+						</apex:pageBlock>
+						<!-- <apex:pageBlock id="cloudArea" title="天気予報エリア">
+						</apex:pageBlock> -->
+						<apex:pageBlock id="totalArea" title="統計情報エリア">
+							お客様ステータス
+								<apex:pageBlockSection columns="1" id="createPageBlockSection">
+									<!-- お客様ステータス -->
+									<apex:pageBlockSectionItem id="relcontactItem" helpText="空室">
+									<!--空室 [<span id="emptyRoom">0</span>] <img src="http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|7CCD7C"/>-->
+									空室 [<span id="emptyRoom">0</span>] <img src="{!URLFOR($Resource.mapFile, 'image/chart2.png')}"/>
+									</apex:pageBlockSectionItem>
+									<!-- お客様ステータス -->
+									<apex:pageBlockSectionItem helpText="空室">
+									<!--割当済 [<span id="leadRoom">0</span>]  <img src="http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|FF3030"/>-->
+									割当済 [<span id="leadRoom">0</span>]  <img src="{!URLFOR($Resource.mapFile, 'image/chart3.png')}"/>
+									</apex:pageBlockSectionItem>
+								</apex:pageBlockSection>
+						</apex:pageBlock>
+						<!-- 
+						<apex:pageBlock id="clearArea" title="清掃機能エリア">
+						</apex:pageBlock> -->
+					</div>
+					<div class="noAssignLeadListView" style="height:200px;"></div>
+					<div style="height:200px;">
+					</div>
+				</div>
+			 </div>
+			 			 <script>
+			 		//機能ワインド
+	           		$j("#tabstrip").kendoTabStrip({
+			            animation:  {
+			                open: {
+			                    effects: "fadeIn"
+			                }
+			            }
+			        });
+			        $j("#functionWindow").show();
+			        $j("#functionWindow").css({
+						top: 10,
+						width:380,
+			   			left: $j(window).width() - 380
+					});
+					$j(".gmnoprint[title='leadFun']").kendoDropTarget({
+		                 dragenter: droptargetOnDragEnter
+		            });
+		            initMap();
+			        $j("#emptyRoom").text(G.DATA.emptyRoomCount);
+	    			$j("#leadRoom").text(G.DATA.leadRoomCount);
+			 	
+			 	function minOrMax(that){
+			 		var minOrMax = $j(that).val();
+			 		if(minOrMax == "minsize"){
+			 			$j("#functionWindow").height(100);
+			 			$j("#functionWindow div.k-content").height(0);
+			 			$j(that).val("maxsize");
+			 			//$j(that).parents("#functionWindow").find("#basicDiv").height(50);
+			 		}else{
+			 			$j(that).val("minsize");
+			 			$j("#functionWindow").height(600);
+			 			$j("#functionWindow div.k-content").height(500);
+			 		}
+			 	}
+			 </script>
+		 </apex:form>
+
+<div id="myPanel" style="display: none; width: 550px; position: relative;" >
+  <div class="hd">
+    <apex:outputText value="部屋詳細情報" />
+  </div>
+
+	<apex:outputPanel layout="block" styleClass="bd" >
+		<apex:form > 
+			<div style="overflow: auto;height:400px;"> 
+		<!-- ORG VALUE HIDDEN SAVE -->
+		<apex:inputHidden value="{!leadInfo.orgLeadPeopleNum}" id="bHidPeopleNumId"/>
+		<apex:inputHidden value="{!leadInfo.orgNights}" id="bHidNightId"/>
+		<apex:inputHidden value="{!leadInfo.leadRoomId}" id="bHidRoomId"/>
+		<apex:inputHidden value="{!leadInfo.entryTime}" id="bHidEntryTime" />
+		<apex:inputHidden value="{!leadInfo.departureTime}" id="bHidDepartureTime" />
+
+		<apex:inputHidden id="leadIdHidden" value="{!strLeadId}" />
+		<apex:inputHidden id="accIdHidden"  /> 
+		<apex:inputHidden id="leadStatusHidden" value="{!RoomDetail.leadDetail.Field298__c}" />
+
+		<apex:inputHidden id="bHidGroupLeadId" value="{!groupLeadIds}"  />
+		<apex:inputHidden id="bHidLeadIndexId" />
+		<apex:inputHidden id="bHidGroupFlg" value="{!isGroupFlg}" /> 
+		<!-- 泊数変更機能(ActionFunction) -->
+		<!-- 2019/02/15 マップ機能無効ソース処理　by zy BEGIN -->
+		<!-- 
+		<apex:actionFunction name="chgSaveNightsInfoFun" rerender="roomIndicator,leadDetailWinMsgPanel"
+			action="{!chgSaveNightsInfo}"
+			oncomplete="bookingCreateCallBack();unblockUi();" />
+ 		 -->
+ 		 <!-- 2019/02/15 マップ機能無効ソース処理　by zy END -->
+		<apex:pageBlock id="dblock">
+
+		<!-- Message Panel Block -->
+		<apex:outputPanel id="leadDetailWinMsgPanel">
+		  <apex:pageMessages id="inputFormMsg"/>
+		  <apex:inputHidden value="{!bookingCreateOK}" id="hidDataCreateOK"/><!-- Hidden:Data Create IS OK -->
+		</apex:outputPanel>
+
+          <apex:pageBlockSection columns="1" id="dsec">
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="予約番号" />
+				<apex:outputText id="bLeadIndexNo" />
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="予約名" />
+		       	<apex:outputText id="bname" value="{!RoomDetail.leadDetail.name}" />
+          	</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="お客様" />
+				<apex:outputText id="bContactRef" />
+			</apex:pageBlockSectionItem>
+          	<apex:outputField id="bField298__c"    value="{!RoomDetail.leadDetail.Field298__c}"/>
+
+          	<apex:pageBlockSectionItem >
+          		<apex:outputLabel value="{!$ObjectType.Lead__c.Fields.EntryTime__c.Label}" />
+          		<apex:outputPanel >
+	           	<table >
+            	<tr >
+                    <td style="vertical-align: middle">
+                    <apex:outputText id="bEntryTime__c" />&nbsp;&nbsp;<apex:outputText id="bField4__c" />
+					</td>
+                    <td style="vertical-align: middle" class="timeChangeTd">→</td>
+                    <td style="vertical-align: middle" class="timeChangeTd">
+                        <apex:inputField id="bInputField4__c" value="{!RoomDetail.leadDetail.Field4__c}" />
+                    </td>
+                </tr>
+                </table>
+	          	</apex:outputPanel>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="{!$ObjectType.Lead__c.Fields.Departure__c.Label}" />
+				<apex:outputPanel >
+	           	<table >
+            	<tr >
+                    <td style="vertical-align: middle">
+                    <apex:outputText id="bDepartureDate__c" />&nbsp;&nbsp;<apex:outputText id="bDepartureTime__c" />
+					</td>
+                    <td style="vertical-align: middle" class="timeChangeTd">→</td>
+                    <td style="vertical-align: middle" class="timeChangeTd">
+                        <apex:inputField id="bInputField3__c" value="{!RoomDetail.leadDetail.Field3__c}"/>
+                    </td>
+                </tr>
+                </table>
+            	</apex:outputPanel>
+            </apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="泊数" />
+				<apex:outputLabel >
+	           	<table >
+            	<tr >
+                    <td style="vertical-align: middle"><apex:outputText id="bNights" /></td>
+                    <td style="vertical-align: middle" class="roomChangeTd">→</td>
+                    <td style="vertical-align: middle" class="roomChangeTd">
+                        <apex:inputText value="{!leadInfo.nights}" id="bInputNights"
+                        				style="width:40px;font-size: 14px;"
+                        				onchange="setDepartureDateAuto()"/>
+                    </td>
+                </tr>
+                </table>
+				</apex:outputLabel>
+			</apex:pageBlockSectionItem>
+
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel value="{!$ObjectType.Lead__c.Fields.StayPersons__c.Label}" />
+				<apex:outputLabel >
+	           	<table >
+            	<tr >
+                    <td style="vertical-align: middle"><apex:outputText id="bStayPersons__c" /></td>
+                    <td style="vertical-align: middle" class="roomChangeTd">→</td>
+                    <td style="vertical-align: middle" class="roomChangeTd">
+                        <apex:inputText value="{!leadInfo.leadPeopleNum}" id="bInputStayPersons"
+                        				style="width:40px;font-size: 14px;"
+                        				onchange="chkStayPersons()"/>
+                    </td>
+                </tr>
+                </table>
+				</apex:outputLabel>
+			</apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem >
+            	<apex:outputLabel value="予約チャネル" />
+            	<apex:outputField id="bField2__c" value="{!RoomDetail.leadDetail.Field2__c}" />
+            </apex:pageBlockSectionItem>
+
+            <apex:outputField id="bplaninfo"    value="{!RoomDetail.leadDetail.Field310__c}" />
+            <apex:pageBlockSectionItem labelStyle="vertical-align: middle;">
+				<apex:outputLabel value="部屋" />
+				<!-- ルーム・チェンジ -->
+				<apex:outputText id="bRroom__c" />
+            </apex:pageBlockSectionItem>
+            <apex:outputField id="bComment3__c"  value="{!RoomDetail.leadDetail.Comment3__c}" />
+
+          </apex:pageBlockSection> 
+
+        </apex:pageBlock> 
+		      </div>
+			  <div style="text-align: right;margin-top: 5px" >
+	    <input type="button" value="キャンセル" id="cancelBtn" class="btn" style="width: 100px" />
+	  </div>
+	</apex:form>
+	</apex:outputPanel>
+</div>        
+	</body>
+</html>
+</apex:page>

@@ -1,0 +1,328 @@
+<apex:page controller="SalaryProcessCTRL" showHeader="true" sidebar="false" tabStyle="TimeManagement__c">
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.common.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}" />
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'styles/kendo.default.min.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/kendo.web.min.js')}" />
+<apex:includeScript value="{!$Resource.CommJs}"/>
+
+<script>
+  function setFocusOnLoad() {}
+
+    $(document).ready(function() {
+		var userNamesDs = $.parseJSON("{!JSENCODE(userNames)}");
+	    $("[id$=':userNameSel']").kendoComboBox(
+		{
+	       dataTextField: "label",
+	       dataValueField: "value",
+	       dataSource: userNamesDs 
+	    });
+	});
+	
+	function setDepartmentValue(){
+	    var userNamesNew = document.getElementById('{!$Component.salaryManagerform.payConditionBlock.userNamesForPage}').value;
+	    
+		$(document).ready(function() {
+		var userNamesDs = $.parseJSON(userNamesNew);
+	    $("[id$=':userNameSel']").kendoComboBox(
+		{
+	       dataTextField: "label",
+	       dataValueField: "value",
+	       dataSource: userNamesDs 
+	    });
+	});
+	}
+
+	function ShowPDFPage(){
+		DepartmentChangedJS();
+		var parameterOfPDFHidden = document.getElementById('{!$Component.salaryManagerform.payConditionBlock.parameterOfPDFHidden}').value;
+        window.open('/apex/SalaryPDF?' + parameterOfPDFHidden,
+    	            '',
+    	            'width=970,height=700');
+    }
+
+</script>
+<apex:form id="salaryManagerform">
+    <apex:outputlabel value="{!errorMessage}" rendered="{!Not(isShowPageDetail)}" />
+	<apex:actionFunction name="DepartmentChangedJS" action="{!DepartmentChanged}"  oncomplete="javascript:setDepartmentValue();" rerender="payConditionBlock" >
+		<apex:param id="selectPara" name="selectPara" value="" />
+	</apex:actionFunction>
+	<apex:actionFunction name="SalaryCalculationJS" action="{!SalaryCalculation}"   rerender="payConditionBlock" />	
+	<!-- 給与明細発行 -->
+	<apex:pageblock title="{!$Label.ps__msg_035_0001}" id="payConditionBlock" rendered="{!isShowPageDetail}">
+		<apex:inputHidden id="userNamesForPage" value="{!userNames}" />
+		<apex:inputHidden id="parameterOfPDFHidden" value="{!parameterOfPDF}" />
+		<apex:pageBlockButtons location="top">		
+		<!-- 再計算 -->
+            <apex:commandButton value="{!$Label.ps__msg_035_0002}"  action="{!SalaryCalculation}"  oncomplete="javascript:DepartmentChangedJS('2');" style="width:100px;"  StyleClass="btn" rerender="payDataBlock" />
+            <!-- 印刷 -->
+	    <apex:commandButton value="{!$Label.ps__msg_035_0003}"  rerender="payConditionBlock" action="{!printFromPDF}" oncomplete="javascript:ShowPDFPage();" style="width:100px;" StyleClass="btn" />
+        </apex:pageBlockButtons>
+       	<apex:pageBlockSection columns="2">
+	<!-- 開始日付 -->
+       		<apex:pageBlockSectionItem >
+        		<apex:outputlabel value="{!$Label.ps__msg_035_0004}" />
+        		<apex:inputField value="{!timeManagementStart.WorkDay__c}" />
+       		</apex:pageBlockSectionItem>
+       		<!-- 支店 -->
+       		<apex:pageBlockSectionItem >
+        		<apex:outputlabel value="{!$Label.ps__msg_035_0005}" />
+       			<apex:selectList value="{!selectedCompanyName}" size="1">
+	            	<apex:selectOptions value="{!selectedCompanyNames}"/>
+	        	</apex:selectList>
+       		</apex:pageBlockSectionItem>
+       		<!-- 終了日付 -->
+       		<apex:pageBlockSectionItem >
+        		<apex:outputlabel value="{!$Label.ps__msg_035_0006}" />
+        		<apex:inputField value="{!timeManagementEnd.WorkDay__c}" />
+       		</apex:pageBlockSectionItem>
+       		<!-- 部門 -->
+       		<apex:pageBlockSectionItem >
+        		<apex:outputlabel value="{!$Label.ps__msg_035_0007}" />
+       			<apex:selectList value="{!selectedDepartment}" size="1" onChange="javascript:DepartmentChangedJS('1');">
+	            	<apex:selectOptions value="{!selectedDepartments}"/>
+	        	</apex:selectList>
+       		</apex:pageBlockSectionItem>
+       		<apex:pageBlockSectionItem id="NetPaymentsItem">
+        		<!-- 差引支給 -->
+        		<apex:outputlabel value="{!$Label.ps__msg_035_0008}" />
+        		<apex:inputText value="{!SalaryItemInfo.NetPayments}" disabled="true" style="width:80px;" />
+       		</apex:pageBlockSectionItem>
+       		<apex:pageBlockSectionItem >
+        		<!-- 氏名 -->
+        		<apex:outputlabel value="{!$Label.ps__msg_035_0009}" />
+        		<apex:inputText id="userNameSel" value="{!selectedUserName}" maxlength="80" style="width:150px" />
+       		</apex:pageBlockSectionItem>
+       	</apex:pageBlockSection>
+    </apex:pageblock>
+    <apex:pageblock id="payDataBlock" rendered="{!isShowPageDetail}">
+       	<apex:pageMessages />
+        <html>
+        	<body>
+        		<div id="dataTableInfo">
+        		<table border="0"  cellspacing="0" cellpadding="0" width="100%">
+				    <tr height="10px">
+				        <td style="width: 0.5cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				        <td style="width: 1.9cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" /></td>
+				    </tr>
+				
+				    <tr style="vertical-align: bottom;" height="20px" >
+				        <td style="text-align: bottom;border-top:2px solid #3E6697;border-left:2px solid #3E6697;font-size: 0.35cm;" align="center"></td>
+				        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 基本給 -->{!$Label.MSG_035_0010}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;text-align: bottom;" align="center" valign="bottom"><!-- 管理職手当 -->{!$Label.MSG_035_0011}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;text-align: bottom;" align="center" valign="bottom"><!-- 役付手当 -->{!$Label.MSG_035_0012}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;text-align: bottom;" align="center" valign="bottom"><!-- 通勤手当 -->{!$Label.MSG_035_0013}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center" valign="bottom"><!-- 残業手当 -->{!$Label.MSG_035_0014}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="width: 100px; height: 17px;"/></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: bottom;border-left:2px solid #3E6697;font-size: 0.35cm;" align="center" rowspan="2"><!-- 支  給--><apex:outputLabel value="{!$Label.ps__msg_035_0015}" escape="false"/></td>
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="center"><apex:inputText value="{!SalaryItemInfo.BaseSalary}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="center"><apex:inputText value="{!SalaryItemInfo.ManagementAllowance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="center"><apex:inputText value="{!SalaryItemInfo.TitleAllowance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="center"><apex:inputText value="{!SalaryItemInfo.TravelAllowance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="center"><apex:inputText value="{!SalaryItemInfo.OvertimeAllowance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.30cm;height:0.6cm;"></td>
+				    </tr>
+				    <tr height="20px">
+				    	<!--<td style="text-align: bottom;border-left:2px solid #3E6697;font-size: 0.35cm;" align="center"></td> -->
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 深夜手当 -->{!$Label.MSG_035_0017}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 早出手当 -->{!$Label.MSG_035_0018}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 仮払い -->{!$Label.MSG_035_0019}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 課税合計 -->{!$Label.MSG_035_0020}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 非課税合計 -->{!$Label.MSG_035_0021}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 総支給額合計 -->{!$Label.MSG_035_0022}</td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: bottom;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;font-size: 0.35cm;" align="center"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.30cm;" align="center"><apex:inputText value="{!SalaryItemInfo.MidnightAllowance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.EarlyShiftAllowance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.TemporaryAdvance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center"><apex:inputText value="{!SalaryItemInfo.TaxationSum}" disabled="true" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center"><apex:inputText value="{!SalaryItemInfo.NoTaxationSum}" disabled="true" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.35cm;height:0.6cm;" align="center"><apex:inputText value="{!SalaryItemInfo.PaymentsSum}" disabled="true" style="width:100px;" /></td>
+				    </tr>
+				    
+				    <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 20px;"/></td></tr>
+				    
+				    <tr height="20px">
+				        <td style="text-align: center;border-top:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 健康保険 -->{!$Label.MSG_035_0023}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 雇用保険 -->{!$Label.MSG_035_0024}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 介護保険 -->{!$Label.MSG_035_0025}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 厚生年金 -->{!$Label.MSG_035_0026}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 課税対象額 -->{!$Label.MSG_035_0027}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 所得税 -->{!$Label.MSG_035_0028}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 住民税 -->{!$Label.MSG_035_0029}</td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: center;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.HealthInsurance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.EmploymentInsurance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.CareInsurance}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.WelfarePension}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.TaxationTargetSum}" disabled="true" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.IncomeTax}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;" align="center"><apex:inputText value="{!SalaryItemInfo.ResidentTax}" style="width:100px;" /></td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: center;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;" rowspan="2"><!-- 控  除--><apex:outputLabel value="{!$Label.ps__msg_035_0030}" escape="false"/></td>
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 賞与 -->{!$Label.MSG_035_0031}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 寮費 -->{!$Label.MSG_035_0032}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 食事代 -->{!$Label.MSG_035_0033}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 光熱費 -->{!$Label.MSG_035_0034}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				    </tr>
+				    <tr height="20px">
+				    	<!--<td style="text-align: center;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>-->
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.Bonus}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.BoardingFees}" style="width:100px;"/></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.MealCharges}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.UtilityCosts}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" ></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;"></td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: center;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 控除額合計 -->{!$Label.MSG_035_0036}</td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: center;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.35cm;height:0.6cm;" align="center"><apex:inputText value="{!SalaryItemInfo.DeductionSum}" disabled="true" style="width:100px;" /></td>
+				    </tr>
+				    
+				    <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 20px;"/></td></tr>
+				    
+				    <tr height="20px">
+				        <td style="text-align: center;border-top:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 要勤務日数 -->{!$Label.MSG_035_0037}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 出勤日数 -->{!$Label.MSG_035_0038}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 欠勤日数 -->{!$Label.MSG_035_0039}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 勤務時間数 -->{!$Label.MSG_035_0040}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 有休消化日数 -->{!$Label.MSG_035_0041}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 有休残日数 -->{!$Label.MSG_035_0042}</td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: center;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;" rowspan="2"><!-- 勤  怠--><apex:outputLabel value="{!$Label.ps__msg_035_0043}" escape="false"/></td>
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.WorkDays}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.RealWorkDays}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.NotWorkDays}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.WorkHours}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.UseRestDays}" style="width:100px;"/></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;height:0.6cm;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.RemainRestDays}" style="width:100px;" /></td>
+				    </tr>
+				    <tr height="20px">
+				    	<!-- <td style="text-align: center;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td> -->
+				        <td style="border-top:1px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 残業時間 -->{!$Label.MSG_035_0045}</td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				    </tr>
+				    <tr height="20px">
+				    	<td style="text-align: center;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;" align="center"><apex:inputText value="{!SalaryItemInfo.OvertimeHours}" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.3cm;height:0.6cm;"></td>
+				    </tr>
+				    
+				    <tr><td><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style="height: 20px;"/></td></tr>
+				    
+				    <tr height="20px">
+				        <td style="text-align: center;border-top:2px solid #3E6697;border-left:2px solid #3E6697;border-bottom:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;" rowspan="2"><!-- 合  計--><apex:outputLabel value="{!$Label.ps__msg_035_0046}" escape="false"/></td>
+				        <td style="border-top:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 累積課税合計 -->{!$Label.MSG_035_0047}</td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:1px solid #3E6697;background:#CACFF9;font-size: 0.35cm;"></td>
+				        <td style="border-top:2px solid #3E6697;border-right:2px solid #3E6697;background:#CACFF9;font-size: 0.35cm;" align="center"><!-- 差引支給額 -->{!$Label.MSG_035_0048}</td>
+				    </tr>
+				    <tr height="20px">
+				    	<!--<td style="text-align: center;border-bottom:2px solid #3E6697;border-left:2px solid #3E6697;width: 0.5cm;font-size: 0.35cm;"></td> -->
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-left:1px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.35cm;" align="center"><apex:inputText value="{!SalaryItemInfo.AccumulationTaxationSum}" disabled="true" style="width:100px;" /></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:1px solid #3E6697;font-size: 0.3cm;"></td>
+				        <td style="border-top:1px solid #3E6697;border-bottom:2px solid #3E6697;border-right:2px solid #3E6697;font-size: 0.35cm;height:0.6cm;" align="center"><apex:inputText value="{!SalaryItemInfo.NetPayments}" disabled="true" style="width:100px;" /></td>
+				    </tr>
+				</table>
+				</div>
+        	</body>
+        </html>
+        </apex:pageblock>
+	
+</apex:form>
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

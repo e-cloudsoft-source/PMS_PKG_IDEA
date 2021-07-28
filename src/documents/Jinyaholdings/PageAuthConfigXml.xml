@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!-- 
+    ページ読み込み専用・編集モード設定機能利用できるユーザ定義する、複数人定義可能
+    書式:
+		USERNAME: 	ユーザ名
+2019.10.15 機能別個別権限制限設定機能の追加
+	SHOPCODE:       店舗コード、支店が非存在　または　各店舗は共通化する場合、空白のままに定義する
+	APPLICATION:			個別画面制限定義用タグ
+		ROOMINDICATOR:		ルームインジケータ画面関連設定
+			MOBILE_READONLY:ルームインジケータ画面、IPAD、スマホで制限フラグ
+				TRUE:		常にドラッグ＆ドロップができないように制限
+				FALSE:		ページ編集権限設定により、画面権限制限を行う（デフォルト値）
+-->
+	<ACCESSUSER>
+		<!-- 
+        <USERNAME>xxxx@yyyyy.yyy</USERNAME>
+        <USERNAME>xxxx@yyyyy.yyy</USERNAME>
+         -->
+	</ACCESSUSER>
+	<!-- 機能別個別権限制限設定用 -->
+	<SHOP>
+    	<SHOPCODE></SHOPCODE>
+    	<APPLICATION>
+      		<ROOMINDICATOR>
+        		<MOBILE_READONLY>FALSE</MOBILE_READONLY>
+      		</ROOMINDICATOR>
+    	</APPLICATION>
+	</SHOP>
+</root>

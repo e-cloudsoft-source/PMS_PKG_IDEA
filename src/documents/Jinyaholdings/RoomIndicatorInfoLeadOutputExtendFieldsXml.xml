@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+2016/11/25 Ver1.0 ルームインジケータ画面の部屋詳細情報表示項目カスタマイズ用
+　　　　　注意：	①該当VERSIONに、カスタマイズできる項目は「ご予約」「お客様」オブジェクトの項目のみです、ご注意ください
+				②変更ボタンをクリックすると、「泊数、人數、ご予約の特記事項、お客様項目」のみ編集できる
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		FIELDS:		店舗単位に、カスタマイズ項目定義情報	
+			SECTION:	セクションに、表示したい項目を定義する
+						書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+				TITLE:	セクションのタイトル定義、省略可能、該当属性が定義しないと、セクション枠が非表示になる
+				COLNUM:	項目の表示の列数「1 OR 2」で定義可能	
+		DISPLAY:	部屋詳細情報ウインドウ外観UI関連情報定義、省略可能
+			WINDOWWIDTH:	ウインドウの横幅サイズ(PX)、省略可能、定義しないと、デフォルト値：550px
+			WINDOWHEIGHT:	ウインドウの縦幅サイズ(PX)、省略可能、定義しないと、デフォルト値：400px
+			LINEHEIGHT:		行間を詰めるするがどうか制御、省略可能、定義しないと、デフォルト値：TRUE
+							TRUE:行間を詰める(デフォルト値）
+							FALSE:行間を広げる
+2017/08/18 NEW ADD
+		ROOMINFOEXT:  縦セルにカスタマイズ項目定義情報
+		              書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+		  
+		補足と注意：
+			①下記特殊キーワードで個別機能対応する
+			$_blank_$:	ウインドウに該当箇所は空白になる
+			②お客様(Contact)データ型は「住所」のAPI項目を直接を使えません、ご注意ください
+				例：住所(郵送先)(MailingAddress)を定義したい場合、下記ように定義する
+				Relcontact__r.MailingCountry,Relcontact__r.MailingState,Relcontact__r.MailingCity,Relcontact__r.MailingStreet
+			③ご予約から参照できるオブジェクトはお客様(Contact)のみ定義可能
+			④API参照名指定の場合、大小文字区分するため、オブジェクト定義のAPI参照名からそのままコピーして、XMLに定義する
+2017/11/15 NEW ADD
+        NOASSIGNSORT: ルームインジケータの未割り当てウインドウの予約表示順設定用タグ
+        例1：作成日昇順を指定したい場合
+        <NOASSIGNSORT>CreatedDate Asc</NOASSIGNSORT>
+        例2：受付日昇順を指定したい場合
+        <NOASSIGNSORT>ReservedDate__c Asc</NOASSIGNSORT>
+        例3：作成日降順を指定したい場合
+        <NOASSIGNSORT>CreatedDate Desc</NOASSIGNSORT>
+        例2：受付日降順を指定したい場合
+        <NOASSIGNSORT>ReservedDate__c Desc</NOASSIGNSORT>
+        
+2019/12/30 NEW ADD
+		RELCONTACT:同一名あるいは同一電話番号のお客様が存在する場合、ご予約詳細画面かルームインジケータに関連お客様リストを表示する（最大１０件）
+			DUPRULES:一致チェック用ルール定義用タグ（ルール関係が「OR」）　
+				DUPRULE：該当ルールチェック項目API定義（お客様オブジェクトのAPI限定）
+		注：該当DUPRULESの定義数は５まで定義してください。
+		例:「氏名とメールが一致」又は「氏名と電話番号一致」場合、関連お客様を表示する
+			<RELCONTACT>
+				<DUPRULES>
+				    <DUPRULE>Name</DUPRULE>
+				    <DUPRULE>Email</DUPRULE>
+			    </DUPRULES>
+				<DUPRULES>
+					<DUPRULE>Name</DUPRULE>
+				    <DUPRULE>Phone</DUPRULE>
+			    </DUPRULES>
+			</RELCONTACT>
+2019/12/30 NEW ADD
+		CREATEINFO:ルームインジケータ画面、部屋詳細画面から小部屋作成ルール定義
+			LEADSINFO:小部屋自動作成ルール定義用タグ(最大10まで定義可能）
+					　複数定義の場合、コピー元予約設定情報を　属性「CONTION」に設定条件と一致する場合、該当ルールで小部屋情報を作成する
+				CONTION:該当小部屋作成ルールが適応がどうか判断条件用タグ、内容定義省略可能、空欄の場合、常に該当ルールで小部屋情報を作成する
+					LEADINFO:小部屋情報作成詳細の定義
+						NIGHTS:作成予約の泊数(0,1指定可能)、省略場合、デフォルト値が０
+						OFFSETDAYS:作成予約の到着日はコピー元予約の到着日の差分日数(-1,0,1)
+						CLONE:作成予約の場合、コピー元予約どの項目設定値をそのまま小部屋に設定したい項目APIを指定する、カンマで複数API定義可能
+							注：数式項目APIは定義不可
+						ASSIGN:ご予約の指定項目に固定値を設定用タグ、複数回定義可能
+							FIELD:ご予約の項目API
+							注：項目のデータ型は下記以外のデータ型を設定できない
+							テキスト、テキストエリア、日付（書式：YYYY-MM-DD）、日付/時間(書式：YYYY-MM-DD HH:MM:SS)
+							数値、通貨(書式：数値)、チェックボックス(書式：TRUE/FALSE)、選択リスト (複数選択)(書式：XX;XX)、選択リスト(テキス)
+							メール(書式：XXX@XX.com)、电话
+						ROOMTYPE:ご予約の部屋タイプをしたい場合、該当タグに部屋タイプの#SEQで指定可能
+		注意事項:ご予約のカスタマイズの必須項目または入力規則が存在場合、該当ルールと合わせて、項目設定方法は上記タグに定義する
+2020/02/28 小部屋機能改善
+		注：新規追加属性に対して、必ず店舗別単位をしてください!!!
+		CREATEINFO:属性タグ「SUBFILTER、SUBICONFLG、CREATENUMS」新規追加
+				SUBFILTER:小部屋生成機能以外で作成したデータが小部屋が存在がどうか判定用条件を定義する（ご予約から参照項目を定義可能）
+					例：ご予約の部屋タイプコードは「001,002,003」の場合、該当予約デーがが小部屋データと認する、その場合、親部屋に家マークが付くこと
+				SUBICONFLG:小部屋作成アイコンと作成済みアイコン表示箇所の切り替えフラグ
+					TRUE：親部屋のみアイコンを表示する（デフォルト値）
+					FALSE：各部屋にアイコンを表示する
+				CREATENUMS:小部屋を生成する時に生成する部屋数を選択可能フラグ
+					TRUE：小部屋を生成する時に生成する部屋数を選択可能
+					FALSE：小部屋を生成する時に生成する部屋数を選択不要（デフォルト値）
+2020/02/28
+		CONFIRMCHANGE:一括チェックアウト機能、デフォルトの処理ロジック切り替えフラグ
+			TRUE:一括チェックアウト機能、デフォルトを個別チェックアウトする
+			FALSE:一括チェックアウト機能、デフォルトを一括チェックアウトする（デフォルト値）
+2020/09/30
+		DAYUSEMOVE:日帰り予約を取った際にチェックイン後インジケータ上でルームチェンジ可/不可切り替えフラグ
+			TURE:ルームチェンジ可（デフォルト値）
+			FALSE:ルームチェンジ不可
+2021/03/05 
+　　　　　ルームインジケータ画面、All(全店舗)を選択する場合、最大表示部屋数の制限機能を追加
+		ALL_LIMIT_ROOM_INT:部屋表示の制限数を定義用タグ
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<NOASSIGNSORT>CreatedDate Asc</NOASSIGNSORT>
+		<!-- 2020.02.28新規追加 -->
+		<CONFIRMCHANGE>FALSE</CONFIRMCHANGE>
+		<DAYUSEMOVE>TRUE</DAYUSEMOVE>
+		<!-- 2021.03.05新規追加 -->
+		<ALL_LIMIT_ROOM_INT>600</ALL_LIMIT_ROOM_INT>
+		<FIELDS>
+		<!-- 
+			<SECTION TITLE="" COLNUM="2">
+				Segment__c,
+				$_blank_$,
+				ReservedStatus__c
+			</SECTION>
+			<SECTION TITLE="お客様情報" COLNUM="2">
+				Relcontact__r.Katakana__c,
+				Relcontact__r.Birthdate,
+				Relcontact__r.Phone,
+				Relcontact__r.MobilePhone,
+				Relcontact__r.Email,
+				Relcontact__r.Fax,
+				Relcontact__r.MailingCountry,
+				Relcontact__r.MailingState,
+				Relcontact__r.MailingCity,
+				Relcontact__r.MailingStreet
+			</SECTION>
+		 -->
+		</FIELDS>
+		<!-- 部屋詳細情報ウインドウ外観UI関連情報定義、省略可能 -->
+		<DISPLAY>
+			<WINDOWWIDTH>650</WINDOWWIDTH> 
+			<WINDOWHEIGHT>500</WINDOWHEIGHT>
+			<LINEHEIGHT>FALSE</LINEHEIGHT>
+		</DISPLAY>
+		<!-- 縦セルにカスタマイズ項目定義情報 -->
+		<!-- 
+        <ROOMINFOEXT>
+            Field2__c,
+            Segment__c
+        </ROOMINFOEXT>
+		 -->
+		 <!-- 
+		  2019/12/30 同一名あるいは同一電話番号のお客様が存在する場合、ご予約詳細画面かルームインジケータに関連お客様リストを表示する
+		  下記例：「氏名とメールが一致」又は「氏名と電話番号一致」場合、関連お客様を表示する
+		 -->
+		<!-- 
+		<RELCONTACT>
+			<DUPRULES>
+			    <DUPRULE>Name</DUPRULE>
+			    <DUPRULE>Email</DUPRULE>
+		    </DUPRULES>
+			<DUPRULES>
+				<DUPRULE>Name</DUPRULE>
+			    <DUPRULE>Phone</DUPRULE>
+		    </DUPRULES>
+		</RELCONTACT>
+		-->
+		<!-- 
+		  2019/12/30 ルームインジケータ画面、部屋詳細画面から小部屋作成ルール定義
+		  例：夕食と翌日の朝食小部屋データ作成
+		-->
+		<!-- 
+		  2020/02/28 タグ属性「SUBFILTER、SUBICONFLG、CREATENUMS」新規追加
+		  設定例：部屋タイプコードが[01,02,03」場合、該当ご予約データは小部屋データとして認識する
+		  		SUBFILTER="refTypeOfRooms__r.RoomTypeCode__c in ('01','02','03')"
+		 -->
+		<CREATEINFO SUBFILTER="" SUBICONFLG="TRUE" CREATENUMS="FALSE">
+			<LEADSINFO CONTION="">
+				<!-- 夕食予約作成 -->
+				<LEADINFO NIGHTS="0" OFFSETDAYS="0">
+					<ROOMTYPE>1500</ROOMTYPE>
+					<CLONE>
+					Relcontact__c,
+					Comment3__c,
+					ReservedContact__c,
+					ReservedType__c,
+					ReservedDate__c
+					</CLONE>
+					<ASSIGN FIELD="StayPersons__c">0</ASSIGN>				
+					<ASSIGN FIELD="Mans__c">0</ASSIGN>	
+					<ASSIGN FIELD="Femails__c">0</ASSIGN>					
+					<ASSIGN FIELD="Field3__c">20:00</ASSIGN>					
+					<ASSIGN FIELD="Field4__c">17:30</ASSIGN>
+				</LEADINFO>
+				<!-- 朝食予約作成 -->
+				<LEADINFO NIGHTS="0" OFFSETDAYS="1">
+					<ROOMTYPE>1500</ROOMTYPE>
+					<CLONE>
+					Relcontact__c,
+					Comment3__c,
+					ReservedContact__c,
+					ReservedType__c,
+					ReservedDate__c
+					</CLONE>
+					<ASSIGN FIELD="StayPersons__c">0</ASSIGN>				
+					<ASSIGN FIELD="Mans__c">0</ASSIGN>	
+					<ASSIGN FIELD="Femails__c">0</ASSIGN>					
+					<ASSIGN FIELD="Field3__c">10:00</ASSIGN>					
+					<ASSIGN FIELD="Field4__c">07:00</ASSIGN>
+				</LEADINFO>
+			</LEADSINFO>
+		</CREATEINFO>
+	</SHOP>
+</root>

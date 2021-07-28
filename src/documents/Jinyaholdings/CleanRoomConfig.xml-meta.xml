@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>清掃機能関連パラメータの定義</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>清掃機能定義情報</name>
+    <public>false</public>
+</Document>

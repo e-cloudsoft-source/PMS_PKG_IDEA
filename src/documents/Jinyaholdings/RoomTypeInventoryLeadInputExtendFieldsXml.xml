@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+2014/01/15 Ver1.0 予約ポップ画面の予約情報入力フォームに入力項目カスタマイズ用
+　　　　　注意：該当VERSIONに、カスタマイズできる項目は「ご予約」オブジェクトの項目のみです、ご注意ください
+		書式：
+		SHOPCODE: 	店舗コード、支店が非存在する場合、空白のままに定義する
+		COLNUMS:    新規予約ウィンドウに入力の項目の表示の列数「1 OR 2」で定義可能
+		FIELDS：		店舗単位に、カスタマイズ項目定義情報	
+					書式：項目API名 複数項目を拡張したい場合、【項目1,項目2,項目N】方式で定義する
+					
+		↓下記機能は予約ポップ画面のみ有効、ルームインジケータとタイムテーブル画面側に未対応
+		
+		REQUIREDFIELDS:	新規予約ウインドウの入力項目のの必須属性を設定可能、該当タグに指定のAPI名は必須項目、未指定の場合、非必須になる
+					書式：項目API名 複数項目を定義できる、【項目1,項目2,項目N】方式で定義する
+					注意：定義の場合、下記注意事項を確認してください	
+						1.お客様項目は非必須になって、空白でご予約を登録する場合、「上様」はご予約に紐付く
+						2.ご予約名は非必須になって、空白でご予約を登録する場合、ご予約名は「仮予約」名で自動設定を行う
+						3.予約人数は非必須になって、空白でご予約を登録する場合、予約人数は１で自動設定を行う
+2016.09.15 追加機能
+		MITUMORIFLAG: 予約ポップ新規予約ウインドウに見積明細できるがどうか制御区分
+					TRUE:見積明細入力セクションを表示
+					FALSE:見積明細入力セクションを非表示
+2019.07.01 SHOP->DEFROOMTYPE 新規予約を入力する場合、部屋タイプごとデフォルト値設定機能(予約ポップ、ルームインジケータ画面のみ対応)
+		<DEFROOMTYPE>
+			<DEFVALUES SEQ="10105,3301">			部屋タイプSEQ値、カンマで複数定義可能
+				<DEFINE>
+					<APINAME>Field4__c</APINAME>	到着時刻(Field4__c)が15:30に定義する  
+					<DEFVALUE>15:30</DEFVALUE>
+				</DEFINE>
+			</DEFVALUES>
+		</DEFROOMTYPE>
+		注：1.実際のAPIが存在しないで、機能対応するため、下記のキーワードで項目を対応する
+			staysNums:泊数
+			bookingRooms:部屋数(予約ポップ画面のみ利用可能)
+		   2.APIの定義可能データ型：数値、テキスト、選択リスト、テキストエリア
+		   3.定義のAPI項目は新規予約ウインドウに存在が必要
+2020.05.30 SHOP->MITUMORIFLAG->BASEPLANFLAG
+		BASEPLANFLAG: 新規予約ウインドウにベースプランを一括選択機能有効・無効フラグ（予約ポップ画面のみ利用可能）
+					TRUE:新規予約ウインドウにベースプランを一括選択機能有効
+					FALSE:新規予約ウインドウにベースプランを一括選択機能無効(デフォルト値)
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>
+		<MITUMORIFLAG BASEPLANFLAG="FALSE">FALSE</MITUMORIFLAG>
+		<FIELDS>
+		Mans__c
+		,Femails__c
+		,CouponTypeLst__c
+		</FIELDS>
+		<REQUIREDFIELDS></REQUIREDFIELDS>
+		<!-- 2019.07.01 SHOP->DEFROOMTYPE 新規予約を入力する場合、部屋タイプごとデフォルト値設定機能
+			例： 
+			部屋タイプ（SEQが10105,3301)が新規予約の場合、到着時刻が11:00、出力時刻が13:00、泊数が０、予約タイプが日帰に設定する
+		-->
+		<!-- 
+		<DEFROOMTYPE>
+			<DEFVALUES SEQ="1,12">
+				<DEFINE>
+					<APINAME>Field4__c</APINAME>
+					<DEFVALUE>11:00</DEFVALUE>
+				</DEFINE>
+				<DEFINE>
+					<APINAME>Field3__c</APINAME>
+					<DEFVALUE>13:00</DEFVALUE>
+				</DEFINE>
+				<DEFINE>
+					<APINAME>staysNums</APINAME>
+					<DEFVALUE>0</DEFVALUE>
+				</DEFINE>
+				<DEFINE>
+					<APINAME>ReservedType__c</APINAME>
+					<DEFVALUE>日帰り</DEFVALUE>
+				</DEFINE>
+			</DEFVALUES>
+		</DEFROOMTYPE>
+		 -->
+	</SHOP>
+	<SHOP>
+		<SHOPCODE>01</SHOPCODE>
+		<MITUMORIFLAG>FALSE</MITUMORIFLAG>
+		<COLNUMS>2</COLNUMS>
+		<FIELDS>
+		Mans__c
+		,Femails__c
+		,CouponTypeLst__c
+		,Field348__c
+		</FIELDS>
+	</SHOP>
+</root>

@@ -1,0 +1,104 @@
+<apex:component controller="DatePickerCtrl" allowDML="false" >
+
+<apex:attribute name="container" type="String" description="compoment id" default="DatePicker" required="false"/>
+<!-- 2017/09/11 印刷リスト機能　by zy BEGIN -->
+<apex:attribute name="beginToday" type="boolean" description="compoment id" default="" required="false"/>
+<apex:attribute name="callbackFun" type="String" description="callback" default="" required="false"/>
+<!-- 2017/09/11 印刷リスト機能　by zy END -->
+<style>
+.date-saturday a.ui-state-default {
+	color:blue;
+}
+.date-sunday a.ui-state-default {
+	color:#ff3366;
+}
+.date-holiday a.ui-state-default {
+	color:#ff3366;
+}
+.date-normalday a.ui-state-default {
+	color:black;
+}
+.ui-state-default {
+	border-color:transparent;
+	background: none;
+}
+.ui-datepicker td a {
+	display: inline-block;
+	font-weight: bold;
+	text-align: center;
+	width: 25px;
+	height: 25px;
+	line-height: 25px;
+	text-shadow: 1px 1px 0px #fff;
+	filter: dropshadow(color=#fff, offx=1, offy=1);
+}
+</style>
+<script>
+(function($){
+	var _holidayjson = JSON.parse("{!JSENCODE(jsHolidayDS)}");
+    $.fn.jinyaDatePicker = function(options){
+		return this.each(function(){
+	    	$(this).datepicker({
+		    	dateFormat:"{!jsEncode(dateFormat)}",
+		      	numberOfMonths: 2,
+		      	showButtonPanel: true,
+		      	currentText: "今日",
+		      	closeText:"閉じる",
+		      	prevText:'<前',
+		      	nextText:'次>',
+		      	dayNamesMin:['日','月','火','水','木','金','土'],
+		      	monthNames:['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+		      	beforeShowDay: function(day) {
+					var result;
+					var holiday = _holidayjson[kendo.toString(day, JINYACONNECT.DateFormat)]
+					// 祝日・非営業日定義に存在するか？
+					if (holiday) {
+						result =  [true, "date-holiday", holiday];
+					} else {
+				        switch (day.getDay()) {
+				          case 0: // 日曜日か？
+				            result = [true, "date-sunday"];
+				            break;
+				          case 6: // 土曜日か？
+				            result = [true, "date-saturday"];
+				            break;
+				          default:
+				            result = [true, "date-normalday"];
+				            break;
+				        }
+			      	}
+					return result;
+				},
+				onSelect: function(selectedDate) {
+					$this = $(this);
+					var _span = $this.closest("span");
+					if (!_span.hasClass("dateOnlyInput")) {
+						// 2016/11/25 TIMEZON fix BEGIN by zh 
+						//var timeStr = kendo.toString(new Date(),"HH:mm");
+						var timeStr = kendo.toString(new Date(),"{!TimeFormat}");
+						$this.val($this.val() + timeStr);
+						// 2016/11/25 TIMEZON fix END by zh
+					}
+				},
+				// 2017/09/11 印刷リスト機能　by zy BEGIN
+				onClose:function(selectedDate,inst){
+					var callBack = "{!callbackFun}";
+					if (callBack != "") eval(callBack);
+				}
+				// 2017/09/11 印刷リスト機能　by zy END
+			});
+			// 2017/09/11 印刷リスト機能　by zy BEGIN
+			var todayFlag = "{!beginToday}";
+			if( todayFlag == "true") $( this ).datepicker( "option", "minDate", new Date() );
+			// 2017/09/11 印刷リスト機能　by zy END
+		});
+	}
+	var old_goToToday = $.datepicker._gotoToday
+	$.datepicker._gotoToday = function(id) {
+	  old_goToToday.call(this,id)
+	  this._selectDate(id)
+	}
+})(jQuery);
+</script>
+
+</apex:component>

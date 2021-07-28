@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>オーダーエントリ情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計 --></label>
+        <name>AccountRef__c</name>
+        <relationshipLabel><!-- オーダーエントリ情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 料理済フラグ --></label>
+        <name>CookDoneFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理情報 --></label>
+        <name>CookInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- ご予約 --></label>
+        <name>LeadRef__c</name>
+        <relationshipLabel><!-- オーダーエントリ情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- オーダーステータス --></label>
+        <name>OrderStatus__c</name>
+    </fields>
+    <fields>
+        <label><!-- オーダー時間別 --></label>
+        <name>OrderTimeStmp__c</name>
+    </fields>
+    <fields>
+        <label><!-- オーダー時間 --></label>
+        <name>OrderTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- 印刷設備名 --></label>
+        <name>PrintInfo__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋 --></label>
+        <name>RoomRef__c</name>
+        <relationshipLabel><!-- オーダーエントリ情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 利用日 --></label>
+        <name>SearchDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計明細 --></label>
+        <name>Trans__c</name>
+    </fields>
+</CustomObjectTranslation>

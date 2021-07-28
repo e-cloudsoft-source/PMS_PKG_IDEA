@@ -1,0 +1,126 @@
+<!--
+ * ---------------------------------------------------------------------------
+ * page     ：ホーム画面
+ *----------------------------------------------------------------------------
+ -->
+<apex:page controller="ExpoShopInfoEditCtrl" action="{!initAct}" showHeader="false" standardStylesheets="false" title="ロゴアップロード">
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/kendo.all.min.js')}"/>
+<style>
+h3 {
+	font-size: 1.5rem;
+	position: relative;
+	background: #f5f5f5;
+	font-weight: bold;
+	border-left: 3px solid #1ea22a;
+	padding: 5px 5px;
+	margin-bottom: 10px;
+}
+/* 多选框设定 */
+.k-multiSelect{
+	vertical-align: middle;
+	display: inline-block;
+}
+/* 多选内容显示的颜色 */
+.k-multiselect .k-button {
+	 border-color: #d5d5d5;
+	 background-color: #d5d5d5;
+}
+.boxDiv{
+	border: 3px solid #e3e3e3;
+	border-radius: 4px;
+	margin-bottom: 10px;
+}
+.titleDiv{
+	background-color:#5e82a3;
+	text-align:left;
+	margin-bottom: 0px;
+}
+/* 必填项Css */
+.hide{
+	display: none;
+}
+.span-input > *{
+	width: 100%;
+}
+.infoDiv{
+	margin: 5px;
+}
+.ui-autocomplete {
+	max-height: 260px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.k-checkbox-label{
+	vertical-align: text-top;
+}
+.parent{
+	position: relative;
+}
+.child{
+	border-left: 3px solid #c00;
+	width: 3px;
+	margin-left: -4px;
+	position: absolute;
+	top: 25%;
+	bottom: 25%;
+}
+tr.detailRow{
+	line-height:35px;
+	height:35px;
+}
+</style>
+<header id="header">
+	<c:ExpoHeaderComp curUser="{!currentUser}" sid="{!sessionId}"/>
+</header>
+<div id="bodyDiv">
+	<apex:form id="mainForm" styleClass="k-mainForm" >
+		<div class="boxDiv">
+			<div class="infoDiv" align="center">
+				<table align="center" style="width: 100%; font-weight: bold;" cellpadding="0" cellspacing="0" html-table="main">
+					<tr><td><div class="titleDiv parent"><h3>1. ファイルを選択してください。 </h3></div></td></tr>
+					<tr class="detailRow">
+						<td>
+							<span class="span-input parent">
+								<apex:inputFile value="{!newLog.body}" filename="{!newLog.name}" style="width: calc(100% - 40px)" />
+							</span>
+						</td>
+					</tr>
+					<tr><td><div class="titleDiv parent"><h3>2. [ロゴの置き換え] ボタンをクリックしてください </h3></div></td></tr>
+					<tr class="detailRow">
+						<td>
+							<apex:commandButton styleClass="btn bc-gy" value="ロゴの置き換え" action="{!saveLogo}"/>
+						</td>
+					</tr>
+					<tr><td><div class="titleDiv parent"><h3>ロゴアップロードの作業を中止したい場合は、キャンセルボタンを押してください </h3> </div></td></tr>
+					<tr class="detailRow">
+						<td>
+							<input type="button" class="btn bc-gy" value="戻る" onclick="openUrl()"/>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</apex:form>
+</div>
+<footer id="footer">
+	<c:ExpoFooterComp />
+</footer>
+<script>
+$(":file").kendoUpload({
+	multiple: false,
+	validation:{
+		allowedExtensions:[".jpg", ".png",".jpeg",".bmp"],
+		//1048576
+		maxFileSize: 1048576
+	}
+});
+
+function openUrl(){
+	window.location.href = "{!URLFOR($Page.ExpoShopInfoEdit, null,[sid=sessionId,Id=dataId], false)}";
+}
+</script>
+</apex:page>

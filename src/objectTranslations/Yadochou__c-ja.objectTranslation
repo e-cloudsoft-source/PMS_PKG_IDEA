@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>宿帳</value>
+    </caseValues>
+    <fields>
+        <label><!-- 御部屋名 --></label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label><!-- 宿泊日 --></label>
+        <name>Field12__c</name>
+    </fields>
+    <fields>
+        <label><!-- 特記事項 --></label>
+        <name>Field13__c</name>
+    </fields>
+    <fields>
+        <label><!-- 顧客 --></label>
+        <name>Field15__c</name>
+        <relationshipLabel><!-- 宿帳 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- ご予約 --></label>
+        <name>Field1__c</name>
+        <relationshipLabel><!-- 宿帳 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 予約インデックスID --></label>
+        <name>LeadIndexId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 全ページ署名 --></label>
+        <name>PageSignature__c</name>
+    </fields>
+    <fields>
+        <label><!-- 敬称 --></label>
+        <name>RespectLstCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- $店舗コード --></label>
+        <name>ShopCodeCal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 署名 --></label>
+        <name>Signature__c</name>
+    </fields>
+    <webLinks>
+        <label><!-- ApplicationFormBtn --></label>
+        <name>ApplicationFormBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- CashRegisterCardPDF --></label>
+        <name>CashRegisterCardPDF</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- QuestionnaireBtn --></label>
+        <name>QuestionnaireBtn</name>
+    </webLinks>
+</CustomObjectTranslation>

@@ -1,0 +1,1 @@
+trigger UpadteContactFromAccounting on ps__AccountAcount__c (after  insert, after update, after delete) {}

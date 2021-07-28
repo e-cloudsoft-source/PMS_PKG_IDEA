@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>TimeSession</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>TimeSession</value>
+    </caseValues>
+    <fields>
+        <label>Reservation</label>
+        <name>Field1__c</name>
+        <relationshipLabel><!-- 時間割 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Usage</label>
+        <lookupFilter>
+            <informationalMessage>Please select the service that you will use ?</informationalMessage>
+        </lookupFilter>
+        <name>Field2__c</name>
+        <relationshipLabel><!-- 時間割 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label>Usage date</label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label>Date</label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label>Time</label>
+        <name>TIME__c</name>
+        <relationshipLabel><!-- 時間割 --></relationshipLabel>
+    </fields>
+    <nameFieldLabel>Time Session#</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+</CustomObjectTranslation>

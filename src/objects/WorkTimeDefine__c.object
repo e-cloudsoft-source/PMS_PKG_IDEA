@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customSettingsType>List</customSettingsType>
+    <description>終業規則の関連定義</description>
+    <enableFeeds>false</enableFeeds>
+    <fields>
+        <fullName>DayOfRegularWorkTime__c</fullName>
+        <defaultValue>480</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>1日所定労働時間(時単位)
+例：7時30分の場合、定義情報は 7 * 60 + 30 = 450 で定義値に設定する</inlineHelpText>
+        <label>1日所定労働時間(分単位)</label>
+        <precision>4</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>LateNightEndTime__c</fullName>
+        <defaultValue>&quot;05:00&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>深夜残業終了時間 書式： HH:MM 
+例：5時まで深夜残業を定義したい場合、「05：00」で設定する</inlineHelpText>
+        <label>深夜残業終了時間（HH:MM)</label>
+        <length>5</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>LateNightStartTime__c</fullName>
+        <defaultValue>&quot;22:00&quot;</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <inlineHelpText>深夜残業開始時間 書式： HH:MM 
+例：22時から深夜残業を定義したい場合、「22：00」で設定する</inlineHelpText>
+        <label>深夜残業開始時間（HH:MM)</label>
+        <length>5</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>ShopCode__c</fullName>
+        <caseSensitive>false</caseSensitive>
+        <deprecated>false</deprecated>
+        <externalId>true</externalId>
+        <label>店舗コード</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>true</unique>
+    </fields>
+    <label>終業規則</label>
+    <visibility>Public</visibility>
+</CustomObject>

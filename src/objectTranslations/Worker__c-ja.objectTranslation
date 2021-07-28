@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>扱者</value>
+    </caseValues>
+    <fields>
+        <help><!-- 退社されたとき、チェックを入れて下さい！ --></help>
+        <label><!-- 退社 --></label>
+        <name>Field10__c</name>
+    </fields>
+    <fields>
+        <label><!-- 携帯電話 --></label>
+        <name>Field11__c</name>
+    </fields>
+    <fields>
+        <label><!-- ひらがな --></label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <label><!-- 従業員# --></label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label><!-- ご自宅電話 --></label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 所属 --></label>
+        <name>Field4__c</name>
+        <picklistValues>
+            <masterLabel>フロント</masterLabel>
+            <translation><!-- フロント --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>接客</masterLabel>
+            <translation><!-- 接客 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>番頭</masterLabel>
+            <translation><!-- 番頭 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>経理</masterLabel>
+            <translation><!-- 経理 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>総料理長</masterLabel>
+            <translation><!-- 総料理長 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>調理師</masterLabel>
+            <translation><!-- 調理師 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ローマ字[姓] --></label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label><!-- ローマ字[名] --></label>
+        <name>Field6__c</name>
+    </fields>
+    <fields>
+        <label><!-- レジ# --></label>
+        <name>Field7__c</name>
+    </fields>
+    <fields>
+        <label><!-- 別名 --></label>
+        <name>Field8__c</name>
+    </fields>
+    <fields>
+        <label><!-- 入社日 --></label>
+        <name>Field9__c</name>
+    </fields>
+</CustomObjectTranslation>

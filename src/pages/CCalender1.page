@@ -1,0 +1,269 @@
+<apex:page controller="repeatCon" id="thePage" showHeader="true">
+<!-- Load jQuery -->
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+    <apex:form id="theForm">
+        <apex:outputPanel id="theCalendar">
+            <div class="bCalendar">
+                <table class="calendarMonthView" width="100%">
+                   <caption>
+                    <div class="calHeader">
+                        <apex:commandLink action="{!prev}" rerender="theCalendar">
+                            <apex:image height="20px" url="{!URLFOR($Resource.Cal_LeftArrow)}" alt="Previous Month" />
+                            <!--  <img title="Previous Month" class="prevCalArrow" alt="Previous Month" src="/s.gif" />-->
+                        </apex:commandLink>
+                        <font size = "5"> &nbsp;&nbsp;{!month.monthname}&nbsp;/&nbsp;{!month.yearname}&nbsp;&nbsp;</font> 
+                        <apex:commandLink action="{!next}" rerender="theCalendar">
+                        <apex:image height="20px" url="{!URLFOR($Resource.Cal_RightArrow)}" alt="Next Month" />
+                            <!--  <img title="Next Month" class="nextCalArrow" alt="Next Month" src="/s.gif" />-->
+                        </apex:commandLink>
+                     </div>
+                    </caption>
+                    <tbody>
+                       <tr class="headerRow">
+                       <th scope="col" class="calDays">日</th>
+                       <th scope="col" class="calDays">月</th>
+                       <th scope="col" class="calDays">火</th>
+                       <th scope="col" class="calDays">水</th>
+                       <th scope="col" class="calDays">木</th>
+                       <th scope="col" class="calDays">金</th>
+                       <th scope="col" class="calDays">土</th>
+                       </tr>
+
+                       <apex:repeat value="{!weeks}" var="wk" id="foreachWeek">
+                           <tr>
+                               <apex:repeat value="{!wk.days}" var="day" id="foreachday">
+                                   <td class="{!day.cssname}" height="190" valign="top">
+                                       <div class="date"><a href="#"
+                                            title="Add Event - {!day.date}"><img src="/s.gif"
+                                            alt="Add Event - {!day.date}" class="addNewEventIcon"
+                                            title="Add Event - {!day.date}" /></a>
+                                            
+                                            <apex:outputPanel layout="none" rendered="{!day.chargetype = 'WEEK'}">
+                                               <a style = "font-size:16px" href="/{!Tier4reportID}?colDt_s={!month.yearname}/{!month.MonthName}/{!day.dayofmonth}&colDt_e={!month.yearname}/{!month.MonthName}/{!day.dayofmonth}"
+                                               title="Day View - {!day.date}">{!day.dayofmonth}<br/><br/><center><font color="darkgoldenrod" size = "2">[  予約人数:  {!day.SumValues}  ] Tier 4</font></center></a>
+                                               <table cellspacing = "1" align = "center" width = "300px">
+                                                    <tr align = "center" >
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">部屋</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">昼</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">夕</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">OUT</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">IN</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">STAY</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">客室</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum01}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum02}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum03}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum04}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum05}</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">伊勢</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum06}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum07}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">藤</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum08}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum09}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">竹河</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum10}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum11}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <!--  <tr align = "center">
+                                                        <td style = "padding-top: 3px; padding-bottom: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">レストラン</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr> -->
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">源氏館</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum12}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum13}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">平安</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum14}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum15}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                               </table>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel layout="none" rendered="{!day.chargetype = 'BHOL'}">
+                                               <a style = "font-size:16px" href="/{!Tier6reportID}?colDt_s={!month.yearname}/{!month.MonthName}/{!day.dayofmonth}&colDt_e={!month.yearname}/{!month.MonthName}/{!day.dayofmonth}"
+                                               title="Day View - {!day.date}">{!day.dayofmonth}<br/><br/><center><font color="tomato" size = "2">[  予約人数:  {!day.SumValues}  ] Tier 6</font></center></a>
+                                               <table cellspacing = "1" align = "center" width = "300px">
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">部屋</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">昼</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">夕</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">OUT</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">IN</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">STAY</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">客室</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum01}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum02}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum03}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum04}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum05}</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">伊勢</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum06}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum07}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">藤</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum08}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum09}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">竹河</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum10}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum11}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <!--  <tr align = "center">
+                                                        <td style = "padding-top: 3px; padding-bottom: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">レストラン</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr> -->
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">源氏館</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum12}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum13}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">平安</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum14}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum15}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                               </table>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel layout="none" rendered="{!day.chargetype = 'NEWY'}">
+                                               <a style = "font-size:16px" href="/{!Tier7reportID}?colDt_s={!month.yearname}/{!month.MonthName}/{!day.dayofmonth}&colDt_e={!month.yearname}/{!month.MonthName}/{!day.dayofmonth}"
+                                               title="Day View - {!day.date}">{!day.dayofmonth}<br/><br/><center><font color="maroon"  size = "2">[  予約人数:  {!day.SumValues}  ] Tier 7</font></center></a>
+                                               <table cellspacing = "1" align = "center" width = "300px">
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">部屋</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">昼</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">夕</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">OUT</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">IN</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:solid; border-color:black; font-size:12px">STAY</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">客室</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum01}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum02}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum03}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum04}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum05}</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">伊勢</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum06}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum07}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">藤</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum08}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum09}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">竹河</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum10}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum11}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <!--  <tr align = "center">
+                                                        <td style = "padding-top: 3px; padding-bottom: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">レストラン</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr> -->
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">源氏館</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum12}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum13}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                                    <tr align = "center">
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">平安</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum14}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px">{!day.Sum15}</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                        <td style = "padding: 3px; border-size: 1px; border-style:dotted solid; border-color:black; font-weight: normal; font-size:12px"> -</td>
+                                                    </tr>
+                                               </table>
+                                            </apex:outputPanel>
+                                        </div>
+                                        <div>
+                                            <!-- <apex:repeat value="{!day.eventstoday}" var="v" id="foreachevent"> -->
+                                                <!-- <span class="event">{!v.formateddate}</span> -->
+                                                  <!-- <a href="#">{!v.ev.subject}</a> -->
+                                                  <!-- <br /> -->
+                                            <!-- </apex:repeat> -->
+                                        </div>
+                                  </td>
+                              </apex:repeat>
+                          </tr>
+                      </apex:repeat>
+                   </tbody>
+                </table>
+            </div>
+        </apex:outputPanel>
+    </apex:form>
+    <c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>

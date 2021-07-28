@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>地域マスタ情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- 地域 --></label>
+        <name>AreaLst__c</name>
+    </fields>
+    <fields>
+        <label><!-- 市区郡すべて --></label>
+        <name>CityAll__c</name>
+    </fields>
+    <fields>
+        <label><!-- 市区郡コード --></label>
+        <name>CityCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 市区郡 --></label>
+        <name>City__c</name>
+    </fields>
+    <fields>
+        <label><!-- 都道府県 --></label>
+        <name>StateLst__c</name>
+    </fields>
+</CustomObjectTranslation>

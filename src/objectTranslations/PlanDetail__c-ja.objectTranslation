@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>プラン明細</value>
+    </caseValues>
+    <fields>
+        <label><!-- 商品 --></label>
+        <name>AccountMasterRef__c</name>
+        <relationshipLabel><!-- プラン明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- オプション商品提供最大数量 --></label>
+        <name>Amount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税(参照) --></label>
+        <name>JmstRef__c</name>
+        <relationshipLabel><!-- プラン明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- オプション商品フラグ --></label>
+        <name>OptionAccMstFLG__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品（プラン） --></label>
+        <name>PlanProdcut__c</name>
+        <relationshipLabel><!-- プラン明細 (プラン) --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- プラン --></label>
+        <name>PlanRef__c</name>
+        <relationshipLabel><!-- プラン明細 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 金額 --></label>
+        <name>Price__c</name>
+    </fields>
+    <fields>
+        <label><!-- 商品数量 --></label>
+        <name>ProductNumber__c</name>
+    </fields>
+    <fields>
+        <label><!-- サービス料(%) --></label>
+        <name>ServiceRate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 消費税 --></label>
+        <name>TaxRate__c</name>
+    </fields>
+    <validationRules>
+        <errorMessage><!-- 明細設定情報に会計商品（プラン）を設定できません。 --></errorMessage>
+        <name>PlanDetailItemTypeCheck</name>
+    </validationRules>
+</CustomObjectTranslation>

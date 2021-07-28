@@ -1,0 +1,27 @@
+<apex:page showHeader="false" title="許可なし" applyHtmlTag="false" applyBodyTag="false" sidebar="false" renderAs="pdf" readonly="true">
+<html>
+<head>
+<title>許可なし</title>
+<style>
+@page {
+	size: 6.93in 9.84in; /* B5 portlate size */
+	margin: 0cm;
+}
+body {
+	font-family: Arial Unicode MS;
+	top: 0.2cm;
+	left: 0.2cm;
+}
+</style>
+</head>
+<body>
+<table style="width:97%;" >
+	<tr>
+		<td>
+			<apex:outputLabel value="{!$Label.ps__msg_035_0132}" />
+		</td>
+	</tr>
+</table>
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,69 @@
+<!-- 
+	新規ユーザ情報登録ページ
+	
+	初期表示ページRECAIUSユーザ情報の登録をする。
+
+	Copyright (c) 2018 TOSHIBA CORPORATION,  All Rights Reserved.
+-->
+<apex:page Controller="RecaiusUserInfo" sidebar="false" >
+    <apex:include pageName="RecaiusUserInfoCss"/>
+    <div id="vf-page" > 
+        <apex:pageMessage title="Recaius Error" summary="{!warningMsg}" severity="error" strength="3" rendered="{!loginErrorFlg}" />
+        
+        <apex:pageMessages id="mes" />
+    
+        <apex:pageBlock title="RECAIUS情報登録" id="Recaius_login">
+            <apex:form >
+                <p>契約ID<apex:inputField value="{!userInfo.ContactId__c}"  /></p>
+            	<p>ユーザーID<apex:inputField value="{!userInfo.UserId__c}" /></p>
+                <p>パスワード</p><apex:inputSecret value="{!userInfo.Password__c}" id="theSecretInput" />
+         
+      			<!-- Invokes the action method when the user clicks this button.　pa,mes -->
+        
+                 <p>
+                    <apex:commandButton action="{!invokeInitialRequest}" value="次へ" reRender="dummy" oncomplete="check();" /> 
+                </p>
+                 <apex:actionFunction action="{!next_groupSetting}" name="testAF" />
+            </apex:form>
+            
+            <apex:outputPanel id="pa">
+                <!-- Displays the response body of the initial callout. -->   
+       			<apex:outputText value="{!result1}" />
+                <br/>
+       			<!-- Displays the response body of the chained callout. -->
+       			<apex:outputText value="{!result2}" />
+            </apex:outputPanel> 
+        </apex:pageBlock>
+    </div>
+        
+    <div id="list-table" >
+        <apex:pageBlock title="登録情報" id="up">
+        	<apex:form >
+        		<apex:pageBlockTable value="{!RecaiusUser}" var="re">
+            		<apex:column style="width:10%;" >
+                		<apex:facet name="" > contact</apex:facet>
+                		<apex:commandLink action="{!showDetail}" value="  edit   |" >
+                    		<apex:param name="recaId" value="{!re.Id}" assignTo="{!SelectedId}" id="recaId" />
+                		</apex:commandLink>
+                
+                		<apex:commandLink action="{!deleteRecord}" value="  delete" reRender="up" >
+                    		<apex:param name="recaId" value="{!re.Id}" assignTo="{!SelectedId}" id="d_recaId" />
+                		</apex:commandLink>
+                    </apex:column>
+            		<apex:column value="{!re.ContactId__c}"/>
+            		<apex:column value="{!re.UserId__c}"/>
+            		<apex:column value="{!re.RecaiusGroup__c}" />
+            		<apex:column value="{!re.chatterGroup__c}" />            	
+                </apex:pageBlockTable>
+            </apex:form>        
+        </apex:pageBlock>
+    </div>
+    
+   <script>
+    function check(){
+        testAF();
+        
+    }
+    </script>
+    
+</apex:page>

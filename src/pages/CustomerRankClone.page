@@ -1,0 +1,268 @@
+<apex:page controller="CustomerRank" sidebar="false" >
+
+<!-- Load jQuery -->
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+  
+   
+    <style type="text/css">
+            .custPopup
+            {
+                background-color: white;
+                border-width: 2px;
+                z-index: 9999;
+                left: 40%;
+                padding:10px;
+                position: absolute;
+                width: 750px;
+                margin-left: -250px;
+                top:200px;                
+            }
+            .popupBackground
+            {
+                background-color:black;
+                opacity : 0.20;
+                filter: alpha(opacity = 20);
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                z-index: 9998;
+                
+            }
+            
+        </style>
+    
+    <script type="text/javascript">        
+        
+         function EditRank(id,inputid)
+         {            
+             document.getElementById(inputid).value = id;
+             return true;               
+         }
+         function DeleteRank(id,inputid)
+         {
+         	//あなたは、ランクを削除してもよろしいですか ？
+             var r=confirm("{!$Label.MSG_013_0001}");
+             if(r == true)
+             {
+                 document.getElementById(inputid).value = id;
+                 return true;
+             }
+             else
+             {
+                 return false;
+             }
+
+         }
+          function checkAll(cb,cbid)
+        {
+            var inputElem = document.getElementsByTagName("input");                     
+            for(var i=0; i<inputElem.length; i++)
+            {             
+                 if(inputElem[i].id.indexOf(cbid)!=-1){                                        
+                    inputElem[i].checked = cb.checked;
+                }
+            }
+        }
+    
+    </script>
+    
+    <apex:form >
+    
+      <input type="hidden" id="rid" name="rid"/>
+          
+       <apex:pageBlock id="pblock">  
+         <br/><br/> 
+          <center>
+          
+       <div style="width: 1050px; height: 160px; background-color: #D8D8D8; -moz-border-radius: 20px;-webkit-border-radius: 15px;border-radius: 15px;">
+          <apex:pageMessages />
+          <table border="0" cellspacing="0" cellpadding="0" >                       
+                <tr>
+                    <td width="100%" align="center" colspan="3">
+                        <br/>
+                        <u><b><apex:outputLabel style="font-size:16px;"><!-- 検索条件 -->{!$Label.ps__msg_013_0002}</apex:outputLabel></b></u>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right" >
+                        <br/>
+                        &nbsp;&nbsp;<apex:outputLabel ><!-- ご利用回数 -->{!$Label.ps__msg_013_0003}</apex:outputLabel> 
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       <apex:selectList value="{!Condition1}" size="1" style="width:75px;">
+                       		<!-- --None-- -->
+                            <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_013_0019}"/>                           
+                            <apex:selectOption itemValue="eq" itemLabel="="/>                            
+                            <apex:selectOption itemValue="gt" itemLabel=">"/>
+                            <apex:selectOption itemValue="lt" itemLabel="<"/>
+                        </apex:selectList>  
+                        &nbsp;&nbsp;&nbsp;&nbsp;                        
+                        <apex:inputText value="{!UsageCountSel}" style="width:60px;"/>
+                        <br/>                     
+                    </td>
+                    <td width="10%" align="Center">
+                        <br/>
+                        <apex:selectList value="{!Condition3}" size="1" style="width:75px;">
+                        	<!-- --None-- -->
+                            <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_013_0019}"/>
+                            <!-- AND -->
+                            <apex:selectOption itemValue="AND" itemLabel="{!$Label.ps__msg_013_0020}"/>
+                            <!-- OR -->
+                            <apex:selectOption itemValue="OR" itemLabel="{!$Label.ps__msg_013_0021}"/>                            
+                        </apex:selectList>  
+                    </td>
+                    <td width="25%" align="left" >
+                        <br/>
+                        &nbsp;&nbsp;<apex:outputLabel ><!-- ご利用金額 -->{!$Label.ps__msg_013_0004}</apex:outputLabel>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       <apex:selectList value="{!Condition2}" size="1" style="width:75px;">
+                       		<!-- --None-- -->
+                            <apex:selectOption itemValue="" itemLabel="{!$Label.ps__msg_013_0019}"/>
+                            <apex:selectOption itemValue="eq" itemLabel="="/>                            
+                            <apex:selectOption itemValue="gt" itemLabel=">"/>
+                            <apex:selectOption itemValue="lt" itemLabel="<"/>
+                        </apex:selectList>  
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <apex:inputText value="{!UsageChargeSel}" style="width:70px;" /> 
+                        <br/>                     
+                    </td>
+                </tr>
+                <tr >
+                    <td width="100%" align="center" colspan="3">
+                       <br/>
+                           <apex:outputLabel ><!-- ご利用期間 -->{!$Label.ps__msg_013_0005}</apex:outputLabel>
+                           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           <apex:outputLabel ><!-- 開始 -->{!$Label.ps__msg_013_0006}</apex:outputLabel>
+                           &nbsp;&nbsp;&nbsp;&nbsp;                           
+                           <apex:inputField value="{!FromDate.SearchDate__c}"/>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <apex:outputLabel ><!-- 終了 -->{!$Label.ps__msg_013_0007}</apex:outputLabel>
+                           &nbsp;&nbsp;&nbsp;&nbsp;
+                           <apex:inputField value="{!ToDate.SearchDate__c}"/>
+                          
+                    </td>
+                </tr>
+                 <tr >
+                    <td width="100%" align="center" colspan="3">
+                            <br/>
+                        <apex:outputPanel id="perPanel" rendered="{!ShowPercentage}">
+                           <apex:outputLabel > <!-- リピーター率 : -->{!$Label.ps__msg_013_0008} </apex:outputLabel>
+                           <apex:outputText value="{0, number,00.00}">
+                               <apex:param value="{!usagePercentage}" />
+                           </apex:outputText>%
+                        </apex:outputPanel>     
+                    </td>
+                 </tr>                                                        
+             </table>
+            </div> 
+             </center>
+           <br/>
+           
+            <center>
+            <!-- 検索開始 -->
+            <apex:commandButton value="{!$Label.ps__msg_013_0009}" action="{!OpenRfmReport}" />
+            </center> 
+           <br/><center>
+           	  <!-- 検索....... -->
+              <apex:actionStatus id="status" style="align:center;color:green;" startText="{!$Label.ps__msg_013_0010}" ></apex:actionStatus>
+           </center>
+           
+           
+         <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!DispPopUp}" id="panelid"/>
+         
+           <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!DispPopUp}">
+              <apex:pageBlock >  
+                 <apex:pageBlockSection columns="1">                    
+                    <apex:pageBlockSectionItem >
+                       <apex:outputLabel ><!-- Rank -->{!$Label.ps__msg_013_0011}</apex:outputLabel>
+                          <!--   <apex:selectList value="{!RankSelectd}" size="1" style="width:55px;">
+                                    <apex:selectOption itemValue="A" itemLabel="A"/>
+                                    <apex:selectOption itemValue="B" itemLabel="B"/>
+                                    <apex:selectOption itemValue="C" itemLabel="C"/>
+                                    <apex:selectOption itemValue="D" itemLabel="D"/>
+                                </apex:selectList>
+                          -->
+                          <apex:inputField value="{!Rank.RANK__c}"/>
+                   </apex:pageBlockSectionItem> 
+                 <apex:pageBlockSectionItem rendered="{!showRadio}">  
+                   <apex:outputLabel ><!-- Apply changes to -->{!$Label.ps__msg_013_0012}</apex:outputLabel>
+                   <apex:selectRadio value="{!SelectedRec}" layout="pageDirection">
+                   	  <!-- The record clicked -->
+                      <apex:selectOption itemValue="The record clicked" itemLabel="{!$Label.ps__msg_013_0022}"/>
+                      <!-- All selected records -->
+                      <apex:selectOption itemValue="All selected records" itemLabel="{!$Label.ps__msg_013_0023}"/>
+                   </apex:selectRadio>
+                 </apex:pageBlockSectionItem>
+                </apex:pageBlockSection> 
+                <!-- Save -->
+                <center><apex:commandButton value="{!$Label.ps__msg_013_0024}" style="text-decoration:none;"  action="{!SaveRank}" reRender="pblock" />&nbsp;&nbsp;
+                <!-- Cancel -->
+                <apex:commandButton value="{!$Label.ps__msg_013_0025}" style="text-decoration:none;" action="{!CancelRank}" reRender="pblock" /></center>
+              </apex:pageBlock>     
+           </apex:outputPanel>
+         
+           <br/><br/><center><u><b><apex:outputLabel style="font-size:16px;" rendered="false"><!-- 検索結果 -->{!$Label.ps__msg_013_0013}</apex:outputLabel></b></u></center>
+         
+           <br/><apex:pageBlockTable value="{!InnserClassList}" var="s" style="width:86%; -moz-border-radius: 20px;-webkit-border-radius: 13px;border-radius: 13px;" align="center" id="tableid" rendered="false">
+               
+               <apex:column width="4%" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header">
+                        <apex:inputCheckbox onclick="checkAll(this,'checkedone')"/>
+                   </apex:facet>
+                   <apex:inputCheckbox value="{!s.IsChecked}"  id="checkedone"/>
+               </apex:column>               
+            <!--  
+               <apex:column width="8%" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">                   
+                   <apex:facet name="header">アクション</apex:facet>
+                   <apex:commandLink value="Edit" style="text-decoration:none;" onclick="EditRank('{!s.RecCount}','rid')" action="{!EditRank}" rendered="{!!s.ShowInput}" reRender="tableid"/>
+                   <apex:outputLabel rendered="{!!s.ShowInput}">&nbsp;|&nbsp;</apex:outputLabel>
+                   <apex:commandLink value="Del" style="text-decoration:none;" onclick="DeleteRank('{!s.RecCount}','rid')" action="{!Deleterank}" rendered="{!!s.ShowInput}" reRender="tableid"/>
+                   
+                   <apex:commandLink value="Save" style="text-decoration:none;" onclick="EditRank('{!s.RecCount}','rid')" action="{!SaveRank}" rendered="{!s.ShowInput}" reRender="tableid"/>
+                   <apex:outputLabel rendered="{!s.ShowInput}">&nbsp;|&nbsp;</apex:outputLabel>
+                   <apex:commandLink value="Cancel" style="text-decoration:none;" action="{!CancelRank}" rendered="{!s.ShowInput}" reRender="tableid"/>
+               </apex:column>
+             --> 
+               <apex:column width="15%" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- ランク -->{!$Label.ps__msg_013_0014}</apex:facet>
+                 <!--  <apex:outputLabel rendered="{!!s.ShowNone}">None</apex:outputLabel> -->
+                   <apex:outputField value="{!s.customerRank.RANK__c}" ></apex:outputfield>
+                       <apex:actionSupport event="ondblclick" action="{!EditRank}" onsubmit="EditRank('{!s.RecCount}','rid')" reRender="pblock"></apex:actionSupport>                           
+                                 
+              <!--  <apex:inputField value="{!s.customerRank.RANK__c}" rendered="{!s.ShowInput}"/> -->                                      
+               </apex:column>
+               <apex:column style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- お客様名 -->{!$Label.ps__msg_013_0015}</apex:facet>
+                   <apex:commandlink value="{!s.ContactName.FirstName} {!s.ContactName.LastName}" action="/{!s.ContactName.id}" target="_blank"/>
+               </apex:column>
+               <apex:column style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- お客様カルテ -->{!$Label.ps__msg_013_0016}</apex:facet>
+                   <apex:commandlink value="{!s.ContactName.FirstName} {!s.ContactName.LastName}" onclick="EditRank('{!s.ContactName.id}','rid')" action="{!ShowPDF}"/>
+               </apex:column>
+           
+               <apex:column value="{!s.UsageCount}" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- ご利用回数 -->{!$Label.ps__msg_013_0003}</apex:facet>
+               </apex:column>
+               <apex:column value="{!s.UsageCharge}" style="background-color: {!IF((s.ColCount == 0),'#D8D8D8','#A9D0F5')}">
+                   <apex:facet name="header"><!-- ご利用金額 -->{!$Label.ps__msg_013_0004}</apex:facet>
+                 <!--  <apex:outputText value="{0, number,¥ 00}">
+                           <apex:param value="{!s.UsageCharge}" />
+                       </apex:outputText>
+                  -->
+               </apex:column>
+           </apex:pageBlockTable>
+           
+          <center><apex:outputLabel rendered="false"><!-- 検索条件はありませんレコードがありません -->{!$Label.ps__msg_013_0017}</apex:outputLabel></center>
+           
+        <!--  <br/><center><apex:commandButton value="保存" action="{!SaveRecords}" status="savestatus" rerender="pblock,tableid" rendered="{!ShowResult}"/></center>  -->  
+            <br/><center>
+            <!-- 節約....... -->
+              <apex:actionStatus id="savestatus" style="align:center;color:green;" startText="{!$Label.ps__msg_013_0018}" ></apex:actionStatus>
+           </center>
+       </apex:pageBlock>
+     
+    </apex:form>
+    <c:CallRegisterPopup ></c:CallRegisterPopup>  
+</apex:page>

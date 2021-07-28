@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：簡易会計の支払メディアの定義
+書式：
+  <SHOP>  店舗別支払メディア情報定義可能
+    <SHOPCODE></SHOPCODE>                   店舗コード
+    <BUTTONTAB>               １グループの支払ボタン定義情報(複数タブ定義可能)
+      <BUTTON>                      支払メディア情報を定義する 
+        <LABEL>現金</LABEL>       支払メディア表示ラベル
+        <PRODCODE>M99000</PRODCODE>   支払メディア関連の会計商品コード
+      </BUTTON>   
+  </SHOP>
+注意：商品種別種別：「支払」かつ　支払種別：「現金,カード,売掛金,クーポン,割引,値引,予約金」のみの会計商品コードを定義してください!!!!!!
+-->
+  
+  <SHOP>
+    <SHOPCODE></SHOPCODE>
+    
+    <BUTTONTAB>
+      <BUTTON>
+          <LABEL>現金</LABEL>
+          <PRODCODE>M99000</PRODCODE>
+      </BUTTON>
+      <BUTTON>
+          <LABEL>雑損[001]</LABEL>
+          <PRODCODE>M041301</PRODCODE>
+      </BUTTON>
+    </BUTTONTAB>
+    <BUTTONTAB>
+      <BUTTON>
+          <LABEL>雑損「z1」</LABEL>
+          <PRODCODE>000000001</PRODCODE>
+      </BUTTON>
+    </BUTTONTAB>
+    <!-- -->
+  </SHOP>
+</root>

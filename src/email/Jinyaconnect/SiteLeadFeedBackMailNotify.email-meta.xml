@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <encodingKey>UTF-8</encodingKey>
+    <name>サイトから予約自動取込の連絡メール(施設へ送信)</name>
+    <style>none</style>
+    <subject>Re: 元湯陣屋　日帰りプランのご予約</subject>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

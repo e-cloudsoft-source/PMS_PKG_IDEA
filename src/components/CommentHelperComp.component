@@ -1,0 +1,40 @@
+<apex:component controller="CommentHelperCompCtrl" id="commentComp" allowDML="false">
+
+<apex:attribute name="commentid" description="target field id" type="String" required="true"/>
+<apex:attribute name="commentFlg" description="comment field type div flg, false:normal textarea, true:richtextarea" type="Boolean" default="true"/>
+<apex:attribute name="isBillComment" description="請求書コメントの選択リスト情報を取得" type="Boolean" />
+<apex:attribute name="isSpecComment" description="特記事項コメントの選択リスト情報を取得" type="Boolean"/>
+<apex:attribute name="commentWidth" description="" type="String" default="100%"/>
+<!--  -->
+<apex:outputPanel rendered="{!commOptionlst.size > 0}">
+	<select size="1" style="margin-bottom:2px;height:20px;width:{!commentWidth}" onchange="_commentComp_selectVal(this,this.value)">
+		<option></option>
+		<apex:repeat value="{!commOptionlst}" var="opt">
+			<option value="{!opt.value}">{!opt.label}</option>
+		</apex:repeat>
+	</select>
+	<script>
+	//初始化
+	function _commentComp_selectVal(that,value){
+		var comment3Id = "{!JSENCODE(commentid)}";
+		var $target = null;
+		var richflg = ("{!IF(commentFlg, 'true', 'false')}" == "true");
+		if (richflg) {
+			$target = $j("[id$="+comment3Id+"] iframe.cke_reset").get(0);
+		} else {
+			$target = $j("[id$="+comment3Id+"]");
+		}
+		// コメント設定する
+		var orgmsg = (richflg ? $target.contentDocument.body.innerText : $target.val()).trim();
+	    // 过滤特技事项内末尾的换行符<br> 
+	    // 重新组成特技事项显示内容
+	    var valString = (orgmsg == '') ? value : (orgmsg  + '\n' +value);
+		if (richflg) {
+			$target.contentDocument.body.innerText = valString;
+		} else {
+			$target.val(valString);
+		}
+	}
+	</script>
+</apex:outputPanel>
+</apex:component>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>予定表ワーク</value>
+    </caseValues>
+    <fields>
+        <label><!-- バッチ最終実施時間 --></label>
+        <name>BatchLastTm__c</name>
+    </fields>
+    <fields>
+        <label><!-- データ種別 --></label>
+        <name>DateType__c</name>
+        <picklistValues>
+            <masterLabel>UI定義</masterLabel>
+            <translation><!-- UI定義 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>バッチ</masterLabel>
+            <translation><!-- バッチ --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 予定表抽出日 --></label>
+        <name>EntryDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 投稿グループ情報 --></label>
+        <name>FeedItemId__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理集計情報2 --></label>
+        <name>FoodSumData2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理集計情報3 --></label>
+        <name>FoodSumData3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理集計情報 --></label>
+        <name>FoodSumData__c</name>
+    </fields>
+    <fields>
+        <label><!-- 料理集計種別 --></label>
+        <name>FoodSumType__c</name>
+        <picklistValues>
+            <masterLabel>予約料理集計</masterLabel>
+            <translation><!-- 予約料理集計 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>会計料理集計</masterLabel>
+            <translation><!-- 会計料理集計 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>見積料理集計</masterLabel>
+            <translation><!-- 見積料理集計 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 店舗情報 --></label>
+        <name>ShopInfoRef__c</name>
+        <relationshipLabel><!-- 予定表ワーク --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

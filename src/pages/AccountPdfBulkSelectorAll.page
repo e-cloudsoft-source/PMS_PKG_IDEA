@@ -1,0 +1,688 @@
+<apex:page standardcontroller="AccountAcount__c" extensions="AccountPdfSwitch" action="{!AccAcountsSelectorMergeInit}"
+sidebar="false" showHeader="false">
+<c:CommHeaderComp />
+<style>
+.k-state-selected {
+	BACKGROUND-COLOR: WHITE;
+}
+.pbHeader{
+	height: auto;
+}
+.overFlowHidden{
+	overflow-y: hidden !important;
+	overflow-x: auto !important;
+}
+.odd {
+	background-color: #F5F5F5;
+}
+.numbercol {
+	text-align: right;
+}
+.centercol {
+	text-align: center;
+}
+div.hideCurrDate span.dateInput span.dateFormat{
+	display:none;
+}
+span.dateInput span.dateFormat{
+	display:none;
+}
+/* PageBlock Title Css */
+td.pbTitle {
+	width: 63px !important;
+	white-space: nowrap;	
+}
+.k-input {
+	padding: 0;
+}
+.imgIconStyle {
+	border: 0;
+}
+body .bPageBlock, body .bPageBlock .pbBody, body .bPageBlock .pbBottomButtons {
+	margin: 0px !important;
+}
+.selectRowStyle{
+	background-color: #FFF9D0;
+}
+.k-state-active {
+	background-color: peachpuff !important;
+}
+.imgHelp:hover{
+	background-position: top right;
+}
+</style>
+<!-- 会計表示期間 -->
+<apex:pageBlock >
+<apex:pageMessages />
+<div id="bodyDiv" style="background-color:#f8f8f8;">
+	<div id="bindSplit">
+	<!-- 分割左侧板块 -->
+		<div id="viewPanel" class="overFlowHidden" >
+			<apex:form id="viewFrom">
+				<!-- 検索情報 -->
+				<apex:pageBlock title="検索情報(0)" >
+					<apex:pageBlockButtons location="top">
+						<span style="width:100%">
+							<span style="margin-right: 5px;">お客様</span>
+							<apex:inputfield value="{!curSObj.relaccount__c}" id="relaccountId" style="width:100px;" styleClass="k-input"/>
+							<span style="margin-left: 5px;margin-right: 5px;">取引先</span>
+							<apex:inputfield value="{!ldSObj.refAccount__c}" id="refAccountId" style="width:100px;" styleClass="k-input"/>
+							<!-- 売上計上日 -->
+							<span style="margin-left: 5px;margin-right: 5px;">{!$Label.MSG_006_0103}</span>
+							<apex:inputfield value="{!c_termSt.WorkDay__c}" id="fromDate" style="width:100px;" styleClass="k-input k-textbox"/>
+							<!-- 〜 -->
+							<span style="margin-left: 2px;margin-right: 5px;">{!$Label.MSG_006_0097}</span>
+							<apex:inputfield value="{!c_termEt.WorkDay__c}" id="toDate" style="width:100px;" styleClass="k-input k-textbox"/>
+							<span style="margin-left: 5px;margin-right: 5px;" title="該当予約インデックス以外会計も表示">
+								全て会計
+								<img src="/img/s.gif" class="helpOrb imgHelp" title="該当予約インデックス以外会計も表示" style="vertical-align: text-bottom; margin-left: -5px;" />
+								<apex:inputHidden value="{!isAccAllFlg}" id="isAccAllFlgHid"/>
+								<input type="checkbox" Id="isAccAllFlg" style="vertical-align: text-bottom; margin-left: -5px; margin-right: 5px;" onclick="syncCheckBox()"/>
+							</span>
+							<apex:inputHidden value="{!accItemGridInfoJson}" id="accItemGridInfoJsonHid"/>
+							<apex:inputHidden value="{!curSObj.Relreserve__r.LeadIndexRef__c}" id="leadIndexIdHid"/>
+							<input type="button" class="k-button k-button-icontext k-gantt-create" value="検索" onclick="getAccountItemGridInfoFun();blockUi(this.form);" />
+						</span>
+					</apex:pageBlockButtons>
+					<div id="viewGrid"></div>
+				</apex:pageBlock>
+			</apex:form>
+		</div>
+		<!-- 分割右侧板块 -->
+		<div id="prinPanel" class="overFlowHidden" >
+			<apex:form id="prinFrom" >
+				<apex:pageBlock title="印刷情報(0)" >
+					
+					<apex:pageBlockButtons location="top" >
+						<div style="width:100%; text-align: center;">
+						<span>
+							<span id="isRoomLab" style="display:none;">
+							部屋別明細印刷
+							<img src="/img/s.gif" class="helpOrb imgHelp" title="選択した会計の会計明細は部屋別印刷する" style="vertical-align: text-bottom; margin-left: -2px;" />
+						</span>
+							<input type="checkbox" Id="isRoomFlg" title="選択した会計の会計明細は部屋別印刷する" style="vertical-align: text-bottom; margin-right: 5px;" onclick="roomCheckBox()"/>
+						</span>
+						<!-- 会計書 -->
+						<input type="button" class="k-button k-button-icontext k-gantt-create" style="{!IF(isBillFlg, 'display:none;','')}" value="{!$Label.MSG_006_0111}" onclick="startPrinFun();" />
+						<!-- 請求書 -->
+						<input type="button" class="k-button k-button-icontext k-gantt-create" style="{!IF(NOT(isBillFlg), 'display:none;','')}" value="{!$Label.MSG_006_0198}" onclick="startPrinFun();" />
+						</div>
+					</apex:pageBlockButtons>
+					<div id="prinGrid" style="height: 100%; background-color: white;"></div>
+				</apex:pageBlock>
+			</apex:form>
+		</div>
+	</div>
+</div>
+<apex:form id="dataHid">
+	<!-- 会計書-印刷 -->
+	<apex:actionFunction action="{!redirect}" reRender="dataHid" name="redirectFun" rendered="true" oncomplete="openPdfFun();unblockUi(this.form);" />
+	<!-- 請求書-印刷 -->
+	<apex:actionFunction action="{!redirectBillPlugin}" reRender="dataHid" name="redirectBillPluginFun" rendered="true" oncomplete="openPdfFun();unblockUi(this.form);" />
+	<apex:inputHidden value="{!isBillFlg}" id="isBillFlgHid"/>
+	<apex:inputHidden value="{!isRoomFlg}" id="isRoomFlgHid"/>
+	<apex:inputHidden value="{!prinUrl}" id="prinUrlHid"/>
+	<apex:inputHidden value="{!prinAccId}" id="prinAccIdHid"/>
+	<apex:inputHidden value="{!isPgPrin}" id="isPgPrinHid"/>
+	<apex:inputHidden value="{!pageNm}" id="pageNmHid"/>
+</apex:form>
+</apex:pageBlock>
+<script>
+$=jQuery.noConflict();
+//---
+var currency = kendo.culture().numberFormat.currency;
+	currency.decimals = JINYACONNECT.NumberPointLen;
+	currency.symbol = JINYACONNECT.CurrencySybmol;
+	currency.pattern = ["-n","n"];
+//---
+var viewFrom = $("[id$=':viewFrom']") ? $("[id$=':viewFrom']")[0] : null,
+	prinFrom = $("[id$=':prinFrom']") ? $("[id$=':prinFrom']")[0] : null; 
+// Lock开启
+function blockUi(formobj) {
+	$("form[id='" + formobj.id +"']").block({
+	//Processing...
+		 message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_006_0109}</h1>'
+	});
+	return true;
+}
+// Lock解除
+function unblockUi (formobj) {
+	$("form[id='" + formobj.id +"']").unblock();
+}
+function syncCheckBox() {
+	$("[id$=':isAccAllFlgHid']").val($("#isAccAllFlg").prop("checked"));
+}
+function roomCheckBox() {
+	$("[id$=':isRoomFlgHid']").val($("#isRoomFlg").prop("checked"));
+}
+
+// Grid_Chk-Header状态设定
+function setChkHeaderFun() {
+	$("[name$='allpick']").prop("checked", $(".itemCheck").length == $(".itemCheck:checked").length);
+}
+// 数据部分chkAll-False
+						
+$(document).ready(function() {
+	// 全て会計初始化
+	$("#isAccAllFlg").prop("checked",$("[id$=':isAccAllFlgHid']").val() == "true");
+	// 印刷Gird初始化
+	kendoInit_PrinGrid();
+	// 检索Grid初始化
+	kendoInit_ViewGrid();
+	// 设定已选择中数据集
+	// bulkAcountClickFun();
+	// kendoCss设定
+	setKendoCssFun();
+});
+// prinGrid初始化
+function kendoInit_PrinGrid(){
+	// 选中Grid高度设定
+	var ht = $(window).height();
+	var gridHt = ht - $("[id$=':prinFrom'] .pbHeader").height() - 40;
+	var prinGrid = $("#prinGrid").kendoGrid({
+		height: gridHt,
+		width: 780,
+		sortable: true,
+		resizable: true,
+		editable: false,
+		selectable: false,
+		filterable: {
+			operators: {
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				},
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: "{!$Label.MSG_041_0032}",
+				// かつ
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				// フィルタ
+				filter: "{!$Label.MSG_041_0041}",
+				// クリア
+				clear: "{!$Label.MSG_041_0042}",
+			}
+		},
+		columns: [
+			// Account#
+			{	field: "accNm", title:"{!$ObjectType.AccountAcount__c.Fields.Name.label}", width: 135, editable: function(){return false;},
+				template: 
+						"# if (accId != null && accId != '') { #" +
+							"<a href='/#= accId#/e?retURL=#= accId#' target='_blank'><span objid='#= accId#'>#= accNm#</span></a>" +
+						"# } else { #" +
+							'' +
+						"# } #",
+			},
+			// お客様
+			{	field: "countNm", title:"{!$ObjectType.AccountAcount__c.Fields.relaccount__c.label}", width: 135, editable: function(){return false;},
+				template:
+						"# if (countId != null && countId != '') { #" +
+							"<a href='/#= countId#' target='_blank'>#= countNm#</a>" +
+						"# } else { #" + 
+							'' +
+						"# } #",
+			},
+			// ご予約
+			{	field:"ldNm", title:"{!$ObjectType.AccountAcount__c.Fields.Relreserve__c.label}", width: 136, editable: function(){return false;},
+				template: 
+						"# if (ldId != null && ldId != '') { #" +
+							"<a href='/#= ldId#' target='_blank'>#= ldNm#</a>" +
+						"# } else { #" +
+							'' +
+						"# } #",
+			},
+			/*
+			// 取引先
+			{	field: "refAccNm", title:"取引先", editable: function(){return false;},
+				template: 
+						"# if (refAccId != null && refAccId != '') { #" +
+							"<a href='/#= refAccId#' target='_blank'>#= refAccNm#</a>" +
+						"# } else { #" +
+							'' +
+						"# } #",
+			},
+			*/
+			// お部屋
+			{	field:"roomNm", title:"{!$Label.MSG_006_0101}", width: 100, sortable: true,},
+			// ご利用金額(税込)
+			{	field:"field151", title:"{!$Label.MSG_006_0108}", width: 120, editable: function(){return false;},
+				sortable: true,
+				type:"number",
+				format: "{0:c}",
+				attributes: {
+					"class": "numbercol"
+				},
+				footerTemplate: "<div class='numbercol' id='field151'>#: sum #<div>"
+			},
+			{	width: 83,
+				headerTemplate: "<a id='delall' class='k-button k-button-icontext' href='javascript:void(0);' onclick='kendoCnvData_Pro(this, true, \"prinGrid\", \"viewGrid\");'>一括削除</a>",
+								//'<input type="button" id="delall" value="一括削除" class="k-button" onclick="prinGridDelAllFun()" />',
+				command: [{
+					name: "Delete",
+					text: "削除",
+					click: function(e){
+						e.preventDefault(); 
+						var tr = $(e.target).closest("tr"); 
+						var rowData = this.dataItem(tr);
+						if(!rowData) return;
+						// 最后一行追数据处理
+						kendoAddData_Pro("viewGrid", rowData);
+						// 删掉当前行数据
+						kendoDelData_Pro(prinGrid, rowData);
+					}
+				}],
+			}],
+			dataBound: function(e) {
+				var len = e.sender.dataSource.data().length;
+				$("[id$=':prinFrom'] .mainTitle").text("印刷情報("+ (len ? len : 0) +")");
+			},
+			dataSource:{
+				aggregate: [
+					{ field: "field151", aggregate: "sum" },
+				],
+				schema: {
+					model: {
+						fields: {
+							field151: {
+								//data type of the field {number|string|boolean|date} default is string
+								type: "number",
+							}
+						}
+					}
+				}
+			}
+			
+	}).data("kendoGrid");
+}
+// Grid初始化
+function kendoInit_ViewGrid(){
+	var ht = $(window).height();
+	var gridHt = ht - $("[id$=':viewFrom'] .pbHeader").height() - 40;
+	var kendoDt = new kendo.data.DataSource({data: JSON.parse($("[id$=':accItemGridInfoJsonHid']").val()),
+										schema: {
+											model: {
+												fields: {
+													field151: {
+														//data type of the field {number|string|boolean|date} default is string
+														type: "number",
+													}
+												}
+											}
+										}
+									});
+	var viewGrid = $("#viewGrid").kendoGrid({
+		height: gridHt,
+		width: 1400,
+		sortable:true,
+		resizable: true,
+		filterable: {
+			operators: {
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				},
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: "{!$Label.MSG_041_0032}",
+				// かつ
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				// フィルタ
+				filter: "{!$Label.MSG_041_0041}",
+				// クリア
+				clear: "{!$Label.MSG_041_0042}",
+			}
+		},
+		columns:[
+		// 一括対象 - {!$Label.MSG_006_0100}
+		{	field: "isChecked",
+			title: " ",
+			width: 94,
+			sortable: false,
+			filterable: false,
+			headerTemplate:
+					"<a class='k-button k-button-icontext' href='javascript:void(0);' onclick='kendoCnvData_Pro(this, true, \"viewGrid\", \"prinGrid\");'>一括印刷</a>",
+			template:
+					"<a class='k-button k-button-icontext' href='javascript:void(0);' onclick='kendoCnvData_Pro(this, false, \"viewGrid\", \"prinGrid\")'>印刷</a>",
+		},
+		// Account#
+		{	field:"accNm", title:"{!$ObjectType.AccountAcount__c.Fields.Name.label}", width: 135,
+			template:
+					"# if (accId != null && accId != '') { #" +
+						"<a href='/#= accId#/e?retURL=#= accId#' target='_blank'><span objid='#= accId#'>#= accNm#</span></a>" +
+					"# } else { #" +
+						'' +
+					"# } #",
+ 		},
+ 		// お客様
+		{	field:"countNm", title:"{!$ObjectType.AccountAcount__c.Fields.relaccount__c.label}", width: 135, filterable: false,
+			template:
+					"# if (countId != null && countId != '') { #" +
+						"<a href='/#= countId#' target='_blank'>#= countNm#</a>" +
+					"# } else { #" +
+						'' +
+					"# } #",
+		},
+		// ご予約
+		{	field:"ldNm", title:"{!$ObjectType.AccountAcount__c.Fields.Relreserve__c.label}", width: 136,
+			template: 
+					"# if (ldId != null && ldId != '') { #" +
+						"<a href='/#= ldId#' target='_blank'>#= ldNm#</a>" +
+					"# } else { #" +
+						'' +
+					"# } #",
+		},
+		// 到着日
+		{	field:"entryTime", title:"{!$ObjectType.Lead__c.Fields['EntryTime__c'].label}", width: 100, sortable: true, filterable: false,},
+		// お部屋
+		{	field:"roomNm", title:"{!$Label.MSG_006_0101}", width: 100, sortable: true,},
+		// 部屋タイプ
+		{	field:"typeOfRoomNm", title:"{!$Label.MSG_006_0102}", width: 100, sortable: true,},
+		// 売上計上日
+		{	field:"salesday", title:"{!$Label.MSG_006_0103}", width: 100, sortable: true, filterable: false,},
+		// 会計日時
+		{	field:"field148", title:"{!$Label.MSG_006_0104}", width: 150, sortable: true, filterable: false,},
+		// 明細数
+		{	field:"childrens", title:"{!$Label.MSG_006_0105}", width: 60, sortable: true, filterable: false, type:"number",attributes: {"class": "numbercol"}},
+		// 会計済
+		{	field:"accountedFlgCal", title:"{!$Label.MSG_006_0106}", width: 60, sortable: false, filterable: false,
+		 	// 识别Html语言
+		 	encoded: false,
+		 	attributes: {
+		 		"class": "imgIconStyle"
+		}},
+		// 会計人数
+		{	field:"field57", title:"{!$Label.MSG_006_0107}", width: 78, sortable: true, filterable: false, type:"number",attributes: {"class": "numbercol"}},
+		// ご利用金額(税込)
+		{	field:"field151", title:"{!$Label.MSG_006_0108}", width: 120, sortable: true,
+			type:"number",
+			format: "{0:c}",
+			attributes: {
+				"class": "numbercol"
+			}
+		}],
+		dataBound: function(e) {
+			var len = e.sender.dataSource.data().length;
+			$("[id$=':viewFrom'] .mainTitle").text("検索情報("+ (len ? len : 0) +")");
+			kendoInit_BindSplit();
+		},
+		dataSource: kendoDt,
+	}).data("kendoGrid");
+}
+// 画面分割
+function kendoInit_BindSplit(){
+	var bindSplit = $("#bindSplit").data("kendoSplitter");
+	if(bindSplit) return;
+	// 画面分割画面高度设定
+	var ht = $(window).height();
+	$("#bindSplit").height(ht -20);
+	// 画面分割左侧宽度计算
+	var width = window.innerWidth;
+	var wh = width > 1251 ? "1176px" : "960px";
+	$("#bindSplit").kendoSplitter({
+		orientation: "horizontal",
+		panes: [
+			// 老板说不用限制, 自动换行就行 min: "960px",
+			{ collapsible: true, size: wh },
+			{ collapsible: true, resizable: true, size:"100%" },
+		],
+		resize: function(e) {
+			var prinPbHeaderWh = $("[id$=':prinFrom'] .pbHeader").width();
+			if(prinPbHeaderWh >= 290) $("[id$='isRoomLab']").show();
+			else $("[id$='isRoomLab']").hide();
+		}
+		
+	});
+}
+// kendoCss设定
+function setKendoCssFun(){
+	$("[id$=':relaccountId'], [id$=':refAccountId']").addClass("k-textbox");
+}
+// kendoLock设定
+function kendoUiBlock_Pro(isBlock){
+	// Lock开启
+	if(isBlock) kendo.ui.progress($("#bodyDiv"), true);
+	else{
+		// Lock解除
+		setTimeout(function(){kendo.ui.progress($("#bodyDiv"), false);},100);
+	}
+}
+// Grid数据相互设定处理
+function kendoCnvData_Pro(_this, isHeader, getGridId, setGridId){
+	// 处理的Grid	
+	var getGrid = $("#" + getGridId).data("kendoGrid");
+	if(!getGrid || !getGrid.dataSource) return;
+	if(isHeader){
+		// 设定的Grid
+		var setGrid = $("#"+setGridId).data("kendoGrid");
+		if(!setGrid || !setGrid.dataSource) return;
+		// Lock开启
+		kendoUiBlock_Pro(true);
+		setTimeout(function(){
+			// 处理的数据集
+			var getGridData = getGrid.dataSource.view();
+			// 设定的数据集
+			var prinGridData = setGrid.dataSource.data();
+			// 设定的数据集合并
+			Array.prototype.push.apply(prinGridData, getGridData);
+			// Grid置换数据集处理
+			setGrid.dataSource.data(prinGridData);
+			// Grid置空数据集处理
+			kendoDelData_Pro(getGrid, getGridData, getGridData.length == getGrid.dataSource.data().length);
+			// Lock解除
+			kendoUiBlock_Pro(false);
+		},100);
+	} else {
+		// Lock开启
+		kendoUiBlock_Pro(true);
+		// 当前行Grid—Uid
+		var kendoUid = $(_this).parents("tr").data("uid");
+		// 当前行Grid数据获取
+		var rowData = getGrid.dataSource.getByUid(kendoUid);
+		// 最后一行追数据处理
+		kendoAddData_Pro(setGridId, rowData);
+		// 删掉当前行数据
+		kendoDelData_Pro(getGrid, rowData);
+		// Lock解除
+		kendoUiBlock_Pro(false);
+	}
+}
+// Grid追加数据集处理
+function kendoAddData_Pro(gridId, data, isHeader){
+	// 获取需要处理的数据集	
+	var grid = $("#" + gridId).data("kendoGrid");
+	if(!grid || !grid.dataSource) return;
+	// 插入坐标
+	var lastIdx = grid.dataSource.data().length+1;
+	// 最后一行追加数据处理
+	grid.dataSource.insert(lastIdx, data);
+}
+// Grid置空数据集处理
+function kendoDelData_Pro(grid, data, isDelAll){
+	// 置空数据
+	if(grid && grid.dataSource && grid.dataSource.data){
+		if(isDelAll) grid.dataSource.data([]);
+		else {
+			if (data != undefined) {
+				if ("length" in data) {
+					for (var i = 0 ; i < data.length ; i++) {
+						grid.dataSource.remove(data[i]);
+					}
+				} else grid.dataSource.remove(data);
+			}
+		}
+	}
+}
+// 印刷的会计ID设定
+function setPrinAccIdFun(){
+	var prinGrid = $("#prinGrid").data("kendoGrid");
+	var prinGridData = prinGrid.dataSource.data();
+	var prinAccIdArr = [];
+	for(var i = 0, len = prinGridData.length; i < len; i++){
+		var rowData = prinGridData[i];
+		prinAccIdArr.push(rowData.accId);
+	}
+	$("[id$=':prinAccIdHid']").val(prinAccIdArr.join(","));
+}
+// 获取检索数据
+function getAccountItemGridInfoFun(){
+	// 印刷的会计ID设定
+	setPrinAccIdFun();
+	// 全会计检索Flg
+	var isAccAllFlg = $("[id$=':isAccAllFlgHid']").val();
+	// お客様
+	var relaccountId = $("[id$=':relaccountId_lkid']").val();
+	// 取引先
+	var refAccountId = $("[id$=':refAccountId_lkid']").val();
+	// 预约IndexId
+	var leadIndexId = $("[id$=':leadIndexIdHid']").val();
+	// 開始
+	var fromDate = $("[id$=':fromDate']").val();
+	// 終了
+	var toDate = $("[id$=':toDate']").val();
+	//  已选中的数据Id
+	var prinAccId = $("[id$=':prinAccIdHid']").val();
+	// make AJAX request to the remote service
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.AccountPdfSwitch.getAccountItemGridInfo}", isAccAllFlg, relaccountId, refAccountId, leadIndexId, fromDate, toDate, prinAccId, function (result, event) {
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+				var jsonResult = $.parseJSON(result);
+				// 最新数据设定
+				var viewGrid = $("#viewGrid").data("kendoGrid");
+				var kendoDt = new kendo.data.DataSource({data: jsonResult,
+										schema: {
+											model: {
+												fields: {
+													field151: {
+														//data type of the field {number|string|boolean|date} default is string
+														type: "number",
+													}
+												}
+											}
+										}
+									});
+				// 更新新数据集合
+				if(viewGrid && viewGrid.dataSource) viewGrid.setDataSource(kendoDt);
+				// Lock解除
+				if(viewFrom) unblockUi(viewFrom);
+			}
+		}, {escape: false});
+}
+function startPrinFun(){
+	// 印刷的会计ID设定
+	setPrinAccIdFun();
+	if($("[id$=':prinAccIdHid']").val() == ""){
+		alert("{!$Label.MSG_006_0409}");
+		return;
+	}
+	blockUi(prinFrom); 
+	// 点击印刷动作设定Flg
+	$("[id$=':isPgPrinHid']").val(true);
+	if($("[id$=':isBillFlgHid']").val() == "true") redirectBillPluginFun();
+	else redirectFun();
+}
+function openPdfFun(){
+	// 印刷Group-Size
+	var groupSize = {!groupSize};
+	// 印刷URL
+	var prinUrl = $("[id$=':prinUrlHid']").val();
+	// 已选中的数据Id
+	var prinAccId = $("[id$=':prinAccIdHid']").val();
+	if(!prinAccId || !prinUrl) return;
+	var prinAccIdArr = prinAccId.split(",");
+	var prinAccIdArrLen = prinAccIdArr.length;
+	if(prinAccIdArrLen <= groupSize){
+		var openUrl = prinUrl + "&bulkid=" + prinAccIdArr.join(",");
+		pdfAutoFun(openUrl);
+		location.replace(openUrl);
+	} else {
+		// 根据指定的分组Size进行处理
+		var rePrinAccIdArr = reSetArr(prinAccIdArr, groupSize);
+		for(var i = 0, len = rePrinAccIdArr.length; i < len; i++){
+			var thisPrinAccIdArr = rePrinAccIdArr[i];
+			var openUrl = prinUrl + "&bulkid=" + thisPrinAccIdArr.join(",");
+			pdfAutoFun(openUrl);
+			if(i == 0) location.replace(openUrl);
+			else window.open(openUrl);
+		}
+	}
+}
+// 自动保存PDF
+function pdfAutoFun(openUrl){
+	var pageNmHid = $("[id$=':pageNmHid']").val();
+	var isBillFlg = $("[id$=':isBillFlgHid']").val();
+	// make AJAX request to the remote service
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.AccountPdfSwitch.syncPdfToAtta}", openUrl, pageNmHid, isBillFlg, function (result, event) {
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+			}
+		}, {escape: false});
+}
+// Arr指定数量分割
+function reSetArr(dataArr, num) {
+	let arr = [];
+	for (let i = 0, len = dataArr.length; i < len; i += num) {
+		arr.push(dataArr.slice(i, i + num));
+	}
+	return arr;
+}
+</script>
+
+</apex:page>

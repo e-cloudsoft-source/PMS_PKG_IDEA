@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>ラックレート</value>
+    </caseValues>
+    <fields>
+        <label><!-- ベースプラン --></label>
+        <name>BasePlanRef__c</name>
+        <relationshipLabel><!-- ラックレート --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 人数 --></label>
+        <name>Persons__c</name>
+        <picklistValues>
+            <masterLabel>1</masterLabel>
+            <translation><!-- 1 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>10</masterLabel>
+            <translation><!-- 10 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>2</masterLabel>
+            <translation><!-- 2 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>3</masterLabel>
+            <translation><!-- 3 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>4</masterLabel>
+            <translation><!-- 4 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>5</masterLabel>
+            <translation><!-- 5 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>6</masterLabel>
+            <translation><!-- 6 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>7</masterLabel>
+            <translation><!-- 7 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>8</masterLabel>
+            <translation><!-- 8 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>9</masterLabel>
+            <translation><!-- 9 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 金額 --></label>
+        <name>Price__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ --></label>
+        <name>RoomTypeRel__c</name>
+        <relationshipLabel><!-- ラックレート --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 販売状態 --></label>
+        <name>SalesStatus__c</name>
+        <picklistValues>
+            <masterLabel>停止中</masterLabel>
+            <translation><!-- 停止中 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>販売中</masterLabel>
+            <translation><!-- 販売中 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- SearchKey --></label>
+        <name>SearchKey__c</name>
+    </fields>
+    <fields>
+        <label><!-- Tier --></label>
+        <name>Tier__c</name>
+        <picklistValues>
+            <masterLabel>Tier1</masterLabel>
+            <translation><!-- Tier1 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier2</masterLabel>
+            <translation><!-- Tier2 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier3</masterLabel>
+            <translation><!-- Tier3 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier4</masterLabel>
+            <translation><!-- Tier4 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier5</masterLabel>
+            <translation><!-- Tier5 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier6</masterLabel>
+            <translation><!-- Tier6 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier7</masterLabel>
+            <translation><!-- Tier7 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Tier8</masterLabel>
+            <translation><!-- Tier8 --></translation>
+        </picklistValues>
+    </fields>
+    <recordTypes>
+        <label><!-- Dayuse --></label>
+        <name>Dayuse</name>
+    </recordTypes>
+    <recordTypes>
+        <label><!-- Nightuse --></label>
+        <name>Nightuse</name>
+    </recordTypes>
+</CustomObjectTranslation>

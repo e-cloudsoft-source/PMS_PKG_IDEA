@@ -1,0 +1,400 @@
+<!-- 会計飛ばし -->
+<apex:page standardController="AccountAcount__c" extensions="AccountSkipCtrl" title="会計飛ばし"
+	sidebar="false" showHeader="false" tabstyle="AccountAcount__c">
+<style>
+th.totalRowNumCell {
+	text-align: right;
+}
+/*
+ * Salesforce Stand Css Edit
+ */
+/* Salesforce Calendar Link No Show */
+.tranDetailRow .dateFormat{
+	display:none;
+}
+/* PageBlock Title Css */
+.bPageBlock .pbTitle {
+	width: 0px;
+}
+.bPageBlock .pbBottomButtons .pbTitle {
+	width: 0px;
+}
+td.pbTitle {	
+	white-space: nowrap;	
+}
+.bPageBlock.apexDefaultPageBlock .pbHeader>table {
+	padding:	0px 5px;
+}
+.bPageBlock .pbHeader>table>tbody>tr>td {
+	padding: 0px 5px;
+}
+.apexp .bPageBlock .pbHeader .btn {
+	margin-right: 0px;
+}
+body .apexp .bPageBlock.apexDefaultPageBlock .pbBody{
+	margin: 7px 5px 7px;
+}
+body .apexp .bPageBlock.apexDefaultPageBlock .pbBottomButtons {
+	margin-top: 0px;
+}
+/* 会計明細 */
+div#tranPanel .list td {
+	padding: 1px 2px 1px 1px;
+}
+div#tranPanel .detailCommStyle{
+	font-size: 12px;
+}
+div#tranPanel .headerRow {
+	text-align: center;
+	font-size: 12px;
+	padding: 0px;
+	margin: 0px;
+}
+div#tranPanel .totalRow {
+	background-color: #f2f3f3;
+	text-align: center;
+	font-size: 12px;
+	padding: 0px;
+	margin: 0px;
+}
+div#tabstrip .bPageBlock .pbHeader {
+	display: none;
+}
+@media screen and (min-width: 1640px) {
+	div#tranPanel .list td.left_fixedWidthCol3 {
+		width: 7%!important;
+	}
+	div#tranPanel .list td.left_fixedWidthCol4 {
+		width: 6%!important;
+	}
+	div#tranPanel .list td.left_fixedWidthCol5 {
+		width: 7%!important;
+	}
+}
+@media screen and (min-width: 1280px) and (max-width: 1540px) {
+	div#tranPanel .list td.left_fixedWidthCol3 {
+		width: 5%!important;
+	}
+	div#tranPanel .list td.left_fixedWidthCol4 {
+		width: 4%!important;
+	}
+	div#tranPanel .list td.left_fixedWidthCol5 {
+		width: 6%!important;
+	}
+}
+@media screen and (min-width: 1540px) and (max-width: 1640px) {
+	div#tranPanel .list td.left_fixedWidthCol3 {
+		width: 6%!important;
+	}
+	div#tranPanel .list td.left_fixedWidthCol4 {
+		width: 4.5%!important;
+	}
+	div#tranPanel .list td.left_fixedWidthCol5 {
+		width: 6%!important;
+	}
+}
+div#tranPanel .list td.fixedWidthCol1 {
+	width: {!(VALUE(payLayoutInfo.tableWidth) -10 -18 - 36)/4}px!important;
+}
+div#tranPanel .list td.fixedWidthCol2 {
+	width: {!(VALUE(payLayoutInfo.tableWidth) -10 -18 - 36)/4}px!important;
+}
+div#tranPanel .list td.fixedWidthCol3 {
+	width: {!(VALUE(payLayoutInfo.tableWidth) -10 -18 - 36)/4}px!important;
+}
+div#tranPanel .list td.fixedWidthCol4 {
+	width: {!(VALUE(payLayoutInfo.tableWidth) -10 -18 - 36)/4}px!important;
+}
+tr.tranDetailRowDemo td.dataCell{
+	height:0px;
+	border-left: 1px solid #ededed;
+	visibility:hidden;
+	background: #f2f3f3;
+}
+.StickyHeadRow{
+	border-bottom: #f2f3f3 !important;
+}
+div#tranPanel .colHeadr {
+	text-align: center;
+	font-size: 12px;
+	padding: 0px;
+	margin: 0px;
+	height:0px;
+	display: none;
+}
+div#tranPanel .colHeadrVis {
+	text-align: center;
+	font-size: 12px;
+	visibility:hidden;
+}
+#contentDiv tr.tranHeadRow{
+	height:0px;
+}
+.autoWidth {
+	width: auto !important;
+	white-space: nowrap !important;
+	min-width: 170px !important;
+}
+ul li{
+	margin-left: margin-left: -28px; !important;
+}
+</style>
+<apex:form id="infoFormId"> 
+<apex:pageBlock >
+<div id="tranPanel" >
+	<span>
+	<!-- 飛ばし先 -->
+	{!$Label.ps__msg_006_0462}
+	<input id="leadTree" style="width:240px;" />
+	<!-- 実行 -->
+	<input id="updateBtnId" class="btn" style="width: 100px; height: 28px;" type="button" value="{!$Label.ps__msg_006_0463}" onclick="updateTranDetailFun()"/>
+	</span>
+	<apex:inputHidden value="{!newAccountId}" id="hidNewAccountId" />
+	<apex:inputHidden value="{!selectTranIdJson}" id="hidSelectTranIdJson" />
+	<apex:inputHidden value="{!selectTTendIdJson}" id="hidSelectTTendIdJson" />
+	<apex:actionFunction name="updateTranDetail" action="{!updateTranDetail}" status="refStatusBlock" reRender="infoFormId" oncomplete="openAccountPage()" />
+	<!-- 商品情報 -->
+	<apex:pageBlockTable value="{!oStickyHeadList}" var="t" style="width: 100%; height:18px; overflow-x:hidden; background:#f2f3f3; margin-top: 10px;" id="headTableBlock" headerClass="StickyHeadRow" rowClasses="tranDetailRowDemo" >
+		<!-- 対象 -->
+		<apex:column style="text-align: center; width:60px;" styleClass="left_fixedWidthCol1">
+			<apex:facet name="header">
+			<input type = "checkbox" id="InvoiceNoShowFlgAll" onclick="isShowAll(true)" checked="checked" />{!$Label.ps__msg_006_0460}
+			</apex:facet>
+		</apex:column>
+		<!-- ご利用日 -->
+		<apex:column style="text-align: center;min-width:84px;width:5%" styleClass="left_fixedWidthCol2" >
+			<apex:facet name="header">
+				{!$Label.ps__msg_006_0255}
+			</apex:facet>
+		</apex:column>
+		<!-- 商品明細 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0256}" >
+		</apex:column>
+		<!-- 単価 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0404}"
+				styleClass="left_fixedWidthCol3"
+				style="min-width:54px;width:4.5%" >
+		</apex:column>	
+		<!-- 数量 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0405}"
+				styleClass="left_fixedWidthCol4"
+				style="min-width:36px;width:3%;" >
+		</apex:column>
+		<!-- 合計金額 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0257}" styleClass="left_fixedWidthCol5"
+			style="text-align: right; background-color: #FFEBCD;width:6%">
+		</apex:column>
+		<!-- 合計金額(税抜) -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0258}" styleClass="fixedWidthCol1"
+			style="text-align: right; background-color: #FFEBCD; width:6.5%">
+		</apex:column>
+		<!-- 消費税 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0406}"
+				style="text-align: right;width:6% "
+				styleClass="fixedWidthCol2">
+		</apex:column>
+		<!-- サビース料 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0407}"
+			style="text-align: right; width:6%"
+			styleClass="fixedWidthCol3" >
+		</apex:column>
+		<!-- 特別税 -->
+		<apex:column headerValue="{!$Label.ps__msg_006_0408}" style="text-align: right; width:5.5%"
+			footerClass="totalRowNumCell"	styleClass="checkScrollBar fixedWidthCol4">
+			<input type="text" style="text-align:right;width:0px;height:0px;" class="detailCommStyle"/>
+		</apex:column>
+		<apex:column headerClass="colHeadrVis"
+			style="width:0px" >
+		</apex:column>
+	</apex:pageBlockTable>
+	<!-- 商品情報 -->
+	<div id="contentDiv" style="width: 100%;overflow-x:hidden;overflow:scroll;height:286px;" >
+		<apex:outputPanel id="rightBotomPanel" layout="block" styleclass="tablescroll_wrapper">
+			<apex:pageBlockTable value="{!oTranSobjLst}" var="t" id="tran1Table" html-recsize="{!oTranSobjLst.size}" rowClasses="tranDetailRow" headerClass="tranHeadRow">
+				<!-- 対象 -->
+				<apex:column style="text-align: center;width:60px;" styleClass="left_fixedWidthCol1" headerClass="colHeadr">
+					<apex:facet name="header">
+						対象
+					</apex:facet>
+					<apex:outputPanel >
+						<input type = "checkbox" dataId="{!t.tranId}" isPayProduct="{!t.isPayProduct}" id="InvoiceNoShowFlg" class="detailCommStyle" onclick="isShowAll(false)" checked="checked" />
+						<!-- <apex:inputField value="{!t.sobj.InvoiceNoShowFlg__c}" html-dataId="{!t.tranId}" html-isPayProduct="{!t.isPayProduct}" id="InvoiceNoShowFlg" styleClass="detailCommStyle" onclick="isShowAll(false)" /> -->
+					</apex:outputPanel>
+				</apex:column>
+				<!-- ご利用日 -->
+				<apex:column style="min-width:84px;width:5%" styleClass="left_fixedWidthCol2" headerClass="colHeadr">
+					<apex:facet name="header">
+						{!$Label.ps__msg_006_0401}
+					</apex:facet>
+					<apex:outputPanel >
+						<apex:outputField value="{!t.sobj.UseDate__c}" id="useDate" style="width:90%;height:100%" styleClass="detailCommStyle"/>
+					</apex:outputPanel>
+				</apex:column>
+			 	<!-- 商品明細 -->
+				<apex:column headerValue="{!$Label.ps__msg_006_0256}" headerClass="colHeadr">
+					<apex:outputText value="{!t.productNm}" id="productName" style="width:120px;height:100%" html-rowIndex="{!t.index}"	styleClass="detailCommStyle"/>
+				</apex:column>
+				<!-- 単価 -->
+				<apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field20__c.label}" styleClass="left_fixedWidthCol3" headerClass="colHeadr"
+					style="text-align: right; min-width:54px; width:4.5%">
+					<apex:outputField value="{!t.sobj.Field20__c}" id="price" style="width:90%;height:100%"	styleClass="detailCommStyle"/>
+				</apex:column>
+				<!-- 数量 -->
+				<apex:column headerValue="{!$ObjectType.Tran1__c.Fields.Field21__c.label}" styleClass="left_fixedWidthCol4" headerClass="colHeadr"
+					style="text-align: right; min-width:36px; width:3%;">
+					<apex:outputField value="{!t.sobj.Field21__c}" id="orderNums" style="width:90%;height:100%" styleClass="detailCommStyle"/>
+				</apex:column>
+				<!-- 合計金額 -->
+				<apex:column headerValue="{!$Label.ps__msg_006_0257}" styleClass="left_fixedWidthCol5" headerClass="colHeadr"
+					style="text-align: right; background-color: #FFEBCD;width:6%">
+					<apex:outputPanel id="amoutPriceIncTax" >
+					<apex:outputText value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!t.isValidata}">
+					<apex:param value="{!t.amoutIncTax}" />
+					</apex:outputText>
+					</apex:outputPanel>
+				</apex:column>
+				<!-- 合計金額(税抜) -->
+				<apex:column headerValue="{!$Label.ps__msg_006_0258}" styleClass="fixedWidthCol1" headerClass="colHeadr"
+					style="text-align: right; background-color: #FFEBCD; width:6.5%">
+					<apex:outputPanel id="amoutPriceExcTax" >
+					<apex:outputText value="{!CurrencySybmol}{0,number,{!NumberFormat}}" rendered="{!t.isValidata}">
+						<apex:param value="{!t.amoutExcTax}" />
+					</apex:outputText>
+					</apex:outputPanel>
+				</apex:column>
+				<!-- 消費税 -->
+				<apex:column headerValue="{!$ObjectType.Tran1__c.Fields.TaxRate__c.label}" headerClass="colHeadr"
+					styleClass="fixedWidthCol2"
+					style="text-align: right; width:6%">
+					<apex:outputText value="{0,number,{!TaxNumberFormat}}" id="taxRateType">
+					<apex:param value="{!t.sobj.TaxRate__c/100}" />
+					</apex:outputText>
+				</apex:column>
+				<!-- サビース料 -->
+				<apex:column headerValue="{!$ObjectType.Tran1__c.Fields.ServiceRate__c.label}" headerClass="colHeadr"
+					styleClass="fixedWidthCol3"
+					style="text-align: right; width:6%">
+					<apex:outputField value="{!t.sobj.ServiceRate__c}" id="serviceRate" />
+				</apex:column>
+				<!-- 特別税 -->
+				<apex:column headerValue="{!$ObjectType.Tran1__c.Fields.SpecialTax__c.label}" headerClass="colHeadr"
+					styleClass="fixedWidthCol4"
+					style="text-align: right; width:5.5%;">
+					<apex:outputText value="{!t.strSpecialTax}" id="specialTax" style="width:90%;height:100%" styleClass="detailCommStyle"/>
+				</apex:column>
+			</apex:pageBlockTable>
+		</apex:outputPanel>
+	</div>
+</div>
+<apex:actionStatus onstart="blockUi();" id="refStatusBlock"/>
+</apex:pageBlock>
+</apex:form>
+<c:CommHeaderComp kendo2019="true" />
+<script>
+$=jQuery.noConflict();
+$(document).ready(function() {
+	if(window.parent.resizeDetailAccountSkipTabHeight) window.parent.resizeDetailAccountSkipTabHeight();
+	var leadGroupDataSourceLst = JSON.parse("{!JSENCODE(leadGroupDataSourceLstJson)}");
+	$("#leadTree").kendoDropDownTree({
+		placeholder: "選択する ...",
+		messages: {
+			noData: "データが見つかりません。"
+		},
+		filter: "startswith",
+		dataSource: leadGroupDataSourceLst,
+		dataBound: function(e) {
+			e.sender.list.addClass("autoWidth");
+		},
+		select: function(e) {
+			if($(e.node).find("span.k-icon").length > 0) e.preventDefault();
+		},
+		change: function(e){
+			btnProDisabledFun();
+		}
+	});
+	btnProDisabledFun();
+});
+function isShowAll(isAllChk){
+	var $isCheckBox = $("input[id$='InvoiceNoShowFlg']");
+	var $isCheckBoxAll = $("input[id$='InvoiceNoShowFlgAll']");
+	if(isAllChk){
+		var isAllChkFlg = $isCheckBoxAll.prop("checked");
+		// 明细设定状态
+		$isCheckBox.prop("checked", isAllChkFlg);
+	} else {
+		var isAllChkFlg = $isCheckBox.length == $(":checked", $("#contentDiv")).length;
+		// All设定状态
+		$isCheckBoxAll.prop("checked", isAllChkFlg);
+	}
+	btnProDisabledFun();
+}
+function updateTranDetailFun(){
+	var tarnIdArr = new Array();
+	var ttendIdArr = new Array();
+	var selectLeadVal = $("#leadTree").data("kendoDropDownTree").value();
+	var $isChkBox = $(":checked", $("#contentDiv"));
+	for(var i = 0; i < $isChkBox.length; i++){
+		var dataId = $isChkBox.eq(i).attr("dataid");
+		var isPayProduct = $isChkBox.eq(i).attr("isPayProduct");
+		if(isPayProduct == "true"){
+			ttendIdArr.push(dataId.substring(0,15));
+		}
+		else{
+			tarnIdArr.push(dataId.substring(0,15));
+		}
+	}
+	$("input[id$='hidNewAccountId']").val(selectLeadVal.accid);
+	var selectTranIdJson = JSON.stringify(tarnIdArr);
+	$("input[id$='hidSelectTranIdJson']").val(selectTranIdJson);
+	var selectTTendIdJson = JSON.stringify(ttendIdArr);
+	$("input[id$='hidSelectTTendIdJson']").val(selectTTendIdJson);
+	// 打印开关check
+	var chkPrintFlg = window.parent.chkPrintReady ? window.parent.chkPrintReady() : false;
+	// POSレジ連携時の挙動
+	if({!autoPrintFlg} && chkPrintFlg && window.parent.setPrintJsonFun){
+		window.parent.printBlockUI();
+		window.parent.setPrintJsonFun(tarnIdArr.join(","), ttendIdArr.join(","), selectLeadVal.roomnm);
+		blockUi();
+	} else{
+		updateTranDetail();
+	}
+	// updateTranDetail();
+}
+function btnProDisabledFun(){
+	var $isChkBox = $(":checked", $("#contentDiv"));
+	var selectLeadVal = $("#leadTree").data("kendoDropDownTree").value();
+	var accid = selectLeadVal.accid;
+	if($isChkBox.length == 0 || !accid || accid == null || accid == ''){
+		$('#updateBtnId').addClass("k-state-disabled");
+		$('#updateBtnId').attr("disabled","disabled");
+	}
+	else{
+		$('#updateBtnId').removeAttr("disabled");
+		$('#updateBtnId').removeClass("k-state-disabled");
+	}
+}
+function treeCloseFun(){
+    // 2021/03/04 CPU LIMITの最適化 BUG[#PC9837] WGCH BEGIN
+    // $("#leadTree").data("kendoDropDownTree").close();
+    var leadTree = $("#leadTree").data("kendoDropDownTree");
+    if(leadTree) leadTree.close();
+    // 2021/03/04 CPU LIMITの最適化 BUG[#PC9837] WGCH END
+}
+function blockUi(){
+	kendo.ui.progress($(document.body), true);
+}
+function unblockUi(){
+	kendo.ui.progress($(document.body), false);
+}
+function openAccountPage(){
+	var newAccountId = $("input[id$='hidNewAccountId']").val();
+	var url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'BillInputSwitch')}?id=" + newAccountId + "&up=1&retURL=" + newAccountId;
+	var oldUrl = window.parent.location.href;
+	if(oldUrl.indexOf("&up=1") == -1) oldUrl += "&up=1";
+	window.parent.location.replace(oldUrl);
+	window.parent.window.open(url);
+	// window.parent.window.location.reload();
+	kendo.ui.progress($(document.body), false);
+}
+</script>
+</apex:page>

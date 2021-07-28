@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>MessageInformation</value>
+    </caseValues>
+    <fields>
+        <label><!-- MessageCode --></label>
+        <name>MessageCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- MessageDtTime --></label>
+        <name>MessageDtTime__c</name>
+    </fields>
+    <fields>
+        <label><!-- MessageHelpUrl --></label>
+        <name>MessageHelpUrl__c</name>
+    </fields>
+    <fields>
+        <label><!-- MessageLevel --></label>
+        <name>MessageLevel__c</name>
+        <picklistValues>
+            <masterLabel>Error</masterLabel>
+            <translation><!-- Error --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Info</masterLabel>
+            <translation><!-- Info --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>Warn</masterLabel>
+            <translation><!-- Warn --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- MessageSub1 --></label>
+        <name>MessageSub1__c</name>
+    </fields>
+    <fields>
+        <label><!-- MessageType --></label>
+        <name>MessageType__c</name>
+        <picklistValues>
+            <masterLabel>IOT</masterLabel>
+            <translation><!-- IOT --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>予約取込</masterLabel>
+            <translation><!-- 予約取込 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>在庫調整</masterLabel>
+            <translation><!-- 在庫調整 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- MessageUUID --></label>
+        <name>MessageUUID__c</name>
+    </fields>
+    <fields>
+        <label><!-- Message --></label>
+        <name>Message__c</name>
+    </fields>
+</CustomObjectTranslation>

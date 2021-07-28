@@ -1,0 +1,501 @@
+<apex:page standardController="AccountMaster__c" recordSetVar="prods" extensions="AccountBarPrintCtrl" action="{!init}" title="バーコード印刷" sidebar="false" readOnly="true" showHeader="true">
+
+<c:CommHeaderComp loadJsLib="false"/>
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2017, 'styles/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles2017, 'styles/kendo.default.min.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2017, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles2017, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/PrintJs.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/process.js')}"/>
+<style type="text/css">
+.k-pager-wrap>.k-link>.k-icon{
+	margin-top: 4px;
+}
+.k-active-filter, .k-state-active, .k-state-active:hover {
+	border-color: #e45200;
+	background-color: #ff6b18;
+}
+#buttonBar{
+	position: relative;
+}
+.icon-status{
+	width: 14px;
+	margin-left: 5px;
+	display:none;
+}
+.OKClass{
+	color: green;
+}
+.NGClass{
+	color: red;
+}
+.numberWrapper{
+	border-left:1px solid #d5d5d5;
+	margin-left: 2px;
+	padding-left:3px;
+	display: inline-block;
+}
+</style>
+<apex:form >
+	<input type="hidden" value="{!colnumJson}" id="hidColumns" /> 
+	<input type="hidden" value="{!curPos}" id="hidCurPos" /> 
+	<input type="hidden" id="hidLocalIp" /> 
+</apex:form>
+<div id="gridWrap">
+	<div id="grid"></div>
+</div>
+<script>
+var hadProcess = false,BarCodePrintDevice
+// 2018/07/14 印刷回数機能追加　by zy BEGIN
+,printTotal;
+// 2018/07/14 印刷回数機能追加　by zy END
+$(document).ready(function() {
+	var wH = $(window).height();
+	var grid = $("#grid");
+	var position = grid.offset();
+	var columnsSetting = customColumnsSetting();
+	headerTemplate: '<input type="checkbox" class="allcheck" name="printCheck" onclick="chgAllCheck(this)" />'
+	// Grid Table Size AutoSetup
+	grid.css('height', (wH - position.top - 20) + 'px').kendoGrid({
+		dataSource: getGridsDs(),
+		serverPaging: true,
+		sortable: true,   // 排序Flg
+		columnMenu: {
+			messages: {
+				// 昇順
+				sortAscending: "{!$Label.MSG_041_0051}",
+				// 降順
+				sortDescending: "{!$Label.MSG_041_0052}",
+				// 列
+				columns: "{!$Label.MSG_041_0053}",
+				// フィルター	
+				filter: "{!$Label.MSG_041_0041}",
+			},
+			columns: false,
+		},
+		filterable: {
+			operators: {
+				number: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値より以上
+					gte: "{!$Label.MSG_041_0043}",
+					// 指定の値より大きい
+					gt: "{!$Label.MSG_041_0044}",
+					// 指定の値より以下
+					lte: "{!$Label.MSG_041_0045}",
+					// 指定の値より小さい
+					lt: "{!$Label.MSG_041_0046}",
+				},
+				string: {
+					// 指定の値に等しい
+					eq: "{!$Label.MSG_041_0033}",
+					// 指定の値に等しくない
+					neq: "{!$Label.MSG_041_0034}",
+					// 指定の値で始まる
+					startswith: "{!$Label.MSG_041_0035}",
+					// 指定の値を含む
+					Contains: "{!$Label.MSG_041_0036}",
+					// 指定の値を含まない
+					doesnotcontain: "{!$Label.MSG_041_0037}",
+					// 指定の値で終わる
+					endswith: "{!$Label.MSG_041_0038}",
+				}
+			},
+			messages: {
+				// フィルター:
+				info: "{!$Label.MSG_041_0032}",
+				// および
+				and: "{!$Label.MSG_041_0039}",
+				// または
+				or: "{!$Label.MSG_041_0040}",
+				search: "{!$Label.MSG_040_0058}", 
+				checkAll: "{!$Label.MSG_040_0095}",
+				selectedItemsFormat: "{0} {!$Label.MSG_040_0096}",
+				// フィルター
+				filter: "{!$Label.MSG_040_0103}",
+				// クリア
+				clear: "{!$Label.MSG_040_0106}",
+				// 昇順
+				sortAscending: "{!$Label.MSG_041_0051}",
+				// 降順
+				sortDescending: "{!$Label.MSG_041_0052}",
+				// 列
+				columns: "{!$Label.MSG_041_0053}",
+			}
+		}, // 筛选Flg
+		resizable: true,
+		groupable: false,  // 自定义分组Flg
+		pageable:{        // 分页Flg
+			refresh: true,
+			//pageSizes: true,
+			buttonCount: 5
+		},
+		// 列表示・非表示自動記憶機能対応 BEGIN
+		dataBound: function(e) {
+			$(".k-header-column-menu").first().hide();
+			$(".k-header-column-menu").last().css('visibility','hidden');
+		},
+		// 列表示・非表示自動記憶機能対応 END
+		// 对应上面的显示，并且显示对应的名头
+		columns: columnsSetting,
+		toolbar: kendo.template($("#editButton").html()),
+	});
+	try{
+		var hadProcessedFlag = true;
+		var ipTimoutId;
+		getIPs(function(ip){
+			if (hadProcessedFlag) {
+				$("input[id$=hidLocalIp]").val(ip);
+				hadProcessedFlag = false;
+			}
+			if (!hadProcess) {
+				//清除上一次调用
+				if (ipTimoutId) clearTimeout(ipTimoutId);
+				//启动下一次调用
+				ipTimoutId = setTimeout(afterGetIp(),200);
+			}
+		});
+	} catch(err){}
+	$("#printSync").kendoNumericTextBox({format:"n0"});
+});
+function afterGetIp(){
+	hadProcess = true;
+	ajaxGetPrintByIp();
+}
+// 全选反选
+function chgAllCheck(el){
+	$("#grid input.checkbox").prop("checked",$(el).is(":checked"));
+}
+var SelectGuid = [];
+// 打印开始
+function printStart(el) {
+	if ($(el).hasClass("processed")) return;
+	// 勾选项目
+	var checkRows = $("#grid input.checkbox:checked");
+	// 进度提示信息
+	var processTile = $("#grid");
+	if (checkRows.length > 0) {
+		checkRows.each(function(){
+			var curRow = $(this).closest("tr[data-uid]");
+			// 2018/08/01 bug fix JINYABUG-778 by zy BEGIN
+			var uid = curRow.data("uid");
+			if ($.inArray(uid,SelectGuid) < 0) SelectGuid.push(uid);
+			// 2018/08/01 bug fix JINYABUG-778 by zy END
+		});
+		processTile.data("processed",0);
+		processTile.data("total",SelectGuid.length);
+		printNext();
+		changeDeviceStatus(STATUS.LOAD);
+	}
+}
+function printNext(){
+	// 打印结束
+	if (SelectGuid.length == 0) {
+		printEnd();
+		return;
+	}
+	var processTile = $("#grid");
+	var processed = processTile.data("processed");
+	var total = processTile.data("total");
+	if (total == undefined ) return;
+	processTile.data("processed",processed);
+	// 第一个项目
+	var firstUid = SelectGuid[0];
+	// 2018/07/14 印刷回数機能追加　by zy BEGIN
+	var printInt = $("#printSync").val();
+	if (printInt == "") printInt = "1";
+	printTotal = kendo.parseInt(printInt);
+	// 2018/07/14 印刷回数機能追加　by zy END
+	// 执行打印
+	printDo(firstUid);
+}
+// 打印结束
+function printEnd(){
+	closePrintDevice();
+	// 进度提示信息
+	var processTile = $("#grid");
+	processTile.data("total","");
+	SelectGuid = [];
+	changeDeviceStatus(STATUS.SUC);
+	$(".processed").removeClass("processed");
+	// 2018/07/14 印刷回数機能追加　by zy BEGIN
+	printTotal = 0;
+	// 2018/07/14 印刷回数機能追加　by zy END
+}
+// 执行打印
+function printDo(dataUid){
+	//var dataUid = getCurRowUid(el);
+	ajaxGetProdPrintInfo(dataUid);
+	printTotal--;
+}
+function beginPrint(info,uid){
+	BarCodePrintDevice.callBackSeqArr = [JSON.stringify(info)];
+	BarCodePrintDevice.uid = uid;
+	BarCodePrintDevice.nextStep();
+}
+// 行内元素获取当前行uid
+function getCurRowUid(el) {
+	var curRow = $(el).closest("tr[role]");
+	var uid = curRow.data("uid");
+	return uid;
+}
+// 根据uid 获取所有data信息
+function getDataByUid(uid){
+	var grid = $("#grid").data("kendoGrid");
+	var data = grid.dataSource.getByUid(uid);
+	return data;
+}
+// 连携获取商品打印信息
+function ajaxGetProdPrintInfo(uid){
+	var grid = $("#grid").data("kendoGrid");
+	var result = {};
+	if (grid != undefined) {
+		var data = getDataByUid(uid);
+		result.ip = getCurIp(),
+		result.pid = data.id;
+		// 2018/07/26 QRコード印刷対応 by zy BEGIN
+		result.ptype = $("input[name=seq]:checked").val();
+		// 2018/07/26 QRコード印刷対応 by zy END
+	}
+	var req = JSON.stringify(result);
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.AccountBarPrintCtrl.getPrintInfo}", req ,function (result, event) {
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+				if (result != "") {
+					var jsonResult = $.parseJSON(result);
+					var seqName = $("input[name=seq]:checked").val();
+					jsonResult.sequence = seqName;
+					beginPrint(jsonResult,uid);
+				} else {
+					changeDeviceStatus(STATUS.FAIL,STATUS.UNCONNECT.replace('_URL',''));
+				}
+			}
+	}, {escape: false});
+}
+// 根据ip取得
+function ajaxGetPrintByIp(){
+	console.log(getCurIp());
+	ajaxGetPrint(testPrintStatus,getCurIp());
+}
+function getCurIp (){
+	if ("jinya_order_setIp" in window.localStorage) return window.localStorage.jinya_order_setIp;
+	return $("input[id$=hidLocalIp]").val();
+}
+// 根据pos取得
+function ajaxGetPrintByPos(curPos){
+	ajaxGetPrint(ajaxGetProdPrintInfo(uid),'',curPos);
+}
+// 测试是否连接正常
+function testPrintStatus(result){
+	if (result != null ) {
+		BarCodePrintDevice = getPrintConnect(result.printName,result.prinUrl,'');
+		BarCodePrintDevice.onClose = errorClose;
+	}
+}
+// 出错处理
+function errorClose(event){
+	if (event.code == 1006) {
+		$(".processed").removeClass("processed");
+		changeDeviceStatus(STATUS.FAIL);
+	}
+}
+var STATUS = {
+	'SUC':'SUCCESS',
+	'FAIL':'FAIL',
+	'LOAD':'LOAD',
+	'UNCONNECT':'接続失敗'
+}
+// 更新打印机按钮状态
+function changeDeviceStatus(status,title) {
+	var pntBtn = $("#printBtn");
+	$(".icon-status").hide();
+	if (status == STATUS.FAIL) {
+		var errorImg = $("#error-image");
+		errorImg.show();
+		//errorImg.css({top:pntTop,left:pntLeft});
+		errorImg.attr("title",title);
+	} else if (status == STATUS.SUC) {
+		$("#sucess-image").show();
+		//$("#sucess-image").css({top:pntTop,left:pntLeft});
+	} else if (status == STATUS.LOAD) {
+		$("#loading-image").show();
+		//$("#loading-image").css({top:pntTop,left:pntLeft});
+	}
+}
+function ajaxGetPrint(callBack,localIp,posNo){
+	var result = {
+		ip:localIp,
+		pos:posNo
+	};
+	var req = JSON.stringify(result);
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.AccountBarPrintCtrl.getPrintByIp}", req ,function (result, event) {
+			if (event.type == 'exception') {
+				alert(event.message);
+			} else {
+				if (result != "") {
+					if (callBack) callBack(result);
+				}
+			}
+	}, {escape: false});
+}
+// 获取POS设定打印机
+function getPrintConnect(curPos,url,seq){
+	if (BarCodePrintDevice == undefined) {
+		BarCodePrintDevice = $.WebPrint({
+			// 2017/07/26 4）ログ情報はDBに記載する by zy BEGIN
+			//ログ保存アド
+			remoteSaveLog:"{!$RemoteAction.AccountBarPrintCtrl.savePrintLodToDb}",
+			// 2017/07/26 4）ログ情報はDBに記載する by zy END
+			webComm:url,
+			isDebug:true,
+			callBackSeqArr:[seq],
+			curPos:curPos,
+			baseInfo:'****barCode：' + curPos + '[ip：' + getCurIp() + ']****',
+			sendMesssage:function(e){
+				try{
+					// 继续打印
+					if ("data" in e) {
+						if (e.data.indexOf('lastResponse')>=0) analyResponse(this,e.data);
+					}
+				}catch(err){
+				}
+			}
+		});
+	}
+	return BarCodePrintDevice;
+}
+function analyResponse(print,res) {
+	// 状态变更
+	if (print.uid) changeStatus(print.uid);
+	// 2018/07/14 印刷回数機能追加　by zy BEGIN
+	if (printTotal > 0) {
+		// 执行打印
+		printDo(print.uid);
+		return;
+	}
+	// 2018/07/14 印刷回数機能追加　by zy END
+	// 继续打印
+	printNext();
+}
+// 状态变更
+function changeStatus(uid){
+	var index = $.inArray(uid,SelectGuid);
+	if (index >= 0) {
+		var curRow = $("tr[data-uid='" + uid + "']");
+		$("input.checkbox",curRow).prop("checked",false);
+		// 2018/07/14 印刷回数機能追加　by zy BEGIN
+		if (printTotal == 0 ) SelectGuid.splice(index,1);
+		// 2018/07/14 印刷回数機能追加　by zy END
+		var data = getDataByUid(uid);
+		data.status = '送信済み';
+		if (data.printcnt == "") data.printcnt = 1;
+		else data.printcnt++;
+		var statusCol = $("td.status",curRow);
+		statusCol.text(data.status);
+		var printCnt = statusCol.prev();
+		printCnt.text(data.printcnt);
+		$("td.status",curRow).addClass(data.status + 'Class');
+		savePrintCnt(data.id);
+	}
+}
+// 关闭当前POS下的设备
+function closePrintDevice(pos) {
+	BarCodePrintDevice.disconnect();
+}
+// 自定义内容
+function customColumnsSetting(columns){
+	var columnStr = $("#hidColumns").val();
+	var columns = [];
+	if (columnStr != undefined && columnStr != "") {
+		columns = JSON.parse(columnStr);
+		for (var i = 0 ; i < columns.length ; i++) {
+		   if (columns[i].field == 'field4__c') columns[i].title = '{!$Label.msg_009_0023}';
+		   else if (columns[i].field == 'gpchange__c') columns[i].title = '{!$Label.msg_009_0024}';
+		   else if (columns[i].field == 'field7__c' || columns[i].field == 'field5__c') columns[i].attributes = {
+		      		style: "text-align: right!important;"
+		   		};
+		}
+		// 打印机状态默认最后,以后可以设计隐藏
+		var printCnt = { field: "printcnt",title:'印刷回数', width:'120px',type:'number',
+	         attributes: {
+		      style: "text-align: right!important;"
+		   }
+	    };
+	    // 把状态放到最末尾
+	    columns.push(printCnt);
+		// 打印机状态默认最后,以后可以设计隐藏
+		var printStatus = { field: "status",sortable: false,title:'状況', width:'80px',filterable: false ,
+	         attributes: {
+		     "class": "status",
+		      style: "text-align: center!important;"
+		   }
+	    };
+	    // 把状态放到最末尾
+	    columns.push(printStatus);
+	}
+	return columns;
+}
+function getGridsDs(){
+	return new kendo.data.DataSource({
+				transport: {
+					read: function (options) {
+						Visualforce.remoting.Manager.invokeAction(
+							"{!$RemoteAction.AccountBarPrintCtrl.getViewInfo}", function (result, event) {
+								if (event.type == 'exception') {
+									alert(event.message);
+								} else {
+									options.success(result);
+								}
+						}, {escape: false});
+					}
+				},
+				pageSize: 100,
+				schema:{
+					model:{
+						fields:{
+							printcnt :{type:"number"},
+							field5__c :{type:"number"},
+							field7__c :{type:"number"},
+						}
+					}
+				}
+			});
+}
+// 保存印刷回数
+function savePrintCnt(prodId){
+	Visualforce.remoting.Manager.invokeAction(
+		"{!$RemoteAction.AccountBarPrintCtrl.savePrintCount}", prodId, function (result, event) {
+			if (event.type == 'exception') {} else {}
+	}, {escape: false});
+}
+// 列表示・非表示自動記憶機能対応 END
+// 2018/07/14 印刷回数機能追加　by zy BEGIN
+function onInputNumberChange(){
+	var curValue = $(event.target).val();
+	var parseValue = kendo.parseInt(curValue);
+	if (parseValue == null || parseValue <= 0 ) $(event.target).val(1);
+}
+// 2018/07/14 印刷回数機能追加　by zy END
+</script>
+<script type="text/x-kendo-template" id="editButton">
+	<a class="k-button k-button-icontext k-grid-edit" id="printBtn" href="javascript:" onclick="printStart(this)" > 
+		印刷<img id="error-image" class="icon-status" src="../img/msg_icons/error24.png" alt="Loading..." />
+			<img id="sucess-image" class="icon-status" src="../img/msg_icons/confirm24.png" alt="Loading..." />
+         	<img id="loading-image" class="icon-status" src="../img/loading32.gif" alt="Loading..." />
+	</a>
+		印刷種別：
+		<input type="radio" value="barcodeprint"  name="seq" checked="checked" />バーコード
+	 	<input type="radio" value="qrcodeprint" name="seq"/>QRコード
+		<span class="numberWrapper">
+		印刷回数<span style="margin-left:5px"><input type="number" min="1" max="999" step="1" style="width:70px;" value="1" id="printSync"/></span>
+		</span>
+</script>
+</apex:page>

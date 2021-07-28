@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>支払情報</value>
+    </caseValues>
+    <fields>
+        <label><!-- 会計 --></label>
+        <name>AccountAcountRef__c</name>
+        <relationshipLabel><!-- 支払情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 明細件数 --></label>
+        <name>ChildRenRsCount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売掛金（システム用） --></label>
+        <name>Credit__c</name>
+    </fields>
+    <fields>
+        <label><!-- 預かり金額 --></label>
+        <name>DepositAmount__c</name>
+    </fields>
+    <fields>
+        <label><!-- 架空フラグ --></label>
+        <name>ImgDataFlg__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約インデックス --></label>
+        <name>LeadIndexRef__c</name>
+        <relationshipLabel><!-- 支払情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- メディア種別 --></label>
+        <name>MediaTypeCode__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売掛金相殺済金額（システム用） --></label>
+        <name>OffsetMoney__c</name>
+    </fields>
+    <fields>
+        <label><!-- 支払種別 --></label>
+        <name>PaymentType__c</name>
+        <picklistValues>
+            <masterLabel>予約金</masterLabel>
+            <translation><!-- 予約金 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>普通</masterLabel>
+            <translation><!-- 普通 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>返金</masterLabel>
+            <translation><!-- 返金 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- 残金２ --></label>
+        <name>RemainingMoney2__c</name>
+    </fields>
+    <fields>
+        <label><!-- 残金３（システム用） --></label>
+        <name>RemainingMoney3__c</name>
+    </fields>
+    <fields>
+        <label><!-- 残金 --></label>
+        <name>RemainingMoney__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計上日(文字)(システム用） --></label>
+        <name>SalesDateStr__c</name>
+    </fields>
+    <fields>
+        <label><!-- 会計支払 --></label>
+        <name>TTendRef__c</name>
+        <relationshipLabel><!-- 支払情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 会計明細 --></label>
+        <name>Tran1Ref__c</name>
+        <relationshipLabel><!-- 支払情報 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 利用済金額 --></label>
+        <name>UsedAmountCal__c</name>
+    </fields>
+</CustomObjectTranslation>

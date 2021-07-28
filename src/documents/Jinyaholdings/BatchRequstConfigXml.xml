@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+<!-- 
+概要：該当XML利用して、バッチリクエストから起動できるバッチを定義する
+	下記リストは定義できるバッチ一覧
+	ChargeBatch							手数料バッチ		(クラス：BulkProcessPurchaseManagentBatch起動）
+	PCABatch							PCA連携バッチ		(クラス：BulkProcessPCABatch起動）
+	FREEEBatch							FREEE連携バッチ	(クラス：PCA/FREEEスケジュールバッチクラスは共有する「BulkProcessPCABatch」)
+	SalesBatch							売上バッチ		(クラス：BulkProcessSchedule_2起動)
+	PosBatch							POS取込バッチ		(クラス：BulkProcessPosImportBatch起動)
+	KanBatch							勘定奉行連携バッチ	(クラス：BulkProcessKANBatch起動))
+	StockBatch							棚卸在庫情報連携バッチ(クラス:BulkStocktakingSyncBatch起動)
+	BillPdfBatch						請求書自動作成バッチ(クラス:BillCopyBatch起動)
+	BulkAccPaymentBatch					支払いメディア一括登録(クラス:BulkAccPaymentBatch起動)
+	QQNAutoAssignBatch					部屋自動割当機能データ学習バッチ(クラス：QQNRoomTrainBatch起動)
+	WorkTimeBatch						勤怠時間チェックバッチ(クラス:WorkTimeBatch起動)
+	NoPayCheckBatch						入金チェックバッチ	(クラス:BulkProcessNoPaymentAlertBatch起動)
+	BadRoomSumBatch						故障部屋数集計バッチ(クラス:BulkBadRoomQtyStatBatch起動)
+	FREEEPostBatch						指摘期間の仕訳明細（仕入明細、会計明細、入出金）はFREEE環境に連携用バッチ（クラス：FreeeSyncCsvGetBatch)
+書式：
+2017/03/08
+	1.タグの新規追加
+	FROMTO:				バッチ集計期間FROM/TOを指定できる（TRUE:期間FROM、TO指定できる、FALSE:集計対象期間は一日分のみ、省略可能、省略の場合、デフォル値はFALSE)
+						注：
+						①期間FROM/TOを指定できるバッチ：ChargeBatch,FREEEBatch,PCABatch,KanBatch,BadRoomSumBatch
+						②FROM/TO一括処理期間は最大31日間まで
+						
+	TIMETERM:			期間日付を自動設定のキーワード(今月/THISMONTH,先月/LASTMONTH,今週/THISWEEK,先週/LASTWEEK)
+						注：
+						①タグ「FROMTO」はTRUEのみ、該当タグは有効になる　
+				　　　　　②該当タグを指定する　かつ　画面のFROM/TOは自動設定されている、リクエストバッチ画面のバッチ処理日が編集不可になる
+						③該当タグの定義は省略可能、省略の場合、バッチ処理日FROM/TO項目は画面に表示して、日付は個別指定可能
+						
+						例1：FROM/TO期間有効、FROM/TO日付は個別指定したい場合
+					            <BATCH FROMTO="TRUE">
+					                <LABEL>1.手数料バッチ</LABEL>
+					                <BATCHKEY>ChargeBatch</BATCHKEY>
+					            </BATCH>  
+						例2：FROM/TO期間有効、かつ　処理期間は「先月」に固定場合
+					            <BATCH FROMTO="TRUE" TIMETERM="先月">
+					                <LABEL>1.手数料バッチ</LABEL>
+					                <BATCHKEY>ChargeBatch</BATCHKEY>
+					            </BATCH> 
+					             
+	2.バッチは指定順番で一括実施可能になる
+						注：現状は指定順番できるバッチは：ChargeBatch,FREEEBatch,PCABatch,KanBatch
+						例1：手数料バッチとFREEE連携バッチは一括実施する、手数料は１番目を実施後、FREEE連携バッチを実施する
+							処理期間は「先月」固定場合
+			            <BATCH FROMTO="TRUE" TIMETERM="先月">
+			                <LABEL>3.Freee連携バッチ</LABEL>
+			                <BATCHKEY>ChargeBatch</BATCHKEY>
+			                <BATCHKEY>FREEEBatch</BATCHKEY>
+			            </BATCH>
+						例2：手数料バッチとFREEE連携バッチは一括実施する、手数料は１番目を実施後、FREEE連携バッチを実施する
+							処理期間は個別指定場合
+			            <BATCH FROMTO="TRUE">
+			                <LABEL>3.Freee連携バッチ</LABEL>
+			                <BATCHKEY>ChargeBatch</BATCHKEY>
+			                <BATCHKEY>FREEEBatch</BATCHKEY>
+			            </BATCH>     
+2018/05/08 PCABatch/KanBatch は　FROMTO、TIMETERM及びバッチ指定順番機能有効になる
+2018/09/19 NOAUTH:		だれでもバッチ実施可能・不可切り替えフラグを新規追加
+				TRUE:	だれでもバッチ実施可能
+				FALSE:	管理者のみバッチ実施可能（デフォルト値）	
+2018/12/20 BillPdfBatch 機能新規追加（指定の予約（単泊）からコピーして、請求書ファイルを自動作成機能）
+2018/12/31 StockBatch	棚卸データは商品在庫へ同期処理バッチの定義タグを新規追加
+2019/01/31 BulkAccPaymentBatch 機能新規追加（支払メデイアを一括作成機能）
+			下記タグ値はバッチ「BulkAccPaymentBatch」のみ有効
+			ACCPAY_BATCH：会計商品コード情報設定用タグ
+				FIRSTNIGHTPAYMENTCODE: 	0泊、1泊の場合、自動設定される支払メディア商品コード
+				NNIGHTPAYMENTCODE:		2泊以上の場合、自動設定される支払メディア商品コード	
+2019/02/15 QQNRoomTrainBatch 機能新規追加（部屋自動割当機能、データ学習機能）
+			注意１.SFのLIMIT制限により、SF版学習機能に対して、最大６００部屋まで学習可能
+				  対象部屋数が超える場合、「ドキュメント→AI Configuration→ROOMTYPESEQ」タグで、部屋タイプを限定してください
+			注意２.学習時間がかかります、学習対象の予約件数は２万件以下推奨
+2019/02/28 WorkTimeBatch 機能新規追加（勤怠時間チェックバッチ）(シフトに登録の予約勤務時間と実際勤怠時間を照合処理を行う)
+			チェック詳細仕様は定義XML「シフト定義情報」の「WORKTIMECHECK」タグを参照ください
+2019/05/15 最終泊自動設定される支払メディア機能追加
+			SHOP→ACCPAY_BATCH→LASTNNIGHTPAYMENTCODEタグ新規追加
+2019/05/15 NoPayCheckBatch 機能新規追加
+			会計商品上に商品ごとに期限「入金期限日数」を設定し（30日など）、バッチ実施日は計上日から設定した期限をすぎたタイミングで会計支払上の「入金済」（消込フラグ）がfalseの場合にアラートを飛ばす機能
+2019/09/17 BadRoomSumBatch 機能新規追加　
+			指定期間部屋タイプ別、日付別、有効予約数、故障部屋数データ集計機能（データ集計に集計データを格納する）	
+			 指定期間：スケジュールバッチで実施場合、バッチ実施日の前90日から実施日の後90日間データ集計する
+			 		　リクエストバッチで実施場合、FROM/TO指定日間データを集計する
+			PROCESSWHERE：	集計対象部屋タイプの制限条件を定義用タグ
+			設定例：部屋タイプ名が「'和室二十畳','露天風呂付き客室'」かつ 部屋タイプの集計対象外がOFFの部屋タイプのみ集計したい場合、下記ように設定する
+			<BATCH>
+                <LABEL>12.故障部屋集計</LABEL>
+                <BATCHKEY>BadRoomSumBatch</BATCHKEY>
+                <PROCESSWHERE>name in('和室二十畳','露天風呂付き客室') AND SumNotApplicableFlg__c = false</PROCESSWHERE>
+            </BATCH>
+2019/12/30 FREEEPostBatch 機能新規追加
+            設定例：
+            <BATCH FROMTO="TRUE" TIMETER="先月">
+                <LABEL>5.FREEEへ連携ポストバッチ</LABEL>
+                <BATCHKEY>FREEEPostBatch</BATCHKEY>
+            </BATCH>
+-->
+    <SHOP>
+        <!-- デフォルト設定情報、削除しない、支店舗追加したい場合、このＮＯＤＥコピーして、後ろに追加してください -->
+        <SHOPCODE></SHOPCODE>
+        <!-- だれでもバッチ実施できる・できない切替フラグ -->
+        <!-- 
+        <NOAUTH>TRUE</NOAUTH>
+         -->
+        <REQUEST_BATCH>
+            <BATCH>
+                <LABEL>1.手数料バッチ</LABEL>
+                <BATCHKEY>ChargeBatch</BATCHKEY>
+            </BATCH>
+            <BATCH>
+                <LABEL>3.Freee連携バッチ</LABEL>
+                <BATCHKEY>FREEEBatch</BATCHKEY>
+            </BATCH>  
+            <BATCH>
+                <LABEL>4.売上バッチ</LABEL>
+                <BATCHKEY>SalesBatch</BATCHKEY>
+            </BATCH>
+            <BATCH>
+                <LABEL>5.POS取込</LABEL>
+                <BATCHKEY>PosBatch</BATCHKEY>
+            </BATCH>
+	    <!-- 
+            <BATCH FROMTO="TRUE" TIMETERM="先月">
+                <LABEL>5.FREEEへ連携ポストバッチ</LABEL>
+                <BATCHKEY>FREEEPostBatch</BATCHKEY>
+            </BATCH>
+            <BATCH>
+                <LABEL>6.勘定奉行連携バッチ</LABEL>
+                <BATCHKEY>KanBatch</BATCHKEY>
+            </BATCH>
+            <BATCH>
+                <LABEL>7.棚卸バッチ</LABEL>
+                <BATCHKEY>StockBatch</BATCHKEY>
+            </BATCH>
+            <BATCH>
+                <LABEL>8.請求書自動作成</LABEL>
+                <BATCHKEY>BillPdfBatch</BATCHKEY>
+            </BATCH>
+            <BATCH>
+                <LABEL>9.支払いメディア一括登録</LABEL>
+                <BATCHKEY>BulkAccPaymentBatch</BATCHKEY>
+            </BATCH>
+            <BATCH FROMTO="TRUE">
+                <LABEL>90.データ学習</LABEL>
+                <BATCHKEY>QQNAutoAssignBatch</BATCHKEY>
+            </BATCH>
+            <BATCH FROMTO="TRUE">
+                <LABEL>10.勤怠時間チェック</LABEL>
+                <BATCHKEY>WorkTimeBatch</BATCHKEY>
+            </BATCH>
+            <BATCH FROMTO="TRUE">
+                <LABEL>11.入金チェック</LABEL>
+                <BATCHKEY>NoPayCheckBatch</BATCHKEY>
+            </BATCH>
+            <BATCH FROMTO="TRUE">
+                <LABEL>12.故障部屋集計</LABEL>
+                <BATCHKEY>BadRoomSumBatch</BATCHKEY>
+                <PROCESSWHERE>name in('和室二十畳','露天風呂付き客室') AND SumNotApplicableFlg__c = false</PROCESSWHERE>
+            </BATCH>
+            -->
+        </REQUEST_BATCH>
+        <!--2019/01/31 新規追加 
+        	BATCHKEYが「BulkAccPaymentBatch」の場合、下記パラメータを有効 
+        		ACCPAY_BATCH
+					FIRSTNIGHTPAYMENTCODE: 	0泊、1泊の場合、自動設定される支払メディアの商品コード
+					NNIGHTPAYMENTCODE:		2泊以上の場合、自動設定される支払メディアの商品コード
+			2019/05/15 新規追加 
+					LASTNNIGHTPAYMENTCODE: 	2泊以上の場合、最終泊自動設定される支払メディアの商品コード	
+					注：定義した商品コードは必ず「会計商品メニュー定義情報.XML」に事前定義済の前提!!!!!!!!
+		-->
+        <!-- 
+        <ACCPAY_BATCH>
+			<FIRSTNIGHTPAYMENTCODE></FIRSTNIGHTPAYMENTCODE>
+			<NNIGHTPAYMENTCODE></NNIGHTPAYMENTCODE>
+			<LASTNNIGHTPAYMENTCODE></LASTNNIGHTPAYMENTCODE>
+        </ACCPAY_BATCH>
+         -->
+    </SHOP>
+</root>

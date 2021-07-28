@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>FREEE連携設定</value>
+    </caseValues>
+    <fields>
+        <help><!-- 認証プロバイダ設定に指定のURL接尾辞を設定する --></help>
+        <label><!-- 認証プロバイダをURL 接尾辞 --></label>
+        <name>DeveloperName__c</name>
+    </fields>
+    <fields>
+        <help><!-- FREEE環境の事業所名を入力してください（注：FREEE連携アプリを設定ありの事業所） --></help>
+        <label><!-- 事業所名(屋号) --></label>
+        <name>DisplayName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 仕訳明細連携対象月計算用パラメータ値を設定 
+例:「-1」指定、バッチは2019/12/15日起動する場合、
+売上計上日が2019/11/01-2019/11/30間の仕訳明細はFREEEへ連携 --></help>
+        <label><!-- スケジュール指定処理月 --></label>
+        <name>OffsetVal__c</name>
+    </fields>
+    <fields>
+        <help><!-- どの店舗の仕訳明細をFREEE側に連携する店舗コードを定義する、カンマで複数店舗コードを定義可能、定義省略可能、空欄の場合、全て店舗の仕訳明細はFREEEの指定の事業所へ連携する
+例：複数店舗(01,02,03)仕訳明細をFREEEへ連携する
+     01,02,03 --></help>
+        <label><!-- 店舗コード --></label>
+        <name>ShopCode__c</name>
+    </fields>
+</CustomObjectTranslation>

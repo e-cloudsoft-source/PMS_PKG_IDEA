@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+<!-- 
+概要：該当XML利用して、おもてなし機能連携定義情報を取得する
+     全て店舗共通、店舗単位に定義ができない
+書式：
+	AUTHINFO:		連携定義情報、おもてなし連携機能を利用する前に、おもてなし側に事前申請が必要
+		domainUrl		おもてなしサービスAPIのURL
+		clined_id:  	認証用clined_id情報
+		client_secret:	認証用client_secret情報
+		user_id:		認証用ユーザ名
+		passwrod:		認証用ユーザパスワート
+2017/02/10 ADD
+	CONTACT_MAPPING:おもてなしお客様情報とSF既存のお客様情報はマッピングルールを定義する
+		MAPPING:		マッピングルール、複数ルールを同時に定義できる、定義のルールはいずれにSFのお客様の項目値と一致すると、該当SFお客様情報にリンクを行う
+			JSONKEY:	おもてなしから引き渡し属性API名
+			SFKEY:		SFお客様項目API
+補足：該当機能を利用する前に、゙domainUrlに定義のURLは「設定→セキュリティのコントロール→リモートサイトの設定」に定義を必要
+-->
+	<SHOP>
+		<SHOPCODE></SHOPCODE>	<!-- RFU、そのまま変更不要 -->
+		<AUTHINFO>
+			<domainUrl>https://staging.kankouyohou.com/id-translator</domainUrl>
+			<clined_id>xxxxxxxxxxx</clined_id>
+			<client_secret>xxxxxxxxxxx</client_secret>
+			<user_id>xxxxxxxxxxx</user_id>
+			<password>xxxxxxxxxxxxxx</password>
+		</AUTHINFO>
+		<!-- SF既存のお客様とマッピングルール -->
+		<CONTACT_MAPPING>
+			<!-- 複数のMAPPINGタグは同時に定義できる、定義の項目情報はいずれに既存お客様情報をヒントすると、該当SFのお客様へリンクを行う -->
+			<MAPPING>
+				<JSONKEY>mailAddress</JSONKEY>　<!-- おもてなしから連携属性名 -->
+				<SFKEY>Email</SFKEY>	<!-- SF側のお客様の項目 -->
+			</MAPPING>
+		</CONTACT_MAPPING>
+	</SHOP>
+</root>

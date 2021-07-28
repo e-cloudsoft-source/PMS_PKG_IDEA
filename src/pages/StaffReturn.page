@@ -1,0 +1,6 @@
+<apex:page controller="StaffTaskCtrl"  >
+<script>
+window.opener.clearBlock();
+window.close();
+</script>
+</apex:page>

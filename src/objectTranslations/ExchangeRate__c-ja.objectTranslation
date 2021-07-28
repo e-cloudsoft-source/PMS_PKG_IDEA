@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>為替レート</value>
+    </caseValues>
+    <fields>
+        <label><!-- 変換元通貨 --></label>
+        <name>FromCurrency__c</name>
+        <picklistValues>
+            <masterLabel>JPY</masterLabel>
+            <translation><!-- JPY --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>USD</masterLabel>
+            <translation><!-- USD --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- レート日 --></label>
+        <name>RateDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- レート --></label>
+        <name>Rate__c</name>
+    </fields>
+    <fields>
+        <label><!-- 変更先通貨 --></label>
+        <name>ToCurrency__c</name>
+        <picklistValues>
+            <masterLabel>JPY</masterLabel>
+            <translation><!-- JPY --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>USD</masterLabel>
+            <translation><!-- USD --></translation>
+        </picklistValues>
+    </fields>
+</CustomObjectTranslation>

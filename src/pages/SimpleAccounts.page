@@ -1,0 +1,937 @@
+<!-- 簡易会計 -->
+<apex:page controller="SimpleAccountsCtrl" title="{!$Label.ps__msg_034_0001}"
+    sidebar="false" showHeader="false" tabstyle="AccountAcount__c">
+<!-- 
+<apex:stylesheet value="{!URLFOR($Resource.queryfiles, 'css/ui-lightness/jquery-ui-1.8.21.custom.css')}"/>
+
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery-ui-1.8.21.custom.min.js')}"/>
+-->
+<c:CommHeaderComp loadJsLib="false"/>
+
+<apex:stylesheet value="{!URLFOR($Resource.kendoFiles, 'css/ui-lightness/jquery-ui-1.10.2.custom.min.css')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.kendoFiles, 'js/jquery-ui-1.10.2.custom.min.js')}" />
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+<!-- 2017/02/22 打印とip 機能独立化　by　zy BEGIN -->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/process.js')}"/>
+ <!-- 2017/04/19 レシート印刷機能追加　by zy BEGIN
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/print.js')}"/>
+-->
+<apex:includeScript value="{!URLFOR($Resource.OrderLib, 'js/PrintJs.js')}"/>
+<!-- 2017/04/19 レシート印刷機能追加　by zy END -->
+<!-- 2017/02/22 打印とip 機能独立化　by　zy END -->
+<apex:includeScript value="{!$Resource.CommJs}"/>
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN -->
+<c:AutoAccountMasterComp />
+<!--  2019/11/15 最近利用している商品一覧機能を提供する BY zyz END -->
+<style>
+body {
+    background:transparent
+}
+/* Salesforce Calendar Link No Show */
+.btn{
+    height:23px;
+}
+div.hideCurrDate span.dateInput span.dateFormat{
+   display:none;
+}
+span.dateInput span.dateFormat{
+   display:none;
+}
+
+table.prodlist{
+    border-top:1px solid #663300;
+    border-left:1px solid #663300;
+    border-collapse:collapse;
+    border-spacing:0;
+    background-color:#ffffff;
+    empty-cells:show;
+}
+.prodlist th{
+    border-right:1px solid #663300;
+    border-bottom:1px solid #663300;
+    color:#330000;
+    background-color:#FFDEAD;
+    background-image:url();
+    background-position:left top;
+    padding:0.3em 1em;
+    text-align:center;
+}
+.prodlist td{
+    border-right:1px solid #663300;
+    border-bottom:1px solid #663300;
+    /*padding:0.3em 1em;*/
+}
+.ui-autocomplete { 
+    font-size: 12px;
+    max-height: 200px;
+    max-width: 125px;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+/* IE 6 doesn't support max-height
+ * we use height instead, but this forces the menu to always be this tall
+ */
+* html .ui-autocomplete {
+    height: 200px;
+    width: 125px;
+}
+.ui-autocomplete-loading { background: white url({!URLFOR($Resource.queryfiles, "css/ui-lightness/images/ui-anim_basic_16x16.gif")}) right center no-repeat; }
+.ui-autocomplete { position: absolute; cursor: default;z-index:30 !important;}
+
+input[type="text"] {
+    width: 95px;
+}
+/* 誤った登録した商品行目 */
+.unSubmitRow{
+    background-color: rgb(212,212,212);
+    text-decoration:line-through;
+}
+</style>
+<script>
+$j=jQuery.noConflict();
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+// Lock
+function blockUi() {
+    $j("form[id$=':billInputForm']").block({
+    //parent.$j("iframe").block({
+    //$j("#body").block({
+    //Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_034_0002}</h1>'
+    });
+    return true;
+}
+// Lock解除
+function unblockUi () {
+    $j("form[id$=':billInputForm']").unblock();
+    //$j("#body").unblock();
+}
+//打印设备链接地址
+var endpoint_comm = "";
+//打印status链接地址
+var endpoint_mess = "";
+/*
+2017/02/22 打印とip 機能独立化　by　zy BEGIN
+var repicaLayout;
+//打印呼叫功能
+var printCallBack = function(para){
+ connect(sendCallBack, para);
+};
+//打印弹出功能
+var sendCallBack = function(jsonMessage) {
+ //ws_comm.send( jsonMessage );
+ waitForConnection(function () {
+       ws_comm.send(jsonMessage);
+   }, 1000)
+};
+//延时处理，防止第二次提交的时候第一次还没处理结束
+var waitForConnection = function (callback, interval) {
+    if (ws_comm.readyState === 1) {
+        callback();
+    } else {
+        var that = this;
+        // optional: implement backoff for interval here
+        setTimeout(function () {
+            that.waitForConnection(callback, interval);
+        }, interval);
+    }
+};
+//websocket连接
+function connect(callBack, para) {
+    //google浏览器下
+    if ('WebSocket' in window) {
+        try {
+            //alert(endpoint_comm);
+            ws_comm = new WebSocket(endpoint_comm);
+            ws_mess = new WebSocket(endpoint_mess);
+        }
+        catch(e) {
+            //alert(e);
+            //console.;(e);
+        }
+    //firefox下
+    } else if ('MozWebSocket' in window) {
+        ws_comm = new MozWebSocket(endpoint_comm);
+        ws_mess = new MozWebSocket(endpoint_mess);
+    //没有websocket接口
+    } else {
+        //alert('WebSocket is not supported by this browser.');
+        console.error('WebSocket is not supported by this browser.');
+        return;
+    }
+2017/02/22 打印とip 機能独立化　by　zy END */
+    /*
+     * Communicator -- Print commander
+     */
+/* 2017/02/22 打印とip 機能独立化　by　zy BEGIN
+    ws_comm.onopen = function() {
+        if (callBack != null) callBack( para );
+    };
+    //链接出错
+    ws_comm.onerror = function(e) {
+        //addError(e);
+        console.log(e);
+    };
+    //
+    ws_comm.onmessage = function(event) {
+        var data = event.data;
+        try {
+            var obj = JSON.parse(data);
+            var respResult = ((obj.lastResponse) ? obj.lastResponse.result : "NG").toUpperCase();
+            console.log(respResult);
+        }catch(e) {}
+    };
+    //链接关闭响应
+    ws_comm.onclose = function(event) {
+        console.log("ws close");
+    };
+2017/02/22 打印とip 機能独立化　by　zy END*/
+    /*
+     * Messenger -- Printer status
+     */
+/* 2017/02/22 打印とip 機能独立化　by　zy BEGIN
+    ws_mess.onopen = function() {
+    };
+
+    ws_mess.onerror = function(e) {
+       // addError(e);
+       console.log(e);
+    };
+
+    ws_mess.onmessage = function(event) {
+2017/02/22 打印とip 機能独立化　by　zy END */     
+/*
+        var data = event.data;
+        try {
+            var obj = JSON.parse(data);
+            printerInfo(obj);
+        }catch(e) {}
+        */
+/*2017/02/22 打印とip 機能独立化　by　zy BEGIN
+    };
+
+    ws_mess.onclose = function(event) {
+    };
+}
+//断开链接
+function disconnect() {
+    if (ws_comm != null) {
+        ws_comm.close();
+        ws_comm = null;
+    }
+    if (ws_mess != null) {
+        ws_mess.close();
+        ws_mess = null;
+    }
+}
+
+ //页面关闭
+ window.onunload = new unloadPage().execute;
+ function unloadPage() {
+     this.previousHandler = window.onunload;
+     this.execute = function() {
+         if(this.previousHandler!=null) this.previousHandler();
+         // Web Socket
+         disconnect();
+     }
+ }
+ function print(){
+    // 2017/02/22 弹出输入金额  begin by wx
+    $j("input[id$=':inputPriceId']").val('');
+    // 2017/02/22 弹出输入金额  end by wx
+    endpoint_comm = $j("input[id$=hidPrintUrl]").val();
+    endpoint_mess = $j("input[id$=hidStatusUrl]").val();
+    //如果ip未配置仍然进行跳转
+    if (endpoint_comm == "" || endpoint_comm == undefined || endpoint_mess == "" || endpoint_mess == undefined) {
+        //2017/02/28 demodata場合下pdf　プリンターない　by　zy　BEGIN
+        var demoFlag = $j("input[id$=hidDemoFlag]").val();
+        if (demoFlag.toLowerCase() != 'true') gotoAccPageFunction();
+        return;
+        //2017/02/28 demodata場合下pdf　プリンターない　by　zy　END
+    }
+    var pntInfo = $j("input[id$=hidPrintInfo]").val();
+    var res_arr = JSON.parse(pntInfo);
+    for (var i = 0 ;i < res_arr.length ; i++) {
+        var pntInfo = res_arr[i];
+        if (pntInfo != null && pntInfo != '' && pntInfo != undefined ){
+            var jsonMsg = JSON.stringify(pntInfo);
+            console.log(jsonMsg);
+            printCallBack(jsonMsg);
+        }
+    }
+ }
+2017/02/22 打印とip 機能独立化　by　zy END*/
+//2017/02/22 打印とip 機能独立化　by　zy BEGIN
+ var accountMessPnt = $j.WebPrint({
+    cashDrawer:false,
+    connectMessage:function(e){
+        try{
+            var res = JSON.parse(e.data);
+            if ("CashDrawer" in res) {
+                if ( res.CashDrawer == 'Open') {
+                    //accountCommPnt.nextStep();
+                    this.cashDrawer = true;
+                } else {
+                    this.cashDrawer = false;
+                }
+            }
+        }catch(err){
+            //console.log(err);
+        }
+    }
+});
+var accountCommPnt = $j.WebPrint({
+    // 2017/07/26 ログ機能追加　by　zy BEGIN
+    //ログ保存アド
+    remoteSaveLog:"{!$RemoteAction.SimpleAccountsCtrl.savePrintLodToDb}",
+    // 2017/07/26 ログ機能追加　by　zy END
+    sendMesssage:function(e){
+        try{
+            if (!accountMessPnt.cashDrawer) {
+                if (this.callBackSeqArr.length > 0 ) {
+                    this.nextStep();
+                } else {
+                    // 断开全部链接   
+                    printCtl('close');
+                }
+            }
+            var res = JSON.parse(e.data);
+            //console.log(res);
+            /*
+            if (res.responses.indexOf("OK") >= 0){
+                // 指令队列，第二个命令为弹出命令
+                if (this.callBackSeqArr.length > 0 && !this.doorHadOpen) {
+                // 队列里没有数据
+                } else {
+                    // 断开全部链接   
+                    printCtl('close');
+                }
+            }*/
+        }catch(err){
+            //console.log(err);
+        }
+    },
+    addError:function(){
+        gotoAccPageFunction();
+        // 断开全部链接   
+        printCtl('close');
+    }
+});
+ function printCall(){
+    // 2017/02/22 弹出输入金额  begin by wx
+    $j("input[id$=':inputPriceId']").val('');
+    // 2017/02/22 弹出输入金额  end by wx
+    endpoint_comm = $j("input[id$=hidPrintUrl]").val();
+    endpoint_mess = $j("input[id$=hidStatusUrl]").val();
+    if (endpoint_comm == "" || endpoint_comm == undefined || endpoint_mess == "" || endpoint_mess == undefined) {
+        //2017/02/28 demodata場合下pdf　プリンターない　by　zy　BEGIN
+        var demoFlag = $j("input[id$=hidDemoFlag]").val();
+        if (demoFlag.toLowerCase() != 'true') gotoAccPageFunction();
+        return;
+        //2017/02/28 demodata場合下pdf　プリンターない　by　zy　END
+    }
+    accountCommPnt.webComm = endpoint_comm;
+    // 2017/07/26 ログ機能追加　by　zy BEGIN
+    accountCommPnt.baseInfo = '****オーダーエンドリー簡易会計ID：' + $j("input[id$=accdataId]").val() + '****';
+    // 2017/07/26 ログ機能追加　by　zy END
+    accountMessPnt.webComm = endpoint_mess;
+    var pntInfoStr = $j("input[id$=hidPrintInfo]").val();
+    var res_arr = JSON.parse(pntInfoStr);
+    var jsonMsgArr = new Array();
+    for (var i = 0 ;i < res_arr.length ; i++) {
+        var pntInfo = res_arr[i];
+        if (pntInfo != null && pntInfo != '' && pntInfo != undefined ){
+            var jsonMsg = JSON.stringify(pntInfo);
+            jsonMsgArr.push(jsonMsg);
+        }
+    }
+    //console.log(pntInfoStr);
+    accountCommPnt.callBackSeqArr = jsonMsgArr;
+    //accountCommPnt.isHadNextStep = true;
+    printCtl('open');
+ }
+//关闭连接
+function printCtl(status){
+    if ( status == 'open') {
+        accountCommPnt.nextStep();
+        accountMessPnt.connect();
+    } else {
+        accountCommPnt.disconnect();
+        accountMessPnt.disconnect();
+    }
+}
+function IpSetup(){
+    //<!-- 2017/01/25 打印小票功能对应 by zy BEGIN-->
+    if ({!openDoorFlag}) {
+        //2017/02/22 ipad侧対応　by zy BEGIN
+        if(window.localStorage["jinya_order_setIp"] != undefined && window.localStorage["jinya_order_setIp"] != ""){
+            var setIp = window.localStorage["jinya_order_setIp"];
+            $j("input[id$=hidLocalIp]").val(setIp);
+            console.log(setIp);
+            return;
+        }
+        //2017/02/22 ipad侧対応　by zy END
+        try{
+            var hadProcessedFlag = true;
+            getIPs(function(ip){
+                localIp = ip;
+                console.log(ip);
+                if (hadProcessedFlag) {
+                    $j("input[id$=hidLocalIp]").val(localIp);
+                    hadProcessedFlag = false;
+                }
+            });
+        } catch(err){
+            console.log(err);
+        }
+    }
+    //<!-- 2017/01/25 打印小票功能对应 by zy END-->
+}
+$j(document).ready(function() {
+    IpSetup();
+});
+//2017/02/22 打印とip 機能独立化　by　zy END
+</script>
+
+
+<apex:form id="billInputForm">
+<!-- 2017/02/22 打印とip 機能独立化　by　zy BEGIN -->
+<apex:inputHidden id="hidLocalIp" value="{!localIp}"/>
+<!-- 2017/02/22 打印とip 機能独立化　by　zy END -->
+<apex:outputPanel style="color: #000000; background-color: #F5F5DC; width:190px;" id="inputBlock"> 
+<apex:pageMessages />
+
+<apex:inputHidden id="unSubmitFlg" value="{!unSubmitFlgStr}"/> <!-- 登録対象外フラグ -->
+<!-- 2017/01/25 打印小票功能对应 by zy BEGIN-->
+<apex:inputHidden id="hidPrintInfo" value="{!printInfoJson}"/>
+<apex:inputHidden id="hidPrintUrl" value="{!prinUrl}" />
+<apex:inputHidden id="hidStatusUrl" value="{!statusUrl}" />
+<!-- //2017/02/28 demodata場合下pdf　プリンターない　by　zy　BEGIN -->
+<apex:inputHidden id="hidDemoFlag" value="{!isDemoFlag}" />
+<!-- //2017/02/28 demodata場合下pdf　プリンターない　by　zy　END -->
+<!-- 2017/01/25 打印小票功能对应 by zy END-->
+<table style="border-spacing:0;font-size: 90%;width: 98%">
+    <colgroup style="width: 40%"></colgroup>
+    <colgroup style="width: 60%"></colgroup>
+    <!-- 売上日 -->   <!-- TIPS:省略書式：月/日, 日 -->
+    <tr>
+        <td width="40%" ><apex:outputLabel value="{!$Label.ps__msg_034_0003}" title="{!$Label.ps__msg_034_0004}"/></td>
+        <td width="60%" >
+        <apex:inputText value="{!saleDate}" maxlength="10" size="18" id="saleDate"/>
+        </td>
+    </tr>
+    <!-- 商品 -->
+    <tr>
+    <td width="40%" ><apex:outputLabel value="{!$Label.ps__msg_034_0005}"/></td>
+    <td width="60%" >
+
+        <span class="lookupInput">
+           <apex:inputText value="{!productNm}" id="productName" maxlength="80" size="18" />
+           <img title="" onmouseover="this.className = 'lookupIconOn';this.className = 'lookupIconOn';"
+            onmouseout="this.className = 'lookupIcon';this.className = 'lookupIcon';"
+            onfocus="this.className = 'lookupIconOn';"
+            onblur="this.className = 'lookupIcon';"
+            class="lookupIcon" alt="" src="/s.gif" style="cursor: pointer;"
+            name="productPopup"/>
+        </span>
+        <!-- 商品コード -->
+        <apex:inputHidden value="{!otran.Field7__c}" id="hidProductId" />
+        <!-- 処理種別 -->
+        <apex:inputHidden value="{!otran.ActionType__c}" id="hidActionType" />
+        <!-- 消費税 -->
+        <apex:inputHidden value="{!otran.TaxRate__c}" id="hidTaxRate" />
+        <!-- サービス料 -->
+        <apex:inputHidden value="{!otran.ServiceRate__c}" id="hidServiceRate" />
+
+    </td>
+    </tr>
+
+    <!-- 単価 -->
+    <tr>
+        <td width="40%" ><apex:outputLabel value="{!$Label.ps__msg_034_0006}"/></td>
+        <td width="60%" >
+        <apex:inputText value="{!otran.Field20__c}" size="18" id="unitPriceId" style="text-align: right; "/>
+        <!--
+        <span id="unitPriceId" style="text-align: right; margin-right: 36px"></span> -->
+        </td>
+    </tr>
+
+    <!-- 数量 -->
+    <tr>
+        <td width="40%" ><apex:outputLabel value="{!$Label.ps__msg_034_0007}"/></td>
+        <td width="60%" >
+        <apex:inputText value="{!otran.Field21__c}" size="18" id="orderNumsId" style="text-align: right; "/>
+        </td>
+    </tr>
+    
+    <!-- メディア -->
+    <tr>
+        <td width="40%" ><apex:outputLabel value="{!$Label.ps__msg_034_0008}"/></td>
+        <td width="60%" >
+        <apex:selectList value="{!mediaType}" multiselect="false" size="1" style="width:106px" id="mediaTypeId">
+            <apex:selectOptions value="{!mediaTypeOptionLst}"/>
+            <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN -->
+            <!--  2017/02/22 弹出输入金额  begin by wx -->
+            <apex:actionSupport event="onchange" rerender="exportBlock"  oncomplete="{!IF( noCustomMediaTypeFlg, 'beforeStartFun(false)', 'isShowPaymentFun()')} "/>
+            <!--  2017/02/22 弹出输入金额  end by wx -->
+            <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END -->
+        </apex:selectList>
+    </td>
+    </tr>
+    <!--  2017/02/22 弹出输入金额  begin by wx -->
+    <!-- 預かり金額 -->
+    <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN -->
+    <tr style="display:{!if(isShowPaymentFlag,'true','none')}" id="paymentpriceTrId">
+    <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END -->
+        <td width="40%" ><div id="lastPanel"><apex:outputLabel value="{!$Label.ps__msg_034_0019}" style="font-size:85%;white-space: nowrap;"/></div></td>
+        <td width="60%" >
+            <div id="pricePanel">
+                <apex:inputText size="18" id="inputPriceId" style="text-align: right; "/>
+                <apex:inputHidden value="{!paymentprice}" id="paymentprice"/>
+            </div>
+        </td>
+    </tr>
+    <!--  2017/02/22 弹出输入金额  end by wx -->
+    
+    <!-- カード種別 -->
+    <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN -->
+    <tr style="display:{!if(noCustomMediaTypeFlg,'true','none')}">
+    <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END -->
+        <td width="40%" style="border-bottom:1px solid #888;" nowrap="nowrap">
+            <!--  2017/02/22 弹出输入金额  begin by wx -->
+            <div id="CardTypePanel">
+            <!--  2017/02/22 弹出输入金额  end by wx -->
+                <apex:outputLabel value="{!$ObjectType.TTend__c.Fields.CardTypeLst__c.label}" style="font-size:85%" />
+            <!--  2017/02/22 弹出输入金额  begin by wx -->    
+            </div>
+            <!--  2017/02/22 弹出输入金额  end by wx -->
+        </td>
+        <td width="60%" style="border-bottom:1px solid #888;">
+            <!--  2017/02/22 弹出输入金额  begin by wx -->
+            <div id="cardTypelstPanel">
+            <!--  2017/02/22 弹出输入金额  end by wx -->
+                <apex:inputField value="{!oTtend.CardTypeLst__c}" style="width:106px" id="cardType" />  
+                <span id="statusBlock" style="display: none"><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> <!-- Processing... -->{!$Label.MSG_034_0002}</span>
+            <!--  2017/02/22 弹出输入金额  begin by wx -->
+            </div>
+            <!--  2017/02/22 弹出输入金额  end by wx -->
+    </td>
+    </tr>
+  <tr><td colspan="2"><img alt="" src="{!URLFOR($Resource.reportFiles, 'img/blank')}" style=" height: 4px;"/></td></tr>
+
+
+<!-- 
+  <tr >
+  <td colspan="2" style="text-align: right;width: 98%">
+        <input type="button" value="商品登録" onclick="javascript:submitTranInfo()" class="btn" id="accTranRegistBtn"
+        style="color: #ffffff; background-color: #00FF00; background-image: url(); width: 80px"/>
+  </td>
+  </tr>
+ -->
+</table>
+<table id="accBtnTableBlock" style="width: 99%;border-spacing: 0px">
+<tr><td style="text-align: right;">
+        <!-- 商品登録 -->
+        <input type="button" value="{!$Label.MSG_034_0009}" onclick="javascript:submitTranInfo()" class="btn" id="accTranRegistBtn"
+        style="color: #ffffff; background-color: #00FF00; background-image: url(); min-width: 80px"/>
+</td></tr></table>
+
+<script>
+
+$j(document).ready(function() {
+    // 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN
+    // 2017/02/22 弹出输入金额  begin by wx
+    /*
+    beforeStartFun();
+    */
+    // 2017/02/22 弹出输入金额  end by wx
+    if({!noCustomMediaTypeFlg}) beforeStartFun();
+    else isShowPaymentFun();
+    // 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END
+    bindEvents();
+    //$j("[id$=':accPdfGenerBtn']").hide();
+});
+</script>
+
+<table class="prodlist" style="width: 98%;" id="prodlistBlock">
+    <tr>
+        <th width="70%" ><!-- 商品名 -->{!$Label.MSG_034_0010}</th>
+        <th width="30%" ><!-- 金額 -->{!$Label.MSG_034_0011}</th>
+    </tr>
+    <tr style="background-color: #FFFFE0">
+    <!-- 合計 -->   <!-- 件 -->
+      <td><apex:outputLabel value="{!$Label.ps__msg_034_0012}({!oTranLst.size}{!$Label.ps__msg_034_0013})"/></td>
+      <td style="text-align: right; font-size: 110%">
+        <!-- <span id="totalPriceId" style="text-align: right; font-weight: bold;">{!totalPrice}</span>
+         -->
+        <apex:outputtext value="{0,number,{!NumberFormat}}" id="totalPriceId" style="text-align: right; font-weight: bold;">
+            <apex:param value="{!VALUE(totalPrice)}" />
+        </apex:outputtext>
+        <apex:inputHidden id="hidTotalPrice" value="{!totalPrice}"/>
+        <!-- 
+        <input type="hidden" id="orgTotalPrice" value="{!totalPrice}"/>
+        <apex:inputHidden id="unSumbitPrice" value="{!umSubmitAmout}"/> --> <!-- 対象外合計金額 -->
+      </td>
+    </tr>
+
+    <apex:variable var="count" value="{!0}"/>
+    <apex:repeat value="{!oTranLst}" var="item">
+    <tr class="recRowClass {!IF(unSubmitInfMap[count], 'unSubmitRow', '')}" rowno="{!count}">
+    <td>
+    <!-- <apex:outputLink value="/{!item.Field7__c}" target="_blank" title="{!item.Field5__c}">{!LEFT(item.Field5__c,10)}</apex:outputLink>-->
+    <apex:outputLink value="javascript:void(0);" onclick="javascript:openProductInfo('{!JSENCODE(item.Field7__c)}');" target="_blank" title="{!item.Field5__c}">{!LEFT(item.Field5__c,9)}</apex:outputLink>
+    </td>
+    <td style="text-align: right;">
+         <apex:outputtext value="{0,number,{!NumberFormat}}" id="childAmount">
+         <apex:param value="{!VALUE(item.Field23__c)}" />
+         </apex:outputtext>
+    </td>
+    </tr>
+    <apex:variable var="count" value="{!count+1}"/>
+    </apex:repeat>
+</table>
+
+<table id="accBtnTableBlock" style="width: 99%;border-spacing: 0px">
+<tr><td style="text-align: right;">
+
+        <span style="display: {!IF(oTranLst.size > 0, 'block', 'none')}">
+        <!-- 
+        <apex:commandButton value="会計確定"  action="{!upsertData}" status="refStatusBlock" id="accPdfGenerBtn"
+            style="color: #ffffff; background-color: #ff0000; background-image: url(); width: 80px" />
+             -->
+        <!-- 会計確定 -->
+        <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN -->
+        <input type="button" value="{!$Label.MSG_034_0014}" onclick="javascript:paymentpriceClearFun();preSaveTranToDBFun()" class="btn" id="accPdfGenerBtn"
+            style="color: #ffffff; background-color: #ff0000; background-image: url(); min-width: 80px"/>
+        <!-- 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END -->
+        </span>
+</td></tr></table>
+
+<input type="hidden" value="{!oTranLst.size}" id="detailRows" />
+<input type="hidden" value="{!accountsId}" id="accdataId" />
+</apex:outputPanel>
+
+<input type="hidden" id="dumyfieldId" />
+
+<apex:actionFunction name="saveTranToMemoryFun" action="{!saveTranToMemory}" oncomplete="javascript:continueFunction()" 
+    rerender="inputBlock" status="refStatusBlock"/>
+<!-- 2017/01/25 打印小票功能对应 by zy BEGIN-->
+<apex:actionFunction name="saveTranToDBFun" action="{!upsertData}" oncomplete="javascript:afterUpdFun();"
+    rerender="inputBlock" status="refStatusBlock"/>
+<!-- 2017/01/25 打印小票功能对应 by zy END-->
+<apex:actionStatus onstart="javascript:blockUi();" onstop="javascript:unblockUi();" id="refStatusBlock"/>
+</apex:form>
+<script>
+
+function bindEvents() {
+    // Readonly Setup
+    //$j("input[id$=':productName']").attr("readonly",true);
+    // 一時封印(売上日変更可能)
+    /*
+    if (1 * JS_DetailRsSize > 0 ) {
+        $j("input[id$=':saleDate']").attr("readonly",true);
+    } else {
+        $j("input[id$=':saleDate']").attr("readonly",false);
+    } */
+    // すべて入力の全角数字は半額に変更を行う
+    $j('input').change(function(){
+        var txt  = $j(this).val();
+        var han = txt.replace(/[Ａ-Ｚａ-ｚ０-９]/g,function(s){return String.fromCharCode(s.charCodeAt(0)-0xFEE0)});
+        $j(this).val(han);
+    });
+    // 売上日自動書式化
+    $j("input[id$=':saleDate']").change(function(){
+        var inputVal = $j(this).val();
+        if($j.trim(inputVal) == "") return false;
+        var inputDt = Date.parseExact(inputVal, JINYACONNECT.DateFormat);
+        if (inputDt == null) {
+        //売上日書式不正(YYYY/MM/DD、YYYYMMD)
+            alert("{!$Label.MSG_034_0015}("+JINYACONNECT.DateFormat+")");
+            $j(this).focus();
+            return false;
+        }
+        //$j(this).val(inputDt.toString(JINYACONNECT.DateFormat));
+        $j(this).val(dateFormat.format(inputDt));
+    });
+
+    $j("img[name='productPopup']").click(function() {
+        var dumyField = $j("#dumyfieldId").get(0);
+        // 引き渡し値を設定して、選択画面を開く
+        ctrlNm = $j("input:text[id$=':productName']").get(0);
+        ctrlId = $j("input:hidden[id$=':hidProductId']").get(0);
+        ctrlHidNm = $j("input:text[id$=':productName']").get(0);
+        ctrlPriceId = $j("input:text[id$=':unitPriceId']").get(0);
+        ctrlOrderNumId = $j("input:text[id$=':orderNumsId']").get(0);
+        ctrlTaxRate = dumyField;
+        ctrlHidTaxRate = $j("input:hidden[id$=':hidTaxRate']").get(0); // 消費税
+        ctrlServiceTaxRate = dumyField;
+        ctrlHidServiceTaxRate =  $j("input:hidden[id$=':hidServiceRate']").get(0); // サビース料金
+        ctrlSpecialTax = dumyField;
+        ctrlHidSpecialTax = dumyField;  // 特別税
+        ctrlHidActionType = $j("input:hidden[id$=':hidActionType']").get(0);
+        var openUrl = "/apex/ProductSearch?npy=1";
+        // 呼び出し順番とPOPUP画面の設定順番は必ず一致するが必要
+        objs = new Array(ctrlNm, ctrlId, ctrlHidNm, ctrlPriceId, ctrlOrderNumId,
+            ctrlTaxRate, ctrlHidTaxRate, ctrlServiceTaxRate, ctrlHidServiceTaxRate, ctrlSpecialTax, ctrlHidSpecialTax, ctrlHidActionType);
+        commUtils.popup(openUrl, "SearchProductInfo", objs, null, null, window.popupCallback);
+    });
+    
+    
+    // 会計商品AutoComplete[1桁以上]
+    $j("input[id$=':productName']").autocomplete({
+        minLength: 1,
+        source: function (request, response) {
+            Visualforce.remoting.Manager.invokeAction(
+                "{!$RemoteAction.SimpleAccountsCtrl.getArrayProductItemInfo}", request.term, function(result, event){
+                if (event.type == 'exception') {
+                    alert(event.message);
+                } else {
+                    response($j.map(result, function (item) {
+                        item.id = item.productId;
+                        item.value = item.prodcutName + "("+item.prodcutCode+")";
+                        return item;
+                    }));
+                } // End else
+            });
+        },
+        focus: function (event, ui) {
+            var nameArray = $j(this).attr("id").split(":");
+            currRowIndex = nameArray[nameArray.length - 2];
+            ui.item.rowIndex = currRowIndex;
+            autoGetProductInfo(ui.item);
+            return false;
+        },
+        select: function (event, ui) {
+            var nameArray = $j(this).attr("id").split(":");
+            currRowIndex = nameArray[nameArray.length - 2];
+            ui.item.rowIndex = currRowIndex;
+            autoGetProductInfo(ui.item);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz BEGIN
+            if ("accMasterFun" in window) accMasterFun(ui.item.id);
+            // 2019/11/15 最近利用している商品一覧機能を提供する BY zyz END
+            return false;
+        },
+    });
+    
+    // 2014/08/29 簡易会計に、商品登録明細の取消機能機能
+    $j(".recRowClass").click(function (e) {
+        // URLのリンクをクリックする場合
+        if (urlLinkClick) {
+            urlLinkClick = false;
+            return false;
+        }
+        // 指定行の会計商品の合計金額を取得する
+        var price = $j(this).children().find("span[id$=':childAmount']").text().replace(/[^\d.]/g,'');
+        // 削除行目のCSSを追加する
+        if ($j(this).hasClass("unSubmitRow")) {
+            $j(this).removeClass("unSubmitRow");
+        } else {
+            $j(this).addClass("unSubmitRow");
+            // 対象から対象外に変更する
+            price = commUtils.mathNumSub(0, price);
+        }
+        
+        // 登録対象外情報の対応行目NOを格納する
+        var unSubmitFlgVal = "";
+        $j(".unSubmitRow").each(function() {
+            var rowNo = 1 * $j(this).attr("rowno");
+            unSubmitFlgVal += rowNo + ",";
+        });
+        if (unSubmitFlgVal.length > 0) unSubmitFlgVal = unSubmitFlgVal.slice(0,-1);
+        $j("input:hidden[id$=':unSubmitFlg']").val(unSubmitFlgVal);
+        // 現在の総金額
+        var totalPriceObj = $j("[id$=':totalPriceId']");
+        var currAmount = 1 * totalPriceObj.text().replace(/[^\d.]/g,'');
+        // 計算後の合計金額を取得する
+        var calSumPrice = commUtils.mathNumAdd(currAmount, price);
+        totalPriceObj.text(commUtils.numFormat(calSumPrice));
+        $j("input[id$=':hidTotalPrice']").val(calSumPrice);
+        
+        // 全部取消される場合、会計確定ボタンを非表示に制御する　
+        // 登録して会計商品が全部取消されると、登録エラーが表示する
+        var allsitems = $j(".recRowClass").length;
+        var umsumbitItems = $j(".unSubmitRow").length;
+        if (allsitems == umsumbitItems) {
+            $j("#accPdfGenerBtn").hide();
+        } else if (allsitems > umsumbitItems) {
+            $j("#accPdfGenerBtn").show();
+        }
+    });
+}
+//<!-- 2017/01/25 打印小票功能对应 by zy BEGIN-->
+function afterUpdFun(){
+    if ({!openDoorFlag}){
+        // 2017/02/22 打印とip 機能独立化　by　zy BEGIN 
+        printCall();
+        // 2017/02/22 打印とip 機能独立化　by　zy END 
+    } else {
+        gotoAccPageFunction();
+    }
+}
+//<!-- 2017/01/25 打印小票功能对应 by zy BEGIN-->
+function popupCallback() {
+    // 数量初期値を設定する
+    var orderNums = $j("input:text[id$=':orderNumsId']").val();
+    if (orderNums == "") orderNums = "1";
+    $j("input:text[id$=':orderNumsId']").val(orderNums);
+    // 総金額内容をクリアする
+    //$j("#totalPriceId").text("");
+    //$j("#accTranRegistBtn").focus();
+}
+// 商品登録ボタンクリックする
+function submitTranInfo() {
+    // 必須情報入力チェック
+    //var saledate = $j("input[id$=':saleDate']").val();
+    var prodIdInfo = $j("input[id$=':hidProductId']").val();
+    var prodNmInfo = $j("input[id$=':productName']").val();
+    var prodPrice = $j("input[id$=':unitPriceId']").val();
+    var prodPty = $j("input[id$=':orderNumsId']").val();
+    if (prodIdInfo == "" || prodNmInfo == "" || prodPrice == "" || prodPty == "") {
+        //商品、単価、数量を全部入力してください。
+        alert("{!$Label.MSG_034_0016}");
+        if (prodIdInfo == "" || prodNmInfo == "") {$j("input[id$=':productName']").focus();}
+        else if (prodPrice == "") {$j("input[id$=':unitPriceId']").focus();}
+        else if (prodPty == "") {$j("input[id$=':orderNumsId']").focus();}
+        return false;
+    }
+    
+    // 2014/07/25 商品登録確認メッセージ追加
+    //var msg = "";
+    //if (commUtils.mathNumAdd($j("#detailRows").val(),1) > 5) msg += "５件以上商品登録する場合、最後５件画面に表示する\n\t";
+    //msg += "登録してよろしいですか？";
+    //if (confirm(msg)) saveTranToMemoryFun();
+    saveTranToMemoryFun();
+}
+
+function continueFunction() {
+    /*
+    var msg = "商品を続けて入力しますか？";
+    if ($j("#detailRows").val() >= 5) msg += "\n\t５件以上商品登録する場合、最後５件画面に表示する";
+    if (window.confirm(msg)) {
+        // 画面クリアする？
+        //$j("img[name='productPopup']").click();
+        $j("input[id$=':productName']").focus();
+    } else {
+        
+    }*/
+    $j("input[id$=':productName']").focus();
+}
+// 事前チェック
+function preSaveTranToDBFun() {
+    // 必須情報入力チェック
+    var saledate = $j("input[id$=':saleDate']").val();
+    if (saledate == "") {
+    //売上日を入力してください。
+        alert("{!$Label.MSG_034_0017}");
+        $j("input[id$=':saleDate']").focus();
+        return false;
+    }
+    // 2017/02/22 弹出输入金额  begin by wx
+    var selectVal = $j("input[id$=':inputPriceId']").val();
+    $j("input[id$=':paymentprice']").val(selectVal);
+    var price = $j(this).children().find("span[id$=':childAmount']").text().replace(/[^\d.]/g,'');
+    // 削除行目のCSSを追加する
+    if ($j(this).hasClass("unSubmitRow")) {
+        $j(this).removeClass("unSubmitRow");
+    } else {
+        $j(this).addClass("unSubmitRow");
+        // 対象から対象外に変更する
+        price = commUtils.mathNumSub(0, price);
+    }
+    var totalPriceObj = $j("[id$=':totalPriceId']");
+    var currAmount = 1 * totalPriceObj.text().replace(/[^\d.]/g,'');
+    var calSumPrice = commUtils.mathNumAdd(currAmount, price);
+    if(selectVal < calSumPrice && selectVal != ""){
+        alert("{!$Label.MSG_034_0020}");
+        return false;   
+    }
+    // 2017/02/22 弹出输入金额  end by wx
+    saveTranToDBFun();
+}
+// 会計登録後の自動会計ページ遷移JS(自動？)
+function gotoAccPageFunction() {
+    //2017/02/28 demodata場合下pdf　プリンターない　by　zy　BEGIN
+    var demoFlag = $j("input[id$=hidDemoFlag]").val();
+    if (demoFlag.toLowerCase() == 'true') return;
+    //2017/02/28 demodata場合下pdf　プリンターない　by　zy　END
+    // 2017/02/22 弹出输入金额  begin by wx
+    $j("input[id$=':inputPriceId']").val('');
+    // 2017/02/22 弹出输入金额  end by wx
+    url = "{!URLFOR('/apex/' & $Setup.CommDefine__c.AppNS__c & 'AccountPdfSwitch')}?id=" + $j("#accdataId").val();
+    // 2019/12/30 会計機能、日付が変わった後、会計データにロックがかかり変更出来ない機能対応 WGCH BEGIN
+    if($j("#accdataId").val() != '') window.open(url);
+    // 2019/12/30 会計機能、日付が変わった後、会計データにロックがかかり変更出来ない機能対応 WGCH END
+}
+
+// 最新商品情報を取得する
+function autoGetProductInfo(result) {
+    // 存在の商品情報は画面へ反映する
+    $j("input:text[id$=':productName']").val(result.prodcutName);
+    $j("input:hidden[id$=':hidProductId']").val(result.productId);
+    $j("input:text[id$=':productName']").val(result.prodcutName);
+    $j("input:text[id$=':unitPriceId']").val(result.unitPrice);
+    $j("input:text[id$=':orderNumsId']").val(1);
+    $j("input:hidden[id$=':hidTaxRate']").val(result.tax); // 消費税
+    $j("input:hidden[id$=':hidServiceRate']").val(result.serviceRate); // サビース料金
+    $j("input:hidden[id$=':hidActionType']").val(result.actionType);
+    // End Process
+    popupCallback();
+}
+var urlLinkClick = false;   // リンクをクリックする後、TRのCLICKのEVENT実施中止
+// 商品明細画面起動関数
+function openProductInfo(productId) {
+    urlLinkClick = true;
+    url ="/" + productId;
+    window.open(url);
+}
+// 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN
+var _g_cashPaycode = "01";
+var _g_caseProduLst = JSON.parse('{!JSENCODE(jsonCaseProducts)}');
+// 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END
+// 2017/02/22 弹出输入金额  begin by wx
+function beforeStartFun(flag){
+    if({!!isShowPaymentFlag}) return;
+    var mediaTypeVal = $j("[id$='mediaTypeId']").val();
+    // 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN
+    //if(mediaTypeVal == "01"){
+    if(mediaTypeVal == _g_cashPaycode){
+    // 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END
+        $j("#lastPanel").toggle(true);
+        $j("#pricePanel").toggle(true);
+        $j("#CardTypePanel").toggle(false);
+        $j("#cardTypelstPanel").toggle(false);
+    }else{
+        $j("#lastPanel").toggle(false);
+        $j("#pricePanel").toggle(false);
+        $j("#CardTypePanel").toggle(true);
+        $j("#cardTypelstPanel").toggle(true);
+    }   
+}
+// 2017/02/22 弹出输入金额  end by wx
+// 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH BEGIN
+function paymentpriceClearFun(){
+    if({!noCustomMediaTypeFlg}){
+        if($j("[id$='mediaTypeId']").val() != _g_cashPaycode) paymentpriceValClearFun();
+    } else if(_PROD_PAY_TYPE_CASH_FLGFun() == false) paymentpriceValClearFun();
+}
+function paymentpriceValClearFun(){
+    $j("input[id$=':inputPriceId']").val('');
+    $j("input[id$=':paymentprice']").val('');
+}
+// 預かり金額入力項目制御
+function isShowPaymentFun(){
+    
+    if(_PROD_PAY_TYPE_CASH_FLGFun()) $j("#paymentpriceTrId").toggle(true);
+    else $j("#paymentpriceTrId").toggle(false);
+}
+function _PROD_PAY_TYPE_CASH_FLGFun(){
+    var mediaProductCd = $j("[id$='mediaTypeId']").val();
+    return _g_caseProduLst.indexOf(mediaProductCd) != -1;
+}
+// 2017/11/27 簡易会計の支払メディアをカスタマイズできるように改善 WGCH END
+</script>
+
+</apex:page>

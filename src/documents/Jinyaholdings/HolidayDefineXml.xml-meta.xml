@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>10年間（２０１４〜２０２４）祝日（振替休日含め）定義ファイル</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>祝日定義ファイル</name>
+    <public>false</public>
+</Document>

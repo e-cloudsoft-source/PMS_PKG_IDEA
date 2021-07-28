@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>QQNAILookup</value>
+    </caseValues>
+    <fields>
+        <label><!-- 字段名 --></label>
+        <name>FieldName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 字段値 --></label>
+        <name>FieldValue__c</name>
+    </fields>
+    <fields>
+        <label><!-- オブジェクト名 --></label>
+        <name>TableName__c</name>
+    </fields>
+    <fields>
+        <label><!-- RowNo. --></label>
+        <name>TranslatedValue__c</name>
+    </fields>
+</CustomObjectTranslation>

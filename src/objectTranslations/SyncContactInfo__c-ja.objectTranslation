@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>おもてなしお客様</value>
+    </caseValues>
+    <fields>
+        <label><!-- 住所 --></label>
+        <name>Address__c</name>
+    </fields>
+    <fields>
+        <label><!-- 生年月日 --></label>
+        <name>Birthday__c</name>
+    </fields>
+    <fields>
+        <label><!-- ファーストネーム（名） --></label>
+        <name>FirstName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 性別 --></label>
+        <name>Gender__c</name>
+        <picklistValues>
+            <masterLabel>不明</masterLabel>
+            <translation><!-- 不明 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>女性</masterLabel>
+            <translation><!-- 女性 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>男性</masterLabel>
+            <translation><!-- 男性 --></translation>
+        </picklistValues>
+        <picklistValues>
+            <masterLabel>適用不能</masterLabel>
+            <translation><!-- 適用不能 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- ラストネーム（姓） --></label>
+        <name>LastName__c</name>
+    </fields>
+    <fields>
+        <label><!-- メールアドレス --></label>
+        <name>MailAddress__c</name>
+    </fields>
+    <fields>
+        <label><!-- ミドルネーム --></label>
+        <name>MiddleName__c</name>
+    </fields>
+    <fields>
+        <label><!-- 国籍 --></label>
+        <name>Nationalities__c</name>
+    </fields>
+    <fields>
+        <label><!-- おもてなし連携提示ID --></label>
+        <name>SyncKey__c</name>
+    </fields>
+</CustomObjectTranslation>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>カスタマイズ支払メディア情報定義用</description>
+    <fields>
+        <fullName>PayProductCd__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <fieldManageability>DeveloperControlled</fieldManageability>
+        <inlineHelpText>該当会計支払メデイアとマッピングする会計商品コード</inlineHelpText>
+        <label>会計商品コード</label>
+        <length>13</length>
+        <required>true</required>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>SortNo__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <fieldManageability>DeveloperControlled</fieldManageability>
+        <label>表示順</label>
+        <precision>5</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <label>支払メディア</label>
+    <validationRules>
+        <fullName>NameLenCheck</fullName>
+        <active>true</active>
+        <description>支払メデイア名最大２桁文字チェックあり　
+A1〜ZZまで定義可能</description>
+        <errorConditionFormula>LEN( DeveloperName ) &gt; 2</errorConditionFormula>
+        <errorDisplayField>DeveloperName</errorDisplayField>
+        <errorMessage>支払メデイア名の値が大きすぎる、２桁以内入力ください</errorMessage>
+    </validationRules>
+    <visibility>Public</visibility>
+</CustomObject>

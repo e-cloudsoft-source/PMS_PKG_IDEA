@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>Sales</value>
+    </caseValues>
+    <caseValues>
+        <plural>true</plural>
+        <value>Sales</value>
+    </caseValues>
+    <fields>
+        <help>ADR limited to Guest room(s)(except the main hall) 、Average Daily Rate：[By each room]Total／Sale Number of rooms</help>
+        <label><!-- ADR --></label>
+        <name>ADR__c</name>
+    </fields>
+    <fields>
+        <label>#A1_Number of working employees</label>
+        <name>Agoukei__c</name>
+    </fields>
+    <fields>
+        <label>#B10_Guest relation</label>
+        <name>B10__c</name>
+    </fields>
+    <fields>
+        <label>#B11_Washing place</label>
+        <name>B11__c</name>
+    </fields>
+    <fields>
+        <label>#B12_Finance &amp; Facility &amp; Design</label>
+        <name>B12__c</name>
+    </fields>
+    <fields>
+        <label>#D1_Employee</label>
+        <name>B1__c</name>
+    </fields>
+    <fields>
+        <label>＃B3_Chosuke</label>
+        <name>B2__c</name>
+    </fields>
+    <fields>
+        <label>＃B3_Chosuke</label>
+        <name>B3__c</name>
+    </fields>
+    <fields>
+        <label>＃B4_Food assistant</label>
+        <name>B4__c</name>
+    </fields>
+    <fields>
+        <label>＃B5_Guest reception</label>
+        <name>B5__c</name>
+    </fields>
+    <fields>
+        <label>＃B6_Haisen meeting</label>
+        <name>B6__c</name>
+    </fields>
+    <fields>
+        <label>＃B7_Head</label>
+        <name>B7__c</name>
+    </fields>
+    <fields>
+        <label>＃B8_Cleaning</label>
+        <name>B8__c</name>
+    </fields>
+    <fields>
+        <label>＃B9_Front office and Garden cleaning</label>
+        <name>B9__c</name>
+    </fields>
+    <fields>
+        <label>Shop</label>
+        <name>BaitenFree__c</name>
+    </fields>
+    <fields>
+        <label>＃B_Part time human rights costs</label>
+        <name>Bgoukei__c</name>
+    </fields>
+    <fields>
+        <label>#C1_Midnight allowance</label>
+        <name>C1__c</name>
+    </fields>
+    <fields>
+        <label>#C2_Employee insurance</label>
+        <name>C2__c</name>
+    </fields>
+    <fields>
+        <label>Shop(With Tax)</label>
+        <name>Chargeofbaiten__c</name>
+    </fields>
+    <fields>
+        <label>Food (With tax)</label>
+        <name>Chargeofmeal__c</name>
+    </fields>
+    <fields>
+        <label>Bath charge(With Tax)</label>
+        <name>Chargeofonsen__c</name>
+    </fields>
+    <fields>
+        <label>Others (With Tax)</label>
+        <name>Chargeofother__c</name>
+    </fields>
+    <fields>
+        <label>Room Charge (with Tax)</label>
+        <name>Chargeofroom__c</name>
+    </fields>
+    <fields>
+        <label>Media Type</label>
+        <name>Chart__c</name>
+    </fields>
+    <fields>
+        <label>Children</label>
+        <name>Childs__c</name>
+    </fields>
+    <fields>
+        <label>Comment</label>
+        <name>Comment__c</name>
+    </fields>
+    <fields>
+        <label>Credit total (With Tax)</label>
+        <name>CreditKkomi__c</name>
+    </fields>
+    <fields>
+        <label>Coupon total (With Tax)</label>
+        <name>CuponKomi__c</name>
+    </fields>
+    <fields>
+        <help>Total amount for tax payment slip, prerequisite as there will be no billing done in the restaurant</help>
+        <label>Deposit</label>
+        <name>Depositwithtax__c</name>
+    </fields>
+    <fields>
+        <label>Discount total</label>
+        <name>Discount2__c</name>
+    </fields>
+    <fields>
+        <label>Credit(With Tax)</label>
+        <name>Discount__c</name>
+    </fields>
+    <fields>
+        <label>$Drink-unit cost</label>
+        <name>DrinkGenkaRuikei__c</name>
+    </fields>
+    <fields>
+        <label>$Drink total amount(Without Tax)</label>
+        <name>DrinkGoukeinoneTaxRuikei__c</name>
+    </fields>
+    <fields>
+        <label>#E1_foodSection</label>
+        <name>E1__c</name>
+    </fields>
+    <fields>
+        <label>#F1_Reception</label>
+        <name>F1__c</name>
+    </fields>
+    <fields>
+        <label>#F2_Service Maintenance</label>
+        <name>F2__c</name>
+    </fields>
+    <fields>
+        <label>#F3_Front office</label>
+        <name>F3__c</name>
+    </fields>
+    <fields>
+        <label>Room unit price</label>
+        <name>FRestrunt9__c</name>
+    </fields>
+    <fields>
+        <label>#F_Local operation section total</label>
+        <name>Fgoukei__c</name>
+    </fields>
+    <fields>
+        <label>Cash total</label>
+        <name>Field1__c</name>
+    </fields>
+    <fields>
+        <label>Credit total</label>
+        <name>Field2__c</name>
+    </fields>
+    <fields>
+        <label>Reservation date</label>
+        <name>Field3__c</name>
+    </fields>
+    <fields>
+        <label>Main hall credit card (With Tax)</label>
+        <name>Field4__c</name>
+    </fields>
+    <fields>
+        <label>Occupancy rate(Room Lunch)</label>
+        <name>Field5__c</name>
+    </fields>
+    <fields>
+        <label>Profit and loss</label>
+        <name>Field6__c</name>
+        <relationshipLabel>Sales</relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_飲料（税抜） --></label>
+        <name>FinalInventoryBeverage__c</name>
+    </fields>
+    <fields>
+        <label>Closing inventory_Bridal (tax excluded)</label>
+        <name>FinalInventoryBridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_材料（税抜） --></label>
+        <name>FinalInventoryMaterial__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期末棚卸高_室料（税抜） --></label>
+        <name>FinalInventoryRoom__c</name>
+    </fields>
+    <fields>
+        <label>Closing inventory_shops (tax excluded)</label>
+        <name>FinalInventoryStand__c</name>
+    </fields>
+    <fields>
+        <help>When the total sales 3 amount is ?0,sales forecast amount will be setup. Else total sales 3 amount is set up</help>
+        <label>$Sales forecast</label>
+        <name>FutureAccount__c</name>
+    </fields>
+    <fields>
+        <help>Estimates of reservation ledger total of roll-up summary values</help>
+        <label>Sales forecast</label>
+        <name>FutureYen__c</name>
+    </fields>
+    <fields>
+        <label>#G1_Bridal</label>
+        <name>G1__c</name>
+    </fields>
+    <fields>
+        <label>#G2_Sales</label>
+        <name>G2__c</name>
+    </fields>
+    <fields>
+        <label>#G3_Others</label>
+        <name>G3__c</name>
+    </fields>
+    <fields>
+        <help>Food purchases amount（Total）/ Cooking sales amount（Total）</help>
+        <label>Food cost rate (total)</label>
+        <name>GenkaritsuRuikei__c</name>
+    </fields>
+    <fields>
+        <label>Cash total (With Tax)</label>
+        <name>GenkinkeiKomi__c</name>
+    </fields>
+    <fields>
+        <label>#G_Sales Marketing section total</label>
+        <name>Ggoukei__c</name>
+    </fields>
+    <fields>
+        <label>#H1_Finance Section</label>
+        <name>H1__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- Guest detail</label>
+        <name>HonkanCustomersGraph__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_飲料（税抜） --></label>
+        <name>InitialInventoryBeverage__c</name>
+    </fields>
+    <fields>
+        <label>Opening inventory_Bridal (tax excluded)</label>
+        <name>InitialInventoryBridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_材料（税抜） --></label>
+        <name>InitialInventoryMaterial__c</name>
+    </fields>
+    <fields>
+        <label><!-- 期首棚卸高_室料（税抜） --></label>
+        <name>InitialInventoryRoom__c</name>
+    </fields>
+    <fields>
+        <label>Opening inventory_shops (tax excluded)</label>
+        <name>InitialInventoryStand__c</name>
+    </fields>
+    <fields>
+        <label><!-- ロックフラグ --></label>
+        <name>IsLockFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- #B_パート人件費合計 +#D1_社員 +#C1_深夜手当 +#C2_労働保険 --></help>
+        <label>#J_Human Resource total</label>
+        <name>Jgoukei__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update #B_パート人件費合計 の累計 --></help>
+        <label>#K1_Part time human resource total</label>
+        <name>K1ruikei__c</name>
+    </fields>
+    <fields>
+        <help>***Prog. update #J_ All labor costs total</help>
+        <label>#K2_Human Resource total</label>
+        <name>K2ruikei__c</name>
+    </fields>
+    <fields>
+        <help>#K2_ All labor costs total / Sales total6(Without tax) Total</help>
+        <label>#K3_Human Resource rate</label>
+        <name>K3ruikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- 売上計6(税抜) / #B_パート人件費合計 --></help>
+        <label>#K4_Part time human resource total</label>
+        <name>K4__c</name>
+    </fields>
+    <fields>
+        <help><!-- 15＜#K4_売上高/パート人件費　　: 良い
+10＜#K4_売上高/パート人件費≦15 : 普通
+　 　#K4_売上高/パート人件費≦10 : 悪い --></help>
+        <label>#K5_Part time operate efficiency</label>
+        <name>K5__c</name>
+    </fields>
+    <fields>
+        <label>Credit(With Tax)</label>
+        <name>KakeKeiKomi__c</name>
+    </fields>
+    <fields>
+        <label>Coupon total</label>
+        <name>Kuupon__c</name>
+    </fields>
+    <fields>
+        <help>If it is the last day of the month set 1, Else 0</help>
+        <label>Month end last date flag</label>
+        <name>LastDayofMonthFlag__c</name>
+    </fields>
+    <fields>
+        <label><!-- $ロック状態 --></label>
+        <name>LockStatus__c</name>
+    </fields>
+    <fields>
+        <help>***Prog. update Food Total sales（Day base）</help>
+        <label>Food sales (Total)</label>
+        <name>MealSalesfreeRuikei__c</name>
+    </fields>
+    <fields>
+        <help>***Prog. update Account Detail SUM($Total amount(Exclude Tax)) - (Bathing tax + Horse ride) AND Aggregate subject AND CategoryA = A1_Food related</help>
+        <label>Food sales (Day base)</label>
+        <name>MealSalesfree__c</name>
+    </fields>
+    <fields>
+        <label>Food</label>
+        <name>Mealfree__c</name>
+    </fields>
+    <fields>
+        <help>The month of business day</help>
+        <label>Month</label>
+        <name>Month__c</name>
+    </fields>
+    <fields>
+        <label>Bath charge</label>
+        <name>NyuuyokuFree__c</name>
+    </fields>
+    <fields>
+        <label>Cash total (With Tax)-Lunch</label>
+        <name>OccHallHiru__c</name>
+    </fields>
+    <fields>
+        <label>Cash total (With Tax)=Dinner</label>
+        <name>OccHallYuu__c</name>
+    </fields>
+    <fields>
+        <label>Cash total (With Tax)</label>
+        <name>OccHall__c</name>
+    </fields>
+    <fields>
+        <help>Occupancy Rate of having meals in the room</help>
+        <label>Rooms-[Lunch]Occupancy rate</label>
+        <name>OccHiru__c</name>
+    </fields>
+    <fields>
+        <label>Rooms-Occupancy rate</label>
+        <name>OccRoom__c</name>
+    </fields>
+    <fields>
+        <help>Occupancy rate for staying in the room</help>
+        <label>Occupancy rate(Stay)</label>
+        <name>Occnights__c</name>
+    </fields>
+    <fields>
+        <label>Occupancy rate</label>
+        <name>Occupy__c</name>
+    </fields>
+    <fields>
+        <help>Occupancy rate for having the dinner in the room</help>
+        <label>Rooms-[DinnerOccupancy rate</label>
+        <name>Occyuu__c</name>
+    </fields>
+    <fields>
+        <help>Number of guest(s) who had paid the bath fee(Adult,Children)</help>
+        <label>Bath number of persons</label>
+        <name>Osenpersons__c</name>
+    </fields>
+    <fields>
+        <label>Others</label>
+        <name>Otherfree__c</name>
+    </fields>
+    <fields>
+        <label>#A2_Part time</label>
+        <name>Part__c</name>
+    </fields>
+    <fields>
+        <help>Payment receipt total amount is with tax, it is prerequisite as the bill will not be done in the restaurant.</help>
+        <label>Payment (With Tax)</label>
+        <name>Paymentwithtax__c</name>
+    </fields>
+    <fields>
+        <label>Rooms</label>
+        <name>Persons__c</name>
+    </fields>
+    <fields>
+        <label>[Lunch] number of guest(s)</label>
+        <name>Pofhiru__c</name>
+    </fields>
+    <fields>
+        <label>Number stay person(s)</label>
+        <name>Pofnights__c</name>
+    </fields>
+    <fields>
+        <label>[Dinner] guest number</label>
+        <name>Pofyuu__c</name>
+    </fields>
+    <fields>
+        <label>#A1_Employee</label>
+        <name>Proper__c</name>
+    </fields>
+    <fields>
+        <label>Beverages purchase amount (daily)</label>
+        <name>PurchaseBeverage__c</name>
+    </fields>
+    <fields>
+        <label>Bridal purchase amount (daily)</label>
+        <name>PurchaseBridal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 旅館外注費仕入高（日別） --></label>
+        <name>PurchaseExpenses__c</name>
+    </fields>
+    <fields>
+        <label>Room charge purchase amount (daily)</label>
+        <name>PurchaseRoom__c</name>
+    </fields>
+    <fields>
+        <help>***Prog. update Food purchase amount（day base）Total</help>
+        <label>Food purchase (Sum)</label>
+        <name>PurchaseRuikei__c</name>
+    </fields>
+    <fields>
+        <label>Shop purchase amount (daily)</label>
+        <name>PurchaseStand__c</name>
+    </fields>
+    <fields>
+        <label>Food purchase (day base)</label>
+        <name>Purchase__c</name>
+    </fields>
+    <fields>
+        <label>Drink(With Tax)</label>
+        <name>RChargeofdrink__c</name>
+    </fields>
+    <fields>
+        <label>Food (With tax)</label>
+        <name>RChargeofmeal__c</name>
+    </fields>
+    <fields>
+        <label>Lunch number of people</label>
+        <name>RPofhiru__c</name>
+    </fields>
+    <fields>
+        <label>Dinner-number of guest(s)</label>
+        <name>RPofyuu__c</name>
+    </fields>
+    <fields>
+        <label>Males</label>
+        <name>Restrunt10__c</name>
+    </fields>
+    <fields>
+        <label>Females</label>
+        <name>Restrunt11__c</name>
+    </fields>
+    <fields>
+        <label>Children</label>
+        <name>Restrunt12__c</name>
+    </fields>
+    <fields>
+        <label>Number of guest(s)</label>
+        <name>Restrunt15__c</name>
+    </fields>
+    <fields>
+        <label>Discount total (With Tax)</label>
+        <name>Restrunt16__c</name>
+    </fields>
+    <fields>
+        <label>Discount total (With Tax)</label>
+        <name>Restrunt17__c</name>
+    </fields>
+    <fields>
+        <label>Amount (With Tax)</label>
+        <name>Restrunt18__c</name>
+    </fields>
+    <fields>
+        <label>Coupon (With Tax)</label>
+        <name>Restrunt19__c</name>
+    </fields>
+    <fields>
+        <label>Cash</label>
+        <name>Restrunt1free__c</name>
+    </fields>
+    <fields>
+        <label>Sales3 (Without Tax)</label>
+        <name>Restrunt25__c</name>
+    </fields>
+    <fields>
+        <label>Consumer tax</label>
+        <name>Restrunt26__c</name>
+    </fields>
+    <fields>
+        <label>Credit</label>
+        <name>Restrunt2free__c</name>
+    </fields>
+    <fields>
+        <label>Amount</label>
+        <name>Restrunt3free__c</name>
+    </fields>
+    <fields>
+        <label>Credit</label>
+        <name>Restrunt4free__c</name>
+    </fields>
+    <fields>
+        <label>Coupon</label>
+        <name>Restrunt5free__c</name>
+    </fields>
+    <fields>
+        <label>Room unit price (With Tax)</label>
+        <name>Restrunt8__c</name>
+    </fields>
+    <fields>
+        <label>Guest detail</label>
+        <name>RestruntCustomersGraph__c</name>
+    </fields>
+    <fields>
+        <label>Drink</label>
+        <name>RestruntDrinkfree__c</name>
+    </fields>
+    <fields>
+        <label>Dinner-number of guest(s)</label>
+        <name>RestruntMealfree__c</name>
+    </fields>
+    <fields>
+        <help>Limited Guest room（Except hall）,RevPARRevenue Per Available Room：[Guest room base]Total／Rooms that can be put for sales</help>
+        <label><!-- RevPAR --></label>
+        <name>RevPAR__c</name>
+    </fields>
+    <fields>
+        <label>Room Charge</label>
+        <name>RoomCfree__c</name>
+    </fields>
+    <fields>
+        <label>Room unit price (With Tax)</label>
+        <name>SalesAverageKomi__c</name>
+    </fields>
+    <fields>
+        <label>Room unit price</label>
+        <name>SalesAverage__c</name>
+    </fields>
+    <fields>
+        <label><!-- 売上計上日(重複チェック) --></label>
+        <name>SalesDateDupCheck__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU --></label>
+        <name>SalesDateNum__c</name>
+    </fields>
+    <fields>
+        <help>Sales accounted Date</help>
+        <label>Sales date</label>
+        <name>Salesday__c</name>
+    </fields>
+    <fields>
+        <label>$Shop-Unit cost</label>
+        <name>ShopGenkaRuikei__c</name>
+    </fields>
+    <fields>
+        <label>$Shop-Total amount (Without Tax)</label>
+        <name>ShopGoukeinoneTaxRuikei__c</name>
+    </fields>
+    <fields>
+        <help><!-- 会計明細の最大消費税率 --></help>
+        <label><!-- 消費税率 --></label>
+        <name>TaxRateCal__c</name>
+    </fields>
+    <fields>
+        <label>Consumer Tax</label>
+        <name>Taxfee__c</name>
+    </fields>
+    <fields>
+        <label>Inside Total (With Tax)</label>
+        <name>UchikinKomi__c</name>
+    </fields>
+    <fields>
+        <help><!-- ***Prog. update 売上計6(税抜)の累計 --></help>
+        <label>Sales total 6 (With out Tax) Sum up</label>
+        <name>Uriage6Total__c</name>
+    </fields>
+    <fields>
+        <help>***Prog. update SUM of the account detail($Total amount(Without Tax)) - (Bath fee + Horse ride) AND Aggregate subject</help>
+        <label>Sales total 6 (With out Tax)</label>
+        <name>Uriage6__c</name>
+    </fields>
+    <fields>
+        <help>POS Cash register daily account settlement sales III（Amount without the tax after the discount）Must be consist</help>
+        <label>Sales total 3 (With out Tax)</label>
+        <name>UriageHon__c</name>
+    </fields>
+    <fields>
+        <help>Last year today’s sales</help>
+        <label>Previous year sales</label>
+        <name>UriageLastYear__c</name>
+    </fields>
+    <fields>
+        <label>Sales total 4 (With Tax)</label>
+        <name>Uriagetaxfee__c</name>
+    </fields>
+    <fields>
+        <label>Credit</label>
+        <name>Urikakekei__c</name>
+    </fields>
+    <fields>
+        <label>Fiscal Year</label>
+        <name>Year__c</name>
+    </fields>
+    <fields>
+        <help>$SalesForcast-Last year sales</help>
+        <label>Sales compare to last year</label>
+        <name>Zennenhi__c</name>
+    </fields>
+    <fields>
+        <help>Input the account section sales、！Margin amount with the force</help>
+        <label>Finance sales</label>
+        <name>accountingsection__c</name>
+    </fields>
+    <fields>
+        <help><!-- FF9904&quot;&amp;chm=c,FF8C00,0,-1,6&quot; --></help>
+        <label><!-- Booking Curves --></label>
+        <name>booking__c</name>
+    </fields>
+    <fields>
+        <label>Female</label>
+        <name>femails__c</name>
+    </fields>
+    <fields>
+        <label>Main hall coupon(With Tax)</label>
+        <name>fornt2__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- Number of guest(s)</label>
+        <name>front10__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- male</label>
+        <name>front13__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- female</label>
+        <name>front14__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- children</label>
+        <name>front15__c</name>
+    </fields>
+    <fields>
+        <label>Main hall -Discount total (With tax)</label>
+        <name>front16__c</name>
+    </fields>
+    <fields>
+        <label>Main hall -Discount total</label>
+        <name>front17__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- sales4 (With tax)</label>
+        <name>front1__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- cash</label>
+        <name>front1free__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- sales3 (Without tax)</label>
+        <name>front25__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- Consume Tax</label>
+        <name>front26__c</name>
+    </fields>
+    <fields>
+        <label>Main hall credit</label>
+        <name>front2free__c</name>
+    </fields>
+    <fields>
+        <label>Main hall credit (With tax)</label>
+        <name>front3__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- amount</label>
+        <name>front3free__c</name>
+    </fields>
+    <fields>
+        <label>Main hall credit card</label>
+        <name>front4free__c</name>
+    </fields>
+    <fields>
+        <label>Main hall coupon</label>
+        <name>front5free__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- amount (With tax)</label>
+        <name>front6__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- cash (With Tax)</label>
+        <name>front7__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- Room unit price (With Tax)</label>
+        <name>front8__c</name>
+    </fields>
+    <fields>
+        <label>Main hall- Room unit price</label>
+        <name>front9__c</name>
+    </fields>
+    <fields>
+        <label>Rooms detail</label>
+        <name>graphCustomers__c</name>
+    </fields>
+    <fields>
+        <label>Male</label>
+        <name>males__c</name>
+    </fields>
+    <fields>
+        <label>Bath tax amount</label>
+        <name>nyuutouM__c</name>
+    </fields>
+    <fields>
+        <label>Bath tax number of persons</label>
+        <name>nyuutouzeiP__c</name>
+    </fields>
+    <fields>
+        <label><!-- pointofbooking --></label>
+        <name>pointofbooking__c</name>
+    </fields>
+    <fields>
+        <label>Sales4(With Tax)</label>
+        <name>restraunt1__c</name>
+    </fields>
+    <fields>
+        <label>Cash (With Tax)</label>
+        <name>restraunt2__c</name>
+    </fields>
+    <fields>
+        <label>Coupon (With Tax)</label>
+        <name>restraunt3__c</name>
+    </fields>
+    <fields>
+        <label>Credit-(With Tax)</label>
+        <name>restraunt4__c</name>
+    </fields>
+    <nameFieldLabel>Reservation account name</nameFieldLabel>
+    <startsWith>Consonant</startsWith>
+    <webLinks>
+        <label>SalesDateInfo</label>
+        <name>CustomLink1</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- RsvLockBtn --></label>
+        <name>RsvLockBtn</name>
+    </webLinks>
+    <webLinks>
+        <label><!-- UnRsvLockBtn --></label>
+        <name>UnRsvLockBtn</name>
+    </webLinks>
+    <webLinks>
+        <label>RevenueUpdate</label>
+        <name>updaterevenue</name>
+    </webLinks>
+</CustomObjectTranslation>

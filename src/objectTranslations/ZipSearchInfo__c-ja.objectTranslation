@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>郵便番号機能定義</value>
+    </caseValues>
+    <fields>
+        <help><!-- 郵便番号から住所取得用エンドポイント種別タイプ
+1.http://zip.cgis.biz
+2.https://postcode.teraren.com
+3.http://zipcloud.ibsnet.co.jp --></help>
+        <label><!-- EndPointType --></label>
+        <name>EndPointType__c</name>
+    </fields>
+    <fields>
+        <help><!-- ResetDateの指定日から、郵便検索EndPointは[http://zip.cgis.biz]に戻るがどうかフラグ
+TRUE:ResetDateの指定日から郵便検索EndPointは[http://zip.cgis.biz]に戻る
+FALSE:ResetDateの指定日から郵便検索EndPointは[http://zip.cgis.biz]に戻らない --></help>
+        <label><!-- NoAutoResetFlg --></label>
+        <name>NoAutoResetFlg__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当指定日からEndPointTypeが「1」にリセットする --></help>
+        <label><!-- ResetDate --></label>
+        <name>ResetDate__c</name>
+    </fields>
+</CustomObjectTranslation>

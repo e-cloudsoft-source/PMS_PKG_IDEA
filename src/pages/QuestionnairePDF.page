@@ -1,0 +1,4113 @@
+<apex:page controller="QuestionnaireCtrl" title="陣屋宿泊アンケート" renderAs="pdf" 
+			applyHtmlTag="false" applyBodyTag="false"
+			showHeader="false" sidebar="false"  readonly="true" >
+<html>
+<head>
+<style>
+@page {
+	/* 2019/02/28 陣屋組織、アンケート出力の文言等のカスタマイズは可能機能対応 BY zyz BEGIN */
+	size: {!oXmlDef.paperSize}   /* A4 portlate size 8.27in 11.69in; */
+	/* 2019/02/28 陣屋組織、アンケート出力の文言等のカスタマイズは可能機能対応 BY zyz END */
+	margin: 20px;
+}
+body {
+	font-family: Arial Unicode MS;
+	top: 0.2cm;
+	left: 0.2cm;
+}
+span {
+	font-size:12px;	 	
+}
+div.titleMarkIcon{
+	font-size: 1em;
+	background-color: white;
+	/*padding:2px 4px 2px 4px;*/
+	margin-left:4px;
+	height: 9px;width: 9px;
+}
+div.itemLabMarkIcon{
+
+	background-color: black;
+	height: 9px;width: 9px;
+}
+div.itemValMarkIcon{
+	border-width:1px;
+	border-style:solid;
+	height: 7px;width: 7px;
+}
+table.soldBorderTd {
+	border: 1px solid #000000;	
+	font-size: 8pt;
+}
+.line {
+	list-style:none; 
+	border-top:2px black solid; 
+}
+
+table.SecTitle {
+	color: white;
+	border: 0px;
+	border-spacing:0px;
+	width: 100%;
+	font-size: 12px;
+	/*margin-top: 2px;
+	margin-bottom: 2px;*/
+}
+table.SecTitle tr {
+	background: black;
+	height: 22px;
+}
+
+table.SecItemLabel {
+	border: 0px;
+	border-spacing:0px;
+	font-size: 9pt;
+	margin-left: 25px;
+	white-space: nowrap;
+	width:100%;
+}
+table.SecItemLabel tr {
+	/*background: white;*/
+	height: 22px;
+}
+table.SecItemValue {
+	border: 0px;
+	border-spacing:0px;
+	font-size: 8pt;
+	width: 100%;
+}
+table.EndSecItemValue {
+	border: 0px;
+	border-spacing:0px;
+	font-size: 9pt;
+	width: 100%;
+	margin-left:5px;
+}
+</style>
+</head>
+<body>
+   
+<table style="width:100%;cellspacing:0;border: 0" >
+	<tr>
+		<td colspan="2"><apex:outputField value="{!ReportInfo.ReportLogo__c}" /></td> 
+	</tr>       
+	<tr style="line-height: 90%">
+		<td style="padding-left:80px">&nbsp;</td>
+        <td style="font-size: 12px">
+        <!-- 
+		この度は数ある施設の中から「元湯&nbsp;陣屋」にご宿泊頂きまして誠にありがとうございます。<br/>        
+		当館でのご滞在はいかがでございましたでしょうか。私どもは、お客様のご意見をお伺いし、次回ご滞在のより良い<br/>        
+		おもてなしへの向上に努めてまいりたいと考えております。<br/>        
+		お忙しい所、大変恐縮ではございますが、ご意見、ご感想をお伺い致したくご案内申し上げます。
+		-->
+		<apex:repeat value="{!oXmlDef.headerStr}" var="str">
+		<apex:outputLabel value="{!str}"/><br/>
+		</apex:repeat>
+		</td>       
+	</tr>
+	<tr style="line-height: 90%">
+		<td colspan="2" style="text-align: right;"><span style="margin-right: 30px"><!-- 元湯 陣屋　女将 --><apex:outputLabel value="{!oXmlDef.managerStr}" /></span></td>
+	</tr>
+</table>
+<!-- 2019/02/28 陣屋組織、アンケート出力の文言等のカスタマイズは可能機能対応 BY zyz BEGIN -->
+<apex:outputLabel rendered="{!if(oXmlDef.begKey =='','false','true')}">
+<table style="width:100%;margin-top:2px;border-spacing: 0px;" border="0" cellpadding="0" cellspacing="0">
+	<apex:outputText value="{!oXmlDef.begKey}" escape="false"></apex:outputText>
+</table>
+	<apex:outputLabel rendered="{!oXmlDef.isNormalLayout}">
+    <table style="width:100%;margin-top: 10px;" border="0" cellpadding="0" cellspacing="0">
+        <tr>            
+            <td style="vertical-align: bottom">
+               	<table class="SecItemLabel" cellpadding="0" cellspacing="0">
+                   	<tr>
+                   		<td style="width:225px;vertical-align: bottom;">
+                    		<div class="itemLabMarkIcon" style="float:right;margin-bottom: 4px"></div>
+                    	</td>
+                    	<td style="width:80px;vertical-align: bottom;">
+                   			<!-- 今回のご滞在全体の満足度の採点をお願いいたします。 -->{!$Label.MSG_012_0457}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td style="vertical-align: bottom;width:150px">
+                <table class="soldBorderTd"  style="width:100%; height:40px;text-align: right;" cellpadding="1" cellspacing="0">
+                	<tr>
+						<td>&nbsp;</td>
+						<td rowspan="2" style="vertical-align: bottom;width:9px;">
+						<img src="{!URLFOR($Resource.reportFiles, 'img/slash.png')}" style="position:relative; left:0; top:0; z-index:0; width:8px;margin: 0; padding: 0"/>
+						</td>
+						<td style="width:35px;">&nbsp;</td>
+				    </tr>
+				    <tr>
+				    	<td style="vertical-align: bottom;"><span style="font-size: 9pt;"><!-- 点 -->{!$Label.MSG_012_0458}</span></td>
+				    	<td nowrap="nowrap"  style="vertical-align: bottom;"><span style="font-size: 8pt"><!-- 100 点 -->{!$Label.MSG_012_0459}&nbsp;</span></td>
+				    </tr>
+                </table>
+       		</td>     
+        </tr>        
+     </table>
+     <table style="width: 100%;line-height: 70%;" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+        	<td style="text-align: right;">
+        		<span style="font-size:7pt;"><!-- ＊ プライバシーポリシーの詳細については当館のホームページをご覧ください -->{!$Label.MSG_012_0460}</span>
+        	</td>
+        </tr>        
+     </table>
+     <table style="width:100%">
+     	<tr style="height:1px">
+			<td  colspan="5" class="line"></td>			
+   		</tr>
+   	 </table>
+   	 <table style="font-size: 9pt;width: 100%;">
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- ご宿泊日 -->{!$Label.MSG_012_0461}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td style="width:200px;">
+   	 			<apex:outputtext value="{0,date,{!dateFormat}}">
+	      		<apex:param value="{!leadInfo.EntryTime__c}"/>
+	    		</apex:outputtext>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- お部屋 -->{!$Label.MSG_012_0462}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!leadInfo.Rroom__r.Name}"/>
+   	 		</td>
+   	 	</tr>
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- お名前 -->{!$Label.MSG_012_0463}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td>
+   	 			<apex:outputText value="{!contactInfo.Name}"/>
+                <span style="margin-left:10px"><!-- 様 -->{!$Label.MSG_012_0464}</span>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="white-space: nowrap;">
+                   			<!-- メールアドレス -->{!$Label.MSG_012_0465}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!contactInfo.email}"/>
+   	 		</td>
+   	 	</tr>
+		<tr>
+			<td style="text-align: right;" colspan="6">
+                <table class="soldBorderTd" style="float: right;margin-right: 4px">
+                	<tr>
+						<td style="width:40px;height:40px"></td>				
+				    </tr>
+                </table>
+			</td>
+		</tr>
+     </table>
+     </apex:outputLabel>
+     <apex:outputLabel rendered="{!oXmlDef.isJpLayout}">
+	    <table style="width:100%;margin-top: 10px;" border="0" cellpadding="0" cellspacing="0">
+	        <tr>            
+	            <td style="vertical-align: bottom">
+	               	<table class="SecItemLabel" cellpadding="0" cellspacing="0">
+	                   	<tr>
+	                   		<td style="width:225px;vertical-align: bottom;">
+	                    		<div class="itemLabMarkIcon" style="float:right;margin-bottom: 4px"></div>
+	                    	</td>
+	                    	<td style="width:80px;vertical-align: bottom;">
+	                   			今回のご滞在全体の満足度の採点をお願いいたします。
+	                   		</td>
+	                   	</tr>
+					</table>
+	       		</td>
+	       		<td style="vertical-align: bottom;width:150px">
+	                <table class="soldBorderTd"  style="width:100%; height:40px;text-align: right;" cellpadding="1" cellspacing="0">
+	                	<tr>
+							<td>&nbsp;</td>
+							<td rowspan="2" style="vertical-align: bottom;width:9px;">
+							<img src="{!URLFOR($Resource.reportFiles, 'img/slash.png')}" style="position:relative; left:0; top:0; z-index:0; width:8px;margin: 0; padding: 0"/>
+							</td>
+							<td style="width:35px;">&nbsp;</td>
+					    </tr>
+					    <tr>
+					    	<td style="vertical-align: bottom;"><span style="font-size: 9pt;">点</span></td>
+					    	<td nowrap="nowrap"  style="vertical-align: bottom;"><span style="font-size: 8pt">100 点&nbsp;</span></td>
+					    </tr>
+	                </table>
+	       		</td>     
+	        </tr>        
+	     </table>
+	     <table style="width: 100%;line-height: 70%;" border="0" cellpadding="0" cellspacing="0">
+	        <tr>
+	        	<td style="text-align: right;">
+	        		<span style="font-size:7pt;">＊ プライバシーポリシーの詳細については当館のホームページをご覧ください</span>
+	        	</td>
+	        </tr>        
+	     </table>
+	     <table style="width:100%">
+	     	<tr style="height:1px">
+				<td  colspan="5" class="line"></td>			
+	   		</tr>
+	   	 </table>
+	   	 <table style="font-size: 9pt;width: 100%;">
+	   	 	<tr>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			ご宿泊日
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	    	 	<td style="width:200px;">
+	   	 			<apex:outputtext value="{0,date,yyyy/MM/dd}">
+		      		<apex:param value="{!leadInfo.EntryTime__c}"/>
+		    		</apex:outputtext>
+	   	 		</td>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			お部屋
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	   	 		<td>
+	   	 			<apex:outputText value="{!leadInfo.Rroom__r.Name}"/>
+	   	 		</td>
+	   	 	</tr>
+	   	 	<tr>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			お名前
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	    	 	<td>
+	   	 			<apex:outputText value="{!contactInfo.Name}"/>
+	                <span style="margin-left:10px">様</span>
+	   	 		</td>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			メールアドレス
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	   	 		<td>
+	   	 			<apex:outputText value="{!contactInfo.email}"/>
+	   	 		</td>
+	   	 	</tr>
+			<tr>
+				<td style="text-align: right;" colspan="6">
+	                <table class="soldBorderTd" style="float: right;margin-right: 4px">
+	                	<tr>
+							<td style="width:40px;height:40px"></td>				
+					    </tr>
+	                </table>
+				</td>
+			</tr>
+	     </table>
+     </apex:outputLabel>
+     <apex:outputLabel rendered="{!oXmlDef.isEnLayout}">
+	    <table style="width:100%;margin-top: 10px;" border="0" cellpadding="0" cellspacing="0">
+	        <tr>            
+	            <td style="vertical-align: bottom">
+	               	<table class="SecItemLabel" cellpadding="0" cellspacing="0">
+	                   	<tr>
+	                   		<td style="width:225px;vertical-align: bottom;">
+	                    		<div class="itemLabMarkIcon" style="float:right;margin-bottom: 4px"></div>
+	                    	</td>
+	                    	<td style="width:80px;vertical-align: bottom;">
+	                   			Please fill in the score of satisfaction level of the entire stay.
+	                   		</td>
+	                   	</tr>
+					</table>
+	       		</td>
+	       		<td style="vertical-align: bottom;width:150px">
+	                <table class="soldBorderTd"  style="width:100%; height:40px;text-align: right;" cellpadding="1" cellspacing="0">
+	                	<tr>
+							<td>&nbsp;</td>
+							<td rowspan="2" style="vertical-align: bottom;width:9px;">
+							<img src="{!URLFOR($Resource.reportFiles, 'img/slash.png')}" style="position:relative; left:0; top:0; z-index:0; width:8px;margin: 0; padding: 0"/>
+							</td>
+							<td style="width:35px;">&nbsp;</td>
+					    </tr>
+					    <tr>
+					    	<td style="vertical-align: bottom;"><span style="font-size: 9pt;">points</span></td>
+					    	<td nowrap="nowrap"  style="vertical-align: bottom;"><span style="font-size: 8pt">100&nbsp;</span></td>
+					    </tr>
+	                </table>
+	       		</td>     
+	        </tr>        
+	     </table>
+	     <table style="width: 100%;line-height: 70%;" border="0" cellpadding="0" cellspacing="0">
+	        <tr>
+	        	<td style="text-align: right;">
+	        		<span style="font-size:7pt;"> ＊ For further details on our hotel policy please see our homepage.</span>
+	        	</td>
+	        </tr>        
+	     </table>
+	     <table style="width:100%">
+	     	<tr style="height:1px">
+				<td  colspan="5" class="line"></td>			
+	   		</tr>
+	   	 </table>
+	   	 <table style="font-size: 9pt;width: 100%;">
+	   	 	<tr>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			Date
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	    	 	<td style="width:200px;">
+					<apex:outputtext value="{0,date,M/d/yyyy}">
+		      		<apex:param value="{!leadInfo.EntryTime__c}"/>
+		    		</apex:outputtext>
+	   	 		</td>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			Room
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	   	 		<td>
+	   	 			<apex:outputText value="{!leadInfo.Rroom__r.Name}"/>
+	   	 		</td>
+	   	 	</tr>
+	   	 	<tr>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td>
+	                   			Name
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	    	 	<td>
+	   	 			<apex:outputText value="{!contactInfo.Name}"/>
+	                <span style="margin-left:10px">Mr./Ms.</span>
+	   	 		</td>
+	   	 		<td style="width:60px;">
+	               	<table class="EndSecItemValue" > 
+	                   	<tr>
+	                   		<td style="width:10px">
+	                    		<div class="itemLabMarkIcon"></div>
+	                    	</td>
+	                    	<td style="white-space: nowrap;">
+	                   			E-mail Address
+	                   		</td>
+	                   	</tr>
+					</table>
+	   	 		</td>
+	   	 		<td width="3px;">:</td>
+	   	 		<td>
+	   	 			<apex:outputText value="{!contactInfo.email}"/>
+	   	 		</td>
+	   	 	</tr>
+			<tr>
+				<td style="text-align: right;" colspan="6">
+	                <table class="soldBorderTd" style="float: right;margin-right: 4px">
+	                	<tr>
+							<td style="width:40px;height:40px"></td>				
+					    </tr>
+	                </table>
+				</td>
+			</tr>
+	     </table>
+     </apex:outputLabel>
+</apex:outputLabel>
+<apex:outputLabel rendered="{!if(oXmlDef.begKey =='','true','false')}">
+<!-- 2019/02/28 陣屋組織、アンケート出力の文言等のカスタマイズは可能機能対応 BY zyz END -->
+<apex:outputLabel rendered="{!oXmlDef.isNormalLayout}">
+<table style="width:100%;margin-top:2px;border-spacing: 0px;">
+
+		<colgroup width="160px;"></colgroup>
+		<colgroup width="4px;"></colgroup>
+		<colgroup width="60px;"></colgroup>
+		<colgroup width="40px;"></colgroup>
+		<colgroup width="60px;"></colgroup>
+		<colgroup width="40px;"></colgroup>
+		<colgroup width="100px;"></colgroup>
+		
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- ご予約についてお伺いいたします。 -->{!$Label.MSG_012_0429} 
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- HPのみやすさ・料金プランわかりやすさ -->{!$Label.MSG_012_0430}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td style="white-space: nowrap;"><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td style="white-space: nowrap;"><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        <!-- SECTION1-2 -->
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 電話・メールのスタッフ対応 -->{!$Label.MSG_012_0436}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+							<!-- お出迎え・チェックイン・チェックアウトについてお伺いいたします。 -->{!$Label.MSG_012_0437}
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+							<!-- お出迎えのスタッフ対応 -->{!$Label.MSG_012_0438}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 館内案内の対応 -->{!$Label.MSG_012_0439}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- ご滞在中のスタッフ対応 -->{!$Label.MSG_012_0440}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- チェックアウト時のスタッフ対応 -->{!$Label.MSG_012_0441}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <!-- SECTION3 -->
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- お食事についてお伺いいたします。 -->{!$Label.MSG_012_0442}
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        
+        <tr>
+       		<td rowspan="2">
+               	<table class="SecItemLabel"> 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="width:127px;">
+                   			<!-- ご夕食について -->{!$Label.MSG_012_0443}
+                   		</td>
+                   		<td style="margin-right: 40px">
+                   			<!-- ・お食事の「質」 -->{!$Label.MSG_012_0444}
+                   		</td>
+                   		<td style="width:20px;"></td>
+                   	</tr>
+                   	<tr>
+                   		<td colspan="2"></td>
+                    	<td><!-- ・お食事の「量」 -->{!$Label.MSG_012_0445}</td>
+                    	<td style="width:20px;"></td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	 
+        
+        </tr>
+        <tr>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+
+               	<table class="SecItemValue" style="line-height: 50%"> 
+                   	<tr>
+                   		<td style="width:10px;" rowspan="2"><div class="itemValMarkIcon"></div></td>
+                    	<td ><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+                   	<tr>
+                    	<td ><span style="font-size: 8px"><!-- (多い・少ない) -->{!$Label.MSG_012_0446}</span></td>
+                   	</tr>
+				</table>
+            </td>	
+        </tr>
+        
+
+        
+        <tr>
+       		<td rowspan="2">
+               	<table class="SecItemLabel"> 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="width:127px;">
+                   			<!-- ご朝食について -->{!$Label.MSG_012_0447}
+                   		</td>
+                   		<td style="margin-right: 40px">
+                   			<!-- ・お食事の「質」 -->{!$Label.MSG_012_0444}
+                   		</td>
+                   		<td style="width:20px;"></td>
+                   	</tr>
+                   	<tr>
+                   		<td colspan="2"></td>
+                    	<td><!-- ・お食事の「量」 -->{!$Label.MSG_012_0445}</td>
+                    	<td style="width:20px;"></td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	 
+        
+        </tr>
+        <tr>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" style="line-height: 50%"> 
+                   	<tr>
+                   		<td style="width:10px;" rowspan="2"><div class="itemValMarkIcon"></div></td>
+                    	<td ><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+                   	<tr>
+                    	<td ><span style="font-size: 8px"><!-- (多い・少ない) -->{!$Label.MSG_012_0446}</span></td>
+                   	</tr>
+				</table>
+            </td>	
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- ドリンクメニュー -->{!$Label.MSG_012_0448}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- スタッフの対応 -->{!$Label.MSG_012_0449}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 施設・サービスについてお伺いいたします。 -->{!$Label.MSG_012_0450}
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- お食事場所の施設・雰囲気 -->{!$Label.MSG_012_0451}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 露天風呂・大浴場の施設・雰囲気 -->{!$Label.MSG_012_0452}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 客室の施設・雰囲気 -->{!$Label.MSG_012_0453}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 備品・アメニティ -->{!$Label.MSG_012_0454}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- 清掃の状態 -->{!$Label.MSG_012_0455}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に満足 -->{!$Label.MSG_012_0431}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 満足 -->{!$Label.MSG_012_0432}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- どちらともいえない -->{!$Label.MSG_012_0433}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 不満 -->{!$Label.MSG_012_0434}</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td><!-- 非常に不満 -->{!$Label.MSG_012_0435}</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- その他、ご意見、ご感想がございましたらご記入ください。 -->{!$Label.MSG_012_0456}
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+ 		<tr >
+            <td colspan="7" style="line-height:23px">   
+            	&nbsp;            
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>            
+            <td style="vertical-align: bottom">
+               	<table class="SecItemLabel" cellpadding="0" cellspacing="0">
+                   	<tr>
+                   		<td style="width:225px;vertical-align: bottom;">
+                    		<div class="itemLabMarkIcon" style="float:right;margin-bottom: 4px"></div>
+                    	</td>
+                    	<td style="width:80px;vertical-align: bottom;">
+                   			<!-- 今回のご滞在全体の満足度の採点をお願いいたします。 -->{!$Label.MSG_012_0457}
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td style="vertical-align: bottom;width:150px">
+                <table class="soldBorderTd"  style="width:100%; height:40px;text-align: right;" cellpadding="1" cellspacing="0">
+                	<tr>
+						<td>&nbsp;</td>
+						<td rowspan="2" style="vertical-align: bottom;width:9px;">
+						<img src="{!URLFOR($Resource.reportFiles, 'img/slash.png')}" style="position:relative; left:0; top:0; z-index:0; width:8px;margin: 0; padding: 0"/>
+						</td>
+						<td style="width:35px;">&nbsp;</td>
+				    </tr>
+				    <tr>
+				    	<td style="vertical-align: bottom;"><span style="font-size: 9pt;"><!-- 点 -->{!$Label.MSG_012_0458}</span></td>
+				    	<td nowrap="nowrap"  style="vertical-align: bottom;"><span style="font-size: 8pt"><!-- 100 点 -->{!$Label.MSG_012_0459}&nbsp;</span></td>
+				    </tr>
+                </table>
+       		</td>     
+        </tr>        
+     </table>
+     <table style="width: 100%;line-height: 70%;" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+        	<td style="text-align: right;">
+        		<span style="font-size:7pt;"><!-- ＊ プライバシーポリシーの詳細については当館のホームページをご覧ください -->{!$Label.MSG_012_0460}</span>
+        	</td>
+        </tr>        
+     </table>
+     
+     <table style="width:100%">
+     	<tr style="height:1px">
+			<td  colspan="5" class="line"></td>			
+   		</tr>
+   	 </table>
+   	 <!--  -->
+   	 <table style="font-size: 9pt;width: 100%;">
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- ご宿泊日 -->{!$Label.MSG_012_0461}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td style="width:200px;">
+    	 		<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+   	 			<!--  <apex:outputtext value="{0,date,yyyy/MM/dd}">-->
+   	 			<apex:outputtext value="{0,date,{!dateFormat}}">
+   	 			<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+	      		<apex:param value="{!leadInfo.EntryTime__c}"/>
+	    		</apex:outputtext>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- お部屋 -->{!$Label.MSG_012_0462}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!leadInfo.Rroom__r.Name}"/>
+   	 		</td>
+   	 	</tr>
+
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			<!-- お名前 -->{!$Label.MSG_012_0463}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td>
+   	 			<apex:outputText value="{!contactInfo.Name}"/>
+                <span style="margin-left:10px"><!-- 様 -->{!$Label.MSG_012_0464}</span>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="white-space: nowrap;">
+                   			<!-- メールアドレス -->{!$Label.MSG_012_0465}
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!contactInfo.email}"/>
+   	 		</td>
+   	 	</tr>
+		<tr>
+			<td style="text-align: right;" colspan="6">
+                <table class="soldBorderTd" style="float: right;margin-right: 4px">
+                	<tr>
+						<td style="width:40px;height:40px"></td>				
+				    </tr>
+                </table>
+			</td>
+		</tr>
+     </table>
+</apex:outputLabel>
+<!-- zyz BEGIN 日 -->
+<apex:outputLabel rendered="{!oXmlDef.isJpLayout}">
+<table style="width:100%;margin-top:2px;border-spacing: 0px;">
+
+		<colgroup width="160px;"></colgroup>
+		<colgroup width="4px;"></colgroup>
+		<colgroup width="60px;"></colgroup>
+		<colgroup width="40px;"></colgroup>
+		<colgroup width="60px;"></colgroup>
+		<colgroup width="40px;"></colgroup>
+		<colgroup width="100px;"></colgroup>
+		
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			ご予約についてお伺いいたします。
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			HPのみやすさ・料金プランわかりやすさ
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        <!-- SECTION1-2 -->
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			電話・メールのスタッフ対応
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			お出迎え・チェックイン・チェックアウトについてお伺いいたします。
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			お出迎えのスタッフ対応
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			館内案内の対応
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			ご滞在中のスタッフ対応
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			チェックアウト時のスタッフ対応
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <!-- SECTION3 -->
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			お食事についてお伺いいたします。
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        
+        <tr>
+       		<td rowspan="2">
+               	<table class="SecItemLabel"> 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			ご夕食について
+                   		</td>
+                   		<td style="margin-right: 40px">
+                   			・お食事の「質」
+                   		</td>
+                   		<td style="width:20px;"></td>
+                   	</tr>
+                   	<tr>
+                   		<td colspan="2"></td>
+                    	<td>・お食事の「量」</td>
+                    	<td style="width:20px;"></td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	 
+        
+        </tr>
+        <tr>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+
+               	<table class="SecItemValue" style="line-height: 50%"> 
+                   	<tr>
+                   		<td style="width:10px;" rowspan="2"><div class="itemValMarkIcon"></div></td>
+                    	<td >非常に不満</td>
+                   	</tr>
+                   	<tr>
+                    	<td ><span style="font-size: 8px">(多い・少ない)</span></td>
+                   	</tr>
+				</table>
+            </td>	
+        </tr>
+        
+
+        
+        <tr>
+       		<td rowspan="2">
+               	<table class="SecItemLabel"> 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			ご朝食について
+                   		</td>
+                   		<td style="margin-right: 40px">
+                   			・お食事の「質」
+                   		</td>
+                   		<td style="width:20px;"></td>
+                   	</tr>
+                   	<tr>
+                   		<td colspan="2"></td>
+                    	<td>・お食事の「量」</td>
+                    	<td style="width:20px;"></td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	 
+        
+        </tr>
+        <tr>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" style="line-height: 50%"> 
+                   	<tr>
+                   		<td style="width:10px;" rowspan="2"><div class="itemValMarkIcon"></div></td>
+                    	<td >非常に不満</td>
+                   	</tr>
+                   	<tr>
+                    	<td ><span style="font-size: 8px">(多い・少ない)</span></td>
+                   	</tr>
+				</table>
+            </td>	
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			ドリンクメニュー
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			スタッフの対応
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			施設・サービスについてお伺いいたします。
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			お食事場所の施設・雰囲気
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			露天風呂・大浴場の施設・雰囲気
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			客室の施設・雰囲気
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			備品・アメニティ
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			清掃の状態
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>満足</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>どちらともいえない</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>不満</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>非常に不満</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			その他、ご意見、ご感想がございましたらご記入ください。
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+ 		<tr >
+            <td colspan="7" style="line-height:23px">   
+            	&nbsp;            
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>            
+            <td style="vertical-align: bottom">
+               	<table class="SecItemLabel" cellpadding="0" cellspacing="0">
+                   	<tr>
+                   		<td style="width:225px;vertical-align: bottom;">
+                    		<div class="itemLabMarkIcon" style="float:right;margin-bottom: 4px"></div>
+                    	</td>
+                    	<td style="width:80px;vertical-align: bottom;">
+                   			今回のご滞在全体の満足度の採点をお願いいたします。
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td style="vertical-align: bottom;width:150px">
+                <table class="soldBorderTd"  style="width:100%; height:40px;text-align: right;" cellpadding="1" cellspacing="0">
+                	<tr>
+						<td>&nbsp;</td>
+						<td rowspan="2" style="vertical-align: bottom;width:9px;">
+						<img src="{!URLFOR($Resource.reportFiles, 'img/slash.png')}" style="position:relative; left:0; top:0; z-index:0; width:8px;margin: 0; padding: 0"/>
+						</td>
+						<td style="width:35px;">&nbsp;</td>
+				    </tr>
+				    <tr>
+				    	<td style="vertical-align: bottom;"><span style="font-size: 9pt;">点</span></td>
+				    	<td nowrap="nowrap"  style="vertical-align: bottom;"><span style="font-size: 8pt">100 点&nbsp;</span></td>
+				    </tr>
+                </table>
+       		</td>     
+        </tr>        
+     </table>
+     <table style="width: 100%;line-height: 70%;" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+        	<td style="text-align: right;">
+        		<span style="font-size:7pt;">＊ プライバシーポリシーの詳細については当館のホームページをご覧ください</span>
+        	</td>
+        </tr>        
+     </table>
+     
+     <table style="width:100%">
+     	<tr style="height:1px">
+			<td  colspan="5" class="line"></td>			
+   		</tr>
+   	 </table>
+   	 <!--  -->
+   	 <table style="font-size: 9pt;width: 100%;">
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			ご宿泊日
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td style="width:200px;">
+   	 			<apex:outputtext value="{0,date,yyyy/MM/dd}">
+	      		<apex:param value="{!leadInfo.EntryTime__c}"/>
+	    		</apex:outputtext>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			お部屋
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!leadInfo.Rroom__r.Name}"/>
+   	 		</td>
+   	 	</tr>
+
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			お名前
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td>
+   	 			<apex:outputText value="{!contactInfo.Name}"/>
+                <span style="margin-left:10px">様</span>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			メールアドレス
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!contactInfo.email}"/>
+   	 		</td>
+   	 	</tr>
+		<tr>
+			<td style="text-align: right;" colspan="6">
+                <table class="soldBorderTd" style="float: right;margin-right: 4px">
+                	<tr>
+						<td style="width:40px;height:40px"></td>				
+				    </tr>
+                </table>
+			</td>
+		</tr>
+     </table>
+</apex:outputLabel>
+<!-- zyz END -->
+<!-- zyz BEGIN 英 -->
+<apex:outputLabel rendered="{!oXmlDef.isEnLayout}">
+<table style="width:100%;margin-top:2px;border-spacing: 0px;">
+
+		<colgroup width="160px;"></colgroup>
+		<colgroup width="4px;"></colgroup>
+		<colgroup width="60px;"></colgroup>
+		<colgroup width="40px;"></colgroup>
+		<colgroup width="60px;"></colgroup>
+		<colgroup width="40px;"></colgroup>
+		<colgroup width="100px;"></colgroup>
+		
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Reservation
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Booking page is clear and easy to understand
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td style="white-space: nowrap;">Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td style="white-space: nowrap;">Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        <!-- SECTION1-2 -->
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Correspondence of Telephone and Email staff
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+							Welcome, Check-in, Check-out
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+							Correspondence of staff during welcoming
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Correspondence of staff during hotel introduction
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Correspondence of staff during your stay
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Correspondence of staff during check-out time
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <!-- SECTION3 -->
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Dining
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        
+        <tr>
+       		<td rowspan="2">
+               	<table class="SecItemLabel"> 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="width:127px;">
+                   			Dinner
+                   		</td>
+                   		<td style="margin-right: 40px">
+                   			・Quality
+                   		</td>
+                   		<td style="width:20px;"></td>
+                   	</tr>
+                   	<tr>
+                   		<td colspan="2"></td>
+                    	<td>・Quantity</td>
+                    	<td style="width:20px;"></td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	 
+        
+        </tr>
+        <tr>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+
+               	<table class="SecItemValue" style="line-height: 50%"> 
+                   	<tr>
+                   		<td style="width:10px;" rowspan="2"><div class="itemValMarkIcon"></div></td>
+                    	<td >Extremely Dissatisfied</td>
+                   	</tr>
+                   	<tr>
+                    	<td ><span style="font-size: 8px"><!-- (多い・少ない) --></span></td>
+                   	</tr>
+				</table>
+            </td>	
+        </tr>
+        
+
+        
+        <tr>
+       		<td rowspan="2">
+               	<table class="SecItemLabel"> 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="width:127px;">
+                   			Breakfast
+                   		</td>
+                   		<td style="margin-right: 40px">
+                   			・Quality
+                   		</td>
+                   		<td style="width:20px;"></td>
+                   	</tr>
+                   	<tr>
+                   		<td colspan="2"></td>
+                    	<td>・Quantity</td>
+                    	<td style="width:20px;"></td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	 
+        
+        </tr>
+        <tr>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" style="line-height: 50%"> 
+                   	<tr>
+                   		<td style="width:10px;" rowspan="2"><div class="itemValMarkIcon"></div></td>
+                    	<td >Extremely Dissatisfied</td>
+                   	</tr>
+                   	<tr>
+                    	<td ><span style="font-size: 8px"><!-- (多い・少ない) --></span></td>
+                   	</tr>
+				</table>
+            </td>	
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Drink Menu
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Correspondence of staff
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Quality of FACILITIES (overall)
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Dining Facilities and Atmosphere
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Outdoor open-air Bath, Main Spa Bath Atmosphere
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Room Facilities and Atmosphere
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Furnishing and Amenities
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+       		<td >
+               	<table class="SecItemLabel" > 
+                   	<tr>
+                   		<td style="width:10px;">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Cleanliness
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td></td>
+            <td >
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td > 
+               	<table class="SecItemValue" >
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Satisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Neither</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	
+            <td >
+               	<table class="SecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px;"><div class="itemValMarkIcon"></div></td>
+                    	<td>Extremely Dissatisfied</td>
+                   	</tr>
+				</table>
+            </td>	           
+        </tr>
+        
+        <tr>
+            <td colspan="7" >
+               	<table class="SecTitle" > 
+                   	<tr>
+                   		<td style="width:14px;">
+                    		<div class="titleMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Others Comments/Suggestions
+                   		</td>
+                   	</tr>
+				</table>
+            </td>
+        </tr>
+ 		<tr >
+            <td colspan="7" style="line-height:23px">   
+            	&nbsp;            
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" style="line-height:10px">   
+            	&nbsp;
+                <hr size="1" color="#CCCCCC"/>
+            </td>
+        </tr>
+    </table>
+    <table style="width:100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>            
+            <td style="vertical-align: bottom">
+               	<table class="SecItemLabel" cellpadding="0" cellspacing="0">
+                   	<tr>
+                   		<td style="width:225px;vertical-align: bottom;">
+                    		<div class="itemLabMarkIcon" style="float:right;margin-bottom: 4px"></div>
+                    	</td>
+                    	<td style="width:80px;vertical-align: bottom;">
+                   			Please fill in the score of satisfaction level of the entire stay.
+                   		</td>
+                   	</tr>
+				</table>
+       		</td>
+       		<td style="vertical-align: bottom;width:150px">
+                <table class="soldBorderTd"  style="width:100%; height:40px;text-align: right;" cellpadding="1" cellspacing="0">
+                	<tr>
+						<td>&nbsp;</td>
+						<td rowspan="2" style="vertical-align: bottom;width:9px;">
+						<img src="{!URLFOR($Resource.reportFiles, 'img/slash.png')}" style="position:relative; left:0; top:0; z-index:0; width:8px;margin: 0; padding: 0"/>
+						</td>
+						<td style="width:35px;">&nbsp;</td>
+				    </tr>
+				    <tr>
+				    	<td style="vertical-align: bottom;"><span style="font-size: 9pt;">points</span></td>
+				    	<td nowrap="nowrap"  style="vertical-align: bottom;"><span style="font-size: 8pt">100&nbsp;</span></td>
+				    </tr>
+                </table>
+       		</td>     
+        </tr>        
+     </table>
+     <table style="width: 100%;line-height: 70%;" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+        	<td style="text-align: right;">
+        		<span style="font-size:7pt;"> ＊ For further details on our hotel policy please see our homepage.</span>
+        	</td>
+        </tr>        
+     </table>
+     
+     <table style="width:100%">
+     	<tr style="height:1px">
+			<td  colspan="5" class="line"></td>			
+   		</tr>
+   	 </table>
+   	 <!--  -->
+   	 <table style="font-size: 9pt;width: 100%;">
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Date
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td style="width:200px;">
+    	 		<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+   	 			<!-- <apex:outputtext value="{0,date,{!dateFormat}}">-->
+				<apex:outputtext value="{0,date,M/d/yyyy}">
+   	 			<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+	      		<apex:param value="{!leadInfo.EntryTime__c}"/>
+	    		</apex:outputtext>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Room
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!leadInfo.Rroom__r.Name}"/>
+   	 		</td>
+   	 	</tr>
+
+   	 	<tr>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td>
+                   			Name
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+    	 	<td>
+   	 			<apex:outputText value="{!contactInfo.Name}"/>
+                <span style="margin-left:10px">Mr./Ms.</span>
+   	 		</td>
+   	 		<td style="width:60px;">
+               	<table class="EndSecItemValue" > 
+                   	<tr>
+                   		<td style="width:10px">
+                    		<div class="itemLabMarkIcon"></div>
+                    	</td>
+                    	<td style="white-space: nowrap;">
+                   			E-mail Address
+                   		</td>
+                   	</tr>
+				</table>
+   	 		</td>
+   	 		<td width="3px;">:</td>
+   	 		<td>
+   	 			<apex:outputText value="{!contactInfo.email}"/>
+   	 		</td>
+   	 	</tr>
+		<tr>
+			<td style="text-align: right;" colspan="6">
+                <table class="soldBorderTd" style="float: right;margin-right: 4px">
+                	<tr>
+						<td style="width:40px;height:40px"></td>				
+				    </tr>
+                </table>
+			</td>
+		</tr>
+     </table>
+</apex:outputLabel>
+<!-- zyz END -->
+<!-- 2019/02/28 陣屋組織、アンケート出力の文言等のカスタマイズは可能機能対応 BY zyz BEGIN -->
+</apex:outputLabel>
+<!-- 2019/02/28 陣屋組織、アンケート出力の文言等のカスタマイズは可能機能対応 BY zyz END -->
+</body>
+</html>
+</apex:page>

@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<!--
+概要：PCA連携店舗別のCSV変換関連コードの定義
+書式：
+	<SHOP>	店舗別支払メディア情報定義可能
+		<SHOPCODE></SHOPCODE>				店舗コード
+		<PCA>								支払メニューの表示スタイル情報
+			<FREEE_LAYOUT>					FREEE連携出力モードの場合、CSV出力の勘定科目/勘定補助科目の列に、
+												コード/名を出力することを切り替え制御フラグ
+												1:会計科目コード/補助科目コードをCSVに出力する（デフォルト値)
+												2:会計科目名/補助科目名をCSVに出力する
+			<PROCESS_FILTER>				PCA/Freee連携出力の場合、出力内容の個別処理機能の定義 
+				<KANJYONAME_NLASTCHAR_DEL>		勘定科目出力内容に対して、後ろからN文字を削除処理機能
+												該当タグは空白ORタグなしの場合、削除処理なし
+			<UTIWAKE_OUTPUT>				Freee出力の売上仕訳のカード手数料は内訳明細として、出力制御情報の定義
+				<ISOUPUT>						内訳明細出力するがどうか制御フラグ：TRUE：出力、FALSE：出力なし(デフォルト値)
+                <CARD_TESURYO>					カード手数料の出力用設定情報
+                	<PAYCHARGEFLG_REQUIRE>		カード手数料内訳として、出力する場合、該当カード関連の取引先の手数料の「手数料支払」ステータスチェックするがどうか制御
+            										TRUE:「手数料支払」はTRUEのみ、内訳明細を出力
+            										FALSE:「手数料支払」はFALSEのみ、内訳明細を出力(デフォルト値) 
+            										空白:「手数料支払」はステータスと関係なし、手数料定義すると、常に内訳明細を出力する
+                	<KANJOCODE> 				カード手数料の勘定科目のSeq#
+                <AGT_TESURYO>					販売手数料内訳の出力要設定情報
+                	<PAYCHARGEFLG_REQUIRE>		販売手数料内訳として、出力する場合、該当販売会社の手数料の「手数料支払」ステータスチェックするがどうか制御
+            										TRUE:「手数料支払」はTRUEのみ、内訳明細を出力
+            										FALSE:「手数料支払」はFALSEのみ、内訳明細を出力(デフォルト値) 
+            										空白:「手数料支払」はステータスと関係なし、手数料定義すると、常に内訳明細を出力する
+                	<KANJOCODE>					販売手数料の勘定科目のSeq#
+
+			<PRICEZERO_OUTPUT>				明細金額は０円データはCSV出力するがどうか制御フラグ、デフォルトは出力しない
+Ver16.49 NEW ADD
+			<ROLLUP_PUR_OUTPUT>				仕入明細に対して、ロールアップ処理するがどうか制御フラグ、デフォルトはロールアップしない「TRUE:ロールアップ処理する、FALSE：ロールアップ処理しない」
+Ver16.60 NEW ADD
+			<POINT_PROCESS>					金額に小数点を含めるの機能対応有効(TRUE)・無効(FALSE)（省略が有効）	
+2017/08/18 NEW ADD 
+            <SERVICE_OUTPUT>                サービス料金額は別行目に出力する・しないフラグ
+                                            TRUE：サビース料金額は別行目に出力する
+                                            FALSE：サビース料金額は別行目に出力しない(デフォルト値)、定義省略可能
+
+			<PCA_FIELD>						店舗別のPCA連携の可変項目の定義情報
+											各項目定義はサンプルデータのコメントを参照ください
+			</PCA_FIELD>
+			<PCA_TAX>						仮受消費税個別定義情報
+				<KANJOCODE>3350</KANJOCODE> 仮受消費税を出力する場合、関連の会計科目のSeq#定義する
+			</PCA_TAX>	
+			<PCA_PYA_TAX>					仮払消費税個別定義情報
+				<KANJOCODE>3351</KANJOCODE>	仮払消費税を出力する場合、関連の会計科目のSeq#定義する
+			</PCA_PYA_TAX>	
+			<PCA_ADVPAY_L>						前受金データを出力する場合、関連の[借方]の会計科目のSeq#定義する
+				<KANJOCODE>3241003</KANJOCODE>	関連の会計科目のSeq#定義する
+			</PCA_ADVPAY_L> 
+			<PCA_ADVPAY_R>						前受金データを出力する場合、関連の[貸方]の会計科目のSeq#定義する
+				<KANJOCODE>3241003</KANJOCODE>	関連の会計科目のSeq#定義する
+			</PCA_ADVPAY_R> 
+            <PCA_REFUND_R> 						返金関連の[貸方]定義情報
+                <KANJOCODE>3241001</KANJOCODE>	関連の会計科目Seq#定義
+            </PCA_REFUND_R>
+2017/08/18 NEW ADD 
+            <PCA_SERVICE_R>                 サビース料個別定義情報
+                <KANJOCODE>5113</KANJOCODE> サビース料を出力する場合、関連の会計科目のSeq#定義する
+            </PCA_SERVICE_R>
+            
+		</PCA>
+		<CASH>								入金、出金科目と会計科目のMapping定義情報、
+											入出金の関連情報はPCA連携対象外したい場合、該当タグは削除すると、PCA連携対象外になる
+			<CASH_INPUT>					入金
+				<CONVERT>
+					<KEMOKU>内金</KEMOKU>				入金の科目の選択リスト値
+					<I_KANJOCODE>1110</I_KANJOCODE> 	借方の会計科目のSeq#
+					<O_KANJOCODE>3241002</O_KANJOCODE> 	貸方の会計科目のSeq#
+				</CONVERT>
+			</CASH_INPUT>
+			<CASH_OUTPUT>					出金
+				<CONVERT>
+					<KEMOKU>交通費</KEMOKU>
+					<I_KANJOCODE>1841</I_KANJOCODE>		借方の会計科目のSeq#
+					<O_KANJOCODE>1110</O_KANJOCODE>		貸方の会計科目のSeq#
+				</CONVERT>
+			</CASH_OUTPUT>
+		</CASH>
+		>>>>>>>
+		仕入の種別の勘定科目を変更する場合：タグ　P_TYPEのTYPENAME内容と一致の行目のKANJOCODEに勘定科目のSeq#値を設定する
+		仕入の科目の勘定科目を変更する場合：タグ　P_KAMOKUのTYPENAME内容と一致の行目のKANJOCODEに勘定科目のSeq#値を設定する
+        <PURCHASE>										仕訳の種別、科目の定義値により、会計科目のマッピング定義情報
+        	<P_TYPE NOTAXKBN_KEY="非課税">				仕入の種目項目の会計科目のマッピング
+        				NOTAXKBN_KEY					NOTAXKBN_KEY：仕入入力画面に、税対象外のチェックボックスを自動チェックする・しない機能関連の設定
+        												該当設定値は非課税の判断キーワードとして、定義する、会計科目の借税区分は該当キーワードの設定値と比較して、一致すると、
+        												該当科目の課税区分は「非課税」とする、仕入入力画面の「種別」選択値は関連の科目の借税区分は「非課税」の場合、仕入入力画面の税対象外を自動チェックされる
+        												例：仕入入力画面の種別「租税公課」は科目「租税公課」とマッピングする:　該当科目「租税公課」の借税区分：B4   
+        													XMLの「NOTAXKBN_KEY="B4"」を設定すると、該当科目の課税区分は「非課税」と判定する、其の場合、該当種別「租税公課」を選択すると、
+        													「税対象外」チェックボックスを自動チェックされる
+                <CONVERT>								種目項目と会計科目のマッピングルール
+                    <TYPENAME>                              支払の「種別」の選択リスト値
+                    <KANJOCODE>                             該当支払の「種別」の選択値はマッピングしたいの会計科目Seq#
+                    <KANJOCODE_TAXKBN>						借方税区分指定可能、指定しない場合、勘定科目の借方税区分から出力する
+                    <KANJOCODE_R>                           貸方の会計科目Seq#、該当科目設定内容により、仕訳の貸方会計科目情報を出力する、定義しないと、仕入の「科目」選択値により、貸方の会計科目情報を出力する
+                    <KANJOCODE_TAXKBN_R>					貸方税区分指定可能、指定しない場合、勘定科目の貸方税区分から出力する
+                    <KANJOCODE_R_DESCRIPT>                  貸方の会計科目の説明
+        	<P_KAMOKU>									仕入の種別項目の会計科目のマッピング
+                <CONVERT>								種別項目と会計科目のマッピングルール
+                    <TYPENAME>							仕入の種別項目の選択リスト値
+                    <KANJOCODE>1110</KANJOCODE> 		会計科目Seq#
+		<MEDIA>											売上の仕訳出力場合、会計支払のカード種別、金券種別の選択リスト定義値と会計科目のSeq#をマッピングする、
+															該当マッピングにより、支払メデイアの補助コードを決める
+			<CARD>										会計支払のカード種別の選択リスト値と会計科目のSeq#のマッピング定義情報
+				<CONVERT>
+					<CARDNAME>VISA</CARDNAME>			会計支払のカード種別の選択リスト定義情報
+					<KANJOCODE>1841008</KANJOCODE> 		会計科目Seq#
+				</CONVERT>
+			</CARD>
+			<KINKEN>									会計支払の金券種別の選択リスト値と会計科目のSeq#のマッピング定義情報
+				<CONVERT>
+					<KINKENNAME>楽天ポイント</KINKENNAME>	会計支払の金券種別の選択リスト値定義情報
+					<KANJOCODE>5210011</KANJOCODE>		会計科目Seq#
+				</CONVERT>
+			</KINKEN>
+		</MEDIA>
+	</SHOP>
+2018/02/28 新規追加
+    MEMO_CUSTOM:    仕訳摘要欄の出力内容をカスタマイズ用
+2018/10/31 新規追加 
+	MEMO_PURCHASE:  仕入摘要欄の出力内容をカスタマイズ用
+2018/11/15 新規追加
+	ROLLUP_SUBKAMOKU_OUTPUT:  ROLLUP機能場合、補助科目まで明細出力する、しないフラグ
+					TRUE:補助科目別集計を行う
+					FALSE:科目別集計を行う、補助科目は空白(デフォルト値)
+	ISINCTAXFLG:  仕訳明細は税込金額出力、しない切替フラグ
+					TRUE:仕訳明細は税込金額出力する
+					FALSE:仕訳明細は税抜き金額出力＋消費税別出力する（デフォルト値)
+2018/11/30 新規追加
+	CASH→CASH_INPUT属性「KAMOKUOUT」新規追加、該当属性はTRUEに設定されている場合、入金の科目ごとに明細出力する（会計科目名じゃなく、入金画面設定の科目値そのまま出力）
+	CASH→CASH_OUTPUT属性「KAMOKUOUT」新規追加、該当属性はTRUEに設定されている場合、出金の科目ごとに明細出力する（会計科目名じゃなく、出金画面設定の科目値そのまま出力）
+2019/03/15 新規追加
+	PCA→SPECIALTAX_OUTPUT	宿泊税金額は別行目に出力する・しないフラグ
+                   TRUE：	宿泊税金額は別行目に出力する
+                   FALSE：	宿泊税金額は別行目に出力しない(デフォルト値)、定義省略可能
+	PCA→PCA_SPECIALTAX_R	宿泊税金額は別行目に出力する場合、関連の[貸方]の会計科目のSeq#定義する
+		注：「SPECIALTAX_OUTPUT」は「TRUE」に設定される前提
+		<PCA_SPECIALTAX_R>					宿泊税個別定義情報
+		    <KANJOCODE>5113</KANJOCODE> 	宿泊税を出力する場合、関連の会計科目のSeq#定義する
+		</PCA_SPECIALTAX_R>
+2019/05/15 新規追加
+	CASH→CASH_INPUT属性「HOJYO_ACCOUNT」新規追加、該当属性はTRUEに設定されている場合、貸方の補助科目名は入金画面の取引先項目名を優先出力、取引先を未設定場合、お客様名を出力する
+	CASH→CASH_OUTPUT属性「HOJYO_ACCOUNT」新規追加、該当属性はTRUEに設定されている場合、貸方の補助科目名は出金画面の取引先項目名を優先出力、取引先を未設定場合、お客様名を出力する
+2019/09/25 新規追加 (軽減税率により、消費税明細行が分ける出力機能対応）
+	①PCA->PCA_TAX->KANJOCODE->RATE 属性定義追加	
+	②PCA->PCA_PYA_TAX->KANJOCODE->RATE 属性定義追加
+	③PCA->PCA_SERVICE_R->KANJOCODE->RATE 属性定義追加
+	①：仮受消費税明細が税率により複数出力したい場合
+		例：８％と１０％明細混在、消費税明細行目が分ける出力したい
+		<PCA_TAX>
+			<KANJOCODE RATE="8">33501</KANJOCODE>
+			<KANJOCODE RATE="10">3350</KANJOCODE>
+		</PCA_TAX>	
+	②：仮払消費税明細が税率により複数出力したい場合
+		例：８％と１０％明細混在、消費税明細行目が分ける出力したい
+		<PCA_PYA_TAX>
+			<KANJOCODE RATE="8">33511</KANJOCODE>
+			<KANJOCODE RATE="10">3351</KANJOCODE>
+		</PCA_PYA_TAX>	
+	③：サビース料が別行目出力かつ税率により複数出力したい場合
+		例：８％と１０％明細混在、消費税明細行目が分ける出力したい
+		<PCA_SERVICE_R>
+			<KANJOCODE RATE="8">5113</KANJOCODE>
+			<KANJOCODE RATE="10">51131</KANJOCODE>
+		</PCA_SERVICE_R>
+2019/12/31 新規追加（仕入の出力も 8%と 10%でわけて会計科目を設定できるように改善対応）
+	①PURCHASE->P_TYPE->CONVERT->KANJOCODE->RATE 属性定義追加
+	②PURCHASE->P_TYPE->CONVERT->KANJOCODE_R->RATE 属性定義追加
+	③PURCHASE->P_KAMOKU->CONVERT->KANJOCODE->RATE 属性定義追加
+	④CASH->CASH_INPUT->CONVERT->I_KANJOCODE->RATE 属性定義追加
+	⑤CASH->CASH_INPUT->CONVERT->O_KANJOCODE->RATE 属性定義追加
+	⑥CASH->CASH_OUTPUT->CONVERT->I_KANJOCODE->RATE 属性定義追加
+	⑦CASH->CASH_OUTPUT->CONVERT->O_KANJOCODE->RATE 属性定義追加
+	①：画面の種別関連の勘定科目は税率により出力した場合
+	　　例：仕入明細種別が「材料仕入」の場合、借方の勘定科目は消費税率により、勘定科目別々出力定義する
+			消費税は8%場合、SEQが324の勘定科目を出力
+			消費税が10%場合、SEQが3241の勘定科目を出力
+		   上記種別「材料仕入」の貸方の勘定科目は消費税率により、勘定科目別々出力定義する
+			消費税は8%場合、SEQが521の勘定科目を出力
+			消費税が10%場合、SEQが5211の勘定科目を出力
+       	<P_TYPE>
+			<CONVERT>
+	            <TYPENAME>材料仕入</TYPENAME>
+	            <KANJOCODE RATE="8">324</KANJOCODE>
+	            <KANJOCODE RATE="10">3241</KANJOCODE>
+	            <KANJOCODE_R RATE="8">521</KANJOCODE>
+	            <KANJOCODE_R RATE="10">5211</KANJOCODE>
+			</CONVERT>
+       	</P_TYPE>
+	②：画面の科目関連の勘定科目は税率により出力した場合
+		例：仕入明細科目が「現金」の場合、貸方の勘定科目は消費税率により、勘定科目別々出力定義する
+			消費税は8%場合、SEQが111の勘定科目を出力
+			消費税が10%場合、SEQが1111の勘定科目を出力
+		注：下記定義しても、P_TYPE->P_TYPE->CONVERT->KANJOCODE_Rを定義される場合
+		　　該当仕入明細の貸方はP_TYPE->CONVERT->KANJOCODE_R定義の勘定科目を優先出力する
+		<P_KAMOKU>
+			<CONVERT>
+				<TYPENAME>現金</TYPENAME>
+				<KANJOCODE RATE="8">111</KANJOCODE>
+				<KANJOCODE RATE="10">1111</KANJOCODE>
+			</CONVERT>
+		</P_KAMOKU>
+2019/12/31 新規追加（税込出力の際、借方税額に”0”の設定値ではなく、その売上の税額を出力する）
+	PCA→TAX_SAMELINE_OUTPUT	税込出力の際、借方税額、貸方金額に”0”の設定値ではなく、その売上の税額を出力する、しない切替フラグ
+					TRUE:借方税額、貸方金額に売上の税額を出力する
+					FALSE:借方税額、貸方金額はXMLタグ「DEBCONSUMPTAX」「CRECONSUMPTAX」設定値で出力する　
+	注：「ISINCTAXFLG」タグを「TRUE」を設定される場合、該当タグの設定が無効になるため
+	　　タグ「TAX_SAMELINE_OUTPUT」有効したい場合、「ISINCTAXFLG」タグ値必ずFALSEに設定してください
+2020/02/06 freee連携時、連泊の支払を入れた際の挙動修正機能の有効化タグ新規追加
+	PCA→PCA_NEWMODE	連泊の支払明細出力モード変更設定タグ
+2020/12/04 連泊の支払を入れた際、前受金の残金は別明細として出力できるように改善対応
+	PCA→PCA_NEWMODE→AP_KANJOSEQ_R　前受金[貸方]会計科目Seq#定義用タグ新規追加
+-->
+	<SHOP>
+		<SHOPCODE>01</SHOPCODE>
+		<PCA>	<!-- PCA連携用項目変換定義情報 -->
+        	<FREEE_LAYOUT>2</FREEE_LAYOUT>				<!-- Freee出力機能に、１:会計科目コード、補助科目コードで出力、２は会計科目名、補助科目名で出力 -->
+			<UTIWAKE_OUTPUT>							<!-- Freee出力の売上仕訳のカード手数料は内訳明細として、出力制御情報の定義 -->
+				<ISOUPUT>FALSE</ISOUPUT>						<!-- 内訳明細出力するがどうか制御フラグ：TRUE：出力、FALSE：出力なし(デフォルト値) -->
+                <CARD_TESURYO>								<!-- カード手数料の出力用設定情報 -->
+                	<PAYCHARGEFLG_REQUIRE>FALSE</PAYCHARGEFLG_REQUIRE>	<!-- カード手数料内訳として、出力する場合、該当カード関連の取引先の手数料の「手数料支払」ステータスチェックするがどうか制御
+                																TRUE:「手数料支払」はTRUEのみ、内訳明細を出力
+                																FALSE:「手数料支払」はFALSEのみ、内訳明細を出力(デフォルト値) 
+                																空白:「手数料支払」はステータスと関係なし、手数料定義すると、常に内訳明細を出力する
+                																-->
+                	<KANJOCODE>427</KANJOCODE> 				<!-- カード手数料の勘定科目のSeq# -->
+                </CARD_TESURYO>
+                <AGT_TESURYO>								<!-- 販売手数料内訳の出力要設定情報 -->
+                	<PAYCHARGEFLG_REQUIRE>FALSE</PAYCHARGEFLG_REQUIRE>	<!-- 販売手数料内訳として、出力する場合、該当販売会社の手数料の「手数料支払」ステータスチェックするがどうか制御
+                																TRUE:「手数料支払」はTRUEのみ、内訳明細を出
+                																FALSE:「手数料支払」はFALSEのみ、内訳明細を出力(デフォルト値) 
+                																空白:「手数料支払」はステータスと関係なし、手数料定義すると、常に内訳明細を出力する
+                																-->
+                	<KANJOCODE>428</KANJOCODE> 				<!-- 販売手数料の勘定科目のSeq# -->
+                </AGT_TESURYO>
+			</UTIWAKE_OUTPUT>
+			<PRICEZERO_OUTPUT>FALSE</PRICEZERO_OUTPUT>	<!-- 明細金額は０円データはCSV出力するがどうか制御フラグ、デフォルトは出力しない -->
+			<ROLLUP_PUR_OUTPUT>FALSE</ROLLUP_PUR_OUTPUT>	<!-- 仕入明細に対して、ROLLUP処理する、しない、デフォルトは処理なし、明細のまま出力する（FALSE) -->
+			<PROCESS_FILTER>							<!-- PCA/Freee連携出力の場合、出力内容の個別処理機能の定義 -->
+				<KANJYONAME_NLASTCHAR_DEL>0</KANJYONAME_NLASTCHAR_DEL>	<!-- 勘定科目名（借方、貸し方) 出力の場合、最後の後ろN文字を削除して、出力を行う -->
+			</PROCESS_FILTER>
+			<!-- <POINT_PROCESS>TRUE</POINT_PROCESS> -->		<!-- 金額に小数点含めてる機能対応有効・無効(TRUE/FALSE)（デフォルト値：有効） -->
+			<!-- <SERVICE_OUTPUT>TRUE</SERVICE_OUTPUT> -->      <!-- サービス料金額は別行目に出力する・しないフラグ -->
+			<ROLLUP_SUBKAMOKU_OUTPUT>FALSE</ROLLUP_SUBKAMOKU_OUTPUT><!-- ROLLUP機能場合、補助科目まで明細出力する、しないフラグ -->
+			<ISINCTAXFLG>FALSE</ISINCTAXFLG><!-- 仕訳明細は税込金額出力、しない切替フラグ -->
+			<SPECIALTAX_OUTPUT>FALSE</SPECIALTAX_OUTPUT> <!-- 宿泊税金額は別行目に出力する・しないフラグ -->
+			<TAX_SAMELINE_OUTPUT>FALSE</TAX_SAMELINE_OUTPUT><!-- 仕訳明細の税額は借方税額、貸方税額に出力する、しない切替フラグ -->
+			<PCA_FIELD>	<!-- PCA連携のXML定義情報 -->
+				<VER>#2</VER>
+				<!-- 伝票番号(開始番号) 店舗単位で、伝票開始番号は別々で定義を行う、1会計1伝票番号で出力する -->
+				<STARTNO>6001</STARTNO>
+				<!-- 計算区分  -->
+				<CALCULATIONKBN>0</CALCULATIONKBN>
+				<!-- 仕訳区分  -->
+				<JOURNALKBN>1</JOURNALKBN>
+				<!-- 管理会計仕訳区分 -->
+				<MANAGEACCJOUKBN>0</MANAGEACCJOUKBN>
+				<!-- 借方部門コード 店舗単位で、部門コードは別々で定義を行う -->
+				<DEBDEPARTCODE>180</DEBDEPARTCODE>
+				<!-- 借方消費税額 -->
+				<DEBCONSUMPTAX>0</DEBCONSUMPTAX>
+				<!-- 貸方部門コード 店舗単位で、部門コードは別々で定義を行う -->
+				<CREDEPARTCODE>180</CREDEPARTCODE>
+				<!-- 貸方消費税額 -->
+				<CRECONSUMPTAX>0</CRECONSUMPTAX>
+				<!-- 入力プログラム区分 -->
+				<INPUTPROGRAMKBN>HANYOU</INPUTPROGRAMKBN>
+                <!-- 非課税区分:該当タグを設定する場合、 
+                仕入側の貸方の税区分は下記文言で出力する
+                仕入の税対象外はTRUEの場合、借税区分も下記文言で出力する
+                売上仕訳出力機能に対して、支払金額の明細に対して、下記文言で税区分を出力する
+                例1：
+                借方                    貸方
+                現金　10800円(非課税)  　　売上　 10000円 (会計科目の貸税区分により）
+                                    　 　仮消費税 800円 (会計科目の貸税区分により）
+                例2:
+                借方                    貸方
+                前受付金 21600円（非課税） 前受付金（リスト残） 10800円（非課税）
+                                       売上   10000円 (会計科目の貸税区分により）       
+                                       仮消費税 800円 (会計科目の貸税区分により）           
+                -->
+                <NOTAXKBN>非課税</NOTAXKBN>
+			</PCA_FIELD>
+			<PCA_TAX>	<!-- 仮受消費税個別定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<KANJOCODE>3350</KANJOCODE>
+			</PCA_TAX>	
+			<PCA_PYA_TAX>	<!-- 仮払消費税個別定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<KANJOCODE>3351</KANJOCODE>
+			</PCA_PYA_TAX>	
+			<PCA_ADVPAY_L>	<!-- 前受金関連の[借方]定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<KANJOCODE>1521</KANJOCODE>
+			</PCA_ADVPAY_L> 
+			<PCA_ADVPAY_R>	<!-- 前受金関連の[貸方]定義情報 -->
+				<!-- 関連の会計科目Seq#定義 -->
+				<KANJOCODE>1521</KANJOCODE>
+			</PCA_ADVPAY_R> 
+            <PCA_REFUND_R> <!-- 返金関連の[貸方]定義情報 -->
+                <!-- 関連の会計科目Seq#定義 -->
+                <KANJOCODE>3241002</KANJOCODE>
+            </PCA_REFUND_R>
+            <PCA_SERVICE_R> <!-- サビース料関連の[貸方]定義情報 -->
+                <!-- 関連の会計科目Seq#定義 -->
+                <KANJOCODE>5113</KANJOCODE>
+            </PCA_SERVICE_R>
+            <PCA_SPECIALTAX_R> <!-- 宿泊税関連の[貸方]定義情報 -->
+                <!-- 宿泊税の会計科目Seq#定義 -->
+                <KANJOCODE>1118</KANJOCODE>
+            </PCA_SPECIALTAX_R>
+            <PCA_NEWMODE>
+            	<ACTIVE>TRUE</ACTIVE><!-- 該当機能有効・無効フラグ（デフォルト：無効） -->
+            	<AP_KANJOSEQ_L>3241002</AP_KANJOSEQ_L>	<!-- 前受金[借方]会計科目Seq#定義(前受金の勘定科目のSEQ) -->
+            	<AP_KANJOSEQ_R>3241002</AP_KANJOSEQ_R>	<!-- 前受金[貸方]会計科目Seq#定義(前受金の勘定科目のSEQ) -->
+            	<DP_KANJOSEQ_L>1841002</DP_KANJOSEQ_L>	<!-- 売掛金[借方]会計科目Seq#定義(売掛金の勘定科目のSEQ) -->
+            	<AC_KANJOSEQ_R>15212</AC_KANJOSEQ_R>	<!-- 売掛金[貸方]会計科目Seq#定義(売掛金の勘定科目のSEQ) -->
+            </PCA_NEWMODE>
+		</PCA>
+
+		<CASH>		<!-- 入金、出金科目の選択リストの定義値と会計科目のSeq#をマッピングする -->
+			<CASH_INPUT KAMOKUOUT="FALSE" HOJYO_ACCOUNT="FALSE">					<!-- 入金 -->
+				<CONVERT>
+					<KEMOKU>売掛金</KEMOKU>
+					<I_KANJOCODE>1110</I_KANJOCODE> <!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>1521</O_KANJOCODE> <!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>仮受金 423</KEMOKU>
+					<I_KANJOCODE>2</I_KANJOCODE> <!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>225</O_KANJOCODE> <!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>申込預かり金 426</KEMOKU>
+					<I_KANJOCODE>2</I_KANJOCODE> <!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>222</O_KANJOCODE> <!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>飲料仕入高 704</KEMOKU>
+					<I_KANJOCODE>2</I_KANJOCODE> <!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>326</O_KANJOCODE> <!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>受取家賃 808</KEMOKU>
+					<I_KANJOCODE>2</I_KANJOCODE> <!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>320</O_KANJOCODE> <!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>その他収入 809</KEMOKU>
+					<I_KANJOCODE>2</I_KANJOCODE> <!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>321</O_KANJOCODE> <!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+			</CASH_INPUT>
+			<CASH_OUTPUT KAMOKUOUT="FALSE" HOJYO_ACCOUNT="FALSE">					<!-- 出金 -->
+				<CONVERT>
+					<KEMOKU>交通費</KEMOKU>
+					<I_KANJOCODE>1210</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>1110</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>立替金 166</KEMOKU>
+					<I_KANJOCODE>73</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>材料仕入高 702</KEMOKU>
+					<I_KANJOCODE>324</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>売店仕入高 703</KEMOKU>
+					<I_KANJOCODE>325</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>飲料仕入高 704</KEMOKU>
+					<I_KANJOCODE>326</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>室料経費 705</KEMOKU>
+					<I_KANJOCODE>327</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>ブライダル仕入 706</KEMOKU>
+					<I_KANJOCODE>328</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>雑給 723</KEMOKU>
+					<I_KANJOCODE>409</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>福利厚生費 727</KEMOKU>
+					<I_KANJOCODE>413</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>旅費交通費 728</KEMOKU>
+					<I_KANJOCODE>414</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>通信費 729</KEMOKU>
+					<I_KANJOCODE>415</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>接待交際費 731</KEMOKU>
+					<I_KANJOCODE>419</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>販売手数料 733</KEMOKU>
+					<I_KANJOCODE>421</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>修繕費 735</KEMOKU>
+					<I_KANJOCODE>423</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>消耗品費 737</KEMOKU>
+					<I_KANJOCODE>425</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>支払手数料　739</KEMOKU>
+					<I_KANJOCODE>427</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>広告宣伝費 741</KEMOKU>
+					<I_KANJOCODE>429</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>租税公課 742</KEMOKU>
+					<I_KANJOCODE>430</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>諸会費 743</KEMOKU>
+					<I_KANJOCODE>431</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>クリーニング費 753</KEMOKU>
+					<I_KANJOCODE>442</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>新聞図書費 754</KEMOKU>
+					<I_KANJOCODE>443</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>寄付金 756</KEMOKU>
+					<I_KANJOCODE>444</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>管理諸費 758</KEMOKU>
+					<I_KANJOCODE>446</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>車両関係費 761</KEMOKU>
+					<I_KANJOCODE>449</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>振込手数料等 763</KEMOKU>
+					<I_KANJOCODE>451</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>車代費用 779</KEMOKU>
+					<I_KANJOCODE>505</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+				<CONVERT>
+					<KEMOKU>旅館外注 780</KEMOKU>
+					<I_KANJOCODE>507</I_KANJOCODE>	<!-- 借方の会計科目->Seq#゙ -->
+					<O_KANJOCODE>2</O_KANJOCODE>	<!-- 貸方の会計科目->Seq#゙゙゙ -->
+				</CONVERT>
+			</CASH_OUTPUT>
+		</CASH>
+        
+        <PURCHASE>	<!-- 仕訳の種別、科目の定義値により、会計科目のマッピング定義情報 -->
+        	<!-- 仕入の種目項目の会計科目のマッピング -->
+        	<P_TYPE>
+                <CONVERT>
+                    <TYPENAME>材料仕入</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>324</KANJOCODE>   <!-- 会計科目Seq# -->
+                </CONVERT>
+                <CONVERT>
+                    <TYPENAME>売店仕入</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>325</KANJOCODE>   <!-- 会計科目Seq# -->
+                </CONVERT>
+                <CONVERT>
+                    <TYPENAME>飲料仕入</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>326</KANJOCODE>   <!-- 会計科目Seq# -->
+                </CONVERT>
+                <CONVERT>
+                    <TYPENAME>カード手数料</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>427</KANJOCODE>   <!-- 会計科目Seq# -->
+                    <KANJOCODE_R>521</KANJOCODE_R>
+                </CONVERT>  
+                <CONVERT>
+                    <TYPENAME>販売手数料</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>428</KANJOCODE>   <!-- 会計科目Seq# -->
+                    <KANJOCODE_R>521</KANJOCODE_R>
+                </CONVERT>      
+                <CONVERT>
+                    <TYPENAME>租税公課</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>600</KANJOCODE>   <!-- 会計科目Seq# -->
+                </CONVERT> 
+        	</P_TYPE>
+        	<!-- 仕入の科目項目の会計科目のマッピング -->
+        	<P_KAMOKU>
+                <CONVERT>
+                    <TYPENAME>現金</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>1110</KANJOCODE>   <!-- 会計科目Seq# -->
+                </CONVERT>
+                <CONVERT>
+                    <TYPENAME>買掛（月末振込）</TYPENAME>   <!-- 会計支払のカード種別の選択リスト定義情報 -->
+                    <KANJOCODE>1521</KANJOCODE>   <!-- 会計科目Seq# -->
+                </CONVERT>
+        	
+        	</P_KAMOKU>
+        </PURCHASE>
+        
+        <!-- 2018/02/28 新規追加
+        MEMO_CUSTOM: 仕訳の摘要の出力内容はカスタマイズ用
+                     カスタマイズできる項目：予約、予約から参照のお客様、部屋、部屋タイプ関連情報
+        書式：API名:ラベル名
+        例：摘要に部屋名と予約名を出力したい場合
+        <MEMO_CUSTOM>
+            Rroom__r.Name:部屋名
+           ,Name:予約名
+        </MEMO_CUSTOM>
+        上記ように定義すると、摘要に「部屋名:106 予約名:三井建築株式会社」文字列を出力される
+        -->
+        <!-- 
+        <MEMO_CUSTOM>
+            Rroom__r.Name:部屋名
+           ,Name:予約名
+        </MEMO_CUSTOM>
+         -->
+        <!-- 2018/10/31 新規追加 
+        MEMO_PURCHASE: 仕入摘要欄の出力内容をカスタマイズ用
+                     カスタマイズできる項目：仕入、仕入から参照の仕入先関連情報
+        書式：API名:ラベル名
+        例：摘要欄に仕入の適用と仕入先を出力したい場合
+        <MEMO_CUSTOM>
+            Purchasesource__r.Name:仕入先
+           ,Memo__c:メモ
+        </MEMO_CUSTOM>
+        上記ように定義すると、摘要に「仕入先:三井水産株式会社 メモ:魚」文字列を出力される
+        -->
+        <!-- 
+		<MEMO_PURCHASE>
+            Purchasesource__r.Name:仕入先
+           ,Memo__c:メモ
+		</MEMO_PURCHASE>
+		 -->
+	</SHOP>
+</root>

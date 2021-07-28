@@ -1,0 +1,68 @@
+<apex:page showHeader="false" title="STAY CARD 宿泊者カード" sidebar="false" action="{!initPdf}" renderas="PDF"
+    applyHtmlTag="false" applyBodyTag="false"
+    readonly="true" standardcontroller="Yadochou__c" extensions="CashRegisterCardExtPDF">
+<html>
+<head>
+<title>STAY CARD 宿泊者カード</title>
+<style>
+@page {
+	size: {!pageformat}        /* A5 portlate size */
+	/*2018/07/17 レジカードコード7の署名機能追加 zyz BEGIN*/
+	margin: 0cm 0.2cm {!if(pageSignaTureFlg ,' 0cm ',' 0.2cm ')} 0.2cm;
+	/*2018/07/17 レジカードコード7の署名機能追加 zyz END*/
+}
+body {
+	font-family: Arial Unicode MS;
+	font-size:12px;
+	top: 0.2cm;
+	left: 0.2cm;
+}
+table {
+	width: 100%;
+	border-spacing: 0px;
+}
+table tr {
+	height: 24px;
+	vertical-align: middle;
+}
+table tr td {
+	padding: 0px;
+}
+ </style>
+</head> 
+<body>
+<!--名头 -->
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ BEGIN -->
+<apex:variable var="idx" value="{!0}"/>
+<apex:repeat value="{!bulkAllPageList}" var="oneCards">
+<div style="vertical-align:top ;margin-top: 4px;height:4px;{!if( idx == 0, '', 'page-break-before: always;')} "></div>
+<apex:repeat value="{!oneCards}" var="oneCard">
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ END -->
+<apex:repeat value="{!oneCard.allPageList}" var="onePage" >
+    <!-- 2018/07/17 レジカードコード7の署名機能追加 zyz BEGIN -->
+    <apex:outputPanel rendered="{!onePage.isSignaImg}" >
+		<apex:outputtext value="{!onePage.signaImg}" escape="false" />
+	</apex:outputPanel>
+    <!-- 2018/07/17 レジカードコード7の署名機能追加 zyz END -->
+<apex:repeat value="{!onePage.onePageList}" var="gif" rendered="{!!onePage.isSignaImg}">
+<!-- 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz BEGIN -->
+<table style="margin-left: 7px;width: 98%;display:{!IF(ISBLANK(oneCard.layoutCardlst.headHtml),'none','')}" >
+<apex:outputtext value="{!oneCard.layoutCardlst.headHtml}" escape="false"></apex:outputtext>
+</table>
+<table style="margin-left: 7px;width: 98%;display:{!IF(ISBLANK(oneCard.layoutCardlst.autoHtml),'none','')}" border="1" cellpadding="0px" cellspacing="0px">
+	<apex:outputtext value="{!oneCard.layoutCardlst.autoHtml}" escape="false"></apex:outputtext>
+</table>
+<table style="margin-left: 7px;width: 98%;display:{!IF(ISBLANK(oneCard.layoutCardlst.footHtml),'none','')}" >
+	<apex:outputtext value="{!oneCard.layoutCardlst.footHtml}" escape="false"></apex:outputtext>
+</table>
+<!-- 2019/10/30 レジカード8のカスタマイズ機能の改善 BY zyz END -->
+</apex:repeat>
+</apex:repeat>
+</apex:repeat>
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ BEGIN -->
+<apex:variable var="idx" value="{!idx + 1}"/>
+</apex:repeat>
+<!-- 2018/09/28 １ページは複数印刷できるように改善対応(レジカード7対応) WSQ END -->
+</body>
+</html>
+</apex:page>

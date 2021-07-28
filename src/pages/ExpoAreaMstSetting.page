@@ -1,0 +1,624 @@
+<apex:page standardController="AccountMaster__c" extensions="ExpoAreaMstSettingCtrl" action="{!init}" sidebar="false" readOnly="true" showHeader="false" title="地域情報" cache="false">
+<!-- css -->
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.common.min.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/kendo.default.min.css')}"/>
+
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/area/application.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/area/bootstrap.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/area/custom.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/area/default.css')}"/>
+<apex:stylesheet value="{!URLFOR($Resource.Expo, 'css/area/op21_spanel.css')}"/>
+<!-- js -->
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/kendo.all.min.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/jquery.blockUI.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/CommJs.js')}"/>
+<apex:includeScript value="{!URLFOR($Resource.Expo, 'js/CommLog.js')}"/>
+<style>
+.k-readonly{
+	color: gray;
+}
+.nets_modules__txt-h3 {
+	text-align: left;
+	font-size: 16px;
+	color: #444;
+	line-height: 1.2;
+	font-weight: bold;
+	border-left: 4px solid #57b3ee;
+	padding-left: 10px;
+}
+._stm_tab_control {
+	padding: 5px 1px !important;
+}
+._stm_list_child {
+	width: 15% !important;
+}
+li {
+	list-style-type: none !important;
+	padding: 0 !important;
+	margin: 5px !important;
+}
+._stm_tab_holder li{
+	width: 60px;
+}
+._stm_clear_btn:hover{
+	background-color: #d0d0d0;
+}
+/* 2019/04/30 修正 WGCH BGEGIN */
+.a_disabled{
+	pointer-events: none;
+}
+/* 2019/04/30 修正 WGCH END */
+</style>
+<!-- 当前会计商品id -->
+<input type="hidden" value="{!accMstId}" id="accmstId"/>
+<!-- 地域を選択板块 -->
+<div id="_stm_search_area" class="_stm_maximized">
+	<div id="_stm_search_box" class="_stm_page _invis">
+		<div id="_stm_slide_holder" style="display: block;">
+			<div class="_stm_child _stm_tab_contents" style="display: block;">
+				<div class="_stm_holder">
+					<dl class="_stm_tabled _stm_btm_dashed">
+						<dt style="width: 80px;">地域を選択</dt>
+						<dd>
+							<ul class="_stm_tab_holder" id="_stm_area_holder">
+								<!-- 地域-コード -->
+								<apex:repeat value="{!pageItem.areaCdLst}" var="cd_a">
+									<!-- 地域 -->
+									<apex:repeat value="{!pageItem.areaInfoMap[cd_a]}" var="var_a">
+										<li><a class="_stm_tab_control {!IF(var_a.checkFlg, '_stm_selected', '')}" href="" data-area-cd="{!var_a.areaCd}">{!var_a.areaLab}</a></li>
+									</apex:repeat>
+								</apex:repeat>
+							</ul>
+						</dd>
+					</dl>
+				</div>
+				<apex:form id="stateInfoForm" rendered="{!NOT(ISBLANK(pageItem.selectAreaCd))}" >
+				<apex:actionStatus onstart="javascript:blockUi();" onstop="unblockUi();" id="refStatusBlock" />
+				<!-- 2019/04/30 修正 WGCH BGEGIN -->
+				<apex:actionFunction name="queryExpoAreaMstData" action="{!queryExpoAreaMstData}" reRender="stateInfoForm" status="refStatusBlock" oncomplete="bindEvent();removeDisabledFun();" />
+				<!-- 2019/04/30 修正 WGCH END -->
+				<apex:inputHidden value="{!pageItem.selectAreaCd}" id="selectAreaCdHid" />
+				<apex:inputHidden value="{!pageItem.selectStateCdJson}" id="selectStateCdJsonHid" />
+				<apex:inputHidden value="{!pageItem.selectCityCdJson}" id="selectCityCdJsonHid" />
+				<div class="_stm_tab_contents" id="_stm_areas" style="display: block;">
+					<div class="_stm_holder mT0">
+						<dl class="_stm_tabled" style="text-align: center; width: 100%; height: 40px;">
+							<dd class="_stm_simple_search_hide" style="float: left !important; width: 150px;">
+								<h3 class="nets_modules__txt-h3 mT10 mB10" >エリアを設定する</h3>
+							</dd>
+							<dt class="_stm_simple_search_hide" style="width: 100%;">
+								<a class="_stm_clear_btn" onclick="saveFun()" style="padding: 5px 30px;" id="_stm_all_clear">確定</a>
+							</dt>
+							<dt class="_stm_simple_search_hide" style="float: right !important; width: 100px;">
+								<a href="" class="_stm_clear_btn" id="_stm_all_clear">すべてをクリア</a>
+							</dt>
+						</dl>
+						<dl class="_stm_tabled _stm_inner_tab">
+							<dd> 
+								<ul class="_stm_tab_holder" id="_stm_state_holder">
+									<!-- 地域 -->
+									<apex:repeat value="{!pageItem.areaInfoMap[pageItem.selectAreaCd]}" var="var_a" >
+										<!-- 都道府県-コード -->
+										<apex:repeat value="{!var_a.stateCdLst}" var="cd_s">
+										<!-- 都道府県 -->
+										<apex:repeat value="{!var_a.stateInfoMap[cd_s]}" var="var_s">
+											<li><a href="" class="_stm_tab_control {!IF(var_s.checkFlg, '_stm_selected', '')}" data-area-cd="{!var_s.areaCd}" data-state-cd="{!var_s.stateCd}" >{!var_s.stateLab}</a></li>
+										</apex:repeat>
+										</apex:repeat>
+									</apex:repeat>
+								</ul> 
+							</dd>
+						</dl>
+						<div id="_stm_city_holder">
+							<!-- 地域 -->
+							<apex:repeat value="{!pageItem.areaInfoMap[pageItem.selectAreaCd]}" var="var_a">
+								<!-- 都道府県-コード -->
+								<apex:repeat value="{!var_a.stateCdLst}" var="cd_s">
+								<!-- 都道府県 -->
+								<apex:repeat value="{!var_a.stateInfoMap[cd_s]}" var="var_s">
+									<div class="_stm_tab_contents" id="_stm_city_holder_{!var_s.stateCd}" style="display: {!IF( var_s.checkFlg, 'block', 'none')};">
+										<ul class="_stm_list_parent">
+											<!-- 都道府県すべて-BUTTON -->
+											<!-- 2019/04/30 修正 WGCH BGEGIN -->
+											<li class="_stm_list_child _stm_block _stm_list_all" style="width: 100% !important;"><label><input id="_stm_state_{!var_s.stateCd}" class="_stm_tab_control_city_all" data-input-mode="city_all" type="checkbox" data-area-cd="{!var_s.areaCd}" data-state-cd="{!var_s.stateCd}" value="{!var_s.stateCd}" />{!var_s.stateLab}すべて</label></li>
+											<!-- 2019/04/30 修正 WGCH END -->
+											<!-- 市区郡すべて-コード -->
+											<apex:repeat value="{!var_s.cityAllLst}" var="cd_lab">
+												<!-- 市区郡すべて-BUTTON -->
+												<!-- 2019/04/30 修正 WGCH BGEGIN -->
+												<apex:variable var="cityCdAll" value=""/>
+												<apex:repeat value="{!var_s.cityCdAllMap[cd_lab]}" var="cd_c">
+													<apex:repeat value="{!var_s.cityInfoMap[cd_c]}" var="var_c">
+													<apex:variable var="cityCdAll" value="{! IF(cityCdAll == "", var_c.cityCd, (cityCdAll + ',' + var_c.cityCd))}"/>
+													</apex:repeat>
+												</apex:repeat>
+												<li class="_stm_list_child _stm_block" style="width: 100% !important;"><label class="_stm_has_child _stm_list_cityall"><input id="_stm_city_{!cd_lab}" class="_stm_tab_control_cityall_all" data-input-mode="cityall_all" type="checkbox" data-area-cd="{!var_s.areaCd}" data-state-cd="{!var_s.stateCd}" data-cityall-cd="{!cd_lab}" data-city-cd="{!cityCdAll}" value="{!cd_lab}" />{!cd_lab}すべて</label>
+												<!-- 2019/04/30 修正 WGCH END -->
+													<ul id="_stm_cityall_holder_{!cd_lab}" class="_stm_list_parent _stm_list_parent_inner">
+														<!-- 市区郡-コード -->
+														<apex:repeat value="{!var_s.cityCdAllMap[cd_lab]}" var="cd_c">
+														<!-- 市区郡 -->
+														<apex:repeat value="{!var_s.cityInfoMap[cd_c]}" var="var_c">
+															<!-- 2019/04/30 修正 WGCH BGEGIN -->
+															<li class="_stm_list_child"><label class="_stm_list_city" ><input id="_stm_area_{!var_c.cityCd}" class="_stm_tab_control_city" type="checkbox" data-area-cd="{!var_c.areaCd}" data-state-cd="{!var_c.stateCd}" data-cityall-cd="{!cd_lab}" data-city-cd="{!var_c.cityCd}" value="{!var_c.cityCd}" />{!var_c.cityLab}</label></li>
+															<!-- 2019/04/30 修正 WGCH END -->
+														</apex:repeat>
+														</apex:repeat>
+													</ul>
+												</li>
+											</apex:repeat>
+											<!-- 市区郡-コード -->
+											<apex:repeat value="{!var_s.cityCdLst}" var="cd_c">
+											<!-- 市区郡 -->
+											<apex:repeat value="{!var_s.cityInfoMap[cd_c]}" var="var_c">
+												<!-- 2019/04/30 修正 WGCH BGEGIN -->
+												<li class="_stm_list_child"><label class="_stm_list_city" ><input id="_stm_city_{!var_c.cityCd}" class="_stm_tab_control_city" type="checkbox" data-area-cd="{!var_c.areaCd}" data-state-cd="{!var_c.stateCd}" data-city-cd="{!var_c.cityCd}" value="{!var_c.cityCd}" />{!var_c.cityLab}</label></li>
+												<!-- 2019/04/30 修正 WGCH END -->
+											</apex:repeat>
+											</apex:repeat>
+										</ul>
+									</div>
+								</apex:repeat>
+								</apex:repeat>
+							</apex:repeat>
+						</div>
+					</div>
+				</div>
+				</apex:form>
+			</div>
+			<apex:outputPanel id="thePanel" layout="block" rendered="{!NOT(ISBLANK(pageItem.selectAreaCd))}">
+			<div class="_stm_holder _stm_btn_panel">
+				<dl class="_stm_tabled">
+					<dd>
+						<div class="_stm_table">
+							<div class="_stm_holder_inner-left _stm_simple_search_hide _stm_ovf_vis">
+								<div class="_selected_val">
+									<span class="_stm_main_area">選択済み</span>
+								</div>
+							</div>
+						</div>
+					</dd>
+					<dt class="_stm_simple_search_hide">
+						<a href="" class="_stm_clear_btn" id="_stm_all_clear">すべてをクリア</a>
+					</dt>
+				</dl>
+			</div>
+			</apex:outputPanel>
+		</div>
+	</div>
+</div>
+<script>
+// 自己写一个map函数=>map转成Object
+Object.defineProperty(Map.prototype, 'obj', {get : function(){ var obj = {}; this.forEach(function(value, key){obj[key] = value;}); return obj;}});
+// 自己写一个set函数=>set转成array
+Object.defineProperty(Set.prototype, 'arr', {get : function(){ var arr = []; this.forEach(function(value, key){arr.push(value);}); return arr;}});
+var _CUST_SYMBOL = "{!JSENCODE(CUST_SYMBOL)}"; // 分隔符
+var _CUST_BLOCKCSS = {
+						//Processing...
+						message: '<h1><img src="{!URLFOR($Resource.Expo, 'img/puff.svg')}" /></h1>',
+						css: { border: 'none !important;', backgroundColor: 'none !important'}
+					};
+var isNoExpoFlg = {!isNoExpoFlg};
+var _selectStateCdMap = new Map();
+var _selectCityCdMap = new Map();
+var _stm_search_div = "#_stm_search_box"; // 地域を選択
+var _stm_area_holder = "#_stm_area_holder"; // 地域
+var _stm_state_holder = "#_stm_state_holder"; // 都道府県
+var _stm_city_holder = "#_stm_city_holder"; // 市区郡
+var _stm_city_holder_all = "#_stm_city_holder_:::AddCode"; // 都道府県すべて-内部所有-市区郡、市区郡すべて
+var _stm_cityall_holder_all = "#_stm_cityall_holder_:::AddCode"; // 都道府県すべて-内部所有-市区郡すべて-内部所有-市区郡
+var _stm_list_cityall = "#_stm_city_holder_:::AddCode ._stm_list_cityall"; // 都道府県すべて-内部所有-市区郡すべて
+var _stm_list_city = "#_stm_city_holder_:::AddCode ._stm_list_city"; // 都道府県すべて-内部所有-市区郡
+
+$(document).ready(function() {
+	// 初期设定已经选中
+	var selectStateCdJsonHid = $("[id$=':selectStateCdJsonHid']");
+	var selectCityCdJsonHid = $("[id$=':selectCityCdJsonHid']");
+	if(selectStateCdJsonHid.length > 0){
+		$.map(JSON.parse(selectStateCdJsonHid.val()), function(val, key){
+			_selectStateCdMap.set(key, val);
+		});
+	}
+	if(selectCityCdJsonHid.length > 0){
+		$.map(JSON.parse(selectCityCdJsonHid.val()), function(val, key){
+			_selectCityCdMap.set(key, new Set(val));
+		});
+	}
+	bindEvent();
+});
+function bindEvent(){
+	// 恢复设定
+	_selectCityCdMap.forEach(function(selectCityCdSet, selectCityCdKey, thisMap){
+		// selectCityCdKey => '地域-コード_都道府県-コード'
+		var _selectCityCdKey = [];
+		if(selectCityCdKey) _selectCityCdKey = selectCityCdKey.split(_CUST_SYMBOL);
+		if(_selectCityCdKey.length == 2){
+			var _areaCd = _selectCityCdKey[0]; // 地域-コード
+			var _stateCd = _selectCityCdKey[1]; // 都道府県-コード
+			var _selectAreaCd = $("[id$=':selectAreaCdHid']").val(); // 当前选中的地域-コード
+			if(_areaCd == _selectAreaCd) {
+				var _cityAllSet = new Set(); // 市区郡すべて-コード 集合
+				// 选中的市区郡-恢复-选中-️设定
+				for (var _cityCd of selectCityCdSet) {
+					var _thisCity = $(":checkbox[value='"+_cityCd+"']"); // 市区郡INPUT
+					if(_thisCity.length == 0) continue;
+					_thisCity.prop("checked", true);
+					var _cityAllCd = _thisCity.data("cityall-cd"); // 市区郡すべて-コード
+					if(_cityAllCd) _cityAllSet.add(_cityAllCd);
+				}
+				// 选中的市区郡すべて-恢复-选中-️设定
+				for (var _cityAllCd of _cityAllSet) { 
+					var _mode_cityall = _actionHandler._generateModeReplaceVal(_stm_cityall_holder_all, _cityAllCd); // 当前-市区郡すべて-mode
+					var _item_cityall = _actionHandler._generateModeInfoVal(_mode_cityall, _cityAllCd); // 当前-市区郡すべて-modeInfo
+					_item_cityall._stm_mode.prop("checked", _item_cityall._stm_mode_flg); // 当前-市区郡すべて-状态设定
+				}
+				// 选中的都道府県すべて-恢复-选中-️设定
+				var _mode_city = _actionHandler._generateModeReplaceVal(_stm_list_city, _stateCd); // 当前-都道府県すべて-mode
+				var _item_city = _actionHandler._generateModeInfoVal(_mode_city, _stateCd); // 当前-都道府県すべて-modeInfo
+				_item_city._stm_mode.prop("checked", _mode_city._stm_mode_flg); // 当前-都道府県すべて-状态设定
+				// 处理-最终显示区域内容
+				_actionHandler._generateSelectedPanelVal(_stateCd);
+			}
+		}
+	});
+	// 地域选中处理
+	$(_stm_area_holder).on("click", "._stm_tab_control", function(){
+		// 2019/04/30 修正 WGCH BGEGIN
+		addDisabledFun();
+		// 2019/04/30 修正 WGCH END
+		// 设置选中的Css
+		_actionHandler._generateSelectTabCssVal($(this));
+		var old_selectAreaCd = $("[id$=':selectAreaCdHid']"); // 旧值 
+		var new_selectAreaCd = $(this).data("area-cd"); // 新值
+		if(old_selectAreaCd.val() == new_selectAreaCd) return; // 新旧相同时跳出
+		old_selectAreaCd.val(new_selectAreaCd);// 设置新值
+		// 都道府県-最新选中数据设定
+		$("[id$=':selectStateCdJsonHid']").val(JSON.stringify(_selectStateCdMap.obj));
+		// 市区郡-最新选中数据设定
+		var _newSelectCityCdMap = new Map();
+		// 把set转成arr处理
+		_selectCityCdMap.forEach(function(selectCityCdSet, selectCityCdKey, thisMap){
+			_newSelectCityCdMap.set(selectCityCdKey, selectCityCdSet.arr);
+		});
+		$("[id$=':selectCityCdJsonHid']").val(JSON.stringify(_newSelectCityCdMap.obj));
+		// 查询选中的地域数据集处理
+		_actionHandler._generateQueryAreaVal();
+	});
+	// 都道府県-Tab选中️事件处理
+	$(_stm_state_holder).on("click", "._stm_tab_control", function(){
+		// 设置选中的Css
+		_actionHandler._generateSelectTabCssVal($(this));
+		// 隐藏所有的都道府県Item
+		$("._stm_tab_contents", _stm_city_holder).hide();
+		// コード-Info
+		var _item_cd = _actionHandler._generateCodeInfoVal($(this));
+		$("._stm_tab_contents[id='_stm_city_holder_"+_item_cd._stateCd+"']", _stm_city_holder).show();
+		// 设置最终选中的都道府県-コード
+		_selectStateCdMap.set(_item_cd._areaCd, _item_cd._stateCd);
+	});
+	// 市区郡-选中️事件处理
+	$(_stm_city_holder).on("click", "._stm_tab_control_city", function(){
+		// コード-Info
+		var _item_cd = _actionHandler._generateCodeInfoVal($(this));
+		// 获取-选中-コード集合
+		var _selectCityCdSet = _selectCityCdMap.has(_item_cd._selectCityCdKey) ? _selectCityCdMap.get(_item_cd._selectCityCdKey) : new Set();
+		if($(this).prop("checked")){
+			_selectCityCdSet.add($(this).val());
+		} else {
+			_selectCityCdSet.delete($(this).val());
+		}
+		// 追加-最新数据集
+		if(!_selectCityCdMap.has(_item_cd._selectCityCdKey)) _selectCityCdMap.set(_item_cd._selectCityCdKey, _selectCityCdSet);
+		// 处理-市区郡すべて
+		if(_item_cd._cityAllCd){
+			// 当前-都道府県すべて-内全部-市区郡、市区郡すべて-处理
+			var _mode_cityall = _actionHandler._generateModeReplaceVal(_stm_cityall_holder_all, _item_cd._cityAllCd); // 当前-都道府県-内全部-市区郡、市区郡すべて-mode
+			var _item_cityall = _actionHandler._generateModeInfoVal(_mode_cityall, _item_cd._cityAllCd); // 当前-都道府県-内全部-市区郡、市区郡すべて-modeInfo
+			_item_cityall._stm_mode.prop("checked", _item_cityall._stm_mode_flg); // 当前-市区郡すべて-状态设定
+		}
+		// 处理-最终显示区域内容
+		_actionHandler._generateSelectedPanelVal(_item_cd._stateCd);
+	});
+	// 市区郡すべて-选中️事件处理
+	$(_stm_city_holder).on("click", "._stm_tab_control_cityall_all", function(){
+		// コード-Info
+		var _item_cd = _actionHandler._generateCodeInfoVal($(this));
+		// 当前-市区郡すべて-内全部-市区郡-处理
+		var _mode_cityall = _actionHandler._generateModeReplaceVal(_stm_cityall_holder_all, _item_cd._cityAllCd); // 当前-市区郡すべて-内全部-市区郡-mode
+		var _item_cityall = _actionHandler._generateModeInfoVal(_mode_cityall, _item_cd._cityAllCd); // 当前-市区郡すべて-内全部-市区郡-modeInfo
+		// 市区郡すべて-选中️处理
+		if($(this).prop("checked")){
+			// 该区域内都选中设定
+			_item_cityall._stm_mode_all.prop("checked", true);
+			var _selectCityCdSet = new Set(); // 该区域内所有市区郡—コード-集合
+			$.each(_item_cityall._stm_mode_all, function(){
+				_selectCityCdSet.add($(this).val());
+			});
+			// 追加-该区域内所有市区郡—コード-集合
+			_selectCityCdMap.set(_item_cd._selectCityCdKey, _selectCityCdSet);
+		} else {
+			// 该区域内都去掉选中设定
+			_item_cityall._stm_mode_all.prop("checked", false);
+			// 去掉-该区域内所有市区郡—コード
+			_selectCityCdMap.set(_item_cd._selectCityCdKey, new Set());
+		}
+		// 处理-最终显示区域内容
+		_actionHandler._generateSelectedPanelVal(_item_cd._stateCd);
+	});
+	// 都道府県すべて-选中️事件处理
+	$(_stm_city_holder).on("click", "._stm_tab_control_city_all", function(){
+		// コード-Info
+		var _item_cd = _actionHandler._generateCodeInfoVal($(this));
+		// 当前-都道府県すべて-内全部-市区郡、市区郡すべて-处理
+		var _mode_city = _actionHandler._generateModeReplaceVal(_stm_city_holder_all, _item_cd._stateCd); // 当前-当前-都道府県すべて-内全部-市区郡、市区郡すべて-mode
+		var _item_city = _actionHandler._generateModeInfoVal(_mode_city, _item_cd._stateCd); // 当前-都道府県すべて-内全部-市区郡、市区郡すべて-modeInfo
+		if($(this).prop("checked")){
+			// 该区域内都选中设定
+			_item_city._stm_mode_all.prop("checked", true);
+			var _selectCityCdSet = new Set(); // 该区域内所有市区郡—コード-集合
+			$.each(_item_city._stm_mode_all.not('._stm_tab_control_cityall_all, ._stm_tab_control_city_all'), function(){
+				_selectCityCdSet.add($(this).val());
+			});
+			// 追加-该区域内所有市区郡—コード-集合
+			_selectCityCdMap.set(_item_cd._selectCityCdKey, _selectCityCdSet);
+			
+		} else {
+			// 该区域内都去掉选中设定
+			_item_city._stm_mode_all.prop("checked", false);
+			// 去掉-该区域内所有市区郡—コード
+			_selectCityCdMap.set(_item_cd._selectCityCdKey, new Set());
+		}
+		// 处理-最终显示区域内容
+		_actionHandler._generateSelectedPanelVal(_item_cd._stateCd);
+	});
+	// 清空处理
+	$(_stm_search_div).on("click", "._stm_clear_btn", function(){
+		var _stm_search_chkbox = $("#_stm_search_area :checkbox");
+		_stm_search_chkbox.prop("checked", false);
+		// 2019/04/30 修正 WGCH BGEGIN
+		/*
+		$.each(_stm_search_chkbox, function(){
+			_actionHandler._generateSelectedVal($(this), "rmv_ch");
+		});
+		*/
+		$("._selected_val a", _stm_search_div).remove();
+		// 2019/04/30 修正 WGCH END
+		// 选中数据清空
+		_selectCityCdMap.clear();
+	});
+	/*
+	// 选中面板-去掉-处理
+	$(_stm_search_div).on("click", "._selected_val a", function(){
+		$(":checkbox[value='" + $(this).data("rel-input") + "']").click();
+	});
+	*/
+}
+// 2019/04/30 修正 WGCH BGEGIN
+function addDisabledFun(){
+	$("._stm_tab_control").addClass("a_disabled");
+}
+function removeDisabledFun(){
+	$("._stm_tab_control").removeClass("a_disabled");
+}
+// 2019/04/30 修正 WGCH END
+// 选中面板-去掉-处理
+function clearFun(_this){
+	// 2019/04/30 修正 WGCH BGEGIN
+	// 当前点击的A标签 对应的 checkbox
+	var _temp_item = $(":checkbox[value='" + $(_this).data("rel-input") + "']");
+	if(_temp_item.length > 0){ // 存在时处理
+		_temp_item.click();
+	} else { // 不存在时处理
+		// 获取コード集合
+		var _item_cd = _actionHandler._generateCodeInfoVal($(_this));
+		var _this_selectCityCdSet = new Set();
+		// 获取已选择的数据
+		if(_selectCityCdMap.has(_item_cd._selectCityCdKey)) _this_selectCityCdSet = _selectCityCdMap.get(_item_cd._selectCityCdKey);
+		// 都道府県すべて-处理
+		if(_item_cd._cityCd == ""){
+			_this_selectCityCdSet.clear();
+		} else { // 市区郡すべて、市区郡-处理
+			var _cityCdArr = _item_cd._cityCd.split(",");
+			for( _this_cityCd of _cityCdArr){
+				// 去掉-不要的市区郡-コード
+				_this_selectCityCdSet.delete(_this_cityCd);
+			}
+		}
+		// 去掉-当前点击的A标签
+		$(_this).remove();
+	}
+	// 2019/04/30 修正 WGCH END
+}
+// 保存处理
+function saveFun(){
+		// blockui
+		$("[id='_stm_search_area']").block(_CUST_BLOCKCSS);
+		var _accMstId = $("#accmstId").val();
+		var _newSelectCityCdMap = new Map();
+		_selectCityCdMap.forEach(function(selectCityCdSet, selectCityCdKey, thisMap){
+			_newSelectCityCdMap.set(selectCityCdKey, selectCityCdSet.arr);
+		});
+		// 事前チェックを行う
+		Visualforce.remoting.Manager.invokeAction(
+			"{!$RemoteAction.ExpoAreaMstSettingCtrl.updateAreaToAccMst}", JSON.stringify(_newSelectCityCdMap.obj), _accMstId, isNoExpoFlg, function(result, event){
+			// 異常
+		 	if(event.type == 'exception') {
+				alert(event.message);
+		 	} else {
+				if(result.errorMessage != ""){
+					$.map(result.selectCityCdMap, function(val, key){
+						_selectCityCdMap.set(key, new Set(val));
+					});
+					bindEvent();
+					alert(result.errorMessage);
+				} else {
+					if(result.isNoExpoFlg) {
+						if(opener){
+							if(typeof(window.opener.document) == 'unknown' || typeof(window.opener.document) == 'undefined' ){ 
+								// Opener Window Is Closed
+								top.window.close();
+							}else{
+								objs = new Array(result.expoAreaMstCode, result.expoAreaMstLab);
+								commUtils.popupSetter(objs);
+								window.opener.focus();
+								top.window.close();
+							} 
+						}else{ 
+							// Opener Window Is Closed
+							top.window.close();
+						}
+					} else {
+						// window.opener.location.reload(true);
+						var windowURL = window.location.href.split("/apex/");
+						if(windowURL.length > 0 && result.accMstId != "" ){
+							var url = windowURL[0] + "/" + result.accMstId;
+							if(window.opener && window.opener.location) window.opener.location.replace(url);
+						}
+					}
+					// 該当ページをクローズする
+					window.close();
+				}
+		 	}
+		 	// unblockui
+		 	$("[id='_stm_search_area']").unblock();
+		});
+}
+// Block Action Window
+function blockUi(){
+	$("form[id$=':stateInfoForm']").block(_CUST_BLOCKCSS);
+}
+// Lock解除
+function unblockUi(){
+	$("form[id$=':stateInfoForm']").unblock(); 
+}
+var _actionHandler = {
+		// コード-替换处理
+		_generateModeReplaceVal : function(_mode, _code){
+			return _mode.replace(/:::AddCode/gi, _code);
+		},
+		// コード-Info
+		_generateCodeInfoVal : function(_this){
+			var _this_areaCd = _this.data("area-cd"); // 地域-コード
+			var _this_stateCd = _this.data("state-cd"); // 都道府県-コード
+			var _this_cityAllCd = _this.data("cityall-cd"); // 市区郡すべて-コード
+			// 2019/04/30 修正 WGCH BGEGIN
+			var _this_cityCd = _this.data("city-cd");
+			// 2019/04/30 修正 WGCH END
+			var _this_selectCityCdKey = _this_areaCd + _CUST_SYMBOL + _this_stateCd; // 选中市区郡-Key => '地域-コード_都道府県-コード'
+			return { 
+					_areaCd : _this_areaCd, // 地域-コード
+					_stateCd : _this_stateCd, // 都道府県-コード
+					_cityAllCd : _this_cityAllCd, // 市区郡すべて-コード
+					// 2019/04/30 修正 WGCH BGEGIN
+					_cityCd : _this_cityCd, // 市区郡-コード
+					// 2019/04/30 修正 WGCH END
+					_selectCityCdKey : _this_selectCityCdKey // 选中市区郡-Key => '地域-コード_都道府県-コード'
+			}
+		},
+		// checkbox-Info
+		_generateModeInfoVal : function(_mode, _code){
+			var _this_stm_mode_all	 = $(":checkbox", _mode); // 当前-全部-checkbox
+			var _this_stm_mode_chk	 = $(":checkbox:checked", _mode); // 当前-选中-️checkbox
+			var _this_stm_mode_nochk = $(":checkbox:not(checked)", _mode); // 当前-未选中-️checkbox
+			var _this_stm_mode_flg	 = _this_stm_mode_all.length == _this_stm_mode_chk.length; // 当前-是否全部-选中-️Flg
+			var _this_stm_mode		 = $(":checkbox[value='"+_code+"']"); // 当前-holder--️checkbox
+			return {
+					_stm_mode_all	: _this_stm_mode_all, // 当前-全部-checkbox
+					_stm_mode_chk	: _this_stm_mode_chk, // 当前-选中-️checkbox
+					_stm_mode_nochk : _this_stm_mode_nochk, // 当前-未选中-️checkbox
+					_stm_mode_flg	: _this_stm_mode_flg, // 当前-是否全部-选中-️Flg
+					_stm_mode		: _this_stm_mode // 当前-holder--️checkbox
+			}
+		},
+		// 设定TAB选中CSS
+		_generateSelectTabCssVal : function(_this){
+			_this.closest("._stm_tab_holder").find("._stm_selected").removeClass("_stm_selected");
+			_this.addClass("_stm_selected");
+		},
+		// 显示选中区域处理
+		_generateSelectedVal : function(_input, _action){
+			// 2019/04/30 修正 WGCH BGEGIN
+			var _temp_item = '<a data-rel-input=":::inpCd" data-area-cd=":::areaCd" data-state-cd=":::stateCd" data-city-cd=":::cityCd" onclick="clearFun(this)" >:::inpText</a>';
+			// 2019/04/30 修正 WGCH END
+			var i;
+			var _addData;
+			switch(_action){
+				case "rmv_ch" :
+					for (i=0; i<_input.length; i++){
+						$("._selected_val a[data-rel-input='"+_input.eq(i).val()+"']").remove();
+					}
+					break;
+				case "add_ch" :
+					for (i=0; i<_input.length; i++){
+						var _this = _input.eq(i);
+						// 2019/04/30 修正 WGCH BGEGIN
+						var _addText = _input.eq(i).parent().text() ? _input.eq(i).parent().text() : "";
+						var _areaCd = _this.data("area-cd") ? _this.attr("data-area-cd") : "";
+						var _stateCd = _this.data("state-cd") ? _this.attr("data-state-cd") : "";
+						var _cityCd = _this.data("city-cd") ? _this.attr("data-city-cd") : "";
+						// 2019/04/30 修正 WGCH END
+						if ($("._selected_val a[data-rel-input='"+_input.eq(i).val()+"']").length <= 0){
+							// 2019/04/30 修正 WGCH BGEGIN
+							$("._selected_val").append(_temp_item.replace(/:::inpCd/gi, _this.val()).replace(/:::inpText/gi, _addText).replace(/:::areaCd/gi, _areaCd).replace(/:::stateCd/gi, _stateCd).replace(/:::cityCd/gi, _cityCd));
+							// 2019/04/30 修正 WGCH END
+						}
+					}
+					break;
+			}
+		},
+		// 最终选中区域自动化处理
+		_generateSelectedPanelVal : function(_stateCd){
+			// 当前-都道府県すべて-内全部-市区郡、市区郡すべて-处理
+			var _mode_cityall_and_city = _actionHandler._generateModeReplaceVal(_stm_city_holder_all, _stateCd); // 当前-当前-都道府県-内全部-市区郡、市区郡すべて-mode
+			var _item_cityall_and_city = _actionHandler._generateModeInfoVal(_mode_cityall_and_city, _stateCd); // 当前-都道府県-内全部-市区郡、市区郡すべて-modeInfo
+			// 当前-都道府県すべて-内全部-市区郡すべて-处理
+			var _mode_cityall = _actionHandler._generateModeReplaceVal(_stm_list_cityall, _stateCd); // 当前-当前-都道府県-内全部-市区郡すべて-mode
+			var _item_cityall = _actionHandler._generateModeInfoVal(_mode_cityall, _stateCd); // 当前-都道府県-内全部-市区郡すべて-modeInfo
+			// 当前-都道府県すべて-内全部-市区郡-处理
+			var _mode_city = _actionHandler._generateModeReplaceVal(_stm_list_city, _stateCd); // 当前-当前-都道府県-内全部-市区郡-mode
+			var _item_city = _actionHandler._generateModeInfoVal(_mode_city, _stateCd); // 当前-都道府県-内全部-市区郡-modeInfo
+			_item_city._stm_mode.prop("checked", _item_city._stm_mode_flg); // 当前-都道府県すべて-状态设定
+			// 去掉-选中区域显示内容-未选中-市区郡、市区郡すべて
+			// 目的未来保持选中的先后顺序
+			$.each(_item_cityall_and_city._stm_mode_nochk, function(){
+				_actionHandler._generateSelectedVal($(this), "rmv_ch");
+			});
+			// 市区郡すべて-选中-处理
+			if(_item_city._stm_mode_flg){
+				// 追加-选中区域显示内容-都道府県すべて
+				_actionHandler._generateSelectedVal(_item_city._stm_mode, "add_ch");
+			} else {
+				// 追加-选中区域显示内容-市区郡
+				$.each(_item_city._stm_mode_chk, function(){
+					_actionHandler._generateSelectedVal($(this), "add_ch");
+				});
+				// 处理-选中区域显示内容-市区郡すべて
+				$.each(_item_cityall._stm_mode_all, function(){
+					var _this_cityAllCd = $(this).val();
+					var _this_mode_city = _actionHandler._generateModeReplaceVal(_stm_cityall_holder_all, _this_cityAllCd); // 当前-市区郡すべて-mode
+					var _this_item_city = _actionHandler._generateModeInfoVal(_this_mode_city, _this_cityAllCd); // 当前-市区郡すべて-modeInfo
+					_this_item_city._stm_mode.prop("checked", _this_item_city._stm_mode_flg); // 当前-市区郡すべて-状态设定
+					$(this).prop("checked", _this_item_city._stm_mode_flg); // 当前-市区郡すべて-状态设定
+					if(_this_item_city._stm_mode_flg){
+						$.each(_this_item_city._stm_mode_chk, function(){
+							_actionHandler._generateSelectedVal($(this), "rmv_ch");
+						});
+						_actionHandler._generateSelectedVal(_this_item_city._stm_mode, "add_ch");
+					} else {
+						$.each(_this_item_city._stm_mode_chk, function(){
+							_actionHandler._generateSelectedVal($(this), "add_ch");
+						});
+						_actionHandler._generateSelectedVal(_this_item_city._stm_mode, "rmv_ch");
+					}
+				});
+				_actionHandler._generateSelectedVal(_item_city._stm_mode, "rmv_ch");
+			}
+		},
+		// 查询选中的地域数据集处理
+		_generateQueryAreaVal : function(){
+			queryExpoAreaMstData();
+		}
+	}
+</script>
+</apex:page>

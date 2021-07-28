@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>部屋属性</value>
+    </caseValues>
+    <fields>
+        <label><!-- 部屋属性名（英） --></label>
+        <name>EnName__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当項目は属性値として優先利用する、該当項目は未入力の場合、部屋属性名は属性値として利用する --></help>
+        <label><!-- 属性値（英） --></label>
+        <name>EnPropValue__c</name>
+    </fields>
+    <fields>
+        <help><!-- 該当項目は属性値として優先利用する、該当項目は未入力の場合、部屋属性名は属性値として利用する --></help>
+        <label><!-- 属性値 --></label>
+        <name>PropValue__c</name>
+    </fields>
+    <fields>
+        <label><!-- お部屋 --></label>
+        <name>RoomRef__c</name>
+        <relationshipLabel><!-- 部屋属性 --></relationshipLabel>
+    </fields>
+</CustomObjectTranslation>

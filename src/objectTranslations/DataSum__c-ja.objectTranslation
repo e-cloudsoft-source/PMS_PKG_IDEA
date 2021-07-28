@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObjectTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <caseValues>
+        <plural>false</plural>
+        <value>データ集計</value>
+    </caseValues>
+    <fields>
+        <label><!-- $売上計III（税抜）⾦額 --></label>
+        <name>AmountSumExc__c</name>
+    </fields>
+    <fields>
+        <label><!-- $売上計 IV（税込）⾦額 --></label>
+        <name>AmountSumInc__c</name>
+    </fields>
+    <fields>
+        <label><!-- 故障部屋数 --></label>
+        <name>BedRoomSumVal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 予約数 --></label>
+        <name>LeadSumVal__c</name>
+    </fields>
+    <fields>
+        <label><!-- 部屋タイプ --></label>
+        <name>RoomTypeRef__c</name>
+        <relationshipLabel><!-- データ集計 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 売上 --></label>
+        <name>RsvDataSumRef__c</name>
+        <relationshipLabel><!-- データ集計 --></relationshipLabel>
+    </fields>
+    <fields>
+        <label><!-- 予約⼈数 --></label>
+        <name>StayPersons__c</name>
+    </fields>
+    <fields>
+        <label><!-- 集計日 --></label>
+        <name>SumDate__c</name>
+    </fields>
+    <fields>
+        <label><!-- RFU(利用不可) --></label>
+        <name>SumType__c</name>
+        <picklistValues>
+            <masterLabel>故障部屋</masterLabel>
+            <translation><!-- 故障部屋 --></translation>
+        </picklistValues>
+    </fields>
+    <fields>
+        <label><!-- RFU(利用不可) --></label>
+        <name>SumVal__c</name>
+    </fields>
+</CustomObjectTranslation>

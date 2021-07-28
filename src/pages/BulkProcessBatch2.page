@@ -1,0 +1,120 @@
+<apex:page controller="BulkProcessBatch" tabstyle="Lead__c" sidebar="false" action="{!setInitVar}">
+
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/jquery.blockUI.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.queryfiles, 'js/dateformat.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.dateplugin, 'date/date.js')}"/>
+	<!-- 2016/06/09 共通JS定数を定義追加する -->
+	<c:CommHeaderComp loadJsLib="false"/>
+    <apex:form id="batchProcess">
+        <!-- 自動チェックイン処理 -->
+        <apex:actionFunction action="{!autoCheckInProcess}" name="checkInProcessFun"
+            reRender="refNewsInfo" oncomplete="autoCommitFun();"/>
+        <!-- 自動売上処理 -->
+        <apex:actionFunction action="{!autoCalDayAmount}" name="calDayAmountFun"
+            reRender="refNewsInfo" oncomplete="autoCommitFun();"/>
+		
+		<!-- バッチ一括処理 -->
+		<apex:pageBlock title="{!$Label.ps__msg_036_0001} ">
+
+            <!-- 自動処理Panel -->
+            <apex:outputPanel id="refNewsInfo">
+            <!-- バッチ処理結果： -->
+            <apex:pageMessage summary="{!message}" severity="info"  strength="1"
+                title="{!$Label.ps__msg_036_0002}" escape="false" rendered="{!isShowMessage}"/>
+            <script>
+            // 売上処理呼び出すする
+            function autoCommitFun() {
+
+                var localTime = "{!ApexSystemTime}"
+                if (localTime == updateTime) {
+                //予期せぬエラーが発生しました。\nボタンを押下し、再度処理してください。\n
+                    alert("{!$Label.ps__msg_036_0006}");
+                    location.href = "{!$Page.BulkProcessBatch2}";
+                    return;
+                }
+                // 処理時間を更新を行う
+                updateTime = localTime;
+                // 売上処理を続いて処理判断を行う
+                var isContinueFlg = "{!isContinueFlg}";
+                // 売上処理続いて
+                if (isContinueFlg == "true") {
+                    // 売上処理Actionを呼びだいする
+                    calDayAmountFun();
+                } else {
+                    unblockUi();
+                    //処理が終了しました。
+                    alert("{!$Label.ps__msg_036_0007}");
+                }
+            }
+            </script>
+            </apex:outputPanel>
+            <!-- 処理日 -->
+		    <apex:outputLabel value="{!$Label.ps__msg_036_0003}" styleClass="labelCol"/>
+			<apex:outputPanel styleClass="requiredInput" layout="block">
+			<apex:outputPanel styleClass="requiredBlock" layout="block"/>
+			<!-- 2016/11/25 TIMEZON fix BEGIN by zh -->
+			<apex:inputText value="{!checkInDate}" maxlength="10" size="14" id="checkInDate"
+			 style="height: 1em; font-size: 100%;"/><!-- (yyyy/mm/dd) {!$Label.MSG_036_0011}-->({!DateFormat})
+			<!-- 2016/11/25 TIMEZON fix END by zh -->
+			&nbsp;&nbsp;&nbsp;
+			<!-- 処理 -->
+            <input type="button" value="{!$Label.MSG_036_0004}" id="saBtn"></input>
+            </apex:outputPanel>
+
+		</apex:pageBlock>
+    </apex:form>
+<script>
+<!-- 処理時間 -->
+var updateTime = "";
+<!-- Jqueryステータス定義 -->
+$j = jQuery.noConflict();
+var dateFormat = new DateFormat(JINYACONNECT.DateFormat);
+
+$j(document).ready(function($) {
+    bindEvent();
+});
+
+<!-- Juqery Function Begin -->
+function bindEvent() {
+    //
+	$j('input[id="saBtn"]').click(function(){
+	    var checkInDt = $j("input[name$=':checkInDate']").val();
+	    if (checkInDt == '') {
+	    //有効な処理日を入力ください.
+	        alert("{!$Label.MSG_036_0008}");
+	        $j("input[name$=':checkInDate']").focus();
+	        return false;
+	    }
+	    blockUi(this.form);
+	    // Upload File To Server
+	    checkInProcessFun();
+	});
+	/*
+	$j("input[id$='checkInDate']").blur(function(){
+		// 2016/11/25 TIMEZON fix BEGIN by zh
+		//var inputDt = Date.parse($j(this).val());
+		var inputDt = Date.parseExact($j(this).val(),JINYACONNECT.DateFormat);
+		if (inputDt != null) $j(this).val(dateFormat.format(inputDt));
+		// 2016/11/25 TIMEZON fix END by zh
+	});*/
+}
+function blockUi(formobj) {
+    $j('input[id="saBtn"]').attr('disabled','disabled');
+    //$j("form[id='" + formobj.id +"']").block({
+    $j.blockUI({
+    //Processing...
+         message: '<h1><img src="{!URLFOR($Resource.queryfiles, 'css/blockui/busy.gif')}" /> {!$Label.MSG_036_0005}</h1>'
+    });
+    return true;
+}
+function unblockUi () {
+    $j('input[id="saBtn"]').removeAttr('disabled');
+    //$j("form[id$=':batchProcess']").unblock();
+    $j.unblockUI({ fadeOut: 200 });
+}
+
+</script>
+<!-- This component is added to show call register popup -->
+<c:CallRegisterPopup ></c:CallRegisterPopup>
+</apex:page>
