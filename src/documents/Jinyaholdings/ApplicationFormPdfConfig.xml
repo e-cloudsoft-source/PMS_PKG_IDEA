@@ -150,18 +150,17 @@
                 <TABLE COLSIZE="300,300" STYLE="margin-left:5%; width:90%;border: 1px solid #000;font-size:14px;">
                     <ROW>
                         <COL STYLE="border-right: 1px solid #000;border-bottom: 1px solid #000;">
-                            お名前：　$$_Relcontact__r.Name_$$ 様
+                            お名前：　$$_Relcontact__r.Name_$$ $$_Honorific_$$
                         </COL>
                         <COL STYLE="border-bottom: 1px solid #000;">予約番号：$$_leadIndexRef__r.name_$$</COL>
                     </ROW>
                     <ROW>
-                        <COL STYLE="border-bottom: 1px solid #000;" COLSPAN="2">ご住所：　〒$$_Relcontact__r.MailingCountry_$$
-                            $$_Relcontact__r.MailingCity_$$ $$_Relcontact__r.MailingState_$$
-                            $$_Relcontact__r.MailingStreet_$$
+                        <COL STYLE="border-bottom: 1px solid #000;" COLSPAN="2">ご住所：　〒 $$_Relcontact__r.MailingPostalCode_$$
+                     $$_Relcontact__r.MailingCountry_$$ $$_Relcontact__r.MailingCity_$$ $$_Relcontact__r.MailingState_$$ $$_Relcontact__r.MailingStreet_$$
                         </COL>
                     </ROW>
                     <ROW>
-                        <COL STYLE="border-bottom: 1px solid #000;" COLSPAN="2">お電話：　$$_Relcontact__r.Phone_$$</COL>
+                        <COL STYLE="border-bottom: 1px solid #000;" COLSPAN="2">お電話：　　$$_Relcontact__r.Phone_$$</COL>
                     </ROW>
                     <ROW>
                         <COL STYLE="border-bottom: 1px solid #000;">
