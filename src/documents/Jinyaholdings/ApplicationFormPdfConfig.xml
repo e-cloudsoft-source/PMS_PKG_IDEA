@@ -183,7 +183,7 @@
                 <ROW STYLE="margin-top:10px;">
                     <COL STYLE="text-align:left;font-size:13px;">ご予約内容</COL>
                 </ROW>
-                <ESTIMATETABLE ROWNUM="18" STYLE="width:95%;margin-left:15px;" COLSIZE="70,100,340,20,100"/>
+                <ESTIMATETABLE ROWNUM="18" STYLE="width:95%;margin-left:15px;table-layout:fixed;" COLSIZE="70,100,340,20,100"/>
                 <ROW STYLE="margin-top:10px;text-align:left;font-size:10pt;">
                     <COL STYLE="font-size:16pt">■</COL>
                     <COL STYLE="vertical-align: middle;">レストラン (ご夕食)のご案内</COL>
