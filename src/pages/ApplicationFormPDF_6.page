@@ -26,11 +26,15 @@ table tr {
 }
 .numClass{
 	text-align: right;
+	padding-right: 2px;
 }
 .estItemClass{
 	border:1px solid #000;
 }
 .estItemClass td{
+	/*2021/07/31 #14050 bug fixed by zy BEGIN*/
+	overflow: hidden;
+	/*2021/07/31 #14050 bug fixed by zy END*/
 	padding-left: 2px;
 	border-right:1px solid #000;
 }

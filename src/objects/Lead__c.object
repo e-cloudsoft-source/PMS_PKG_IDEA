@@ -25788,7 +25788,6 @@ console.log(leadinfo);
 // 2021/07/30 #JP10785 by zy END
 function autoLoader_js() {
 
-
     // XMLのコメント情報初期値
     var rsStr = &quot;&quot;+sforce.apex.execute(locNs + &quot;ApplicationFormPDFSwitch&quot;, &quot;getApplicationFormPdfCommentAndRooms&quot;, {leadIndex:strLeadIndex});
     var rsArr = rsStr.split(&quot;:&quot;);
@@ -25798,10 +25797,15 @@ function autoLoader_js() {
     var infoMojiNb = (layoutCd == 5 ? 40 : 40);
     // アサイン部屋が存在する場合、選択肢を追加する
     var roomIsShowMsg = &quot;&quot;;
+// 2021/07/31 #13970 bug fixed by zy BEGIN
+if (layoutCd != &apos;6&apos;){
+// 2021/07/31 #13970 bug fixed by zy END
     if (assignedRooms &gt; 0) {
     roomIsShowMsg = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol&quot; nowrap=&quot;nowrap&quot;&gt;部屋番号&lt;/td&gt;&lt;td&gt;&lt;input type=&quot;radio&quot; name=&quot;dialog_showroom&quot; value=&quot;&quot; checked=&quot;checked&quot;&gt;非表示&lt;input type=&quot;radio&quot; name=&quot;dialog_showroom&quot; value=&quot;1&quot;&gt;表示&lt;/td&gt;&lt;/tr&gt;&apos;;
     }
-
+// 2021/07/31 #13970 bug fixed by zy BEGIN
+}
+// 2021/07/31 #13970 bug fixed by zy END
     if (jQuery) {
 
         var d = sfdcPage.dialogs[&apos;MyCoolDialog&apos;], close;

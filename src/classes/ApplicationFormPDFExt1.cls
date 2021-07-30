@@ -127,7 +127,7 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 				if(layoutCode == layoutType5A4) pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(oXmlInfo.bComment,4,40));
 				// 2021/07/30 #JP10785 by zy BEGIN
                 if(layoutCode == layoutType6) {
-                	pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(paraMap.get(commentKey),4,40));
+                	pComment = CommUtils.nullToBlank(CommRepUtils.getPdfMaxShowStringNew(oXmlInfo.bComment,4,40));
                 }
 				// 2021/07/30 #JP10785 by zy END
 			}
@@ -174,7 +174,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 	            String beforeHtml = customizeHtml.substringBefore(ESTIAMTE_TAB_BEG);
 		        String afterHtml = customizeHtml.substringAfter(ESTIAMTE_TAB_END);
 		        // 見積明細TAGを取得する
-		        String bookingEstHtml = customizeHtml.replace(beforeHtml, '').replace(afterHtml, '');
+		        // 2021/07/31 #13991 bug fixed by zy BEGIN
+		        String bookingEstHtml = customizeHtml.substringBetween(beforeHtml, afterHtml);
+		        // 2021/07/31 #13991 bug fixed by zy END
 		        Dom.Document estDoc = new Dom.Document();
 		        otherAttr = '';
 		        estColGroupStr = '';
@@ -185,8 +187,6 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 		            // 見積明細設定情報
 		            integer rowNumInt = null;
 		            if (estNode != null) {
-		            	// 内容列横幅設定
-		            	String prodNameWidth = '';
 		                for (integer i = 0 ; i < estNode.getAttributeCount() ; i++) {
 		                    String key = estNode.getAttributeKeyAt(i);
 		                    if (key == 'rownum') {
@@ -203,21 +203,11 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 		                            for (String col : colSizeArr){
 		                                estColGroupStr += '<col width="' + col + '" />';
 		                            }
-		                            if (colSizeArr.size() > 2) {
-		                            	prodNameWidth = colSizeArr[2];
-		                            }
 		                        }
 		                    } else {
 		                        String val = estNode.getAttribute(key,null);
 		                        otherAttr += ' '+ key + '="' + val + '"';
 		                    }
-		                }
-		                customMaxLen = oXmlInfo.pageSizeType == ReportXmlParserHelper.PAGETYPE.B5.name() ? 48 : 56;
-		                // 明細例横幅設定の場合
-		                if (!CommUtils.isBlank(prodNameWidth) && prodNameWidth.isNumeric()){
-		                	integer widthSize = COmmUtils.nullToIntZero(prodNameWidth);
-		                	// 12pxの英字、横幅は8pxです
-		                	customMaxLen = integer.valueOf(widthSize/8);
 		                }
 		                
 		            }
@@ -395,6 +385,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 	                        			UseDate__c,RowNo__c,
 	                        			// 2018/01/15 予約確認書の明細欄に日付を表示したい zyz END
 	                        			refAccountMaster__r.Field3__c,ActionType__c,PaymentType__c,refBooking__r.EntryTime__c,refBooking__r.Rroom__r.Name
+	                        			// 2021/07/31 #14017 bug fixed by zy BEGIN
+	                        			,refBooking__r.refTypeOfRooms__r.Name
+	                        			// 2021/07/31 #14017 bug fixed by zy END
 	                        			// 2018/11/29 BugFix [会計の売上計上日設定区分]が２の場合、SObject row was retrieved via SOQL without querying the requested field: ps__Lead__c.ps__Departure__c不具合修正 WSQ BEGIN
 	                        			,refBooking__r.Departure__c
 	                        			// 2018/11/29 BugFix [会計の売上計上日設定区分]が２の場合、SObject row was retrieved via SOQL without querying the requested field: ps__Lead__c.ps__Departure__c不具合修正 WSQ END
@@ -420,6 +413,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 				String PROD_ACTION_TYPE_PL = CommConst.PROD_ACTION_TYPE_PL;
 				String queryStr = ' Select id, name, X2_1__c, Tankanonetax__c, Amount__c, TaxRate__c, UnitPriceDefKbCal__c, Total__c, SpecialTax__c, GoukeinoneTax__c, UnitPrice__c, ProductName__c, SpTotal__c , ServiceRate__c, UseDate__c, RowNo__c, refAccountMaster__r.Field3__c, ActionType__c, PaymentType__c, refBooking__r.EntryTime__c, refBooking__r.Rroom__r.Name, AccountOutside__c, ParentBookingItemRef__c, ' +
 								  ' refBooking__r.Departure__c, ' +
+								  // 2021/07/31 #14017 bug fixed by zy BEGIN
+                    			  ' refBooking__r.refTypeOfRooms__r.Name,' + 
+                    			  // 2021/07/31 #14017 bug fixed by zy END
 								  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH BEGIN
 								  ' OptionPlanKey__c, ' +
 								  // 2020/05/29 エステなど商品を追加したプラン機能 WGCH END
@@ -802,12 +798,20 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
         }
        	String beforeHtml = customizeHtml.substringBefore(ESTIAMTE_TAB_BEG);
 		String afterHtml = customizeHtml.substringAfter(ESTIAMTE_TAB_END);
-        String bookingEstHtml = customizeHtml.replace(beforeHtml, '').replace(afterHtml, '');
 		// 2021/07/30 #JP10785 by zy END
+		// 2021/07/31 #13961 bug fixed by zy BEGIN
+		integer maxRows = oXmlInfo.bMaxRows;
+		// カスタムサイズの確認書、合計欄対応
+		if (layoutCode == layoutType6) {
+			maxRows -= 1;
+		}
+		// 2021/07/31 #13961 bug fixed by zy END
         // 改ページ処理を行う
         for (BookItem detailItem : dsList) {
 			// 新規ページの場合
-        	if (Math.mod(cntRsNum , oXmlInfo.bMaxRows) == 0) {
+			// 2021/07/31 #13961 bug fixed by zy BEGIN
+        	if (Math.mod(cntRsNum ,  maxRows) == 0) {
+        	// 2021/07/31 #13961 bug fixed by zy END
         		onePage = new OnePageInfo(locHeader, locFooter);
         		allPageList.add(onePage);
         		onePage.currPages = allPageList.size();
@@ -815,6 +819,12 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
         	}
         	onePage.addDetail(detailItem);
         	cntRsNum++;
+        	// 2021/07/31 #13961 bug fixed by zy BEGIN
+        	// カスタムサイズの確認書、合計欄対応
+        	if (layoutCode == layoutType6 && Math.mod(cntRsNum , maxRows) == 0) {
+        		onePage.addDetail(new BookItem(new BookingEstimateItem__c(), pointlen));
+        	}
+        	// 2021/07/31 #13961 bug fixed by zy END
         }
         // 取得明細情報
         if (allPageList.isEmpty()) {
@@ -949,7 +959,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 	        // 合計値集計を行う
 	        usedRooms  = 0;
 	        dinnerNums = 0;
-	        stayPeoples = stayMale = stayFemale = stayChildren = stayChildrenA = stayChildrenB = stayChild = tourConductor = 0;
+	        // 2021/07/31 #13983 bug fixed by zy BEGIN
+			leadPersons = stayPeoples = stayMale = stayFemale = stayChildren = stayChildrenA = stayChildrenB = stayChild = tourConductor = 0;
+			// 2021/07/31 #13983 bug fixed by zy BEGIN 
 	        // 利用予定の部屋名
 	        roomNos = new List<String>();
 	        Set<String> roomNameFilterSet = new Set<String>();
@@ -999,6 +1011,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 							+ CommUtils.nullToZero(lead.ChildE__c)
 							+ CommUtils.nullToZero(lead.ChildF__c);
 				// 2015/11/16 錦水館専用表示項目 END
+				// 2021/07/31 #13983 bug fixed by zy BEGIN
+				leadPersons += CommUtils.nullToZero(lead.StayPersons__c);
+				// 2021/07/31 #13983 bug fixed by zy BEGIN 
 			}
 			// 2015/11/16 錦水館専用表示項目 BEGIN
 			for (String w:roomNmMap.keySet() ) {
@@ -1106,6 +1121,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 		// 2019/03/31 日帰り時刻を表記 BY zyz BEGIN
 		public String departureTime{get; private set;} 	// 出 発 時 間 HH時mm分
 		// 2019/03/31 日帰り時刻を表記 BY zyz END
+		// 2021/07/31 #13983 bug fixed by zy BEGIN
+		public Decimal leadPersons;
+		// 2021/07/31 #13983 bug fixed by zy BEGIN
 
 	}
 	// 2015/11/16 改正 BEGIN
@@ -1130,15 +1148,13 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 				// 2019/07/30 軽減税率機能対応 WGCH BEGIN
 				if(isReducedTaxFlg) maxLen -= 4;
 				// 2019/07/30 軽減税率機能対応 WGCH END
-				// 2021/07/30 #JP10785 by zy BEGIN
-				// カスタム設定字段長
-				if (layoutCode == layoutType6) {
-					maxLen = customMaxLen;
-				}
-				// 2021/07/30 #JP10785 by zy END
 				// 会計商品名
 				productNm = (CommUtils.isBlank(s.ProductName__c) ? s.X2_1__c : s.ProductName__c);
-				productNm = CommRepUtils.getPdfMaxShowString(productNm, maxLen);
+				// 2021/07/31 #14050 bug fixed by zy BEGIN
+				if (layoutCode != layoutType6) {
+					productNm = CommRepUtils.getPdfMaxShowString(productNm, maxLen);
+				}
+				// 2021/07/31 #14050 bug fixed by zy END
 	            // Ver4.54       2014/08/05  E-CLOUD     過去の合計計算不具合修正           
 	            CommUtils.ProductInfo proc = new CommUtils.ProductInfo(CommUtils.nullToIntZero(s.UnitPriceDefKbCal__c),pointlen);
 	            // 単価（サービス料込、税込）計算を行う
@@ -1349,7 +1365,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
 		}
 		// 入湯税商品がどうか確認用
 		public Boolean isBathProd(String prodCd) {
-			return (bathProdCdSet != null && bathProdCdSet.contains(prodCd));
+			// 2021/07/31 #13962 bug fixed by zy BEGIN
+			return (layoutCode != layoutType6 && bathProdCdSet != null && bathProdCdSet.contains(prodCd));
+			// 2021/07/31 #13962 bug fixed by zy END
 		}
 	}
 	// Footerの施設情報を格納する
@@ -1504,8 +1522,10 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
             customeStyleStr = '';
             pageSizeType = 'B5';// ページサイズタイプ
             if(layoutCode == layoutType6) {
-	            String marginLeft = '0';
-	            String marginTop = '0';
+            	// 2021/07/31 #14038 bug fixed by zy BEGIN
+	            String marginLeft = '0.2cm';
+	            String marginTop = '0.2cm';
+	            // 2021/07/31 #14038 bug fixed by zy END
 	            Dom.XmlNode defFields = shopNode.getChildElement('RESVCARD', null);
 	            if (defFields != null ) {
 	                Dom.XmlNode cardSize = defFields.getChildElement('PAGESIZE', null);
@@ -1967,6 +1987,7 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
     private static final String shopWebSite = 'ShopWebSite';
     private static final String honorific = 'Honorific';
     private static final String comment = 'Comment';
+    private static final String payPrefix = '▲ ';
     // シスタム日付
     private static final String systemDate = 'SystemDate';
     private static final String CONST_DATEFORMAT = 'yyyy/MM/dd';
@@ -1975,8 +1996,6 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
     private static final String ESTIAMTE_TAB_END = '</ESTIMATETABLE>';
     private static final String COMMENT_TAB = 'COMMENT';
     private String otherAttr; // 見積明細の属性
-    // カスタム設定文字長
-    private static integer customMaxLen;
     // 特殊字段名
     private Set<String> excludeSet = new Set<String>{personNumber,adultNumber,childNumber,roomNumber,nightNumber,shopPostNo,shopName,shopAddress,shopPhone,shopFax,shopEmail,shopWebSite,honorific,comment,systemDate};
     // 見積明細HTML中にHEADのHTML
@@ -2002,24 +2021,32 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
         for (integer i = 0 ; i < curPage.details.size() ; i++ ){
             BookItem item = curPage.details[i];
             if (i == lastIdx) {
-                html += footContentHtml.replace('_price_',OrderServiceHelp.currency(summaryInf.amoutPrice))
+            	// 2021/07/31 #13962 bug fixed by zy BEGIN
+                html += footContentHtml.replace('_price_',OrderServiceHelp.currency(summaryInf.bathProd.amount + summaryInf.amoutQuotePriceIncTax))
+               	// 2021/07/31 #13962 bug fixed by zy END
                                     .replace('_cnt_',CommUtils.nullToBlank(CommUtils.nullToIntZero(summaryInf.totalAmount)));
                 continue;
             }
-            if (item == null || item.s.id == null) {
+            // 2021/07/31 #14031 bug fixed by zy BEGIN
+            if (item == null || (item.s.id == null && CommUtils.isBlank(item.s.ProductName__c))) {
+            // 2021/07/31 #14031 bug fixed by zy END
                 html += balnkHtml;
                 continue;
             }
             String userDateStr = item.useDate == null ? '' : DateTime.newInstance(item.useDate.Year(),item.useDate.month(),item.useDate.day()).format('yyyy/MM/dd');
             String roomName = '';
-            if (item.s.refBooking__r != null && item.s.refBooking__r.Rroom__r != null){
-                roomName = item.s.refBooking__r.Rroom__r.Name;
+            // 2021/07/31 #14017 bug fixed by zy BEGIN
+            if (item.s.refBooking__r != null && item.s.refBooking__r.refTypeOfRooms__r.Name != null){
+                roomName = item.s.refBooking__r.refTypeOfRooms__r.Name;
             }
+            // 2021/07/31 #14017 bug fixed by zy END
             html += detailContentHtml.replace('_date_',userDateStr)
                     .replace('_roomtype_', roomName)
                     .replace('_content_',item.productNm)
                     .replace('_cnt_',CommUtils.nullToBlank(Commutils.nullToIntZero(item.unitNums)))
-                    .replace('_price_',OrderServiceHelp.currency(CommUtils.nullToZero(item.amount)));
+                    // 2021/07/31 #14008 bug fixed by zy BEGIN
+                    .replace('_price_',(item.isPayItem ? payPrefix : '') +  OrderServiceHelp.currency(CommUtils.nullToZero(item.amount)));
+                    // 2021/07/31 #14008 bug fixed by zy END
         }
         html += '</table>';
         return html;
@@ -2146,7 +2173,9 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
                                 From Lead__c where Id in :targetLeadIds];
         HeaderInfo locHeader = new HeaderInfo(rsLeads, oXmlInfo, leadInfLst[0]);
        	Map<String,String> resultMap = new Map<String,String>{
-            PersonNumber => Commutils.nullToBlank(CommUtils.nullToIntZero(locHeader.stayPeoples)),
+       		// 2021/07/31 #13983 bug fixed by zy BEGIN
+            PersonNumber => Commutils.nullToBlank(CommUtils.nullToIntZero(locHeader.leadPersons)),
+            // 2021/07/31 #13983 bug fixed by zy END
             adultNumber => Commutils.nullToBlank(CommUtils.nullToIntZero(locHeader.adult)),
             childNumber => Commutils.nullToBlank(CommUtils.nullToIntZero(locHeader.stayChildren)),
             roomNumber => Commutils.nullToBlank(CommUtils.nullToIntZero(locHeader.usedRooms)),
@@ -2167,8 +2196,10 @@ public with sharing class ApplicationFormPDFExt1 extends CommBaseCtrl{
         String beforeHtml = html.substringBefore(befTag);
         // 終了TAG
         String afterHtml = html.substringAfter(endTag);
+        // 2021/07/31 #13991 bug fixed by zy BEGIN
         // 指定TAGーHTML
-        String content = html.replace(beforeHtml, '').replace(afterHtml, '');
+        String content = html.substringBetween(beforeHtml, afterHtml) ;
+        // 2021/07/31 #13991 bug fixed by zy END
         // TAG前にHTML元素を作成する
         if (!CommUtils.isBlank(beforeHtml)) {
             columns.add(new PageColumn(beforeHtml));

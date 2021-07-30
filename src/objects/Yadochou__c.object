@@ -397,7 +397,7 @@ if (leadid != &quot;&quot;) {
   if (layoutCd == &apos;6&apos;){
     var leadinfo = sforce.apex.execute(locNs + &quot;ShopInfoUtil&quot;,&quot;getLeadInfo&quot;,{leadId:leadid,shopCode:defaultShop});
     leadinfo = JSON.parse(leadinfo);
-    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;予約人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;personNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.PersonNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
+    leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; nowrap=&quot;nowrap&quot; &gt;&lt;label&gt;予約人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;personNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.PersonNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;大人人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;adultNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.AdultNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;子供人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;childNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.ChildNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml += &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;部屋数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;roomNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.RoomNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
@@ -416,9 +416,15 @@ if (leadid != &quot;&quot;) {
       var infoMojiNb = (layoutCd == 5 ? 40 : 40);
       // アサイン部屋が存在する場合、選択肢を追加する
       var roomIsShowMsg = &quot;&quot;;
+// 2021/07/31 #13970 bug fixed by zy BEGIN
+if (layoutCd != &apos;6&apos;) {
+// 2021/07/31 #13970 bug fixed by zy END
       if (assignedRooms &gt; 0) {
       roomIsShowMsg = &apos;&lt;tr&gt;&lt;td class=&quot;labelCol&quot; nowrap=&quot;nowrap&quot;&gt;部屋番号&lt;/td&gt;&lt;td&gt;&lt;input type=&quot;radio&quot; name=&quot;dialog_showroom&quot; value=&quot;&quot; checked=&quot;checked&quot;&gt;非表示&lt;input type=&quot;radio&quot; name=&quot;dialog_showroom&quot; value=&quot;1&quot;&gt;表示&lt;/td&gt;&lt;/tr&gt;&apos;;
       }
+// 2021/07/31 #13970 bug fixed by zy BEGIN
+ }
+// 2021/07/31 #13970 bug fixed by zy END
 
       if(jQuery) {
 
@@ -515,7 +521,7 @@ if (leadid != &quot;&quot;) {
     autoLoader_js();
   }else{
     var showRoomUrl = &quot;&quot;;
-    if (layoutCd != 1) {
+    if (layoutCd != 1 ) {
       var assignedRooms = 1*sforce.apex.execute(locNs + &quot;ApplicationFormPDFSwitch&quot;, &quot;isHaveAssigedRoom&quot;, {leadIndex:strLeadIndex});
       if (assignedRooms &gt; 0 &amp;&amp; window.confirm(&quot;部屋番号を表示しますか?&quot;)) {
         showRoomUrl = &quot;&amp;showroom=1&quot;;
