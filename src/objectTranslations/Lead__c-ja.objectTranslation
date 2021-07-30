@@ -5472,6 +5472,57 @@
         <name>yfood1__c</name>
         <relationshipLabel><!-- ご予約 (夕 料理2) --></relationshipLabel>
     </fields>
+    <layouts>
+        <layout>ご予約 宿泊 Layout</layout>
+        <sections>
+            <label><!-- (旧) --></label>
+            <section>(旧)</section>
+        </sections>
+        <sections>
+            <label><!-- お部屋の割当て --></label>
+            <section>お部屋の割当て</section>
+        </sections>
+        <sections>
+            <label><!-- ご予約の人数 --></label>
+            <section>ご予約の人数</section>
+        </sections>
+        <sections>
+            <label><!-- ご予約の受付内容 --></label>
+            <section>ご予約の受付内容</section>
+        </sections>
+        <sections>
+            <label><!-- ご予約の詳細内容 --></label>
+            <section>ご予約の詳細内容</section>
+        </sections>
+        <sections>
+            <label><!-- ご予約メール --></label>
+            <section>ご予約メール</section>
+        </sections>
+        <sections>
+            <label><!-- ご予約先ソース --></label>
+            <section>ご予約先ソース</section>
+        </sections>
+        <sections>
+            <label><!-- ご到着とご出発予定 --></label>
+            <section>ご到着とご出発予定</section>
+        </sections>
+        <sections>
+            <label><!-- カスタムリンク --></label>
+            <section>カスタムリンク</section>
+        </sections>
+        <sections>
+            <label><!-- ステータス情報 --></label>
+            <section>ステータス情報</section>
+        </sections>
+        <sections>
+            <label><!-- 予約見積明細合計(税込) --></label>
+            <section>予約見積明細合計(税込)</section>
+        </sections>
+        <sections>
+            <label><!-- 会計 --></label>
+            <section>会計</section>
+        </sections>
+    </layouts>
     <recordTypes>
         <description><!-- 施設[旅館] --></description>
         <label><!-- 基本 --></label>

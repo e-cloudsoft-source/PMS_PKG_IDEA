@@ -749,12 +749,14 @@ function openLeadConfirmPdf(leadid, strLeadIndex, shopCd,mrTypeStr) {
 	// 2021/07/30 #JP10785 by zy BEGIN
 	if (layoutCd == '6'){
       	var leadinfo = sforce.apex.execute(locNs + "ShopInfoUtil","getLeadInfo",{leadId:leadid,shopCode:locShopCode});
-        leadinfo = JSON.parse(leadinfo);
-        leadInfoHtml += '<tr><td class="labelCol first " nowrap="nowrap"><label>予約人数</label></td><td class="data2Col first "><input id="personNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.PersonNumber + '"/></td></tr>';
-        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>大人人数</label></td><td class="data2Col first "><input id="adultNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.AdultNumber + '"/></td></tr>';
-        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>子供人数</label></td><td class="data2Col first "><input id="childNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.ChildNumber + '"/></td></tr>';
-        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>部屋数</label></td><td class="data2Col first "><input id="roomNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.RoomNumber + '"/></td></tr>';
-        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>宿泊数</label></td><td class="data2Col first "><input id="nightNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.NightNumber + '"/></td></tr>';
+      	if (leadinfo != null && ("length" in leadinfo) && leadinfo[0] != null) {
+	        leadinfo = JSON.parse(leadinfo);
+	        leadInfoHtml += '<tr><td class="labelCol first " nowrap="nowrap"><label>予約人数</label></td><td class="data2Col first "><input id="personNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.PersonNumber + '"/></td></tr>';
+	        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>大人人数</label></td><td class="data2Col first "><input id="adultNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.AdultNumber + '"/></td></tr>';
+	        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>子供人数</label></td><td class="data2Col first "><input id="childNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.ChildNumber + '"/></td></tr>';
+	        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>部屋数</label></td><td class="data2Col first "><input id="roomNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.RoomNumber + '"/></td></tr>';
+	        leadInfoHtml += '<tr><td class="labelCol first " width="80px"><label>宿泊数</label></td><td class="data2Col first "><input id="nightNumberInput" onchange="$(this).addClass(\'change\')" type="text" value="' + leadinfo.NightNumber + '"/></td></tr>';
+    	}
     } 
     // 2021/07/30 #JP10785 by zy END
 	if (popupWinIsShowFlg.toLowerCase() != 'false' && layoutCd != '1') {

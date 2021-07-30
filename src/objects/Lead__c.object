@@ -25777,13 +25777,14 @@ var leadInfoHtml = &apos;&apos;;
 if (layoutCd == &apos;6&apos;){
     var leadId = &quot;{!Lead__c.Id}&quot;;
     var leadinfo = sforce.apex.execute(locNs + &quot;ShopInfoUtil&quot;,&quot;getLeadInfo&quot;,{leadId:leadId,shopCode:locShopCode}); 
+if (leadinfo != null &amp;&amp; (&quot;length&quot;  in leadinfo) &amp;&amp; leadinfo[0] != null) {
     leadinfo = JSON.parse(leadinfo);
     leadInfoHtml +=  &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;予約人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;personNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.PersonNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml +=  &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;大人人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;adultNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.AdultNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml +=  &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;子供人数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;childNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.ChildNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml +=  &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;部屋数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;roomNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.RoomNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
     leadInfoHtml +=  &apos;&lt;tr&gt;&lt;td class=&quot;labelCol first &quot; width=&quot;80px&quot;&gt;&lt;label&gt;宿泊数&lt;/label&gt;&lt;/td&gt;&lt;td class=&quot;data2Col first &quot;&gt;&lt;input id=&quot;nightNumberInput&quot; onchange=&quot;$(this).addClass(\&apos;change\&apos;)&quot; type=&quot;text&quot; value=&quot;&apos; + leadinfo.NightNumber + &apos;&quot;/&gt;&lt;/td&gt;&lt;/tr&gt;&apos;;
-console.log(leadinfo);
+}
 }
 // 2021/07/30 #JP10785 by zy END
 function autoLoader_js() {

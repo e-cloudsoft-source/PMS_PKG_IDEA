@@ -5468,6 +5468,57 @@
         <name>yfood1__c</name>
         <relationshipLabel>Reservations　(Dinner Cuisine 2)</relationshipLabel>
     </fields>
+    <layouts>
+        <layout>ご予約 宿泊 Layout</layout>
+        <sections>
+            <label>(Old)</label>
+            <section>(旧)</section>
+        </sections>
+        <sections>
+            <label>Room allocation</label>
+            <section>お部屋の割当て</section>
+        </sections>
+        <sections>
+            <label>Reservation person(s)</label>
+            <section>ご予約の人数</section>
+        </sections>
+        <sections>
+            <label>Reception details of the reservation</label>
+            <section>ご予約の受付内容</section>
+        </sections>
+        <sections>
+            <label>Detail description of the reservation</label>
+            <section>ご予約の詳細内容</section>
+        </sections>
+        <sections>
+            <label>Reservation mails</label>
+            <section>ご予約メール</section>
+        </sections>
+        <sections>
+            <label>Source reservation destination</label>
+            <section>ご予約先ソース</section>
+        </sections>
+        <sections>
+            <label>Arrival and departure plan</label>
+            <section>ご到着とご出発予定</section>
+        </sections>
+        <sections>
+            <label>Guest rink</label>
+            <section>カスタムリンク</section>
+        </sections>
+        <sections>
+            <label>Status information</label>
+            <section>ステータス情報</section>
+        </sections>
+        <sections>
+            <label>Details of the reservation estimation total (Inc: Tax)</label>
+            <section>予約見積明細合計(税込)</section>
+        </sections>
+        <sections>
+            <label>Accounting</label>
+            <section>会計</section>
+        </sections>
+    </layouts>
     <nameFieldLabel>Reserved Name</nameFieldLabel>
     <recordTypes>
         <description><!-- 施設[旅館] --></description>
