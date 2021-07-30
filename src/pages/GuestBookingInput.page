@@ -859,7 +859,9 @@ function openLeadConfirmPdf(leadid, strLeadIndex, shopCd,mrTypeStr) {
         d.show();
 	}else{
 		var showRoomUrl = "";
-    	if (layoutCd != 1) {
+    	// 2021/07/31 #13970 bug fixed by zy BEGIN
+		if (layoutCd != 1 && layoutCd != '6') {
+		// 2021/07/31 #13970 bug fixed by zy END
       		var assignedRooms = 1*sforce.apex.execute(locNs+"ApplicationFormPDFSwitch", "isHaveAssigedRoom", {leadIndex:strLeadIndex});
      		if (assignedRooms > 0 && window.confirm("部屋番号を表示しますか?")) {
         		showRoomUrl = "&showroom=1";

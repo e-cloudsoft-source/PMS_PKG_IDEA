@@ -25900,7 +25900,9 @@ if (popupWinIsShowFlg.toLowerCase() != &apos;false&apos; &amp;&amp; layoutCd != 
     autoLoader_js();
 } else {
   var showRoomUrl = &quot;&quot;;
-  if (layoutCd != 1) {
+// 2021/07/31 #13970 bug fixed by zy BEGIN
+  if (layoutCd != 1 &amp;&amp; layoutCd != &apos;6&apos;) {
+// 2021/07/31 #13970 bug fixed by zy END
     var assignedRooms = 1*sforce.apex.execute(locNs + &quot;ApplicationFormPDFSwitch&quot;, &quot;isHaveAssigedRoom&quot;, {leadIndex:strLeadIndex});
     if (assignedRooms &gt; 0 &amp;&amp; window.confirm(&quot;部屋番号を表示しますか?&quot;)) {
       showRoomUrl = &quot;&amp;showroom=1&quot;;
