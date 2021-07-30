@@ -137,12 +137,12 @@
                     <COL STYLE="float:right;margin-top:10px;">$$_SystemDate_$$</COL>
                 </ROW>
                 <ROW STYLE="margin-top:10px;">
-                    <COL STYLE="height:50px;word-break:break-all;font-size:13px;">
+                    <COL STYLE="height:50px;font-size:13px;">
                         この度は「ホテル サンプル沖縄」へご宿泊のご予約を頂きまして、誠にありがとうございます。
                     </COL>
                 </ROW>
                 <ROW>
-                    <COL STYLE="height:50px;word-break:break-all;font-size:13px;">
+                    <COL STYLE="height:50px;font-size:13px;">
                         ご予約は以下の内容で承りましたので、ご確認くださいますようお願い申し上げます。
                     </COL>
                 </ROW>

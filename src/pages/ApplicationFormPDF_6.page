@@ -47,7 +47,6 @@ table tr {
 </style>
 </head> 
 <body>
-	<div style="width:100%;background: gray;"></div>
 	<apex:repeat value="{!allPageList}" var="onePage" >
 		<div style="vertical-align:top ;margin-top: 0px;{!if( onePage.isFirstPage, '', 'page-break-before: always;')}">
 			<apex:repeat value="{!onePage.pageColumns}" var="column" >
